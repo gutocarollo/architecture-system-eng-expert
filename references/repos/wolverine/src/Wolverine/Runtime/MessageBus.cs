@@ -1,0 +1,525 @@
+using System.Diagnostics;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.MultiTenancy;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime.Routing;
+using Wolverine.Transports;
+
+namespace Wolverine.Runtime;
+
+public partial class MessageBus : IMessageBus, IMessageContext
+{
+    public static MessageBus Build(IWolverineRuntime runtime, string correlationId) =>
+        new MessageBus(runtime, correlationId);
+    
+    // ReSharper disable once InconsistentNaming
+    protected readonly List<Envelope> _outstanding = new();
+
+    // Protects _outstanding from concurrent mutation. The Marten async daemon's
+    // multi-stream projection runner can call PublishAsync on the same MessageContext
+    // from many slices in parallel (Block parallelism = 10). Without this lock,
+    // concurrent List<Envelope>.Add silently corrupts the list and drops messages.
+    // GH-2529.
+    // ReSharper disable once InconsistentNaming
+    protected readonly object _outstandingLock = new();
+    private string? _tenantId;
+
+    public MessageBus(IWolverineRuntime runtime) : this(runtime, Activity.Current?.RootId ?? Guid.NewGuid().ToString())
+    {
+    }
+
+    internal MessageBus(IWolverineRuntime runtime, string? correlationId)
+    {
+        if (runtime == null)
+        {
+            throw new ArgumentNullException(nameof(runtime));
+        }
+
+        Runtime = runtime;
+        Storage = runtime.Storage;
+        CorrelationId = correlationId;
+    }
+
+    private void assertNotMediatorOnly()
+    {
+        if (Runtime.Options.Durability.Mode == DurabilityMode.MediatorOnly)
+        {
+            throw new InvalidOperationException(
+                $"This operation is not allowed with Wolverine is bootstrapped in {nameof(DurabilityMode.MediatorOnly)} mode");
+        }
+    }
+
+    public string? CorrelationId { get; set; }
+    public string? UserName { get; set; }
+    public Envelope? Envelope { get; protected set; }
+    public virtual ValueTask RespondToSenderAsync(object response)
+    {
+        throw new NotSupportedException("Not supported from MessageBus, only within message handlers executing against MessageContext");
+    }
+
+    public virtual Task ReScheduleCurrentAsync(DateTimeOffset rescheduledAt)
+    {
+        throw new NotSupportedException("Not supported from MessageBus, only within message handlers executing against MessageContext");
+    }
+
+    public IWolverineRuntime Runtime { get; }
+    public IMessageStore Storage { get; internal set; }
+
+    /// <summary>
+    /// Snapshot of envelopes published in this context that have not yet been flushed.
+    /// Returns a copy to avoid concurrent-enumeration issues — see <see cref="_outstandingLock"/>.
+    /// </summary>
+    public IEnumerable<Envelope> Outstanding
+    {
+        get
+        {
+            lock (_outstandingLock) return _outstanding.ToArray();
+        }
+    }
+
+    public IEnvelopeTransaction? Transaction { get; protected set; }
+    public Guid ConversationId { get; protected set; }
+
+    public string? TenantId
+    {
+        get => _tenantId;
+        set => _tenantId = Runtime.Options.Durability.TenantIdStyle.MaybeCorrectTenantId(value!);
+    }
+
+    public IDestinationEndpoint EndpointFor(string endpointName)
+    {
+        if (endpointName == null)
+        {
+            throw new ArgumentNullException(nameof(endpointName));
+        }
+
+        var endpoint = Runtime.Endpoints.EndpointByName(endpointName);
+        if (endpoint == null)
+        {
+            throw new UnknownEndpointException(endpointName);
+        }
+
+        return new DestinationEndpoint(endpoint, this);
+    }
+
+    public IDestinationEndpoint EndpointFor(Uri uri)
+    {
+        if (uri == null)
+        {
+            throw new ArgumentNullException(nameof(uri));
+        }
+
+        var sender = Runtime.Endpoints.GetOrBuildSendingAgent(uri).Endpoint;
+        return new DestinationEndpoint(sender, this);
+    }
+
+    public Task InvokeAsync(object message, CancellationToken cancellation = default, TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync(message, this, cancellation, timeout);
+    }
+
+    public Task<T> InvokeAsync<T>(object message, CancellationToken cancellation = default,
+        TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync<T>(message, this, cancellation, timeout);
+    }
+
+    public Task InvokeAsync(object message, DeliveryOptions options, CancellationToken cancellation = default,
+        TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync(message, this, cancellation, timeout, options);
+    }
+
+    public Task<T> InvokeAsync<T>(object message, DeliveryOptions options, CancellationToken cancellation = default,
+        TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync<T>(message, this, cancellation, timeout, options);
+    }
+
+    public Task InvokeForTenantAsync(string tenantId, object message, CancellationToken cancellation = default,
+        TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync(message, this, cancellation, timeout, new DeliveryOptions{TenantId = tenantId});
+    }
+
+    public Task<T> InvokeForTenantAsync<T>(string tenantId, object message, CancellationToken cancellation = default,
+        TimeSpan? timeout = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).InvokeAsync<T>(message, this, cancellation, timeout, new DeliveryOptions{TenantId = tenantId});
+    }
+
+    public IAsyncEnumerable<TResponse> StreamAsync<TResponse>(object message, CancellationToken cancellation = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).StreamAsync<TResponse>(message, this, cancellation);
+    }
+
+    public IAsyncEnumerable<TResponse> StreamAsync<TResponse>(object message, DeliveryOptions options, CancellationToken cancellation = default)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return Runtime.FindInvoker(message.GetType()).StreamAsync<TResponse>(message, this, cancellation, options);
+    }
+
+    public Task<TResponse> StreamAsync<TRequest, TResponse>(IAsyncEnumerable<TRequest> messages,
+        CancellationToken cancellation = default, TimeSpan? timeout = default)
+    {
+        if (messages == null)
+        {
+            throw new ArgumentNullException(nameof(messages));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return findStreamInvoker<TRequest>().InvokeAsync<TResponse>(messages, this, cancellation, timeout);
+    }
+
+    public Task<TResponse> StreamAsync<TRequest, TResponse>(IAsyncEnumerable<TRequest> messages,
+        DeliveryOptions options, CancellationToken cancellation = default, TimeSpan? timeout = default)
+    {
+        if (messages == null)
+        {
+            throw new ArgumentNullException(nameof(messages));
+        }
+
+        Runtime.AssertHasStarted();
+
+        return findStreamInvoker<TRequest>().InvokeAsync<TResponse>(messages, this, cancellation, timeout, options);
+    }
+
+    private IMessageInvoker findStreamInvoker<TRequest>()
+    {
+        // The concrete runtime type of an IAsyncEnumerable<TRequest> instance is a compiler-generated
+        // iterator, so dispatch must key off the declared stream type rather than message.GetType()
+        var messageType = typeof(IAsyncEnumerable<TRequest>);
+        if (!Runtime.Options.HandlerGraph.CanHandle(messageType))
+        {
+            throw new NotSupportedException(
+                $"StreamAsync is only supported for locally-handled message streams, and no handler accepts {messageType.FullNameInCode()} as its message type. " +
+                $"Define a handler like 'Task<TResponse> Handle(IAsyncEnumerable<{typeof(TRequest).FullNameInCode()}> messages, CancellationToken token)'.");
+        }
+
+        return Runtime.FindInvoker(messageType);
+    }
+
+    public IReadOnlyList<Envelope> PreviewSubscriptions(object message)
+    {
+        return Runtime.RoutingFor(message.GetType()).RouteForPublish(message, null);
+    }
+    
+    public IReadOnlyList<Envelope> PreviewSubscriptions(object message, DeliveryOptions options)
+    {
+        return Runtime.RoutingFor(message.GetType()).RouteForPublish(message, options);
+    }
+
+    public ValueTask SendAsync<T>(T message, DeliveryOptions? options = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+        
+        // Check for both so you don't get an infinite loop
+        // from TimeoutMessage
+        if (options == null && message is ISendMyself m)
+        {
+            return m.ApplyAsync(this);
+        }
+
+        Runtime.AssertHasStarted();
+        assertNotMediatorOnly();
+        options = applyTenantContext(options);
+
+        // Cannot trust the T here. Can be "object"
+        var outgoing = Runtime.RoutingFor(message.GetType()).RouteForSend(message, options);
+        trackEnvelopeCorrelation(Activity.Current, outgoing);
+
+        return PersistOrSendAsync(outgoing);
+    }
+
+    public ValueTask PublishAsync<T>(T message, DeliveryOptions? options = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        // Check for both so you don't get an infinite loop
+        // from TimeoutMessage
+        if (options == null && message is ISendMyself m)
+        {
+            return m.ApplyAsync(this);
+        }
+
+        Runtime.AssertHasStarted();
+        assertNotMediatorOnly();
+        options = applyTenantContext(options);
+
+        // You can't trust the T here.
+        var outgoing = Runtime.RoutingFor(message.GetType()).RouteForPublish(message, options);
+
+        trackEnvelopeCorrelation(Activity.Current, outgoing);
+
+        if (outgoing.Length != 0)
+        {
+            return PersistOrSendAsync(outgoing);
+        }
+
+        Runtime.MessageTracking.NoRoutesFor(new Envelope(message));
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask BroadcastToTopicAsync(string topicName, object message, DeliveryOptions? options = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        Runtime.AssertHasStarted();
+        assertNotMediatorOnly();
+        options = applyTenantContext(options);
+
+        var outgoing = Runtime.RoutingFor(message.GetType()).RouteToTopic(message, topicName, options);
+
+        // GH-4556: every other send path stamps correlation here, but this one never did, so a
+        // topic broadcast went out with no Source, no CorrelationId, no ParentId and a null
+        // Store -- MessageRoute.CreateForSending sets none of them. That is why a projection
+        // side effect's ToTopic() carried none of its MessageMetadata: the metadata rides
+        // TrackEnvelopeCorrelation, and topics were the one route that skipped it.
+        trackEnvelopeCorrelation(Activity.Current, outgoing);
+
+        return PersistOrSendAsync(outgoing);
+    }
+
+    internal async ValueTask PersistOrSendAsync(Envelope envelope)
+    {
+        if (envelope is null) return; // Not sure how this would happen
+
+        foreach (var rule in Runtime.Options.MetadataRules)
+        {
+            rule.ApplyCorrelation(this, envelope);
+        }
+
+        if (envelope.Sender is null)
+        {
+            throw new InvalidOperationException("Envelope has not been routed");
+        }
+
+        if (Transaction is not null)
+        {
+            lock (_outstandingLock)
+            {
+                // Fill, NOT Add. The dedup is load-bearing -- see PersistOrSendAsync(Envelope[]).
+                _outstanding.Fill(envelope);
+            }
+
+            await envelope.PersistAsync(Transaction).ConfigureAwait(false);
+
+            return;
+        }
+
+        await envelope.StoreAndForwardAsync().ConfigureAwait(false);
+    }
+
+    public void EnlistInOutbox(IEnvelopeTransaction transaction)
+    {
+        Transaction = transaction;
+    }
+
+    public Task EnlistInOutboxAsync(IEnvelopeTransaction transaction)
+    {
+        var original = Transaction;
+        Transaction = transaction;
+
+        if (original is MessageContext c)
+        {
+            return c.CopyToAsync(transaction);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void trackEnvelopeCorrelation(Activity? activity, Envelope[] outgoing)
+    {
+        foreach (var outbound in outgoing) TrackEnvelopeCorrelation(outbound, activity);
+    }
+
+    internal virtual void TrackEnvelopeCorrelation(Envelope outbound, Activity? activity)
+    {
+        // A CustomizeOutgoingMessagesOfType<T> rule (or any other DeliveryOptions
+        // override) may have already stamped a per-message Source — for example,
+        // when InteropWithCloudEvents() is in play and the producer needs to set
+        // a spec-valid CloudEvents `source` URI per message. Don't clobber it.
+        if (outbound.Source.IsEmpty())
+        {
+            outbound.Source = Runtime.Options.ServiceName;
+        }
+
+        // DeliveryOptions.Override may have already stamped a per-message
+        // CorrelationId (e.g. from a Marten projection's RaiseSideEffects
+        // call passing MessageMetadata) — don't clobber it. See GH-2545.
+        if (outbound.CorrelationId.IsEmpty())
+        {
+            outbound.CorrelationId = CorrelationId;
+        }
+        outbound.ConversationId = outbound.Id; // the message chain originates here
+        outbound.TenantId ??= TenantId; // don't override a tenant id that's specifically set on the envelope itself
+
+        if (Runtime.Options.EnableRelayOfUserName)
+        {
+            outbound.UserName ??= UserName;
+        }
+
+        outbound.ParentId = activity?.Id;
+        outbound.Store = Storage;
+    }
+
+    internal async ValueTask PersistOrSendAsync(params Envelope[] outgoing)
+    {
+        var metadataRules = Runtime.Options.MetadataRules;
+        if (metadataRules.Count > 0)
+        {
+            foreach (var envelope in outgoing)
+            {
+                foreach (var rule in metadataRules)
+                {
+                    rule.ApplyCorrelation(this, envelope);
+                }
+            }
+        }
+
+        if (Transaction != null)
+        {
+            // This filtering is done to only persist envelopes where
+            // the sender is currently latched
+            var durableCount = 0;
+            for (var i = 0; i < outgoing.Length; i++)
+            {
+                if (isDurable(outgoing[i]))
+                {
+                    durableCount++;
+                }
+            }
+
+            var envelopes = durableCount == outgoing.Length ? outgoing : new Envelope[durableCount];
+            if (durableCount != outgoing.Length)
+            {
+                var index = 0;
+                for (var i = 0; i < outgoing.Length; i++)
+                {
+                    if (isDurable(outgoing[i]))
+                    {
+                        envelopes[index++] = outgoing[i];
+                    }
+                }
+            }
+
+            for (var i = 0; i < envelopes.Length; i++)
+            {
+                if (envelopes[i] is { Sender: { Latched: true }, Status: EnvelopeStatus.Outgoing })
+                {
+                    envelopes[i].OwnerId = TransportConstants.AnyNode;
+                }
+            }
+
+            await Transaction.PersistAsync(envelopes).ConfigureAwait(false);
+
+            lock (_outstandingLock)
+            {
+                // Fill, NOT AddRange. GH-4325 replaced this with AddRange on the reasoning that
+                // every envelope here is freshly minted by the router and so the Contains check
+                // could never hit. That reasoning was WRONG and it broke request/reply over the
+                // database transports: an envelope can reach this list twice in one context, and
+                // the second entry makes FlushOutgoingMessagesAsync store-and-forward the same
+                // envelope Id a second time. The duplicate insert throws, the catch in the flush
+                // loop logs "Unable to send an outgoing message" and swallows it, and the reply is
+                // silently never sent -- a green-looking system that drops responses.
+                //
+                // Caught by PostgresqlTests.Transport.end_to_end_from_scratch. If the O(n^2) cost
+                // of Fill is ever worth removing, it needs a dedup that is still a dedup (a HashSet
+                // of ids alongside the list), not the removal of one.
+                _outstanding.Fill(outgoing);
+            }
+        }
+        else
+        {
+            foreach (var outgoingEnvelope in outgoing) await outgoingEnvelope.StoreAndForwardAsync().ConfigureAwait(false);
+        }
+    }
+
+    private bool isDurable(Envelope envelope)
+    {
+        return envelope.Sender?.IsDurable ?? Runtime.Endpoints.GetOrBuildSendingAgent(envelope.Destination!).IsDurable;
+    }
+
+    private DeliveryOptions? applyTenantContext(DeliveryOptions? options)
+    {
+        if (TenantId.IsEmpty())
+        {
+            return options;
+        }
+
+        if (options == null)
+        {
+            return new DeliveryOptions { TenantId = TenantId };
+        }
+
+        options.TenantId ??= TenantId;
+        return options;
+    }
+}

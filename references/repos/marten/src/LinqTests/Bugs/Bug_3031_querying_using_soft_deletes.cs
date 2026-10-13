@@ -1,0 +1,246 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Marten.Linq.SoftDeletes;
+using Marten.Metadata;
+using Marten.Testing.Harness;
+using Shouldly;
+using Marten;
+namespace LinqTests.Bugs;
+
+public class Bug_3031_querying_using_soft_deletes : BugIntegrationContext
+{
+
+    public static IQueryable<T> AddWhere<T>(IQueryable<T> q)
+    {
+        return q.Where(x => x.MaybeDeleted());
+    }
+
+    public static IQueryable<Entity> AddWhereNonGeneric(IQueryable<Entity> q)
+    {
+        return q.Where(x => x.MaybeDeleted());
+    }
+
+    // Fails with "System.InvalidOperationException":
+    // "Document type object is not configured as soft deleted"
+    [Fact]
+    public async Task test_any_maybe_deleted_in_generic_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        await using var session = theStore.QuerySession();
+        var q = session.Query<Entity>();
+        var w = AddWhere(q);
+        var result = await w.AnyAsync();
+
+        result.ShouldBeTrue();
+    }
+
+    // Works fine
+    [Fact]
+    public async Task test_any_maybe_deleted_in_non_generic_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        await using var session = theStore.QuerySession();
+        var q = session.Query<Entity>();
+        var w = AddWhereNonGeneric(q);
+        var result = await w.AnyAsync();
+
+        result.ShouldBeTrue();
+    }
+
+    // Fails with "System.InvalidOperationException":
+    // "Document type object is not configured as soft deleted"
+    [Fact]
+    public async Task test_any_maybe_deleted_in_generic_extension_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        using var session = theStore.QuerySession();
+
+        bool result = (await session
+            .Query<Entity>()
+            .WithArchivedState(ArchivedState.IncludeArchived)
+            .AnyAsync());
+
+        result.ShouldBeTrue();
+    }
+
+    // Fails with "System.InvalidOperationException":
+    // "Document type object is not configured as soft deleted"
+    [Fact]
+    public async Task test_list_maybe_deleted_in_generic_extension_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        using var session = theStore.QuerySession();
+        var result = (await session
+            .Query<Entity>()
+            .WithArchivedState(ArchivedState.IncludeArchived)
+            .ToListAsync());
+
+        result.Count.ShouldBe(1);
+    }
+
+    // Working fine
+    [Fact]
+    public async Task test_any_maybe_deleted_in_extension_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        using var session = theStore.QuerySession();
+        bool result = (await session
+            .Query<Entity>()
+            .WithArchivedStateNonGeneric(ArchivedState.IncludeArchived)
+            .AnyAsync());
+
+        result.ShouldBeTrue();
+    }
+
+    // Working fine
+    [Fact]
+    public async Task test_list_maybe_deleted_in_extension_method()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        using var session = theStore.QuerySession();
+        var result = (await session
+            .Query<Entity>()
+            .WithArchivedStateNonGeneric(ArchivedState.IncludeArchived)
+            .ToListAsync());
+
+        result.Count.ShouldBe(1);
+    }
+
+    // Working fine
+    [Fact]
+    public async Task test_any()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+
+        using (var sessionX = theStore.LightweightSession())
+        {
+            sessionX.Store(entity, entity);
+            await sessionX.SaveChangesAsync();
+        }
+
+        using var session = theStore.QuerySession();
+        bool result = (await session
+            .Query<Entity>()
+            .Where(x => x.MaybeDeleted())
+            .AnyAsync());
+
+        result.ShouldBeTrue();
+    }
+
+    // Working fine
+    [Fact]
+    public async Task test_list()
+    {
+        var entity = new Entity { Id = Guid.NewGuid() };
+        var entityDeleted = new Entity { Id = Guid.NewGuid() };
+
+        using (var session = theStore.LightweightSession())
+        {
+            session.Store(entity, entityDeleted);
+            await session.SaveChangesAsync();
+        }
+
+        using (var session = theStore.LightweightSession())
+        {
+            session.Delete<Entity>(entityDeleted.Id);
+            await session.SaveChangesAsync();
+        }
+
+        using var query = theStore.QuerySession();
+
+        var list = (await query.Query<Entity>()
+            .Where(x => x.MaybeDeleted())
+            .ToListAsync());
+
+        list.Count.ShouldBe(2);
+        list[0].Id.ShouldBe(entity.Id);
+        list[0].Deleted.ShouldBe(false);
+        list[0].DeletedAt.ShouldBe(null);
+        list[1].Id.ShouldBe(entityDeleted.Id);
+        list[1].Deleted.ShouldBe(true);
+        list[1].DeletedAt.HasValue.ShouldBeTrue();
+    }
+}
+
+public enum ArchivedState
+{
+    NotArchived,
+    IncludeArchived,
+    OnlyArchived
+}
+
+
+public static class ArchiveStateExtensions
+{
+    public static IQueryable<T> WithArchivedState<T>(this IQueryable<T> q, ArchivedState archivedState)
+    {
+        return archivedState switch
+        {
+            ArchivedState.NotArchived => q, // no-op
+            ArchivedState.IncludeArchived => q.Where(x => x.MaybeDeleted()),
+            ArchivedState.OnlyArchived => q.Where(x => x.IsDeleted()),
+            _ => throw new ArgumentOutOfRangeException(nameof(archivedState), archivedState, null)
+        };
+    }
+
+    public static IQueryable<Entity> WithArchivedStateNonGeneric(this IQueryable<Entity> q, ArchivedState archivedState)
+    {
+        return archivedState switch
+        {
+            ArchivedState.NotArchived => q, // no-op
+            ArchivedState.IncludeArchived => q.Where(x => x.MaybeDeleted()),
+            ArchivedState.OnlyArchived => q.Where(x => x.IsDeleted()),
+            _ => throw new ArgumentOutOfRangeException(nameof(archivedState), archivedState, null)
+        };
+    }
+}
+
+public class Entity: ISoftDeleted
+{
+    public Guid Id { get; set; }
+    public bool Deleted { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
+}

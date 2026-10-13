@@ -1,0 +1,640 @@
+using System.Reflection;
+using System.Text.Json.Serialization;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using JasperFx.Events;
+using JasperFx.Events.Descriptors;
+using JasperFx.Events.EventModeling;
+using Wolverine.Configuration.EventModeling;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.Sagas;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Handlers;
+
+namespace Wolverine.Configuration.Capabilities;
+
+public class ServiceCapabilities : OptionsDescription
+{
+    [JsonConstructor]
+    public ServiceCapabilities()
+    {
+    }
+
+    public ServiceCapabilities(WolverineOptions options)
+    {
+        // Explicitly select only properties useful for CritterWatch monitoring —
+        // no Reflection, no noise from WolverineOptions internal plumbing
+        Subject = "Wolverine.WolverineOptions";
+
+        Version = (options.ApplicationAssembly ?? Assembly.GetEntryAssembly())!.GetName().Version?.ToString()!;
+        WolverineVersion = options.GetType().Assembly.GetName().Version?.ToString();
+        DurabilitySettings = options.Durability.ToDescription();
+
+        AddValue(nameof(options.ServiceName), options.ServiceName);
+
+        // User-defined service-level tags (GH-3240). Free-form strings surfaced on the inherited
+        // OptionsDescription.Tags (string[]); consumed by CritterWatch to let users filter related services by
+        // their own labels. Distinct from per-endpoint tag concepts — this is service-level.
+        Tags = options.Tags.ToArray();
+
+        AddValue(nameof(options.DefaultExecutionTimeout), options.DefaultExecutionTimeout);
+        AddValue(nameof(options.DefaultRemoteInvocationTimeout), options.DefaultRemoteInvocationTimeout);
+        AddValue(nameof(options.DisableAllExternalListeners), options.DisableAllExternalListeners);
+        AddValue(nameof(options.EnableRemoteInvocation), options.EnableRemoteInvocation);
+        AddValue(nameof(options.EnableAutomaticFailureAcks), options.EnableAutomaticFailureAcks);
+        AddValue(nameof(options.EnableRelayOfUserName), options.EnableRelayOfUserName);
+        AddValue(nameof(options.ServiceLocationPolicy), options.ServiceLocationPolicy);
+        AddValue("MetricsMode", options.Metrics.Mode);
+        AddValue("MetricsSamplingPeriod", options.Metrics.SamplingPeriod);
+
+        // Surface the WolverineOptions.Tracking flags so CritterWatch can render which
+        // opt-in tracing diagnostics this service has enabled. Each flag matches its
+        // property name on TrackingOptions (no rename through this layer).
+        AddValue(nameof(options.Tracking.EnableMessageCausationTracking), options.Tracking.EnableMessageCausationTracking);
+        AddValue(nameof(options.Tracking.HandlerExecutionDiagnosticsEnabled), options.Tracking.HandlerExecutionDiagnosticsEnabled);
+        AddValue(nameof(options.Tracking.DeserializationSpanEnabled), options.Tracking.DeserializationSpanEnabled);
+        AddValue(nameof(options.Tracking.OutboxDiagnosticsEnabled), options.Tracking.OutboxDiagnosticsEnabled);
+    }
+
+    public DateTimeOffset Evaluated { get; set; } = DateTimeOffset.UtcNow;
+
+    public string Version { get; set; } = null!;
+
+    public string? WolverineVersion { get; set; }
+
+    public List<EventStoreUsage> EventStores { get; set; } = [];
+
+    /// <summary>
+    /// Diagnostic snapshots of every <c>IDocumentStore</c> registered in the
+    /// service container — Marten and Polecat alike. Populated by walking
+    /// <see cref="IDocumentStoreUsageSource"/> services through DI; mirrors
+    /// the <see cref="EventStores"/> collection so monitoring tools
+    /// (CritterWatch) can render document-side configuration the same way.
+    /// </summary>
+    public List<DocumentStoreUsage> DocumentStores { get; set; } = [];
+
+    /// <summary>
+    /// Diagnostic snapshots of every EF Core <c>DbContext</c> registered in
+    /// the service container, populated by walking
+    /// <see cref="IDbContextUsageSource"/> services through DI. Mirrors
+    /// <see cref="DocumentStores"/> on the EF Core side so CritterWatch's
+    /// Storage tab can render the third subsection alongside Event Stores
+    /// and Document Stores. (#102)
+    /// </summary>
+    public List<DbContextUsage> DbContexts { get; set; } = [];
+
+    public List<MessageDescriptor> Messages { get; set; } = [];
+
+    /// <summary>
+    /// One <see cref="SagaDescriptor"/> per concrete <see cref="Saga"/>
+    /// state class discovered in the handler graph. Each descriptor
+    /// lists the messages that touch the saga with the role each
+    /// message plays (Start / StartOrHandle / Orchestrate / NotFound),
+    /// the cascading messages each handler emits, and a
+    /// <c>StorageProvider</c> tag (e.g. <c>Marten</c>,
+    /// <c>EntityFrameworkCore</c>) resolved by walking
+    /// <see cref="IPersistenceFrameProvider"/>s — same lookup the saga
+    /// handler pipeline uses at codegen time to decide which storage
+    /// handles each saga. Consumed by external monitoring tools
+    /// (CritterWatch) to render saga workflow diagrams without having
+    /// to introspect runtime types.
+    /// </summary>
+    public List<SagaDescriptor> Sagas { get; set; } = [];
+
+    /// <summary>
+    /// One <see cref="RecurringScheduleDescriptor" /> per recurring (cron) message schedule
+    /// registered through <c>opts.Schedules</c> — name, cron expression, time zone, message
+    /// type, plus the runtime pause state and pending next occurrence read best-effort from the
+    /// message store's recurring tracking extension. First-class rather than an
+    /// <c>AdditionalCapabilities</c> entry so consumers (CritterWatch) get typed fields and a
+    /// schedule change participates in capability change detection. Empty when no schedules are
+    /// registered.
+    /// </summary>
+    public List<RecurringScheduleDescriptor> RecurringSchedules { get; set; } = [];
+
+    public List<MessageStore> MessageStores { get; set; } = [];
+
+    /// <summary>
+    /// Diagnostic snapshots of every Wolverine.HTTP graph in this
+    /// process — populated by walking <see cref="IHttpGraphUsageSource"/>
+    /// services through DI. Mirrors <see cref="DocumentStores"/> on the
+    /// HTTP side (#84). Empty when no Wolverine.HTTP graph is loaded.
+    /// </summary>
+    public List<HttpGraphUsage> HttpGraphs { get; set; } = [];
+
+    /// <summary>
+    /// Diagnostic snapshots of non-Wolverine ASP.NET Core endpoints
+    /// (Minimal API, MVC, Razor Pages, SignalR, …) populated by
+    /// <c>Wolverine.CritterWatch.Http</c> when the host opted into it
+    /// via <c>services.AddCritterWatchHttp()</c>. Empty when the
+    /// integration package isn't loaded — pure-Wolverine workers and
+    /// console hosts incur no ASP.NET Core dependency.
+    /// </summary>
+    public List<AspNetEndpointDescriptor> AspNetEndpoints { get; set; } = [];
+
+    /// <summary>
+    /// Diagnostic snapshots of the application's Wolverine gRPC RPC endpoints — the proto-first and code-first RPCs
+    /// whose generated wrapper forwards a request to the message bus — populated by walking
+    /// <see cref="IGrpcEndpointDescriptorSource"/> services through DI. <c>Wolverine.Grpc</c> registers a single
+    /// source when gRPC integration is enabled. Empty when no gRPC integration is loaded (pure-Wolverine workers
+    /// incur no gRPC dependency). Mirrors <see cref="AspNetEndpoints"/>.
+    /// </summary>
+    public List<GrpcRpcDescriptor> GrpcEndpoints { get; set; } = [];
+
+    public List<EndpointDescriptor> MessagingEndpoints { get; set; } = [];
+
+    /// <summary>
+    ///     The Event Models this service hosts (GH-3988), assembled from every
+    ///     <see cref="IEventModelDefinitionSource" /> registered in the container — Wolverine's own derived
+    ///     chain roles, Wolverine.HTTP's, and any jasperfx#687 overlay the application registered. Slices
+    ///     merge by name <em>within</em> a model, with derived roles winning over overlay names. Null when
+    ///     the section could not be read.
+    /// </summary>
+    /// <remarks>
+    ///     GH-4424: this was a single <see cref="EventModelDescriptor" />, which had nowhere to put a second
+    ///     model — so the assembly folded every model into one named for the service, losing a name outright
+    ///     and reporting nothing. One service is not one model: each of the three stores can name its own
+    ///     through <c>StoreOptions.EventModelName</c>, so a modular monolith with an ancillary store per
+    ///     module legitimately hosts several. A consumer that can only render one canvas asks
+    ///     <see cref="EventModelSetDescriptor.Sole" />, or folds explicitly with
+    ///     <see cref="EventModelSetDescriptor.Collapse" /> and gets a <c>ModelCollapse</c> hotspot recording
+    ///     what it lost.
+    /// </remarks>
+    public EventModelSetDescriptor? EventModel { get; set; }
+
+    public DatabaseCardinality MessageStoreCardinality { get; set; } = DatabaseCardinality.None;
+
+    public List<BrokerDescription> Brokers { get; set; } = [];
+
+    public OptionsDescription? DurabilitySettings { get; set; }
+
+    /// <summary>
+    /// Additional capability descriptions contributed by extension frameworks
+    /// (e.g. Wolverine.HTTP) via ICapabilityDescriptor implementations.
+    /// </summary>
+    public List<OptionsDescription> AdditionalCapabilities { get; set; } = [];
+
+    /// <summary>
+    ///     Uri for sending command messages to this service
+    /// </summary>
+    public Uri? SystemControlUri { get; set; }
+
+    public static async Task<ServiceCapabilities> ReadFrom(IWolverineRuntime runtime, Uri? systemControlUri,
+        CancellationToken token)
+    {
+        var capabilities = new ServiceCapabilities(runtime.Options)
+        {
+            SystemControlUri = systemControlUri
+        };
+
+        // GH-3740: every section below is a purely *diagnostic* read of the application's own configuration,
+        // and the snapshot as a whole is best effort. Before this, one misbehaving property getter,
+        // descriptor source, or unreachable database anywhere in the graph aborted ReadFrom outright -- and
+        // a monitoring console (CritterWatch) consequently received *no* capabilities at all for the
+        // service, permanently, since it retries the same doomed call on every batch. Each section is now
+        // isolated: it either contributes its data or logs a warning and is left out.
+        readSection(runtime, nameof(Brokers), token, () => readTransports(runtime, capabilities, token));
+
+        await readSectionAsync(runtime, nameof(MessageStores), token, () => readMessageStores(runtime, capabilities));
+
+        await readSectionAsync(runtime, nameof(EventStores), token, () => readEventStores(runtime, token, capabilities));
+
+        await readSectionAsync(runtime, nameof(DocumentStores), token,
+            () => readDocumentStores(runtime, token, capabilities));
+
+        await readSectionAsync(runtime, nameof(DbContexts), token, () => readDbContexts(runtime, token, capabilities));
+
+        await readSectionAsync(runtime, nameof(HttpGraphs), token, () => readHttpGraphs(runtime, token, capabilities));
+
+        readSection(runtime, nameof(AspNetEndpoints), token, () => readAspNetEndpoints(runtime, capabilities));
+
+        readSection(runtime, nameof(GrpcEndpoints), token, () => readGrpcEndpoints(runtime, capabilities));
+
+        readSection(runtime, nameof(Messages), token, () => readMessageTypes(runtime, capabilities));
+
+        readSection(runtime, nameof(MessagingEndpoints), token, () => readEndpoints(runtime, capabilities, token));
+
+        readSection(runtime, nameof(Sagas), token, () => readSagas(runtime, capabilities));
+
+        await readSectionAsync(runtime, nameof(RecurringSchedules), token,
+            () => readRecurringSchedules(runtime, token, capabilities));
+
+        readSection(runtime, nameof(AdditionalCapabilities), token,
+            () => readAdditionalCapabilities(runtime, capabilities));
+
+        await readSectionAsync(runtime, nameof(EventModel), token, () => readEventModel(runtime, token, capabilities));
+
+        return capabilities;
+    }
+
+    private static void readSection(IWolverineRuntime runtime, string section, CancellationToken token, Action read)
+    {
+        try
+        {
+            read();
+        }
+        catch (Exception e)
+        {
+            warnAboutFailedSection(runtime, section, token, e);
+        }
+    }
+
+    private static async Task readSectionAsync(IWolverineRuntime runtime, string section, CancellationToken token,
+        Func<Task> read)
+    {
+        try
+        {
+            await read();
+        }
+        catch (Exception e)
+        {
+            warnAboutFailedSection(runtime, section, token, e);
+        }
+    }
+
+    private static void warnAboutFailedSection(IWolverineRuntime runtime, string section, CancellationToken token,
+        Exception e)
+    {
+        // A cancelled token means the host is shutting down or the caller gave up waiting -- that's not a
+        // failure of this particular section, and there's no point grinding through the remaining ones or
+        // logging a dozen warnings about it.
+        token.ThrowIfCancellationRequested();
+
+        runtime.Logger.LogWarning(e,
+            "Wolverine was unable to read the {Section} section of the ServiceCapabilities diagnostic snapshot for service {ServiceName}. That section will be missing or incomplete, the rest of the snapshot is unaffected.",
+            section, runtime.Options.ServiceName);
+    }
+
+    /// <summary>
+    /// Mirror of <see cref="readDocumentStores"/> for Wolverine HTTP
+    /// graphs. Walks every <see cref="IHttpGraphUsageSource"/>
+    /// registered in DI (Wolverine.Http auto-registers a single source
+    /// when <c>MapWolverineEndpoints()</c> is called) and asks each one
+    /// for a snapshot. Sources that return null (transient init) are
+    /// silently skipped.
+    /// </summary>
+    private static async Task readHttpGraphs(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        var sources = runtime.Services.GetServices<IHttpGraphUsageSource>();
+        var seen = new HashSet<Uri>();
+        var list = new List<HttpGraphUsage>();
+        foreach (var source in sources)
+        {
+            if (!seen.Add(source.Subject)) continue;
+
+            var usage = await source.TryCreateUsage(runtime.Services, token);
+            if (usage != null)
+            {
+                list.Add(usage);
+            }
+        }
+
+        capabilities.HttpGraphs.AddRange(list.OrderBy(x => x.SubjectUri.ToString()));
+    }
+
+    /// <summary>
+    /// Walk every <see cref="IAspNetEndpointDescriptorSource"/> in DI —
+    /// implemented in <c>Wolverine.CritterWatch.Http</c> when the host
+    /// opted into it. Pure-Wolverine workers won't have any registered;
+    /// the collection stays empty.
+    /// </summary>
+    private static void readAspNetEndpoints(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var sources = runtime.Services.GetServices<IAspNetEndpointDescriptorSource>();
+        var list = new List<AspNetEndpointDescriptor>();
+        foreach (var source in sources)
+        {
+            list.AddRange(source.Endpoints);
+        }
+
+        capabilities.AspNetEndpoints.AddRange(list.OrderBy(x => x.Route + "::" + string.Join(",", x.HttpMethods)));
+    }
+
+    /// <summary>
+    /// Walk every <see cref="IGrpcEndpointDescriptorSource"/> in DI — registered by <c>Wolverine.Grpc</c> when gRPC
+    /// integration is enabled. Pure-Wolverine workers won't have any registered; the collection stays empty. Ordered
+    /// by service + method so the snapshot is stable across emits.
+    /// </summary>
+    private static void readGrpcEndpoints(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var sources = runtime.Services.GetServices<IGrpcEndpointDescriptorSource>();
+        var list = new List<GrpcRpcDescriptor>();
+        foreach (var source in sources)
+        {
+            list.AddRange(source.Endpoints);
+        }
+
+        capabilities.GrpcEndpoints.AddRange(list.OrderBy(x => x.ServiceName + "::" + x.MethodName, StringComparer.Ordinal));
+    }
+
+    private static void readEndpoints(IWolverineRuntime runtime, ServiceCapabilities capabilities,
+        CancellationToken token)
+    {
+        foreach (var endpoint in runtime.Options.Transports.AllEndpoints().OrderBy(x => x.Uri.ToString()))
+        {
+            if (endpoint.Role == EndpointRole.System) continue;
+
+            // GH-3740: same reasoning as readTransports() -- EndpointDescriptor reflects over the endpoint's
+            // public properties, and one bad getter shouldn't empty out the whole endpoint list
+            try
+            {
+                capabilities.MessagingEndpoints.Add(new EndpointDescriptor(endpoint));
+            }
+            catch (Exception e)
+            {
+                token.ThrowIfCancellationRequested();
+
+                runtime.Logger.LogWarning(e,
+                    "Wolverine was unable to build a diagnostic description of the endpoint at {EndpointUri}. It will be missing from the ServiceCapabilities snapshot.",
+                    endpoint.Uri);
+            }
+        }
+    }
+
+    private static void readMessageTypes(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var messageTypes = runtime.Options.Discovery.FindAllMessages(runtime.Options.HandlerGraph);
+        foreach (var messageType in messageTypes.OrderBy(x => x.FullNameInCode()))
+        {
+            if (messageType.IsSystemMessageType()) continue;
+            capabilities.Messages.Add(new MessageDescriptor(messageType, runtime));
+        }
+    }
+
+    /// <summary>
+    /// Walk every <see cref="SagaChain"/> on the handler graph (via
+    /// <see cref="SagaDescriptorBuilder"/>) and emit one
+    /// <see cref="SagaDescriptor"/> per concrete saga state type. The
+    /// per-message role classification + saga-id binding + cascading
+    /// PublishedTypes come from the shared builder so the host-wide
+    /// snapshot agrees byte-for-byte with each per-storage
+    /// <see cref="ISagaStoreDiagnostics"/> view. The
+    /// <c>StorageProvider</c> tag is resolved by asking each registered
+    /// <see cref="IPersistenceFrameProvider"/> whether it can persist
+    /// the saga state type — same lookup the saga handler pipeline uses.
+    /// </summary>
+    private static void readSagas(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var sagaTypes = SagaDescriptorBuilder.CollectSagaChains(runtime.Options.HandlerGraph)
+            .Where(c => c.Handlers.Any(h => h.HandlerType.CanBeCastTo<Saga>()))
+            .Select(c => c.SagaType)
+            .Distinct()
+            .OrderBy(t => t.FullNameInCode())
+            .ToArray();
+        if (sagaTypes.Length == 0) return;
+
+        var providers = runtime.Options.CodeGeneration.OrderedPersistenceProviders();
+        var container = runtime.Options.HandlerGraph.Container;
+
+        foreach (var sagaType in sagaTypes)
+        {
+            var storageProvider = resolveStorageProvider(sagaType, providers, container);
+            capabilities.Sagas.Add(
+                SagaDescriptorBuilder.Build(runtime.Options.HandlerGraph, sagaType, storageProvider));
+        }
+    }
+
+    /// <summary>
+    /// Tag a saga state type with the persistence-provider name that
+    /// owns it at runtime. Walks the registered
+    /// <see cref="IPersistenceFrameProvider"/>s — same precedence the
+    /// saga code-gen uses — and returns a stable, human-readable string
+    /// for the first one that claims the type. Falls back to
+    /// <c>"InMemory"</c> when no provider is registered (a common shape
+    /// for in-process tests).
+    /// </summary>
+    private static string resolveStorageProvider(Type sagaType, IReadOnlyList<IPersistenceFrameProvider> providers, IServiceContainer container)
+    {
+        if (providers.Count == 0) return "InMemory";
+
+        foreach (var provider in providers)
+        {
+            try
+            {
+                if (provider.CanPersist(sagaType, container, out _))
+                {
+                    return providerLabel(provider);
+                }
+            }
+            catch
+            {
+                // CanPersist may probe DI for a real session/context — if
+                // resolution fails (transient registration that needs a
+                // scope, etc) treat that provider as not-applicable and
+                // keep walking. Storage tagging is diagnostic-only and
+                // must not raise.
+            }
+        }
+
+        return "InMemory";
+    }
+
+    private static string providerLabel(IPersistenceFrameProvider provider)
+    {
+        // Type-name-driven so each provider package owns its own label
+        // without Wolverine.Core needing to know the concrete types.
+        // Strip the "PersistenceFrameProvider" suffix Marten/EFCore/RavenDb
+        // all use to land on a clean, UI-friendly tag.
+        var name = provider.GetType().Name;
+        const string suffix = "PersistenceFrameProvider";
+        if (name.EndsWith(suffix, StringComparison.Ordinal))
+            name = name[..^suffix.Length];
+        return name.Length == 0 ? "InMemory" : name;
+    }
+
+    public const string EventSubscriptionAgentScheme = "event-subscriptions";
+
+    private static async Task readEventStores(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        var eventStores = runtime.Services.GetServices<IEventStore>();
+        var storeList = new List<EventStoreUsage>();
+        foreach (var eventStore in eventStores)
+        {
+            var eventStoreUsage = await eventStore.TryCreateUsage(token);
+            if (eventStoreUsage != null)
+            {
+                eventStoreUsage.PopulateAgentUris(EventSubscriptionAgentScheme, eventStore.Identity);
+                storeList.Add(eventStoreUsage);
+            }
+        }
+
+        capabilities.EventStores.AddRange(storeList.OrderBy(x => x.SubjectUri.ToString()));
+    }
+
+    /// <summary>
+    /// Mirror of <see cref="readEventStores"/> for the document side. Walks
+    /// every <see cref="IDocumentStoreUsageSource"/> registered in DI (Marten
+    /// stores satisfy this via <c>IDocumentStore</c>; Polecat stores too), and
+    /// asks each one for a <see cref="DocumentStoreUsage"/> snapshot. Stores
+    /// that return null (transient-init failure) are silently skipped — same
+    /// permissive policy as the event-store path.
+    /// </summary>
+    private static async Task readDocumentStores(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        var stores = runtime.Services.GetServices<IDocumentStoreUsageSource>();
+        var seen = new HashSet<Uri>();
+        var storeList = new List<DocumentStoreUsage>();
+        foreach (var store in stores)
+        {
+            // Marten stores typically also register as IEventStore on the same
+            // instance — once Wolverine boots both interfaces resolve to the
+            // same concrete object. Dedupe by Subject URI so we don't double-
+            // count when a store wears both hats.
+            if (!seen.Add(store.Subject)) continue;
+
+            var usage = await store.TryCreateUsage(token);
+            if (usage != null)
+            {
+                storeList.Add(usage);
+            }
+        }
+
+        capabilities.DocumentStores.AddRange(storeList.OrderBy(x => x.SubjectUri.ToString()));
+    }
+
+    /// <summary>
+    /// Mirror of <see cref="readDocumentStores"/> for EF Core. Walks every
+    /// <see cref="IDbContextUsageSource"/> registered in DI (each
+    /// <c>AddDbContextWith…</c> integration registers one; plain
+    /// <c>AddDbContext</c> registrations are picked up by the implicit
+    /// discovery hooked into <c>UseEntityFrameworkCoreTransactions</c>) and
+    /// asks each one for a <see cref="DbContextUsage"/> snapshot. Sources
+    /// that return null (transient configuration / DI failure) are silently
+    /// skipped — same permissive policy as the document-store path.
+    /// </summary>
+    private static async Task readDbContexts(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        var sources = runtime.Services.GetServices<IDbContextUsageSource>();
+        var seen = new HashSet<Uri>();
+        var usageList = new List<DbContextUsage>();
+        foreach (var source in sources)
+        {
+            // Dedupe by Subject URI — multiple registrations of the same
+            // DbContext type (e.g. integration test harness re-registering)
+            // shouldn't double-count.
+            if (!seen.Add(source.Subject)) continue;
+
+            var usage = await source.TryCreateUsage(token);
+            if (usage != null)
+            {
+                usageList.Add(usage);
+            }
+        }
+
+        capabilities.DbContexts.AddRange(usageList.OrderBy(x => x.SubjectUri.ToString()));
+    }
+
+    private static async Task readMessageStores(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var collection = runtime.Stores;
+        var stores = await collection.FindAllAsync();
+        capabilities.MessageStores.AddRange(stores.Select(MessageStore.For).OrderBy(x => x.Uri.ToString()));
+
+        capabilities.MessageStoreCardinality = collection.Cardinality();
+    }
+
+    /// <summary>
+    ///     GH-3988: assemble the Event Model from every registered <see cref="IEventModelDefinitionSource" />.
+    ///     Wolverine core registers its derived source ahead of everything else, so derived roles win on
+    ///     merge; Wolverine.HTTP adds its chains; an application's overlays only name, group and link.
+    /// </summary>
+    private static async Task readEventModel(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        // GH-4424: the SET, not a fold of it. Every model this host assembled reaches the capabilities
+        // document (and so CritterWatch) with its own name intact.
+        capabilities.EventModel =
+            await WolverineEventModelExport.AssembleSetAsync(runtime.Services, runtime.Options.ServiceName, token);
+    }
+
+    /// <summary>
+    /// One descriptor per registered recurring (cron) schedule. Definition data comes straight
+    /// off the code-first registrations; the runtime half (paused, the actually-pending next
+    /// occurrence) is read from the message store's recurring tracking extension with its own
+    /// inner best-effort guard — an unreachable database costs the snapshot the runtime fields,
+    /// never the schedule definitions themselves.
+    /// </summary>
+    private static async Task readRecurringSchedules(IWolverineRuntime runtime, CancellationToken token,
+        ServiceCapabilities capabilities)
+    {
+        var schedules = runtime.Options.Schedules;
+        if (!schedules.Any()) return;
+
+        var rows = new Dictionary<string, RecurringMessageRecord>();
+        try
+        {
+            foreach (var row in await runtime.Storage.RecurringMessages.LoadAllAsync(token))
+            {
+                rows[row.Name] = row;
+            }
+        }
+        catch (Exception e)
+        {
+            token.ThrowIfCancellationRequested();
+            runtime.Logger.LogWarning(e,
+                "Wolverine was unable to read the recurring-message tracking rows for the ServiceCapabilities snapshot. Schedule definitions are still reported; pause state and pending occurrences are not.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        foreach (var schedule in schedules.OrderBy(x => x.Name, StringComparer.Ordinal))
+        {
+            var row = rows.GetValueOrDefault(schedule.Name);
+            capabilities.RecurringSchedules.Add(new RecurringScheduleDescriptor
+            {
+                Name = schedule.Name,
+                CronExpression = schedule.Schedule.Expression,
+                TimeZoneId = schedule.Schedule.TimeZone.Id,
+                MessageType = TypeDescriptor.For(schedule.MessageType),
+                Paused = row?.Paused ?? false,
+                PausedAt = row?.PausedAt,
+                NextOccurrence = row?.Paused == true
+                    ? null
+                    : row?.NextOccurrence ?? schedule.Schedule.NextOccurrence(now)
+            });
+        }
+    }
+
+    private static void readAdditionalCapabilities(IWolverineRuntime runtime, ServiceCapabilities capabilities)
+    {
+        var descriptors = runtime.Services.GetServices<ICapabilityDescriptor>();
+        foreach (var descriptor in descriptors)
+        {
+            capabilities.AdditionalCapabilities.Add(descriptor.Describe());
+        }
+    }
+
+    private static void readTransports(IWolverineRuntime runtime, ServiceCapabilities capabilities,
+        CancellationToken token)
+    {
+        foreach (var transport in runtime.Options.Transports)
+        {
+            // GH-3740: BrokerDescription reflects over every public property of the transport, so one
+            // throwing getter on one broker's configuration must not cost us the description of every
+            // *other* broker in the application
+            try
+            {
+                if (transport.TryBuildBrokerUsage(out var usage))
+                {
+                    capabilities.Brokers.Add(usage);
+                }
+            }
+            catch (Exception e)
+            {
+                token.ThrowIfCancellationRequested();
+
+                runtime.Logger.LogWarning(e,
+                    "Wolverine was unable to build a diagnostic description of the {Protocol} ({TransportName}) transport. It will be missing from the ServiceCapabilities snapshot.",
+                    transport.Protocol, transport.Name);
+            }
+        }
+    }
+}

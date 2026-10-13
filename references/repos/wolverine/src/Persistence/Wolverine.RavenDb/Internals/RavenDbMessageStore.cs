@@ -1,0 +1,157 @@
+using System.Diagnostics.CodeAnalysis;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Raven.Client.Documents;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.RavenDb.Internals.Durability;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Transports;
+
+namespace Wolverine.RavenDb.Internals;
+
+public partial class RavenDbMessageStore : IMessageStoreWithAgentSupport
+{
+    private readonly IDocumentStore _store;
+    private readonly WolverineOptions _options;
+    private readonly Func<Envelope, string> _identity = e => $"{e.Id}/{e.Destination!.ToString().Replace(":/", "")}";
+
+    public RavenDbMessageStore(IDocumentStore store, WolverineOptions options)
+    {
+        _identity = options.Durability.MessageIdentity == MessageIdentity.IdOnly
+            ? e => e.Id.ToString()
+            : e => $"{e.Id}/{e.Destination!.ToString().Replace(":/", "").TrimEnd('/')}";
+
+        _store = store;
+        _options = options;
+
+        _leaderLockId = "wolverine/leader";
+        _scheduledLockId = "wolverine/scheduled";
+    }
+
+    public MessageStoreRole Role { get; set; } = MessageStoreRole.Main;
+    
+    public List<string> TenantIds { get; } = new();
+    
+    public void PromoteToMain(IWolverineRuntime runtime)
+    {
+        Role = MessageStoreRole.Main;
+    }
+
+    public void DemoteToAncillary()
+    {
+        Role = MessageStoreRole.Ancillary;
+    }
+
+    public string Name => _store.Identifier;
+
+    public Uri Uri => new($"{PersistenceConstants.AgentScheme}://ravendb/durability");
+
+    public string IdentityFor(Envelope envelope) => _identity(envelope);
+
+    public ValueTask DisposeAsync()
+    {
+        // Assume that the RavenDb store is owned by the IoC container
+        HasDisposed = true;
+        return new ValueTask();
+    }
+
+    public bool HasDisposed { get; set; }
+    public IMessageInbox Inbox => this;
+    public IMessageOutbox Outbox => this;
+    public INodeAgentPersistence Nodes => this;
+
+    // Default no-op listener store; real RavenDb-backed listener registry is
+    // a follow-up implementation. Stays a no-op while EnableDynamicListeners
+    // is false (default).
+    public IListenerStore Listeners { get; protected set; } = NullListenerStore.Instance;
+
+    public IMessageStoreAdmin Admin => this;
+    public IDeadLetters DeadLetters => this;
+    public void Initialize(IWolverineRuntime runtime)
+    {
+        // In Balanced mode Wolverine requires a node control endpoint so nodes can
+        // exchange agent-coordination commands. Without this the runtime throws
+        // "ControlEndpoint cannot be null for this usage" from WolverineNode.For.
+        // Register a native RavenDB-backed control queue unless the user already
+        // supplied one (e.g. an external broker or UseTcpForControlEndpoint()).
+        if (Role == MessageStoreRole.Main
+            && runtime.Options.Transports.NodeControlEndpoint == null
+            && runtime.Options.Durability.Mode == DurabilityMode.Balanced)
+        {
+            // The transport itself is registered eagerly in UseRavenDbPersistence so
+            // its "ravendb://" scheme resolves for publishing rules. Here we promote
+            // its control endpoint to the NodeControlEndpoint, which marks it as a
+            // live listener — only under Balanced, so Solo hosts never poll.
+            var transport = runtime.Options.Transports.OfType<Transport.RavenDbControlTransport>().FirstOrDefault()
+                            ?? new Transport.RavenDbControlTransport(_store, runtime.Options);
+            runtime.Options.Transports.Add(transport);
+            runtime.Options.Transports.NodeControlEndpoint = transport.ControlEndpoint;
+        }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "DatabaseDescriptor(subject) reads subject's runtime-type properties for diagnostic reporting. RavenDbMessageStore properties trimmed away are silently omitted, which is acceptable for this diagnostic surface.")]
+    public DatabaseDescriptor Describe()
+    {
+        return new DatabaseDescriptor(this)
+        {
+            Engine = "ravendb",
+            DatabaseName = _store.Identifier
+        };
+    }
+
+    public Task DrainAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public IAgent StartScheduledJobs(IWolverineRuntime runtime)
+    {
+        _leaderLockId = "wolverine/leader/" + runtime.Options.ServiceName.ToLowerInvariant();
+        _scheduledLockId = _scheduledLockId + "/" + runtime.Options.ServiceName.ToLowerInvariant();
+        _runtime = runtime;
+
+        // NodeAgentController owns the durability agent lifecycle via the
+        // wolverinedb://ravendb/durability URI; do not start a second instance here.
+        // The agent built here is held by WolverineRuntime.DurableScheduledJobs purely
+        // for its disposal-time StopAsync (which is null-safe on the unstarted task fields).
+        return BuildAgent(runtime);
+    }
+
+    public IAgent BuildAgent(IWolverineRuntime runtime)
+    {
+        return new RavenDbDurabilityAgent(_store, runtime, this);
+    }
+
+    public IAgentFamily? BuildAgentFamily(IWolverineRuntime runtime)
+    {
+        return null;
+    }
+
+    public async Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress, int limit)
+    {
+        using var session = _store.OpenAsyncSession();
+        var incoming = await session
+            .Query<IncomingMessage>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .Where(x => x.OwnerId == TransportConstants.AnyNode && x.ReceivedAt == listenerAddress && x.Status == EnvelopeStatus.Incoming)
+            .OrderBy(x => x.EnvelopeId)
+            .Take(limit)
+            .ToListAsync();
+
+        return incoming.Select(x => x.Read()).ToList();
+    }
+
+    public async Task ReassignIncomingAsync(int ownerId, IReadOnlyList<Envelope> incoming)
+    {
+        using var session = _store.OpenAsyncSession();
+        foreach (var envelope in incoming)
+        {
+            session.Advanced.Patch<IncomingMessage, int>(_identity(envelope), x => x.OwnerId, ownerId);
+        }
+
+        await session.SaveChangesAsync();
+    }
+}

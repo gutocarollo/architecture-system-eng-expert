@@ -1,0 +1,110 @@
+using IntegrationTests;
+using JasperFx;
+using JasperFx.Core;
+using Marten;
+using Marten.Newtonsoft;
+using Marten.Exceptions;
+using Marten.Schema;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Weasel.Core;
+using Wolverine;
+using Wolverine.ErrorHandling;
+using Wolverine.Marten;
+using Wolverine.Tracking;
+
+namespace MartenTests.Bugs;
+
+public class Bug_1427_no_endpoint_error_on_retries : IAsyncLifetime
+{
+    private IHost _host = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddMarten(o =>
+        {
+            // enabling writing private properties to the models
+            o.UseNewtonsoftForSerialization(nonPublicMembersStorage: NonPublicMembersStorage.NonPublicSetters);
+
+            o.Connection(Servers.PostgresConnectionString);
+            o.AutoCreateSchemaObjects = AutoCreate.All;
+            o.DatabaseSchemaName = "gh1427";
+    
+            o.DisableNpgsqlLogging = true;
+    
+            // register custom schema for module
+            o.Schema.For<DomainObjectX>().DatabaseSchemaName("samplemodule");
+    
+        }).UseLightweightSessions().IntegrateWithWolverine();
+
+        builder.Services.AddWolverine(options =>
+        {
+            options.Policies.UseDurableLocalQueues();
+            options.Policies.AutoApplyTransactions();
+
+            options.Policies.LogMessageStarting(LogLevel.Information);
+
+            options.MultipleHandlerBehavior = MultipleHandlerBehavior.Separated;
+
+            options.Discovery.DisableConventionalDiscovery()
+                .IncludeType(typeof(StartBatchHandler));
+            options.Durability.Mode = DurabilityMode.Solo;
+
+            // ISSUE: this attempt to retry the failed messages leads to the "Wolverine.Runtime.Handlers.NoHandlerForEndpointException"
+            options
+                .OnException<ConcurrencyException>()
+                .RetryWithCooldown(2.Seconds(), 4.Seconds(), 8.Seconds());
+    
+        });
+
+        _host = builder.Build();
+        await _host.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+    }
+
+    [Fact]
+    public async Task send_a_bunch_of_batches_and_see_no_problems()
+    {
+        await _host.ExecuteAndWaitAsync(async c =>
+        {
+            await c.InvokeAsync(new StartBatch());
+        }, 10000);
+    }
+}
+
+[UseOptimisticConcurrency]
+public class DomainObjectX
+{
+    public Guid Id { get; init; }
+}
+
+// this event is being consumed by multiple (in this case 2) handlers
+public record MyEvent(string Id);
+
+public record StartBatch;
+
+public static class StartBatchHandler
+{
+    public static OutgoingMessages Handle(StartBatch message, IDocumentSession session)
+    {
+        // simply adding one document that will be used to trigger the exception
+        session.Insert(new DomainObjectX { Id = Guid.NewGuid() });
+
+        var messages = new OutgoingMessages();
+
+        // 2 messages should be enough to trigger the issue.
+        // If not, invoke the post again or increase the number.
+        for (var i = 0; i < 2; i++)
+        {
+            messages.Add(new MyEvent(Guid.NewGuid().ToString()));
+        }
+
+        return messages;
+    }
+}

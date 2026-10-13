@@ -1,0 +1,80 @@
+plugins {
+    id("java-platform")
+    id("maven-publish")
+    id("signing")
+}
+
+signing {
+    def gpgKey = System.getenv("GPG_KEY")
+    def gpgPassphrase = System.getenv("GPG_PASSPHRASE")
+    required = gpgKey != null
+    useInMemoryPgpKeys(gpgKey, gpgPassphrase)
+    sign publishing.publications
+}
+
+def projectArtifactId = 'resilience4j'
+def url = "https://resilience4j.readme.io"
+
+publishing {
+    publications {
+        resilience4j(MavenPublication) {
+           from components.javaPlatform
+            pom.withXml {
+                def devs = ['RobWin': 'Robert Winkler',
+                            'storozhukBM': 'Bogdan Storozhuk',
+                            'Romeh': 'Mahmoud Romeh',
+                            'dlsrb6342': 'Ingyu Hwhang',
+                            'Hexmind': 'Tomasz Skowroński',
+                            'drmaas': 'Dan Maas']
+                def root = asNode()
+
+                root.appendNode('name', "${projectArtifactId}")
+                root.appendNode('url', "${url}")
+                root.appendNode('description', project.description)
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'Apache-2.0')
+                license.appendNode('url', 'https://github.com/resilience4j/resilience4j/blob/master/LICENSE.txt')
+                license.appendNode('distribution', 'repo')
+
+                root.appendNode('scm').appendNode('url', 'https://github.com/resilience4j/resilience4j.git')
+
+                def developers = root.appendNode('developers')
+                devs.each {
+                    def d = developers.appendNode('developer')
+                    d.appendNode('id', it.key)
+                    d.appendNode('name', it.value)
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    constraints {
+        api project(":resilience4j-core")
+        api project(":resilience4j-ratelimiter")
+        api project(":resilience4j-cache")
+        api project(":resilience4j-retry")
+        api project(":resilience4j-circuitbreaker")
+        api project(":resilience4j-bulkhead")
+        api project(":resilience4j-all")
+        api project(":resilience4j-circularbuffer")
+        api project(":resilience4j-metrics")
+        api project(":resilience4j-consumer")
+        api project(":resilience4j-annotations")
+        api project(":resilience4j-spring6")
+        api project(":resilience4j-spring-boot3")
+        api project(":resilience4j-spring-boot4")
+        api project(":resilience4j-feign")
+        api project(":resilience4j-timelimiter")
+        api project(":resilience4j-rxjava2")
+        api project(":resilience4j-rxjava3")
+        api project(":resilience4j-reactor")
+        api project(":resilience4j-micrometer")
+        api project(":resilience4j-micronaut")
+        api project(":resilience4j-micronaut-annotation")
+        api project(":resilience4j-kotlin")
+        api project(":resilience4j-vavr")
+    }
+}

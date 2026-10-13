@@ -1,0 +1,1090 @@
+﻿using JasperFx.Core;
+using JasperFx.Descriptors;
+using JasperFx.MultiTenancy;
+using Wolverine.Persistence;
+
+namespace Wolverine;
+
+public enum DurabilityMode
+{
+    /// <summary>
+    /// The durability agent will be optimized to run in a single node. This is very useful
+    /// for local development where you may be frequently stopping and restarting the service
+    ///
+    /// All known agents will automatically start on the local node. The recovered inbox/outbox
+    /// messages will start functioning immediately
+    /// </summary>
+    Solo,
+
+    /// <summary>
+    /// Normal mode that assumes that Wolverine is running on multiple load balanced nodes
+    /// with messaging active
+    /// </summary>
+    Balanced,
+
+    /// <summary>
+    /// Disables all message persistence to optimize Wolverine for usage within serverless functions
+    /// like AWS Lambda or Azure Functions. Requires that all endpoints be inline
+    /// </summary>
+    Serverless,
+
+    /// <summary>
+    /// Optimizes Wolverine for usage as strictly a mediator tool. This completely disables all node
+    /// persistence including the inbox and outbox
+    /// </summary>
+    MediatorOnly
+}
+
+/// <summary>
+/// Controls how Wolverine chooses to identify received message uniqueness in message storage
+/// </summary>
+public enum MessageIdentity
+{
+    /// <summary>
+    /// The default, "classic" behavior where Wolverine only identifies a received message by the unique message id
+    /// </summary>
+    IdOnly,
+    
+    /// <summary>
+    /// Make Wolverine identify message identity uniqueness by a combination of the message id and destination (received_at). Use
+    /// this if you are having a single Wolverine process receive the same message from multiple external listeners. This may be
+    /// necessary for some "Modular Monolith" approaches
+    /// </summary>
+    IdAndDestination
+}
+
+public class DurabilitySettings : IDescribeMyself
+{
+    private readonly CancellationTokenSource _cancellation = new();
+    private TenantIdStyle _tenantIdStyle = TenantIdStyle.CaseSensitive;
+
+    /// <summary>
+    /// For systems that use multi-tenancy, this controls how Wolverine does or does not "correct" the supplied tenant
+    /// id, with the default behavior being to use case-sensitive tenant ids.
+    ///
+    /// Use the IServiceCollection.CritterStackDefaults() method to change this 
+    /// </summary>
+    public TenantIdStyle TenantIdStyle
+    {
+        get => _tenantIdStyle;
+        internal set
+        {
+            _tenantIdStyle = value;
+            TenantIdStyleHasChanged = true;
+        }
+    }
+    
+    internal bool TenantIdStyleHasChanged { get; set; }
+
+    /// <summary>
+    ///     Set by tenancy integrations (e.g. Wolverine's conjoined EF Core multi-tenancy)
+    ///     that need the message store to provision its wolverine_tenants registry table
+    ///     even without database-per-tenant master table tenancy
+    /// </summary>
+    public bool TenantRegistryRequired { get; set; }
+
+    /// <summary>
+    ///     How long a tenant database list discovered from a dynamic tenancy source stays current before
+    ///     the next bulk enumeration re-reads it. <b>Defaults to zero — every bulk enumeration re-reads
+    ///     the list, exactly as it always has.</b> Raise it to bound how often a large tenant fleet goes
+    ///     back to the tenant registry.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///     Concurrent callers always share one refresh regardless of this value, and that sharing is not
+    ///     opt-in. It is also the half that actually closes the connection storm this exists for: the cost
+    ///     was every concurrent caller and every retry opening its own connection to the registry, not the
+    ///     frequency of a single refresh.
+    ///     </para>
+    ///     <para>
+    ///     Only applies to <see cref="DatabaseCardinality.DynamicMultiple" /> sources, where discovery is a
+    ///     round trip to the tenant registry. A lookup that misses — <c>FindDatabaseAsync</c> — always
+    ///     forces past this window, so a newly provisioned tenant database is never invisible to a
+    ///     single-database lookup for this long.
+    ///     </para>
+    ///     <para>
+    ///     A non-zero value does mean a database provisioned moments ago can be missing from a BULK
+    ///     enumeration (<c>FindAllAsync</c>) until the window elapses. That is fine for the durability
+    ///     sweeps, which is what the value is for; it is not fine for an application that provisions a
+    ///     tenant and immediately expects to enumerate it, which is why zero is the default.
+    ///     </para>
+    /// </remarks>
+    public TimeSpan TenantDatabaseListStaleTime { get; set; } = TimeSpan.Zero;
+
+    /// <summary>
+    /// If set, this establishes a default database schema name for all registered message
+    /// storage databases. Use this with a modular monolith approach where all modules target the same physical database. The default is null.
+    /// </summary>
+    public string? MessageStorageSchemaName { get; set; } = null;
+    
+    /// <summary>
+    /// Control and optimize the durability agent behavior within Wolverine applications
+    /// </summary>
+    public DurabilityMode Mode { get; set; } = DurabilityMode.Balanced;
+
+    /// <summary>
+    /// Opt-in reconciliation for when more than one registered message store claims the <c>Main</c> role
+    /// (GH-3226) — e.g. an event-store-backed main store (Marten / Polecat <c>IntegrateWithWolverine()</c>)
+    /// combined with a database-backed transport (the SQL Server / PostgreSQL queues) that also registers an
+    /// implicit <c>Main</c> store. The callback receives every <c>Main</c>-tagged store and returns the one to
+    /// keep as <c>Main</c>; the others are demoted to <c>Ancillary</c> instead of Wolverine throwing
+    /// "There must be exactly one message store tagged as the 'main' store". When left null (the default) the
+    /// strict single-Main validation is enforced. Return null from the callback to also fall back to the
+    /// strict validation.
+    /// </summary>
+    public Func<IReadOnlyList<Wolverine.Persistence.Durability.IMessageStore>,
+        Wolverine.Persistence.Durability.IMessageStore?>? ResolveMainStoreOnConflict { get; set; }
+
+    /// <summary>
+    /// Direct Wolverine on how it judges message identity. "Classic" default is IdOnly. Switch to IdAndDestination
+    /// for Modular Monolith usage where you may be receiving the same message and processing separately in different
+    /// external transport listening endpoints
+    /// </summary>
+    public MessageIdentity MessageIdentity { get; set; } = MessageIdentity.IdOnly;
+
+    /// <summary>
+    /// GH-4012. The maximum number of times Wolverine will try to settle (ack/nack) a single broker
+    /// delivery before giving up and letting the broker redeliver it.
+    ///
+    /// This is a budget shared across the whole completion path via <c>Envelope.AckAttempts</c>,
+    /// which is the point: <c>RetryBlock.MaximumAttempts</c> bounds retries within a single
+    /// <c>PostAsync</c>, but the durable path stacks two of them
+    /// (<c>DurableReceiver._completeBlock</c> -> <c>Listener.CompleteAsync</c> ->
+    /// <c>RabbitMqChannelCallback.Complete</c>), so their budgets multiplied to nine broker round
+    /// trips with neither block able to see the other's count.
+    ///
+    /// Note this cannot bound a redeliver -> dedupe -> re-ack loop: every redelivery constructs a
+    /// brand new envelope, so the counter starts over. Only a broker-side delivery count can do
+    /// that.
+    /// </summary>
+    public int MaximumAckAttempts { get; set; } = 3;
+
+    /// <summary>
+    /// GH-4012 item 4. The most times a broker may <b>deliver</b> one message before Wolverine stops trying to
+    /// process it and moves it to the dead letter queue instead. Zero — the default — leaves the broker's
+    /// own limit in charge and changes nothing.
+    ///
+    /// <para>
+    /// GH-4216: <b>this is a delivery count, not a redelivery count, despite the property name.</b> The first
+    /// delivery is <c>1</c> on both Azure Service Bus and SQS, and the check is <c>count &gt; limit</c>, so
+    /// <c>MaximumBrokerRedeliveries = 3</c> permits three deliveries and dead-letters on the fourth. A message
+    /// delivered exactly the permitted number of times still gets to run. This summary previously said
+    /// "redeliver", which describes a limit one delivery more generous than the one implemented.
+    /// </para>
+    /// </summary>
+    /// <remarks>
+    /// This is the counterpart to <see cref="MaximumAckAttempts" /> for the failure that one cannot reach.
+    /// An in-process budget restarts at zero on every redelivery because each one constructs a brand new
+    /// envelope; the broker's count does not, so it is the only thing that can bound a
+    /// redeliver → dedupe → re-ack loop — the shape where a delivery can never be settled, the inbox
+    /// deduplicates it on arrival, the settle fails again, and the broker delivers it once more.
+    ///
+    /// Read from whichever native signal the transport carries: RabbitMQ's <c>x-death</c> count, Amazon
+    /// SQS's <c>ApproximateReceiveCount</c>, Azure Service Bus's <c>DeliveryCount</c>. A transport with no
+    /// such signal leaves <c>Envelope.BrokerDeliveryCount</c> null and is unaffected.
+    /// </remarks>
+    public int MaximumBrokerRedeliveries { get; set; }
+
+    /// <summary>
+    /// GH-3711. The most successful handler completions a durable endpoint coalesces into one batched
+    /// mark-as-handled <c>UPDATE</c> against the inbox. One flush is in flight at a time and every
+    /// completion that arrives while it runs joins the next flush, so batches form from concurrency
+    /// alone -- a lone completion is still flushed immediately, and every completion still waits for
+    /// its own UPDATE to land before the message counts as handled. A batch that fails falls back to
+    /// marking each envelope individually with retries. Set to 1 to mark every completion in its own
+    /// round trip as before. Default 100.
+    /// </summary>
+    public int MarkAsHandledBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// GH-4319. The most concurrent durable local queue publishes Wolverine coalesces into one batched
+    /// inbox <c>INSERT</c>. Same shape as <see cref="MarkAsHandledBatchSize" /> and deliberately timer-free:
+    /// one flush is in flight at a time, every publish that arrives while it runs joins the next flush, and
+    /// a lone publish is written immediately -- so trickle traffic pays exactly the one round trip it paid
+    /// before and batches can only form where there was already a flush to hide behind. Every publisher
+    /// still waits for its own row to land before <c>StoreAndForwardAsync</c> returns. A batch that fails
+    /// rolls back whole and falls back to storing each envelope individually, so a duplicate envelope
+    /// still raises <c>DuplicateIncomingEnvelopeException</c> for itself alone. Set to 1 to give every
+    /// publish its own round trip as before. Default 100.
+    /// </summary>
+    public int StoreIncomingBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// GH-4319. The most concurrent non-transactional outbox stores Wolverine coalesces into one batched
+    /// outgoing <c>INSERT</c>, and the most successful single-envelope sends it coalesces into one batched
+    /// <c>DELETE</c>. Timer-free for a reason that matters more here than anywhere else in Wolverine: the
+    /// outbox store <i>gates the send</i>, so a max-age window in front of it would delay delivery rather
+    /// than bookkeeping -- GH-3490 measured that shape at a 5,767ms transit p50. A lone send is therefore
+    /// stored and forwarded immediately and batches form only from concurrency. Set to 1 to give every
+    /// send its own round trip as before. Default 100.
+    /// </summary>
+    public int StoreOutgoingBatchSize { get; set; } = 100;
+
+    /// <summary>
+    /// If non-null, this directs Wolverine to "push" any message in the durable outbox that is older
+    /// than the configured time even if the message is marked as owned by an active node
+    /// </summary>
+    public TimeSpan? OutboxStaleTime { get; set; }
+    
+    /// <summary>
+    /// If non-null, this directs Wolverine to "push" any message in the durable inbox that is older
+    /// than the configured time even if the message is marked as owned by an active node. Should NOT ever
+    /// be necessary, but it's an imperfect world. Enable this if you see "stuck" envelopes
+    /// </summary>
+    public TimeSpan? InboxStaleTime { get; set; }
+
+    /// <summary>
+    /// GH-4659. How long a tenant database's writes are held after it refuses one, before a single probe
+    /// is let through to see whether it is back. Defaults to 2 seconds.
+    /// </summary>
+    /// <remarks>
+    /// While a tenant's database is down, its stranded envelopes are deferred back to the broker and
+    /// redelivered immediately, so every one of them retries as fast as the database can refuse a
+    /// connection. This bounds the cost of that spin to one connection attempt per store per cycle; the
+    /// refusals in between never reach the network. Raising it reduces the load on a database that is
+    /// already struggling, at the cost of taking longer to notice it has recovered.
+    /// </remarks>
+    public TimeSpan TenantWriteBrakeCycle { get; set; } = 2.Seconds();
+    
+    /// <summary>
+    /// For persistence mechanisms that support this (PostgreSQL), this directs Wolverine to use partitioning
+    /// based on the envelope status for the transactional inbox storage. This can be a performance optimization,
+    /// but does require a database migration if enabled.
+    ///
+    /// Note that partitioning also weakens the inbox's uniqueness guarantee, because the primary key gains the
+    /// status column and PostgreSQL can only enforce uniqueness within a single partition. One message identity
+    /// can therefore exist as both Incoming and Scheduled at the same time, for example when a broker redelivers
+    /// a message while the previous attempt is parked as a scheduled retry. The scheduled message poller resolves
+    /// such a pair by discarding the scheduled copy in favor of the row that supersedes it, whether that row sits
+    /// in the incoming or in the handled partition.
+    ///
+    /// When the superseding row is a handled one the pending retry is dropped and never executed. That is
+    /// deliberate: promoting past it would re-execute a message that already completed, into a row that could
+    /// never be marked handled because marking it handled is itself a cross-partition move onto the key the
+    /// retained row still holds.
+    ///
+    /// When the superseding row is an incoming one it is executed in the retry's place. The discarded
+    /// copy carries the retry state of the earlier attempt, so the surviving row is executed with the attempt count
+    /// it was stored with rather than the one the retry had reached. The retry budget therefore restarts, and
+    /// the message can be attempted more times than the endpoint's error policy nominally allows.
+    ///
+    /// Under <see cref="MessageIdentity.IdOnly"/> the identity is the envelope id alone, so a pair
+    /// like this is resolved across listening endpoints rather than within one.
+    ///
+    /// The Incoming/Handled pair is weakened in the same way, and the poller never sees it. A message
+    /// retained after handling by <see cref="KeepAfterMessageHandling"/> sits in the handled partition, where it no
+    /// longer blocks an insert of the same identity as Incoming. On a durable listening endpoint duplicate
+    /// detection is that insert failing, so a redelivery arriving inside that retention window is stored and
+    /// handled again rather than discarded. Retiring that second copy is a cross-partition move onto the key
+    /// the retained row still holds, so it is discarded outright instead of flipped; the retained handled row
+    /// is what serves the retention window and it is already there. Parking a retry for such an identity is
+    /// the same shape and is resolved the same way -- a retained handled row is never dragged into the
+    /// scheduled partition alongside the row being parked, and a redundant incoming copy gives way to a
+    /// scheduled row that already exists.
+    ///
+    /// Neither pair raises <see cref="Persistence.Durability.DuplicateIncomingEnvelopeException"/>, which is the
+    /// only path to <see cref="MaximumBrokerRedeliveries"/>. That setting dead-letters a delivery the inbox
+    /// rejected as a duplicate and the listener could not settle; it does not bound duplicate execution, and
+    /// neither pair reaches it.
+    /// </summary>
+    public bool EnableInboxPartitioning { get; set; }
+
+    /// <summary>
+    ///     Should the message durability agent be enabled during execution.
+    ///     The default is true.
+    /// </summary>
+    public bool DurabilityAgentEnabled { get; set; } = true;
+
+    /// <summary>
+    /// When true, scheduled-for-later messages destined for non-durable
+    /// <see cref="Transports.Local.BufferedLocalQueue"/> instances route to
+    /// <c>IMessageStore.Inbox</c> instead of the in-process
+    /// <c>IScheduledJobProcessor</c>. Set via
+    /// <see cref="IPolicies.AlwaysMakeScheduledMessagesDurable"/>.
+    ///
+    /// Other scheduling paths already provide durability without this flag — see the
+    /// XML doc on <see cref="IPolicies.AlwaysMakeScheduledMessagesDurable"/> for the
+    /// full matrix. No-ops when no message store is configured.
+    /// </summary>
+    public bool AlwaysMakeScheduledMessagesDurable { get; set; }
+
+    /// <summary>
+    ///     How long should successfully handled messages be kept to use in idempotency checking
+    /// </summary>
+    public TimeSpan KeepAfterMessageHandling { get; set; } = 5.Minutes();
+
+    /// <summary>
+    ///     Polling interval for the background cleanup of expired, successfully handled incoming
+    ///     envelopes (the idempotency records). This cleanup runs on its own timer in a dedicated
+    ///     transaction, separate from the main recovery loop, so a slow cleanup cannot block inbox
+    ///     recovery work. Default is 1 minute.
+    /// </summary>
+    public TimeSpan HandledMessageCleanupPollingTime { get; set; } = 1.Minutes();
+
+    /// <summary>
+    ///     The maximum number of expired, handled incoming envelopes deleted in a single bounded
+    ///     DELETE statement for providers that support batching (currently PostgreSQL and SQL Server).
+    ///     Smaller batches hold locks for less time and reduce contention with live inbox traffic
+    ///     under heavy load. Default is 5000.
+    /// </summary>
+    public int HandledMessageCleanupBatchSize { get; set; } = 5000;
+
+    /// <summary>
+    ///     Safety cap on how many delete batches the handled-envelope cleanup runs in a single
+    ///     polling cycle before yielding. Any remaining expired rows are cleaned up on the next
+    ///     cycle. Default is 20.
+    /// </summary>
+    public int HandledMessageCleanupMaxBatchesPerCycle { get; set; } = 20;
+
+    /// <summary>
+    ///     GH-4180. Opt in to storage for <b>logical</b> message deduplication ids — the
+    ///     <see cref="Envelope.DeduplicationId" /> an application sets to say "this is the same intent",
+    ///     as opposed to <see cref="Envelope.Id" />, which identifies one delivery.
+    ///
+    ///     <para>
+    ///     Off by default, and deliberately so: enabling it provisions a new
+    ///     <c>wolverine_deduplication</c> table, and forcing a schema change on every existing
+    ///     deployment is not something a patch upgrade should do. Nothing in the read or write path of
+    ///     the transactional inbox changes either way — the deduplication markers live in their own
+    ///     table (see <see cref="Persistence.Durability.IDeduplicationStore" /> for why).
+    ///     </para>
+    ///
+    ///     <para>
+    ///     Turning this on provisions storage; it does not by itself deduplicate anything. Individual
+    ///     message handlers, HTTP endpoints and gRPC methods opt in with <c>[Deduplicated]</c> or via
+    ///     <c>Policies.RequireDeduplicationId()</c>.
+    ///     </para>
+    /// </summary>
+    /// <remarks>
+    ///     GH-4757. A boolean cannot say HOW the ids are compared, and the original string comparison
+    ///     behaves differently on SQL Server and MySQL than on PostgreSQL and SQLite — see
+    ///     <see cref="MessageDeduplicationMode" />. Kept as a pass-through so existing configuration code
+    ///     keeps compiling: <c>true</c> now means
+    ///     <see cref="Wolverine.MessageDeduplicationMode.CompareByHash" />, the engine-independent
+    ///     comparison. An application that needs the old table and the old comparison sets
+    ///     <see cref="MessageDeduplicationMode" /> to
+    ///     <see cref="Wolverine.MessageDeduplicationMode.CompareByString" /> explicitly.
+    /// </remarks>
+    [Obsolete(
+        "Use DurabilitySettings.MessageDeduplicationMode instead. 'true' maps to MessageDeduplicationMode.CompareByHash and 'false' to MessageDeduplicationMode.None. GH-4757")]
+    public bool EnableMessageDeduplication
+    {
+        get => MessageDeduplicationMode != MessageDeduplicationMode.None;
+        set => MessageDeduplicationMode =
+            value ? MessageDeduplicationMode.CompareByHash : MessageDeduplicationMode.None;
+    }
+
+    /// <summary>
+    ///     GH-4757. Opt in to storage for <b>logical</b> message deduplication ids, and choose how those
+    ///     ids are compared for equality. <see cref="Wolverine.MessageDeduplicationMode.None" /> — the
+    ///     default — provisions nothing, so an upgrade migrates nothing.
+    ///
+    ///     <para>
+    ///     Prefer <see cref="Wolverine.MessageDeduplicationMode.CompareByHash" />: the comparison is a
+    ///     binary one and therefore identical on every engine.
+    ///     <see cref="Wolverine.MessageDeduplicationMode.CompareByString" /> preserves the original
+    ///     GH-4180 table and comparison exactly, for an application that cannot take the schema change.
+    ///     </para>
+    ///
+    ///     <para>
+    ///     Setting this provisions storage; it does not by itself deduplicate anything. Individual
+    ///     message handlers, HTTP endpoints and gRPC methods opt in with <c>[Deduplicated]</c> or via
+    ///     <c>Policies.RequireDeduplicationId()</c>.
+    ///     </para>
+    /// </summary>
+    public MessageDeduplicationMode MessageDeduplicationMode { get; set; } = MessageDeduplicationMode.None;
+
+    /// <summary>
+    ///     GH-4742. Opt in to storage for <c>[DeduplicatedWithResponse]</c> HTTP endpoints, which answer a repeat
+    ///     of a request with its first response. Provisions a separate <c>wolverine_deduplicated_responses</c>
+    ///     table, so it is independent of <see cref="EnableMessageDeduplication" />. Claims expire after
+    ///     <see cref="DeduplicationWindow" /> unless the endpoint sets its own, and are reaped on
+    ///     <see cref="DeduplicationCleanupPollingTime" />.
+    /// </summary>
+    public bool EnableDeduplicatedResponses { get; set; }
+
+    /// <summary>
+    ///     GH-4180. How long a logical deduplication claim is honoured before the reaper removes it.
+    ///     Default is 24 hours.
+    ///
+    ///     <para>
+    ///     This is the whole guarantee, so it is stated rather than inherited. It is NOT
+    ///     <see cref="KeepAfterMessageHandling" />: that setting exists to absorb a broker redelivery
+    ///     and defaults to five minutes, which would turn "idempotent" into "idempotent for a while" —
+    ///     worse than no guarantee, because it holds in testing and fails in production.
+    ///     </para>
+    ///
+    ///     <para>
+    ///     Past this window the same logical id is accepted again. Size it against how long a duplicate
+    ///     could plausibly arrive: an operator double-click is seconds, a console republish is minutes,
+    ///     an agent that pre-publishes tomorrow's scheduled occurrences is a day.
+    ///     </para>
+    /// </summary>
+    public TimeSpan DeduplicationWindow { get; set; } = 24.Hours();
+
+    /// <summary>
+    ///     GH-4180. Polling interval for the reaper that deletes expired deduplication claims. Runs on
+    ///     its own timer in its own transaction, off the recovery loop, for the same reason the
+    ///     handled-envelope cleanup does (issue #3116). Default is 5 minutes — the table only needs to
+    ///     be kept bounded, not kept current, and a claim that outlives its expiry by a few minutes
+    ///     costs nothing but a row.
+    /// </summary>
+    public TimeSpan DeduplicationCleanupPollingTime { get; set; } = 5.Minutes();
+
+    /// <summary>
+    ///     GH-4180. Maximum number of expired deduplication claims deleted in a single bounded DELETE.
+    ///     Default is 5000, matching <see cref="HandledMessageCleanupBatchSize" />.
+    /// </summary>
+    public int DeduplicationCleanupBatchSize { get; set; } = 5000;
+
+    /// <summary>
+    ///     Is the recurring (cron) message feature active on this application? Flipped by
+    ///     registering the first schedule through <c>opts.Schedules</c> — never set this by hand.
+    ///
+    ///     <para>
+    ///     It exists as a durability setting because the message stores read it: when
+    ///     <see langword="true" />, the main store provisions the <c>wolverine_recurring_messages</c>
+    ///     tracking table and builds a real <see cref="Persistence.Durability.IRecurringMessageStore" />.
+    ///     When <see langword="false" /> — every application that has not registered a schedule —
+    ///     providers return the null store and the schema is byte-identical to a Wolverine version
+    ///     without the feature, so an upgrade forces no migration on anyone who has not asked for it.
+    ///     </para>
+    /// </summary>
+    public bool EnableRecurringMessages { get; set; }
+
+    /// <summary>
+    ///     Governs the page size for how many persisted incoming or outgoing messages
+    ///     will be loaded at one time for attempted retries or scheduled jobs
+    /// </summary>
+    public int RecoveryBatchSize { get; set; } = 100;
+
+    /// <summary>
+    ///     GH-3971: polling interval for the sweep that releases inbox/outbox messages owned by nodes
+    ///     that no longer exist. This runs on its own timer in a dedicated transaction, separate from the
+    ///     main recovery loop.
+    ///
+    ///     <para>It used to ride <see cref="ScheduledJobPollingTime" />, which also drives scheduled
+    ///     message execution and the recoverable-message checks — so slowing the sweep on a large inbox
+    ///     also delayed scheduled delivery, an unrelated trade the operator never asked for. Default is 5
+    ///     seconds, matching the previous cadence.</para>
+    /// </summary>
+    public TimeSpan OrphanedMessageSweepPollingTime { get; set; } = 5.Seconds();
+
+    /// <summary>
+    ///     GH-3971: the maximum number of envelopes whose ownership is released in a single bounded
+    ///     UPDATE, for providers that support batching (currently PostgreSQL and SQL Server).
+    ///
+    ///     <para>Losing one node makes every envelope it owned qualify at once, in one statement. A
+    ///     reported deployment lost ~910,000 rows' worth across its shards on a single node loss, with a
+    ///     12 KB average body — several GB of rewrite per sweep run per shard, all of it holding locks
+    ///     against live inbox traffic. Default is 5000.</para>
+    /// </summary>
+    public int OrphanedMessageReleaseBatchSize { get; set; } = 5000;
+
+    /// <summary>
+    ///     GH-3971: safety cap on how many release batches the orphaned-message sweep runs in a single
+    ///     polling cycle before yielding. Any remaining orphans are picked up on the next cycle.
+    ///     Default is 20.
+    /// </summary>
+    public int OrphanedMessageReleaseMaxBatchesPerCycle { get; set; } = 20;
+
+    /// <summary>
+    ///     How frequently Wolverine will attempt to reassign incoming or outgoing
+    ///     persisted methods from nodes that are detected to be offline
+    /// </summary>
+    public TimeSpan NodeReassignmentPollingTime { get; set; } = 5.Seconds();
+
+    /// <summary>
+    ///     When should the first execution of the node reassignment job
+    ///     execute after application startup.
+    /// </summary>
+    public TimeSpan FirstNodeReassignmentExecution { get; set; } = 0.Seconds();
+
+    /// <summary>
+    ///     Interval between collecting persisted and queued message metrics
+    /// </summary>
+    public TimeSpan MetricsCollectionSamplingInterval { get; set; } = 5.Seconds();
+
+    /// <summary>
+    ///     How long to wait before the first execution of polling
+    ///     for ready, persisted scheduled messages
+    /// </summary>
+    public TimeSpan ScheduledJobFirstExecution { get; set; } = Random.Shared.Next(500, 5000).Milliseconds();
+
+    /// <summary>
+    ///     Polling interval for executing scheduled messages
+    /// </summary>
+    public TimeSpan ScheduledJobPollingTime { get; set; } = 5.Seconds();
+
+    public int AssignedNodeNumber { get; internal set; } = Guid.NewGuid().ToString().GetDeterministicHashCode();
+
+    public CancellationToken Cancellation => _cancellation.Token;
+
+
+    /// <summary>
+    /// Time span before the first health check is executed
+    /// </summary>
+    public TimeSpan FirstHealthCheckExecution { get; set; } = 3.Seconds();
+
+    /// <summary>
+    /// Polling time between health checks
+    /// </summary>
+    public TimeSpan HealthCheckPollingTime { get; set; } = 10.Seconds();
+
+    /// <summary>
+    /// Age of health check data before a node is considered to be "stale" or dormant and
+    /// will be recovered by the durability agent
+    /// </summary>
+    public TimeSpan StaleNodeTimeout { get; set; } = 1.Minutes();
+
+    /// <summary>
+    ///     GH-3604 / D1: how many consecutive health-check ticks the observing node must see another node
+    ///     as stale before it destructively deletes that node's row (which also releases the node's
+    ///     in-flight envelope ownership and its agent assignments). Routing to a stale node stops
+    ///     immediately regardless — it is dropped from the assignment grid on the first observation — so
+    ///     this only adds hysteresis to the irreversible delete, preventing a single stale snapshot read or
+    ///     transient blip from ejecting a node that is really alive. Minimum (and default) 2.
+    /// </summary>
+    public int StaleNodeEjectionThreshold { get; set; } = 2;
+
+    /// <summary>
+    ///     GH-3701: a hard cap on the number of rows retained in the node record table
+    ///     (<c>wolverine_node_records</c>), the append-only diagnostic log written by
+    ///     <c>INodeAgentPersistence.LogRecordsAsync</c> and read back by <c>FetchRecentRecordsAsync</c>.
+    ///     <see cref="NodeEventRecordExpirationTime" /> bounds those rows by *age* only, which puts no ceiling on
+    ///     the table at all: a cluster churning assignments writes one <c>AssignmentChanged</c> row per agent per
+    ///     decision, so millions of rows a day fit comfortably inside the age window and turn an
+    ///     agent-assignment incident into a database capacity problem on top of it. This cap is applied on the
+    ///     same housekeeping pass as the age sweep, every <see cref="NodeRecordPruningPeriod" />, against the
+    ///     <c>Main</c> store only. Raise it on very large agent universes, where one assignment wave is already
+    ///     thousands of rows. Set to zero or a negative number to keep the age sweep as the only bound, which
+    ///     was the behavior before 6.24.1.
+    /// </summary>
+    public int NodeRecordRetention { get; set; } = 10_000;
+
+    /// <summary>
+    ///     GH-3701: how often the node record table is pruned, both by age
+    ///     (<see cref="NodeEventRecordExpirationTime" />) and down to <see cref="NodeRecordRetention" /> rows.
+    ///     Deliberately far slower than <see cref="ScheduledJobPollingTime" /> — this is a housekeeping scan
+    ///     over a table nothing on the hot path reads, and until 6.24.1 it was being appended to every
+    ///     five-second recovery batch instead.
+    /// </summary>
+    public TimeSpan NodeRecordPruningPeriod { get; set; } = 1.Hours();
+
+    /// <summary>
+    ///     How often should Wolverine do a full check that all assigned agents are
+    ///     really running and try to restart (or stop) any differences from the last
+    ///     good set of assignments
+    /// </summary>
+    public TimeSpan CheckAssignmentPeriod { get; set; } = 30.Seconds();
+
+    /// <summary>
+    ///     How long the cluster's node set must be unchanged before the leader runs its first agent
+    ///     assignment pass. A rolling deploy brings pods up one at a time, and the leader assigns against
+    ///     whatever nodes exist at that moment, so every pod that joins afterwards triggers another
+    ///     rebalance. On a large agent universe -- database-per-tenant Marten with one subscription agent
+    ///     per tenant per projection -- each wave is thousands of agent starts and stops, and the fleet is
+    ///     below full throughput until the last one lands. Waiting for the node set to go quiet collapses
+    ///     those waves into a single pass.
+    ///
+    ///     Only nodes <i>joining</i> are waited out. A node that leaves has taken its agents with it, so
+    ///     that work is running nowhere and waiting would be exactly wrong -- a departure assigns
+    ///     immediately and cancels any wait in progress. <see cref="MaxAssignmentSettleTime" /> bounds the
+    ///     wait so a cluster that keeps gaining nodes is still served.
+    ///
+    ///     Zero (the default) keeps the previous behavior: assign on the first tick after leadership,
+    ///     however new the node set is. The cost of a non-zero value is that a cold start runs no agents at
+    ///     all until it elapses, so size it against the rollout it is meant to absorb -- tens of seconds for
+    ///     a rolling deploy whose pods come up within a minute of each other.
+    /// </summary>
+    public TimeSpan AssignmentSettlePeriod { get; set; } = 0.Seconds();
+
+    /// <summary>
+    ///     The longest the leader will hold agent assignment back waiting for
+    ///     <see cref="AssignmentSettlePeriod" /> of quiet. A cluster that gains a node every few seconds --
+    ///     an autoscaler ramping up, or a node flapping in and out -- would otherwise never settle and never
+    ///     be assigned. Measured from the first join of the current wait, not from process start. Ignored
+    ///     when <see cref="AssignmentSettlePeriod" /> is zero. Default 1 minute.
+    /// </summary>
+    public TimeSpan MaxAssignmentSettleTime { get; set; } = 1.Minutes();
+
+    /// <summary>
+    ///     The node count that ends a <see cref="AssignmentSettlePeriod" /> wait early: once at least this
+    ///     many nodes are live, the leader assigns without waiting the period out. This is the fast path for
+    ///     a cold start of a deployment whose replica count you know — the timer is then only the fallback
+    ///     for a pod that never arrives. Leave it at zero (the default, off) for a rolling deploy where the
+    ///     outgoing pods are still live and counted, since the target would already be met on the first tick
+    ///     and nothing would ever be waited out. Ignored when <see cref="AssignmentSettlePeriod" /> is zero.
+    /// </summary>
+    public int AssignmentSettleNodeCount { get; set; }
+
+    /// <summary>
+    ///     GH-4897. How many of its first assignment evaluations a newly elected leader spends NOT placing
+    ///     agents that are running nowhere yet, when it took over a cluster whose other nodes already hold
+    ///     assignments. The pending-assignment ledger is leader-local, so a new leader cannot see the starts
+    ///     its predecessor dispatched that have not yet come up as persisted rows; placing those agents
+    ///     straight away can send one to a second node while the first copy is still starting. Holding the
+    ///     unplaced ones back for a snapshot cycle lets those rows appear and be kept where they are.
+    ///
+    ///     Only agents that are running nowhere and have no start in flight wait; moves, stops and every
+    ///     agent already visible proceed. The hold only applies when another node already holds assignments;
+    ///     a cold cluster's first leader is governed by <see cref="LeaderColdStartHoldEvaluations" /> instead.
+    ///     Default 1. Zero disables it.
+    /// </summary>
+    public int LeaderTakeoverHoldEvaluations { get; set; } = 1;
+
+    /// <summary>
+    ///     GH-4569. How many assignment evaluations the first node of a cold cluster spends NOT placing agents
+    ///     while it is the only node registered. With nobody else in the node table every distribution hands
+    ///     that node the whole agent universe, and each node that joins afterwards is served out of the first
+    ///     node's own lane as a stop-then-start: on the reported fleet 37,310 of 37,388 agents started on the
+    ///     first node before any peer got a share. One or two evaluations is enough for pods that start
+    ///     together to register and take their share from the outset.
+    ///
+    ///     Only applies when the wave being held is larger than <see cref="AgentStartBatchSize" />, so a single
+    ///     node running a handful of agents is not made to wait for peers that are never coming, and ends the
+    ///     moment a second node registers. A rollout whose pods arrive over a longer period is what
+    ///     <see cref="AssignmentSettlePeriod" /> is for. Default 1. Zero disables it.
+    /// </summary>
+    public int LeaderColdStartHoldEvaluations { get; set; } = 1;
+
+    /// <summary>
+    ///     GH-4569. Whether this node may be elected leader of the cluster and run the agent assignment. Every
+    ///     node is eligible by default. Set it to false on a node that should run agents but never decide
+    ///     their placement -- the warm-up nodes of a blue/green rollout, whose own store enumerates the NEW
+    ///     version's agents and which would otherwise evaluate the whole cluster from the least representative
+    ///     node in it. An ineligible node still heartbeats, ejects stale peers, reconciles and sweeps its own
+    ///     agents, and takes whatever assignments the leader gives it; it simply never contends for the
+    ///     leadership lock. At least one node of the cluster must be eligible, or nothing is ever assigned.
+    /// </summary>
+    public bool LeadershipEligible { get; set; } = true;
+
+    /// <summary>
+    ///     GH-3604 / D3: the maximum number of agent assignments the leader packs into a single
+    ///     <c>StartAgents</c> control message to a node. A node running a very large agent universe
+    ///     (e.g. database-per-tenant Marten with thousands of subscription shards) cannot start
+    ///     thousands of daemon agents inside one request/reply window, so assignments to a destination
+    ///     are chunked into batches of this size and sent one chunk at a time. Default 50.
+    /// </summary>
+    public int AgentStartBatchSize { get; set; } = 50;
+
+    /// <summary>
+    ///     GH-4720. Compress agent command payloads on the wire, under the separate
+    ///     <c>binary/wolverine+gzip</c> content type. Off by default.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///     An agent command carries a list of agent URIs, which at cluster scale is both large and extremely
+    ///     compressible — nearly all of it is repeated scheme, family, projection and database structure.
+    ///     Measured 3.9x on a GUID-dominated URI shape and up to 24x on a structural one, at roughly 5ms for
+    ///     7,592 agents. That shrinks the control queue rows a large cluster writes and re-reads on every
+    ///     poll, and it raises the ceiling under <c>Options.MaxIncomingEnvelopeDataSize</c>.
+    ///     </para>
+    ///     <para>
+    ///     <b>Turn this on only once every node in the cluster is running a version that can read it.</b>
+    ///     Reading is unconditional from this version forward, so the upgrade path is: deploy everywhere
+    ///     first, then enable. A node that predates the content type will reject the command rather than
+    ///     misread it — loudly, but it will still reject it, and agent assignment to that node stops until it
+    ///     is upgraded. It is off by default for exactly that reason; a rolling deploy is the normal case.
+    ///     </para>
+    ///     <para>
+    ///     Compression does not REPLACE chunking by <see cref="AgentStartBatchSize" /> (GH-4718). It scales
+    ///     the constant; it does not bound anything, and at tens of thousands of agents even a 10x saving is
+    ///     back over the reader's limit.
+    ///     </para>
+    /// </remarks>
+    public bool CompressAgentCommands { get; set; }
+
+    /// <summary>
+    ///     GH-3604 / D3: the maximum number of agents a receiving node starts concurrently when it
+    ///     handles a <c>StartAgents</c> batch. Daemon-agent starts are I/O bound (database round-trips),
+    ///     so starting them with bounded parallelism instead of serially lets a batch complete well
+    ///     inside the reply window. Default 10.
+    /// </summary>
+    public int MaxAgentStartParallelism { get; set; } = 10;
+
+    /// <summary>
+    ///     GH-3604 / D3 (WO-7): the maximum number of agents this node stops concurrently when it is
+    ///     draining every locally-running agent on shutdown. The old sequential drain
+    ///     (<c>stopAllAgentsAsync</c>) could not finish thousands of daemon subscription agents inside a
+    ///     typical 30s SIGTERM grace window, so agents were SIGKILLed mid-stop with unflushed progression.
+    ///     A bounded fan-out makes the shutdown window usable at scale. Default 10.
+    /// </summary>
+    public int MaxAgentStopParallelism { get; set; } = 10;
+
+    /// <summary>
+    ///     GH-3748: once a batched agent command's initial reply window has elapsed without an answer,
+    ///     the leader stops waiting passively and starts asking the destination node which of the
+    ///     requested agents are actually running (or stopped) at this interval. Each poll is a cheap
+    ///     read of the node's in-memory agent registry, so the interval mostly decides how quickly the
+    ///     leader notices convergence. Default 10 seconds.
+    /// </summary>
+    public TimeSpan AgentProgressPollInterval { get; set; } = 10.Seconds();
+
+    /// <summary>
+    ///     GH-3748 / GH-3750: how long the leader tolerates ZERO observed progress on an in-flight
+    ///     agent batch before giving up on the unconfirmed remainder and letting the next assignment
+    ///     evaluation re-decide it. Any progress — one more agent confirmed running or stopped —
+    ///     resets this clock, so a node that is slow but converging gets unbounded time while a node
+    ///     that is wedged or gone costs a bounded wait. Sized to the slowest legitimate single agent
+    ///     start we know of: a Marten projection shard replaying behind a version bump under the
+    ///     daemon's bounded side-effect gate, which has a five-minute ceiling. Default 5 minutes.
+    /// </summary>
+    public TimeSpan AgentProgressStallTimeout { get; set; } = 5.Minutes();
+
+    /// <summary>
+    ///     GH-4871: how long <see cref="IAgentRuntime.ApplyRestrictionsAsync" /> waits for an agent that an
+    ///     operator's restart or pin should have put to work to show up in the persisted node assignments,
+    ///     before it reports the change as not confirmed. The kickstarted health check dispatches its
+    ///     assignment commands asynchronously, so the start may still be in flight when the inline drain
+    ///     returns; a healthy start lands within milliseconds, so this only runs its full length when an
+    ///     agent genuinely will not start. Default 10 seconds.
+    /// </summary>
+    public TimeSpan AgentRestrictionConfirmationTimeout { get; set; } = 10.Seconds();
+
+    /// <summary>
+    ///     GH-3519: how many extra times this node immediately re-tries an agent that failed to start,
+    ///     before giving up and leaving it to the next assignment reevaluation. A first-assignment start
+    ///     races the subsystems the agent depends on — an event-subscription shard evaluated before its
+    ///     store's high-water detection is up is the reported case, and on a multi-store host a different
+    ///     shard lost that race on every boot. Without a local retry the loser waited a full
+    ///     <see cref="CheckAssignmentPeriod" /> (30s by default) doing nothing while its high-water mark
+    ///     climbed. Set to 0 to restore the old single-attempt behavior. Default 2.
+    /// </summary>
+    public int AgentStartRetryAttempts { get; set; } = 2;
+
+    /// <summary>
+    ///     GH-3519: how long this node waits before each of the <see cref="AgentStartRetryAttempts" />
+    ///     immediate re-tries of a failed agent start, multiplied by the attempt number so the second
+    ///     retry waits twice as long as the first. Sized for a startup race that resolves in well under a
+    ///     second, not for an outage — a failure that outlives these attempts is left to the next
+    ///     assignment reevaluation rather than retried harder here. Default 250ms.
+    /// </summary>
+    public TimeSpan AgentStartRetryDelay { get; set; } = 250.Milliseconds();
+
+    /// <summary>
+    ///     GH-3888: how many node-local auto-restarts a stalled event-subscription agent may burn
+    ///     without its sequence advancing before it gives up on this node. Once the budget is exhausted,
+    ///     the node releases the agent's assignment — provided another live node advertises the
+    ///     capability to run it — so the leader can place it on a healthy peer instead of retrying the
+    ///     same conditions in the same place forever. Any observed progress resets the budget. Only a
+    ///     self-healing failure (<c>ShardFailureCategory.Other</c>) ever reaches the auto-restart path
+    ///     at all; per-event failures are surfaced and left alone (GH-3638). Set to 0 or a negative
+    ///     number to disable release entirely and keep unbounded local retries (the pre-GH-3888
+    ///     behavior). Default 3.
+    /// </summary>
+    public int MaxLocalAgentRestartsBeforeRelease { get; set; } = 3;
+
+    /// <summary>
+    ///     How many consecutive health-check ticks a mismatch between this node's persisted agent
+    ///     assignments and its actually-running agents must be observed before the node reconciles
+    ///     it. Set to 0 or a negative number to disable the reconciliation sweep. Default 3.
+    /// </summary>
+    public int LocalAgentReconciliationThreshold { get; set; } = 3;
+
+    /// <summary>
+    ///     GH-4407: the most reconciliation actions (starts, stops, restored claims) one node takes on a single
+    ///     health-check tick. The sweep runs inside the serialized health check, ahead of the leader's
+    ///     assignment pass on the leader node, so after something like a leader crash on a large fleet an
+    ///     unbounded sweep could hold that pass back for as long as hundreds of agent starts take. Anything over
+    ///     the cap keeps its place and is handled on a later tick, longest-standing first. Set to 0 or a
+    ///     negative number for no cap. Default 50.
+    /// </summary>
+    public int MaxLocalAgentReconciliationsPerTick { get; set; } = 50;
+
+    /// <summary>
+    ///     Opt in to capacity-aware agent assignment. Each node advertises its current load (see
+    ///     <see cref="NodeLoadMonitor" />) on every heartbeat; the leader prefers the least-loaded
+    ///     nodes, never places onto a node at or above <see cref="NodeOverloadThreshold" />, and sheds
+    ///     agents off overloaded nodes onto nodes that still have headroom. Requires a message store
+    ///     that persists the load advertisement — PostgreSQL, SQL Server, MySQL, Oracle, SQLite, RavenDB
+    ///     and Azure Cosmos DB all do (GH-4593); a store that does not is reported as a startup warning.
+    ///     Off by default.
+    ///     <para>
+    ///         Setting this to true <b>requires</b> a <see cref="NodeLoadMonitor" />; there is no
+    ///         default. Starting a host with this on and no monitor is a startup error.
+    ///     </para>
+    ///     <para>
+    ///         How strictly load is honored depends on how constrained the placement already is.
+    ///         <see cref="Runtime.Agents.AssignmentGrid.DistributeEvenly(string)" /> treats the overload
+    ///         threshold as a hard line — every node is a candidate there, so refusing the overloaded
+    ///         ones cannot strand an agent, and an agent waits rather than being piled onto a node that
+    ///         cannot start it. The capability-aware paths — group affinity for multi-database event
+    ///         stores, blue/green across mixed capabilities, and the durability-agent affinity spread —
+    ///         treat it as a strong preference instead: their candidate sets are already narrowed by
+    ///         declared capabilities, so a second hard constraint could empty one and leave a shard
+    ///         database with no running agent at all. There, a node with headroom always wins, but an
+    ///         overloaded node still beats nothing.
+    ///     </para>
+    ///     <para>
+    ///         Group affinity additionally moves whole partitions off an overloaded node, at most
+    ///         <see cref="OverloadShedBatchSize" /> per evaluation and only when another candidate can
+    ///         take the entire partition — a shard database's agents are never split to relieve pressure.
+    ///     </para>
+    ///     <para>
+    ///         On a relational store, enabling this provisions a <c>load_factor</c> column on the
+    ///         <c>wolverine_nodes</c> table. With <c>AutoCreate.None</c> — or a process without DDL
+    ///         rights — apply the schema migration before turning this on; otherwise every heartbeat
+    ///         fails against the missing column. Every statement naming the column is gated on this same
+    ///         flag, so leaving it off migrates nothing and reads nothing. The document stores have no
+    ///         schema to migrate: an absent property simply reads back as "not advertising".
+    ///     </para>
+    /// </summary>
+    public bool CapacityAwareAssignment { get; set; }
+
+    /// <summary>
+    ///     Advertised load percentage at or above which a node is considered overloaded: it begins
+    ///     shedding agents, and stops receiving new ones starting 10 points below this value.
+    ///     Default 90.
+    /// </summary>
+    public double NodeOverloadThreshold { get; set; } = 90;
+
+    /// <summary>
+    ///     Maximum number of agents per scheme the leader moves off an overloaded node in one
+    ///     assignment evaluation. Default 1. Shedding only happens when some other node can take the
+    ///     work — an overloaded node with nowhere to shed to keeps what it is running.
+    /// </summary>
+    public int OverloadShedBatchSize { get; set; } = 1;
+
+    /// <summary>
+    ///     Sampler for this node's own load. <b>Required</b> when
+    ///     <see cref="CapacityAwareAssignment" /> is enabled — there is deliberately no default,
+    ///     because what "load" means is specific to what the application does. See
+    ///     <see cref="Runtime.Agents.INodeLoadMonitor" />, and
+    ///     <see cref="Runtime.Agents.MemoryPressureLoadMonitor" /> for the memory case.
+    /// </summary>
+    public Runtime.Agents.INodeLoadMonitor? NodeLoadMonitor { get; set; }
+
+    /// <summary>
+    ///     GH-3970: how many consecutive assignment ticks may fail to <i>build or start</i> an agent on this
+    ///     node before the node releases it to a capable peer, using the same embargo as
+    ///     <see cref="MaxLocalAgentRestartsBeforeRelease" />.
+    ///
+    ///     <para>This is the counterpart budget for a failure that happens <b>before</b> there is an agent
+    ///     instance at all. A start that throws out of <c>IAgentFamily.BuildAgentAsync</c> leaves nothing
+    ///     registered on the node, so the stall detector — which sweeps the agents this node is actually
+    ///     running — never sees it, and no restart budget is ever consumed. Without this the leader learns
+    ///     only that the agent is "unconfirmed", which it deliberately does not treat as a failure
+    ///     (GH-3750), so the assignment stands and the same agent is requested on the same node again on
+    ///     every tick, forever.</para>
+    ///
+    ///     <para>Note each tick has already made <see cref="AgentStartRetryAttempts" /> + 1 attempts of its
+    ///     own before it counts as one failure here, so the default is a deliberately patient
+    ///     three-strikes over three separate assignment cycles rather than a hair trigger. A successful
+    ///     start clears the count. Set to 0 or a negative number to disable release for failed starts and
+    ///     keep the pre-GH-3970 behavior of retrying on the same node indefinitely. Default 3.</para>
+    /// </summary>
+    public int MaxAgentStartFailuresBeforeRelease { get; set; } = 3;
+
+    /// <summary>
+    ///     GH-3888: how long a node withholds a released agent's URI from its advertised capabilities
+    ///     after exhausting local restarts on it. While the embargo is live, the leader's
+    ///     capability-matched distribution cannot hand the agent straight back to the node that just
+    ///     failed it — the anti-bounce half of the release policy. After it lapses, the node advertises
+    ///     the capability again and becomes an ordinary candidate; a node that is still sick will burn
+    ///     another full restart budget before releasing again, so the worst case is one bounded move per
+    ///     cooldown rather than a reassignment storm. A process restart clears all embargoes, since
+    ///     capabilities are recaptured at startup. Default 10 minutes.
+    /// </summary>
+    public TimeSpan AgentReleaseCooldown { get; set; } = 10.Minutes();
+
+    /// <summary>
+    /// Opt-in switch for the dynamic listener registry: persisted listener URIs that
+    /// are activated at runtime in addition to the listeners declared statically
+    /// through <see cref="WolverineOptions"/>. When <c>true</c>, <c>IMessageStore.Listeners</c>
+    /// is backed by durable storage (and database-backed message stores create their
+    /// listener registry table on first migration); when <c>false</c> (the default),
+    /// <c>IMessageStore.Listeners</c> is a no-op store and no listener-registry
+    /// schema is provisioned. Default is <c>false</c> so users upgrading Wolverine
+    /// see no schema migration churn.
+    /// </summary>
+    public bool EnableDynamicListeners { get; set; } = false;
+
+    /// <summary>
+    /// If using any kind of dynamic multi-tenancy where Wolverine should discover new
+    /// tenants, this is the polling time. Default is 5 seconds
+    /// </summary>
+    public TimeSpan TenantCheckPeriod { get; set; } = 5.Seconds();
+
+    private TimeSpan _updateMetricsPeriod = 5.Seconds();
+
+    /// <summary>
+    /// If using any kind of message persistence, this is the polling time
+    /// to update the metrics on the persisted envelope counts. Default is 5 seconds.
+    /// Must be greater than zero. Use <see cref="DurabilityMetricsEnabled"/> to turn
+    /// the polling off entirely.
+    /// </summary>
+    public TimeSpan UpdateMetricsPeriod
+    {
+        get => _updateMetricsPeriod;
+        set
+        {
+            // The metrics sweeper paces its pass with Task.Delay, so a non-positive period
+            // would hot-spin the sweep loop against every registered database rather than
+            // fail. Reject it at configuration time instead.
+            if (value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(UpdateMetricsPeriod), value,
+                    $"{nameof(UpdateMetricsPeriod)} must be greater than zero. Set {nameof(DurabilityMetricsEnabled)} to false to disable durability metrics polling.");
+            }
+
+            _updateMetricsPeriod = value;
+        }
+    }
+
+    /// <summary>
+    /// Is the polling for durability metrics enabled? Default is true
+    /// </summary>
+    public bool DurabilityMetricsEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Declares how many connections this application may take against each database server, and
+    /// surfaces how many are actually in use. Rides the same sweep as the durability metrics, so
+    /// it is silent unless <see cref="DurabilityMetricsEnabled"/> is true. See #3397.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// opts.Durability.ConnectionBudgets
+    ///     .ForServer("pg-shard-a", 5432, maxConnections: 400)
+    ///     .ForServer("pg-shard-b", 5432, maxConnections: 200);
+    /// </code>
+    /// </example>
+    public ConnectionBudgets ConnectionBudgets { get; } = new();
+
+    /// <summary>
+    /// If DeadLetterQueueExpirationEnabled is true, this governs how long persisted
+    /// dead letter queue messages will be retained. The default is 10 days from the time
+    /// the message is persisted.
+    /// </summary>
+    public TimeSpan DeadLetterQueueExpiration { get; set; } = 10.Days();
+    
+    /// <summary>
+    /// Opt-in flag governs whether or not dead letter queued messages have expiration
+    /// enforced for database stored dead letter messages. The default is false.
+    /// </summary>
+    public bool DeadLetterQueueExpirationEnabled { get; set; }
+
+    /// <summary>
+    /// Configurable time to keep records in the wolverine_node_records storage (or equivalent) for node records.
+    /// Default is 5 days
+    /// </summary>
+    public TimeSpan NodeEventRecordExpirationTime { get; set; } = 5.Days();
+
+    /// <summary>
+    /// Health-check threshold for dead-letter-queue growth. When the persisted DLQ count grows
+    /// faster than this many envelopes per minute between two consecutive health-check evaluations,
+    /// the durability agent reports Degraded. Default is 100/min. See #2646.
+    /// </summary>
+    public int HealthDeadLetterGrowthPerMinuteThreshold { get; set; } = 100;
+
+    /// <summary>
+    /// Health-check threshold for stuck recovery / scheduled-job pollers. When the persisted
+    /// inbox+outbox count (or the scheduled count) is non-zero and has not decreased over this
+    /// many consecutive evaluations, the durability agent reports Degraded. Default is 3. See #2646.
+    /// </summary>
+    public int HealthStuckPollCycleThreshold { get; set; } = 3;
+
+    /// <summary>
+    /// Health-check threshold for consecutive persistence-layer failures. After this many
+    /// consecutive failed poll cycles, the durability agent reports Unhealthy (a single failure
+    /// reports Degraded). Default is 3. See #2646.
+    /// </summary>
+    public int HealthConsecutiveFailureUnhealthyThreshold { get; set; } = 3;
+
+    /// <summary>
+    ///     How long a sending agent can be idle before it is considered stale
+    ///     and eligible for cleanup. Default is 5 minutes.
+    /// </summary>
+    public TimeSpan SendingAgentIdleTimeout { get; set; } = 5.Minutes();
+
+    /// <summary>
+    /// When this option is enabled retry block used in InlineSendingAgent will synchronously wait on sending task to assure the message is send.
+    /// When set to <see langword="false"/> default behavior is used so InlineSendingAgent agent will try to send a message and when failed it will give control to caller and retry on other thread in async manner
+    /// </summary>
+    public bool UseSyncRetryBlock { get; set; }
+
+    /// <summary>
+    /// Controls whether health check operations emit telemetry traces for 'wolverine_node_assignments'. 
+    /// Default is true to maintain backwards compatibility. Set to false to completely disable health check tracing.
+    /// </summary>
+    public bool NodeAssignmentHealthCheckTracingEnabled { get; set; } = true;
+
+    /// <summary>
+    /// When set, health check traces will be throttled to emit at most once per this time period.
+    /// For example, set to 10 minutes to only emit traces every 10 minutes instead of every health check.
+    /// This reduces telemetry volume while still providing periodic visibility.
+    /// Default is null (no throttling - all health checks are traced when NodeAssignmentHealthCheckTracingEnabled is true).
+    /// </summary>
+    public TimeSpan? NodeAssignmentHealthCheckTraceSamplingPeriod { get; set; }
+
+    /// <summary>
+    /// Maximum time to wait for in-flight message handlers to complete during graceful
+    /// shutdown before proceeding with the shutdown sequence. Default is 30 seconds.
+    /// </summary>
+    public TimeSpan DrainTimeout { get; set; } = 30.Seconds();
+
+    /// <summary>
+    ///     Get or set the logical Wolverine service name. By default, this is
+    ///     derived from the name of a custom WolverineOptions
+    /// </summary>
+    internal void Cancel()
+    {
+        _cancellation.Cancel();
+    }
+
+    public OptionsDescription ToDescription()
+    {
+        var desc = new OptionsDescription { Subject = "Wolverine.DurabilitySettings" };
+        desc.AddValue(nameof(Mode), Mode);
+        desc.AddValue(nameof(MessageIdentity), MessageIdentity);
+        desc.AddValue(nameof(DurabilityAgentEnabled), DurabilityAgentEnabled);
+        desc.AddValue(nameof(RecoveryBatchSize), RecoveryBatchSize);
+        desc.AddValue(nameof(OrphanedMessageSweepPollingTime), OrphanedMessageSweepPollingTime);
+        desc.AddValue(nameof(OrphanedMessageReleaseBatchSize), OrphanedMessageReleaseBatchSize);
+        desc.AddValue(nameof(OrphanedMessageReleaseMaxBatchesPerCycle), OrphanedMessageReleaseMaxBatchesPerCycle);
+        desc.AddValue(nameof(KeepAfterMessageHandling), KeepAfterMessageHandling);
+        desc.AddValue(nameof(NodeReassignmentPollingTime), NodeReassignmentPollingTime);
+        desc.AddValue(nameof(MetricsCollectionSamplingInterval), MetricsCollectionSamplingInterval);
+        desc.AddValue(nameof(ScheduledJobPollingTime), ScheduledJobPollingTime);
+        desc.AddValue(nameof(HealthCheckPollingTime), HealthCheckPollingTime);
+        desc.AddValue(nameof(StaleNodeTimeout), StaleNodeTimeout);
+        desc.AddValue(nameof(CheckAssignmentPeriod), CheckAssignmentPeriod);
+        desc.AddValue(nameof(AssignmentSettlePeriod), AssignmentSettlePeriod);
+        desc.AddValue(nameof(MaxAssignmentSettleTime), MaxAssignmentSettleTime);
+        desc.AddValue(nameof(AssignmentSettleNodeCount), AssignmentSettleNodeCount);
+        desc.AddValue(nameof(LocalAgentReconciliationThreshold), LocalAgentReconciliationThreshold);
+        desc.AddValue(nameof(MaxLocalAgentReconciliationsPerTick), MaxLocalAgentReconciliationsPerTick);
+        desc.AddValue(nameof(CapacityAwareAssignment), CapacityAwareAssignment);
+        desc.AddValue(nameof(NodeOverloadThreshold), NodeOverloadThreshold);
+        desc.AddValue(nameof(OverloadShedBatchSize), OverloadShedBatchSize);
+        desc.AddValue(nameof(TenantCheckPeriod), TenantCheckPeriod);
+        desc.AddValue(nameof(UpdateMetricsPeriod), UpdateMetricsPeriod);
+        desc.AddValue(nameof(DurabilityMetricsEnabled), DurabilityMetricsEnabled);
+        desc.AddValue(nameof(DeadLetterQueueExpirationEnabled), DeadLetterQueueExpirationEnabled);
+        desc.AddValue(nameof(DeadLetterQueueExpiration), DeadLetterQueueExpiration);
+        desc.AddValue(nameof(NodeEventRecordExpirationTime), NodeEventRecordExpirationTime);
+        desc.AddValue(nameof(NodeRecordRetention), NodeRecordRetention);
+        desc.AddValue(nameof(NodeRecordPruningPeriod), NodeRecordPruningPeriod);
+        desc.AddValue(nameof(MaxLocalAgentRestartsBeforeRelease), MaxLocalAgentRestartsBeforeRelease);
+        desc.AddValue(nameof(MaxAgentStartFailuresBeforeRelease), MaxAgentStartFailuresBeforeRelease);
+        desc.AddValue(nameof(AgentReleaseCooldown), AgentReleaseCooldown);
+        desc.AddValue(nameof(SendingAgentIdleTimeout), SendingAgentIdleTimeout);
+        desc.AddValue(nameof(AgentRestrictionConfirmationTimeout), AgentRestrictionConfirmationTimeout);
+        desc.AddValue(nameof(DrainTimeout), DrainTimeout);
+        desc.AddValue(nameof(EnableInboxPartitioning), EnableInboxPartitioning);
+        desc.AddValue(nameof(MessageDeduplicationMode), MessageDeduplicationMode);
+        if (MessageDeduplicationMode != MessageDeduplicationMode.None || EnableDeduplicatedResponses)
+        {
+            desc.AddValue(nameof(DeduplicationWindow), DeduplicationWindow);
+            desc.AddValue(nameof(DeduplicationCleanupPollingTime), DeduplicationCleanupPollingTime);
+        }
+
+        desc.AddValue(nameof(EnableDeduplicatedResponses), EnableDeduplicatedResponses);
+        desc.AddValue(nameof(EnableRecurringMessages), EnableRecurringMessages);
+
+        if (OutboxStaleTime.HasValue) desc.AddValue(nameof(OutboxStaleTime), OutboxStaleTime.Value);
+        if (InboxStaleTime.HasValue) desc.AddValue(nameof(InboxStaleTime), InboxStaleTime.Value);
+        if (MessageStorageSchemaName != null) desc.AddValue(nameof(MessageStorageSchemaName), MessageStorageSchemaName);
+        return desc;
+    }
+}

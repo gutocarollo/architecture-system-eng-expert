@@ -1,0 +1,170 @@
+using IntegrationTests;
+using JasperFx.Resources;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using Shouldly;
+using Weasel.Core;
+using Weasel.Postgresql;
+using Weasel.Postgresql.Tables;
+using WolverineWebApi;
+
+namespace Wolverine.Http.Tests;
+
+public class using_efcore : IntegrationContext
+{
+    public using_efcore(AppFixture fixture) : base(fixture)
+    {
+    }
+
+    
+
+    [Fact]
+    public async Task using_db_context_without_outbox()
+    {
+        await cleanItems();
+
+        var command = new CreateItemCommand { Name = "Isaiah Pacheco" };
+
+        await Scenario(x =>
+        {
+            x.Post.Json(command).ToUrl("/ef/create");
+            x.StatusCodeShouldBe(204);
+        });
+
+        using var nested = Host.Services.CreateScope();
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+
+        var item = await context.Items.Where(x => x.Name == command.Name).FirstOrDefaultAsync(cancellationToken: TestContext.Current.CancellationToken);
+        item.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task using_db_context_with_outbox()
+    {
+        await cleanItems();
+
+        var command = new CreateItemCommand { Name = "Jerick McKinnon" };
+
+        var (tracked, _) = await TrackedHttpCall(x =>
+        {
+            x.Post.Json(command).ToUrl("/ef/publish");
+            x.StatusCodeShouldBe(204);
+        });
+
+        using var nested = Host.Services.CreateScope();
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+
+        var item = await context.Items.Where(x => x.Name == command.Name).FirstOrDefaultAsync(cancellationToken: TestContext.Current.CancellationToken);
+        item.ShouldNotBeNull();
+
+        tracked.Sent.SingleMessage<ItemCreated>()
+            .ShouldNotBeNull();
+    }
+
+    private async Task cleanItems()
+    {
+        await Host.ResetResourceState();
+        EfCoreEndpoints.DbContext = null;
+        EfCoreEndpoints.NestedDbContext = null;
+
+        var table = new Table("items");
+        table.AddColumn<Guid>("Id").AsPrimaryKey();
+        table.AddColumn<string>("Name");
+
+        using (var conn = new NpgsqlConnection(Servers.PostgresConnectionString))
+        {
+            await conn.OpenAsync();
+
+            await table.ApplyChangesAsync(conn);
+
+            await conn.RunSqlAsync("delete from items");
+            await conn.CloseAsync();
+        }
+    }
+    
+    
+    [Fact]
+    public async Task using_db_context_with_outbox_schedule()
+    {
+        await cleanItems();
+
+        var command = new CreateItemCommand { Name = "Jerick McKinnon" };
+
+        var (tracked, _) = await TrackedHttpCall(x =>
+        {
+            x.Post.Json(command).ToUrl("/ef/schedule");
+            x.StatusCodeShouldBe(204);
+        }, 60000);
+
+        using var nested = Host.Services.CreateScope();
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+
+        var item = await context.Items.Where(x => x.Name == command.Name).FirstOrDefaultAsync(cancellationToken: TestContext.Current.CancellationToken);
+        item.ShouldBeNull();
+
+        var records = tracked.AllRecordsInOrder().ToArray();
+
+        var scheduledMessage = tracked.Scheduled.SingleEnvelope<ItemCreated>();
+        scheduledMessage.ScheduleDelay.ShouldNotBeNull();
+        scheduledMessage.Message.ShouldBeOfType<ItemCreated>();
+    }
+    
+    [Fact]
+    public async Task using_db_context_with_outbox_schedule2()
+    {
+        await cleanItems();
+
+        var command = new CreateItemCommand { Name = "Jerick McKinnon" };
+
+        var (tracked, _) = await TrackedHttpCall(x =>
+        {
+            x.Post.Json(command).ToUrl("/ef/schedule2");
+            x.StatusCodeShouldBe(204);
+        });
+
+        using var nested = Host.Services.CreateScope();
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+
+        var item = await context.Items.Where(x => x.Name == command.Name).FirstOrDefaultAsync(cancellationToken: TestContext.Current.CancellationToken);
+        item.ShouldBeNull();
+
+        var scheduledMessage = tracked.Scheduled.SingleEnvelope<ItemCreated>();
+        scheduledMessage.ScheduleDelay.ShouldNotBeNull();
+        scheduledMessage.Message.ShouldBeOfType<ItemCreated>();
+    }
+
+    [Fact]
+    public async Task using_db_context_with_outbox_schedule_nodb()
+    {
+        await cleanItems();
+
+        var command = new CreateItemCommand { Name = "Jerick McKinnon" };
+
+        var (tracked, _) = await TrackedHttpCall(x =>
+        {
+            x.Post.Json(command).ToUrl("/ef/schedule_nodb");
+            x.StatusCodeShouldBe(204);
+        });
+
+        var scheduledMessage = tracked.Scheduled.SingleEnvelope<ItemCreated>();
+        scheduledMessage.ScheduleDelay.ShouldNotBeNull();
+        scheduledMessage.Message.ShouldBeOfType<ItemCreated>();
+    }
+
+    [Fact]
+    public async Task http_handler_with_http_context_sourced_gets_the_same_service()
+    {
+        await cleanItems();
+
+        var _ = await TrackedHttpCall(x =>
+        {
+            x.Post.Json(new CreateItemCommand()).ToUrl("/ef/servicelocation");
+            x.StatusCodeShouldBe(204);
+        });
+
+        EfCoreEndpoints.DbContext.ShouldNotBeNull();
+        EfCoreEndpoints.NestedDbContext.ShouldNotBeNull();
+        EfCoreEndpoints.DbContext.ShouldBe(EfCoreEndpoints.NestedDbContext);
+    }
+}

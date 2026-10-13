@@ -1,0 +1,97 @@
+using System;
+using System.Threading.Tasks;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events.Projections;
+using Marten.Metadata;
+using Marten.Storage;
+using Marten.Testing.Harness;
+using Xunit;
+
+namespace DaemonTests.Bugs;
+
+public class Bug_DeleteWhere_Operations_Should_Respect_Tenancy : BugIntegrationContext
+{
+    private readonly ITestOutputHelper _output;
+
+    public Bug_DeleteWhere_Operations_Should_Respect_Tenancy(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
+    [Fact]
+    public async Task ShouldDelete_ForDeleteCondition_AfterRebuild()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<DeletableEventProjection>(ProjectionLifecycle.Inline);
+            opts.Events.TenancyStyle = TenancyStyle.Conjoined;
+            opts.Policies.AllDocumentsAreMultiTenanted();
+
+            opts.Advanced.DefaultTenantUsageEnabled = false;
+        });
+
+        var innerGuid = Guid.NewGuid();
+        var createNormal = new CreateDeletableProjection(Guid.NewGuid(), innerGuid);
+        var deleteNormal = new DeleteEvent(innerGuid);
+
+        var innerGuid2 = Guid.NewGuid();
+        var createHard = new CreateDeletableProjection(Guid.NewGuid(), innerGuid2);
+        var deleteHard = new HardDeleteEvent(innerGuid2);
+
+        await using var session = theStore.LightweightSession("test");
+
+        session.Events.StartStream(createNormal);
+        session.Events.StartStream(createHard);
+
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var createdProjections = await session.LoadManyAsync<DeletableProjection>(createNormal.Id, createHard.Id);
+        Assert.Equal(2, createdProjections.Count);
+
+        session.Events.StartStream(deleteNormal);
+        session.Events.StartStream(deleteHard);
+
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var normalDeleteInline = await session.LoadAsync<DeletableProjection>(createNormal.Id, TestContext.Current.CancellationToken);
+        var hardDeleteInline = await session.LoadAsync<DeletableProjection>(createHard.Id, TestContext.Current.CancellationToken);
+        Assert.Null(normalDeleteInline);
+        Assert.Null(hardDeleteInline);
+
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+
+        await daemon.RebuildProjectionAsync<DeletableEventProjection>(TestContext.Current.CancellationToken);
+
+        var normalDeleteRebuilt = await session.LoadAsync<DeletableProjection>(createNormal.Id, TestContext.Current.CancellationToken);
+        var hardDeleteRebuilt = await session.LoadAsync<DeletableProjection>(createHard.Id, TestContext.Current.CancellationToken);
+        Assert.Null(normalDeleteRebuilt);
+        Assert.Null(hardDeleteRebuilt);
+    }
+
+}
+
+public record DeletableProjection(Guid Id, Guid InnerGuid);
+
+public record DeleteEvent(Guid Id);
+
+public record HardDeleteEvent(Guid Id);
+
+public record CreateDeletableProjection(Guid Id, Guid InnerGuid);
+
+public partial class DeletableEventProjection : EventProjection
+{
+    public DeletableEventProjection()
+    {
+        Options.DeleteViewTypeOnTeardown<DeletableProjection>();
+    }
+
+    public void Project(CreateDeletableProjection @event, IDocumentOperations operations) =>
+        operations.Store(new DeletableProjection(@event.Id, @event.InnerGuid));
+
+    public void Project(DeleteEvent @event, IDocumentOperations operations) =>
+        operations.DeleteWhere<DeletableProjection>(x => x.InnerGuid == @event.Id);
+
+    public void Project(HardDeleteEvent @event, IDocumentOperations operations) =>
+        operations.HardDeleteWhere<DeletableProjection>(x => x.InnerGuid == @event.Id);
+}

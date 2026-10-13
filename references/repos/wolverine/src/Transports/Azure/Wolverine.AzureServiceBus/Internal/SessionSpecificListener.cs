@@ -1,0 +1,294 @@
+using Azure.Messaging.ServiceBus;
+using JasperFx.Blocks;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.AzureServiceBus.Internal;
+
+internal class AzureServiceBusSessionListener : IListener
+{
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly AzureServiceBusEndpoint _endpoint;
+    private readonly ILogger _logger;
+    private readonly IEnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage> _mapper;
+    private readonly IReceiver _receiver;
+    private readonly ISender _requeue;
+
+    private readonly List<Task> _tasks = new();
+    private readonly AzureServiceBusTransport _transport;
+
+    public AzureServiceBusSessionListener(AzureServiceBusTransport transport, AzureServiceBusEndpoint endpoint,
+        IReceiver receiver, IEnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage> mapper, ILogger logger,
+        ISender requeue)
+    {
+        _transport = transport;
+        _endpoint = endpoint;
+        _receiver = receiver;
+        _mapper = mapper;
+        _logger = logger;
+        _requeue = requeue;
+
+        // GH-3494 (AO2): exactly ONE accept loop per listener instance. ListeningAgent already
+        // builds Endpoint.ListenerCount of these listeners, so spawning ListenerCount loops inside
+        // each one made RequireSessions(n) open n-squared concurrent AcceptNextSessionAsync loops --
+        // 25 for RequireSessions(5) -- all competing for the same sessions.
+        _tasks.Add(Task.Run(listenForMessages, _cancellation.Token));
+    }
+
+    /// <summary>
+    /// The number of concurrent AcceptNextSessionAsync loops this listener runs. Exposed for testing.
+    /// </summary>
+    internal int AcceptLoopCount => _tasks.Count;
+
+    public IHandlerPipeline? Pipeline => _receiver.Pipeline;
+
+    public ValueTask CompleteAsync(Envelope envelope)
+    {
+        throw new NotSupportedException();
+    }
+
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        throw new NotSupportedException();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cancellation.CancelAsync();
+        _cancellation.Dispose();
+        foreach (var task in _tasks)
+            task.SafeDispose();
+    }
+
+    public Uri Address => _endpoint.Uri;
+
+    public async ValueTask StopAsync()
+    {
+        await _cancellation.CancelAsync();
+    }
+
+    private async Task listenForMessages()
+    {
+        var failedCount = 0;
+
+        while (!_cancellation.Token.IsCancellationRequested)
+        {
+            try
+            {
+                await using var sessionReceiver =
+                    await _transport.AcceptNextSessionAsync(_endpoint, _cancellation.Token);
+                var sessionListener =
+                    new SessionSpecificListener(sessionReceiver, _endpoint, _receiver, _mapper, _logger, _requeue);
+                var count = await sessionListener.ExecuteAsync(_cancellation.Token);
+
+                failedCount = 0;
+
+                if (count == 0)
+                {
+                    // TODO -- make this configurable
+                    await Task.Delay(250.Milliseconds());
+                }
+            }
+            catch (ServiceBusException sbe) when (sbe.Reason == ServiceBusFailureReason.ServiceTimeout)
+            {
+                // There's nothing there, so just slow down
+                failedCount++;
+                var pauseTime = failedCount > 5 ? 1.Seconds() : (failedCount * 100).Milliseconds();
+
+                await Task.Delay(pauseTime);
+            }
+            catch (TaskCanceledException) when (_cancellation.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception e)
+            {
+                failedCount++;
+                var pauseTime = failedCount > 5 ? 1.Seconds() : (failedCount * 100).Milliseconds();
+
+                if (_endpoint.Role == EndpointRole.Application)
+                {
+                    _logger.LogError(e, "Error while trying to retrieve messages from Azure Service Bus {Uri}",
+                        _endpoint.Uri);
+                }
+                else
+                {
+                    _logger.LogError(e,
+                        "Error while trying to retrieve messages from Azure Service Bus {Uri}. Check if system queues should be enabled for this application because this could be from the application being unable to create the system queues for Azure Service Bus",
+                        _endpoint.Uri);
+                }
+
+                await Task.Delay(pauseTime);
+            }
+        }
+    }
+}
+
+internal class SessionSpecificListener : IListener, ISupportDeadLetterQueue
+{
+    private readonly CancellationTokenSource _cancellation = new();
+
+    private readonly RetryBlock<AzureServiceBusEnvelope> _complete;
+    private readonly RetryBlock<AzureServiceBusEnvelope> _deadLetter;
+    private readonly RetryBlock<AzureServiceBusEnvelope> _defer;
+    private readonly AzureServiceBusEndpoint _endpoint;
+    private readonly ILogger _logger;
+    private readonly IEnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage> _mapper;
+    private readonly IReceiver _receiver;
+    private readonly ServiceBusSessionReceiver _sessionReceiver;
+
+    public SessionSpecificListener(ServiceBusSessionReceiver sessionReceiver, AzureServiceBusEndpoint endpoint,
+        IReceiver receiver, IEnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage> mapper, ILogger logger,
+        ISender requeue)
+    {
+        _sessionReceiver = sessionReceiver;
+        _endpoint = endpoint;
+        _receiver = receiver;
+        _mapper = mapper;
+        _logger = logger;
+
+        // GH-4012 item 5. This settle had no terminal classification at all: item 3 landed it in
+        // AzureServiceBusSettlement and routed the two non-session listeners through the helper, but both
+        // session listeners call CompleteAsync directly and so kept burning the full retry budget on a
+        // failure that can never succeed. Declaring the predicate ON THE BLOCK is what makes that hard to
+        // forget again -- "remember to call the helper" is exactly what was forgotten here.
+        _complete = AzureServiceBusSettlement.CompleteBlock((e, _) => e.CompleteAsync(_cancellation.Token),
+            _logger, _cancellation.Token);
+
+        _defer = new RetryBlock<AzureServiceBusEnvelope>(async (envelope, _) =>
+        {
+            if (envelope is { IsCompleted: false } e)
+            {
+                await e.CompleteAsync(_cancellation.Token);
+            }
+
+            await requeue.SendAsync(envelope);
+        }, logger, _cancellation.Token);
+
+        _deadLetter =
+            new RetryBlock<AzureServiceBusEnvelope>(
+                (e, c) => e.DeadLetterAsync(_cancellation.Token, e.Exception?.GetType().NameInCode(),
+                    e.Exception?.Message), logger,
+                _cancellation.Token);
+    }
+
+    public IHandlerPipeline? Pipeline => _receiver.Pipeline;
+
+    public ValueTask CompleteAsync(Envelope envelope)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            var task = _complete.PostAsync(e);
+            return new ValueTask(task);
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            var task = _defer.PostAsync(e);
+            return new ValueTask(task);
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public Uri Address => _endpoint.Uri;
+
+    public ValueTask StopAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public bool NativeDeadLetterQueueEnabled => true;
+
+    public async Task MoveToErrorsAsync(Envelope envelope, Exception exception)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            // GH-3474: the diagnostic headers have to be on the envelope BEFORE the move, because
+            // AzureServiceBusEnvelope.buildDiagnosticProperties reads them off Headers to carry them onto the
+            // dead lettered message. This listener was the only one of the four that never stamped them, so a
+            // message dead lettered from a session-specific listener reached $DeadLetterQueue with none of
+            // the failure diagnostics its three siblings attach.
+            DeadLetterQueueConstants.StampFailureMetadata(envelope, exception);
+            e.Exception = exception;
+            await _deadLetter.PostAsync(e);
+        }
+    }
+
+    public async Task<int> ExecuteAsync(CancellationToken cancellationToken)
+    {
+        var messages =
+            await _sessionReceiver.ReceiveMessagesAsync(_endpoint.MaximumMessagesToReceive, _endpoint.MaximumWaitTime,
+                cancellationToken);
+
+        foreach (var message in messages)
+        {
+            try
+            {
+                var envelope = new AzureServiceBusEnvelope(message, _sessionReceiver);
+
+                _mapper.MapIncomingToEnvelope(envelope, message);
+
+                try
+                {
+                    await _receiver.ReceivedAsync(this, envelope);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e,
+                        "Failure to receive an incoming message with {Id}, trying to 'Defer' the message", envelope.Id);
+
+                    try
+                    {
+                        await DeferAsync(envelope);
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogError(exception, "Failure trying to Nack a previously failed message {Id}",
+                            envelope.Id);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                await tryMoveToDeadLetterQueue(message);
+                _logger.LogError(e, "Error while reading message {Id} from {Uri}", message.MessageId,
+                    _endpoint.Uri);
+            }
+        }
+
+        await _deadLetter.DrainAsync();
+        await _complete.DrainAsync();
+        await _defer.DrainAsync();
+
+        return messages.Count;
+    }
+
+    private async Task tryMoveToDeadLetterQueue(ServiceBusReceivedMessage message)
+    {
+        try
+        {
+            await _sessionReceiver.DeadLetterMessageAsync(message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failure while trying to move message {Id} to the dead letter queue",
+                message.MessageId);
+        }
+    }
+}

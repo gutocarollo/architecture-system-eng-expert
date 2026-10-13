@@ -1,0 +1,254 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Wolverine.Tracking;
+using Xunit;
+
+namespace CoreTests.Acceptance;
+
+// ---------------------------------------------------------------------------
+// Message types
+// ---------------------------------------------------------------------------
+
+public record StreamRequest(int Count);
+
+public record StreamItem(int Value);
+
+// A typed IAsyncEnumerable<T> that should cascade as individual messages
+// (latent bug fix verification)
+public record CascadeRequest(int Count);
+
+public record CascadeItem(int Value);
+
+// Separate request type so we can route to a dedicated handler that throws after
+// yielding a fixed number of items (mid-stream fault behavior).
+public record FaultingStreamRequest(int YieldBeforeThrow);
+
+// ---------------------------------------------------------------------------
+// Handlers
+// ---------------------------------------------------------------------------
+
+public static class StreamingRequestHandler
+{
+    public static async IAsyncEnumerable<StreamItem> Handle(StreamRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        for (var i = 0; i < request.Count; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new StreamItem(i);
+            await Task.Yield();
+        }
+    }
+}
+
+// Returns a typed IAsyncEnumerable<T> (T != object) - should cascade each item
+// when called via InvokeAsync (not StreamAsync). This verifies the latent bug fix.
+public static class CascadeStreamingHandler
+{
+    public static async IAsyncEnumerable<CascadeItem> Handle(CascadeRequest request)
+    {
+        for (var i = 0; i < request.Count; i++)
+        {
+            yield return new CascadeItem(i);
+            await Task.Yield();
+        }
+    }
+}
+
+public static class CascadeItemHandler
+{
+    public static void Handle(CascadeItem item, CascadeItemTracker tracker)
+    {
+        tracker.Add(item);
+    }
+}
+
+public class CascadeItemTracker
+{
+    private readonly List<CascadeItem> _items = new();
+    public IReadOnlyList<CascadeItem> Items => _items;
+    public void Add(CascadeItem item) => _items.Add(item);
+}
+
+public static class FaultingStreamingHandler
+{
+    public static async IAsyncEnumerable<StreamItem> Handle(FaultingStreamRequest request)
+    {
+        for (var i = 0; i < request.YieldBeforeThrow; i++)
+        {
+            yield return new StreamItem(i);
+            await Task.Yield();
+        }
+
+        throw new InvalidOperationException("handler faulted mid-stream");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+public class streaming_handler_support
+{
+    [Fact]
+    public async Task stream_items_from_local_handler()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+
+        var items = new List<StreamItem>();
+        await foreach (var item in bus.StreamAsync<StreamItem>(new StreamRequest(3), TestContext.Current.CancellationToken))
+        {
+            items.Add(item);
+        }
+
+        items.Count.ShouldBe(3);
+        items.Select(i => i.Value).ShouldBe([0, 1, 2]);
+    }
+
+    [Fact]
+    public async Task stream_returns_empty_when_handler_yields_nothing()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+
+        var items = new List<StreamItem>();
+        await foreach (var item in bus.StreamAsync<StreamItem>(new StreamRequest(0), TestContext.Current.CancellationToken))
+        {
+            items.Add(item);
+        }
+
+        items.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task cancellation_stops_iteration()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+
+        using var cts = new CancellationTokenSource();
+        var count = 0;
+
+        await Should.ThrowAsync<OperationCanceledException>(async () =>
+        {
+            await foreach (var item in bus.StreamAsync<StreamItem>(new StreamRequest(100), cts.Token))
+            {
+                count++;
+                if (count >= 2)
+                {
+                    await cts.CancelAsync();
+                }
+            }
+        });
+
+        count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task typed_async_enumerable_cascades_items_via_regular_invoke()
+    {
+        // Verifies the latent bug fix: IAsyncEnumerable<T> (T != object) returned from a handler
+        // should iterate and cascade each item when called via InvokeAsync (not StreamAsync).
+        var tracker = new CascadeItemTracker();
+
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(tracker);
+            })
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.InvokeMessageAndWaitAsync(new CascadeRequest(3));
+
+        tracker.Items.Count.ShouldBe(3);
+        // Sort before asserting - cascaded messages are dispatched concurrently so arrival order is non-deterministic.
+        tracker.Items.Select(i => i.Value).OrderBy(v => v).ShouldBe([0, 1, 2]);
+    }
+
+    [Fact]
+    public async Task handler_exception_after_partial_yield_surfaces_to_caller_with_items_already_consumed()
+    {
+        // Caller should observe the items yielded before the throw, then the exception when
+        // the enumerator advances past them. This is the contract end-users will rely on when
+        // composing streaming handlers - partial results are not silently swallowed.
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+
+        var items = new List<StreamItem>();
+        var ex = await Should.ThrowAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var item in bus.StreamAsync<StreamItem>(new FaultingStreamRequest(2)))
+            {
+                items.Add(item);
+            }
+        });
+
+        ex.Message.ShouldBe("handler faulted mid-stream");
+        items.Select(i => i.Value).ShouldBe([0, 1]);
+    }
+
+    [Fact]
+    public async Task mid_stream_throw_marks_activity_status_error()
+    {
+        var capturedActivities = new List<Activity>();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == "Wolverine",
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStopped = activity => capturedActivities.Add(activity)
+        };
+        ActivitySource.AddActivityListener(listener);
+
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+
+        await Should.ThrowAsync<InvalidOperationException>(async () =>
+        {
+            await foreach (var _ in bus.StreamAsync<StreamItem>(new FaultingStreamRequest(2)))
+            {
+            }
+        });
+
+        var streamingActivity = capturedActivities
+            .FirstOrDefault(a => a.OperationName.Contains("stream", StringComparison.OrdinalIgnoreCase));
+        streamingActivity.ShouldNotBeNull();
+        streamingActivity.Status.ShouldBe(ActivityStatusCode.Error);
+    }
+
+    [Fact]
+    public async Task stream_with_delivery_options()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine()
+            .StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var bus = host.MessageBus();
+        var options = new DeliveryOptions();
+
+        var items = new List<StreamItem>();
+        await foreach (var item in bus.StreamAsync<StreamItem>(new StreamRequest(2), options, TestContext.Current.CancellationToken))
+        {
+            items.Add(item);
+        }
+
+        items.Count.ShouldBe(2);
+    }
+}

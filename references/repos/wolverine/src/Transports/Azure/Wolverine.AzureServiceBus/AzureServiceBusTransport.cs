@@ -1,0 +1,551 @@
+using Azure;
+using Azure.Core;
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
+using JasperFx.Core;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.Logging;
+using Wolverine.AzureServiceBus.Internal;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.AzureServiceBus;
+
+public partial class AzureServiceBusTransport : BrokerTransport<AzureServiceBusEndpoint>, IAsyncDisposable
+{
+    public const string ProtocolName = "asb";
+    public const string ResponseEndpointName = "AzureServiceBusResponses";
+    public const string RetryEndpointName = "AzureServiceBusRetries";
+    private readonly Lazy<ServiceBusClient> _busClient;
+    private readonly Lazy<ServiceBusAdministrationClient> _managementClient;
+
+    public readonly List<AzureServiceBusSubscription> Subscriptions = new();
+    private string? _hostName;
+    public const string DeadLetterQueueName = DeadLetterQueueConstants.DefaultQueueName;
+
+    public AzureServiceBusTransport() : this(ProtocolName)
+    {
+
+    }
+
+    public AzureServiceBusTransport(string protocolName) : base(protocolName, "Azure Service Bus", ["azure", "azureservicebus"])
+    {
+        Queues = new(name => new AzureServiceBusQueue(this, name));
+        Topics = new(name => new AzureServiceBusTopic(this, name));
+
+        _managementClient =
+            new Lazy<ServiceBusAdministrationClient>(createServiceBusAdministrationClient);
+        _busClient = new Lazy<ServiceBusClient>(createServiceBusClient);
+
+        IdentifierDelimiter = ".";
+    }
+
+    /// <summary>
+    /// CAUTION!!! If set to true, Wolverine will delete *every* queue and topic in the connected
+    /// Azure Service Bus namespace at application start up before provisioning any objects. This is
+    /// opt in, and is only intended for local development or testing against the Azure Service Bus
+    /// emulator. See <see cref="AzureServiceBusConfiguration.DeleteAllExistingObjectsOnStartup"/>
+    /// </summary>
+    public bool DeleteAllExistingObjectsOnStartup { get; set; }
+
+    public async Task DeleteAllObjectsAsync()
+    {
+        var topics = _managementClient.Value.GetTopicsAsync();
+        await foreach (var topic in topics)
+        {
+            await _managementClient.Value.DeleteTopicAsync(topic.Name);
+        }
+
+        var queues = _managementClient.Value.GetQueuesAsync();
+        await foreach (var queue in queues)
+        {
+            await _managementClient.Value.DeleteQueueAsync(queue.Name);
+        }
+    }
+
+    public override Uri ResourceUri
+    {
+        get
+        {
+            var uri = new Uri($"{ProtocolName}://");
+
+            if (FullyQualifiedNamespace.IsNotEmpty())
+            {
+                uri = new Uri(uri, FullyQualifiedNamespace);
+            }
+
+            return uri;
+        }
+    }
+
+    /// <summary>
+    /// Azure Service Bus accepts only letters, numbers, periods, hyphens and underscores in an entity
+    /// name segment (plus '/' as the segment separator for hierarchical paths). Anything else comes
+    /// back from the management API as a 400 with SubCode=40000 at provisioning time, which
+    /// <see cref="BrokerTransport{TEndpoint}.InitializeAsync"/> then retries twenty times over two
+    /// minutes before reporting only "Unable to initialize the Broker asb in time".
+    ///
+    /// That is what GH-3786 was: conventional routing derives its queue name from the message type,
+    /// and a handler taking an ARRAY -- <c>Handle(BatchedItem[] items)</c> -- yields
+    /// "…bugs.batcheditem[]". One such handler anywhere in the assembly took down broker startup for
+    /// every conventionally-routed host in it. Generic and nested message types ('&lt;', '&gt;', ',', '+')
+    /// have the same shape.
+    ///
+    /// Substituting rather than stripping keeps distinct type names distinct: <c>Foo[]</c> becomes
+    /// "foo__" and stays separable from <c>Foo</c>. No name that works today changes -- a name
+    /// containing an illegal character could never have been provisioned in the first place.
+    /// </summary>
+    public override string SanitizeIdentifier(string identifier)
+    {
+        var lowered = identifier.ToLowerInvariant();
+
+        char[]? corrected = null;
+        for (var i = 0; i < lowered.Length; i++)
+        {
+            if (isLegalEntityCharacter(lowered[i])) continue;
+
+            corrected ??= lowered.ToCharArray();
+            corrected[i] = '_';
+        }
+
+        return corrected is null ? lowered : new string(corrected);
+    }
+
+    // '/' is kept because Azure Service Bus allows hierarchical entity PATHS, and an application
+    // already running against a name like "orders/priority" must keep addressing the same entity.
+    private static bool isLegalEntityCharacter(char c)
+        => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_' or '/';
+
+    internal LightweightCache<string, AzureServiceBusTenant> Tenants { get; } = new(key => new AzureServiceBusTenant(key));
+
+    /// <summary>
+    /// Is this transport connection allowed to build and use response, retry, and control queues
+    /// for just this node?
+    /// </summary>
+    public bool SystemQueuesEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Optional prefix prepended to the names of the queues Wolverine creates for its own use --
+    /// the response queue, the retry queue, the node control queue, and the default dead letter
+    /// queue. Null or empty (the default) leaves those names exactly as they have always been.
+    /// Set through <see cref="AzureServiceBusConfiguration.SystemQueuePrefix"/>, which sanitizes
+    /// the value; setting this property directly is also sanitized defensively when the names are
+    /// built, so an illegal entity name can't get through.
+    /// </summary>
+    public string? SystemQueuePrefix { get; set; }
+
+    /// <summary>
+    /// Prepend <see cref="SystemQueuePrefix"/> to a Wolverine system queue name, using the Azure
+    /// Service Bus identifier delimiter ('.'). Returns the name untouched when no prefix is
+    /// configured, so the default naming is byte for byte what it was before the prefix existed.
+    /// </summary>
+    /// <param name="name">The unprefixed Wolverine system queue name</param>
+    /// <returns></returns>
+    public string PrefixSystemQueueName(string name)
+    {
+        if (SystemQueuePrefix.IsEmpty()) return name;
+
+        return $"{SanitizeIdentifier(SystemQueuePrefix!)}{IdentifierDelimiter}{name}";
+    }
+
+    private string? _defaultDeadLetterQueueName;
+
+    /// <summary>
+    /// The transport wide default dead letter queue name used by every Azure Service Bus queue that
+    /// does not configure a dead letter queue of its own. Defaults to
+    /// <see cref="DeadLetterQueueName"/> ("wolverine-dead-letter-queue"), with
+    /// <see cref="SystemQueuePrefix"/> prepended when one is configured. An explicitly assigned
+    /// name is taken as given and is never prefixed. Set through
+    /// <see cref="AzureServiceBusConfiguration.DefaultDeadLetterQueueName"/>.
+    /// </summary>
+    public string DefaultDeadLetterQueueName
+    {
+        get => _defaultDeadLetterQueueName ?? PrefixSystemQueueName(DeadLetterQueueConstants.DefaultQueueName);
+        set => _defaultDeadLetterQueueName = value;
+    }
+
+    private int? _prefetchCount;
+
+    /// <summary>
+    /// GH-4051. Null unless a transport-wide prefetch was actually configured. An endpoint needs to tell "the user
+    /// chose 0" from "nobody chose anything", because a NativeAck endpoint substitutes a lane-sized default in the
+    /// second case only -- an explicit choice, at either level, always wins.
+    /// </summary>
+    internal int? ExplicitPrefetchCount => _prefetchCount;
+
+    /// <summary>
+    ///     The transport-wide default for the number of messages that the underlying Azure Service
+    ///     Bus receivers eagerly buffer on the client ahead of any ReceiveMessagesAsync() calls.
+    ///     Applied to every listening endpoint that does not override PrefetchCount itself. The
+    ///     default is 0 (prefetch is disabled). Be aware that prefetched messages age against the
+    ///     queue's message lock duration while they sit in the client buffer, so an oversized
+    ///     prefetch combined with slow handlers leads to lock-lost redeliveries.
+    /// </summary>
+    public int PrefetchCount
+    {
+        get => _prefetchCount ?? 0;
+        set
+        {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "PrefetchCount cannot be negative");
+            }
+
+            _prefetchCount = value;
+        }
+    }
+
+    [IgnoreDescription]
+    public LightweightCache<string, AzureServiceBusQueue> Queues { get; }
+    [IgnoreDescription]
+    public LightweightCache<string, AzureServiceBusTopic> Topics { get; }
+
+    // Contains shared access key / password — raw value hidden to avoid
+    // leaking secrets in diagnostic views. Surfaced via ConnectionSummary below.
+    [IgnoreDescription]
+    public string? ConnectionString { get; set; }
+
+    /// <summary>
+    /// Optional separate connection string for the ServiceBusAdministrationClient.
+    /// When set, the management client uses this instead of ConnectionString.
+    /// Useful for the Azure Service Bus Emulator which exposes management on a different port.
+    /// </summary>
+    [IgnoreDescription]
+    public string? ManagementConnectionString { get; set; }
+
+    /// <summary>
+    /// The configured connection string with the <c>SharedAccessKey</c> value
+    /// masked. Safe to render in diagnostic output.
+    /// </summary>
+    public string? ConnectionSummary => ConnectionString == null
+        ? null
+        : ConnectionStringRedactor.Redact(ConnectionString, "SharedAccessKey");
+
+    /// <summary>
+    /// The configured management connection string with the <c>SharedAccessKey</c>
+    /// value masked. Safe to render in diagnostic output.
+    /// </summary>
+    public string? ManagementConnectionSummary => ManagementConnectionString == null
+        ? null
+        : ConnectionStringRedactor.Redact(ManagementConnectionString, "SharedAccessKey");
+
+    public string? FullyQualifiedNamespace { get; set; }
+    [IgnoreDescription]
+    public TokenCredential? TokenCredential { get; set; }
+    [IgnoreDescription]
+    public AzureNamedKeyCredential? NamedKeyCredential { get; set; }
+    [IgnoreDescription]
+    public AzureSasCredential? SasCredential { get; set; }
+
+    [ChildDescription]
+    public ServiceBusClientOptions ClientOptions { get; } = new()
+    {
+        TransportType = ServiceBusTransportType.AmqpTcp
+    };
+
+    public async Task WithManagementClientAsync(Func<ServiceBusAdministrationClient, Task> action)
+    {
+        await action(_managementClient.Value);
+
+        foreach (var tenant in Tenants)
+        {
+            tenant.Transport.NamedKeyCredential ??= NamedKeyCredential;
+            tenant.Transport.SasCredential ??= SasCredential;
+            tenant.Transport.TokenCredential ??= TokenCredential;
+
+            try
+            {
+                await tenant.Transport.WithManagementClientAsync(action);
+            }
+            catch (Exception)
+            {
+                // Tenant management failures should not block the default namespace.
+                // Tenant resources will be provisioned on demand or by their own hosts.
+            }
+        }
+    }
+
+    public async Task WithServiceBusClientAsync(Func<ServiceBusClient, Task> action)
+    {
+        await action(BusClient);
+
+        foreach (var tenant in Tenants)
+        {
+            tenant.Transport.NamedKeyCredential ??= NamedKeyCredential;
+            tenant.Transport.SasCredential ??= SasCredential;
+            tenant.Transport.TokenCredential ??= TokenCredential;
+
+            try
+            {
+                await tenant.Transport.WithServiceBusClientAsync(action);
+            }
+            catch (Exception)
+            {
+                // Tenant management failures should not block the default namespace.
+                // Tenant resources will be provisioned on demand or by their own hosts.
+            }
+        }
+    }
+    
+    // GH-3740: both of these lazily *build a live Azure client* on first read. Diagnostic descriptions
+    // (JasperFx OptionsDescription, and through it Wolverine's ServiceCapabilities) reflect over every public
+    // property, so without this they would connect to Azure Service Bus as a side effect of describing the
+    // configuration -- and throw outright on any transport that has no connection information yet.
+    [IgnoreDescription]
+    public ServiceBusClient BusClient => _busClient.Value;
+
+    [IgnoreDescription]
+    public ServiceBusAdministrationClient ManagementClient => _managementClient.Value;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_busClient.IsValueCreated)
+        {
+            await _busClient.Value.DisposeAsync();
+        }
+
+        foreach (var tenant in Tenants)
+        { 
+            await tenant.Transport.DisposeAsync();
+        }
+    }
+
+    protected override void tryBuildSystemEndpoints(IWolverineRuntime runtime)
+    {
+        if (!SystemQueuesEnabled) return;
+
+        // In Solo mode the assigned node number is always 1 (#3188) and the service name is not
+        // unique per host, so multiple Solo hosts on one namespace would share a response queue and
+        // cross-deliver replies — key on the always-unique UniqueNodeId instead. Balanced gets a
+        // unique AssignedNodeNumber via election. See #3189.
+        var responseNode = runtime.Options.Durability.Mode == DurabilityMode.Solo
+            ? runtime.Options.UniqueNodeId.ToString("N")
+            : runtime.DurabilitySettings.AssignedNodeNumber.ToString();
+        var queueName = PrefixSystemQueueName($"wolverine.response.{runtime.Options.ServiceName}.{responseNode}");
+
+        var queue = Queues[queueName];
+
+        queue.Options.AutoDeleteOnIdle = 5.Minutes();
+        queue.Mode = EndpointMode.BufferedInMemory;
+        queue.IsListener = true;
+        queue.EndpointName = ResponseEndpointName;
+        queue.IsUsedForReplies = true;
+        queue.Role = EndpointRole.System;
+
+
+        var retryName =
+            SanitizeIdentifier(PrefixSystemQueueName($"wolverine.retries.{runtime.Options.ServiceName}").ToLower());
+        var retryQueue = Queues[retryName];
+        retryQueue.Mode = EndpointMode.BufferedInMemory;
+        retryQueue.IsListener = true;
+        retryQueue.EndpointName = RetryEndpointName;
+        retryQueue.Role = EndpointRole.System;
+        
+        RetryQueue = retryQueue;
+    }
+
+    public override Endpoint? ReplyEndpoint()
+    {
+        var replies = base.ReplyEndpoint();
+        if (replies is AzureServiceBusQueue) return replies;
+
+        return null;
+    }
+
+    internal AzureServiceBusQueue? RetryQueue { get; set; }
+
+    /// <summary>
+    /// The node control queue built eagerly by <see cref="AzureServiceBusConfiguration.EnableWolverineControlQueues"/>,
+    /// tracked here rather than on the configuration object because a single transport can be reached through more
+    /// than one AzureServiceBusConfiguration instance. Kept so that a later
+    /// <see cref="AzureServiceBusConfiguration.SystemQueuePrefix"/> call can rebuild it under the prefixed name.
+    /// </summary>
+    internal AzureServiceBusQueue? ControlQueue { get; set; }
+
+    /// <summary>
+    /// The host name of the connected Azure Service Bus namespace, parsed from the <c>Endpoint</c> segment of
+    /// <see cref="ConnectionString"/> when there is one, and otherwise the configured
+    /// <see cref="FullyQualifiedNamespace"/> (which *is* the host name for credential-based connections).
+    /// Null only when this transport has no connection information at all.
+    /// </summary>
+    public string? HostName
+    {
+        get
+        {
+            // GH-3740: this used to blow up with a NullReferenceException on `ConnectionString!` for every
+            // credential-based connection (FullyQualifiedNamespace + TokenCredential / NamedKeyCredential /
+            // SasCredential), where there is no connection string at all. Being a public getter, it was
+            // reached reflectively by JasperFx's OptionsDescription while building the Wolverine
+            // ServiceCapabilities snapshot, so a perfectly valid managed-identity setup could never complete
+            // a CritterWatch handshake.
+            if (_hostName == null)
+            {
+                foreach (var part in ConnectionString?.Split(';') ?? [])
+                {
+                    // Only split on the FIRST '=' -- SharedAccessKey values are base64 and routinely
+                    // carry trailing '=' padding.
+                    var split = part.Split('=', 2);
+                    if (split.Length == 2 && split[0].Trim().EqualsIgnoreCase("Endpoint") &&
+                        Uri.TryCreate(split[1].Trim(), UriKind.Absolute, out var uri))
+                    {
+                        _hostName = uri.Host;
+                        break;
+                    }
+                }
+
+                _hostName ??= FullyQualifiedNamespace;
+            }
+
+            return _hostName;
+        }
+    }
+
+    public override string? DescribeEndpoint()
+    {
+        if (!string.IsNullOrEmpty(FullyQualifiedNamespace)) return FullyQualifiedNamespace;
+
+        // The Endpoint host inside the connection string is the namespace FQDN; only the SharedAccessKey is secret.
+        if (!string.IsNullOrEmpty(ConnectionString)) return HostName;
+
+        return null;
+    }
+
+    protected override IEnumerable<Endpoint> explicitEndpoints()
+    {
+        foreach (var queue in Queues) yield return queue;
+
+        foreach (var topic in Topics) yield return topic;
+
+        foreach (var subscription in Subscriptions) yield return subscription;
+    }
+
+    protected override IEnumerable<AzureServiceBusEndpoint> endpoints()
+    {
+        var dlqNames = Queues.Select(x => x.DeadLetterQueueName).Where(x => x.IsNotEmpty()).Distinct().ToArray();
+        foreach (var dlqName in dlqNames)
+        {
+            Queues.FillDefault(dlqName!);
+        }
+
+        foreach (var queue in Queues) yield return queue;
+
+        foreach (var topic in Topics) yield return topic;
+
+        foreach (var subscription in Subscriptions) yield return subscription;
+    }
+
+    /// <summary>
+    /// GH-4523. The base "too large to fit in a batch (max size: N bytes)" gives the limit and stops, which
+    /// leaves the user holding a number and no move to make. SQS already names both of its remedies, so name
+    /// Azure's: the namespace tier that sets the ceiling, and the claim check that sidesteps it. Also say
+    /// that the send is terminal -- a retry cannot change the size of the message, and an operator watching
+    /// it fail repeatedly deserves to be told that up front.
+    /// </summary>
+    internal static string MessageTooLargeRemedy(Uri endpointUri)
+    {
+        return
+            $"No retry can help, because retrying does not make the message smaller -- this send will fail identically every time until the message or the namespace changes. The ceiling is set by the Service Bus namespace tier (256 KB on Standard, 1 MB on Premium), so either move '{endpointUri}' to a namespace with a larger limit, or keep the payload out of the message entirely with a claim check (WolverineFx.AzureBlobStorage). Catch MessageTooLargeException in a sending failure policy to dead-letter or discard oversized messages rather than letting them block the endpoint.";
+    }
+
+    protected override AzureServiceBusEndpoint findEndpointByUri(Uri uri)
+    {
+        switch (uri.Host)
+        {
+            case "queue":
+                return Queues[Uri.UnescapeDataString(uri.Segments[1])];
+
+            case "topic":
+                var topicName = Uri.UnescapeDataString(uri.Segments[1].TrimEnd('/'));
+                if (uri.Segments.Length == 3)
+                {
+                    var subscription = Subscriptions.FirstOrDefault(x => x.Uri == uri);
+                    if (subscription != null)
+                    {
+                        return subscription;
+                    }
+
+                    var subscriptionName = Uri.UnescapeDataString(uri.Segments.Last().TrimEnd('/'));
+                    var topic = Topics[topicName];
+                    subscription = new AzureServiceBusSubscription(this, topic, subscriptionName);
+                    Subscriptions.Add(subscription);
+
+                    return subscription;
+                }
+
+                return Topics[topicName];
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(uri),
+            $"Azure Service Bus Uris must use the format '{Protocol}://queue/{{queueName}}', '{Protocol}://topic/{{topicName}}', or '{Protocol}://topic/{{topicName}}/{{subscriptionName}}': {uri}");
+    }
+
+    public override async ValueTask ConnectAsync(IWolverineRuntime runtime)
+    {
+        if (DeleteAllExistingObjectsOnStartup)
+        {
+            runtime.Logger.LogWarning(
+                "Deleting all existing queues and topics in the Azure Service Bus namespace at {Broker} because DeleteAllExistingObjectsOnStartup() was enabled",
+                DescribeEndpoint());
+
+            await DeleteAllObjectsAsync();
+        }
+
+        // otherwise, we're going to use a client per endpoint
+    }
+
+    public WolverineTransportHealthCheck BuildHealthCheck(IWolverineRuntime runtime)
+    {
+        return new AzureServiceBusHealthCheck(this);
+    }
+
+    public override IEnumerable<PropertyColumn> DiagnosticColumns()
+    {
+        yield return new PropertyColumn("Queue", "Name");
+        yield return new PropertyColumn(nameof(QueueProperties.Status));
+    }
+
+    private ServiceBusClient createServiceBusClient()
+    {
+        if (FullyQualifiedNamespace.IsNotEmpty() && TokenCredential != null)
+        {
+            return new ServiceBusClient(FullyQualifiedNamespace, TokenCredential, ClientOptions);
+        }
+
+        if (FullyQualifiedNamespace.IsNotEmpty() && NamedKeyCredential != null)
+        {
+            return new ServiceBusClient(FullyQualifiedNamespace, NamedKeyCredential, ClientOptions);
+        }
+
+        if (FullyQualifiedNamespace.IsNotEmpty() && SasCredential != null)
+        {
+            return new ServiceBusClient(FullyQualifiedNamespace, SasCredential, ClientOptions);
+        }
+
+        return new ServiceBusClient(ConnectionString, ClientOptions);
+    }
+    
+    private ServiceBusAdministrationClient createServiceBusAdministrationClient()
+    {
+        if (FullyQualifiedNamespace.IsNotEmpty() && TokenCredential != null)
+        {
+            return new ServiceBusAdministrationClient(FullyQualifiedNamespace, TokenCredential);
+        }
+
+        if (FullyQualifiedNamespace.IsNotEmpty() && NamedKeyCredential != null)
+        {
+            return new ServiceBusAdministrationClient(FullyQualifiedNamespace, NamedKeyCredential);
+        }
+
+        if (FullyQualifiedNamespace.IsNotEmpty() && SasCredential != null)
+        {
+            return new ServiceBusAdministrationClient(FullyQualifiedNamespace, SasCredential);
+        }
+
+        return new ServiceBusAdministrationClient(ManagementConnectionString ?? ConnectionString);
+    }
+
+
+}

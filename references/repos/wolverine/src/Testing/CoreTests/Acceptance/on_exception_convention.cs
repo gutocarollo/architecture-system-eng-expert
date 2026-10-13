@@ -1,0 +1,649 @@
+using System.Collections;
+using System.Collections.Concurrent;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Shouldly;
+using Wolverine.Attributes;
+using Wolverine.ComplianceTests;
+using Wolverine.Tracking;
+using Xunit;
+namespace CoreTests.Acceptance;
+
+public class on_exception_convention
+{
+    private readonly ITestOutputHelper _output;
+
+    public on_exception_convention(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
+    private async Task<(ActionLog actions, ITrackedSession session)> invokeMessage<T>(T message,
+        Action<IPolicies>? registration = null)
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(OnExceptionHandler));
+                opts.Discovery.IncludeType(typeof(SpecificExceptionHandler));
+                opts.Discovery.IncludeType(typeof(OnExceptionWithFinallyHandler));
+                opts.Discovery.IncludeType(typeof(VoidOnExceptionHandler));
+                registration?.Invoke(opts.Policies);
+            }).StartAsync();
+
+        var session = await host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(message);
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync();
+
+        return (recorder.Actions, session);
+    }
+
+    [Fact]
+    public async Task handler_level_on_exception_is_called()
+    {
+        var (actions, _) = await invokeMessage(new MessageThatThrows("boom"));
+
+        actions.ShouldContain("OnException:boom");
+    }
+
+    [Fact]
+    public async Task specific_exception_matched_first()
+    {
+        var (actions, _) = await invokeMessage(new MessageThatThrowsSpecific("specific boom"));
+
+        actions.ShouldContain("OnSpecificException:specific boom");
+        actions.ShouldNotContain(a => a.StartsWith("OnGeneralException"));
+    }
+
+    [Fact]
+    public async Task general_exception_catches_base_type()
+    {
+        var (actions, _) = await invokeMessage(new MessageThatThrowsGeneral("general boom"));
+
+        actions.ShouldContain("OnGeneralException:general boom");
+    }
+
+    [Fact]
+    public async Task on_exception_with_finally_both_run()
+    {
+        var (actions, _) = await invokeMessage(new MessageWithFinally());
+
+        actions.ShouldContain("Handler");
+        actions.ShouldContain("OnException");
+        actions.ShouldContain("Finally");
+    }
+
+    [Fact]
+    public async Task void_on_exception_swallows()
+    {
+        var (actions, session) = await invokeMessage(new MessageForVoidHandler());
+
+        actions.ShouldContain("OnException:void handler boom");
+        // Exception was swallowed — not in dead letter queue
+    }
+
+    [Fact]
+    public async Task middleware_on_exception()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(NoOwnExceptionHandler));
+                opts.Policies.AddMiddleware(typeof(GlobalOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForMiddlewareTest("middleware test"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("MiddlewareOnException:middleware test");
+    }
+
+    [Fact]
+    public async Task non_static_middleware_on_exception_with_constructor_injection()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForInstanceMiddlewareHandler));
+                opts.Policies.AddMiddleware(typeof(InstanceOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForInstanceMiddleware("ctor inject test"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("InstanceMiddlewareOnException:ctor inject test");
+    }
+
+    [Fact]
+    public async Task middleware_with_ilogger_injection()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForLoggerMiddlewareHandler));
+                opts.Policies.AddMiddleware(typeof(LoggerOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForLoggerMiddleware("logger test"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("LoggerOnException:logger test");
+    }
+
+    [Fact]
+    public async Task static_middleware_on_exception_with_additional_injected_parameters()
+    {
+        var recorder = new OnExceptionRecorder();
+        var probe = new StaticMiddlewareDependencyProbe();
+
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Services.AddSingleton(probe);
+                opts.Discovery.IncludeType(typeof(MessageForStaticMiddlewareDependencyHandler));
+                opts.Policies.AddMiddleware(typeof(StaticMiddlewareWithDependencyOnException));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForStaticMiddlewareDependency("static dependency test"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("StaticDependencyOnException:static dependency test");
+        probe.WasCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task non_static_middleware_with_before_and_on_exception()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForBeforeAndOnExceptionHandler));
+                opts.Policies.AddMiddleware(typeof(BeforeAndOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForBeforeAndOnException("before+onexception test"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("BeforeMiddleware:before+onexception test");
+        recorder.Actions.ShouldContain("BeforeAndOnExceptionMiddleware:before+onexception test");
+    }
+
+    [Fact]
+    public async Task non_static_middleware_shares_instance_state_between_before_and_on_exception()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForSharedInstanceStateHandler));
+                opts.Policies.AddMiddleware(typeof(SharedInstanceStateMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForSharedInstanceState("shared state"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        // The SAME middleware instance must be used for Before and OnException, so the state set in
+        // Before is visible in OnException. A fresh catch-block instance would record "<lost>".
+        recorder.Actions.ShouldContain("SharedState:shared state");
+    }
+
+    [Fact]
+    public async Task static_on_exception_return_value_is_cascaded()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForReturningOnExceptionHandler));
+                opts.Discovery.IncludeType(typeof(CascadedFromOnExceptionHandler));
+                opts.Policies.AddMiddleware(typeof(ReturningOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var session = await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForReturningOnException("ret"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("ReturningOnException:ret");
+        // The message RETURNED from OnException must be cascaded/published.
+        session.Sent.SingleEnvelope<CascadedFromOnException>().Message
+            .ShouldBeOfType<CascadedFromOnException>()
+            .Text.ShouldBe("cascaded:ret");
+    }
+
+    [Fact]
+    public async Task instance_on_exception_return_value_is_cascaded()
+    {
+        var recorder = new OnExceptionRecorder();
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddSingleton(recorder);
+                opts.Discovery.IncludeType(typeof(MessageForInstanceReturningOnExceptionHandler));
+                opts.Discovery.IncludeType(typeof(CascadedFromOnExceptionHandler));
+                opts.Policies.AddMiddleware(typeof(InstanceReturningOnExceptionMiddleware));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var session = await host.TrackActivity().DoNotAssertOnExceptionsDetected()
+            .PublishMessageAndWaitAsync(new MessageForInstanceReturningOnException("ret"));
+
+        foreach (var action in recorder.Actions) _output.WriteLine($"\"{action}\"");
+        await host.StopAsync(TestContext.Current.CancellationToken);
+
+        recorder.Actions.ShouldContain("InstanceReturningOnException:ret");
+        session.Sent.SingleEnvelope<CascadedFromOnException>().Message
+            .ShouldBeOfType<CascadedFromOnException>()
+            .Text.ShouldBe("instance-cascaded:ret");
+    }
+}
+
+// Support types
+public class OnExceptionRecorder
+{
+    public ActionLog Actions { get; } = new();
+}
+
+/// <summary>
+/// A thread-safe append-only log of what each OnException hook did.
+///
+/// <para>This was a plain <c>List&lt;string&gt;</c>, and a handler that cascades MORE THAN ONE message
+/// writes to it from more than one thread: <c>OnException</c> returning an <c>OutgoingMessages</c> of two
+/// messages gets both handled off the same local queue, which runs at a parallelism above one. Concurrent
+/// <c>List&lt;T&gt;.Add</c> is not safe -- two threads can take the same slot, or one can write while the
+/// other is resizing -- so an entry is silently lost and the assertion fails on a message that really was
+/// handled. Observed as <c>every_message_in_the_returned_collection_is_cascaded</c> finding only
+/// "Handled:...:second" in a full-suite run, and passing in isolation, which is what a race looks like
+/// rather than a bug in the code under test.</para>
+///
+/// <para>A queue rather than a <c>ConcurrentBag</c> because the tests dump this to test output for
+/// diagnosis, and insertion order is worth keeping there even though nothing asserts on it.</para>
+/// </summary>
+public sealed class ActionLog : IEnumerable<string>
+{
+    private readonly ConcurrentQueue<string> _actions = new();
+
+    public void Add(string action) => _actions.Enqueue(action);
+
+    public IEnumerator<string> GetEnumerator() => _actions.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
+public class action_log_is_safe_for_concurrent_handlers
+{
+    [Fact]
+    public void concurrent_writers_do_not_lose_entries()
+    {
+        // The property the cascading tests depend on. A plain List<string> loses entries here, which is
+        // how every_message_in_the_returned_collection_is_cascaded came to fail in a full-suite run while
+        // passing in isolation -- two cascaded messages handled off one local queue at parallelism > 1.
+        const int writers = 8;
+        const int perWriter = 2000;
+
+        var log = new ActionLog();
+
+        Parallel.For(0, writers, w =>
+        {
+            for (var i = 0; i < perWriter; i++) log.Add($"{w}:{i}");
+        });
+
+        log.Count().ShouldBe(writers * perWriter);
+    }
+}
+
+public class TestAppException : Exception
+{
+    public TestAppException(string message) : base(message) { }
+}
+
+public class SpecificTestException : TestAppException
+{
+    public SpecificTestException(string message) : base(message) { }
+}
+
+// Messages
+public record MessageThatThrows(string Text);
+public record MessageThatThrowsSpecific(string Text);
+public record MessageThatThrowsGeneral(string Text);
+public record MessageWithFinally;
+public record MessageForVoidHandler;
+public record MessageForMiddlewareTest(string Text);
+
+// Handlers
+public static class OnExceptionHandler
+{
+    public static void Handle(MessageThatThrows message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+
+    public static void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"OnException:{ex.Message}");
+    }
+}
+
+public static class SpecificExceptionHandler
+{
+    public static void Handle(MessageThatThrowsSpecific message, OnExceptionRecorder recorder)
+    {
+        throw new SpecificTestException(message.Text);
+    }
+
+    public static void Handle(MessageThatThrowsGeneral message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+
+    public static void OnException(SpecificTestException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"OnSpecificException:{ex.Message}");
+    }
+
+    public static void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"OnGeneralException:{ex.Message}");
+    }
+}
+
+public static class OnExceptionWithFinallyHandler
+{
+    public static void Handle(MessageWithFinally message, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add("Handler");
+        throw new TestAppException("error");
+    }
+
+    public static void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add("OnException");
+    }
+
+    public static void Finally(OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add("Finally");
+    }
+}
+
+public static class VoidOnExceptionHandler
+{
+    public static void Handle(MessageForVoidHandler message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException("void handler boom");
+    }
+
+    public static void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"OnException:{ex.Message}");
+    }
+}
+
+/// <summary>
+/// Handler that does NOT have its own OnException — relies on middleware
+/// </summary>
+public static class NoOwnExceptionHandler
+{
+    public static void Handle(MessageForMiddlewareTest message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+public static class GlobalOnExceptionMiddleware
+{
+    public static void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"MiddlewareOnException:{ex.Message}");
+    }
+}
+
+// Support types for the instance middleware ctor-injection test
+public record MessageForInstanceMiddleware(string Text);
+
+public static class MessageForInstanceMiddlewareHandler
+{
+    public static void Handle(MessageForInstanceMiddleware message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+/// <summary>
+/// Non-static middleware whose dependency (OnExceptionRecorder) is injected via the constructor.
+/// Exercises constructor-injection support for OnException handlers.
+/// </summary>
+public class InstanceOnExceptionMiddleware
+{
+    private readonly OnExceptionRecorder _recorder;
+
+    public InstanceOnExceptionMiddleware(OnExceptionRecorder recorder)
+    {
+        _recorder = recorder;
+    }
+
+    public void OnException(TestAppException ex)
+    {
+        _recorder.Actions.Add($"InstanceMiddlewareOnException:{ex.Message}");
+    }
+}
+
+// Support types for the ILogger injection test
+public record MessageForLoggerMiddleware(string Text);
+
+public static class MessageForLoggerMiddlewareHandler
+{
+    public static void Handle(MessageForLoggerMiddleware message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+/// <summary>
+/// Middleware that receives an ILogger via constructor injection and an OnExceptionRecorder
+/// via the OnException parameter list — mirrors the documented usage example.
+/// </summary>
+public class LoggerOnExceptionMiddleware
+{
+    private readonly ILogger<LoggerOnExceptionMiddleware> _logger;
+
+    public LoggerOnExceptionMiddleware(ILogger<LoggerOnExceptionMiddleware> logger)
+    {
+        _logger = logger;
+    }
+
+    public void OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        _logger.LogError(ex, "Unhandled exception in message handler: {Message}", ex.Message);
+        recorder.Actions.Add($"LoggerOnException:{ex.Message}");
+    }
+}
+
+public record MessageForStaticMiddlewareDependency(string Text);
+
+public static class MessageForStaticMiddlewareDependencyHandler
+{
+    public static void Handle(MessageForStaticMiddlewareDependency message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+public class StaticMiddlewareDependencyProbe
+{
+    public bool WasCalled { get; set; }
+}
+
+public static class StaticMiddlewareWithDependencyOnException
+{
+    public static void OnException(TestAppException ex, StaticMiddlewareDependencyProbe probe, OnExceptionRecorder recorder)
+    {
+        probe.WasCalled = true;
+        recorder.Actions.Add($"StaticDependencyOnException:{ex.Message}");
+    }
+}
+
+// Support types for the Before + OnException test (exercises the "move existing ConstructorFrame" path)
+public record MessageForBeforeAndOnException(string Text);
+
+public static class MessageForBeforeAndOnExceptionHandler
+{
+    public static void Handle(MessageForBeforeAndOnException message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+/// <summary>
+/// Non-static middleware that has BOTH a Before method and an OnException method.
+/// Exercises the code path where the existing ConstructorFrame (created by BuildBeforeCalls)
+/// is moved before TryCatchFinallyFrame so the same instance is reachable in catch blocks.
+/// </summary>
+public class BeforeAndOnExceptionMiddleware
+{
+    private readonly OnExceptionRecorder _recorder;
+
+    public BeforeAndOnExceptionMiddleware(OnExceptionRecorder recorder)
+    {
+        _recorder = recorder;
+    }
+
+    public void Before(MessageForBeforeAndOnException message)
+    {
+        _recorder.Actions.Add($"BeforeMiddleware:{message.Text}");
+    }
+
+    public void OnException(TestAppException ex)
+    {
+        _recorder.Actions.Add($"BeforeAndOnExceptionMiddleware:{ex.Message}");
+    }
+}
+
+// GH-3000 analysis: the genuine gap the PR targets — INSTANCE STATE set in Before and read in
+// OnException requires the SAME middleware instance in both. On main the catch block constructs a
+// fresh instance, so the state is lost. This test should FAIL on main and pass with the fix.
+public record MessageForSharedInstanceState(string Text);
+
+public static class MessageForSharedInstanceStateHandler
+{
+    public static void Handle(MessageForSharedInstanceState message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+public class SharedInstanceStateMiddleware
+{
+    private readonly OnExceptionRecorder _recorder;
+    private string? _stateFromBefore;
+
+    public SharedInstanceStateMiddleware(OnExceptionRecorder recorder)
+    {
+        _recorder = recorder;
+    }
+
+    public void Before(MessageForSharedInstanceState message)
+    {
+        _stateFromBefore = message.Text;
+    }
+
+    public void OnException(TestAppException ex)
+    {
+        // If a fresh instance was constructed for the catch block, _stateFromBefore is null.
+        _recorder.Actions.Add($"SharedState:{_stateFromBefore ?? "<lost>"}");
+    }
+}
+
+// GH-3000 return-value probe: does an OnException that RETURNS a cascading message actually publish
+// it? (The author's goal returns a value from OnException.) Static + extra-param variant.
+public record MessageForReturningOnException(string Text);
+public record CascadedFromOnException(string Text);
+
+// Local handler so the cascaded message has a route and is tracked/delivered.
+public static class CascadedFromOnExceptionHandler
+{
+    public static void Handle(CascadedFromOnException message, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"Handled:{message.Text}");
+    }
+}
+
+public static class MessageForReturningOnExceptionHandler
+{
+    public static void Handle(MessageForReturningOnException message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+public static class ReturningOnExceptionMiddleware
+{
+    public static CascadedFromOnException OnException(TestAppException ex, OnExceptionRecorder recorder)
+    {
+        recorder.Actions.Add($"ReturningOnException:{ex.Message}");
+        return new CascadedFromOnException($"cascaded:{ex.Message}");
+    }
+}
+
+// Non-static + ctor-injected variant returning a cascading message.
+public record MessageForInstanceReturningOnException(string Text);
+
+public static class MessageForInstanceReturningOnExceptionHandler
+{
+    public static void Handle(MessageForInstanceReturningOnException message, OnExceptionRecorder recorder)
+    {
+        throw new TestAppException(message.Text);
+    }
+}
+
+public class InstanceReturningOnExceptionMiddleware
+{
+    private readonly OnExceptionRecorder _recorder;
+    public InstanceReturningOnExceptionMiddleware(OnExceptionRecorder recorder) => _recorder = recorder;
+
+    public CascadedFromOnException OnException(TestAppException ex)
+    {
+        _recorder.Actions.Add($"InstanceReturningOnException:{ex.Message}");
+        return new CascadedFromOnException($"instance-cascaded:{ex.Message}");
+    }
+}

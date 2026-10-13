@@ -1,0 +1,8 @@
+
+dependencies {
+    api "io.eventuate.tram.core:eventuate-tram-commands:$eventuateTramVersion"
+    api "io.eventuate.common:eventuate-common-jdbc:$eventuateCommonVersion"
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

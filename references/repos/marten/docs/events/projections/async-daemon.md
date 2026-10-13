@@ -1,0 +1,982 @@
+# Async Projections Daemon
+
+The *Async Daemon* is the nickname for Marten's built in asynchronous projection processing engine. The current async daemon from Marten V4 on requires no other infrastructure
+besides Postgresql and Marten itself. The daemon itself runs inside an [IHostedService](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-5.0&tabs=visual-studio) implementation in your application. The **daemon is disabled by default**.
+
+The *Async Daemon* will process events **in order** through all projections registered with an
+asynchronous lifecycle.
+
+First, some terminology:
+
+* *Projection* -- a projected view defined by the `IProjection` interface and registered with Marten. See also [Projections](/events/projections/).
+* *Projection Shard* -- a logical segment of events that are executed separately by the async daemon
+* *High Water Mark* -- the furthest known event sequence that the daemon "knows" that all events with that sequence or lower can be safely processed in order by projections. The high water mark will frequently be a little behind the highest known event sequence number if outstanding gaps in the event sequence are detected.
+
+There are only two basic things to configure the *Async Daemon*:
+
+1. Register the projections that should run asynchronously
+2. Set the `StoreOptions.AsyncMode` to either `Solo` or `HotCold` (more on what these options mean later in this page)
+
+As an example, this configures the daemon to run in the current node with a single active projection:
+
+<!-- snippet: sample_bootstrap_daemon_solo -->
+<a id='snippet-sample_bootstrap_daemon_solo'></a>
+```cs
+var host = await Host.CreateDefaultBuilder()
+    .ConfigureServices(services =>
+    {
+        services.AddMarten(opts =>
+            {
+                opts.Connection("some connection string");
+
+                // Register any projections you need to run asynchronously
+                opts.Projections.Add<TripProjectionWithCustomName>(ProjectionLifecycle.Async);
+            })
+            // Turn on the async daemon in "Solo" mode
+            .AddAsyncDaemon(DaemonMode.Solo);
+    })
+    .StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/CommandLineRunner/AsyncDaemonBootstrappingSamples.cs#L17-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_bootstrap_daemon_solo' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Likewise, we can configure the daemon to run in *HotCold* mode like this:
+
+<!-- snippet: sample_bootstrap_daemon_hotcold -->
+<a id='snippet-sample_bootstrap_daemon_hotcold'></a>
+```cs
+var host = await Host.CreateDefaultBuilder()
+    .ConfigureServices(services =>
+    {
+        services.AddMarten(opts =>
+            {
+                opts.Connection("some connection string");
+
+                // Register any projections you need to run asynchronously
+                opts.Projections.Add<TripProjectionWithCustomName>(ProjectionLifecycle.Async);
+            })
+            // Turn on the async daemon in "HotCold" mode
+            // with built in leader election
+            .AddAsyncDaemon(DaemonMode.HotCold);
+    })
+    .StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/CommandLineRunner/AsyncDaemonBootstrappingSamples.cs#L88-L106' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_bootstrap_daemon_hotcold' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: tip
+If you are experiencing any level of "stale high water" detection or getting log messages about "event skipping" with
+Marten, you want to at least consider switching to the [QuickAppend](https://martendb.io/events/appending.html#rich-vs-quick-appends) option. The `QuickAppend`
+mode is faster, and is substantially less likely to lead to gaps in the event sequence which in turn helps the async daemon
+run more smoothly.
+:::
+
+## How the Daemon Works
+
+![How Aggregation Works](/images/aggregation-projection-flow.png "How Aggregation Projections Work")
+
+First off, in production usage, events should be continuously flowing into the event storage within a Marten-ized PostgreSQL
+database. Part of the [Async Daemon](/events/projections/async-daemon) is a little agent that constantly watches your
+database to now where the *high water mark* that means the highest assigned event sequence number where it's safe to
+process asynchronous projections and subscriptions to. At the same time, the async daemon always knows what the current progression
+by event sequence number is for each individual asynchronous projection. Assuming that the "high water mark" is higher than
+the current progression point, the daemon
+
+## Solo vs. HotCold
+
+As of right now, the daemon can run as one of two modes:
+
+1. *Solo* -- the daemon will be automatically started when the application is bootstrapped and all projections and projection shards will be started on that node. The assumption with Solo
+   is that there is never more than one running system node for your application.
+1. *HotCold* -- the daemon will use a built in [leader election](https://en.wikipedia.org/wiki/Leader_election) function individually for each
+   projection on each tenant database and **ensure that each projection is running on exactly one running process**.
+
+By default the `HotCold` leadership lock is session-scoped (`pg_try_advisory_lock`), so the session
+holding it keeps no transaction open while it is the leader. Set
+`options.Events.UseAdvisoryLockTransaction` to true to use a transaction-scoped lock
+(`pg_try_advisory_xact_lock`) instead. That is the better fit behind PgBouncer in transaction pooling
+mode, which can hand a session-scoped lock's server connection to another client, but it means the
+leader keeps a transaction open for as long as it holds leadership.
+
+```cs
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(connectionString);
+
+    // Opt into the transaction-scoped leadership lock
+    opts.Events.UseAdvisoryLockTransaction = true;
+})
+.AddAsyncDaemon(DaemonMode.HotCold);
+```
+
+### Leadership lock monitoring
+
+Marten also *monitors* the leadership lock, so that it notices when the connection holding the lock
+is lost — a database restart or a fail-over. Without monitoring, `HasLock` keeps reporting true after
+the lock is gone, and because the leadership loop only tries to re-attain a lock when `HasLock` says
+it does not have one, two nodes can end up running the same projection. That is why monitoring is on
+by default:
+
+```cs
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(connectionString);
+
+    // Opt OUT of leadership lock monitoring. Only do this knowing the failure mode above.
+    opts.Events.UseMonitoredAdvisoryLock = false;
+})
+.AddAsyncDaemon(DaemonMode.HotCold);
+```
+
+Monitoring used to be visible in the database as a long-running `SELECT pg_catalog.pg_sleep(60)`,
+which some monitoring tools reported as load. On a data source Marten owns that is no longer how it
+works: the monitor waits client-side for a notification instead, and the backend simply sits `idle`
+for up to a minute at a time. It still consumes no database resources.
+
+Releasing the locks at shutdown is bounded by `Projections.StopAndDrainTimeout`
+<Badge type="tip" text="9.46" />. Monitoring parks the lock connection in a one-minute wait between
+checks, and a session-scoped lock multiplexes several held locks onto one such connection, so the
+last release on a connection could end up waiting out that whole window — which made some host stops
+take 60 or 120 seconds, with nothing logged
+([#5567](https://github.com/JasperFx/marten/issues/5567)). The releases now run concurrently and stop
+being waited on once the timeout is up; anything still outstanding finishes in the background and is
+logged as a warning naming how many locks it was still waiting on. The practical consequence of
+hitting that timeout is that leadership of those projections cannot move to another node until the
+releases complete, so a rolling deployment may see a projection sit unowned for up to a minute.
+Before 9.46 the stop simply blocked for the same period instead.
+
+::: tip
+Marten's gap detection recognizes its own leadership lock connections and never counts them as
+possible appenders, so a transaction-scoped lock — whether currently held or leaked from a host that
+has already been torn down — does not stall the high water mark. Before 9.23 it could: one such
+session was enough to pin the mark for every later daemon in that process, surfacing as
+`WaitForNonStaleProjectionDataAsync` timing out and a repeating
+`Daemon high water detection is holding before the sequence gap` log. If you are on an older version
+and see that, `UseAdvisoryLockTransaction = false` is the workaround, since a session-scoped lock
+holds no transaction to be seen.
+:::
+
+## Sequence Gaps and the High Water Mark <Badge type="tip" text="9.23" />
+
+The high water mark is the point below which the daemon knows every event is committed and safely
+ordered. It advances contiguously, so it stops under any hole in the event sequence.
+
+Most holes fill in within milliseconds — they are simply appends that have drawn a sequence number and
+not yet committed. Some never fill: a rolled-back `SaveChangesAsync`, or an optimistic-concurrency
+loser, burns its sequence numbers permanently, because PostgreSQL sequences are non-transactional.
+The daemon cannot tell those two apart by looking at the hole, so it asks a different question: is any
+transaction still running that could have reserved it? While the answer is yes, the mark holds. Once
+no such transaction remains, the gap is proven dead and the daemon skips the entire dead span in one
+step, recording it in `mt_high_water_skips`.
+
+This is why the daemon holds rather than guessing, and why it never skips past events that later
+commit. It also means an open transaction that will never commit is the thing that can stall it. That
+covers sessions parked `idle in transaction` — the daemon rules out any session that has provably
+executed nothing since before the gap's sequence numbers were handed out, and its own leadership lock
+connections regardless. The evidence supporting that reasoning is durable, so it survives daemon
+restarts, deploys and shard rebalancing.
+
+If you want a bounded escape hatch anyway — against, say, a leaked application session that holds an
+open transaction forever — set a cap:
+
+```cs
+// Skip a stale gap once it has been stuck this long even if a transaction that
+// could still fill it appears to be alive. Null (the default) never knowingly
+// skips past a live appender.
+opts.Projections.SkipStaleGapsDespiteLiveTransactionsAfter = 5.Minutes();
+```
+
+Use it deliberately: past the cap the daemon skips on a *suspicion* of deadness, so an append that
+commits inside the skipped range will never be projected. PostgreSQL's own
+`idle_in_transaction_session_timeout` is usually the better backstop, since it removes the cause
+rather than working around it. Note that it will also kill Wolverine's transaction-scoped listener
+locks if you use them.
+
+To recover a mark that is stuck for any other reason, `AdvanceHighWaterMarkToLatestAsync()` moves it
+to the highest committed sequence:
+
+```cs
+await store.Advanced.AdvanceHighWaterMarkToLatestAsync(CancellationToken.None);
+```
+
+::: warning
+`AdvanceHighWaterMarkToLatestAsync()` is a manual override. Anything still in flight below the new
+mark will never be projected, so reach for it when you have established that a gap is genuinely dead
+and not as routine maintenance.
+:::
+
+## Projection Distribution
+
+If your Marten store is only using a single database, Marten will distribute projections by projection type. If your store is using
+[separate databases for multi-tenancy](/configuration/multitenancy), the async daemon will group all projections for a single
+database on the same executing node as a purposeful strategy to reduce the total number of connections to the databases.
+
+::: tip
+The built in capability of Marten to distribute projections is somewhat limited, and it's still likely that all projections
+will end up running on the first process to start up. If your system requires better load distribution for increased scalability,
+contact [JasperFx Software](https://jasperfx.net) about their "Critter Stack Pro" product.
+:::
+
+## Daemon Connection Governors <Badge type="tip" text="9.13" />
+
+Every running projection or subscription agent opens its own database session both to load pages of events and to
+commit each batch of projected documents plus its progression update. On a wide store — many projections, or
+[per-tenant event partitioning](/events/multitenancy#per-tenant-event-partitioning) where the daemon runs one agent
+per (projection × tenant) — an unbounded daemon can drive the connection pool's high-water mark toward the total
+agent count even though only a handful of loads or writes are ever active at the same instant.
+
+Marten therefore governs the daemon's concurrent database work out of the box with two caps, both applied per
+daemon instance (one daemon per store × database):
+
+```cs
+// These are the defaults — you don't need to set either one
+opts.Projections.MaxConcurrentEventLoadsPerDatabase = 4;
+opts.Projections.MaxConcurrentBatchWritesPerDatabase = 4;
+```
+
+* **`MaxConcurrentEventLoadsPerDatabase`** (default 4) caps how many agents may load pages of events from the
+  database concurrently. All of a daemon's agents share one throttle, collapsing the steady-state connection
+  footprint to *O(databases)* with no measured throughput cost.
+* **`MaxConcurrentBatchWritesPerDatabase`** (default 4) caps how many projection batches may execute their SQL
+  (the commit round trip) concurrently against one database.
+
+Setting either knob to zero or a negative number disables that governor and restores the historical unbounded
+behavior. The governors apply to continuous (running daemon) work only — projection rebuilds are capped separately
+by `MaxConcurrentRebuildsPerDatabase`, which derives its default from the Npgsql connection pool size. See
+[Capping Rebuild Concurrency](/events/projections/rebuilding#capping-rebuild-concurrency).
+
+## Graceful Shutdown and the Drain Timeout <Badge type="tip" text="9.20" />
+
+When a projection or subscription shard is stopped, the daemon does not simply cancel it. It first tries to
+*drain* the agent: let the in-flight page of events finish being applied, then flush the shard's progression row
+so the next start picks up exactly where this one left off. `StopAndDrainTimeout` bounds how long the daemon
+waits for that drain on **a single** shard:
+
+```cs
+// The default is 5 seconds
+opts.Projections.StopAndDrainTimeout = 30.Seconds();
+```
+
+The bound applies to every stop path: stopping one agent, stopping all agents (the `SIGTERM`/host shutdown
+path), and the internal stop-if-already-running replacement that happens when an agent is reassigned.
+
+### What a drain actually does <Badge type="tip" text="9.47" />
+
+A drain is deliberately **not** "process everything that is queued". Three things happen:
+
+1. The page or range **in flight** is allowed to finish, and its progression is committed.
+2. Pages or ranges still **queued** behind it are skipped. They are not lost — the next owner of the shard
+   resumes them from the committed progression row.
+3. If the in-flight page is still running when `StopAndDrainTimeout` expires, it is **cancelled**, and its
+   transaction — the projection or subscription writes *plus* the progression update — rolls back together. That
+   page is processed again by whichever node runs the shard next.
+
+This is what makes shutdown bounded rather than proportional to the backlog, and it is what stops a node that
+has lost a shard's lock from continuing to apply its backlog alongside the new owner. That overlap used to end
+in `ProgressionProgressOutOfOrderException` and a **Stopped** shard, because progression is written with an
+optimistic `last_seq_id` guard and only one of the two nodes can win it.
+
+::: warning
+**A page slower than `StopAndDrainTimeout` is re-processed on every shutdown and every rebalance.** Delivery has
+always been at-least-once, so this is not a new guarantee — but duplicates become far more likely for slow
+pages. Anything a projection or subscription does *outside* the store session does not roll back with the
+cancelled transaction: HTTP calls, or sends that bypass the [transactional outbox](https://wolverinefx.net/guide/durability/).
+If your pages are legitimately slow, raise `StopAndDrainTimeout` rather than discover this as duplicate
+processing.
+:::
+
+**Why you would raise it.** So that in-flight pages finish instead of being cancelled and re-processed. Raise
+the timeout when pages legitimately take longer than five seconds — a large `BatchSize`, expensive projection
+code, heavy rebuild load, or a slow or contended database. A shard whose pages never finish inside the bound
+makes no forward progress across a restart loop: every attempt is cancelled and rolled back, and the next one
+starts from the same place. This is most visible shutting down a host with a large agent universe: a
+[database-per-tenant](/configuration/multitenancy) deployment with thousands of (projection × tenant) shards all
+draining inside a Kubernetes termination grace window.
+
+::: tip
+A per-shard bound is only useful if the process lives long enough to spend it. Match a raised
+`StopAndDrainTimeout` with the host's own `HostOptions.ShutdownTimeout` and, on Kubernetes, the pod's
+`terminationGracePeriodSeconds`.
+:::
+
+**Why you would lower it.** A deployment that would rather cut a wedged shard loose quickly and take the
+progression replay hit — to keep node failover and reassignment latency low, for instance — can set it below
+the default.
+
+**Opting out.** `Timeout.InfiniteTimeSpan`, or any non-positive value, removes the separate bound so the drain
+is limited only by the daemon's own cancellation. Be aware that this means a genuinely wedged shard can hold up
+shutdown indefinitely.
+
+## Daemon Logging
+
+The daemon logs through the standard .Net `ILogger` interface service registered in your application's underlying DI container. In the case of the daemon having to skip
+"poison pill" events, you can see a record of this in the `DeadLetterEvent` storage in your database (the `mt_doc_deadletterevent` table) along with the exception. Use this to fix underlying issues
+and be able to replay events later after the fix.
+
+## PgBouncer
+
+If you use Marten's async daemon feature *and* [PgBouncer](https://www.pgbouncer.org/), make sure you're aware of some 
+[Npgsql configuration settings](https://www.npgsql.org/doc/compatibility.html#pgbouncer) for best usage with Marten. Marten's
+async daemon uses [PostgreSQL Advisory Locks](https://www.postgresql.org/docs/current/explicit-locking.html) to help distribute work across an application cluster, and PgBouncer can
+throw off that functionality without the connection settings in the Npgsql documentation linked above. 
+
+::: tip
+If you are also using [Wolverine](https://wolverinefx.net), its ability to [distribute Marten projections and subscriptions](https://wolverinefx.net/guide/durability/marten/distribution.html) does not depend on advisory
+locks and also spreads work out more evenly through a cluster. 
+:::
+
+## Error Handling
+
+**In all examples, `opts` is a `StoreOptions` object. Besides the basic [Polly error handling](/configuration/retries#resiliency-policies),
+you have these three options to configure error handling within your system's usage of asynchronous projections:
+
+<!-- snippet: sample_async_daemon_error_policies -->
+<a id='snippet-sample_async_daemon_error_policies'></a>
+```cs
+using var host = await Host.CreateDefaultBuilder()
+    .ConfigureServices(services =>
+    {
+        services.AddMarten(opts =>
+            {
+                // connection information...
+
+                opts.Projections.Errors.SkipApplyErrors = true;
+                opts.Projections.Errors.SkipSerializationErrors = true;
+                opts.Projections.Errors.SkipUnknownEvents = true;
+
+                opts.Projections.RebuildErrors.SkipApplyErrors = false;
+                opts.Projections.RebuildErrors.SkipSerializationErrors = false;
+                opts.Projections.RebuildErrors.SkipUnknownEvents = false;
+            })
+            .AddAsyncDaemon(DaemonMode.HotCold);
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/ErrorHandling.cs#L13-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_async_daemon_error_policies' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+| Option                    | Description                                                                                                                      | Continuous Default | Rebuild Default |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------|-----------------|
+| `SkipApplyErrors`         | Should errors that occur in projection code (i.e., not Marten or PostgreSQL related errors) be skipped during Daemon processing? | True               | False           |
+| `SkipSerializationErrors` | Should errors from serialization or upcasters be ignored and that event skipped during processing?                               | True               | False           |
+| `SkipUnknownEvents`       | Should unknown event types be skipped by the daemon?                                                                             | True               | False           |
+
+In all cases, if a serialization, apply, or unknown error is encountered and Marten is not configured to skip that type of 
+error, the individual projection will be paused. In the case of projection rebuilds, this will immediately stop the rebuild
+operation. By default, all of these errors are skipped during continuous processing and enforced during rebuilds.
+
+::: tip
+Skipping unknown event types is important for "blue/green" deployment of system changes where a new application version
+introduces an entirely new event type.
+:::
+
+## Poison Event Detection
+
+See the section on error handling. Poison event detection is a little more automatically integrated into Marten 7.0.
+
+## Accessing the Executing Async Daemon
+
+Marten supports access to the executing instance of the daemon for each database in your system.
+You can use this approach to track progress or start or stop individual projections like so:
+
+<!-- snippet: sample_using_projection_coordinator -->
+<a id='snippet-sample_using_projection_coordinator'></a>
+```cs
+public static async Task accessing_the_daemon(IHost host)
+{
+    // This is a new service introduced by Marten 7.0 that
+    // is automatically registered as a singleton in your
+    // application by IServiceCollection.AddMarten()
+
+    var coordinator = host.Services.GetRequiredService<IProjectionCoordinator>();
+
+    // If targeting only a single database with Marten
+    var daemon = coordinator.DaemonForMainDatabase();
+    await daemon.StopAgentAsync("Trip:All");
+
+    // If targeting multiple databases for multi-tenancy
+    var daemon2 = await coordinator.DaemonForDatabase("tenant1");
+    await daemon.StopAllAsync();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/DaemonUsage.cs#L10-L29' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_projection_coordinator' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Testing Async Projections <Badge type="tip" text="7.0" />
+
+::: tip
+This method works by polling the progress tables in the database, so it's usable regardless of where or how you've started
+up the async daemon in your code.
+:::
+
+Asynchronous projections can be a little rough to test because of the timing issues (is the daemon finished with my new events yet?).
+To that end, Marten introduced an extension method called `IDocumentStore.WaitForNonStaleProjectionDataAsync()` to help your tests "wait" until any asynchronous
+projections are caught up to the latest events posted at the time of the call.
+
+You can see the usage below from one of the Marten tests where we use that method to just wait until the running projection
+daemon has caught up:
+
+<!-- snippet: sample_using_waitfornonstaleprojectiondataasync -->
+<a id='snippet-sample_using_waitfornonstaleprojectiondataasync'></a>
+```cs
+[Fact]
+public async Task run_simultaneously()
+{
+    StoreOptions(x => x.Projections.Add(new DistanceProjection(), ProjectionLifecycle.Async));
+
+    NumberOfStreams = 10;
+
+    var agent = await StartDaemon();
+
+    // This method publishes a random number of events
+    await PublishSingleThreaded();
+
+    // Wait for all projections to reach the highest event sequence point
+    // as of the time this method is called
+    await theStore.WaitForNonStaleProjectionDataAsync(15.Seconds());
+
+    await CheckExpectedResults();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/DaemonTests/EventProjections/event_projections_end_to_end.cs#L27-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_waitfornonstaleprojectiondataasync' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The basic idea in your tests is to:
+
+1. Start the async daemon running continuously
+1. Set up your desired system state by appending events as the test input
+1. Call the `WaitForNonStaleProjectionDataAsync()` method **before** checking the expected outcomes of the test
+
+There is also another overload to wait for just one tenant database in the case of using a database per tenant. The default
+overload **will wait for the daemon of all known databases to catch up to the latest sequence.**
+
+### Accessing the daemon from IHost:
+
+If you're integration testing with the `IHost` (e.g. using Alba) object, you can access the daemon and wait for non stale data like this:
+
+<!-- snippet: sample_accessing_daemon_from_ihost -->
+<a id='snippet-sample_accessing_daemon_from_ihost'></a>
+```cs
+[Fact]
+public async Task run_simultaneously()
+{
+    var host = await StartDaemonInHotColdMode();
+
+    StoreOptions(x => x.Projections.Add(new DistanceProjection(), ProjectionLifecycle.Async));
+
+    NumberOfStreams = 10;
+
+    var agent = await StartDaemon();
+
+    // This method publishes a random number of events
+    await PublishSingleThreaded();
+
+    // Wait for all projections to reach the highest event sequence point
+    // as of the time this method is called
+    await host.WaitForNonStaleProjectionDataAsync(15.Seconds());
+
+    await CheckExpectedResults();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/DaemonTests/EventProjections/event_projections_end_to_end_ihost.cs#L22-L45' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_accessing_daemon_from_ihost' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Diagnostics
+
+The following code shows the diagnostics support for the async daemon as it is today:
+
+<!-- snippet: sample_daemondiagnostics -->
+<a id='snippet-sample_daemondiagnostics'></a>
+```cs
+public static async Task ShowDaemonDiagnostics(IDocumentStore store)
+{
+    // This will tell you the current progress of each known projection shard
+    // according to the latest recorded mark in the database
+    var allProgress = await store.Advanced.AllProjectionProgress();
+    foreach (var state in allProgress) Console.WriteLine($"{state.ShardName} is at {state.Sequence}");
+
+    // This will allow you to retrieve some basic statistics about the event store
+    var stats = await store.Advanced.FetchEventStoreStatistics();
+    Console.WriteLine($"The event store highest sequence is {stats.EventSequenceNumber}");
+
+    // This will let you fetch the current shard state of a single projection shard,
+    // but in this case we're looking for the daemon high water mark
+    var daemonHighWaterMark = await store.Advanced.ProjectionProgressFor(new ShardName(ShardState.HighWaterMark));
+    Console.WriteLine($"The daemon high water sequence mark is {daemonHighWaterMark}");
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/CommandLineRunner/AsyncDaemonBootstrappingSamples.cs#L109-L128' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_daemondiagnostics' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Both `AllProjectionProgress()` and `ProjectionProgressFor()` accept an optional tenant id. With a
+tenant id, the read targets the database containing that tenant. When the tenant id is omitted on
+a store with a single database, the default database is used. When the tenant id is omitted under
+multi-tenancy with multiple databases — including `MultiTenantedWithShardedDatabases()` — the read
+spans *every* known database: `AllProjectionProgress()` concatenates each database's progression
+rows (with `Events.UseTenantPartitionedEvents` the per-tenant rows carry the tenant id in their
+shard identity, `{Name}:{ShardKey}:{tenantId}`, so results remain attributable per tenant), and
+`ProjectionProgressFor()` returns the highest progression found for the shard name across the
+databases. Since a tenant-qualified shard identity only ever exists in the one database that owns
+the tenant, `ProjectionProgressFor()` with such an identity returns that tenant's exact
+progression.
+
+## Command Line Support
+
+If you're using [Marten's command line support](/configuration/cli), you have the new `projections` command to help
+manage the daemon at development or even deployment time.
+
+To just start up and run the async daemon for your application in a console window, use:
+
+```bash
+dotnet run -- projections
+```
+
+To interactively select which projections to run, use:
+
+```bash
+dotnet run -- projections -i
+```
+
+or
+
+```bash
+dotnet run -- projections --interactive
+```
+
+To list out all the known projection shards, use:
+
+```bash
+dotnet run -- projections --list
+```
+
+To run a single projection, use:
+
+```bash
+dotnet run -- projections --projection [shard name]
+```
+
+or
+
+```bash
+dotnet run -- projections -p [shard name]
+```
+
+To rebuild all the known projections with both asynchronous and inline lifecycles, use:
+
+```bash
+dotnet run -- projections --rebuild
+```
+
+To interactively select which projections to rebuild, use:
+
+```bash
+dotnet run -- projections -i --rebuild
+```
+
+To rebuild a single projection at a time, use:
+
+```bash
+dotnet run -- projections --rebuild -p [shard name]
+```
+
+If you are using multi-tenancy with multiple Marten databases, you can choose to rebuild the
+projections for only one tenant database -- but note that this will rebuild the entire database
+across all the tenants in that database -- by using the `--tenant` flag like so:
+
+```bash
+dotnet run -- projections --rebuild --tenant tenant1
+```
+
+## Using the Async Daemon from DocumentStore
+
+All of the samples so far assumed that your application used the `AddMarten()` extension
+methods to configure Marten in an application bootstrapped by `IHostBuilder`. If instead you
+want to use the async daemon from just an `IDocumentStore`, here's how you do it:
+
+<!-- snippet: sample_use_async_daemon_alone -->
+<a id='snippet-sample_use_async_daemon_alone'></a>
+```cs
+public static async Task UseAsyncDaemon(IDocumentStore store, CancellationToken cancellation)
+{
+    using var daemon = await store.BuildProjectionDaemonAsync();
+
+    // Fire up everything!
+    await daemon.StartAllAsync();
+
+    // or instead, rebuild a single projection
+    await daemon.RebuildProjectionAsync("a projection name", 5.Minutes(), cancellation);
+
+    // or a single projection by its type
+    await daemon.RebuildProjectionAsync<TripProjectionWithCustomName>(5.Minutes(), cancellation);
+
+    // Be careful with this. Wait until the async daemon has completely
+    // caught up with the currently known high water mark
+    await daemon.WaitForNonStaleData(5.Minutes());
+
+    // Start a single projection shard
+    await daemon.StartAgentAsync("shard name", cancellation);
+
+    // Or change your mind and stop the shard you just started
+    await daemon.StopAgentAsync("shard name");
+
+    // No, shut them all down!
+    await daemon.StopAllAsync();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/CommandLineRunner/AsyncDaemonBootstrappingSamples.cs#L130-L160' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_use_async_daemon_alone' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Open Telemetry and Metrics <Badge type="tip" text="7.10" />
+
+::: info
+All of these facilities are used automatically by Marten. 
+:::
+
+See [Open Telemetry and Metrics](/otel) to learn more about exporting Open Telemetry data and metrics
+from systems using Marten. 
+
+If your system is configured to export metrics and Open Telemetry data from Marten like this:
+
+<!-- snippet: sample_enabling_open_telemetry_exporting_from_marten -->
+<a id='snippet-sample_enabling_open_telemetry_exporting_from_marten'></a>
+```cs
+// This is passed in by Project Aspire. The exporter usage is a little
+// different for other tools like Prometheus or SigNoz
+var endpointUri = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
+Console.WriteLine("OLTP endpoint: " + endpointUri);
+
+builder.Services.AddOpenTelemetry().UseOtlpExporter();
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing.AddSource("Marten");
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics.AddMeter("Marten");
+    });
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/samples/AspireHeadlessTripService/Program.cs#L21-L40' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_enabling_open_telemetry_exporting_from_marten' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+*And* you are running the async daemon in your system, you should see potentially activities for each running projection
+or subscription with the prefix: `marten.{Subscription or Projection Name}.{shard key, basically always "all" at this point}`:
+
+* `execution` -- traces the execution of a page of events through the projection or subscription, with tags for the tenant id, event sequence floor and ceiling, and database name
+* `loading` -- traces the loading of a page of events for a projection or subscription. Same tags as above
+* `grouping` -- traces the grouping process for projections that happens prior to execution. This does not apply to subscriptions. Same tags as above
+
+In addition, there are three metrics built for every combination of projection or subscription shard on each
+Marten database (in the case of using separate databases for multi-tenancy), again using the same prefix as above
+with the addition of the Marten database identifier in the case of multi-tenancy through separate databases like `marten.{database name}.{projection or subscription name}.all.*:
+
+* `processed` - a counter giving you an indication of how many events are being processed by the currently running subscription or projection shard
+* `gap` - a histogram telling you the "gap" between the high water mark of the system and the furthest progression of the running subscription or projection. 
+* `skipped` - added in Marten 8.6, a counter telling you how many events were skipped during asynchronous projection or subscription processing. Depending on how the application is 
+  configured, Marten may skip events because of serialization errors, unknown events, or application errors (basically, *your* code threw an exception)
+
+::: tip
+The `gap` metrics are a good health check on the performance of any given projection or subscription. If this gap
+is growing, that's a sign that your projection or subscription isn't being able to keep up with the incoming
+events
+:::
+
+## High Water Mark <Badge type="tip" text="7.33" />
+
+One of the possible issues in Marten operation is "event skipping" in the async daemon where the high water mark
+detection grows "stale" because of gaps in the event sequence (generally caused by either very slow outstanding transactions or errors)
+and Marten emits an error message like this in the log file:
+
+```js
+"High Water agent is stale after threshold of {DelayInSeconds} seconds, skipping gap to events marked after {SafeHarborTime} for database {Name}"
+```
+
+With the recent prevalence of [Open Telemetry](https://opentelemetry.io/) tooling in the software industry, Marten
+is now emitting Open Telemetry spans and metrics around the high water mark detection in the async daemon.
+
+First off, Marten is emitting spans named either `marten.daemon.highwatermark` in the case of
+only targeting a single database, or `marten.[database name].daemon.highwatermark` in the case of 
+using multi-tenancy through a database per tenant. On these spans will be these tags:
+
+* `sequence` -- the largest event sequence that has been assigned to the database at this point
+* `status` -- either `CaughtUp`, `Changed`, or `Stale` meaning "all good", "proceeding normally", or "uh, oh, something is up with outstanding transactions"
+* `current.mark` -- the current, detected "high water mark" where Marten says is the ceiling on where events can be safely processed
+* `skipped` -- this tag will only be present as a "true" value if Marten is forcing the high water detection to skip stale gaps in the event sequence
+* `last.mark` -- if skipping event sequences, this will be the last good mark before the high water detection calculated the skip
+
+There is also a counter metric called `marten.daemon.skipping` or `marten.[database name].daemon.skipping`
+that just emits and update every time that Marten has to "skip" stale events.
+
+## Extended Progression Tracking
+
+Extended progression tracking adds eight monitoring columns (`heartbeat`,
+`agent_status`, `pause_reason`, `running_on_node`, `failure_category`, `failure_event_sequence`,
+`failure_event_type`, `failure_event_tenant_id`) to `mt_event_progression`. The async daemon writes
+them from existing runtime state and the shard-state selector reads them back
+into `ShardState` so monitoring tooling such as CritterWatch can display
+per-shard health.
+
+Two further columns, `warning_behind_threshold` and `critical_behind_threshold`, are also created but
+are neither written nor read — nothing has ever owned the value, and every lag threshold lives in the
+monitoring tool. They are kept rather than dropped purely so that upgrading does not change this
+table's schema: `alter table … drop column` needs an ACCESS EXCLUSIVE lock on a small, hot table that
+every running daemon writes, and while that lock waits it blocks every reader and writer behind it.
+Two always-NULL columns are the cheaper trade.
+
+### Why a shard is down <Badge type="tip" text="9.20" />
+
+The four `failure_*` columns record the *classified* reason a shard paused or stopped, so a consumer
+polling the database — which is exactly what a monitoring tool must fall back to when the node that
+was running the shard is down — sees the same reason an in-process `ShardState` observer does instead
+of only that the shard is `Paused`. They are read back onto `ShardState.Failure`:
+
+```cs
+var states = await store.Storage.Database.AllProjectionProgress();
+foreach (var state in states.Where(x => x.Failure != null))
+{
+    // ApplyEvent, EventSerialization, UnknownEventType, ProgressionOutOfOrder, or Other
+    Console.WriteLine($"{state.ShardName}: {state.Failure!.Category} on {state.Failure.Event}");
+}
+```
+
+`failure_category` stores the enum *name* rather than its ordinal, so reordering
+`ShardFailureCategory` in a future release can never silently re-label rows an older deployment wrote.
+The reason *text* has no column of its own — `ShardFailure.Detail` is exactly what `pause_reason` has
+always carried.
+
+Marten's own read-path exceptions declare their category, so a body that fails to deserialize reports
+`EventSerialization` with the offending event's sequence and type alias, and an event type alias with
+no registered .NET type reports `UnknownEventType`. The two are kept apart deliberately: bad data
+needs a serializer or data fix, while a missing registration is usually a deployment gap or a rollback
+past the event type's introduction.
+
+A shard that recovers clears its failure columns on the next successful start, so a supervisor built on
+them does not keep alerting on a failure that was fixed an hour ago.
+
+**Default: off.** Opt in explicitly. The columns are useful for any stuck-shard diagnosis -- not just
+CritterWatch -- and the write-side cost is negligible, because they carry already-computed
+daemon-internal values. That is a good reason to turn it on, and not a reason for Marten to turn it on
+for you: an existing store that never asked for monitoring should not start writing six columns on
+every shard state transition because it upgraded.
+
+The columns themselves are created for **every** store regardless of this setting, and the next
+`ApplyAllConfiguredChangesToDatabaseAsync()` adds them to an existing database. They are nullable, so
+no backfill is required, and a store that leaves tracking off never writes them.
+
+That the shape does not depend on the setting is deliberate. It used to, and two `DocumentStore`s
+pointed at the same `DatabaseSchemaName` that disagreed about the flag then stripped each other's
+columns on every schema application -- last writer wins, with no warning on either side. Two
+processes over one schema is an ordinary arrangement (a service beside a seeder, a reporting job or
+a migration tool), so the table shape is now the same for all of them
+(see [marten#5309](https://github.com/JasperFx/marten/issues/5309)).
+
+Opt in (e.g. for CritterWatch monitoring or your own shard health tooling) by setting the toggle:
+
+```cs
+opts.Events.EnableExtendedProgressionTracking = true;
+```
+
+Marten registers a storage-agnostic
+[`IEventStoreInstrumentation`](https://github.com/JasperFx/jasperfx/blob/main/src/JasperFx.Events/IEventStoreInstrumentation.cs)
+adapter (from JasperFx.Events 2.9.0) in the container. Satellite packages such as
+`Wolverine.CritterWatch.Marten` enable the same columns by resolving that service
+from DI and setting the interface property -- no reference to Marten's concrete
+`EventGraph` required:
+
+```cs
+builder.Services.AddSingleton<IConfigureMarten>(new EnableExtendedProgression());
+
+// ...
+
+public class EnableExtendedProgression: IConfigureMarten
+{
+    public void Configure(IServiceProvider services, StoreOptions options)
+    {
+        options.Events.EnableExtendedProgressionTracking = true;
+    }
+}
+```
+
+The adapter's value is applied at store build only if something actually set it, so it does **not**
+overwrite a direct `opts.Events.EnableExtendedProgressionTracking = ...` of either polarity and the
+two paths compose. Setting `ExtendedProgressionEnabled = false` on the adapter is a real opt-out, not
+merely the absence of an opt-in. (Note that `opts.Events` -- Marten's `EventGraph` -- does not itself
+implement `IEventStoreInstrumentation`; use the `EnableExtendedProgressionTracking` property shown
+above.)
+
+### What extended progression actually costs
+
+The columns themselves are free -- they ride along on writes the daemon already makes when a shard
+starts, pauses or stops. What is **not** free is the *periodic* heartbeat: a timer-driven flush that
+opens its own connection and transaction **per shard database, per node**.
+
+Marten 9.22.4 / JasperFx 2.39 turns that periodic beat **off by default**. Only status transitions
+reach the database, so an idle store makes no telemetry writes at all. Before that it ran on a
+hardcoded 5-second interval with no configuration path, which on a 512-shard-database store worked out
+to roughly 37 connection acquisitions per second per node to keep a handful of rows current -- enough
+to exhaust a small per-database connection pool and queue application requests behind it
+(see [marten#5167](https://github.com/JasperFx/marten/issues/5167)).
+
+If you want the periodic beat back -- a monitoring console that needs to distinguish "this shard is
+alive but idle" from "this shard's agent died" -- opt in explicitly and pick a cadence that suits your
+database count:
+
+```cs
+opts.Events.EnableExtendedProgressionTracking = true;
+
+// Off by default. Any positive value restores the periodic flush at that cadence;
+// null, zero or negative keeps it off.
+opts.Projections.ExtendedProgressionHeartbeatInterval = TimeSpan.FromSeconds(30);
+```
+
+Budget it as `databases-on-this-node / interval` connection acquisitions per second. All shard states
+that arrive within one interval are coalesced into a single flush on one rented connection, so the
+connection cost scales with the number of databases rather than the number of shards.
+
+Within that flush each shard's row is written by its **own single-row statement, in its own implicit
+transaction**. That is deliberate and load-bearing: a batch is there to amortize the *connection*, not
+the transaction. Marten 9.22.4 and earlier folded the flush into one `UPDATE ... FROM unnest(...)`,
+which takes a row lock on every shard in the batch and holds all of them until it commits — so a single
+slow projection batch sitting on one progression row stalled the telemetry write of every *other* shard
+on that database, and whatever was queued behind those. If you are diagnosing lock waits on
+`mt_event_progression` on an older version, note that `pg_blocking_pids()` reports only *direct*
+blockers: the telemetry `UPDATE` genuinely is the blocker, and the projection transaction that is the
+real root is one hop further down the chain. Walk it recursively.
+
+::: tip
+Status transitions are always written immediately regardless of this setting, so `agent_status`,
+`pause_reason` and the `failure_*` columns stay current with the beat switched off. The only thing you
+lose is the periodic refresh of `heartbeat` on a shard that is quietly making progress.
+:::
+
+## Advanced Skipping Tracking <Badge type="tip" text="8.6" />
+
+::: info
+This setting will be required and utilized by the forthcoming "CritterWatch" tool.
+:::
+
+As part of some longer term planned improvements for Marten projection/subscription monitoring and potential
+administrative "healing" functions, you can opt into having Marten write out an additional table
+called `mt_high_water_skips` that tracks every time the high water detection has to "skip" over stale data. You can 
+use this information to "know" what streams and projections may be impacted by a skip.
+
+The flag for this is shown below:
+
+<!-- snippet: sample_enabling_advanced_tracking -->
+<a id='snippet-sample_enabling_advanced_tracking'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(builder.Configuration.GetConnectionString("marten"));
+
+    opts.Events.EnableAdvancedAsyncTracking = true;
+});
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/DaemonTests/Resiliency/when_skipping_events_in_daemon.cs#L190-L200' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_enabling_advanced_tracking' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Querying for Non Stale Data
+
+There are some potential benefits to running projections asynchronously, namely:
+
+* Avoiding concurrent updates to aggregated documents so that the results are accurate, especially when the aggregation is "multi-stream"
+* Putting the work of building aggregates into a background process so you don't take the performance "hit" of doing that work during requests from a client
+
+All that being said, using asynchronous projections means you're going into the realm of [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency), and sometimes
+that's really inconvenient when your users or clients expect up to date information about the projected aggregate data. 
+
+Not to worry though, because Marten will allow you to "wait" for an asynchronous projection to catch up so that you
+can query the latest information as all the events captured at the time of the query are processed through the asynchronous
+projection like so:
+
+<!-- snippet: sample_using_query_for_non_stale_data -->
+<a id='snippet-sample_using_query_for_non_stale_data'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(builder.Configuration.GetConnectionString("marten"));
+    opts.Projections.Add<TripProjection>(ProjectionLifecycle.Async);
+}).AddAsyncDaemon(DaemonMode.HotCold);
+
+using var host = builder.Build();
+await host.StartAsync();
+
+// DocumentStore() is an extension method in Marten just
+// as a convenience method for test automation
+await using var session = host.DocumentStore().LightweightSession();
+
+// This query operation will first "wait" for the asynchronous projection building the
+// Trip aggregate document to catch up to at least the highest event sequence number assigned
+// at the time this method is called
+var latest = await session.QueryForNonStaleData<Trip>(5.Seconds())
+    .OrderByDescending(x => x.Started)
+    .Take(10)
+    .ToListAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Aggregation/querying_with_non_stale_data.cs#L143-L167' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_query_for_non_stale_data' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Do note that this can time out if the projection just can't catch up to the latest event sequence in time. You may need to
+be both cautious with using this in general, and also cautious especially with the timeout setting. 
+
+### Returning stale data instead of throwing on timeout
+
+By default `QueryForNonStaleData` throws a `TimeoutException` if the asynchronous projection cannot catch up
+to the event store high water mark within the supplied timeout. In some scenarios — for example when a gap in
+the event sequence (left by a failed append) makes the high water mark effectively unreachable — that would
+make *every* call throw, even though the projection has perfectly usable, slightly stale data already
+materialized. If you would rather serve the latest available data than fail the request, use the overload that
+takes a `NonStaleDataTimeoutMode`:
+
+```csharp
+// Wait up to 5 seconds for the projection to catch up, but if it cannot,
+// return the latest available (possibly stale) data instead of throwing.
+var latest = await session
+    .QueryForNonStaleData<Trip>(5.Seconds(), NonStaleDataTimeoutMode.ReturnStaleData)
+    .OrderByDescending(x => x.Started)
+    .Take(10)
+    .ToListAsync();
+```
+
+`NonStaleDataTimeoutMode.ThrowException` is the default and matches the behavior of the single-argument
+`QueryForNonStaleData<T>(timeout)` overload, so existing usages are unaffected. Choose
+`NonStaleDataTimeoutMode.ReturnStaleData` only when serving slightly stale data is preferable to a failed query.
+
+## Migrating a Projection from Inline to Async <Badge type="tip" text="7.35" />
+
+::: warning
+This will only work correctly *if* you have system downtime before migrating the new version of the code with this option
+enabled. This feature cannot support a "blue/green" deployment model. Marten needs to system to be at rest before it starts
+up the projection asynchronously or there's a chance you may "skip" events in the projection.
+:::
+
+During the course of a system's lifetime, you may find that you want to change a projection that's currently running
+with a lifecycle of `Inline` to running asynchronously instead. If you need to do this *and* there is no structural change
+to the projection that would require a projection rebuild, you can direct Marten to start that projection at the highest
+sequence number assigned by the system (not the high water mark, but the event sequence number which may be higher).
+
+To do so, use this option when registering the projection:
+
+<!-- snippet: sample_using_subscribe_as_inline_to_async -->
+<a id='snippet-sample_using_subscribe_as_inline_to_async'></a>
+```cs
+opts
+    .Projections
+    .Snapshot<SimpleAggregate>(SnapshotLifecycle.Async, o =>
+    {
+        // This option tells Marten to start the async projection at the highest
+        // event sequence assigned as the processing floor if there is no previous
+        // async daemon progress for this projection
+        o.SubscribeAsInlineToAsync();
+    });
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/DaemonTests/Aggregations/converting_projection_from_inline_to_async.cs#L30-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_subscribe_as_inline_to_async' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Just to be clear, when Marten's async daemon starts a projection with this starting option:
+
+1. If there is no previously recorded progression, Marten will start processing this projection with the highest assigned event sequence
+   in the database as the floor and record that value as the current progress
+2. If there is a previously recorded progression, Marten will start processing this projection at the recorded sequence as normal

@@ -1,0 +1,1250 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Documents;
+using JasperFx.MultiTenancy;
+using JasperFx.CommandLine;
+using JasperFx.CommandLine.Descriptions;
+using JasperFx.Core.Reflection;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.EventModeling;
+using JasperFx.Events.Projections;
+using JasperFx.Events.Subscriptions;
+using Marten.Events.Daemon.Coordination;
+using Marten.Events.EventModeling;
+using Marten.Events.Projections;
+using Marten.Internal;
+using Marten.Schema;
+using Marten.Services;
+using Marten.Sessions;
+using Marten.Subscriptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Npgsql;
+using Weasel.Core.Migrations;
+using Weasel.Core.MultiTenancy;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten;
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2087",
+    Justification = "Class-level: generic method/type argument flows reflective Type values into a DAM-annotated target. Source preserved at the registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2091",
+    Justification = "Class-level: generic type argument doesn't carry the DAM annotation of its target. The argument types flow in from StoreOptions / projection-registration on the caller side and are preserved by the trimmer at that boundary.")]
+public static class MartenServiceCollectionExtensions
+{
+    /// <summary>
+    ///     Apply additional configuration to a Marten DocumentStore. This is applied *after*
+    ///     AddMarten(), but before the DocumentStore is initialized
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureMartenWithServices<T>(this IServiceCollection services)
+        where T : class, IAsyncConfigureMarten
+    {
+        services.EnsureAsyncConfigureMartenApplicationIsRegistered();
+        services.AddSingleton<IAsyncConfigureMarten, T>();
+        return services;
+    }
+
+    /// <summary>
+    ///     Apply additional configuration to a Marten DocumentStore. This is applied *after*
+    ///     AddMarten(), but before the DocumentStore is initialized
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureMarten(this IServiceCollection services,
+        Action<StoreOptions> configure)
+    {
+        return services.ConfigureMarten((s, opts) => configure(opts));
+    }
+
+    /// <summary>
+    ///     Apply additional configuration to a Marten DocumentStore. This is applied *after*
+    ///     AddMarten(), but before the DocumentStore is initialized
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureMarten(this IServiceCollection services,
+        Action<IServiceProvider, StoreOptions> configure)
+    {
+        var configureMarten = new LambdaConfigureMarten(configure);
+        services.AddSingleton<IConfigureMarten>(configureMarten);
+        return services;
+    }
+
+    /// <summary>
+    ///     Apply additional configuration to a Marten DocumentStore of type "T". This is applied *after*
+    ///     AddMartenStore<T>(), but before the actual DocumentStore for "T" is initialized
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureMarten<T>(this IServiceCollection services,
+        Action<IServiceProvider, StoreOptions> configure) where T : IDocumentStore
+    {
+        var configureMarten = new LambdaConfigureMarten<T>(configure);
+        services.AddSingleton<IConfigureMarten<T>>(configureMarten);
+        return services;
+    }
+
+    /// <summary>
+    ///     Apply additional configuration to a Marten DocumentStore of type "T". This is applied *after*
+    ///     AddMartenStore<T>(), but before the actual DocumentStore for "T" is initialized
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static IServiceCollection ConfigureMarten<T>(this IServiceCollection services,
+        Action<StoreOptions> configure) where T : IDocumentStore
+    {
+        var configureMarten = new LambdaConfigureMarten<T>((s, opts) => configure(opts));
+        services.AddSingleton<IConfigureMarten<T>>(configureMarten);
+        return services;
+    }
+
+    /// <summary>
+    ///     Add Marten IDocumentStore, IDocumentSession, and IQuerySession service registrations
+    ///     to your application with the given Postgresql connection string and Marten
+    ///     defaults
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         You need to configure connection settings through DI, e.g. by calling `UseNpgsqlDataSource`
+    ///         and configuring `NpqsqlDataSource` with `AddNpgsqlDataSource` from `Npgsql.DependencyInjection`
+    ///     </para>
+    ///     <para>
+    ///         To name the Event Model these projections contribute to, set
+    ///         <see cref="StoreOptions.EventModelName" /> rather than looking for an argument here.
+    ///         An optional <c>string</c> parameter on this overload would not be additive: it would
+    ///         make this a better match than <c>AddMarten(connectionString)</c> for a lone string
+    ///         argument, because C# prefers a candidate with no omitted optional parameters, so every
+    ///         existing <c>AddMarten("Host=...")</c> call would silently rebind here with the
+    ///         connection string landing in the name (#5404). See "API compatibility" in CLAUDE.md.
+    ///     </para>
+    /// </remarks>
+    /// <param name="services"></param>
+    /// <returns></returns>
+    public static MartenConfigurationExpression AddMarten(this IServiceCollection services)
+    {
+        return services.AddMarten(new StoreOptions());
+    }
+
+    /// <summary>
+    ///     Add Marten IDocumentStore, IDocumentSession, and IQuerySession service registrations
+    ///     to your application with the given Postgresql connection string and Marten
+    ///     defaults
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="connectionString">The connection string to your application's Postgresql database</param>
+    /// <returns></returns>
+    public static MartenConfigurationExpression AddMarten(this IServiceCollection services, string connectionString)
+    {
+        var options = new StoreOptions();
+        options.Connection(connectionString);
+        return services.AddMarten(options);
+    }
+
+    /// <summary>
+    ///     Add Marten IDocumentStore, IDocumentSession, and IQuerySession service registrations
+    ///     to your application using the configured StoreOptions
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="options">The Marten configuration for this application</param>
+    /// <returns></returns>
+    public static MartenConfigurationExpression AddMarten(
+        this IServiceCollection services,
+        StoreOptions options
+    )
+    {
+        services.AddMarten(s => options);
+
+        // #4598 / jasperfx#413: when the configured tenancy is a dynamic source
+        // (MasterTableTenancy or ShardedTenancy as of #4598), register it as
+        // IDynamicTenantSource<string> so a store-agnostic admin tool (e.g.
+        // CritterWatch) can resolve it via GetServices without referencing
+        // concrete Marten tenancy types. Conditional so non-dynamic stores
+        // (DefaultTenancy / StaticMultiTenant) keep GetServices empty — the
+        // graceful-no-op behavior the consumer relies on.
+        //
+        // Probed safely: `options.Tenancy` throws if no tenancy is configured yet
+        // (e.g. when the caller uses the AddMarten() + later UseNpgsqlDataSource()
+        // pattern). Dynamic tenancies are always set inside the StoreOptions
+        // configure callback before AddMarten returns, so a not-yet-configured
+        // store is by construction not dynamic and the registration is correctly
+        // skipped.
+        if (TryGetDynamicTenantSource(options) is not null)
+        {
+            services.AddSingleton<IDynamicTenantSource<string>>(s =>
+                (IDynamicTenantSource<string>)s.GetRequiredService<IDocumentStore>().As<DocumentStore>().Tenancy);
+        }
+
+        return new MartenConfigurationExpression(services, options);
+    }
+
+    private static IDynamicTenantSource<string>? TryGetDynamicTenantSource(StoreOptions options)
+    {
+        try
+        {
+            return options.Tenancy as IDynamicTenantSource<string>;
+        }
+        catch (InvalidOperationException)
+        {
+            // No tenancy configured yet — the caller is on the AddMarten() +
+            // UseNpgsqlDataSource() flow, which only ever lands on DefaultTenancy
+            // (not dynamic). Safe to treat as "not a dynamic source".
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     Add Marten IDocumentStore, IDocumentSession, and IQuerySession service registrations
+    ///     to your application by configuring a StoreOptions using services in your DI container
+    /// </summary>
+    /// <param name="optionSource">Func that will build out a StoreOptions with the applications IServiceProvider as the input</param>
+    /// <returns></returns>
+    public static MartenConfigurationExpression AddMarten(
+        this IServiceCollection services,
+        Func<IServiceProvider, StoreOptions> optionSource
+    )
+    {
+        services.AddJasperFx();
+        // #4494: register the hosted service that drains IAsyncConfigureMarten so
+        // bare AddSingleton<IAsyncConfigureMarten, T>() works the same way bare
+        // AddSingleton<IConfigureMarten, T>() does. The helper is idempotent.
+        services.EnsureAsyncConfigureMartenApplicationIsRegistered();
+        services.AddSingleton<ISystemPart, MartenSystemPart>();
+        services.AddSingleton<IEventStore>(s => (IEventStore)s.GetRequiredService<IDocumentStore>());
+
+        // #5394 (jasperfx#825): the store-derived Event Model rung. One SlicePattern.View slice per
+        // registered projection -- the projection, the document it produces, and the events its
+        // Apply/Create/Evolve methods take -- so a View slice appears on an Event Model canvas without
+        // a human having written one down.
+        //
+        // The resolver is the whole reason this call exists here rather than in JasperFx: a store
+        // registers itself under its own interface, and AddMarten is the only place that knows the
+        // primary store's is IDocumentStore. AddMartenStore<T> registers its own with T.
+        //
+        // #5405: the model NAME comes off the resolved store's StoreOptions at assembly time rather
+        // than being passed in here, so naming a model never changes an AddMarten signature and the
+        // ordering against AddEventModel(...) stops mattering.
+        services.AddEventModelSource(
+            new MartenProjectionEventModelSource(s => s.GetRequiredService<IDocumentStore>()));
+        services.AddSingleton<IDocumentStoreUsageSource>(s =>
+            (IDocumentStoreUsageSource)s.GetRequiredService<IDocumentStore>());
+        services.AddSingleton<IDocumentStoreDiagnostics>(s =>
+            (IDocumentStoreDiagnostics)s.GetRequiredService<IDocumentStore>());
+        // #5543 / jasperfx#870 §6. Registered beside the reader rather than behind an opt-in, because the
+        // two are separate INTERFACES for the benefit of a host that wants to hand out only one -- the
+        // console asks for what it needs, and a host that does not want diagnostic writes removes this
+        // registration. Nothing here is reachable without the console already holding the container.
+        services.AddSingleton<IDocumentStoreDiagnosticsWriter>(s =>
+            (IDocumentStoreDiagnosticsWriter)s.GetRequiredService<IDocumentStore>());
+
+        var instrument = new SetEventStoreInstrumentation();
+        services.AddSingleton<IConfigureMarten>(instrument);
+        services.AddSingleton<IEventStoreInstrumentation>(instrument);
+
+        services.AddSingleton(s =>
+        {
+            var options = optionSource(s);
+
+            var configures = s.GetServices<IConfigureMarten>();
+            foreach (var configure in configures) configure.Configure(s, options);
+
+            options.ReadJasperFxOptions(s.GetService<JasperFxOptions>());
+
+            options.InitialData.AddRange(s.GetServices<IInitialData>());
+
+            // jasperfx#679 (#5258). Sweep any store-agnostic IDocumentCommitListener out of the
+            // container and adapt it onto Marten's own listener collection. This runs inside the
+            // StoreOptions factory, and session construction copies Options.Listeners strictly
+            // afterwards (QuerySession's constructors), so every session opened from this store
+            // sees them.
+            //
+            // ⚠️ PRIMARY STORE ONLY, deliberately, and it is the IInitialData line above that sets
+            // the precedent: a bare GetServices<T>() sweep from this factory cannot tell which store
+            // a registration was meant for, so applying it to ancillary stores as well would attach
+            // every listener in the container to every AddMartenStore<T>() in the application --
+            // silently, and with no way to opt one out. Ancillary stores configure through
+            // IConfigureMarten<T>, so their opt-in is
+            // services.ConfigureMarten<T>(opts => opts.AddCommitListener(listener)).
+            foreach (var listener in s.GetServices<JasperFx.Events.Documents.IDocumentCommitListener>())
+            {
+                options.AddCommitListener(listener);
+            }
+            options.Projections.AttachServiceProvider(s);
+            options.Services = s;
+
+            return options;
+        });
+
+        services.AddSingleton<IDocumentStore>(s =>
+        {
+            var options = s.GetRequiredService<StoreOptions>();
+
+            // for the purpose of not losing your sanity
+            // when running command line tools
+            if (JasperFxEnvironment.RunQuiet)
+            {
+                options.DisableNpgsqlLogging = true;
+            }
+
+            if (options.Logger().GetType() != typeof(NulloMartenLogger))
+            {
+                return new DocumentStore(options);
+            }
+
+            var logger = s.GetService<ILogger<IDocumentStore>>() ?? new NullLogger<IDocumentStore>();
+            options.Logger(new DefaultMartenLogger(logger));
+
+            options.LogFactory = s.GetService<ILoggerFactory>();
+
+            return new DocumentStore(options);
+        });
+
+        services.AddSingleton<IMasterTableMultiTenancy>(s => (IMasterTableMultiTenancy)s.GetRequiredService<IDocumentStore>());
+
+        // This can be overridden by the expression following
+        services.AddSingleton<ISessionFactory, LightweightSessionFactory>();
+
+        services.AddScoped(s => s.GetRequiredService<ISessionFactory>().QuerySession());
+        services.AddScoped(s => s.GetRequiredService<ISessionFactory>().OpenSession());
+
+        services.AddSingleton<IDatabaseSource>(s =>
+            s.GetRequiredService<IDocumentStore>().As<DocumentStore>().Tenancy);
+
+        return new MartenConfigurationExpression(services, null);
+    }
+
+    /// <summary>
+    ///     Add Marten IDocumentStore, IDocumentSession, and IQuerySession service registrations
+    ///     to your application using the configured StoreOptions
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static MartenConfigurationExpression AddMarten(
+        this IServiceCollection services,
+        Action<StoreOptions> configure
+    )
+    {
+        var options = new StoreOptions();
+        configure(options);
+
+        return services.AddMarten(options);
+    }
+
+    /// <summary>
+    ///     Add a secondary IDocumentStore service to the container using only
+    ///     an interface "T" that should directly inherit from IDocumentStore
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static MartenStoreExpression<T> AddMartenStore<T>(
+        this IServiceCollection services,
+        Action<StoreOptions> configure
+    ) where T : class, IDocumentStore
+    {
+        return services.AddMartenStore<T>(s =>
+        {
+            var options = new StoreOptions();
+            configure(options);
+
+            return options;
+        });
+    }
+
+    /// <summary>
+    ///     Add a secondary IDocumentStore service to the container using only
+    ///     an interface "T" that should directly inherit from IDocumentStore
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configure"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static MartenStoreExpression<T> AddMartenStore<T>(this IServiceCollection services,
+        Func<IServiceProvider, StoreOptions> configure) where T : class, IDocumentStore
+    {
+        services.AddJasperFx();
+        services.AddSingleton<IDocumentStoreSource, DocumentStoreSource<T>>();
+
+        services.AddSingleton<ISystemPart, MartenSystemPart<T>>();
+
+        services.AddSingleton<IEventStore>(s => (IEventStore)s.GetRequiredService<T>());
+        services.AddSingleton<IDocumentStoreUsageSource>(s => (IDocumentStoreUsageSource)s.GetRequiredService<T>());
+        services.AddSingleton<IDocumentStoreDiagnostics>(s => (IDocumentStoreDiagnostics)s.GetRequiredService<T>());
+        // #5543: an ancillary store carries its own Subject, so a console holding several
+        // IDocumentStoreDiagnosticsWriter instances can still tell which store each one writes to.
+        services.AddSingleton<IDocumentStoreDiagnosticsWriter>(s => (IDocumentStoreDiagnosticsWriter)s.GetRequiredService<T>());
+
+        // #5394 (jasperfx#825): an ancillary store derives its own View slices, resolved through its
+        // marker type. Registered per store rather than once over every IEventStore in the container
+        // for the same reason AddMarten's is: the marker is what says WHICH store, and only this
+        // method knows it. Two sources emitting a slice for the same document type is harmless --
+        // slices merge by name, which is what naming them after the document is for.
+        services.AddEventModelSource(new MartenProjectionEventModelSource(s => s.GetRequiredService<T>()));
+
+        var instrument = new SetEventStoreInstrumentation<T>();
+        services.AddSingleton<IConfigureMarten<T>>(instrument);
+        services.AddSingleton<IEventStoreInstrumentation>(instrument);
+
+        var stores = services
+            .Where(x => !x.IsKeyedService)
+            .Select(x => x.ImplementationInstance)
+            .OfType<SecondaryDocumentStores>().FirstOrDefault();
+
+        if (stores == null)
+        {
+            stores = new SecondaryDocumentStores();
+            services.AddSingleton(stores);
+        }
+
+        services.AddSingleton<IDatabaseSource>(s => s.GetRequiredService<T>().As<DocumentStore>().Tenancy);
+
+        var config = new SecondaryStoreConfig<T>(configure);
+        stores.Add(config);
+
+        services.AddSingleton<T>(s => config.Build(s));
+        services.AddSingleton<Lazy<T>>(s => new Lazy<T>(() => s.GetRequiredService<T>()));
+        services.AddSingleton<Func<T, IStorageOperations>>(_ => store => (IStorageOperations)store.LightweightSession());
+
+        // Default keyed session factory for the ancillary store
+        services.AddKeyedSingleton<ISessionFactory>(typeof(T), (sp, _) =>
+        {
+            var store = (IDocumentStore)sp.GetRequiredService<T>();
+            return new LightweightSessionFactory(store);
+        });
+
+        services.AddSingleton<IMasterTableMultiTenancy>(s => (IMasterTableMultiTenancy)s.GetRequiredService<T>());
+
+        return new MartenStoreExpression<T>(services);
+    }
+
+    internal static IReadOnlyList<IDocumentStore> AllDocumentStores(this IHost host)
+    {
+        return host.Services.AllDocumentStores();
+    }
+
+    public static IReadOnlyList<IDocumentStore> AllDocumentStores(this IServiceProvider services)
+    {
+        var list = new List<IDocumentStore>();
+        var store = services.GetService<IDocumentStore>();
+        if (store != null)
+        {
+            list.Add(store);
+        }
+
+        list.AddRange(services.GetServices<IDocumentStoreSource>().Select(x => x.Resolve(services)));
+
+        return list;
+    }
+
+    internal static void EnsureAsyncConfigureMartenApplicationIsRegistered(this IServiceCollection services)
+    {
+        if (!services.Any(
+                x => x.ServiceType == typeof(IHostedService) &&
+                     x.ImplementationType == typeof(AsyncConfigureMartenApplication)))
+        {
+            services.Insert(0,
+                new ServiceDescriptor(typeof(IHostedService), typeof(AsyncConfigureMartenApplication),
+                    ServiceLifetime.Singleton));
+        }
+    }
+
+    internal static void EnsureMartenActivatorIsRegistered(this IServiceCollection services)
+    {
+        if (!services.Any(
+                x => x.ServiceType == typeof(IHostedService) && x.ImplementationType == typeof(MartenActivator)))
+        {
+            var descriptor = services.FirstOrDefault(x =>
+                x.ServiceType == typeof(IHostedService) &&
+                x.ImplementationType == typeof(AsyncConfigureMartenApplication));
+
+            if (descriptor != null)
+            {
+                var index = services.IndexOf(descriptor);
+                services.Insert(index + 1,
+                    new ServiceDescriptor(typeof(IHostedService), typeof(MartenActivator), ServiceLifetime.Singleton));
+            }
+            else
+            {
+                services.Insert(0,
+                    new ServiceDescriptor(typeof(IHostedService), typeof(MartenActivator), ServiceLifetime.Singleton));
+            }
+        }
+    }
+
+    internal static void EnsureMartenActivatorIsRegistered<T>(this IServiceCollection services) where T : IDocumentStore
+    {
+        if (!services.Any(
+                x => x.ServiceType == typeof(IHostedService) && x.ImplementationType == typeof(MartenActivator<T>)))
+        {
+            services.Insert(0,
+                new ServiceDescriptor(typeof(IHostedService), typeof(MartenActivator<T>), ServiceLifetime.Singleton));
+        }
+    }
+
+    /// <summary>
+    ///     Adds initial data sets to the separate Marten store of type "T" and ensures that they will be
+    ///     executed upon IHost initialization
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    public static IServiceCollection InitializeMartenWith<T>(this IServiceCollection services,
+        params IInitialData[] data) where T : IDocumentStore
+    {
+        services.EnsureMartenActivatorIsRegistered<T>();
+        services.ConfigureMarten<T>(opts => opts.InitialData.AddRange(data));
+        return services;
+    }
+
+    /// <summary>
+    ///     Registers type T as a singleton against IInitialData to be used in IHost activation
+    ///     to apply changes or at least actions against the as built IDocumentStore
+    /// </summary>
+    /// <typeparam name="TData">The type that implements IInitialData</typeparam>
+    /// <returns></returns>
+    public static IServiceCollection InitializeMartenWith<TStore, TData>(this IServiceCollection services)
+        where TData : class, IInitialData where TStore : IDocumentStore
+    {
+        services.EnsureMartenActivatorIsRegistered<TStore>();
+        services.AddSingleton<TData>();
+        services.AddSingleton<IConfigureMarten<TStore>, AddInitialData<TStore, TData>>();
+        return services;
+    }
+
+    /// <summary>
+    ///     Adds initial data sets to the Marten store and ensures that they will be
+    ///     executed upon IHost initialization
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    public static IServiceCollection InitializeMartenWith(this IServiceCollection services, params IInitialData[] data)
+    {
+        services.EnsureMartenActivatorIsRegistered();
+        services.ConfigureMarten(opts => opts.InitialData.AddRange(data));
+        return services;
+    }
+
+    /// <summary>
+    ///     Registers type T as a singleton against IInitialData to be used in IHost activation
+    ///     to apply changes or at least actions against the as built IDocumentStore
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IServiceCollection InitializeMartenWith<T>(this IServiceCollection services)
+        where T : class, IInitialData
+    {
+        services.EnsureMartenActivatorIsRegistered();
+        services.AddSingleton<IInitialData, T>();
+        return services;
+    }
+
+
+    public class MartenStoreExpression<T> where T : class, IDocumentStore
+    {
+        public MartenStoreExpression(IServiceCollection services)
+        {
+            Services = services;
+        }
+
+        public IServiceCollection Services { get; }
+
+        /// <summary>
+        ///     Register the Async Daemon hosted service to continuously attempt to update asynchronous event projections
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public MartenStoreExpression<T> AddAsyncDaemon(DaemonMode mode)
+        {
+            Services.ConfigureMarten<T>(opts => opts.Projections.AsyncMode = mode);
+
+            // Only Solo/HotCold mean "this process hosts the daemon". Disabled hosts nothing, and
+            // ExternallyManaged (jasperfx#490) means an external system (e.g. Wolverine's managed
+            // event-subscription distribution) executes the async projections — Marten must not
+            // register its own coordination for either.
+            // marten#5056: guard against a repeated AddAsyncDaemon() call registering a second
+            // IHostedService forwarding to the same coordinator singleton. The host would call
+            // StopAsync twice on it at shutdown, and the second pass used to fan StopAllAsync out
+            // over daemons the first pass had already disposed (the marten#5055 error-log storm).
+            if (mode is DaemonMode.Solo or DaemonMode.HotCold && !Services.Any(x =>
+                    x.ServiceType == typeof(Marten.Events.Daemon.Coordination.IProjectionCoordinator<T>) &&
+                    x.ImplementationType == typeof(ProjectionCoordinator<T>)))
+            {
+                Services.AddSingleton<Marten.Events.Daemon.Coordination.IProjectionCoordinator<T>, ProjectionCoordinator<T>>();
+                Services.AddSingleton<IHostedService>(s => s.GetRequiredService<Marten.Events.Daemon.Coordination.IProjectionCoordinator<T>>());
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a hosted service to your .Net application that will attempt to apply any detected database changes before the
+        ///     rest of the application starts running
+        /// </summary>
+        /// <returns></returns>
+        public MartenStoreExpression<T> ApplyAllDatabaseChangesOnStartup()
+        {
+            Services.EnsureMartenActivatorIsRegistered<T>();
+
+            Services.ConfigureMarten<T>(opts => opts.ShouldApplyChangesOnStartup = true);
+
+            return this;
+        }
+
+
+        /// <summary>
+        ///     Adds initial data sets to the Marten store and ensures that they will be
+        ///     executed upon IHost initialization
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public MartenStoreExpression<T> InitializeWith(params IInitialData[] data)
+        {
+            Services.EnsureMartenActivatorIsRegistered<T>();
+            Services.ConfigureMarten<T>(opts => opts.InitialData.AddRange(data));
+            return this;
+        }
+
+        /// <summary>
+        ///     Registers type T as a singleton against IInitialData to be used in IHost activation
+        ///     to apply changes or at least actions against the as built IDocumentStore
+        /// </summary>
+        /// <typeparam name="TData">The type that implements IInitialData</typeparam>
+        /// <returns></returns>
+        public MartenStoreExpression<T> InitializeWith<TData>() where TData : class, IInitialData
+        {
+            Services.EnsureMartenActivatorIsRegistered<T>();
+            Services.AddSingleton<TData>();
+            Services.AddSingleton<IConfigureMarten<T>, AddInitialData<T, TData>>();
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a projection to this application that requires IoC services. The projection itself will
+        ///     be created with the application's IoC container
+        /// </summary>
+        /// <param name="lifecycle">The projection lifecycle for Marten</param>
+        /// <param name="lifetime">
+        ///     The IoC lifecycle for the projection instance. Note that the Transient lifetime will still be
+        ///     treated as Scoped
+        /// </param>
+        /// <param name="configure">Optional confiuration of the projection name, version, event filtering, and async execution</param>
+        /// ///
+        /// <typeparam name="TProjection">The type of projection to add</typeparam>
+        /// <returns></returns>
+        public MartenStoreExpression<T> AddProjectionWithServices<TProjection>(ProjectionLifecycle lifecycle,
+            ServiceLifetime lifetime, Action<ProjectionBase>? configure = null) where TProjection : class, IMartenRegistrable
+        {
+            TProjection.Register<TProjection, T>(Services, lifecycle, lifetime, configure);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a subscription to this Marten store that will require resolution
+        ///     from the application's IoC container in order to function correctly
+        /// </summary>
+        /// <param name="lifetime">IoC service lifetime</param>
+        /// <param name="configure">Optional configuration of the subscription within Marten</param>
+        /// <typeparam name="T">The type of projection to add</typeparam>
+        /// <returns></returns>
+        public MartenStoreExpression<T> AddSubscriptionWithServices<TSubscription>(ServiceLifetime lifetime,
+            Action<ISubscriptionOptions>? configure = null) where TSubscription : class, ISubscription
+        {
+            switch (lifetime)
+            {
+                case ServiceLifetime.Singleton:
+                    Services.AddSingleton<TSubscription>();
+                    Services.ConfigureMarten<T>((s, opts) =>
+                    {
+                        var subscription = s.GetRequiredService<TSubscription>();
+                        if (subscription is SubscriptionBase subscriptionBase)
+                        {
+                            configure?.Invoke(subscriptionBase);
+                            opts.Projections.Subscribe(subscriptionBase);
+                        }
+                        else
+                        {
+                            opts.Projections.Subscribe(subscription, configure);
+                        }
+                    });
+                    break;
+
+                case ServiceLifetime.Transient:
+                case ServiceLifetime.Scoped:
+                    Services.AddScoped<TSubscription>();
+                    Services.ConfigureMarten<T>((s, opts) =>
+                    {
+                        var subscription = new ScopedSubscriptionServiceWrapper<TSubscription>(s);
+                        opts.Projections.Subscribe(subscription, configure);
+                    });
+                    break;
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Use an alternative strategy / configuration for opening IDocumentSession or IQuerySession
+        ///     objects for this ancillary store with a custom ISessionFactory type registered as a keyed singleton
+        /// </summary>
+        /// <param name="lifetime">
+        ///     IoC service lifetime for the session factory. Default is Singleton, but use Scoped if you need
+        ///     to reference per-scope services
+        /// </param>
+        /// <typeparam name="TFactory">The custom session factory type</typeparam>
+        /// <returns></returns>
+        public MartenStoreExpression<T> BuildSessionsWith<TFactory>(ServiceLifetime lifetime = ServiceLifetime.Singleton)
+            where TFactory : class, ISessionFactory
+        {
+            var descriptor = new ServiceDescriptor(
+                typeof(ISessionFactory),
+                typeof(T),
+                (sp, _) =>
+                {
+                    var store = sp.GetRequiredService<T>();
+                    return ActivatorUtilities.CreateInstance<TFactory>(sp, (IDocumentStore)store);
+                },
+                lifetime);
+            Services.Add(descriptor);
+            return this;
+        }
+
+        /// <summary>
+        ///     Use lightweight sessions by default for this ancillary store. Equivalent to
+        ///     IDocumentStore.LightweightSession();
+        /// </summary>
+        /// <returns></returns>
+        public MartenStoreExpression<T> UseLightweightSessions()
+        {
+            return BuildSessionsWith<LightweightSessionFactory>();
+        }
+
+        /// <summary>
+        ///     Use identity sessions by default for this ancillary store. Equivalent to
+        ///     IDocumentStore.IdentitySession();
+        /// </summary>
+        /// <returns></returns>
+        public MartenStoreExpression<T> UseIdentitySessions()
+        {
+            return BuildSessionsWith<IdentitySessionFactory>();
+        }
+
+        /// <summary>
+        ///     Use dirty-tracked sessions by default for this ancillary store. Equivalent to
+        ///     IDocumentStore.DirtyTrackedSession();
+        /// </summary>
+        /// <returns></returns>
+        public MartenStoreExpression<T> UseDirtyTrackedSessions()
+        {
+            return BuildSessionsWith<DirtyTrackedSessionFactory>();
+        }
+    }
+
+    public class MartenConfigurationExpression
+    {
+        private readonly StoreOptions? _options;
+
+        internal MartenConfigurationExpression(IServiceCollection services, StoreOptions? options)
+        {
+            Services = services;
+            _options = options;
+        }
+
+        /// <summary>
+        ///     Gets the IServiceCollection
+        /// </summary>
+        public IServiceCollection Services { get; }
+
+        /// <summary>
+        ///     Use an alternative strategy / configuration for opening IDocumentSession or IQuerySession
+        ///     objects in the application with a custom ISessionFactory type registered as a singleton
+        /// </summary>
+        /// <param name="lifetime">
+        ///     IoC service lifetime for the session factory. Default is Singleton, but use Scoped if you need
+        ///     to reference per-scope services
+        /// </param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public MartenConfigurationExpression BuildSessionsWith<T>(ServiceLifetime lifetime = ServiceLifetime.Singleton)
+            where T : class, ISessionFactory
+        {
+            Services.Add(new ServiceDescriptor(typeof(ISessionFactory), typeof(T), lifetime));
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a hosted service to your .Net application that will attempt to apply any detected database changes before the
+        ///     rest of the application starts running
+        /// </summary>
+        /// <returns></returns>
+        public MartenConfigurationExpression ApplyAllDatabaseChangesOnStartup()
+        {
+            Services.EnsureMartenActivatorIsRegistered();
+
+            Services.ConfigureMarten(opts => opts.ShouldApplyChangesOnStartup = true);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds a hosted service to your .Net application that will assert that database matches configuration before the
+        ///     rest of the application starts running. Prevents the application from starting if database does not match
+        ///     configuration.
+        /// </summary>
+        /// <returns></returns>
+        public MartenConfigurationExpression AssertDatabaseMatchesConfigurationOnStartup()
+        {
+            Services.EnsureMartenActivatorIsRegistered();
+
+            Services.ConfigureMarten(opts => opts.ShouldAssertDatabaseMatchesConfigurationOnStartup = true);
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Register the Async Daemon hosted service to continuously attempt to update asynchronous event projections
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public MartenConfigurationExpression AddAsyncDaemon(DaemonMode mode)
+        {
+            Services.ConfigureMarten(opts => opts.Projections.AsyncMode = mode);
+
+            // Only Solo/HotCold mean "this process hosts the daemon". Disabled hosts nothing, and
+            // ExternallyManaged (jasperfx#490) means an external system (e.g. Wolverine's managed
+            // event-subscription distribution) executes the async projections — Marten must not
+            // register its own coordination for either.
+            // marten#5056: guard against a repeated AddAsyncDaemon() call registering a second
+            // IHostedService forwarding to the same coordinator singleton. The host would call
+            // StopAsync twice on it at shutdown, and the second pass used to fan StopAllAsync out
+            // over daemons the first pass had already disposed (the marten#5055 error-log storm).
+            if (mode is DaemonMode.Solo or DaemonMode.HotCold && !Services.Any(x =>
+                    x.ServiceType == typeof(Marten.Events.Daemon.Coordination.IProjectionCoordinator) &&
+                    x.ImplementationType == typeof(ProjectionCoordinator)))
+            {
+                Services.AddSingleton<Marten.Events.Daemon.Coordination.IProjectionCoordinator, ProjectionCoordinator>();
+                Services.AddSingleton<IHostedService>(s => s.GetRequiredService<Marten.Events.Daemon.Coordination.IProjectionCoordinator>());
+                // jasperfx#430 — also resolve the JasperFx.Events base interface, so a stock host can
+                // GetService<JasperFx.Events.Daemon.IProjectionCoordinator>() directly instead of walking
+                // the registered IHostedServices for one.
+                Services.AddSingleton<JasperFx.Events.Daemon.IProjectionCoordinator>(s => s.GetRequiredService<Marten.Events.Daemon.Coordination.IProjectionCoordinator>());
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        ///     Use lightweight sessions by default for the injected IDocumentSession objects. Equivalent to
+        ///     IDocumentStore.LightweightSession(); This is now the default as of Marten 9.0.3
+        /// </summary>
+        /// <returns></returns>
+        public MartenConfigurationExpression UseLightweightSessions()
+        {
+            return BuildSessionsWith<LightweightSessionFactory>();
+        }
+
+        /// <summary>
+        ///     Use identity sessions by default for the injected IDocumentSession objects. Equivalent to
+        ///     IDocumentStore.IdentitySession();
+        /// </summary>
+        /// <returns></returns>
+        public MartenConfigurationExpression UseIdentitySessions()
+        {
+            return BuildSessionsWith<IdentitySessionFactory>();
+        }
+
+        /// <summary>
+        ///     Use dirty-tracked sessions by default for the injected IDocumentSession objects. Equivalent to
+        ///     IDocumentStore.DirtyTrackedSession();
+        /// </summary>
+        /// <returns></returns>
+        public MartenConfigurationExpression UseDirtyTrackedSessions()
+        {
+            return BuildSessionsWith<DirtyTrackedSessionFactory>();
+        }
+
+        /// <summary>
+        ///     Use configured NpgsqlDataSource from DI container
+        /// </summary>
+        /// <param name="serviceKey">NpgsqlDataSource service key as registered in DI</param>
+        /// <returns></returns>
+        public MartenConfigurationExpression UseNpgsqlDataSource(object? serviceKey = null)
+        {
+            Services.ConfigureMarten((sp, opts) =>
+                opts.Connection(
+                    serviceKey != null
+                        ? sp.GetRequiredKeyedService<NpgsqlDataSource>(serviceKey)
+                        : sp.GetRequiredService<NpgsqlDataSource>()
+                )
+            );
+            return this;
+        }
+
+        /// <summary>
+        ///     Use configured NpgsqlDataSource from DI container
+        /// </summary>
+        /// <param name="dataSourceBuilderFactory">configuration of the data source builder</param>
+        /// <param name="serviceKey">NpgsqlDataSource service key as registered in DI</param>
+        /// <returns></returns>
+        public MartenConfigurationExpression UseNpgsqlDataSource(
+            Func<string, NpgsqlDataSourceBuilder> dataSourceBuilderFactory,
+            object? serviceKey = null
+        )
+        {
+            Services.ConfigureMarten((sp, opts) =>
+                opts.Connection(
+                    dataSourceBuilderFactory,
+                    serviceKey != null
+                        ? sp.GetRequiredKeyedService<NpgsqlDataSource>(serviceKey)
+                        : sp.GetRequiredService<NpgsqlDataSource>()
+                )
+            );
+            return this;
+        }
+
+        /// <summary>
+        ///     Adds initial data sets to the Marten store and ensures that they will be
+        ///     executed upon IHost initialization
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public MartenConfigurationExpression InitializeWith(params IInitialData[] data)
+        {
+            Services.EnsureMartenActivatorIsRegistered();
+            Services.ConfigureMarten(opts => opts.InitialData.AddRange(data));
+            return this;
+        }
+
+        /// <summary>
+        ///     Registers type T as a singleton against IInitialData to be used in IHost activation
+        ///     to apply changes or at least actions against the as built IDocumentStore
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public MartenConfigurationExpression InitializeWith<T>() where T : class, IInitialData
+        {
+            Services.EnsureMartenActivatorIsRegistered();
+            Services.AddSingleton<IInitialData, T>();
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a projection to this application that requires IoC services. The projection itself will
+        ///     be created with the application's IoC container
+        /// </summary>
+        /// <param name="lifecycle">The projection lifecycle for Marten</param>
+        /// <param name="lifetime">
+        ///     The IoC lifecycle for the projection instance. Note that the Transient lifetime will still be
+        ///     treated as Scoped
+        /// </param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configure">Optional configuration of the projection behavior including the name, version, event filtering, and async execution behavior</param>
+        /// <returns></returns>
+        public MartenConfigurationExpression AddProjectionWithServices<T>(ProjectionLifecycle lifecycle,
+            ServiceLifetime lifetime, Action<ProjectionBase>? configure = null) where T : class, IMartenRegistrable
+        {
+            T.Register<T>(Services, lifecycle, lifetime, configure);
+            return this;
+        }
+
+        /// <summary>
+        ///     Add a projection to this application that requires IoC services. The projection itself will
+        ///     be created with the application's IoC container
+        /// </summary>
+        /// <param name="lifecycle">The projection lifecycle for Marten</param>
+        /// <param name="lifetime">
+        ///     The IoC lifecycle for the projection instance. Note that the Transient lifetime will still be
+        ///     treated as Scoped
+        /// </param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public MartenConfigurationExpression AddProjectionWithServices<T>(ProjectionLifecycle lifecycle,
+            ServiceLifetime lifetime, string projectionName) where T : class, IMartenRegistrable
+        {
+            return AddProjectionWithServices<T>(lifecycle, lifetime, x => x.Name = projectionName);
+        }
+
+
+        /// <summary>
+        ///     Add a subscription to this Marten store that will require resolution
+        ///     from the application's IoC container in order to function correctly
+        /// </summary>
+        /// <param name="lifetime">IoC service lifetime</param>
+        /// <param name="configure">Optional configuration of the subscription within Marten</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public MartenConfigurationExpression AddSubscriptionWithServices<T>(
+            ServiceLifetime lifetime, Action<ISubscriptionOptions>? configure = null) where T : class, ISubscription
+        {
+            switch (lifetime)
+            {
+                case ServiceLifetime.Singleton:
+                    Services.AddSingleton<T>();
+                    Services.ConfigureMarten((s, opts) =>
+                    {
+                        var subscription = s.GetRequiredService<T>();
+                        if (subscription is SubscriptionBase subscriptionBase)
+                        {
+                            configure?.Invoke(subscriptionBase);
+                            opts.Projections.Subscribe(subscriptionBase);
+                        }
+                        else
+                        {
+                            opts.Projections.Subscribe(subscription, configure);
+                        }
+                    });
+                    break;
+
+                case ServiceLifetime.Transient:
+                case ServiceLifetime.Scoped:
+                    Services.AddScoped<T>();
+                    Services.ConfigureMarten((s, opts) =>
+                    {
+                        var subscription = new ScopedSubscriptionServiceWrapper<T>(s);
+                        opts.Projections.Subscribe(subscription, configure);
+                    });
+                    break;
+            }
+
+            return this;
+        }
+    }
+
+    internal class AddInitialData<T, TData>: IConfigureMarten<T> where T : IDocumentStore where TData : IInitialData
+    {
+        private readonly TData _data;
+
+        public AddInitialData(TData data)
+        {
+            _data = data;
+        }
+
+        public void Configure(IServiceProvider services, StoreOptions options)
+        {
+            options.InitialData.Add(_data);
+        }
+    }
+
+    /// <summary>
+    ///     Register a projection that depends on application services, against the default Marten store.
+    ///     Equivalent to <see cref="MartenConfigurationExpression.AddProjectionWithServices{T}(ProjectionLifecycle, ServiceLifetime, Action{ProjectionBase})"/>
+    ///     but usable from any module that only has access to <see cref="IServiceCollection"/> —
+    ///     intended for modular-monolith setups where the <c>AddMarten</c> builder chain is
+    ///     consumed once at composition root. See https://github.com/JasperFx/marten/issues/4267.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="lifecycle">The projection lifecycle for Marten</param>
+    /// <param name="lifetime">
+    ///     The IoC lifecycle for the projection instance. Note that the Transient lifetime will still
+    ///     be treated as Scoped.
+    /// </param>
+    /// <param name="configure">Optional configuration of the projection name, version, event filtering, and async execution</param>
+    /// <typeparam name="TProjection">The type of projection to register</typeparam>
+    public static IServiceCollection AddProjectionWithServices<TProjection>(
+        this IServiceCollection services,
+        ProjectionLifecycle lifecycle,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped,
+        Action<ProjectionBase>? configure = null)
+        where TProjection : class, IMartenRegistrable
+    {
+        TProjection.Register<TProjection>(services, lifecycle, lifetime, configure);
+        return services;
+    }
+
+    /// <summary>
+    ///     Register a projection that depends on application services, against the ancillary
+    ///     Marten store <typeparamref name="TStore"/>. Equivalent to
+    ///     <see cref="MartenStoreExpression{T}.AddProjectionWithServices{TProjection}(ProjectionLifecycle, ServiceLifetime, Action{ProjectionBase})"/>
+    ///     but usable from any module that only has access to <see cref="IServiceCollection"/>.
+    ///     See https://github.com/JasperFx/marten/issues/4267.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="lifecycle">The projection lifecycle for Marten</param>
+    /// <param name="lifetime">
+    ///     The IoC lifecycle for the projection instance. Note that the Transient lifetime will still
+    ///     be treated as Scoped.
+    /// </param>
+    /// <param name="configure">Optional configuration of the projection name, version, event filtering, and async execution</param>
+    /// <typeparam name="TProjection">The type of projection to register</typeparam>
+    /// <typeparam name="TStore">The ancillary store interface the projection belongs to</typeparam>
+    public static IServiceCollection AddProjectionWithServices<TProjection, TStore>(
+        this IServiceCollection services,
+        ProjectionLifecycle lifecycle,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped,
+        Action<ProjectionBase>? configure = null)
+        where TProjection : class, IMartenRegistrable
+        where TStore : class, IDocumentStore
+    {
+        TProjection.Register<TProjection, TStore>(services, lifecycle, lifetime, configure);
+        return services;
+    }
+}
+
+public interface IGlobalConfigureMarten: IConfigureMarten;
+
+#region sample_iconfiguremarten
+
+/// <summary>
+///     Mechanism to register additional Marten configuration that is applied after AddMarten()
+///     configuration, but before DocumentStore is initialized
+/// </summary>
+public interface IConfigureMarten: JasperFx.IConfigureStore<StoreOptions>
+{
+}
+
+#endregion
+
+#region sample_iasyncconfiguremarten
+
+/// <summary>
+///     Mechanism to register additional Marten configuration that is applied after AddMarten()
+///     configuration, but before DocumentStore is initialized when you need to utilize some
+///     kind of asynchronous services like Microsoft's FeatureManagement feature to configure Marten
+/// </summary>
+public interface IAsyncConfigureMarten: JasperFx.IAsyncConfigureStore<StoreOptions>
+{
+}
+
+#endregion
+
+internal class AsyncConfigureMartenApplication: IHostedService
+{
+    private readonly IList<IAsyncConfigureMarten> _configures;
+    private readonly StoreOptions _options;
+
+    public AsyncConfigureMartenApplication(IEnumerable<IAsyncConfigureMarten> configures, StoreOptions options)
+    {
+        _configures = configures.ToList();
+        _options = options;
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        foreach (var configure in _configures)
+            await configure.Configure(_options, cancellationToken).ConfigureAwait(false);
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+}
+
+internal class LambdaConfigureMarten: IConfigureMarten
+{
+    private readonly Action<IServiceProvider, StoreOptions> _configure;
+
+    public LambdaConfigureMarten(Action<IServiceProvider, StoreOptions> configure)
+    {
+        _configure = configure;
+    }
+
+    public void Configure(IServiceProvider services, StoreOptions options)
+    {
+        _configure(services, options);
+    }
+}
+
+internal class LambdaConfigureMarten<T>: LambdaConfigureMarten, IConfigureMarten<T> where T : IDocumentStore
+{
+    public LambdaConfigureMarten(Action<IServiceProvider, StoreOptions> configure): base(configure)
+    {
+    }
+}
+
+internal interface IDocumentStoreSource
+{
+    IDocumentStore Resolve(IServiceProvider serviceProvider);
+}
+
+internal class DocumentStoreSource<T>: IDocumentStoreSource where T : IDocumentStore
+{
+    public IDocumentStore Resolve(IServiceProvider services)
+    {
+        return services.GetRequiredService<T>();
+    }
+}
+
+// This little bit of fun is all about CritterWatch
+internal class SetEventStoreInstrumentation: IConfigureMarten, IEventStoreInstrumentation
+{
+    public void Configure(IServiceProvider services, StoreOptions options)
+    {
+        // #4981: only apply the adapter's value, never overwrite. This adapter is always registered
+        // by AddMarten, so an unconditional assignment clobbered a direct
+        // `opts.Events.EnableExtendedProgressionTracking = true` (and any directly-set
+        // AppendObserver) back to the adapter defaults at store build.
+        //
+        // #5310: "was it assigned" and "is it true" are different questions, and keying off the backing
+        // field keeps them apart. #4981's guard was `if (ExtendedProgressionEnabled)`, which cannot
+        // distinguish "left alone" from "deliberately turned off" -- harmless while the EventGraph
+        // default is false, and silently wrong the moment anything changes that. Kept even though the
+        // default went back to false, because it is correct for either one and costs nothing.
+        if (_extendedProgressionEnabled.HasValue)
+        {
+            options.EventGraph.EnableExtendedProgressionTracking = _extendedProgressionEnabled.Value;
+        }
+
+        if (AppendObserver != null)
+        {
+            options.EventGraph.AppendObserver += AppendObserver;
+        }
+    }
+
+    private bool? _extendedProgressionEnabled;
+
+    public bool ExtendedProgressionEnabled
+    {
+        // Unset reads as the EventGraph default this adapter would leave in place (false), so reading
+        // the property before the store is built does not misreport what the store will get.
+        get => _extendedProgressionEnabled ?? false;
+        set => _extendedProgressionEnabled = value;
+    }
+
+    public Action<IReadOnlyList<IEvent>>? AppendObserver { get; set; }
+}
+
+internal class SetEventStoreInstrumentation<T>: IConfigureMarten<T>, IEventStoreInstrumentation where T : IDocumentStore
+{
+    public void Configure(IServiceProvider services, StoreOptions options)
+    {
+        // #4981 / #5310: see SetEventStoreInstrumentation.Configure — apply an explicit value of
+        // either polarity, never clobber an unset one.
+        if (_extendedProgressionEnabled.HasValue)
+        {
+            options.EventGraph.EnableExtendedProgressionTracking = _extendedProgressionEnabled.Value;
+        }
+
+        if (AppendObserver != null)
+        {
+            options.EventGraph.AppendObserver += AppendObserver;
+        }
+    }
+
+    private bool? _extendedProgressionEnabled;
+
+    public bool ExtendedProgressionEnabled
+    {
+        get => _extendedProgressionEnabled ?? false;
+        set => _extendedProgressionEnabled = value;
+    }
+
+    public Action<IReadOnlyList<IEvent>>? AppendObserver { get; set; }
+}

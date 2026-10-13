@@ -1,0 +1,37 @@
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Xunit;
+
+namespace Wolverine.RabbitMQ.Tests;
+
+public class response_queue_disabling : IAsyncLifetime
+{
+    private IHost _host = null!;
+
+    [Fact]
+    public void reply_queue_should_not_be_declared()
+    {
+        var transport = _host.Get<WolverineOptions>().RabbitMqTransport();
+
+        transport.ReplyEndpoint()
+            .ShouldBeNull();
+    }
+
+    public async ValueTask InitializeAsync()
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.ServiceName = "MyApp";
+                opts.UseRabbitMq()
+                    .DisableSystemRequestReplyQueueDeclaration();
+            }).StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+    }
+}
+ 

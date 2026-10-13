@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="xunit.v3"/>
+        <PackageReference Include="xunit.runner.visualstudio">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Wolverine.Marten\Wolverine.Marten.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\..\Servers.cs">
+            <Link>Servers.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+
+
+  <ItemGroup>
+    <!-- Core WolverineFx no longer ships the Roslyn runtime compiler (#2876); this
+         Dynamic-mode test project needs it. The package auto-registers via its [WolverineModule]. -->
+    <ProjectReference Include="../../Wolverine.RuntimeCompilation/Wolverine.RuntimeCompilation.csproj" />
+  </ItemGroup>
+</Project>

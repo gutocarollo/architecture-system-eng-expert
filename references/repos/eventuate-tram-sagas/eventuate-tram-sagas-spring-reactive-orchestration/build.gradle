@@ -1,0 +1,19 @@
+
+dependencies {
+    api project(":eventuate-tram-sagas-reactive-orchestration")
+    api project(":eventuate-tram-sagas-spring-reactive-common")
+
+    api "io.eventuate.tram.core:eventuate-tram-spring-reactive-events:$eventuateTramVersion"
+    api "io.eventuate.common:eventuate-common-spring-reactive-jdbc:$eventuateCommonVersion"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:$springBootVersion"
+    testImplementation "io.eventuate.common:eventuate-common-id:$eventuateCommonVersion"
+}
+
+test {
+    def  profile = System.env['SPRING_PROFILES_ACTIVE']
+    if (profile != null && profile != "" && !profile.toLowerCase().contains("mysql")) {
+        exclude '**/**'
+    }
+    useJUnitPlatform()
+}

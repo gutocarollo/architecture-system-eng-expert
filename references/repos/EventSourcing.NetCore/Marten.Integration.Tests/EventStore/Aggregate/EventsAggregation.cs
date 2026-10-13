@@ -1,0 +1,103 @@
+using FluentAssertions;
+using Marten.Integration.Tests.TestsInfrastructure;
+using Xunit;
+
+namespace Marten.Integration.Tests.EventStore.Aggregate;
+
+public class EventsAggregation(MartenFixture fixture): MartenTest(fixture.PostgreSqlContainer)
+{
+    public record IssueCreated(
+        string IssueId,
+        string Description
+    );
+
+    public record IssueUpdated(
+        string IssueId,
+        string Description
+    );
+
+    public record IssueRemoved(
+        string IssueId
+    );
+
+    public record Issue(
+        string IssueId,
+        string Description
+    );
+
+    public class IssuesList
+    {
+        public string Id { get; set; } = null!;
+        public Dictionary<string, Issue> Issues { get; } = new();
+
+        public void Apply(IssueCreated @event)
+        {
+            var (issueId, description) = @event;
+            Issues.Add(issueId, new Issue(issueId, description));
+        }
+
+        public void Apply(IssueUpdated @event)
+        {
+            if (!Issues.ContainsKey(@event.IssueId))
+                return;
+
+            Issues[@event.IssueId] = Issues[@event.IssueId]
+                with {Description = @event.Description};
+        }
+
+        public void Apply(IssueRemoved @event)
+        {
+            Issues.Remove(@event.IssueId);
+        }
+    }
+
+    [Fact]
+    public async Task GivenStreamOfEvents_WhenAggregateStreamIsCalled_ThenChangesAreAppliedProperly()
+    {
+        var streamId = GenerateRandomId();
+
+        //1. First Issue Was Created
+        var issue1Id = GenerateRandomId();
+        EventStore.Append(streamId, new IssueCreated(issue1Id, "Description"));
+        await Session.SaveChangesAsync();
+
+        var issuesList = await EventStore.AggregateStreamAsync<IssuesList>(streamId);
+
+        issuesList!.Issues.Should().HaveCount(1);
+        issuesList.Issues.Values.Single().IssueId.Should().Be(issue1Id);
+        issuesList.Issues.Values.Single().Description.Should().Be("Description");
+
+        //2. First Issue Description Was Changed
+        EventStore.Append(streamId, new IssueUpdated(issue1Id, "New Description"));
+        await Session.SaveChangesAsync();
+
+        issuesList = await EventStore.AggregateStreamAsync<IssuesList>(streamId);
+
+        issuesList!.Issues.Should().HaveCount(1);
+        issuesList.Issues.Values.Single().IssueId.Should().Be(issue1Id);
+        issuesList.Issues.Values.Single().Description.Should().Be("New Description");
+
+        //3. Two Other tasks were added
+        EventStore.Append(streamId, new IssueCreated(GenerateRandomId(), "Description2"),
+            new IssueCreated(GenerateRandomId(), "Description3"));
+        await Session.SaveChangesAsync();
+
+        issuesList = await EventStore.AggregateStreamAsync<IssuesList>(streamId);
+
+        issuesList!.Issues.Should().HaveCount(3);
+        issuesList.Issues.Values.Select(t => t.Description)
+            .Should()
+            .BeEquivalentTo("New Description", "Description2", "Description3");
+
+        //4. First issue was removed
+        EventStore.Append(streamId, new IssueRemoved(issue1Id));
+        await Session.SaveChangesAsync();
+
+        issuesList = await EventStore.AggregateStreamAsync<IssuesList>(streamId);
+
+        issuesList!.Issues.Should().HaveCount(2);
+        issuesList.Issues.Values.Select(t => t.Description)
+            .Should()
+            .BeEquivalentTo("Description2", "Description3");
+    }
+}

@@ -1,0 +1,132 @@
+using FluentAssertions;
+using JasperFx;
+using JasperFx.Events;
+using JasperFx.Events.Projections;
+using Marten.Events.Aggregation;
+using Marten.Events.Projections;
+using Marten.Integration.Tests.TestsInfrastructure;
+using Xunit;
+
+namespace Marten.Integration.Tests.EventStore.Projections;
+
+public class AggregationProjectionsTest(MartenFixture fixture): MartenTest(fixture.PostgreSqlContainer)
+{
+    public record IssueCreated(
+        string IssueId,
+        string Description
+    );
+
+    public record IssueUpdated(
+        string IssueId,
+        string Description
+    );
+
+    public record Issue(
+        string IssueId,
+        string Description
+    );
+
+    public class IssuesList
+    {
+        public string Id { get; set; } = null!;
+        public Dictionary<string, Issue> Issues { get; set;  } = new();
+
+        public void Apply(IssueCreated @event)
+        {
+            var (issueId, description) = @event;
+            Issues.Add(issueId, new Issue(issueId, description));
+        }
+
+        public void Apply(IssueUpdated @event)
+        {
+            Issues[@event.IssueId] = Issues[@event.IssueId]
+                with
+                {
+                    Description = @event.Description
+                };
+        }
+    }
+
+    public class IssueDescriptions
+    {
+        public string Id { get; set; } = null!;
+        public Dictionary<string, string> Descriptions { get; set; } = new();
+
+        public void Apply(IssueCreated @event)
+        {
+            Descriptions.Add(@event.IssueId, @event.Description);
+        }
+
+        public void Apply(IssueUpdated @event)
+        {
+            Descriptions[@event.IssueId] = @event.Description;
+        }
+    }
+
+    public class IssueDescriptionsProjection: SingleStreamProjection<IssueDescriptions, string>
+    {
+        public void Apply(IssueCreated @event, IssueDescriptions item)
+        {
+            item.Apply(@event);
+        }
+
+        public void Apply(IssueUpdated @event, IssueDescriptions item)
+        {
+            item.Apply(@event);
+        }
+    }
+
+    protected override IDocumentSession CreateSession(Action<StoreOptions>? setStoreOptions = null)
+    {
+        var store = DocumentStore.For(options =>
+        {
+            options.Connection(ConnectionString);
+            options.AutoCreateSchemaObjects = AutoCreate.All;
+            options.DatabaseSchemaName = SchemaName;
+            options.Events.DatabaseSchemaName = SchemaName;
+            options.Events.StreamIdentity = StreamIdentity.AsString;
+
+            //It's needed to manually set that inline aggregation should be applied
+            options.Projections.Snapshot<IssuesList>(SnapshotLifecycle.Inline);
+            options.Projections.Add(new IssueDescriptionsProjection(), ProjectionLifecycle.Inline);
+        });
+
+        return store.LightweightSession();
+    }
+
+    [Fact]
+    public async Task GivenEvents_WhenInlineTransformationIsApplied_ThenReturnsSameNumberOfTransformedItems()
+    {
+        var streamId = GenerateRandomId();
+        var issue1Id = GenerateRandomId();
+        var issue2Id = GenerateRandomId();
+
+        var events = new object[]
+        {
+            new IssueCreated(issue1Id, "Description 1"), new IssueUpdated(issue1Id, "Description 1 New"),
+            new IssueCreated(issue2Id, "Description 2"), new IssueUpdated(issue1Id, "Description 1 Super New"),
+            new IssueUpdated(issue2Id, "Description 2 New"),
+        };
+
+        //1. Create events
+        EventStore.StartStream<IssuesList>(streamId, events);
+
+        await Session.SaveChangesAsync();
+
+        //2. Get live agregation
+        var issuesListFromLiveAggregation = await EventStore.AggregateStreamAsync<IssuesList>(streamId);
+
+        //3. Get inline aggregation
+        var issuesListFromInlineAggregation = await Session.LoadAsync<IssuesList>(streamId);
+
+        var projection = Session.Query<IssueDescriptions>().FirstOrDefault();
+
+        issuesListFromLiveAggregation.Should().NotBeNull();
+        issuesListFromInlineAggregation.Should().NotBeNull();
+        projection.Should().NotBeNull();
+
+        issuesListFromLiveAggregation!.Issues.Count.Should().Be(2);
+        issuesListFromInlineAggregation!.Issues.Count.Should().Be(2);
+        projection!.Descriptions.Count.Should().Be(2);
+    }
+}

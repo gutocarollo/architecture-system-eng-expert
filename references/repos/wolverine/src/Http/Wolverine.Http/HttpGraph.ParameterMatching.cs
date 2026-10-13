@@ -1,0 +1,105 @@
+using System.Reflection;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Wolverine.Http.CodeGen;
+using Wolverine.Persistence;
+
+namespace Wolverine.Http;
+
+public partial class HttpGraph
+{
+    private readonly List<IParameterStrategy> _strategies =
+    [
+        new FromFormAttributeUsage(),
+        new FromQueryAttributeUsage(),
+        new AsParamatersAttributeUsage(),
+        new FromFileStrategy(),
+        new MultipartReaderStrategy(),
+        new HttpChainParameterAttributeStrategy(),
+        new FromServicesParameterStrategy(),
+        new MessageBusStrategy(),
+        new HttpContextElements(),
+        new RouteParameterStrategy(),
+        new FromHeaderStrategy(),
+        new QueryStringParameterStrategy(),
+        new JsonBodyParameterStrategy()
+    ];
+
+    internal void ApplyParameterMatching(HttpChain chain)
+    {
+        var methodCall = chain.Method;
+        ApplyParameterMatching(chain, methodCall);
+    }
+
+    internal void ApplyParameterMatching(HttpChain chain, MethodCall methodCall)
+    {
+        var parameters = methodCall.Method.GetParameters();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var parameter = parameters[i];
+
+            // Do *not* do anything if the argument variable has already
+            // been resolved
+            if (methodCall.Arguments[i] != null) continue;
+
+            if (!TryMatchParameter(chain, methodCall, parameter, i))
+            {
+            }
+        }
+    }
+
+    internal bool TryMatchParameter(HttpChain chain, MethodCall methodCall, ParameterInfo parameter, int i)
+    {
+        foreach (var strategy in _strategies)
+        {
+            if (strategy.TryMatch(chain, Container, parameter, out var variable))
+            {
+                if (variable != null)
+                {
+                    if (variable.Creator != null)
+                    {
+                        // TODO -- THIS IS SMELLY!!!!!! Only happens because of IEventStream<T> that does not get
+                        // "mirrored" by LoadEntityFrameBlock
+                        if (chain.Middleware.OfType<LoadEntityFrameBlock>()
+                            .Any(x => object.ReferenceEquals(x.Creator, variable.Creator)))
+                        {
+                            continue;
+                        }
+                        
+                        // Do this idempotently!
+                        chain.Middleware.Fill(variable.Creator);
+                    }
+
+                    methodCall.Arguments[i] = variable;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void InsertParameterStrategy(IParameterStrategy strategy)
+    {
+        _strategies.Insert(0, strategy);
+    }
+
+    internal Variable BuildJsonDeserializationVariable(HttpChain httpChain)
+    {
+        if (httpChain.RequestType == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(httpChain), "No request type for this HTTP chain");
+        }
+        
+        var strategy = _strategies.OfType<JsonBodyParameterStrategy>().Single();
+        if (strategy.TryBuildVariable(httpChain, out var variable))
+        {
+            return variable;
+        }
+
+        throw new InvalidOperationException($"Unable to determine a JSON deserialization strategy for request type {httpChain.RequestType.FullNameInCode()}");
+    }
+}

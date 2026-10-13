@@ -1,0 +1,366 @@
+# Archiving Event Streams
+
+Like most (all?) event stores, Marten is designed around the idea of the events being persisted to a single file, immutable
+log of events. All the same though, there are going to be problem domains where certain event streams become obsolete. Maybe
+because a workflow is completed, maybe through time based expiry rules, or maybe because a customer or user is removed
+from the system. To help optimize Marten's event store usage, you can take advantage of the stream archiving to 
+mark events as archived on a stream by stream basis. 
+
+::: warning
+You can obviously use pure SQL to modify the events persisted by Marten. While that might be valuable in some cases,
+we urge you to be cautious about doing so.
+:::
+
+The impact of archiving an event stream is:
+
+* In the "classic" usage of Marten, the relevant stream and event rows are marked with an `is_archived = TRUE`
+* With the "opt in" table partitioning model for "hot/cold" storage described in the next section, the stream and event rows are
+  moved to the archived partition tables for streams and events
+* The [async daemon](/events/projections/async-daemon) subsystem process that processes projections and subscriptions in a background process automatically ignores
+  archived events -- but that can be modified on a per projection/subscription basis
+* Archived events are excluded by default from any event data queries through the LINQ support in Marten
+
+To mark a stream as archived, it's just this syntax:
+
+<!-- snippet: sample_archive_stream_usage -->
+<a id='snippet-sample_archive_stream_usage'></a>
+```cs
+public async Task SampleArchive(IDocumentSession session, string streamId)
+{
+    session.Events.ArchiveStream(streamId);
+    await session.SaveChangesAsync();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/archiving_events.cs#L36-L44' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_archive_stream_usage' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+As in all cases with an `IDocumentSession`, you need to call `SaveChanges()` to commit the
+unit of work.
+
+Archiving the same stream again preserves one archived copy of its stream and event rows,
+including when hot/cold partitioning is enabled. A single-stream projection with
+`IncludeArchivedEvents = true` can process the `Archived` marker after an inline projection
+has already archived the stream.
+
+::: tip
+At this point, you will also have to manually delete any projected aggregates based on the event streams being
+archived if that is desirable
+:::
+
+The `mt_events` and `mt_streams` tables both have a boolean column named `is_archived`.
+
+Archived events are filtered out of all event Linq queries by default. But of course, there's a way
+to query for archived events with the `IsArchived` property of `IEvent` as shown below:
+
+<!-- snippet: sample_querying_for_archived_events -->
+<a id='snippet-sample_querying_for_archived_events'></a>
+```cs
+var events = await theSession.Events
+    .QueryAllRawEvents()
+    .Where(x => x.IsArchived)
+    .ToListAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/archiving_events.cs#L232-L239' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_querying_for_archived_events' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+You can also query for all events both archived and not archived with `MaybeArchived()`
+like so:
+
+<!-- snippet: sample_query_for_maybe_archived_events -->
+<a id='snippet-sample_query_for_maybe_archived_events'></a>
+```cs
+var events = await theSession.Events.QueryAllRawEvents()
+    .Where(x => x.MaybeArchived()).ToListAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/archiving_events.cs#L265-L270' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_query_for_maybe_archived_events' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Appending to an Archived Stream
+
+An archived stream is closed to new events. Appending to one fails the transaction with
+`Marten.Exceptions.InvalidStreamOperationException` and the message
+`Attempted to append event to archived stream with Id '{id}'.` — in Rich append mode the stream state is read before the
+append and the check happens in Marten (`RichEventAppender`), and in Quick append mode the `mt_quick_append_events` function
+raises SQLSTATE `MT001` which Marten translates into the same exception. Either way you get one exception type and one
+message, so this does not change with `EventAppendMode`.
+
+There is no un-archive API in Marten. Archiving is a terminal step for a stream — a stream that should keep receiving events
+should not have been archived. Recovering one means flipping `is_archived` back with SQL on both `mt_streams` and
+`mt_events` (and, under [hot/cold partitioning](/events/archiving.html#hot-cold-storage-partitioning), moving the rows back
+out of the archived partitions), which is exactly the kind of direct manipulation the warning at the top of this page
+cautions about.
+
+Note that `StartStream` against an archived stream's id is a **different** failure. The id is still in use, so it is an
+identity collision (`ExistingStreamIdCollisionException`), not an archived-stream error — except under
+`UseArchivedStreamPartitioning`, where the archived row lives in a different partition and the reuse is silently allowed
+unless you also set `EnableStrictStreamIdentityEnforcement`. See
+[Strict Stream Identity After Archive](/events/archiving.html#strict-stream-identity-after-archive) below.
+
+## Hot/Cold Storage Partitioning <Badge type="tip" text="7.25" />
+
+::: warning
+This option will only be beneficial if you are being aggressive about marking obsolete, old, or expired event data
+as archived.
+:::
+
+Want your system using Marten to scale and perform even better than it already does? If you're leveraging
+event archiving in your application workflow, you can possibly derive some significant performance and scalability
+improvements by opting into using PostgreSQL native table partitioning on the event and event stream data
+to partition the "hot" (active) and "cold" (archived) events into separate partition tables. 
+
+The long and short of this option is that it keeps the active `mt_streams` and `mt_events` tables smaller, which pretty
+well always results in better performance over time.
+
+The simple flag for this option is:
+
+<!-- snippet: sample_turn_on_stream_archival_partitioning -->
+<a id='snippet-sample_turn_on_stream_archival_partitioning'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection("some connection string");
+
+    // Turn on the PostgreSQL table partitioning for
+    // hot/cold storage on archived events
+    opts.Events.UseArchivedStreamPartitioning = true;
+});
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/Optimizations.cs#L14-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_turn_on_stream_archival_partitioning' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: warning
+If you are turning this option on to an existing system, you may want to run the database schema migration script
+by hand rather than trying to let Marten do it automatically. The data migration from non-partitioned to partitioned
+will probably require system downtime because it actually has to copy the old table data, drop the old table, create the new 
+table, copy all the existing data from the temp table to the new partitioned table, and finally drop the temporary table.
+:::
+
+### Strict Stream Identity After Archive <Badge type="tip" text="8.x" />
+
+::: tip
+This setting is only necessary when stream identity is generated **outside** of
+Marten — most commonly when the user is providing string keys themselves
+(order numbers, external reference ids, etc.). With Marten-generated `Guid`
+ids, accidental reuse is vanishingly unlikely, so the default of `false` is
+fine for most projects.
+:::
+
+When `UseArchivedStreamPartitioning = true` is enabled, archiving a stream
+physically moves its row from the active partition (`mt_streams_default`) to
+the archived partition (`mt_streams_archived`). PostgreSQL requires the
+partition key (`is_archived`) to be part of the primary key on a partitioned
+table, so the effective stream-table PK becomes `(id, is_archived)`. That
+means a fresh `StartStream` call with the same id as a previously-archived
+stream **does not collide** — you can silently reuse the identity, ending up
+with two rows: one active, one archived.
+
+In the "classic" (non-partitioned) mode, archive merely flips
+`is_archived = TRUE` on the existing row. The unique constraint on the id
+still fires, so reuse throws `ExistingStreamIdCollisionException`. Without
+extra configuration, the partitioning mode is therefore **less strict** about
+identity reuse than the non-partitioned mode.
+
+If you want the strict behavior under both modes, opt in to the
+`EnableStrictStreamIdentityEnforcement` flag:
+
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection("some connection string");
+
+    // Recommended companion when stream ids come from outside Marten
+    // (especially string keys) and you also want hot/cold partitioning.
+    opts.Events.UseArchivedStreamPartitioning = true;
+    opts.Events.EnableStrictStreamIdentityEnforcement = true;
+});
+```
+
+Under the hood Marten creates a sibling, **non-partitioned**
+`mt_streams_identity` table whose primary key is just the stream identity
+(`(id)`, or `(tenant_id, id)` under conjoined tenancy). Each `StartStream` is
+rewritten to also INSERT into that table in the same prepared statement (via
+a modifying CTE), so a duplicate identity raises a unique violation that
+Marten translates into the same `ExistingStreamIdCollisionException` you'd
+expect in non-partitioned mode. Archive does **not** touch
+`mt_streams_identity`, so the identity row stays put and the protection
+spans the active / archived divide.
+
+The flag is cheap when partitioning is off — it adds a second tiny INSERT
+per stream creation — but the practical reason to enable it is exactly the
+combination above. If you only have Marten-generated `Guid` stream ids and
+don't use partitioning, the default `mt_streams` primary key already
+enforces this and the flag is unnecessary.
+
+## Archived Event <Badge type="tip" text="7.34" />
+
+::: tip
+The `Archived` type moved into the shared JasperFx.Events library for Marten 8.0.
+:::
+
+Marten has a built in event named `Archived` that can be appended to any event stream:
+
+```cs
+namespace JasperFx.Events;
+
+/// <summary>
+/// The presence of this event marks a stream as "archived" when it is processed
+/// by a single stream projection of any sort
+/// </summary>
+public record Archived(string Reason);
+```
+
+When this event is appended to an event stream *and* that event is processed through any type of single stream projection
+for that event stream (snapshot or what we used to call a "self-aggregate", `SingleStreamProjection`, or `CustomProjection` with the `AggregateByStream` option),
+Marten will automatically mark that entire event stream as archived as part of processing the projection. This applies for
+both `Inline` and `Async` execution of projections. 
+
+Let's try to make this concrete by building a simple order processing system that might include this
+aggregate:
+
+<!-- snippet: sample_order_for_optimized_command_handling -->
+<a id='snippet-sample_order_for_optimized_command_handling'></a>
+```cs
+public class Item
+{
+    public string Name { get; set; }
+    public bool Ready { get; set; }
+}
+
+public class Order
+{
+    // This would be the stream id
+    public Guid Id { get; set; }
+
+    // This is important, by Marten convention this would
+    // be the
+    public long Version { get; set; }
+
+    public Order(OrderCreated created)
+    {
+        foreach (var item in created.Items)
+        {
+            Items[item.Name] = item;
+        }
+    }
+
+    public void Apply(IEvent<OrderShipped> shipped) => Shipped = shipped.Timestamp;
+    public void Apply(ItemReady ready) => Items[ready.Name].Ready = true;
+
+    public DateTimeOffset? Shipped { get; private set; }
+
+    public Dictionary<string, Item> Items { get; set; } = new();
+
+    public bool IsReadyToShip()
+    {
+        return Shipped == null && Items.Values.All(x => x.Ready);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/OptimizedCommandHandling.cs#L24-L62' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_order_for_optimized_command_handling' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Next, let's say we're having the `Order` aggregate snapshotted so that it's updated every time new events 
+are captured like so:
+
+<!-- snippet: sample_registering_order_as_inline -->
+<a id='snippet-sample_registering_order_as_inline'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection("some connection string");
+
+    // The Order aggregate is updated Inline inside the
+    // same transaction as the events being appended
+    opts.Projections.Snapshot<Order>(SnapshotLifecycle.Inline);
+
+    // Opt into an optimization for the inline aggregates
+    // used with FetchForWriting()
+    opts.Projections.UseIdentityMapForAggregates = true;
+})
+
+// This is also a performance optimization in Marten to disable the
+// identity map tracking overall in Marten sessions if you don't
+// need that tracking at runtime
+.UseLightweightSessions();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/OptimizedCommandHandling.cs#L210-L231' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_registering_order_as_inline' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Now, let's say as a way to keep our application performing as well as possible, we'd like to be aggressive about archiving
+shipped orders to keep the "hot" event storage table small. One way we can do that is to append the `Archived` event 
+as part of processing a command to ship an order like so:
+
+<!-- snippet: sample_handling_shiporder_and_emitting_archived_event -->
+<a id='snippet-sample_handling_shiporder_and_emitting_archived_event'></a>
+```cs
+public static async Task HandleAsync(ShipOrder command, IDocumentSession session)
+{
+    var stream = await session.Events.FetchForWriting<Order>(command.OrderId);
+    var order = stream.Aggregate;
+
+    if (!order.Shipped.HasValue)
+    {
+        // Mark it as shipped
+        stream.AppendOne(new OrderShipped());
+
+        // But also, the order is done, so let's mark it as archived too!
+        stream.AppendOne(new Archived("Shipped"));
+
+        await session.SaveChangesAsync();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/OptimizedCommandHandling.cs#L234-L253' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_handling_shiporder_and_emitting_archived_event' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If an `Order` hasn't already shipped, one of the outcomes of that command handler executing is that the entire event stream
+for the `Order` will be marked as archived. 
+
+::: info
+This was originally conceived as a way to improve the Wolverine aggregate handler workflow usability while also encouraging
+Marten users to take advantage of the event archiving feature. 
+:::
+
+::: info
+When an `Archived` event is appended to a stream (as described above), Marten will mark the entire event stream as archived once that event is processed.
+
+As a result, asynchronous multi-stream projections will no longer process any other events from that stream, even if those events appear earlier in the sequence or were added in a different session and have not yet been processed.
+
+If you rely on asynchronous multi-stream projections and need all events to be processed before archiving, you can work around this by either:
+
+* Writing the `Archived` event as a side effect within your asynchronous projection, after all other events have been processed, or
+* Delaying the archiving by publishing a scheduled or delayed message (for example, when using Marten together with Wolverine) that appends the `Archived` event after projection completion.
+
+This ensures all prior events are fully projected before the stream is marked as archived.
+:::
+
+### Archived in Composite Projections <Badge type="tip" text="8.x" />
+
+When multiple single-stream projections run inside the same
+[composite projection](/events/projections/composite), every child projection
+processes every slice in the batch. An `Archived` event raised on one child's
+stream is therefore *seen* by every sibling. To avoid redundant stream-archival
+operations, the `mt_archive_stream` call is only issued from the child that
+actually **owns** the stream — measured by whether the child has a snapshot for
+that stream id (either loaded before the slice was applied, or materialized by
+the slice itself). Siblings that did not materialize anything skip the archive.
+
+::: tip
+Archiving a stream and deleting the projected document are **independent**
+operations. Marten does not delete projected documents as a side effect of an
+`Archived` event — that's a common and legitimate pattern: keep the read model
+around for historical queries while the underlying event stream moves out of
+the hot table. If you *do* want the document removed when the stream is
+archived, either call `session.Delete<T>(id)` explicitly (see the earlier tip)
+or register the deletion in your projection's `Apply(Archived, current)`
+method by returning `null` (or otherwise opting in).
+:::
+
+Whether a projection's `Create(Archived)` or `Apply(Archived, current)` method
+runs is entirely governed by the user-defined handlers on that projection —
+`Archived` is just an event and receives no special treatment at the
+`EvolveAsync` level. The ownership guard described above only scopes the
+stream-archival side effect.

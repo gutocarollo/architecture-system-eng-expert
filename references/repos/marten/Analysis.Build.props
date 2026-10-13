@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers">
+            <PrivateAssets>all</PrivateAssets>
+            <ExcludeAssets>none</ExcludeAssets>
+            <IncludeAssets>all</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Meziantou.Analyzer">
+            <PrivateAssets>all</PrivateAssets>
+            <ExcludeAssets>none</ExcludeAssets>
+            <IncludeAssets>all</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+</Project>

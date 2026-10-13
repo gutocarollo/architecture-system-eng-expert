@@ -1,0 +1,22 @@
+datasources:
+  default:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: test
+    driverClassName: org.h2.Driver
+jpa:
+  default:
+    packages-to-scan:
+      - 'io.eventuate.examples.tram.sagas.ordersandcustomers'
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        show_sql: true
+transactional:
+  noop:
+    duplicate:
+      message:
+        detector:
+          factory:
+            enabled: true

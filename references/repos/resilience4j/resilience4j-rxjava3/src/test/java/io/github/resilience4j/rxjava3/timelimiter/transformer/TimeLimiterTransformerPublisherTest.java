@@ -1,0 +1,163 @@
+/*
+ *  Copyright 2026 authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.github.resilience4j.rxjava3.timelimiter.transformer;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.jupiter.api.Test;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+import io.reactivex.rxjava3.schedulers.TestScheduler;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+
+import io.github.resilience4j.timelimiter.TimeLimiter;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
+
+class TimeLimiterTransformerPublisherTest {
+
+    private TestScheduler testScheduler;
+
+    @BeforeEach
+    void setUpScheduler() {
+        testScheduler = new TestScheduler();
+        RxJavaPlugins.setIoSchedulerHandler(scheduler -> testScheduler);
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> testScheduler);
+        RxJavaPlugins.setNewThreadSchedulerHandler(scheduler -> testScheduler);
+    }
+
+    @AfterEach
+    void resetScheduler() {
+        RxJavaPlugins.reset();
+    }
+    private final TimeLimiter timeLimiter = mock(TimeLimiter.class);
+
+    @Test
+    void otherError() {
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ZERO));
+        TestSubscriber<Object> subscriber = Flowable.error(new RuntimeException())
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        testScheduler.advanceTimeBy(1, TimeUnit.MINUTES);
+
+        subscriber.assertError(RuntimeException.class);
+        then(timeLimiter).should()
+            .onError(any(RuntimeException.class));
+    }
+
+    @Test
+    void timeout() {
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ZERO));
+        TestSubscriber<Long> subscriber = Flowable.interval(1, TimeUnit.MINUTES)
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        testScheduler.advanceTimeBy(1, TimeUnit.MINUTES);
+
+        subscriber.assertError(TimeoutException.class);
+        then(timeLimiter).should()
+            .onError(any(TimeoutException.class));
+    }
+
+    @Test
+    void timeoutEmpty() {
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ZERO));
+        TestSubscriber<Object> subscriber = Flowable.empty()
+            .delay(1, TimeUnit.MINUTES)
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        testScheduler.advanceTimeBy(1, TimeUnit.MINUTES);
+
+        subscriber.assertError(TimeoutException.class);
+        then(timeLimiter).should()
+            .onError(any(TimeoutException.class));
+    }
+
+    @Test
+    void doNotTimeout() {
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ofMinutes(1)));
+        TestSubscriber<Long> subscriber = Flowable.interval(1, TimeUnit.SECONDS)
+            .take(2)
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        testScheduler.advanceTimeBy(1, TimeUnit.MINUTES);
+
+        subscriber.assertValueCount(2)
+            .assertComplete();
+        then(timeLimiter).should(times(3))
+            .onSuccess();
+    }
+
+    @Test
+    void timeoutAfterInitial() throws InterruptedException {
+        int timeout = 2;
+        int initialDelay = 1;
+        int periodDelay = 3;
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ofSeconds(timeout)));
+        TestSubscriber<Long> subscriber = Flowable
+            .interval(initialDelay, periodDelay, TimeUnit.SECONDS)
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        testScheduler.advanceTimeBy(1, TimeUnit.MINUTES);
+
+        subscriber.await()
+            .assertValueCount(1)
+            .assertError(TimeoutException.class);
+        then(timeLimiter).should()
+            .onSuccess();
+        then(timeLimiter).should()
+            .onError(any(TimeoutException.class));
+    }
+
+    @Test
+    void doNotTimeoutEmpty() {
+        given(timeLimiter.getTimeLimiterConfig())
+            .willReturn(toConfig(Duration.ofMinutes(1)));
+
+        TestSubscriber<Object> subscriber = Flowable.empty()
+            .compose(TimeLimiterTransformer.of(timeLimiter))
+            .test();
+
+        subscriber.assertComplete();
+        then(timeLimiter).should()
+            .onSuccess();
+    }
+
+    private TimeLimiterConfig toConfig(Duration timeout) {
+        return TimeLimiterConfig.custom()
+            .timeoutDuration(timeout)
+            .build();
+    }
+}

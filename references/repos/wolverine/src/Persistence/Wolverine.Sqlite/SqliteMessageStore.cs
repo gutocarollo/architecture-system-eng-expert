@@ -1,0 +1,887 @@
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.Sqlite;
+using Wolverine.Logging;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.Sagas;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Sagas;
+using Wolverine.RDBMS.Transport;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Sqlite.Schema;
+using Wolverine.Sqlite.Internals;
+using Wolverine.Sqlite.Util;
+using Wolverine.Transports;
+using DbCommandBuilder = Weasel.Core.DbCommandBuilder;
+
+namespace Wolverine.Sqlite;
+
+internal class SqliteMessageStore : MessageDatabase<SqliteConnection>, ISagaStorageCodeSource
+{
+    /// <summary>
+    /// GH-4375. SQLITE_MAX_VARIABLE_NUMBER, measured at 32,766 against the bundled SQLite 3.50.4 by
+    /// walking a multi-row insert to "too many SQL variables". Older SQLite builds default to 999, so
+    /// this is deliberately the measured value rather than the theoretical one.
+    /// </summary>
+    public override int MaximumParameterCount => 32_766;
+
+    private readonly string _deleteOutgoingEnvelopesSql;
+    private readonly string _discardAndReassignOutgoingSql;
+    private readonly string _findAtLargeEnvelopesSql;
+    private readonly string _reassignIncomingSql;
+
+    private readonly List<ISchemaObject> _externalTables = new();
+
+    private ImHashMap<Type, IDatabaseSagaSchema> _sagaStorage = ImHashMap<Type, IDatabaseSagaSchema>.Empty;
+
+    public SqliteMessageStore(DatabaseSettings databaseSettings, DurabilitySettings settings, DbDataSource dataSource,
+        ILogger<SqliteMessageStore> logger) : this(databaseSettings, settings, dataSource, logger, Array.Empty<SagaTableDefinition>())
+    {
+        var descriptor = Describe();
+        Id = new DatabaseId(descriptor.ServerName, descriptor.DatabaseName);
+    }
+
+    // typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(...) at L67
+    // closes the saga schema generic over (sagaType, idType) at startup. Same
+    // chunk D / I / J / K / AE / AF CloseAndBuildAs pattern: AOT-clean apps
+    // preserve saga state types via TrimmerRootDescriptor. Cross-link to #2769.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    public SqliteMessageStore(DatabaseSettings databaseSettings, DurabilitySettings settings, DbDataSource dataSource,
+        ILogger<SqliteMessageStore> logger, IEnumerable<SagaTableDefinition> sagaTypes) : base(asTablePrefixed(databaseSettings), dataSource,
+        settings, logger, new SqliteMigrator(), SqliteProvider.Instance)
+    {
+        _reassignIncomingSql =
+            $"update {this.TableNameFor(DatabaseConstants.IncomingTable)} set owner_id = @owner, status = '{EnvelopeStatus.Incoming}' where id IN (@ids)";
+        _deleteOutgoingEnvelopesSql =
+            $"delete from {this.TableNameFor(DatabaseConstants.OutgoingTable)} WHERE id IN (@ids);";
+
+        _findAtLargeEnvelopesSql =
+            $"select {DatabaseConstants.IncomingFields} from {this.TableNameFor(DatabaseConstants.IncomingTable)} where owner_id = {TransportConstants.AnyNode} and status = '{EnvelopeStatus.Incoming}' and {DatabaseConstants.ReceivedAt} = @address limit @limit";
+
+        _discardAndReassignOutgoingSql = _deleteOutgoingEnvelopesSql +
+                                         $";update {this.TableNameFor(DatabaseConstants.OutgoingTable)} set owner_id = @node where id IN (@rids)";
+
+        DataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+        _settings.DataSource ??= DataSource;
+
+        AdvisoryLock = new SqliteAdvisoryLock(dataSource, logger, Identifier);
+
+        foreach (var sagaTableDefinition in sagaTypes)
+        {
+            var storage = typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(sagaTableDefinition, _settings, sagaTableDefinition.SagaType, sagaTableDefinition.IdMember.GetMemberType()!);
+            _sagaStorage = _sagaStorage.AddOrUpdate(sagaTableDefinition.SagaType, storage);
+        }
+    }
+
+    /// <summary>
+    /// GH-3943: SQLite has no user-defined schemas, so a schema name is only ever a table name
+    /// prefix here. Stamped on the way into the base constructor — which renders table names before
+    /// this class's own body runs — rather than left to each caller, because a store built without
+    /// it would emit prefixed DDL and schema-qualified DML and fail with "no such table". That split
+    /// is the bug this exists to make unrepresentable.
+    /// </summary>
+    private static DatabaseSettings asTablePrefixed(DatabaseSettings databaseSettings)
+    {
+        databaseSettings.SchemaNameIsTablePrefix = true;
+        return databaseSettings;
+    }
+
+    public new DbDataSource DataSource { get; }
+
+    public async Task<IReadOnlyList<DbObjectName>> SchemaTablesAsync(CancellationToken ct = default)
+    {
+        var schemaNames = AllSchemaNames();
+
+        await using var conn = (SqliteConnection)await DataSource.OpenConnectionAsync(ct).ConfigureAwait(false);
+
+        return await conn.ExistingTablesAsync(schemas: schemaNames, ct: ct).ConfigureAwait(false);
+    }
+
+    protected override INodeAgentPersistence? buildNodeStorage(DatabaseSettings databaseSettings,
+        DbDataSource dataSource)
+    {
+        return new SqliteNodePersistence(databaseSettings, this, dataSource);
+    }
+
+    protected override bool isExceptionFromDuplicateEnvelope(Exception ex)
+    {
+        if (ex is SqliteException sqliteException)
+        {
+            // SQLITE_CONSTRAINT_PRIMARYKEY (1555) or SQLITE_CONSTRAINT_UNIQUE (2067)
+            if (sqliteException.SqliteExtendedErrorCode == 1555
+                || sqliteException.SqliteExtendedErrorCode == 2067)
+            {
+                return true;
+            }
+
+            // Fallback: SQLITE_CONSTRAINT (19) plus message-match
+            return sqliteException.SqliteErrorCode == 19
+                && (sqliteException.Message.Contains("UNIQUE constraint failed")
+                    || sqliteException.Message.Contains("PRIMARY KEY"));
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// GH-4567. Bound the handled-envelope reap, as PostgreSQL and SQL Server already do. Without an
+    /// override the base returns null and <c>DeleteExpiredHandledEnvelopesCommand</c> falls back to one
+    /// unbounded statement.
+    /// </summary>
+    /// <remarks>
+    /// SQLite has no <c>DELETE ... LIMIT</c> in its default build, but every ordinary table has a
+    /// <c>rowid</c>, so the bound goes through a subquery — the same shape as PostgreSQL's <c>ctid</c> one.
+    /// It matters more here than anywhere else: a SQLite write takes a lock over the whole database file
+    /// and there is only one writer, so a long reap stalls every other write in the application, not just
+    /// contending inbox traffic.
+    /// </remarks>
+    public override string? BatchedDeleteExpiredHandledEnvelopesSql(int batchSize)
+    {
+        var table = this.TableNameFor(DatabaseConstants.IncomingTable);
+
+        return
+            $"delete from {table} where rowid in (select rowid from {table} " +
+            $"where {DatabaseConstants.Status} = '{EnvelopeStatus.Handled}' and {DatabaseConstants.KeepUntil} <= @now limit {batchSize});";
+    }
+
+    /// <summary>
+    /// GH-4567. Bound the deduplication-claim reap. Fisher-backed applications took the unbounded path,
+    /// and a busy chain under the default 24-hour window accumulates a day of claims before the reaper
+    /// runs. Same rowid bound as <see cref="BatchedDeleteExpiredHandledEnvelopesSql"/>.
+    /// </summary>
+    public override string? BatchedDeleteExpiredDeduplicationClaimsSql(int batchSize)
+    {
+        // GH-4757: whichever table the configured mode provisioned.
+        var table = this.TableNameFor(DeduplicationTableNameFor(Durability));
+
+        return
+            $"delete from {table} where rowid in (select rowid from {table} " +
+            $"where {DatabaseConstants.Expires} <= @now limit {batchSize});";
+    }
+
+    /// <summary>GH-4742. As <see cref="BatchedDeleteExpiredDeduplicationClaimsSql" />.</summary>
+    public override string? BatchedDeleteExpiredDeduplicatedResponsesSql(int batchSize)
+    {
+        var table = this.TableNameFor(DatabaseConstants.DeduplicatedResponsesTableName);
+
+        return
+            $"delete from {table} where rowid in (select rowid from {table} " +
+            $"where {DatabaseConstants.Expires} <= @now limit {batchSize});";
+    }
+
+    /// <summary>
+    /// GH-4565. Whether <paramref name="ex"/> is a unique-constraint violation raised by the INBOX table
+    /// specifically, as opposed to anywhere else in the transaction.
+    /// </summary>
+    /// <remarks>
+    /// <para>Distinct from <see cref="isExceptionFromDuplicateEnvelope"/>, which is deliberately
+    /// table-agnostic: its caller has already established that the failing insert was the inbox one, and it
+    /// is reused for the deduplication table and the dynamic listener registry. This predicate is for
+    /// callers with no such context — the <c>Discard()</c> rule in <c>FisherIntegration</c>, which sees
+    /// every exception a handler's transaction can raise.</para>
+    ///
+    /// <para>SQLite names the columns, and therefore the tables, in the message:
+    /// <c>UNIQUE constraint failed: wolverine_incoming_envelopes.id</c>, comma-separated for a composite
+    /// key. <c>SqliteException</c> exposes nothing structured, so the message is what is read.</para>
+    /// </remarks>
+    public static bool IsDuplicateIncomingEnvelope(Exception ex)
+    {
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            if (current is SqliteException sqliteException
+                && isUniqueViolation(sqliteException)
+                && tablesFrom(sqliteException.Message).Any(IncomingTableNaming.IsIncomingTable))
+            {
+                return true;
+            }
+
+            if (current is AggregateException aggregate
+                && aggregate.InnerExceptions.Any(IsDuplicateIncomingEnvelope))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// GH-4571. Whether <paramref name="ex"/> is the one failure a transactional deduplication claim's
+    /// optimistic check cannot prevent: two genuinely concurrent callers both read "not claimed", both
+    /// enlist the INSERT, and the second to commit trips the deduplication table's primary key.
+    /// </summary>
+    /// <remarks>
+    /// Scoped to the deduplication table for the same reason <see cref="IsDuplicateIncomingEnvelope"/> is
+    /// scoped to the inbox: a bare constraint-code test would also match a duplicate key raised by the
+    /// application's own documents in the same transaction, and report that to the caller as "already
+    /// handled". SQLite puts the table name in the message and nowhere else.
+    /// </remarks>
+    public static bool IsDuplicateDeduplicationClaim(Exception ex)
+    {
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            if (current is SqliteException sqliteException
+                && isUniqueViolation(sqliteException)
+                && tablesFrom(sqliteException.Message).Any(IncomingTableNaming.IsDeduplicationTable))
+            {
+                return true;
+            }
+
+            if (current is AggregateException aggregate
+                && aggregate.InnerExceptions.Any(IsDuplicateDeduplicationClaim))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool isUniqueViolation(SqliteException ex)
+        // SQLITE_CONSTRAINT_PRIMARYKEY (1555), SQLITE_CONSTRAINT_UNIQUE (2067), or the bare
+        // SQLITE_CONSTRAINT (19) older builds report
+        => ex.SqliteExtendedErrorCode is 1555 or 2067 || ex.SqliteErrorCode == 19;
+
+    /// <summary>
+    /// The table names out of <c>UNIQUE constraint failed: t.a, t.b</c>. Empty when the message is not
+    /// that shape — a composite key lists one <c>table.column</c> pair per constraint column.
+    /// </summary>
+    /// <remarks>
+    /// The driver wraps SQLite's own text, so the whole message reads
+    /// <c>SQLite Error 19: 'UNIQUE constraint failed: wolverine_incoming_envelopes.id'.</c> — note the
+    /// closing quote and period AFTER the column name. Trimming them is not cosmetic: leave them on and
+    /// the last '.' in the pair is that trailing one rather than the table/column separator, so every
+    /// table name comes out wrong and the predicate answers false for the inbox itself.
+    /// </remarks>
+    private static IEnumerable<string> tablesFrom(string message)
+    {
+        const string marker = "constraint failed:";
+
+        var start = message.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (start < 0) yield break;
+
+        foreach (var pair in message.Substring(start + marker.Length).Split(','))
+        {
+            // Strip a trailing "(19)" the raw sqlite text can carry...
+            var trimmed = pair.Trim();
+            var parenthesis = trimmed.IndexOf('(');
+            if (parenthesis >= 0) trimmed = trimmed.Substring(0, parenthesis);
+
+            // ...then the driver's own quoting and sentence punctuation
+            trimmed = trimmed.Trim().TrimEnd('.', '\'', '"', ' ');
+
+            var lastDot = trimmed.LastIndexOf('.');
+            if (lastDot > 0) yield return trimmed.Substring(0, lastDot);
+        }
+    }
+
+    protected override void writePagingAfter(DbCommandBuilder builder, int offset, int limit)
+    {
+        if (limit > 0)
+        {
+            builder.Append(" LIMIT ");
+            builder.AppendParameter(limit);
+        }
+
+        if (offset > 0)
+        {
+            builder.Append(" OFFSET ");
+            builder.AppendParameter(offset);
+        }
+    }
+
+    public override ITable AddExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = new Weasel.Sqlite.Tables.Table(prefixedTableName(definition.TableName));
+        table.AddColumn(definition.IdColumnName, "TEXT").AsPrimaryKey();
+        table.AddColumn(definition.JsonBodyColumnName, "TEXT").NotNull();
+        if (definition.TimestampColumnName.IsNotEmpty())
+        {
+            table.AddColumn(definition.TimestampColumnName, "TEXT").DefaultValueByExpression("(datetime('now'))");
+        }
+
+        if (definition.MessageTypeColumnName.IsNotEmpty())
+        {
+            table.AddColumn(definition.MessageTypeColumnName, "TEXT");
+        }
+
+        return table;
+    }
+
+    public override async Task MigrateExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = (Weasel.Sqlite.Tables.Table)AddExternalMessageTable(definition);
+        await using var conn = (SqliteConnection)await DataSource.OpenConnectionAsync().ConfigureAwait(false);
+
+        var migration = await SchemaMigration.DetermineAsync(conn, default(CancellationToken), table);
+        if (migration.Difference != SchemaPatchDifference.None)
+        {
+            await new SqliteMigrator().ApplyAllAsync(conn, migration, _settings.AutoCreate);
+        }
+
+        await conn.CloseAsync();
+    }
+
+    protected override Task deleteManyAsync(DbTransaction tx, Guid[] ids, DbObjectName tableName,
+        string idColumnName, CancellationToken token)
+    {
+        var idList = string.Join(",", ids.Select(id => $"'{id:D}'"));
+        return tx.CreateCommand($"delete from {prefixedTableName(tableName)} where lower({idColumnName}) IN ({idList})")
+            .ExecuteNonQueryAsync(token);
+    }
+
+    private string prefixedTableName(DbObjectName tableName) => TablePrefixing.Apply(tableName.Schema, tableName.Name);
+
+    // Polling lock: delegate to the AdvisoryLock instance. The previous override here
+    // ran INSERT OR IGNORE and returned true unconditionally, which falsely reported
+    // "lock acquired" whenever another row already held the slot. SqliteAdvisoryLock
+    // checks the affected row count.
+    protected override Task<bool> TryAttainLockAsync(int lockId, SqliteConnection connection, CancellationToken token)
+    {
+        return AdvisoryLock.TryAttainLockAsync(lockId, token);
+    }
+
+    protected override Task ReleaseLockAsync(int lockId, SqliteConnection connection, CancellationToken token)
+    {
+        return AdvisoryLock.ReleaseLockAsync(lockId);
+    }
+
+    // Migration lock: SQLite's row-based wolverine_locks scheme can't be used here,
+    // because the table itself is created by the migration the lock is supposed to
+    // serialize. Use BEGIN EXCLUSIVE TRANSACTION instead — it doesn't depend on any
+    // schema and is automatically released when the connection closes (so process
+    // crashes during migration don't leave stale locks).
+    protected override async Task<bool> acquireMigrationLockAsync(int lockId, SqliteConnection conn, CancellationToken token)
+    {
+        const int maxAttempts = 10;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            try
+            {
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandText = "BEGIN EXCLUSIVE TRANSACTION";
+                await cmd.ExecuteNonQueryAsync(token);
+                return true;
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 5 /* SQLITE_BUSY */
+                                              || ex.SqliteErrorCode == 6 /* SQLITE_LOCKED */)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100 * (attempt + 1)), token);
+            }
+        }
+
+        return false;
+    }
+
+    protected override async Task releaseMigrationLockAsync(int lockId, SqliteConnection conn, CancellationToken token)
+    {
+        try
+        {
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "COMMIT";
+            await cmd.ExecuteNonQueryAsync(token);
+        }
+        catch
+        {
+            // Best-effort. Closing the connection rolls back the transaction
+            // without ill effect — the migration itself succeeded.
+        }
+    }
+
+    protected override DbCommand buildFetchSql(SqliteConnection conn, DbObjectName tableName, string[] columnNames, int maxRecords)
+    {
+        return conn.CreateCommand($"select {columnNames.Join(", ")} from {prefixedTableName(tableName)} LIMIT {maxRecords}");
+    }
+
+    public override async Task<PersistedCounts> FetchCountsAsync()
+    {
+        var counts = new PersistedCounts();
+
+        await using (var reader = await CreateCommand($"select status, count(*) from {this.TableNameFor(DatabaseConstants.IncomingTable)} group by status")
+                         .ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                var status = Enum.Parse<EnvelopeStatus>(await reader.GetFieldValueAsync<string>(0));
+                var count = await reader.GetFieldValueAsync<long>(1);
+
+                if (status == EnvelopeStatus.Incoming)
+                {
+                    counts.Incoming = (int)count;
+                }
+                else if (status == EnvelopeStatus.Handled)
+                {
+                    counts.Handled = (int)count;
+                }
+                else if (status == EnvelopeStatus.Scheduled)
+                {
+                    counts.Scheduled = (int)count;
+                }
+            }
+
+            await reader.CloseAsync();
+        }
+
+        var longCount = await CreateCommand($"select count(*) from {this.TableNameFor(DatabaseConstants.OutgoingTable)}")
+            .ExecuteScalarAsync();
+
+        counts.Outgoing = Convert.ToInt32(longCount);
+
+        var deadLetterCount = await CreateCommand($"select count(*) from {this.TableNameFor(DatabaseConstants.DeadLetterTable)}")
+            .ExecuteScalarAsync();
+
+        counts.DeadLetter = Convert.ToInt32(deadLetterCount);
+
+        // GH-4499 follow-up: the head of the outbox, so a stuck outbox can be told from a busy one
+        await fetchOldestOutgoingAsync(counts);
+
+        return counts;
+    }
+
+    public override async Task DiscardAndReassignOutgoingAsync(Envelope[] discards, Envelope[] reassigned, int nodeId)
+    {
+        var discardIds = string.Join(",", discards.Select(e => $"'{e.Id:D}'"));
+        var reassignIds = string.Join(",", reassigned.Select(e => $"'{e.Id:D}'"));
+
+        await using var cmd = CreateCommand(
+            $"delete from {this.TableNameFor(DatabaseConstants.OutgoingTable)} WHERE lower(id) IN ({discardIds});" +
+            $"update {this.TableNameFor(DatabaseConstants.OutgoingTable)} set owner_id = @node where lower(id) IN ({reassignIds})");
+        cmd.Parameters.Add(new SqliteParameter("@node", nodeId));
+
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+    }
+
+    public override async Task DeleteOutgoingAsync(Envelope[] envelopes)
+    {
+        if (HasDisposed) return;
+
+        var ids = string.Join(",", envelopes.Select(e => $"'{e.Id:D}'"));
+        await CreateCommand($"delete from {this.TableNameFor(DatabaseConstants.OutgoingTable)} WHERE lower(id) IN ({ids})")
+            .ExecuteNonQueryAsync(_cancellation);
+    }
+
+    protected override string determineOutgoingEnvelopeSql(DurabilitySettings settings)
+    {
+        return
+            $"select {DatabaseConstants.OutgoingFields} from {this.TableNameFor(DatabaseConstants.OutgoingTable)} where owner_id = {TransportConstants.AnyNode} and destination = @destination LIMIT {settings.RecoveryBatchSize}";
+    }
+
+    public override async Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress,
+        int limit)
+    {
+        return await CreateCommand(_findAtLargeEnvelopesSql)
+            .With("address", listenerAddress.ToString())
+            .With("limit", limit)
+            .FetchListAsync(r => DatabasePersistence.ReadIncomingAsync(r));
+    }
+
+    public override DbCommandBuilder ToCommandBuilder()
+    {
+        return new DbCommandBuilder(new SqliteCommand());
+    }
+
+    public override void WriteLoadScheduledEnvelopeSql(DbCommandBuilder builder, DateTimeOffset utcNow)
+    {
+        builder.Append(
+            $"select {DatabaseConstants.IncomingFields} from {this.TableNameFor(DatabaseConstants.IncomingTable)} where status = '{EnvelopeStatus.Scheduled}' and datetime(execution_time) <= datetime(");
+
+        builder.AppendParameter(utcNow.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"));
+        builder.Append($") order by execution_time LIMIT {Durability.RecoveryBatchSize};");
+    }
+
+    /// <summary>
+    /// GH-4216. Builds the promotion statement for the batch the poller just selected. Two things it must
+    /// not do, both of which the previous <c>where lower(id) IN (...)</c> did:
+    ///
+    /// <list type="bullet">
+    /// <item>Under <see cref="MessageIdentity.IdAndDestination"/> the identity is <c>(id, received_at)</c>, so
+    /// matching on the id alone also rewrites a row for a different message that merely shares the id at
+    /// another destination -- reassigning an <c>owner_id</c> the poller never selected. The pairs have to be
+    /// matched together: an <c>id IN (...) and received_at IN (...)</c> pair of lists would match the cross
+    /// product, which is the same bug wearing a longer statement.</item>
+    /// <item>Without a status predicate it also rewrites rows that are already Incoming or Handled, and
+    /// promotes a scheduled sibling that is not due yet -- a message scheduled an hour out executes now. The
+    /// load side already selects only Scheduled rows, so constraining the update to match costs nothing.</item>
+    /// </list>
+    ///
+    /// Mirrors <c>PostgresqlMessageStore._reassignIncomingSql</c>, which does the same job through
+    /// <c>unnest(@ids, @uris)</c>. See GH-4209 for the incident that first exposed the shape.
+    /// </summary>
+    private string writePromotionSql(DbCommand command, string tableName, IReadOnlyList<Envelope> envelopes)
+    {
+        var matchesById = Durability.MessageIdentity == MessageIdentity.IdOnly;
+        var clauses = new List<string>(envelopes.Count);
+
+        for (var i = 0; i < envelopes.Count; i++)
+        {
+            // Ids stay inline exactly as before -- Guid "D" formatting is already lower case, which is what
+            // the lower(id) comparison this table has always used expects.
+            var idMatch = $"lower(id) = '{envelopes[i].Id:D}'";
+
+            if (matchesById)
+            {
+                clauses.Add(idMatch);
+                continue;
+            }
+
+            command.With($"uri{i}", envelopes[i].Destination!.ToString());
+            clauses.Add($"({idMatch} and {DatabaseConstants.ReceivedAt} = @uri{i})");
+        }
+
+        return $"update {tableName} set owner_id = @owner, status = '{EnvelopeStatus.Incoming}' " +
+               $"where status = '{EnvelopeStatus.Scheduled}' and ({string.Join(" or ", clauses)})";
+    }
+
+    public override async Task PollForScheduledMessagesAsync(IWolverineRuntime runtime, ILogger logger,
+        DurabilitySettings durabilitySettings, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<Envelope> envelopes;
+
+        if (HasDisposed) return;
+
+        await using var conn = await DataSource.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            var tx = await conn.BeginTransactionAsync(cancellationToken);
+
+            var builder = new DbCommandBuilder(conn);
+            WriteLoadScheduledEnvelopeSql(builder, DateTimeOffset.UtcNow);
+            await using var cmd = builder.Compile();
+            cmd.Connection = conn;
+            cmd.Transaction = tx;
+
+            envelopes = await cmd.FetchListAsync(reader =>
+                DatabasePersistence.ReadIncomingAsync(reader, cancellationToken), cancellation: cancellationToken);
+
+            if (!envelopes.Any())
+            {
+                await tx.RollbackAsync(cancellationToken);
+                return;
+            }
+
+            await using var reassign = conn.CreateCommand("");
+            reassign.CommandText = writePromotionSql(reassign, this.TableNameFor(DatabaseConstants.IncomingTable),
+                envelopes);
+            reassign.Transaction = tx;
+            await reassign.With("owner", durabilitySettings.AssignedNodeNumber)
+                .ExecuteNonQueryAsync(_cancellation);
+
+            await tx.CommitAsync(cancellationToken);
+
+            // Mirror onto the in-memory envelopes what the UPDATE above just did to their rows:
+            // owning store (GH-2576) and promoted status (GH-4673).
+            DatabasePersistence.MarkPromotedFromScheduled(envelopes, this,
+                durabilitySettings.AssignedNodeNumber);
+
+            await runtime.EnqueueDirectlyAsync(envelopes);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public override async Task<bool> ExistsAsync(Envelope envelope, CancellationToken cancellation)
+    {
+        if (HasDisposed) return false;
+
+        await using var conn = await DataSource.OpenConnectionAsync(cancellation).ConfigureAwait(false);
+
+        if (Durability.MessageIdentity == MessageIdentity.IdOnly)
+        {
+            var count = await conn
+                .CreateCommand($"select count(id) from {this.TableNameFor(DatabaseConstants.IncomingTable)} where id = @id")
+                .With("id", envelope.Id)
+                .ExecuteScalarAsync(cancellation);
+
+            return Convert.ToInt64(count) > 0;
+        }
+        else
+        {
+            var count = await conn
+                .CreateCommand($"select count(id) from {this.TableNameFor(DatabaseConstants.IncomingTable)} where id = @id and {DatabaseConstants.ReceivedAt} = @destination")
+                .With("id", envelope.Id)
+                .With("destination", envelope.Destination!.ToString())
+                .ExecuteScalarAsync(cancellation);
+
+            return Convert.ToInt64(count) > 0;
+        }
+    }
+
+    public override async Task PublishMessageToExternalTableAsync(ExternalMessageTable table, string? messageTypeName, byte[] json,
+        CancellationToken token)
+    {
+        await using var conn = await DataSource.OpenConnectionAsync(token).ConfigureAwait(false);
+        var tableName = prefixedTableName(table.TableName);
+
+        if (table.MessageTypeColumnName.IsEmpty())
+        {
+            await conn.CreateCommand(
+                    $"insert into {tableName} ({table.IdColumnName}, {table.JsonBodyColumnName}) values (@id, @json)")
+                .With("id", Guid.NewGuid().ToString())
+                .With("json", System.Text.Encoding.UTF8.GetString(json))
+                .ExecuteNonQueryAsync(token);
+        }
+        else
+        {
+            await conn.CreateCommand(
+                    $"insert into {tableName} ({table.IdColumnName}, {table.JsonBodyColumnName}, {table.MessageTypeColumnName}) values (@id, @json, @message)")
+                .With("id", Guid.NewGuid().ToString())
+                .With("json", System.Text.Encoding.UTF8.GetString(json))
+                .With("message", messageTypeName!)
+                .ExecuteNonQueryAsync(token);
+        }
+
+        await conn.CloseAsync();
+    }
+
+    public override DatabaseDescriptor Describe()
+    {
+        var builder = new SqliteConnectionStringBuilder(DataSource?.ConnectionString ?? Settings.ConnectionString);
+        var descriptor = new DatabaseDescriptor()
+        {
+            Engine = "SQLite",
+            ServerName = "local",
+            DatabaseName = builder.DataSource ?? "unspecified",
+            Subject = GetType().FullNameInCode(),
+            SubjectUri = SubjectUri,
+            Identifier = Identifier
+        };
+
+        descriptor.TenantIds.AddRange(TenantIds);
+
+        descriptor.Properties.Add(new OptionsValue { Name = "DataSource", Value = builder.DataSource! });
+        descriptor.Properties.Add(new OptionsValue { Name = "Mode", Value = builder.Mode.ToString() });
+        descriptor.Properties.Add(new OptionsValue { Name = "Cache", Value = builder.Cache.ToString() });
+
+        return descriptor;
+    }
+
+    public override IEnumerable<ISchemaObject> AllObjects()
+    {
+        yield return new OutgoingEnvelopeTable(Durability, SchemaName);
+        yield return new IncomingEnvelopeTable(Durability, SchemaName);
+        yield return new DeadLettersTable(Durability, SchemaName);
+
+        // GH-4180. Every store role, not just Main -- see the PostgreSQL twin.
+        // GH-4757: exactly one of the two, never both. The hash mode's key is a binary column, which
+        // cannot be reached from the original table by any migration Weasel can express.
+        if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByString)
+        {
+            yield return new DeduplicationTable(SchemaName);
+        }
+        else if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByHash)
+        {
+            yield return new HashedDeduplicationTable(SchemaName);
+        }
+
+        // GH-4742. Every store role, behind its own opt-in.
+        if (Durability.EnableDeduplicatedResponses)
+        {
+            yield return new DeduplicatedResponsesTable(SchemaName);
+        }
+
+        // Recurring-message tracking — Main store only, behind the opt-in. See the PostgreSQL twin.
+        if (Durability.EnableRecurringMessages && Role == MessageStoreRole.Main)
+        {
+            yield return new RecurringMessagesTable(SchemaName);
+        }
+
+        foreach (var table in _externalTables)
+        {
+            yield return table;
+        }
+
+        if (Role == MessageStoreRole.Main)
+        {
+            var nodeTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.NodeTableName)));
+            nodeTable.AddColumn("id", "TEXT").AsPrimaryKey();
+            nodeTable.AddColumn("node_number", "INTEGER").NotNull();
+            nodeTable.AddColumn("description", "TEXT").NotNull();
+            nodeTable.AddColumn("uri", "TEXT").NotNull();
+            nodeTable.AddColumn("started", "TEXT").NotNull().DefaultValueByExpression("(datetime('now'))");
+            nodeTable.AddColumn("health_check", "TEXT").NotNull().DefaultValueByExpression("(datetime('now'))");
+            nodeTable.AddColumn("version", "TEXT");
+            nodeTable.AddColumn("capabilities", "TEXT");
+
+            // GH-4593, mirroring the PostgreSQL gate from GH-3959: provisioned only behind the opt-in so
+            // an upgrade migrates nothing, and SqliteNodePersistence gates every statement naming it on
+            // the same flag. REAL rather than TEXT -- unlike the timestamps around it, this value is only
+            // ever compared numerically and never round-tripped through a format.
+            if (Durability.CapacityAwareAssignment)
+            {
+                nodeTable.AddColumn(DatabaseConstants.LoadFactor, "REAL");
+            }
+
+            yield return nodeTable;
+
+            var assignmentTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.NodeAssignmentsTableName)));
+            assignmentTable.AddColumn("id", "TEXT").AsPrimaryKey();
+            assignmentTable.AddColumn("node_id", "TEXT").NotNull();
+            assignmentTable.AddColumn("started", "TEXT").NotNull().DefaultValueByExpression("(datetime('now'))");
+
+            yield return assignmentTable;
+
+            if (_settings.CommandQueuesEnabled)
+            {
+                var queueTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.ControlQueueTableName)));
+                queueTable.AddColumn("id", "TEXT").AsPrimaryKey();
+                queueTable.AddColumn("message_type", "TEXT").NotNull();
+                queueTable.AddColumn("node_id", "TEXT").NotNull();
+                queueTable.AddColumn(DatabaseConstants.Body, "BLOB").NotNull();
+                queueTable.AddColumn("posted", "TEXT").NotNull().DefaultValueByExpression("(datetime('now'))");
+                queueTable.AddColumn("expires", "TEXT");
+
+                yield return queueTable;
+            }
+
+            if (_settings.AddTenantLookupTable)
+            {
+                var tenantTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.TenantsTableName)));
+                tenantTable.AddColumn(StorageConstants.TenantIdColumn, "TEXT").AsPrimaryKey();
+                tenantTable.AddColumn(StorageConstants.ConnectionStringColumn, "TEXT").NotNull();
+                tenantTable.AddColumn(DatabaseConstants.DisabledColumn, "INTEGER").DefaultValueByExpression("0").NotNull();
+                yield return tenantTable;
+            }
+
+            var eventTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.NodeRecordTableName)));
+            eventTable.AddColumn("id", "INTEGER").AsPrimaryKey().AutoIncrement();
+            eventTable.AddColumn("node_number", "INTEGER").NotNull();
+            eventTable.AddColumn("event_name", "TEXT").NotNull();
+            eventTable.AddColumn("timestamp", "TEXT").NotNull().DefaultValueByExpression("(datetime('now'))");
+            eventTable.AddColumn("description", "TEXT");
+            yield return eventTable;
+
+            var restrictionTable =
+                new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.AgentRestrictionsTableName)));
+            restrictionTable.AddColumn("id", "TEXT").AsPrimaryKey();
+            restrictionTable.AddColumn("uri", "TEXT").NotNull();
+            restrictionTable.AddColumn("type", "TEXT").NotNull();
+            restrictionTable.AddColumn("node", "INTEGER").NotNull().DefaultValue(0);
+            yield return restrictionTable;
+
+            // Advisory lock table for SQLite. Deliberately NOT prefixed by the schema name the way
+            // the tables above are (GH-3943): lock ids are already derived from a hash of the schema
+            // name, so several prefixed table sets sharing one file take distinct rows out of one
+            // shared table. SqliteAdvisoryLock's SQL names it unqualified to match.
+            var lockTable = new Weasel.Sqlite.Tables.Table(new SqliteObjectName("wolverine_locks"));
+            lockTable.AddColumn("lock_id", "INTEGER").AsPrimaryKey();
+            lockTable.AddColumn("acquired_at", "TEXT").NotNull();
+            yield return lockTable;
+
+            // Dynamic listener registry (GH-2685). Provisioned only when the opt-in
+            // flag is set so existing apps see no migration churn.
+            if (Durability.EnableDynamicListeners)
+            {
+                var listenerTable =
+                    new Weasel.Sqlite.Tables.Table(new SqliteObjectName(this.TableNameFor(DatabaseConstants.ListenersTableName)));
+                listenerTable.AddColumn("uri", "TEXT").AsPrimaryKey();
+                yield return listenerTable;
+            }
+        }
+
+        foreach (var table in _otherTables)
+        {
+            yield return table;
+        }
+
+        foreach (var entry in _sagaStorage.Enumerate())
+        {
+            yield return entry.Value.Table;
+        }
+    }
+
+    private readonly List<Weasel.Sqlite.Tables.Table> _otherTables = new();
+
+    public void AddTable(Weasel.Sqlite.Tables.Table table)
+    {
+        _otherTables.Add(table);
+    }
+
+    /// <summary>
+    ///     GH-4805. Lets generated saga code construct <see cref="DatabaseSagaSchema{T,TId}" /> itself,
+    ///     which is the only way the saga path runs in a native image — <see cref="SagaSchemaFor{T,TId}" />
+    ///     below is an abstract generic method, and ILC cannot dispatch one.
+    /// </summary>
+    /// <remarks>
+    ///     <c>MakeGenericType</c> is safe here and nowhere near the runtime path: this is called once per
+    ///     saga chain while the chain model is built, under the JIT, and the <see cref="Type" /> it returns
+    ///     is only rendered as source text. Note the argument order — this store's schema is
+    ///     <c>DatabaseSagaSchema&lt;TSaga, TId&gt;</c>, whereas the SQL Server one declares its parameters
+    ///     the other way round, which is exactly why each store answers this for itself.
+    /// </remarks>
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "GH-4805. The closed type is RENDERED AS SOURCE TEXT by EnrollAndFetchSagaStorageFrame and never instantiated from this Type. Called once per saga chain while the chain model is built -- codegen time, under the JIT -- so this line does not execute in a native image at all; the generated code that replaces it is what runs there. Removing this call is the entire point of the change: it is what lets the native image construct the schema without MakeGenericType.")]
+    public SagaSchemaCodegen? SagaSchemaCodegenFor(Type sagaType, Type idType)
+    {
+        return new SagaSchemaCodegen(typeof(DatabaseSagaSchema<,>).MakeGenericType(sagaType, idType),
+            typeof(RelationalSagaStorage));
+    }
+
+    public override DatabaseSagaSchema<T, TId> SagaSchemaFor<T, TId>()
+    {
+        if (_sagaStorage.TryFind(typeof(T), out var raw))
+        {
+            if (raw is DatabaseSagaSchema<T, TId> sagaStorage)
+            {
+                return sagaStorage;
+            }
+        }
+
+        var definition = new SagaTableDefinition(typeof(T), null);
+        var storage = new DatabaseSagaSchema<T, TId>(definition, _settings);
+        _sagaStorage = _sagaStorage.AddOrUpdate(typeof(T), storage);
+
+        return storage;
+    }
+
+    protected override void writeMessageIdArrayQueryList(DbCommandBuilder builder, Guid[] messageIds)
+    {
+        var ids = string.Join(",", messageIds.Select(id => $"'{id:D}'"));
+        builder.Append($" and lower({DatabaseConstants.Id}) IN ({ids})");
+    }
+
+    public override async Task DeleteAllHandledAsync()
+    {
+        await using var conn = await DataSource.OpenConnectionAsync().ConfigureAwait(false);
+
+        var deleted = 1;
+
+        var sql = $@"
+        DELETE FROM {this.TableNameFor(DatabaseConstants.IncomingTable)}
+        WHERE id IN (
+            SELECT id FROM {this.TableNameFor(DatabaseConstants.IncomingTable)}
+            WHERE status = '{EnvelopeStatus.Handled}'
+            LIMIT 10000
+        );
+";
+
+        try
+        {
+            while (deleted > 0)
+            {
+                await using var cmd = conn.CreateCommand(sql);
+                deleted = await cmd.ExecuteNonQueryAsync();
+                await Task.Delay(10);
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+}

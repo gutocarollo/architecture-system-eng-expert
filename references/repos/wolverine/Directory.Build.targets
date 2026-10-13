@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+    <!--
+      Security remediation for GHSA-v5pm-xwqc-g5wc (uncontrolled recursion / stack overflow
+      when parsing OpenAPI documents with circular schema references).
+
+      Microsoft.AspNetCore.OpenApi 10.0.0 (net10.0) pulls in the vulnerable Microsoft.OpenApi
+      2.0.0 transitively. With TreatWarningsAsErrors=true the NU1903 restore audit turns that
+      into a hard build break. Add a direct reference to the patched 2.7.5 (same 2.x major, so
+      API-compatible with AspNetCore.OpenApi 10.x; version pinned centrally in
+      Directory.Packages.props) so it wins over the transitive 2.0.0.
+
+      Scoped deliberately to (net10.0 AND references Microsoft.AspNetCore.OpenApi):
+        * net9.0 resolves Microsoft.OpenApi 1.6.x, which is not in the affected range — leave it.
+        * Swashbuckle-only web apps resolve Microsoft.OpenApi 1.2.x — forcing 2.x would break
+          Swashbuckle 6.5.0, and they aren't vulnerable, so leave them too.
+      Non-web test projects that reference these web apps inherit the pin transitively.
+    -->
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' And @(PackageReference->AnyHaveMetadataValue('Identity', 'Microsoft.AspNetCore.OpenApi')) ">
+        <PackageReference Include="Microsoft.OpenApi" />
+    </ItemGroup>
+
+    <!--
+      Every test process builds hundreds of hosts, and Host.CreateDefaultBuilder() attaches a
+      FileSystemWatcher to the content root for each one. See src/DisableConfigReloadInTests.cs for
+      the mechanics and the numbers. Linked in from here rather than per-project so a new test
+      project cannot silently reintroduce the leak.
+
+      Keyed on IsTestProject, which Microsoft.NET.Test.Sdk sets for us, rather than on the project
+      name: eight suites here do not end in "Tests" (the six *.LeaderElection projects,
+      EfCoreTests.MultiTenancy, ChaosTesting) and a name test quietly skips every one of them.
+      It also excludes Wolverine.ComplianceTests, which ships as WolverineFx.ComplianceTests — a
+      module initializer that mutates process environment variables has no business inside a
+      published package.
+
+      This lives in Directory.Build.targets and not .props because .props is imported before the
+      project body and before the NuGet-generated props, so IsTestProject is not set yet there.
+
+      Do NOT reach for '$(PackageId)' == '' as the package guard: PackageId defaults to the assembly
+      name, so that condition is false for every project and silently compiles nothing — while the
+      build still reports success.
+    -->
+    <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
+        <Compile Include="$(MSBuildThisFileDirectory)src/DisableConfigReloadInTests.cs">
+            <Link>DisableConfigReloadInTests.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+</Project>

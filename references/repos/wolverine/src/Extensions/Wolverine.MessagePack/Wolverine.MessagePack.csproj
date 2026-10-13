@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>MessagePack serialization for Wolverine Applications</Description>
+        <PackageId>WolverineFx.MessagePack</PackageId>
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Wolverine\Wolverine.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MessagePack" />
+    </ItemGroup>
+
+</Project>

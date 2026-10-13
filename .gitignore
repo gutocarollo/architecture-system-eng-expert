@@ -1,2 +1,45 @@
-.idea/
+# architecture-system-eng-expert
+# Blobs pesados (> 1MB) ficam apenas no disco local, fora do versionamento.
+# Motivo: manter o repositório remoto leve/pushável sem LFS. Ver references/README.md.
+
+/references/data-engineer-handbook/intermediate-bootcamp/materials/1-dimensional-data-modeling/data.dump
+/references/data-engineer-handbook/intermediate-bootcamp/materials/1-dimensional-data-modeling/visual notes/01__Dimensional Data Modeling.png
+/references/data-engineer-handbook/intermediate-bootcamp/materials/1-dimensional-data-modeling/visual notes/02__Idempotency_SCD.png
+/references/data-engineer-handbook/intermediate-bootcamp/materials/2-fact-data-modeling/resources/slides/fact-data-modeling-day-1-jade-wilson.pdf
+/references/data-engineer-handbook/intermediate-bootcamp/materials/3-spark-fundamentals/data/events.csv
+/references/data-engineer-handbook/intermediate-bootcamp/materials/3-spark-fundamentals/data/match_details.csv
+/references/data-engineer-handbook/intermediate-bootcamp/materials/3-spark-fundamentals/data/matches.csv
+/references/data-engineer-handbook/intermediate-bootcamp/materials/3-spark-fundamentals/data/medals_matches_players.csv
+/references/data-engineer-handbook/intermediate-bootcamp/materials/6-data-impact-training/data/events.csv
+/references/repos/awesome-software-architecture/assets/home.png
+/references/repos/debezium/documentation/modules/ROOT/assets/images/debezium-platform-pipeline-logs.png
+/references/repos/marten/docs/images/a_pine_marten_walking_across_a_tree_branch.png
+/references/repos/marten/docs/images/japanese_marten.png
+/references/repos/marten/docs/images/japanese_marten2.png
+/references/repos/marten/docs/images/martens-in-conference-room.png
+/references/repos/marten/docs/images/martens-on-quest.png
+/references/repos/marten/docs/images/ping_marten_jumping_off_branch.png
+/references/repos/marten/documentation/content/images/marten.jpeg
+/references/repos/marten/src/EventAppenderPerfTester/data.json
+/references/repos/marten/src/Marten.Testing/Github/fubucore.json
+/references/repos/marten/src/Marten.Testing/Github/fubumvc.json
+/references/repos/marten/src/Marten.Testing/Github/storyteller.json
+/references/repos/marten/src/Marten.Testing/Github/structuremap.json
+/references/repos/modular-monolith-with-ddd/docs/Images/Payments_EventStorming_Design_HighRes.jpg
+/references/repos/modular-monolith-with-ddd/docs/Project/MyMeetings.vpp
+/references/repos/watermill/_examples/real-world-examples/server-sent-events/screen.gif
+/references/repos/wolverine/docs/public/WolverineMessaging.png
+/references/repos/wolverine/docs/public/jasper.png
+/references/repos/wolverine/docs/public/modular-monolith.png
+/references/repos/wolverine/docs/public/wolverines-wizard-of-oz.png
+/references/repos/wolverine/src/Testing/Benchmarks/attic/targets.json
+
+# Artefatos de build/comuns
+**/bin/
+**/obj/
+**/target/
+**/node_modules/
+**/.venv/
+**/__pycache__/
+**/.idea/
 .DS_Store

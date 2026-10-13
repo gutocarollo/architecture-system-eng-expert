@@ -1,0 +1,24 @@
+using System.Linq;
+using System.Threading.Tasks;
+using Marten.Testing.Documents;
+using Marten.Testing.Harness;
+using Shouldly;
+using Marten;
+namespace LinqTests.Bugs;
+
+public class Bug_1413_not_inside_of_where_against_child_collection : IntegrationContext
+{
+    public Bug_1413_not_inside_of_where_against_child_collection(DefaultStoreFixture fixture) : base(fixture)
+    {
+    }
+
+    [Fact]
+    public async Task can_do_so()
+    {
+        await theStore.Advanced.ResetAllData();
+        var results = (await theSession.Query<Target>().Where(x => x.Children.Any(c => c.String == "hello" && c.Color != Colors.Blue))
+            .ToListAsync());
+
+        results.ShouldNotBeNull();
+    }
+}

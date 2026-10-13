@@ -1,0 +1,336 @@
+# Oracle Integration
+
+::: info
+Wolverine can use the Oracle durability options with any mix of Entity Framework Core
+as a higher level persistence framework
+:::
+
+Wolverine supports an Oracle backed message persistence strategy and even an Oracle backed messaging transport
+option. To get started, add the `WolverineFx.Oracle` dependency to your application:
+
+```bash
+dotnet add package WolverineFx.Oracle
+```
+
+## Message Persistence
+
+To enable Oracle to serve as Wolverine's [transactional inbox and outbox](./), you just need to use the `WolverineOptions.PersistMessagesWithOracle()`
+extension method as shown below in a sample:
+
+```cs
+var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("oracle");
+
+builder.Host.UseWolverine(opts =>
+{
+    // Setting up Oracle-backed message storage
+    // This requires a reference to Wolverine.Oracle
+    opts.PersistMessagesWithOracle(connectionString);
+
+    // Other Wolverine configuration
+});
+
+// This is rebuilding the persistent storage database schema on startup
+// and also clearing any persisted envelope state
+builder.Host.UseResourceSetupOnStartup();
+
+var app = builder.Build();
+
+// Other ASP.Net Core configuration...
+
+// Using JasperFx opens up command line utilities for managing
+// the message storage
+return await app.RunJasperFxCommands(args);
+```
+
+## Aspire Integration
+
+The recommended way to integrate Wolverine with .NET Aspire for Oracle is to read the connection string injected by Aspire via `IConfiguration.GetConnectionString()`.
+
+**AppHost** (`Aspire.Hosting.Oracle` NuGet):
+```csharp
+var oracle = builder.AddOracle("oracle")
+    .AddDatabase("wolverine");
+
+builder.AddProject<Projects.MyWorker>("worker")
+    .WithReference(oracle)
+    .WaitFor(oracle);
+```
+
+**Service project:**
+```csharp
+var builder = Host.CreateApplicationBuilder(args);
+
+// Aspire injects ConnectionStrings__wolverine automatically via WithReference()
+var connectionString = builder.Configuration.GetConnectionString("wolverine")!;
+
+builder.UseWolverine(opts =>
+{
+    opts.PersistMessagesWithOracle(connectionString);
+    opts.Policies.UseDurableLocalQueues();
+});
+
+await builder.Build().RunAsync();
+```
+
+`WaitFor(oracle)` in the AppHost ensures Oracle is healthy before your service starts. If you are using Entity Framework Core with Oracle, install `Aspire.Oracle.EntityFrameworkCore` and call `builder.AddOracleDatabaseDbContext<MyDbContext>("wolverine")` to register the `DbContext`.
+
+## Oracle Messaging Transport
+
+::: info
+All Oracle queues are built into a *WOLVERINE_QUEUES* schema by default.
+:::
+
+The `WolverineFx.Oracle` Nuget also contains a simple messaging transport that was mostly meant to be usable for teams
+who want asynchronous queueing without introducing more specialized infrastructure. To enable this transport in your code,
+use the `EnableMessageTransport()` option which also requires Oracle backed message persistence:
+
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.UseWolverine(opts =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("oracle");
+    opts.PersistMessagesWithOracle(
+            connectionString,
+
+            // This argument is the database schema for the envelope storage
+            // If separate logical services are targeting the same physical database,
+            // you should use a separate schema name for each logical application
+            // to make basically *everything* run smoother
+            "MYAPP")
+
+        // Enable the Oracle messaging transport
+        .EnableMessageTransport(transport =>
+        {
+            // Configure the schema name for transport queue tables
+            transport.TransportSchemaName("QUEUES");
+
+            // Tell Wolverine to build out all necessary queue or scheduled message
+            // tables on demand as needed
+            transport.AutoProvision();
+
+            // Optional that may be helpful in testing, but probably bad
+            // in production!
+            transport.AutoPurgeOnStartup();
+        });
+
+    // Use this extension method to create subscriber rules
+    opts.PublishAllMessages().ToOracleQueue("outbound");
+
+    // Use this to set up queue listeners
+    opts.ListenToOracleQueue("inbound")
+
+        .CircuitBreaker(cb =>
+        {
+            // fine tune the circuit breaker
+            // policies here
+        })
+
+        // Optionally specify how many messages to
+        // fetch into the listener at any one time
+        .MaximumMessagesToReceive(50);
+});
+
+using var host = builder.Build();
+await host.StartAsync();
+```
+
+The Oracle transport is strictly queue-based at this point. The queues are configured as durable by default, meaning
+that they are utilizing the transactional inbox and outbox. The Oracle queues can also be buffered:
+
+```cs
+opts.ListenToOracleQueue("sender").BufferedInMemory();
+```
+
+Using this option just means that the Oracle queues can be used for both sending or receiving with no integration
+with the transactional inbox or outbox. This is a little more performant, but less safe as messages could be
+lost if held in memory when the application shuts down unexpectedly.
+
+### Polling
+Wolverine has a number of internal polling operations, and any Oracle queues will be polled on a configured interval.
+The default polling interval is set in the `DurabilitySettings` class and can be configured at runtime as below:
+
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.UseWolverine(opts =>
+{
+    // Health check message queue/dequeue
+    opts.Durability.HealthCheckPollingTime = TimeSpan.FromSeconds(10);
+
+    // Node reassigment checks
+    opts.Durability.NodeReassignmentPollingTime = TimeSpan.FromSeconds(5);
+
+    // User queue poll frequency
+    opts.Durability.ScheduledJobPollingTime = TimeSpan.FromSeconds(5);
+}
+```
+
+You can also override the polling interval for a specific queue:
+
+```cs
+opts.ListenToOracleQueue("inbound").PollingInterval(2.Seconds());
+```
+
+When not set, the queue falls back to the global `DurabilitySettings.ScheduledJobPollingTime`.
+
+::: info Control queue
+Wolverine has an internal control queue (`dbcontrol`) used for internal operations.
+This queue is hardcoded to poll every second and should not be changed to ensure the stability of the application.
+:::
+
+### Deterministic Queue Ordering
+
+Each Oracle queue listener takes the oldest messages first and hands each batch to Wolverine in `timestamp`
+order. Scheduled messages are moved to the ready queue in `execution_time` order. The `timestamp` column
+defaults to `SYSTIMESTAMP AT TIME ZONE 'UTC'`, which has microsecond precision, so two messages sent
+separately rarely share a value. Ties are still possible: messages written within the same microsecond,
+messages written by a single statement, or rows whose timestamps were set explicitly. Messages with the
+same timestamp can be returned in either order. To persist a tie-breaker for those rows, opt into
+deterministic queue ordering:
+
+```cs
+opts.PersistMessagesWithOracle(connectionString, "MYAPP")
+    .EnableMessageTransport(transport =>
+    {
+        transport.EnableDeterministicQueueOrdering();
+    });
+```
+
+This adds a `queue_order NUMBER(19) GENERATED BY DEFAULT AS IDENTITY` column to the ready and scheduled
+queue tables, plus composite indexes on `(timestamp, queue_order)` and `(execution_time, queue_order)`.
+It applies to both durable and buffered listeners, including the queue tables in every tenant database,
+and keeps scheduled messages that share an execution time in sequence when they are promoted to the
+ready queue. Existing queue rows are retained, and Oracle gives each of them a distinct `queue_order`
+value when the column is added. Their original order cannot be reconstructed when their timestamps
+already tie. This gives a stable order within each queue; it does not define global transaction commit
+order across concurrent senders, consumers, or different queues. The identity is backed by an Oracle
+sequence, which hands out increasing values on a single instance. On Oracle RAC, sequence values are
+not ordered across instances by default.
+
+The option is disabled by default so existing applications do not receive an automatic queue schema
+change. With `AutoCreate.None`, apply the Wolverine resource migration before starting with the option
+enabled. Configure the option consistently on every application using the same queue schema; once the
+schema has been upgraded, leaving the option disabled preserves the added column and indexes. The
+existing `execution_time` index on the scheduled table remains and the opt-in adds the composite indexes,
+which take additional storage and write maintenance. Adding the identity column to a populated table
+updates every existing row, so apply the migration while the queues are small or quiet.
+
+For a safe rollout, deploy the compatible version with this option disabled to every application sharing
+the queue schema. Then apply the opt-in schema migration and enable the option on all consumers. Rolling
+back to a binary that predates this change requires suppressing its automatic queue schema migrations,
+because its older table model may remove the added column and indexes.
+
+### Resetting in Tests
+
+`RebuildAsync()` / `ClearAllAsync()` on the message store clear envelope storage only — they leave
+this transport's queue and scheduled-message tables alone. To wipe both in an integration test
+harness, call [`IHost.ClearAllWolverineStorageAsync()`](/guide/testing.html#resetting-all-wolverine-storage-in-tests),
+which leaves the queue tables built but empty across every tenant database.
+
+## Multi-Tenancy
+
+As of Wolverine 5.x, you can use multi-tenancy through separate databases per tenant with Oracle.
+
+To utilize Wolverine managed multi-tenancy, you have a couple main options. The simplest is just using a static configured
+set of tenant id to database connections like so:
+
+```cs
+var builder = Host.CreateApplicationBuilder();
+
+var configuration = builder.Configuration;
+
+builder.UseWolverine(opts =>
+{
+    // First, you do have to have a "main" Oracle database for messaging persistence
+    // that will store information about running nodes, agents, and non-tenanted operations
+    opts.PersistMessagesWithOracle(configuration.GetConnectionString("main"))
+
+        // Add known tenants at bootstrapping time
+        .RegisterStaticTenants(tenants =>
+        {
+            // Add connection strings for the expected tenant ids
+            tenants.Register("tenant1", configuration.GetConnectionString("tenant1"));
+            tenants.Register("tenant2", configuration.GetConnectionString("tenant2"));
+            tenants.Register("tenant3", configuration.GetConnectionString("tenant3"));
+        });
+});
+```
+
+If you need to be able to add new tenants at runtime or just have more tenants than is comfortable living in static configuration
+or plenty of other reasons I could think of, you can also use Wolverine's "master table tenancy" approach where tenant id
+to database connection string information is kept in a separate database table.
+
+Here's a possible usage of that model:
+
+```cs
+var builder = Host.CreateApplicationBuilder();
+
+var configuration = builder.Configuration;
+builder.UseWolverine(opts =>
+{
+    // You need a main database no matter what that will hold information about the Wolverine system itself
+    // and..
+    opts.PersistMessagesWithOracle(configuration.GetConnectionString("wolverine"))
+
+        // ...also a table holding the tenant id to connection string information
+        .UseMasterTableTenancy(seed =>
+        {
+            // These registrations are 100% just to seed data for local development
+            // Maybe you want to omit this during production?
+            // Or do something programmatic by looping through data in the IConfiguration?
+            seed.Register("tenant1", configuration.GetConnectionString("tenant1"));
+            seed.Register("tenant2", configuration.GetConnectionString("tenant2"));
+            seed.Register("tenant3", configuration.GetConnectionString("tenant3"));
+        });
+
+});
+```
+
+Here's some more important background on the multi-tenancy support:
+
+* Wolverine is spinning up a completely separate "durability agent" across the application to recover stranded messages in
+  the transactional inbox and outbox, and that's done automatically for you
+* The lightweight saga support for Oracle absolutely works with this model of multi-tenancy
+* Wolverine is able to manage all of its database tables including the tenant table itself (`wolverine_tenants`) across both the
+  main database and all the tenant databases including schema migrations
+* Wolverine's transactional middleware is aware of the multi-tenancy and can connect to the correct database based on the `IMessageContext.TenantId`
+  or utilize the tenant id detection in Wolverine.HTTP as well
+* You can "plug in" a custom implementation of `ITenantSource<string>` to manage tenant id to connection string assignments in whatever way works for your deployed system
+
+::: warning
+Wolverine is not able to dynamically tear down tenants yet. That's long planned, and honestly probably only happens
+when an outside company sponsors that work.
+:::
+
+## Lightweight Saga Usage
+
+See the details on [Lightweight Saga Storage](/guide/durability/sagas.html#lightweight-saga-storage) for more information.
+
+## Oracle-Specific Considerations
+
+### Schema Names
+
+Oracle schema names are always stored in upper case by Wolverine. The default schema name for envelope storage is `WOLVERINE`,
+and the default schema name for transport queues is `WOLVERINE_QUEUES`.
+
+### Advisory Locks
+
+Wolverine uses row-level locks (`SELECT ... FOR UPDATE NOWAIT`) against a `wolverine_locks` table for distributed locking
+to coordinate scheduled message processing across nodes. Each lock is keyed by an integer lock id.
+
+### Data Types
+
+The Oracle persistence uses the following data type mappings:
+
+| Purpose | Oracle Type |
+|---------|------------|
+| Message body | `BLOB` |
+| GUIDs | `RAW(16)` |
+| Timestamps | `TIMESTAMP WITH TIME ZONE` |
+| String identifiers | `NVARCHAR2` |
+
+### Compatibility
+
+The Oracle persistence requires:
+- Oracle Database 19c+
+- Uses the [Oracle.ManagedDataAccess.Core](https://www.nuget.org/packages/Oracle.ManagedDataAccess.Core) driver via Weasel.Oracle

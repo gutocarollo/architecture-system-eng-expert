@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>Compliance test harnesses for adding persistence and transport options to Wolverine</Description>
+        <PackageId>WolverineFx.ComplianceTests</PackageId>
+        <!--
+          This is a LIBRARY of xUnit base classes, not a test project, so it references
+          xunit.v3.extensibility.core rather than xunit.v3. xunit.v3 would force
+          <OutputType>Exe</OutputType> (its targets hard-error otherwise), which a package
+          consumed by ~40 downstream test projects must not be.
+        -->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Wolverine\Wolverine.csproj"/>
+        <ProjectReference Include="..\..\Persistence\Wolverine.RDBMS\Wolverine.RDBMS.csproj"/>
+        <!--
+          Core WolverineFx no longer ships the Roslyn runtime compiler (#2876). Compliance
+          suites bootstrap Wolverine hosts in the default TypeLoadMode.Dynamic, so they need
+          the runtime compiler. Referencing WolverineFx.RuntimeCompilation here flows
+          transitively to the ~39 downstream test/sample projects and auto-registers
+          IAssemblyGenerator via its [WolverineModule] — no per-project change needed.
+        -->
+        <ProjectReference Include="..\..\Wolverine.RuntimeCompilation\Wolverine.RuntimeCompilation.csproj"/>
+        <!--
+          TransportCompliance.cs exercises options.UseNewtonsoftForSerialization()
+          against every transport. Newtonsoft moved to its own package in 6.0;
+          the compliance harness carries the explicit dependency so transport
+          authors who run the compliance suite don't have to install the extra
+          package by hand.
+        -->
+        <ProjectReference Include="..\..\Extensions\Wolverine.Newtonsoft\Wolverine.Newtonsoft.csproj"/>
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="xunit.v3.extensibility.core" />
+        <!--
+          GH-4634. ConjoinedTenancyCompliance has to skip out loud on a store that cannot run one of
+          the battery items (Fisher has no switch to disable default-tenant usage; neither Polecat nor
+          Fisher has a TenantIdStyle of its own), and dynamic Assert.Skip lives in xunit.v3.assert.
+          Every downstream consumer already pulls this in transitively through xunit.v3, at the same
+          pinned version, so this widens the package's declared dependencies without widening what any
+          consumer actually restores.
+        -->
+        <PackageReference Include="xunit.v3.assert" />
+        <!--
+          GH-4634. ConjoinedTenancyCompliance defines the TenantTally aggregate, and the Apply/Create
+          dispatcher for a self-aggregating type is emitted by this compile-time generator in the
+          assembly that DEFINES the type. There is no runtime fallback, only an
+          InvalidProjectionException naming this assembly. PrivateAssets=all keeps it from flowing to
+          the ~40 downstream test projects, where a second analyzer instance emitting the same
+          dispatchers is the CS0433 failure that PolecatTests.csproj and FisherTests.csproj already
+          carry a target to avoid.
+        -->
+        <PackageReference Include="JasperFx.Events.SourceGenerator" OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" PrivateAssets="all" />
+    </ItemGroup>
+
+</Project>

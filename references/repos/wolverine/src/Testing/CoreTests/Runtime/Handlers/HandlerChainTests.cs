@@ -1,0 +1,92 @@
+﻿using JasperFx;
+using Microsoft.Extensions.Logging;
+using Wolverine.ComplianceTests.Compliance;
+using Wolverine.Persistence;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Handlers;
+using Xunit;
+
+namespace CoreTests.Runtime.Handlers;
+
+public class HandlerChainTests
+{
+
+    [Fact]
+    public void the_default_success_log_level_is_debug()
+    {
+        // Changed from Information in GH-3490 — a per-message Information log is a real
+        // throughput tax on hot listeners
+        var chain = HandlerChain.For<Target>(x => x.Go(null!), null!);
+        chain.SuccessLogLevel.ShouldBe(LogLevel.Debug);
+    }
+
+    [Fact]
+    public void is_transactional_is_false_by_default()
+    {
+        var chain = HandlerChain.For<Target>(x => x.Go(null!), null!);
+        chain.IsTransactional.ShouldBeFalse();
+    }   
+
+    [Fact]
+    public void default_idempotency_is_none()
+    {
+        var chain = HandlerChain.For<Target>(x => x.Go(null!), null!);
+        chain.Idempotency.ShouldBe(IdempotencyStyle.None);
+    }
+
+    [Fact]
+    public void open_telemetry_enabled_is_true_by_default()
+    {
+        var chain = HandlerChain.For<Target>(x => x.Go(null!), null!);
+        chain.TelemetryEnabled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void create_by_method()
+    {
+        var chain = HandlerChain.For<Target>(x => x.Go(null!), null!);
+        chain.MessageType.ShouldBe(typeof(Message1));
+
+        var methodCall = chain.Handlers.Single();
+        methodCall.HandlerType.ShouldBe(typeof(Target));
+        methodCall.Method.Name.ShouldBe(nameof(Target.Go));
+    }
+
+    [Fact]
+    public void create_by_static_method()
+    {
+        var chain = HandlerChain.For<Target>(nameof(Target.GoStatic), null!);
+
+        chain.MessageType.ShouldBe(typeof(Message2));
+
+        var methodCall = chain.Handlers.Single();
+        methodCall.HandlerType.ShouldBe(typeof(Target));
+        methodCall.Method.Name.ShouldBe(nameof(Target.GoStatic));
+    }
+
+    [Fact]
+    public void default_number_of_max_attempts_is_null()
+    {
+        var chain = HandlerChain.For<Target>(nameof(Target.GoStatic), null!);
+        chain.Failures.MaximumAttempts.HasValue.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ignore_message_type_as_service_dependency()
+    {
+        var chain = HandlerChain.For<Target>(nameof(Target.GoStatic), null!);
+        chain.ServiceDependencies(ServiceContainer.Empty(), new List<Type>())
+            .ShouldNotContain(typeof(Message2));
+    }
+
+    public class Target
+    {
+        public void Go(Message1 message)
+        {
+        }
+
+        public static void GoStatic(Message2 message)
+        {
+        }
+    }
+}

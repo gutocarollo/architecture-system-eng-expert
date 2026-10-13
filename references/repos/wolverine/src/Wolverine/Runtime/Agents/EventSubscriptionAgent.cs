@@ -1,0 +1,409 @@
+using JasperFx;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+using JasperFxSubscriptionAgent = JasperFx.Events.Daemon.ISubscriptionAgent;
+
+namespace Wolverine.Runtime.Agents;
+
+public class EventSubscriptionAgent : IEventSubscriptionAgent
+{
+    private readonly ShardName _shardName;
+    private readonly IProjectionDaemon _daemon;
+    private readonly ILogger _logger;
+    private JasperFxSubscriptionAgent? _innerAgent;
+
+    // Health check stall tracking
+    private long _lastKnownSequence;
+    private DateTimeOffset _lastAdvancedAt;
+
+    /// <summary>
+    /// Clock used by the stall detector. Defaults to the system clock; tests substitute it so the
+    /// auto-restart path can be exercised without waiting out StallTimeout three times over.
+    /// </summary>
+    public TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+    private int _consecutiveStallCount;
+
+    // Configurable thresholds (loaded from progression table, with defaults)
+    private long? _warningThreshold;
+    private long? _criticalThreshold;
+    private bool _thresholdsLoaded;
+
+    private const long DefaultWarningThreshold = 1000;
+    private const long DefaultCriticalThreshold = 5000;
+    private static readonly TimeSpan StallTimeout = TimeSpan.FromSeconds(60);
+    private const int MaxConsecutiveStallsBeforeRestart = 3;
+
+    // GH-3888: auto-restarts attempted since the sequence last advanced. Unlike _consecutiveStallCount,
+    // which resets on every restart, this only resets on observed progress — it is the evidence that
+    // restarting HERE is not working.
+    private int _restartsSinceProgress;
+
+    // GH-3888: 0=idle, 1=a restart is executing. Health checks arriving while a restart is still in
+    // flight used to dispatch ANOTHER concurrent restart on every tick; with the release budget spent
+    // at dispatch, that would also burn budget slots on restarts that never got a chance to work.
+    private int _restartInFlight;
+
+    /// <summary>
+    /// GH-3888: how many node-local auto-restarts this agent may attempt without its sequence advancing
+    /// before it declares its local restart budget exhausted and asks to be released to another capable
+    /// node. Stamped from <see cref="DurabilitySettings.MaxLocalAgentRestartsBeforeRelease" /> by
+    /// <see cref="EventSubscriptionAgentFamily.BuildAgentAsync" />; zero or negative disables release
+    /// and keeps unbounded local retries.
+    /// </summary>
+    public int MaxLocalRestartsBeforeRelease { get; set; } = 3;
+
+    /// <inheritdoc cref="IEventSubscriptionAgent.LocalRestartsExhausted" />
+    public bool LocalRestartsExhausted { get; private set; }
+
+    /// <inheritdoc cref="IEventSubscriptionAgent.ResetLocalRestartBudget" />
+    public void ResetLocalRestartBudget()
+    {
+        _restartsSinceProgress = 0;
+        _consecutiveStallCount = 0;
+        LocalRestartsExhausted = false;
+        _lastAdvancedAt = TimeProvider.GetUtcNow();
+    }
+
+    /// <summary>
+    /// Callback fired when the agent is auto-restarted due to stalls.
+    /// Parameters: agentUri, reason, timestamp
+    /// </summary>
+    public Action<string, string, DateTimeOffset>? OnRestarted { get; set; }
+
+    /// <summary>
+    /// Set by <see cref="EventStoreAgents.BuildAgentAsync"/> so the owning store can count how many of a
+    /// database's agents are running on this node, and let go of that database's tracker subscriptions
+    /// when the last one stops.
+    /// </summary>
+    internal Func<ValueTask>? OnStarted { get; set; }
+
+    internal Func<ValueTask>? OnStopped { get; set; }
+
+    public EventSubscriptionAgent(Uri uri, ShardName shardName, IProjectionDaemon daemon, ILogger logger)
+    {
+        _shardName = shardName;
+        _daemon = daemon;
+        _logger = logger;
+        Uri = uri;
+    }
+
+    public EventSubscriptionAgent(Uri uri, ShardName shardName, IProjectionDaemon daemon)
+        : this(uri, shardName, daemon, Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance)
+    {
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await resumeContinuousAsync(cancellationToken);
+
+        // Only count an agent that actually started - a throw above leaves the count untouched
+        if (OnStarted != null)
+        {
+            await OnStarted();
+        }
+    }
+
+    // Start (or re-adopt) the continuous inner agent through the registered daemon path and refresh the
+    // wrapper's view of it. Deliberately does NOT invoke OnStarted: the running-agent bookkeeping in
+    // EventStoreAgents counts one logical agent per node for the observer-subscription lifecycle, and a
+    // rebuild/rewind is transparent to that count (the wrapper never observed a matching stop), so
+    // re-counting here would leak the database's tracker subscriptions. See GH-3520.
+    private async Task resumeContinuousAsync(CancellationToken cancellationToken)
+    {
+        _innerAgent = await _daemon.StartAgentAsync(_shardName, cancellationToken);
+        Status = AgentStatus.Running;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _daemon.StopAgentAsync(_shardName);
+        Status = AgentStatus.Stopped;
+
+        if (OnStopped != null)
+        {
+            await OnStopped();
+        }
+    }
+
+    public async Task RebuildAsync(CancellationToken cancellationToken)
+    {
+        // Pass the shard's tenant so a per-tenant agent rebuilds ONLY its tenant's partition under
+        // single-database per-tenant partitioning. _shardName.TenantId is null for store-global /
+        // database-per-tenant shards, where the tenant-less behavior is correct.
+        await _daemon.RebuildProjectionAsync(_shardName.Name, _shardName.TenantId, cancellationToken);
+
+        // GH-3520: the daemon-level rebuild stops the continuous agent and never restarts it. Under
+        // Wolverine-managed distribution there is no store coordinator to resurrect it, and this wrapper
+        // would otherwise keep reporting Running against the now-stopped agent, so NodeAgentController
+        // sees nothing to fix and the shard freezes at RegisteredIdle while its high-water climbs.
+        // Restore continuous execution ourselves through the registered daemon start path.
+        await resumeContinuousAsync(cancellationToken);
+    }
+
+    public async Task RewindAsync(long? sequenceFloor, DateTimeOffset? timestamp, CancellationToken cancellationToken)
+    {
+        // The per-tenant overload delegates to the store-global path when TenantId is null, so this
+        // covers both store-global and per-tenant rewinds. This is the agent-level rewind path
+        // CritterWatch needs because DaemonForDatabase() throws under Wolverine-managed distribution.
+        await _daemon.RewindSubscriptionAsync(_shardName.Name, _shardName.TenantId, cancellationToken,
+            sequenceFloor, timestamp);
+
+        // GH-3520: same freeze as RebuildAsync. RewindSubscriptionAsync restarts continuous agents
+        // daemon-side, but the wrapper's _innerAgent still points at the stopped pre-rewind agent and
+        // Status still reads Running. Re-adopt the live agent through the registered start path so the
+        // wrapper reflects reality. This requires JasperFx#536 (rewind registers its restarted agent) so
+        // the registered start resolves to that same running agent idempotently rather than spinning up a
+        // duplicate on the same progression row - this ships in lockstep with that JasperFx bump.
+        await resumeContinuousAsync(cancellationToken);
+    }
+
+    public Uri Uri { get; }
+
+    private AgentStatus _status = AgentStatus.Stopped;
+
+    // GH-3519: reflect the LIVE daemon shard status once we have started rather than latching a value.
+    // The wedge in the field: a shard that stops or idles underneath this wrapper -- a lost
+    // first-assignment start race, a daemon-side stop, or an execution-loop fault -- used to keep
+    // reading Running because nothing flipped the latched field back. NodeAgentController only restarts
+    // agents it can see are non-Running, so a wrapper that lies "Running" over a dead shard froze at
+    // RegisteredIdle forever while its high-water climbed. Delegating to the inner agent (whose Status
+    // the daemon keeps current) lets the controller's reevaluation notice the dead shard and restart it.
+    // Before an inner agent exists, or after an explicit StopAsync (which sets _status = Stopped), fall
+    // back to the wrapper's own tracked value so a not-yet-started / deliberately-stopped agent still
+    // reads Stopped.
+    public AgentStatus Status
+    {
+        get => _status == AgentStatus.Stopped ? AgentStatus.Stopped : _innerAgent?.Status ?? _status;
+        private set => _status = value;
+    }
+
+    /// <inheritdoc />
+    // GH-3638: the reason rides alongside the status for exactly the same reason the status itself
+    // delegates (GH-3519) -- the daemon owns both, and it sets Failure at the same moment it flips Status
+    // to Paused/Stopped and clears it on start/replay. Reading a cached copy here would let the wrapper
+    // report a stale reason for a shard that has since recovered.
+    public ShardFailure? Failure => _innerAgent?.Failure;
+
+    /// <summary>
+    /// The failure categories that will fail again on the exact same event no matter how many times the
+    /// shard is restarted, so an automated restart is pure churn: it burns the daemon's start path, resets
+    /// the operator's view of the failure, and re-pauses on the same sequence.
+    /// <see cref="ShardFailureCategory.ProgressionOutOfOrder" /> is worse than useless — it means two
+    /// processes are on the same shard, and restarting adds a third contender. Only
+    /// <see cref="ShardFailureCategory.Other" /> (a database outage, a timeout) is what auto-restart is
+    /// actually for. See GH-3638.
+    /// </summary>
+    private static bool canSelfHeal(ShardFailure? failure)
+        => failure == null || failure.Category == ShardFailureCategory.Other;
+
+    // GH-3638: turn "paused due to errors" into something an operator can act on without going to dig
+    // through logs -- what kind of failure, which event it died on, and the exception type that actually
+    // names the fault (the root, not the ApplyEventException/ShardStopException wrapper around it).
+    private static string describeFailure(Uri uri, AgentStatus status, ShardFailure failure)
+    {
+        var where = failure.Event == null
+            ? string.Empty
+            : $" at event sequence {failure.Event.Sequence}" +
+              (failure.Event.EventTypeName == null ? string.Empty : $" ({failure.Event.EventTypeName})") +
+              (failure.Event.TenantId == null ? string.Empty : $" for tenant '{failure.Event.TenantId}'");
+
+        return $"Projection {uri} is {status} on a {failure.Category} failure{where}: " +
+               $"{failure.RootExceptionType}: {failure.Message}";
+    }
+
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        var status = Status;
+        if (status is AgentStatus.Paused or AgentStatus.Stopped)
+        {
+            var failure = Failure;
+            if (failure != null)
+            {
+                return Task.FromResult(HealthCheckResult.Unhealthy(describeFailure(Uri, status, failure)));
+            }
+        }
+
+        if (status == AgentStatus.Paused)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy($"Projection {Uri} paused due to errors"));
+        }
+
+        if (status != AgentStatus.Running)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy($"Agent {Uri} is {status}"));
+        }
+
+        // Load thresholds on first health check
+        if (!_thresholdsLoaded)
+        {
+            LoadThresholds();
+        }
+
+        // GH-3580: a per-tenant agent's Position lives in its OWN tenant's event sequence (per-tenant
+        // event partitioning gives every tenant an independent sequence -- the reason the per-tenant
+        // fan-out exists, GH-3280), so it must be measured against that tenant's high-water mark, not
+        // the database-wide tracker mark. The inner JasperFx agent already carries the tenant-scoped
+        // mark: it is seeded from the per-tenant ceiling at start and only ever raised by the tenanted
+        // high-water coordinator's per-tenant routing (marten#4717). Comparing against the database-wide
+        // mark made every quiet tenant in a busy database read as thousands of "events behind" (a tenant
+        // with zero events reported the full database mark) and fed the stall detector the permanently
+        // true "currentSequence < highWaterMark", auto-restarting healthy idle agents.
+        var highWaterMark = _shardName.TenantId != null
+            ? _innerAgent?.HighWaterMark ?? 0
+            : _daemon.Tracker.HighWaterMark;
+        var currentSequence = _innerAgent?.Position ?? 0;
+
+        var warningThreshold = _warningThreshold ?? DefaultWarningThreshold;
+        var criticalThreshold = _criticalThreshold ?? DefaultCriticalThreshold;
+
+        // Check if behind thresholds
+        var behindCount = highWaterMark - currentSequence;
+        if (behindCount > criticalThreshold)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy(
+                $"Projection {Uri} is {behindCount} events behind (critical threshold: {criticalThreshold})"));
+        }
+
+        if (behindCount > warningThreshold)
+        {
+            return Task.FromResult(HealthCheckResult.Degraded(
+                $"Projection {Uri} is {behindCount} events behind (warning threshold: {warningThreshold})"));
+        }
+
+        // Check for stalled projection
+        if (_lastAdvancedAt == default)
+        {
+            // First observation. Anchored here rather than in the constructor so a substituted
+            // TimeProvider is the one that sets it -- otherwise the baseline comes from the system
+            // clock and every later comparison against a test clock reads as stalled since year one.
+            _lastAdvancedAt = TimeProvider.GetUtcNow();
+        }
+
+        if (currentSequence != _lastKnownSequence)
+        {
+            // Sequence has advanced, reset stall tracking. Progress also refunds the GH-3888 release
+            // budget: the point of the budget is "restarting here is not working", and it just worked.
+            _lastKnownSequence = currentSequence;
+            _lastAdvancedAt = TimeProvider.GetUtcNow();
+            _consecutiveStallCount = 0;
+            _restartsSinceProgress = 0;
+            LocalRestartsExhausted = false;
+        }
+        else if (currentSequence < highWaterMark &&
+                 TimeProvider.GetUtcNow() - _lastAdvancedAt > StallTimeout)
+        {
+            // Sequence hasn't changed, there are events ahead, and it's been stalled
+            _consecutiveStallCount++;
+
+            if (_consecutiveStallCount >= MaxConsecutiveStallsBeforeRestart)
+            {
+                // GH-3638: a shard stalled behind a per-event failure will die on that same event on every
+                // restart, so restarting it is churn that also resets the operator's view every time the
+                // stall detector fires. Surface the failure and leave it alone; only a self-healing
+                // category (a database blip, a timeout -- what auto-restart actually exists for) is retried.
+                var failure = Failure;
+                if (!canSelfHeal(failure))
+                {
+                    return Task.FromResult(HealthCheckResult.Unhealthy(
+                        describeFailure(Uri, Status, failure!) +
+                        $" -- stalled for {_consecutiveStallCount} consecutive health checks. Auto-restart suppressed: this failure will recur on the same event until it is resolved."));
+                }
+
+                // GH-3888: restarting in place has already been tried MaxLocalRestartsBeforeRelease
+                // times since the sequence last advanced, and the shard is stalled again. The fault is
+                // evidently not one another local restart will clear — it is a property of this node or
+                // its process, not of the shard — so stop churning the daemon's start path and flag the
+                // agent for release instead. NodeAgentController's failed-agent sweep picks the flag up
+                // and, when a live peer advertises the capability, releases the assignment so the leader
+                // can place the shard there.
+                if (MaxLocalRestartsBeforeRelease > 0 && _restartsSinceProgress >= MaxLocalRestartsBeforeRelease)
+                {
+                    LocalRestartsExhausted = true;
+                    return Task.FromResult(HealthCheckResult.Unhealthy(
+                        $"Projection {Uri} has stalled through {_restartsSinceProgress} auto-restarts on this node without advancing. Local restarts are exhausted; the agent is eligible for release to another capable node. See GH-3888."));
+                }
+
+                // Trigger auto-restart. GH-3888: the budget is spent at dispatch, synchronously with
+                // the rest of the stall bookkeeping, so the exhaustion decision above never races the
+                // background restart task — and a restart that throws still counts, which is even
+                // stronger evidence that restarting here is not working. The in-flight guard keeps a
+                // health check that lands mid-restart from piling a second concurrent restart (and a
+                // second spent budget slot) on top of the one still running.
+                if (Interlocked.CompareExchange(ref _restartInFlight, 1, 0) == 0)
+                {
+                    _restartsSinceProgress++;
+                    _ = Task.Run(() => AttemptAutoRestartAsync(cancellationToken), cancellationToken);
+                }
+
+                return Task.FromResult(HealthCheckResult.Unhealthy(
+                    $"Projection {Uri} has been stalled for {_consecutiveStallCount} consecutive health checks. Attempting auto-restart."));
+            }
+
+            return Task.FromResult(HealthCheckResult.Degraded(
+                $"Projection {Uri} stalled at sequence {currentSequence} (high water mark: {highWaterMark})"));
+        }
+
+        return Task.FromResult(HealthCheckResult.Healthy());
+    }
+
+    private async Task AttemptAutoRestartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogWarning(
+                "Projection {Uri} has been stalled for {StallCount} consecutive health checks. Attempting auto-restart",
+                Uri, _consecutiveStallCount);
+
+            await StopAsync(cancellationToken);
+            await StartAsync(cancellationToken);
+
+            _consecutiveStallCount = 0;
+            _lastAdvancedAt = TimeProvider.GetUtcNow();
+
+            _logger.LogInformation("Projection {Uri} auto-restart completed successfully", Uri);
+
+            try
+            {
+                OnRestarted?.Invoke(
+                    Uri.ToString(),
+                    $"Auto-restarted after {MaxConsecutiveStallsBeforeRestart} consecutive stalled health checks",
+                    TimeProvider.GetUtcNow());
+            }
+            catch (Exception callbackEx)
+            {
+                _logger.LogDebug(callbackEx, "Error invoking OnRestarted callback for {Uri}", Uri);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to auto-restart projection {Uri}", Uri);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _restartInFlight, 0);
+        }
+    }
+
+    private void LoadThresholds()
+    {
+        // Thresholds will be loaded from the progression table when CritterWatch pushes config.
+        // For now, use defaults. The threshold columns are read when they exist in the table.
+        _warningThreshold = DefaultWarningThreshold;
+        _criticalThreshold = DefaultCriticalThreshold;
+        _thresholdsLoaded = true;
+    }
+
+    /// <summary>
+    /// Sets the warning and critical behind thresholds for this agent's health check.
+    /// Called when CritterWatch pushes threshold configuration.
+    /// </summary>
+    public void SetThresholds(long? warningBehindThreshold, long? criticalBehindThreshold)
+    {
+        _warningThreshold = warningBehindThreshold ?? DefaultWarningThreshold;
+        _criticalThreshold = criticalBehindThreshold ?? DefaultCriticalThreshold;
+        _thresholdsLoaded = true;
+    }
+}

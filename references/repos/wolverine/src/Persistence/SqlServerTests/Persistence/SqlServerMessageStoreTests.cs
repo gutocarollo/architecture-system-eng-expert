@@ -1,0 +1,247 @@
+﻿using IntegrationTests;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
+using Shouldly;
+using Weasel.Core;
+using Wolverine;
+using Wolverine.ComplianceTests;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Durability;
+using Wolverine.RDBMS.Polling;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.SqlServer;
+using Wolverine.Tracking;
+using Wolverine.Transports.Local;
+
+namespace SqlServerTests.Persistence;
+
+public class SqlServerMessageStoreTests : MessageStoreCompliance
+{
+    public override async Task<IHost> BuildCleanHost()
+    {
+        var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "receiver");
+                // Exercise the real RdbmsListenerStore impl in the IListenerStore
+                // compliance tests (GH-2685). When this flag is off the suite falls
+                // back to the NullListenerStore short-circuit in MessageStoreCompliance.
+                opts.Durability.EnableDynamicListeners = true;
+            })
+            .StartAsync();
+
+        var persistence = (IMessageDatabase)host.Services.GetRequiredService<IMessageStore>();
+        await persistence.Admin.ClearAllAsync();
+
+        return host;
+    }
+
+    [Fact]
+    public async Task delete_expired_envelopes()
+    {
+        var envelope = ObjectMother.Envelope();
+
+        await thePersistence.Inbox.StoreIncomingAsync(envelope);
+
+        await thePersistence.Inbox.MarkIncomingEnvelopeAsHandledAsync(envelope);
+
+        var hourAgo = DateTimeOffset.UtcNow.Add(1.Hours());
+        var operation =
+            new DeleteExpiredEnvelopesOperation(new DbObjectName("receiver", DatabaseConstants.IncomingTable), hourAgo);
+        var batch = new DatabaseOperationBatch((IMessageDatabase)thePersistence, [operation]);
+        await theHost.InvokeAsync(batch);
+
+        var counts = await thePersistence.Admin.FetchCountsAsync();
+
+        counts.Incoming.ShouldBe(0);
+        counts.Scheduled.ShouldBe(0);
+        counts.Handled.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task delete_expired_handled_envelopes_in_batches()
+    {
+        // Regression for #3116 -- batched DELETE TOP cleanup on SQL Server
+        for (var i = 0; i < 5; i++)
+        {
+            var envelope = ObjectMother.Envelope();
+            await thePersistence.Inbox.StoreIncomingAsync(envelope);
+            await thePersistence.Inbox.MarkIncomingEnvelopeAsHandledAsync(envelope);
+        }
+
+        await using (var conn = new SqlConnection(Servers.SqlServerConnectionString))
+        {
+            await conn.OpenAsync(TestContext.Current.CancellationToken);
+            await conn.CreateCommand(
+                    $"update receiver.{DatabaseConstants.IncomingTable} set {DatabaseConstants.KeepUntil} = @cutoff where status = 'Handled'")
+                .With("cutoff", DateTimeOffset.UtcNow.Subtract(1.Hours()))
+                .ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+            await conn.CloseAsync();
+        }
+
+        var command = new DeleteExpiredHandledEnvelopesCommand((IMessageDatabase)thePersistence,
+            new DurabilitySettings(), NullLogger.Instance);
+        await theHost.InvokeAsync(command);
+
+        var counts = await thePersistence.Admin.FetchCountsAsync();
+        counts.Handled.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task move_replayable_error_messages_to_incoming()
+    {
+        /*
+         * Going to start with two error messages in dead letter queue
+         * Mark one as Replayable
+         * Run the DurabilityAction
+         * Replayable message should be moved back to Inbox
+         */
+
+        var unReplayableEnvelope = ObjectMother.Envelope();
+        var replayableEnvelope = ObjectMother.Envelope();
+        await thePersistence.Inbox.StoreIncomingAsync(unReplayableEnvelope);
+        await thePersistence.Inbox.StoreIncomingAsync(replayableEnvelope);
+
+        var divideByZeroException = new DivideByZeroException("Kaboom!");
+        var applicationException = new ApplicationException("Kaboom!");
+        await thePersistence.Inbox.MoveToDeadLetterStorageAsync(unReplayableEnvelope, divideByZeroException);
+        await thePersistence.Inbox.MoveToDeadLetterStorageAsync(replayableEnvelope, applicationException);
+
+        // make one of the messages(DivideByZeroException) replayable
+        await thePersistence
+            .DeadLetters
+            .MarkDeadLetterEnvelopesAsReplayableAsync(divideByZeroException.GetType().FullName!);
+
+        // run the action
+        var operation = new MoveReplayableErrorMessagesToIncomingOperation((IMessageDatabase)thePersistence);
+        var batch = new DatabaseOperationBatch((IMessageDatabase)thePersistence, [operation]);
+        await theHost.InvokeAsync(batch);
+
+        var counts = await thePersistence.Admin.FetchCountsAsync();
+
+        counts.DeadLetter.ShouldBe(1);
+        counts.Incoming.ShouldBe(1);
+        counts.Scheduled.ShouldBe(0);
+        counts.Handled.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task move_dead_letter_messages_as_replayable_by_id_to_incoming()
+    {
+        var unReplayableEnvelope = ObjectMother.Envelope();
+        var replayableEnvelope = ObjectMother.Envelope();
+        await thePersistence.Inbox.StoreIncomingAsync(unReplayableEnvelope);
+        await thePersistence.Inbox.StoreIncomingAsync(replayableEnvelope);
+
+        var divideByZeroException = new DivideByZeroException("Kaboom!");
+        var applicationException = new ApplicationException("Kaboom!");
+        await thePersistence.Inbox.MoveToDeadLetterStorageAsync(unReplayableEnvelope, divideByZeroException);
+        await thePersistence.Inbox.MoveToDeadLetterStorageAsync(replayableEnvelope, applicationException);
+
+        await thePersistence
+            .DeadLetters
+            .MarkDeadLetterEnvelopesAsReplayableAsync([replayableEnvelope.Id]);
+
+        var operation = new MoveReplayableErrorMessagesToIncomingOperation((IMessageDatabase)thePersistence);
+        var batch = new DatabaseOperationBatch((IMessageDatabase)thePersistence, [operation]);
+        await theHost.InvokeAsync(batch);
+
+        var counts = await thePersistence.Admin.FetchCountsAsync();
+
+        counts.DeadLetter.ShouldBe(1);
+        counts.Incoming.ShouldBe(1);
+        counts.Scheduled.ShouldBe(0);
+        counts.Handled.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task should_reasign_incoming_envelope_to_owner_id()
+    {
+        var envelope = ObjectMother.Envelope();
+        envelope.Status = EnvelopeStatus.Incoming;
+        envelope.ScheduledTime = DateTimeOffset.Now;
+
+        await thePersistence.Inbox.StoreIncomingAsync(envelope);
+        await thePersistence.Inbox.ScheduleExecutionAsync(envelope);
+
+        var durabilitySettings = theHost.Services.GetRequiredService<DurabilitySettings>();
+
+        // Use a substituted runtime rather than the live one. PollForScheduledMessagesAsync
+        // reassigns ownership AND hands the envelope straight to the execution pipeline via
+        // IWolverineRuntime.EnqueueDirectlyAsync. With the real runtime the envelope is picked
+        // up off local://replies and marked Handled within ~250ms, so asserting on the row's
+        // status is a race the test only usually wins -- it lost twice on CI. See GH-3821.
+        var runtime = Substitute.For<IWolverineRuntime>();
+
+        await thePersistence.As<IMessageDatabase>().PollForScheduledMessagesAsync(runtime, NullLogger.Instance, durabilitySettings, TestContext.Current.CancellationToken);
+
+        var stored = (await thePersistence.Admin.AllIncomingAsync()).Single();
+
+        stored.OwnerId.ShouldBe(durabilitySettings.AssignedNodeNumber);
+        stored.Status.ShouldBe(EnvelopeStatus.Incoming);
+
+        // and the poll really did hand the envelope off to be executed
+        await runtime.Received().EnqueueDirectlyAsync(Arg.Is<IReadOnlyList<Envelope>>(x => x.Count == 1));
+    }
+    
+        [Fact]
+    public async Task delete_old_log_node_records()
+    {
+        var nodeRecord1 = new NodeRecord()
+        {
+            AgentUri = new Uri("fake://one"), 
+            Description = "Started", 
+            Id = Guid.NewGuid().ToString(), 
+            NodeNumber = 1,
+            RecordType = NodeRecordType.AgentStarted, ServiceName = "MyService",
+            Timestamp = DateTimeOffset.UtcNow.Subtract(10.Days())
+        };
+        
+        var nodeRecord2 = new NodeRecord()
+        {
+            AgentUri = new Uri("fake://one"), 
+            Description = "Started", 
+            Id = Guid.NewGuid().ToString(), 
+            NodeNumber = 2,
+            RecordType = NodeRecordType.AgentStarted, ServiceName = "MyService",
+            Timestamp = DateTimeOffset.UtcNow.Subtract(4.Days())
+        };
+
+        var messageDatabase = thePersistence.As<IMessageDatabase>();
+        var log = new PersistNodeRecord(messageDatabase.Settings, [nodeRecord1, nodeRecord2]);
+        await theHost.InvokeAsync(new DatabaseOperationBatch(messageDatabase, [log]));
+
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync(TestContext.Current.CancellationToken);
+        await conn.CreateCommand(
+                $"update receiver.{DatabaseConstants.NodeRecordTableName} set timestamp = @time where node_number = 2")
+            .With("time", DateTimeOffset.UtcNow.Subtract(10.Days()))
+            .ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        await conn.CloseAsync();
+        
+        var recent2 = await thePersistence.Nodes.FetchRecentRecordsAsync(100);
+        
+        recent2.Any().ShouldBeTrue();
+
+        var op = new DeleteOldNodeEventRecords((IMessageDatabase)thePersistence,
+            new DurabilitySettings { NodeEventRecordExpirationTime = 5.Days() });
+        
+        var batch = new DatabaseOperationBatch((IMessageDatabase)thePersistence, [op]);
+        await theHost.InvokeAsync(batch);
+
+        var recent = await thePersistence.Nodes.FetchRecentRecordsAsync(100);
+        
+        recent.Any().ShouldBeTrue();
+        recent.Any(x => x.Id == nodeRecord2.Id).ShouldBeFalse();
+    }
+
+
+}

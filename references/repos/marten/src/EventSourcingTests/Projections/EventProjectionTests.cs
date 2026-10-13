@@ -1,0 +1,332 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Events;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events;
+using Marten.Events.Projections;
+using Marten.Exceptions;
+using Marten.Testing.Documents;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace EventSourcingTests.Projections;
+
+public class EventProjectionTests: OneOffConfigurationsContext, IAsyncLifetime
+{
+    public override async ValueTask InitializeAsync()
+    {
+        await theStore.Advanced.Clean.DeleteDocumentsByTypeAsync(typeof(User));
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        Dispose();
+        return base.DisposeAsync();
+    }
+
+    protected void UseProjection<T>() where T : EventProjection, new()
+    {
+        StoreOptions(x => x.Projections.Add(new T(), ProjectionLifecycle.Inline));
+    }
+
+    [Fact]
+    public void documents_created_by_event_projection_should_be_registered_as_document_types()
+    {
+        UseProjection<SimpleTransformProjectionUsingMetadata>();
+
+        // MyAggregate is the aggregate type for AllGood above.
+        // 9.0: AllDocumentMappings is lazy (#4303); AllKnownDocumentTypes()
+        // is the public accessor that materializes everything first.
+        ((IReadOnlyStoreOptions)theStore.Options).AllKnownDocumentTypes()
+            .Select(x => x.DocumentType)
+            .ShouldContain(typeof(User));
+    }
+
+    [Fact]
+    public async Task use_simple_synchronous_project_methods()
+    {
+        UseProjection<SimpleProjection>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        (await query.Query<User>().OrderBy(x => x.UserName).Select(x => x.UserName)
+            .ToListAsync())
+            .ShouldHaveTheSameElementsAs("one", "two");
+
+        theSession.Events.Append(stream, new UserDeleted { UserName = "one" });
+        await theSession.SaveChangesAsync();
+
+        (await query.Query<User>()
+            .OrderBy(x => x.UserName)
+            .Select(x => x.UserName)
+            .SingleAsync())
+            .ShouldBe("two");
+    }
+
+    [Fact]
+    public async Task use_simple_synchronous_project_methods_with_inline_lambdas()
+    {
+        UseProjection<LambdaProjection>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        (await query.Query<User>().OrderBy(x => x.UserName).Select(x => x.UserName)
+            .ToListAsync())
+            .ShouldHaveTheSameElementsAs("one", "two");
+
+        theSession.Events.Append(stream, new UserDeleted { UserName = "one" });
+        await theSession.SaveChangesAsync();
+
+        (await query.Query<User>()
+            .OrderBy(x => x.UserName)
+            .Select(x => x.UserName)
+            .SingleAsync())
+            .ShouldBe("two");
+    }
+
+    [Fact]
+    public async Task synchronous_create_method()
+    {
+        UseProjection<SimpleCreatorProjection>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        (await query.Query<User>().OrderBy(x => x.UserName).Select(x => x.UserName)
+            .ToListAsync())
+            .ShouldHaveTheSameElementsAs("one", "two");
+
+        theSession.Events.Append(stream, new UserDeleted { UserName = "one" });
+        await theSession.SaveChangesAsync();
+
+        (await query.Query<User>()
+            .OrderBy(x => x.UserName)
+            .Select(x => x.UserName)
+            .SingleAsync())
+            .ShouldBe("two");
+    }
+
+    [Fact]
+    public async Task using_explicit_apply_method()
+    {
+        UseProjection<SimpleCreatorProjection2>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        (await query.Query<User>().OrderBy(x => x.UserName).Select(x => x.UserName)
+            .ToListAsync())
+            .ShouldHaveTheSameElementsAs("one", "two");
+
+        theSession.Events.Append(stream, new UserDeleted { UserName = "one" });
+        await theSession.SaveChangesAsync();
+
+        (await query.Query<User>()
+            .OrderBy(x => x.UserName)
+            .Select(x => x.UserName)
+            .SingleAsync())
+            .ShouldBe("two");
+    }
+
+    [Fact]
+    public async Task use_event_metadata()
+    {
+        UseProjection<SimpleTransformProjectionUsingMetadata>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.Append(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task use_event_metadata_with_string_stream_identity()
+    {
+        StoreOptions(x =>
+        {
+            x.Events.StreamIdentity = StreamIdentity.AsString;
+            x.Projections.Add(new SimpleTransformProjectionUsingMetadata(), ProjectionLifecycle.Inline);
+        });
+
+        var stream = Guid.NewGuid().ToString();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        theSession.Events.Append(stream, new UserCreated { UserName = "three" });
+        await theSession.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task synchronous_with_transform_method()
+    {
+        UseProjection<SimpleTransformProjection>();
+
+        var stream = Guid.NewGuid();
+        theSession.Events.StartStream(stream, new UserCreated { UserName = "one" },
+            new UserCreated { UserName = "two" });
+
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        (await query.Query<User>().OrderBy(x => x.UserName).Select(x => x.UserName)
+            .ToListAsync())
+            .ShouldHaveTheSameElementsAs("one", "two");
+
+        theSession.Events.Append(stream, new UserDeleted { UserName = "one" });
+        await theSession.SaveChangesAsync();
+
+        (await query.Query<User>()
+            .OrderBy(x => x.UserName)
+            .Select(x => x.UserName)
+            .SingleAsync())
+            .ShouldBe("two");
+    }
+
+    [Fact]
+    public void empty_projection_throws_validation_error()
+    {
+        var projection = new EmptyProjection();
+        Should.Throw<InvalidProjectionException>(() =>
+        {
+            projection.AssembleAndAssertValidity();
+        });
+    }
+}
+
+public partial class EmptyProjection: EventProjection
+{
+}
+
+public partial class SimpleProjection: EventProjection
+{
+    public void Project(UserCreated @event, IDocumentOperations operations) =>
+        operations.Store(new User { UserName = @event.UserName });
+
+    public void Project(UserDeleted @event, IDocumentOperations operations) =>
+        operations.DeleteWhere<User>(x => x.UserName == @event.UserName);
+}
+
+public partial class SimpleTransformProjection: EventProjection
+{
+    public User Transform(UserCreated @event) =>
+        new User { UserName = @event.UserName };
+
+    public void Project(UserDeleted @event, IDocumentOperations operations) =>
+        operations.DeleteWhere<User>(x => x.UserName == @event.UserName);
+}
+
+public class OtherCreationEvent: UserCreated
+{
+}
+
+public partial class SimpleTransformProjectionUsingMetadata: EventProjection
+{
+    public User Transform(IEvent<UserCreated> @event)
+    {
+        if (@event.StreamId == Guid.Empty && @event.StreamKey.IsEmpty())
+        {
+            throw new Exception("StreamKey and StreamId are both missing");
+        }
+
+        return new User { UserName = @event.Data.UserName };
+    }
+
+    public User Transform(IEvent<OtherCreationEvent> @event)
+    {
+        if (@event.StreamId == Guid.Empty && @event.StreamKey.IsEmpty())
+        {
+            throw new Exception("StreamKey and StreamId are both missing");
+        }
+
+        return new User { UserName = @event.Data.UserName };
+    }
+
+    public void Project(UserDeleted @event, IDocumentOperations operations) =>
+        operations.DeleteWhere<User>(x => x.UserName == @event.UserName);
+}
+
+public partial class SimpleCreatorProjection: EventProjection
+{
+    public User Create(UserCreated e) => new User { UserName = e.UserName };
+
+    public void Project(UserDeleted @event, IDocumentOperations operations) =>
+        operations.DeleteWhere<User>(x => x.UserName == @event.UserName);
+}
+
+public partial class SimpleCreatorProjection2: EventProjection
+{
+    public override ValueTask ApplyAsync(IDocumentOperations operations, IEvent e, CancellationToken cancellation)
+    {
+        switch (e.Data)
+        {
+            case UserCreated c:
+                operations.Store(new User { UserName = c.UserName });
+                break;
+
+            case UserDeleted d:
+                operations.DeleteWhere<User>(x => x.UserName == d.UserName);
+                break;
+        }
+
+        return new ValueTask();
+    }
+}
+
+#region sample_method_convention_event_projection
+
+public partial class LambdaProjection: EventProjection
+{
+    // JasperFx.Events 2.0 (JasperFx/jasperfx#276 / #286) removed the
+    // EventProjection.Project<TEvent>(action) / ProjectAsync<TEvent>(action)
+    // inline-lambda registration helpers. Use the `Project` /
+    // `ProjectAsync` method convention on a `partial` projection class
+    // instead — the source generator dispatches them at compile time.
+
+    public void Project(UserCreated e, IDocumentOperations ops) =>
+        ops.Store(new User { UserName = e.UserName });
+
+    public void Project(UserDeleted e, IDocumentOperations ops) =>
+        ops.DeleteWhere<User>(x => x.UserName == e.UserName);
+}
+
+#endregion
+
+public class UserCreated
+{
+    public string UserName { get; set; }
+}
+
+public class UserDeleted
+{
+    public string UserName { get; set; }
+}

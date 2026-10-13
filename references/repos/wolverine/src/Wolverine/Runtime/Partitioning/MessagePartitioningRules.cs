@@ -1,0 +1,472 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using ImTools;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Wolverine.Runtime.Handlers;
+
+namespace Wolverine.Runtime.Partitioning;
+
+public class MessagePartitioningRules
+{
+    private readonly WolverineOptions _options;
+    private readonly List<IGroupingRule> _rules = new();
+    private readonly List<Func<Type, bool>> _processingExemptions = new();
+    private ImHashMap<Type, bool> _processingExemptionCache = ImHashMap<Type, bool>.Empty;
+    private bool _useInferredGrouping;
+    private bool _hasTopologyGrouping;
+    private ImHashMap<Type, IGroupingRule[]?> _topologyGroupingCache = ImHashMap<Type, IGroupingRule[]?>.Empty;
+
+    public MessagePartitioningRules(WolverineOptions options)
+    {
+        _options = options;
+    }
+
+    internal bool HasAnyRules() => _rules.Any();
+    
+    internal List<PartitionedMessageTopology> ShardedMessageTopologies { get; } = new();
+
+    internal List<GlobalPartitionedMessageTopology> GlobalPartitionedTopologies { get; } = new();
+
+    public void AddPublishingTopology(Func<WolverineOptions, MessagePartitioningRules, PartitionedMessageTopology> factory)
+    {
+        ShardedMessageTopologies.Add(factory(_options, this));
+        _topologyGroupingCache = ImHashMap<Type, IGroupingRule[]?>.Empty;
+    }
+    
+    /// <summary>
+    /// Using the global message grouping rules, "shard" message publishing between
+    /// a specified number of local queues names [baseName]1, [baseName]2, etc.
+    /// </summary>
+    /// <param name="baseName">The prefix for all local queues in this sharded topology</param>
+    /// <param name="numberOfQueues">The number of queue "slots" for the workload</param>
+    /// <param name="configure">Optionally configure each local queue's behavior</param>
+    public void PublishToPartitionedLocalMessaging(string baseName, int numberOfQueues, Action<LocalPartitionedMessageTopology> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        
+        var topology = new LocalPartitionedMessageTopology(_options, baseName, numberOfQueues);
+        configure(topology);
+        
+        topology.AssertValidity();
+        
+        ShardedMessageTopologies.Add(topology);
+        _topologyGroupingCache = ImHashMap<Type, IGroupingRule[]?>.Empty;
+    }
+    
+    /// <summary>
+    /// Configure global partitioning which ensures that no two messages with the same
+    /// GroupId are ever executed concurrently throughout an application cluster.
+    /// Both external transport queues and local queues will be forced to durable mode.
+    /// </summary>
+    /// <param name="configure">Configure the global partitioned topology</param>
+    public void GlobalPartitioned(Action<GlobalPartitionedMessageTopology> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var topology = new GlobalPartitionedMessageTopology(_options);
+        configure(topology);
+
+        topology.AssertValidity();
+
+        GlobalPartitionedTopologies.Add(topology);
+        _topologyGroupingCache = ImHashMap<Type, IGroupingRule[]?>.Empty;
+
+        // Also register with sharded topologies so route discovery finds it
+        // The external topology is already registered for listening/sending
+    }
+
+    internal bool TryFindGlobalTopology(Type messageType, out GlobalPartitionedMessageTopology? topology)
+    {
+        topology = GlobalPartitionedTopologies.FirstOrDefault(x => x.Matches(messageType));
+        return topology != null;
+    }
+
+    /// <summary>
+    /// Exempt any message type that can be cast to <typeparamref name="T"/> (including marker
+    /// interfaces and base classes) from partitioned, GroupId-keyed *processing* on listening
+    /// endpoints configured with <c>PartitionProcessingByGroupId()</c> (including the listening side
+    /// of partitioned/global partitioned topologies). Exempted message types execute on the
+    /// endpoint's normal parallel execution lane (its <c>MaxDegreeOfParallelism</c>) instead of a
+    /// sequential GroupId slot. Use this for high-volume message types that need no ordering
+    /// guarantees so a single dominant GroupId cannot collapse the whole listener to sequential
+    /// processing.
+    ///
+    /// This changes only the in-process execution lane — durable inbox/outbox handling, message
+    /// routing, sender-side queue sharding, and GroupId stamping are all unaffected. An exempted
+    /// message may execute concurrently with a non-exempted message carrying the same GroupId, so
+    /// only exempt types that truly require no ordering relative to the partitioned types.
+    /// </summary>
+    public MessagePartitioningRules ExemptFromPartitionedProcessing<T>()
+    {
+        return ExemptFromPartitionedProcessing(type => type.CanBeCastTo<T>());
+    }
+
+    /// <summary>
+    /// Exempt any message type matching the supplied filter from partitioned, GroupId-keyed
+    /// *processing* on listening endpoints configured with <c>PartitionProcessingByGroupId()</c>.
+    /// See <see cref="ExemptFromPartitionedProcessing{T}"/> for the semantics and caveats.
+    /// </summary>
+    /// <param name="filter">Evaluated once per concrete message type (results are cached)</param>
+    public MessagePartitioningRules ExemptFromPartitionedProcessing(Func<Type, bool> filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+        _processingExemptions.Add(filter);
+        _processingExemptionCache = ImHashMap<Type, bool>.Empty;
+        return this;
+    }
+
+    internal bool HasProcessingExemptions => _processingExemptions.Count != 0;
+
+    internal bool IsExemptFromPartitionedProcessing(Type messageType)
+    {
+        if (_processingExemptions.Count == 0)
+        {
+            return false;
+        }
+
+        if (_processingExemptionCache.TryFind(messageType, out var exempt))
+        {
+            return exempt;
+        }
+
+        exempt = _processingExemptions.Any(filter => filter(messageType));
+        _processingExemptionCache = _processingExemptionCache.AddOrUpdate(messageType, exempt);
+        return exempt;
+    }
+
+    /// <summary>
+    /// Use any known TenantId as the message GroupId. The rules on <see cref="MessagePartitioningRules"/>
+    /// are one application-wide, first-match-wins list, and this rule matches every message that carries a
+    /// tenant id, so in a multi-tenant application no rule declared after it is ever reached. To group only
+    /// the messages of one partitioned topology by tenant, use <c>GroupByTenantId()</c> on that topology.
+    /// </summary>
+    public MessagePartitioningRules ByTenantId()
+    {
+        _rules.Add(new TenantGroupingRule());
+        return this;
+    }
+
+    /// <summary>
+    /// Configure a strategy to determine the GroupId for any message that can be
+    /// cast to the type "T"
+    /// </summary>
+    /// <param name="strategy"></param>
+    /// <typeparam name="T"></typeparam>
+    public MessagePartitioningRules ByMessage<T>(Func<T, string> strategy)
+    {
+        _rules.Add(new MessageGrouping<T>(strategy));
+        return this;
+    }
+
+    /// <summary>
+    /// Register a custom message grouping rule
+    /// </summary>
+    /// <param name="rule"></param>
+    /// <returns></returns>
+    public MessagePartitioningRules ByRule(IGroupingRule rule)
+    {
+        _rules.Add(rule);
+        return this;
+    }
+
+    /// <summary>
+    /// Determine the GroupId of a message by looking for a property with a matching name
+    /// on the message type. This is useful when your message types are auto-generated (e.g. from
+    /// .proto files) and you cannot add a marker interface. The first matching property name wins.
+    /// Property values are converted to string via ToString(), with null values becoming string.Empty.
+    /// </summary>
+    /// <param name="propertyNames">The property names to look for on each message type</param>
+    public MessagePartitioningRules ByPropertyNamed(params string[] propertyNames)
+    {
+        _rules.Add(new PropertyNameGroupingRule(propertyNames));
+        return this;
+    }
+
+    /// <summary>
+    /// Add a grouping rule based on a concrete message type and the property
+    /// of the message type that exposes the group id information
+    /// Used extensively internally
+    /// </summary>
+    /// <param name="messageType"></param>
+    /// <param name="messageProperty"></param>
+    /// <returns></returns>
+    public MessagePartitioningRules ByMessage(Type messageType, PropertyInfo messageProperty)
+    {
+        var grouping = _rules.OfType<ExplicitGrouping>().FirstOrDefault();
+        if (grouping == null)
+        {
+            grouping = new ExplicitGrouping();
+            _rules.Add(grouping);
+        }
+        
+        grouping.AddMessageType(messageType, messageProperty);
+
+        return this;
+    }
+    
+    internal string? DetermineGroupId(Envelope envelope)
+    {
+        if (envelope.GroupId.IsNotEmpty()) return envelope.GroupId;
+
+        // A topology's own grouping rules go first for the messages that topology publishes, so they win
+        // over the application-wide list however the two were declared. They are ADDITIVE, not
+        // authoritative: when none of them match, the application-wide rules below still get their say.
+        // That is what keeps a global rule -- above all the saga/aggregate identity that
+        // UseInferredMessageGrouping() infers -- reachable from every topology, so narrowing one
+        // topology's grouping never silently drops the fallback the rest of the application relies on.
+        if (_hasTopologyGrouping && envelope.Message != null
+                                 && TopologyGroupingFor(envelope.Message.GetType()) is { } topologyRules)
+        {
+            foreach (var rule in topologyRules)
+            {
+                if (rule.TryFindIdentity(envelope, out var topologyGroupId))
+                {
+                    envelope.GroupId = topologyGroupId;
+                    return topologyGroupId;
+                }
+            }
+        }
+
+        foreach (var rule in _rules)
+        {
+            if (rule.TryFindIdentity(envelope, out var groupId))
+            {
+                // Might as well save it
+                envelope.GroupId = groupId;
+                return groupId;
+            }
+        }
+
+        return null;
+    }
+
+    internal void TopologyGroupingChanged()
+    {
+        _hasTopologyGrouping = true;
+        _topologyGroupingCache = ImHashMap<Type, IGroupingRule[]?>.Empty;
+    }
+
+    /// <summary>
+    /// The grouping rules of the one partitioned topology that publishes this message type and declares
+    /// its own grouping, to be tried ahead of the application-wide rules, or null when no such topology
+    /// exists and the application-wide rules are the whole story
+    /// </summary>
+    internal IGroupingRule[]? TopologyGroupingFor(Type messageType)
+    {
+        if (_topologyGroupingCache.TryFind(messageType, out var cached)) return cached;
+
+        var declaring = ShardedMessageTopologies
+            .Where(x => x.GroupingRules.Count != 0 && x.Matches(messageType))
+            .Select(x => (Name: x.Uri.ToString(), Rules: x.GroupingRules))
+            .Concat(GlobalPartitionedTopologies
+                .Where(x => x.GroupingRules.Count != 0 && x.Matches(messageType))
+                .Select(x => (Name: x.ExternalTopology?.Uri.ToString() ?? "a global partitioned topology", Rules: x.GroupingRules)))
+            .ToArray();
+
+        if (declaring.Length > 1)
+        {
+            throw new InvalidOperationException(
+                $"Message type {messageType.FullNameInCode()} is published to more than one partitioned topology that declares its own grouping rules ({declaring.Select(x => x.Name).Join(", ")}). An envelope has a single GroupId, so only one topology can decide it.");
+        }
+
+        var rules = declaring.Length == 1 ? declaring[0].Rules.ToArray() : null;
+        _topologyGroupingCache = _topologyGroupingCache.AddOrUpdate(messageType, rules);
+        return rules;
+    }
+
+    /// <summary>
+    /// Resolve topology-scoped grouping for every known message type up front, so an ambiguous
+    /// configuration fails at startup rather than on the first send
+    /// </summary>
+    internal void AssertTopologyGroupingIsUnambiguous(IEnumerable<Type> messageTypes)
+    {
+        if (!_hasTopologyGrouping) return;
+
+        foreach (var messageType in messageTypes)
+        {
+            TopologyGroupingFor(messageType);
+        }
+    }
+
+    internal bool TryFindTopology(Type messageType, out PartitionedMessageTopology? topology)
+    {
+        topology = ShardedMessageTopologies.FirstOrDefault(x => x.Matches(messageType));
+        return topology != null;
+    }
+
+    /// <summary>
+    /// As possible, let Wolverine infer the message grouping based on the message usage.
+    /// For example, messages related to a Saga will use any saga id property in the command type. In
+    /// the Marten aggregate handler workflow, Wolverine will use a property on the command type that
+    /// identifies the event stream *if only one event stream is impacted*
+    /// </summary>
+    /// <returns></returns>
+    public MessagePartitioningRules UseInferredMessageGrouping()
+    {
+        _useInferredGrouping = true;
+        return this;
+    }
+
+    internal void MaybeInferGrouping(HandlerGraph handlerGraph)
+    {
+        if (!_useInferredGrouping) return;
+
+        foreach (var chain in handlerGraph.Chains)
+        {
+            if (chain.TryInferMessageIdentity(out var property))
+            {
+                ByMessage(chain.MessageType, property!);
+            }
+
+            // For messages implementing SequencedMessage, use Order as the group id
+            // so that messages with the same sequence number are partitioned together
+            if (chain.MessageType.CanBeCastTo<SequencedMessage>())
+            {
+                _rules.Add(new SequencedMessageGroupingRule(chain.MessageType));
+            }
+        }
+    }
+}
+
+internal interface IGrouper
+{
+    Type MessageType { get; }
+    string ToGroupId(object message);
+}
+
+internal class ExplicitGrouping : IGroupingRule
+{
+    private ImHashMap<Type, IGrouper> _groupers = ImHashMap<Type, IGrouper>.Empty;
+
+    public bool TryFindIdentity(Envelope envelope, out string groupId)
+    {
+        if (_groupers.TryFind(envelope.Message!.GetType(), out var grouper))
+        {
+            groupId = grouper.ToGroupId(envelope.Message);
+            return true;
+        }
+        
+        groupId = default!;
+        return false;
+    }
+
+    public void AddMessageType(Type messageType, PropertyInfo property)
+    {
+        _groupers = _groupers.AddOrUpdate(messageType, Groupers.For(messageType, property));
+    }
+}
+
+internal static class Groupers
+{
+    /// <summary>
+    /// GH-4811. Builds the accessor for a grouping property.
+    ///
+    /// <para>
+    /// Closing <see cref="Grouper{TConcrete,TProperty}" /> reflectively is the fast path, and it stays the
+    /// only path under the JIT. It cannot be the path under Native AOT: the second type argument is the
+    /// property's own type, so a <c>Guid</c> tenant id or an <c>int</c> is the common case rather than an
+    /// exotic one, and <c>UseInferredMessageGrouping()</c> closes it over a saga's <c>Guid</c> identity
+    /// during <see cref="Wolverine.Runtime.Handlers.HandlerGraph.Compile" /> — at startup, in a native image
+    /// too. GH-4805 measured that <c>[DynamicDependency]</c> preserves metadata and not code, so a root over
+    /// a value-type instantiation is silently ineffective; the roots that do work elsewhere survive through
+    /// reference-type canonical sharing, which does not apply here. And neither grouping rule is a frame, so
+    /// <see cref="Wolverine.Configuration.IAotRootSource" /> cannot collect it either.
+    /// </para>
+    ///
+    /// <para>
+    /// So, as in GH-4805: rather than root the instantiation, do not create one. ILC substitutes
+    /// <see cref="RuntimeFeature.IsDynamicCodeSupported" /> with <c>false</c> and removes this branch
+    /// outright, so a native image never asks for a closed <c>Grouper&lt;,&gt;</c> at all. Nothing is given
+    /// up by the fallback: JasperFx's <c>LambdaBuilder.GetProperty</c> — the only thing the generic buys —
+    /// degrades to a reflective getter on exactly the same condition.
+    /// </para>
+    /// </summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "GH-4811. Closes Grouper<,> over (messageType, property.PropertyType), which only ever runs under the JIT -- the branch is removed from a native image by the IsDynamicCodeSupported substitution, which uses ReflectiveGrouper instead. The property itself is named by the application's own partitioning rule.")]
+    public static IGrouper For(Type messageType, PropertyInfo property)
+    {
+        if (RuntimeFeature.IsDynamicCodeSupported)
+        {
+            return typeof(Grouper<,>).CloseAndBuildAs<IGrouper>(property, messageType, property.PropertyType);
+        }
+
+        return new ReflectiveGrouper(messageType, property);
+    }
+}
+
+/// <summary>
+/// GH-4811. The Native AOT twin of <see cref="Grouper{TConcrete,TProperty}" />, reading the grouping
+/// property through the <see cref="PropertyInfo" /> instead of a compiled accessor so that nothing has to
+/// close a generic over the property's type. See <see cref="Groupers.For" /> for why that matters.
+/// </summary>
+internal class ReflectiveGrouper : IGrouper
+{
+    private readonly PropertyInfo _property;
+
+    public ReflectiveGrouper(Type messageType, PropertyInfo property)
+    {
+        MessageType = messageType;
+        _property = property;
+    }
+
+    public Type MessageType { get; }
+
+    public string ToGroupId(object message)
+    {
+        // If it's empty, it will get randomly sorted
+        // into the partitioned slots
+        return _property.GetValue(message)?.ToString() ?? string.Empty;
+    }
+}
+
+internal class Grouper<TConcrete, TProperty> : IGrouper
+{
+    private readonly Func<TConcrete, TProperty> _source;
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "LambdaBuilder.GetProperty compiles a property-access expression via FastExpressionCompiler. The groupMember PropertyInfo originates from the application's registered partitioning rule (a strongly-typed message property), so the property survives trimming via the rule's explicit registration.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "Property-access lambda compiled via FastExpressionCompiler; AOT consumers running pre-generated handlers via TypeLoadMode.Static avoid this code path.")]
+    public Grouper(PropertyInfo groupMember)
+    {
+        _source = LambdaBuilder.GetProperty<TConcrete, TProperty>(groupMember);
+    }
+
+    public Type MessageType => typeof(TConcrete);
+    public string ToGroupId(object message)
+    {
+        var raw = _source((TConcrete)message);
+
+        // If it's empty, it will get randomly sorted
+        // into the partitioned slots
+        return raw?.ToString() ?? string.Empty;
+    }
+}
+
+/// <summary>
+/// Grouping rule for SequencedMessage types that uses the Order property as the group id.
+/// Messages with null or zero Order get a random group id so they are not partitioned together.
+/// </summary>
+internal class SequencedMessageGroupingRule : IGroupingRule
+{
+    private readonly Type _messageType;
+
+    public SequencedMessageGroupingRule(Type messageType)
+    {
+        _messageType = messageType;
+    }
+
+    public bool TryFindIdentity(Envelope envelope, out string groupId)
+    {
+        if (envelope.Message is SequencedMessage sequenced && envelope.Message.GetType() == _messageType)
+        {
+            groupId = sequenced.Order?.ToString() ?? Guid.NewGuid().ToString();
+            return true;
+        }
+
+        groupId = default!;
+        return false;
+    }
+}

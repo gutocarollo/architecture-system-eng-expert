@@ -1,0 +1,97 @@
+using System.Net;
+using System.Reflection;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Wolverine.Runtime;
+
+namespace Wolverine.Http.CodeGen;
+
+internal class RouteParameterStrategy : IParameterStrategy
+{
+    #region sample_supported_route_parameter_types
+    public static readonly Dictionary<Type, string> TypeOutputs = new()
+    {
+        { typeof(bool), "bool" },
+        { typeof(byte), "byte" },
+        { typeof(sbyte), "sbyte" },
+        { typeof(char), "char" },
+        { typeof(decimal), "decimal" },
+        { typeof(float), "float" },
+        { typeof(short), "short" },
+        { typeof(int), "int" },
+        { typeof(double), "double" },
+        { typeof(long), "long" },
+        { typeof(ushort), "ushort" },
+        { typeof(uint), "uint" },
+        { typeof(ulong), "ulong" },
+        { typeof(Guid), typeof(Guid).FullName! },
+        { typeof(DateTime), typeof(DateTime).FullName! },
+        { typeof(DateTimeOffset), typeof(DateTimeOffset).FullName! },
+        { typeof(DateOnly), typeof(DateOnly).FullName! }
+    };
+
+    #endregion
+
+    public static readonly Dictionary<Type, string> TypeRouteConstraints = new()
+    {
+        { typeof(bool), "bool" },
+        { typeof(string), "alpha" },
+        { typeof(decimal), "decimal" },
+        { typeof(float), "float" },
+        { typeof(int), "int" },
+        { typeof(double), "double" },
+        { typeof(long), "long" },
+        { typeof(Guid), "guid" },
+        { typeof(DateTime), "datetime" }
+    };
+
+    public bool TryMatch(HttpChain chain, IServiceContainer container, ParameterInfo parameter, out Variable? variable)
+    {
+        if (parameter.TryGetAttribute<FromRouteAttribute>(out var att) && att.Name.IsNotEmpty())
+        {
+            if (chain.FindRouteVariable(parameter.ParameterType, att.Name!, out variable))
+            {
+                return true;
+            }
+
+            throw new InvalidOperationException(
+                $"Unable to find a route argument '{att.Name}' specified on parameter '{parameter.Name}' of {chain.Method.HandlerType.FullNameInCode()}.{chain.Method.Method.Name}()");
+        }
+
+        return chain.FindRouteVariable(parameter, out variable);
+    }
+
+    public static bool CanParse(Type argType)
+    {
+        // Edge case from GH-1941
+        if (argType == typeof(IPAddress)) return false;
+        
+        return TypeOutputs.ContainsKey(argType) || argType.IsEnum || argType.GetMethods().Any( x=> x.Name == "TryParse")
+               || SingleValueWrapper.TryFind(argType, out _);
+    }
+
+    public static void TryApplyRouteVariables(HttpChain chain, MethodCall call)
+    {
+        for (int i = 0; i < call.Arguments.Length; i++)
+        {
+            // Don't override them at all of course
+            if (call.Arguments[i] == null)
+            {
+                var parameter = call.Method.GetParameters()[i];
+                if (parameter.ParameterType == typeof(string) || CanParse(parameter.ParameterType))
+                {
+                    if (chain.FindRouteVariable(parameter.ParameterType, parameter.Name!, out var variable))
+                    {
+                        call.Arguments[i] = variable;
+                    }
+                }
+            }
+        }
+    }
+}

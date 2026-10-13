@@ -1,0 +1,105 @@
+using IntegrationTests;
+using JasperFx.Resources;
+using Marten;
+using JasperFx.Events.Projections;
+using Marten.Events.Projections;
+using MartenTests.AggregateHandlerWorkflow;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Marten;
+
+namespace MartenTests;
+
+public class read_aggregate_attribute_usage : PostgresqlContext, IAsyncLifetime
+{
+    private IHost theHost = null!;
+    private IDocumentStore theStore = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        theHost = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Durability.Mode = DurabilityMode.Solo;
+
+                opts.Discovery.DisableConventionalDiscovery().IncludeType(typeof(FindLettersHandler));
+
+                opts.Services.AddMarten(m =>
+                    {
+                        m.Connection(Servers.PostgresConnectionString);
+                        m.Projections.Snapshot<LetterAggregate>(SnapshotLifecycle.Async);
+
+                        m.DisableNpgsqlLogging = true;
+                    })
+                    .UseLightweightSessions()
+                    .IntegrateWithWolverine();
+
+                opts.Services.AddResourceSetupOnStartup();
+            }).StartAsync();
+
+        theStore = theHost.Services.GetRequiredService<IDocumentStore>();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await theHost.StopAsync();
+        theHost.Dispose();
+    }
+
+    [Fact]
+    public async Task use_end_to_end_happy_past()
+    {
+        var streamId = Guid.NewGuid();
+        using (var session = theStore.LightweightSession())
+        {
+            session.Events.StartStream<LetterAggregate>(streamId, new AEvent(), new AEvent(), new CEvent());
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var latest = await session.Events.FetchLatest<LetterAggregate>(streamId, TestContext.Current.CancellationToken);
+            latest.ShouldNotBeNull();
+        }
+
+        var envelope = await theHost.MessageBus().InvokeAsync<LetterAggregateEnvelope>(new FindAggregate(streamId), TestContext.Current.CancellationToken);
+        envelope.Inner.ACount.ShouldBe(2);
+        envelope.Inner.CCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task end_to_end_sad_path()
+    {
+        var envelope = await theHost.MessageBus()
+            .InvokeAsync<LetterAggregateEnvelope>(new FindAggregate(Guid.NewGuid()), TestContext.Current.CancellationToken);
+        envelope.ShouldBeNull();
+    }
+}
+
+public record LetterAggregateEnvelope(LetterAggregate Inner);
+
+#region sample_using_readaggregate_in_messsage_handlers
+public record FindAggregate(Guid Id);
+
+public static class FindLettersHandler
+{
+    // This is admittedly just some weak sauce testing support code
+    public static LetterAggregateEnvelope Handle(FindAggregate command, [ReadAggregate] LetterAggregate aggregate)
+    {
+        return new LetterAggregateEnvelope(aggregate);
+    }
+    
+    /* ALTERNATIVE VERSION
+    [WolverineHandler]
+    public static LetterAggregateEnvelope Handle2(
+        FindAggregate command, 
+        
+        // Just showing you that you can disable the validation
+        [ReadAggregate(Required = false)] LetterAggregate aggregate)
+    {
+        return aggregate == null ? null : new LetterAggregateEnvelope(aggregate);
+    }
+    */
+}
+
+#endregion

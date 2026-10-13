@@ -1,0 +1,991 @@
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.MultiTenancy;
+using Wolverine.Runtime.Deduplication;
+using Wolverine.Runtime.Handlers;
+using Wolverine.Runtime.Partitioning;
+using Wolverine.Runtime.Scheduled;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports.Local;
+using Wolverine.Transports.Stub;
+
+[assembly: InternalsVisibleTo("Wolverine.Testing")]
+
+namespace Wolverine;
+
+public enum MultipleHandlerBehavior
+{
+    /// <summary>
+    /// The "classic" Wolverine behavior where multiple handlers for the same message
+    /// type are combined into a single logical message handler
+    /// </summary>
+    ClassicCombineIntoOneLogicalHandler,
+    
+    /// <summary>
+    /// Force Wolverine to make each individual handler for a message type be
+    /// processed completely independently. This is common when you may be publishing
+    /// an event message to multiple module handlers within the same process
+    /// </summary>
+    Separated
+}
+
+public enum WolverineMetricsMode
+{
+    /// <summary>
+    /// Wolverine will publish performance metrics via System.Diagnostics.Meter
+    /// where any Otel tooling can be configured to scrape metrics
+    /// </summary>
+    SystemDiagnosticsMeter,
+    
+    /// <summary>
+    /// Wolverine will accumulate and occasionally publish performance metrics
+    /// via messaging to subscribers configured to listen for Wolverine performance
+    /// data
+    /// </summary>
+    CritterWatch,
+    
+    /// <summary>
+    /// Wolverine will both accumulate and publish metrics information to CritterWatch
+    /// *and* publish metrics via System.Diagnostics.Meter
+    /// </summary>
+    Hybrid
+}
+
+public enum UnknownMessageBehavior
+{
+    /// <summary>
+    /// Default behavior. Wolverine will log a message that there was no known handler
+    /// for the incoming message, but otherwise discard it
+    /// </summary>
+    LogOnly,
+    
+    /// <summary>
+    /// Wolverine will log a message that there was no known handler for the incoming message,
+    /// then move it to the appropriate dead letter queue for the receiving endpoint
+    /// </summary>
+    DeadLetterQueue
+}
+
+/// <summary>
+/// Controls how much tracing and logging is applied to InvokeAsync() calls.
+/// By default, InvokeAsync uses lightweight tracking without detailed log messages.
+/// </summary>
+public enum InvokeTracingMode
+{
+    /// <summary>
+    /// Default behavior. InvokeAsync() uses lightweight tracking without
+    /// emitting log messages for execution start/finish/success/failure.
+    /// </summary>
+    Lightweight,
+
+    /// <summary>
+    /// InvokeAsync() will emit the same structured log messages as transport-received
+    /// messages, including execution started, execution finished, message succeeded,
+    /// and message failed log entries. Use this mode when you need full observability
+    /// for messages invoked as an in-process mediator.
+    /// </summary>
+    Full
+}
+
+/// <summary>
+/// Controls how Wolverine generates unique identifiers for envelopes (messages).
+/// </summary>
+public enum EnvelopeIdGeneration
+{
+    /// <summary>
+    /// Default. Uses MassTransit's NewId algorithm (<c>NewId.NextSequentialGuid()</c>), which builds
+    /// GUIDs from machine identity (MAC/DNS) and a timestamp, laid out so they sort in time order the way
+    /// .NET and PostgreSQL compare GUIDs. SQL Server compares a <c>uniqueidentifier</c> starting from its
+    /// last six bytes, so these ids arrive in effectively random order there and fragment SQL Server's
+    /// clustered envelope tables; see <see cref="NewIdSqlServerOrder"/>. Can produce duplicates in cloud
+    /// environments where multiple instances share network identity (containers, Cloud Run, serverless).
+    /// </summary>
+    NewId,
+
+    /// <summary>
+    /// Uses Guid.CreateVersion7() which produces GUIDs with a millisecond timestamp and cryptographically
+    /// strong random bits per RFC 9562. Recommended for greenfield applications and cloud environments
+    /// where instances may share network identity. Guaranteed unique without relying on machine-specific
+    /// properties. Ids created within the same millisecond are in random order, and SQL Server does not
+    /// sort them by time at all.
+    /// </summary>
+    GuidV7,
+
+    /// <summary>
+    /// GH-4902. The same NewId algorithm and uniqueness as <see cref="NewId"/>, but laid out with the
+    /// timestamp in the last six bytes (<c>NewId.NextGuid()</c>) so the ids sort in time order the way SQL
+    /// Server compares a <c>uniqueidentifier</c>. This keeps SQL Server's clustered inbox, outbox and
+    /// dead-letter tables from fragmenting. Wolverine switches to this automatically when every message store
+    /// in the application is SQL Server and nothing was set explicitly. The id travels with the message and
+    /// becomes the key in the RECEIVING application's inbox, and on PostgreSQL these ids index worse than
+    /// random GUIDs, so set <see cref="WolverineOptions.EnvelopeIdGeneration"/> explicitly to
+    /// <see cref="NewId"/> if a SQL Server-only application sends to services that store envelopes in PostgreSQL.
+    /// </summary>
+    NewIdSqlServerOrder
+}
+
+public class MetricsOptions
+{
+    private WolverineMetricsMode? _mode;
+
+    /// <summary>
+    /// How should Wolverine collect and publish metrics about message handling and publications?
+    /// </summary>
+    public WolverineMetricsMode Mode
+    {
+        get => _mode ?? WolverineMetricsMode.SystemDiagnosticsMeter;
+        set => _mode = value;
+    }
+
+    /// <summary>
+    /// Is <c>true</c> once anything has assigned <see cref="Mode"/>, even when the assigned value happens to be
+    /// the default <see cref="WolverineMetricsMode.SystemDiagnosticsMeter"/>. Lets configuration that would
+    /// otherwise overwrite <see cref="Mode"/> — add on extensions like CritterWatch monitoring, say — tell an
+    /// application's deliberate choice of <see cref="WolverineMetricsMode.SystemDiagnosticsMeter"/> apart from
+    /// nobody having chosen anything at all. See GH-4753.
+    /// </summary>
+    public bool ModeWasSetExplicitly => _mode.HasValue;
+
+    /// <summary>
+    /// If using either CritterWatch or Hybrid metrics publishing, this is the period in which
+    /// Wolverine will sample and publish metric data collection. Default is 5 seconds
+    /// </summary>
+    public TimeSpan SamplingPeriod { get; set; } = 5.Seconds();
+
+    /// <summary>
+    /// Default value for <see cref="TenantIdleEvictionCycles"/> (12 sampling periods, i.e. one
+    /// minute at the default <see cref="SamplingPeriod"/> of 5 seconds).
+    /// </summary>
+    public const int DefaultTenantIdleEvictionCycles = 12;
+
+    /// <summary>
+    /// If using either CritterWatch or Hybrid metrics publishing, the number of consecutive
+    /// sampling periods a tenant may go without any recorded activity for a given message type and
+    /// destination before its per-tenant tracking entry is evicted. Evicted tenants are re-tracked
+    /// automatically on their next activity. This bounds the per-tenant metrics series set in
+    /// high-tenant-count systems instead of letting it grow monotonically. The idle window in wall
+    /// clock time is roughly this value times <see cref="SamplingPeriod"/> (default: 12 cycles ~= 1
+    /// minute). Set to zero or a negative number to never evict idle tenants.
+    /// </summary>
+    public int TenantIdleEvictionCycles { get; set; } = DefaultTenantIdleEvictionCycles;
+
+    /// <summary>
+    /// Default explicit histogram bucket boundaries (in milliseconds) applied to the
+    /// <c>wolverine-execution-time</c> and <c>wolverine-effective-time</c> histograms. The
+    /// OpenTelemetry SDK's default buckets are poor for millisecond-scale latencies; these are tuned for
+    /// message handling. See GH-3224.
+    /// </summary>
+    public static readonly IReadOnlyList<double> DefaultHistogramBucketBoundaries =
+        new double[] { 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000, 60000 };
+
+    /// <summary>
+    /// Explicit histogram bucket boundaries (in milliseconds) used as the instrument <em>advice</em> for
+    /// the <c>wolverine-execution-time</c> and <c>wolverine-effective-time</c> histograms, so quantile
+    /// baselines computed from a time-series database (Prometheus / VictoriaMetrics) are meaningful for
+    /// millisecond latencies. Defaults to <see cref="DefaultHistogramBucketBoundaries"/>. Set to
+    /// <c>null</c> to fall back to the OpenTelemetry SDK / exporter defaults, or supply your own ascending
+    /// boundaries. An OpenTelemetry <c>View</c> still overrides this advice when configured. See GH-3224.
+    /// </summary>
+    public IReadOnlyList<double>? HistogramBucketBoundaries { get; set; } = DefaultHistogramBucketBoundaries;
+}
+
+/// <summary>
+/// Opt-in tracking and tracing diagnostics. Each of the boolean flags controls a
+/// separate slice of structured tracing surface — handler-execution events / tags,
+/// the deserialization span, and outbox-flush events around
+/// <c>FlushOutgoingMessages</c>. All default to <c>false</c>; users opt into the
+/// extra emission only when they want to pay for it.
+/// </summary>
+public class TrackingOptions
+{
+    /// <summary>
+    /// When enabled, Wolverine tracks which message types are produced as a result
+    /// of handling other message types (cause and effect). New causation pairs are
+    /// reported to <c>IWolverineObserver.MessageCausedBy</c> for CritterWatch topology
+    /// visualization. Default is <c>false</c>; <c>Wolverine.CritterWatch</c> enables this
+    /// automatically.
+    /// </summary>
+    public bool EnableMessageCausationTracking { get; set; }
+
+    /// <summary>
+    /// When enabled, the Wolverine event-store integrations (Wolverine.Marten / Wolverine.Polecat)
+    /// report events appended during an outbox-enrolled message/endpoint execution to
+    /// <c>IWolverineObserver.EventsAppended</c>, so the executing-handler→appended-event-type
+    /// relationship (invisible to message causation, since appended events never hit the outbox)
+    /// can be reconstructed. Default is <c>false</c>; <c>Wolverine.CritterWatch</c> enables this
+    /// automatically.
+    /// </summary>
+    public bool EnableEventAppendTracking { get; set; }
+
+    /// <summary>
+    /// When enabled, Wolverine emits structured diagnostics around each handler
+    /// invocation: <c>wolverine.handler.started</c> / <c>wolverine.handler.finished</c>
+    /// <see cref="System.Diagnostics.ActivityEvent"/>s wrapping the actual user
+    /// handler body, plus <c>wolverine.envelope.transport_lag_ms</c> and
+    /// <c>wolverine.envelope.receive_dwell_ms</c> tags on envelope activities.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool HandlerExecutionDiagnosticsEnabled { get; set; }
+
+    /// <summary>
+    /// When enabled, Wolverine starts a <c>wolverine.deserialize</c> span around
+    /// inbound envelope deserialization, tagging it with the payload size in bytes.
+    /// Default is <c>false</c>.
+    /// </summary>
+    public bool DeserializationSpanEnabled { get; set; }
+
+    /// <summary>
+    /// When enabled, Wolverine emits <c>wolverine.outbox.flushing</c> /
+    /// <c>wolverine.outbox.published</c> <see cref="System.Diagnostics.ActivityEvent"/>s
+    /// around the call to <c>FlushOutgoingMessages</c> in the generated handler
+    /// chain code. When the chain pulls in Wolverine.Marten transactional middleware
+    /// this flag also brackets the Marten <c>IDocumentSession.SaveChangesAsync</c>
+    /// postprocessor with <c>marten.savechanges.start</c> /
+    /// <c>marten.savechanges.finished</c> ActivityEvents. Useful for performance
+    /// optimization — separating slow database commits from slow broker publishes
+    /// when profiling a transactional handler. Default is <c>false</c>.
+    /// </summary>
+    public bool OutboxDiagnosticsEnabled { get; set; }
+
+    internal Wolverine.Tracking.TrackingIgnoreRules IgnoreRules { get; } = new();
+
+    /// <summary>
+    /// Every tracked session against this host ignores messages whose type is declared in
+    /// <paramref name="assembly" />, a batch of them included. Use this for traffic an embedded tool or
+    /// library keeps in flight for the whole life of the host, such as an embedded CritterWatch console's
+    /// polling, so a tracked session (and every WolverineFx.Bobcat act) waits for the application's own
+    /// messages only. An ignored envelope is never recorded: it does not hold the session open, it does not
+    /// appear in the session's history, and an exception it throws is not reported by the session. A single
+    /// session can opt back in with <c>TrackedSessionConfiguration.IncludeHostIgnoredTraffic()</c>.
+    /// </summary>
+    public TrackingOptions IgnoreMessagesFromAssembly(Assembly assembly)
+    {
+        IgnoreRules.IgnoreMessagesMatchingType(Wolverine.Tracking.TrackingIgnoreRules.FromAssembly(assembly));
+        return this;
+    }
+
+    /// <summary>
+    /// Every tracked session against this host ignores messages of type <typeparamref name="T" />, a batch
+    /// of them included. See <see cref="IgnoreMessagesFromAssembly" /> for what ignoring means.
+    /// </summary>
+    public TrackingOptions IgnoreMessageType<T>()
+    {
+        return IgnoreMessagesMatchingType(t => t == typeof(T));
+    }
+
+    /// <summary>
+    /// Every tracked session against this host ignores messages whose type matches
+    /// <paramref name="filter" />. A batch's array type is tested along with its element type. See
+    /// <see cref="IgnoreMessagesFromAssembly" /> for what ignoring means.
+    /// </summary>
+    public TrackingOptions IgnoreMessagesMatchingType(Func<Type, bool> filter)
+    {
+        IgnoreRules.IgnoreMessagesMatchingType(filter);
+        return this;
+    }
+
+    /// <summary>
+    /// Every tracked session against this host ignores traffic to or through the endpoint at
+    /// <paramref name="endpointUri" />: any envelope whose destination is that endpoint, whether it is sent
+    /// there or received by its listener. See <see cref="IgnoreMessagesFromAssembly" /> for what ignoring
+    /// means.
+    /// </summary>
+    public TrackingOptions IgnoreEndpoint(Uri endpointUri)
+    {
+        IgnoreRules.IgnoreEnvelopes(Wolverine.Tracking.TrackingIgnoreRules.ForEndpoint(endpointUri));
+        return this;
+    }
+
+    /// <summary>
+    /// Every tracked session against this host ignores any envelope matching <paramref name="filter" />.
+    /// The host-wide twin of <c>TrackedSessionConfiguration.IgnoreEnvelopes()</c>. Acknowledgements are
+    /// never ignored, whatever the filter. See <see cref="IgnoreMessagesFromAssembly" /> for what ignoring
+    /// means.
+    /// </summary>
+    public TrackingOptions IgnoreEnvelopes(Func<Envelope, bool> filter)
+    {
+        IgnoreRules.IgnoreEnvelopes(filter);
+        return this;
+    }
+}
+
+/// <summary>
+///     Completely defines and configures a Wolverine application
+/// </summary>
+public sealed partial class WolverineOptions
+{
+    private readonly List<Action<WolverineOptions>> _lazyActions = [];
+    private AutoCreate? _autoBuildMessageStorageOnStartup;
+    private UnknownMessageBehavior _unknownMessageBehavior = UnknownMessageBehavior.LogOnly;
+
+    public WolverineOptions() : this(null)
+    {
+        
+    }
+
+    public WolverineOptions(string? assemblyName)
+    {
+        Transports = new TransportCollection();
+
+        _serializers.Add(EnvelopeReaderWriter.Instance.ContentType, EnvelopeReaderWriter.Instance);
+        _serializers.Add(IntrinsicSerializer.MimeType, IntrinsicSerializer.Instance);
+
+        // GH-4720: registered unconditionally, and independently of whether this node ever WRITES compressed
+        // agent commands. Reading has to work on every node in the cluster before any node can safely start
+        // writing it, which is the whole rollout story for a format that travels between nodes.
+        _serializers.Add(CompressedIntrinsicSerializer.MimeType, CompressedIntrinsicSerializer.Instance);
+
+        UseSystemTextJsonForSerialization();
+
+        CodeGeneration = new GenerationRules("Internal.Generated");
+        CodeGeneration.Sources.Add(new NowTimeVariableSource());
+        CodeGeneration.Sources.Add(new TenantIdSource());
+        CodeGeneration.Sources.Add(new Runtime.Batching.BatchContextVariableSource());
+
+        // MassTransit shim variable sources
+        CodeGeneration.Sources.Add(new Shims.MassTransit.ConsumeContextVariableSource());
+        CodeGeneration.Sources.Add(new Shims.MassTransit.MassTransitInterfaceVariableSource());
+
+        CodeGeneration.Assemblies.Add(GetType().Assembly);
+
+        if (assemblyName != null)
+        {
+            establishApplicationAssembly(assemblyName);
+        }
+        else
+        {
+            // GH-3521: capture the caller's assembly now, while its frame is still on the stack. The
+            // application assembly is finalized later in ReadJasperFxOptions from a lazy DI factory where
+            // the caller's frame is long gone, so this is the only reliable point to learn where THIS host
+            // was actually registered — needed to detect the first-host-wins pin.
+            CaptureRegistrationCallingAssembly();
+        }
+
+        if (ApplicationAssembly != null)
+        {
+            CodeGeneration.Assemblies.Add(ApplicationAssembly);
+        }
+
+        Durability = new DurabilitySettings { AssignedNodeNumber = UniqueNodeId.ToString().GetDeterministicHashCode() };
+
+        Policies.Add<SagaPersistenceChainPolicy>();
+        Policies.Add<SideEffectPolicy>();
+        Policies.Add<ResponsePolicy>();
+        Policies.Add<OutgoingMessagesPolicy>();
+
+        // Phase-A pre-population of IChain.AncillaryStoreType for [Storage]-attributed handlers so the
+        // ancillary-store inbox routing map sees them eagerly at startup. Mirrors the per-provider
+        // eager policies (e.g. Marten's MartenStoreEagerPolicy). See StorageAttributeEagerPolicy.
+        Policies.Add<StorageAttributeEagerPolicy>();
+
+        // GH-4180. Weaves logical deduplication frames into handler chains that opted in with
+        // [Deduplicated] or Policies.RequireDeduplicationId(). Always registered; it is a no-op for the
+        // (overwhelmingly common) case where no chain asked for deduplication. HandlerGraph pulls it to
+        // the end of the policy list -- see handlerPolicies().
+        RegisteredPolicies.Add(new DeduplicationHandlerPolicy(this));
+
+        this.OnException<DuplicateIncomingEnvelopeException>().Discard();
+
+        // GH-3289: a batch handler can throw ApplyItemException to isolate poison items from a batch.
+        // Throwing the exception is the opt-in; this built-in rule resolves it on every attempt.
+        this.OnException<ApplyItemException>().ContinueWith(new Runtime.Batching.ApplyItemContinuationSource());
+
+        MessagePartitioning = new MessagePartitioningRules(this);
+        
+        InternalRouteSources.Insert(0, Transports.GetOrCreate<StubTransport>());
+    }
+
+    [ChildDescription]
+    public MetricsOptions Metrics { get; } = new();
+
+    /// <summary>
+    /// Opt-in tracking and tracing diagnostics. See <see cref="TrackingOptions"/> for the
+    /// individual flags. Default is "off everything" — users opt into the extra surface only
+    /// when they want the structured emission.
+    /// </summary>
+    [ChildDescription]
+    public TrackingOptions Tracking { get; } = new();
+
+    /// <summary>
+    /// Global default settings for entity loading behavior with [Entity], [Document],
+    /// [Aggregate], [ReadAggregate], and [WriteAggregate] attributes.
+    /// Per-attribute settings always take precedence over these defaults.
+    /// </summary>
+    public EntityDefaults EntityDefaults { get; } = new();
+
+    /// <summary>
+    /// Global failure handling policies for outgoing message send failures.
+    /// Use this to configure how Wolverine handles exceptions that occur when
+    /// trying to send messages to external transports.
+    /// </summary>
+    public SendingFailurePolicies SendingFailure { get; } = new();
+
+    /// <summary>
+    /// When enabled, Wolverine will automatically relay the authenticated user name
+    /// from HTTP ClaimsPrincipal through the messaging infrastructure, propagating it
+    /// on outgoing envelopes and into the outboxed session of the Marten, Polecat or Fisher
+    /// integration (LastModifiedBy, or CurrentUserName on Fisher)
+    /// </summary>
+    /// <remarks>
+    /// Applies to every HTTP endpoint with a message context, including ones that only open an
+    /// outboxed session.
+    /// </remarks>
+    public bool EnableRelayOfUserName { get; set; }
+
+    /// <summary>
+    /// Controls how much tracing and logging is applied to InvokeAsync() calls.
+    /// Default is <see cref="InvokeTracingMode.Lightweight"/> which uses minimal tracking.
+    /// Set to <see cref="InvokeTracingMode.Full"/> to emit the same structured log messages
+    /// as transport-received messages, useful for full observability when using Wolverine
+    /// as an in-process mediator.
+    /// </summary>
+    public InvokeTracingMode InvokeTracing { get; set; } = InvokeTracingMode.Lightweight;
+
+    /// <summary>
+    /// Controls how Wolverine generates unique identifiers for message envelopes.
+    /// Default is <see cref="EnvelopeIdGeneration.NewId"/> for backward compatibility, except that when this is
+    /// not set explicitly and every message store in the application prefers the same value -- for example
+    /// <see cref="EnvelopeIdGeneration.NewIdSqlServerOrder"/> when SQL Server is the only message storage --
+    /// Wolverine switches to that value at startup. Setting this explicitly, even to
+    /// <see cref="EnvelopeIdGeneration.NewId"/>, turns that automatic switch off.
+    /// Use <see cref="EnvelopeIdGeneration.GuidV7"/> for greenfield applications or
+    /// cloud environments where multiple instances may share network identity.
+    /// </summary>
+    public EnvelopeIdGeneration EnvelopeIdGeneration
+    {
+        get => _envelopeIdGeneration ?? _storePreferredEnvelopeIdGeneration ?? EnvelopeIdGeneration.NewId;
+        set => _envelopeIdGeneration = value;
+    }
+
+    // GH-4902. Set only by an explicit assignment, which always wins over what the message stores prefer
+    private EnvelopeIdGeneration? _envelopeIdGeneration;
+
+    // GH-4902. What every message store agreed on at startup, used only when nothing was set explicitly
+    private EnvelopeIdGeneration? _storePreferredEnvelopeIdGeneration;
+
+    internal bool EnvelopeIdGenerationIsExplicit => _envelopeIdGeneration.HasValue;
+
+    internal void UseStorePreferredEnvelopeIdGeneration(EnvelopeIdGeneration generation)
+    {
+        _storePreferredEnvelopeIdGeneration = generation;
+    }
+
+    /// <summary>
+    /// What is the policy within this application for whether or not it is valid to allow Service Location within
+    /// the generated code for message handlers or HTTP endpoints. Default is <see cref="ServiceLocationPolicy.NotAllowed"/>
+    /// as of Wolverine 6.0 (was <see cref="ServiceLocationPolicy.AllowedButWarn"/> in 5.x). Wolverine really does
+    /// not want you to use service location if you don't have to — register services so the codegen can inline-
+    /// construct them via constructor injection, and opt specific types in with
+    /// <see cref="JasperFx.CodeGeneration.GenerationRules.AlwaysUseServiceLocationFor{T}()"/> only when the
+    /// underlying registration (opaque lambda factory, etc.) genuinely requires it.
+    ///
+    /// Please see https://wolverinefx.net/guide/codegen.html for more information.
+    /// </summary>
+    public ServiceLocationPolicy ServiceLocationPolicy { get; set; } = ServiceLocationPolicy.NotAllowed;
+
+    public Uri SubjectUri => new Uri("wolverine://" + ServiceName.Sanitize());
+
+    /// <summary>
+    /// How should Wolverine treat message handlers for the same message type?
+    /// Default is ClassicCombineIntoOneLogicalHandler, but change this if wanting
+    /// to execute different handlers for the same type of message in different endpoints.
+    ///
+    /// This frequently comes into play with "modular monolith" architectures
+    /// </summary>
+    public MultipleHandlerBehavior MultipleHandlerBehavior
+    {
+        get => HandlerGraph.MultipleHandlerBehavior;
+        set => HandlerGraph.MultipleHandlerBehavior = value;
+    }
+
+    /// <summary>
+    /// Use to establish rules about determining the message GroupId metadata that
+    /// is used by Wolverine for message sharding or with message transports like Azure Service Bus,
+    /// AWS SQS, or Kafka that respect some kind of "group id"
+    ///
+    /// This will be automatically applied to all outgoing messages, but will never override
+    /// any explicitly defined Envelope.GroupId
+    /// </summary>
+    public MessagePartitioningRules MessagePartitioning { get; }
+
+    /// <summary>
+    /// GH-4180 follow up. Use to establish rules for deriving the <see cref="Envelope.DeduplicationId"/>
+    /// -- the *logical* identity of a message -- from the message itself, so that publishers do not
+    /// have to set <c>DeliveryOptions.DeduplicationId</c> by hand at every call site.
+    ///
+    /// These are applied to all outgoing messages, but never override an explicitly set
+    /// <see cref="Envelope.DeduplicationId"/>. See also the <c>[DeduplicationIdentity]</c> attribute
+    /// for declaring the identity on the message type itself.
+    /// </summary>
+    public MessageDeduplicationRules MessageDeduplication { get; } = new();
+
+    /// <summary>
+    /// Recurring (cron) message registrations. A single agent per cluster keeps the NEXT occurrence
+    /// of each registered schedule pre-scheduled through the existing scheduled-message machinery;
+    /// registering the first schedule is the feature's opt-in (nothing store-affecting activates on
+    /// a host with zero schedules). See <see cref="RecurringMessageCollection" />.
+    /// </summary>
+    public RecurringMessageCollection Schedules => _schedules ??= new RecurringMessageCollection(this);
+
+    private RecurringMessageCollection? _schedules;
+
+    /// <summary>
+    /// List of <see cref="IEnvelopeRule"/> instances applied to every outgoing envelope.
+    /// </summary>
+    public List<IEnvelopeRule> MetadataRules { get; } = new();
+
+    /// <summary>
+    /// GH-4527. Connection string names this application expects to find in <c>IConfiguration</c>, registered
+    /// by the <c>Use{Transport}UsingNamedConnection(name)</c> APIs. The runtime validates all of them in one
+    /// pass at startup -- before the message store migrates and before any transport connects -- and throws a
+    /// single <see cref="MissingNamedConnectionStringsException"/> naming every one that is missing.
+    ///
+    /// <para>
+    /// Any API that resolves a connection string by name should register here so the check stays uniform and
+    /// the developer sees every missing name on one run rather than one per deploy.
+    /// </para>
+    /// </summary>
+    public List<NamedConfigurationDependency> NamedConfigurationDependencies { get; } = new();
+
+    /// <summary>
+    /// GH-3001 extension point. Factories for codegen frames that prime a handler's service-location
+    /// child scope with an already-resolved "singleton-per-message" instance (e.g. Marten's
+    /// outbox-enrolled IDocumentSession), so service-located dependencies resolve to that instance
+    /// rather than a duplicate. Each produced frame is emitted right after the scope is created and
+    /// must self-guard (no-op when its target variable is absent from the chain). Integrations
+    /// (Wolverine.Marten / Wolverine.Polecat) register a factory here; the MessageContext priming
+    /// frame is always added by the runtime in addition to these.
+    /// </summary>
+    public List<Func<JasperFx.CodeGeneration.Frames.SyncFrame>> ScopingFrameSources { get; } = new();
+
+    
+    /// For advanced usages, this gives you the ability to register pre-canned message handling
+    /// that does not require any code generation. 
+    /// </summary>
+    /// <param name="messageType"></param>
+    /// <param name="handler"></param>
+    public void AddMessageHandler(Type messageType, IMessageHandler handler)
+    {
+        HandlerGraph.RegisterMessageType(messageType);
+        HandlerGraph.AddMessageHandler(messageType, handler);
+
+        // For error handling and other policies
+        if (handler is MessageHandler h)
+        {
+            h.Chain = new HandlerChain(messageType, HandlerGraph);
+        }
+    }
+
+    /// <summary>
+    /// For advanced usages, this gives you the ability to register pre-canned message handling
+    /// that does not require any code generation. 
+    /// </summary>
+    /// <param name="handler"></param>
+    /// <typeparam name="T"></typeparam>
+    public void AddMessageHandler<T>(MessageHandler<T> handler)
+    {
+        AddMessageHandler(typeof(T), handler);
+        handler.ConfigureChain(handler.Chain!); // Yeah, this is 100% a tell, don't ask violation
+    }
+
+    [IgnoreDescription]
+    public Guid UniqueNodeId { get; } = Guid.NewGuid();
+
+    /// <summary>
+    ///     Configure or extend how Wolverine does the runtime (or build ahead time) code generation
+    /// </summary>
+    [ChildDescription]
+    public GenerationRules CodeGeneration { get; }
+
+    /// <summary>
+    ///     When true, Wolverine consumes the pre-generated handler registry (emitted by
+    ///     <c>dotnet run -- codegen write</c>) to skip runtime assembly scanning during handler
+    ///     discovery. Implicitly enabled in <see cref="JasperFx.CodeGeneration.TypeLoadMode.Static" />;
+    ///     set explicitly via <see cref="UseStaticRegistries" /> for dynamic-mode users who still want
+    ///     to bypass scanning. Falls back to a runtime scan (with a warning) when no registry is present.
+    /// </summary>
+    internal bool UseStaticHandlerRegistry { get; set; }
+
+    /// <summary>
+    ///     Opt into consuming the pre-generated static handler registry emitted by
+    ///     <c>dotnet run -- codegen write</c> so that startup skips conventional handler discovery's
+    ///     assembly scan, even when not running in <see cref="JasperFx.CodeGeneration.TypeLoadMode.Static" />.
+    ///     If no generated registry is found, Wolverine logs a warning and falls back to scanning.
+    /// </summary>
+    public WolverineOptions UseStaticRegistries()
+    {
+        UseStaticHandlerRegistry = true;
+        return this;
+    }
+
+    /// <summary>
+    ///     Configure how & where Wolverine discovers message handler classes and message types to override or expand
+    ///     the built in conventions. Register additional Wolverine module assemblies
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    [IgnoreDescription]
+    public HandlerDiscovery Discovery => HandlerGraph.Discovery;
+
+
+    /// <summary>
+    ///     Options for applying conventional configuration to all or a subset of messaging endpoints
+    /// </summary>
+    [IgnoreDescription]
+    public IPolicies Policies => this;
+
+    /// <summary>
+    /// You may want to let Wolverine "know" about a message type upfront that would otherwise
+    /// be discovered at runtime so that Wolverine can build in diagnostics or apply message routing
+    /// upfront
+    /// </summary>
+    /// <param name="messageType"></param>
+    public void RegisterMessageType(Type messageType)
+    {
+        HandlerGraph.RegisterMessageType(messageType);
+    }
+
+    /// <summary>
+    /// </summary>
+    [IgnoreDescription]
+    public TransportCollection Transports { get; }
+
+    /// <summary>
+    ///     Advanced configuration options for Wolverine message processing,
+    ///     job scheduling, validation, and resiliency features and node specific settings
+    /// </summary>
+    [ChildDescription]
+    public DurabilitySettings Durability { get; }
+
+    /// <summary>
+    ///     Configuration for the periodic <see cref="Wolverine.Runtime.Heartbeat.WolverineHeartbeat"/>
+    ///     emission used by external monitoring tools to detect node liveness. The hosted service
+    ///     that emits heartbeats is registered through
+    ///     <see cref="WolverineOptionsExtensions.EnableHeartbeats"/>.
+    /// </summary>
+    [ChildDescription]
+    public HeartbeatPolicy Heartbeat { get; } = new();
+
+    /// <summary>
+    ///     The default message execution timeout for local queues. This uses a CancellationTokenSource
+    ///     behind the scenes, and the timeout enforcement is dependent on the usage within handlers
+    /// </summary>
+    public TimeSpan DefaultExecutionTimeout { get; set; } = 60.Seconds();
+
+    /// <summary>
+    ///     The default remote invocation timeout over external transport. If a message is not acknowledged within the time specified,
+    ///     it will throw a TimeoutException
+    /// </summary>
+    public TimeSpan DefaultRemoteInvocationTimeout { get; set; } = 5.Seconds();
+
+    /// <summary>
+    ///     GH-4116. The wall-clock budget for connecting to and provisioning an external broker at startup.
+    ///     <see cref="Wolverine.Transports.BrokerTransport{TEndpoint}"/> retries a failed attempt every five
+    ///     seconds until this elapses; a single attempt already in flight is not interrupted, so the real
+    ///     worst case is this budget plus one broker client request timeout. Was effectively unbounded before:
+    ///     the loop counted twenty attempts without a clock, and one attempt is as slow as the client's own
+    ///     request timeout -- 60s for librdkafka -- which made an unreachable broker a ~21 minute startup hang.
+    /// </summary>
+    public TimeSpan BrokerInitializationTimeout { get; set; } = 2.Minutes();
+
+    /// <summary>
+    ///     Register additional services to the underlying IoC container with either .NET standard IServiceCollection extension
+    ///     methods. This usage will have access to the application's
+    ///     full ServiceCollection *at the time of this call*
+    /// </summary>
+    [IgnoreDescription]
+    public IServiceCollection Services { get; internal set; } = new ServiceCollection();
+
+    internal HandlerGraph HandlerGraph { get; } = new();
+
+    /// <summary>
+    ///     Direct Wolverine to make any necessary database patches for envelope storage upon
+    ///     application start. Default is taken from JasperFxOptions, and is CreateOrDefault 
+    /// </summary>
+    public AutoCreate AutoBuildMessageStorageOnStartup
+    {
+        get => _autoBuildMessageStorageOnStartup ?? AutoCreate.CreateOrUpdate;
+        set => _autoBuildMessageStorageOnStartup = value;
+    }
+
+    private ResourceMigrationFailureMode? _resourceMigrationFailureMode;
+
+    /// <summary>
+    ///     Controls what happens when Wolverine's own startup work — message store migration and
+    ///     messaging transport initialization / auto-provisioning — fails. Defaults (when not set here)
+    ///     to the active JasperFx profile's value, i.e. <see cref="ResourceMigrationFailureMode.FailFast"/>
+    ///     (abort startup). Set to <see cref="ResourceMigrationFailureMode.ContinueOnFailures"/> — typically
+    ///     only on the <c>Production</c> profile via <c>JasperFxOptions.Production.ResourceMigrationFailureMode</c> —
+    ///     so that, e.g., a replica that loses the migration lock during a rolling deploy logs the failure
+    ///     and continues starting up instead of crash-looping. Mirrors JasperFx's resource-setup hosted
+    ///     service for resources outside that service's reach (GH-3130). An explicit value set here wins
+    ///     over the profile.
+    /// </summary>
+    public ResourceMigrationFailureMode ResourceMigrationFailureMode
+    {
+        get => _resourceMigrationFailureMode ?? ResourceMigrationFailureMode.FailFast;
+        set => _resourceMigrationFailureMode = value;
+    }
+
+    /// <summary>
+    ///     Descriptive name of the running service. Used in Wolverine diagnostics and testing support
+    /// </summary>
+    public string ServiceName { get; set; } = null!;
+
+    /// <summary>
+    ///     GH-4916. Register every <c>EventModelDefinition</c> subclass in the application's assemblies from the
+    ///     compile-time manifest JasperFx.SourceGenerator writes, so no definition needs its own
+    ///     <c>AddEventModel&lt;T&gt;()</c>. Diagnostic surface only; default true. Set false to register
+    ///     definitions explicitly and only those.
+    /// </summary>
+    public bool AutoRegisterEventModelDefinitions { get; set; } = true;
+
+    /// <summary>
+    ///     Free-form, user-defined service-level tags. These are surfaced on <c>ServiceCapabilities.Tags</c> and flow
+    ///     to monitoring tools (e.g. CritterWatch) so operators can label and filter related services by their own
+    ///     conventions. The operator owns any <c>key:value</c> convention — Wolverine treats these as opaque strings.
+    /// </summary>
+    public IList<string> Tags { get; } = new List<string>();
+
+    /// <summary>
+    ///     This should probably *only* be used in development or testing
+    ///     to latch all outgoing message sending
+    /// </summary>
+    internal bool ExternalTransportsAreStubbed { get; set; }
+    
+    /// <summary>
+    /// Should all listeners for external transports be disabled in
+    /// this process? You may want to use this for command line applications
+    /// that publish outbound messages
+    /// </summary>
+    public bool DisableAllExternalListeners { get; set; }
+
+    [IgnoreDescription]
+    internal LocalTransport LocalRouting => Transports.GetOrCreate<LocalTransport>();
+    
+    internal bool LocalRoutingConventionDisabled { get; set; }
+
+    /// <summary>
+    /// Should remote usages of IMessageBus.InvokeAsync() or IMessageBus.InvokeAsync<T>()
+    /// that ultimately use an external transport be enabled? Default is true, but you
+    /// may want to disable this to avoid surprise network round trips
+    /// </summary>
+    public bool EnableRemoteInvocation { get; set; } = true;
+
+    /// <summary>
+    /// Should message failures automatically try to send a failure acknowledgement message back to the
+    /// original caller. Default is *false* as of Wolverine 4.6
+    /// </summary>
+    public bool EnableAutomaticFailureAcks { get; set; } = false;
+
+    /// <summary>
+    /// Legacy flag for message-causation tracking. Reads and writes flow through
+    /// <see cref="TrackingOptions.EnableMessageCausationTracking"/> on the
+    /// <see cref="Tracking"/> sub-config. Use the new property directly going
+    /// forward.
+    /// </summary>
+    [Obsolete("Use Tracking.EnableMessageCausationTracking instead")]
+    public bool EnableMessageCausationTracking
+    {
+        get => Tracking.EnableMessageCausationTracking;
+        set => Tracking.EnableMessageCausationTracking = value;
+    }
+
+    private void deriveServiceName()
+    {
+        if (GetType() == typeof(WolverineOptions))
+        {
+            ServiceName = ApplicationAssembly?.GetName().Name ?? "WolverineService";
+        }
+        else
+        {
+            ServiceName = GetType().Name.Replace("WolverineOptions", "").Replace("Registry", "")
+                .Replace("Options", "");
+        }
+    }
+    
+    /// <summary>
+    ///     Produce a report of why or why not this Wolverine application
+    ///     is finding or not finding methods from this handlerType
+    ///     USE THIS TO TROUBLESHOOT HANDLER DISCOVERY ISSUES
+    /// </summary>
+    /// <param name="handlerType"></param>
+    /// <returns></returns>
+    public string DescribeHandlerMatch(Type handlerType)
+    {
+        return Discovery.DescribeHandlerMatch(this, handlerType);
+    }
+
+    /// <summary>
+    /// Apply a change to this WolverineOptions after all other explicit configurations
+    /// are processed. Generally to avoid ordering issues
+    /// </summary>
+    /// <param name="action"></param>
+    public void ConfigureLazily(Action<WolverineOptions> action)
+    {
+        _lazyActions.Add(action);
+    }
+
+    internal void ApplyLazyConfiguration()
+    {
+        foreach (var action in _lazyActions)
+        {
+            action(this);
+        }
+
+        _lazyActions.Clear();
+    }
+
+    public void MapGenericMessageType(Type interfaceType, Type closedType)
+    {
+        HandlerGraph.MappedGenericMessageTypes[interfaceType] = closedType;
+    }
+
+    internal IEnumerable<Endpoint> FindOrCreateEndpointByName(string endpointName)
+    {
+        var existing = Transports.SelectMany(x => x.Endpoints())
+            .Where(x => x.EndpointName.EqualsIgnoreCase(endpointName)).ToArray();
+
+        if (existing.Any()) return existing;
+
+        return [Transports.GetOrCreateEndpoint(new Uri($"local://{endpointName}"))];
+    }
+
+    public IEnumerable<Endpoint> FindEndpointsWithHandlerType(Type handlerType)
+    {
+        return Transports.SelectMany(x => x.Endpoints()).Where(x => x.StickyHandlers.Contains(handlerType));
+    }
+
+    public Version? Version => ApplicationAssembly?.GetName().Version ?? Assembly.GetEntryAssembly()?.GetName().Version;
+    
+    // This helps govern some command line work
+    internal bool LightweightMode { get; set; }
+
+    public UnknownMessageBehavior UnknownMessageBehavior
+    {
+        get => _unknownMessageBehavior;
+        set
+        {
+            _unknownMessageBehavior = value;
+            if (value == UnknownMessageBehavior.DeadLetterQueue)
+            {
+                Services.TryAddSingleton<IMissingHandler, MoveUnknownMessageToDeadLetterQueue>();
+            }
+            else
+            {
+                Services.RemoveAll(x =>
+                    !x.IsKeyedService && x.ServiceType == typeof(IMissingHandler) && x.ImplementationType ==
+                        typeof(MoveUnknownMessageToDeadLetterQueue));
+            }
+        }
+    }
+
+    internal void ReadJasperFxOptions(JasperFxOptions jasperfx)
+    {
+        // GH-4448: the exchange runs BOTH ways, and it used to run only one. `??=` makes JasperFx's value
+        // the fallback for Wolverine's — which already says an explicit WolverineOptions.ServiceName
+        // outranks it — but nothing carried that value back, so `opts.ServiceName = "Ledgers"` (the
+        // documented way to name a Wolverine service) left JasperFxOptions.ServiceName at ITS default,
+        // the entry assembly name. Anything reading the JasperFx side then disagreed with Wolverine
+        // about the name of the one running service.
+        //
+        // ⚠️ The visible damage is an Event Model canvas SPLITTING IN TWO. WolverineEventModelSource
+        // names its model from WolverineOptions.ServiceName while a store's source (fisher#280 and its
+        // Marten/Polecat twins) falls back to JasperFxOptions.ServiceName, so one host contributed two
+        // differently-named models and no single model held both halves. It only ever looked correct
+        // when the assembly name and the service name happened to coincide, which is exactly why it
+        // survived: reported from fisher#284, where Stoat's assembly is also called Stoat.
+        //
+        // Captured before the `??=` because afterwards there is no telling a value the user set from
+        // one just adopted from JasperFx — and adopting is precisely the case that must NOT write back.
+        var explicitlyNamedHere = ServiceName;
+
+        ServiceName ??= jasperfx.ServiceName;
+
+        if (explicitlyNamedHere.IsNotEmpty())
+        {
+            // Wolverine's own value wins, in the same direction the `??=` above already established.
+            // Safe to assign unconditionally because JasperFxOptions is resolved from THIS container, so
+            // a second host in the process has its own instance to name.
+            jasperfx.ServiceName = explicitlyNamedHere;
+        }
+
+
+        if (_applicationAssembly == null)
+        {
+            // GH-3776: JasperFx resolves its own application assembly with the same kind of stack walk and has
+            // no test-runner exclusion, so in a test process it can hand us the RUNNER assembly. Adopting that
+            // silently points handler discovery at an assembly with no handlers in it. Drop it and resolve
+            // locally instead, where determineCallingAssembly's IsTestRunnerAssembly check keeps the walk
+            // honest and ultimately falls back to the entry assembly.
+            var fromJasperFx = jasperfx.ApplicationAssembly;
+            if (fromJasperFx?.GetName().Name is { } pinned && IsTestRunnerAssembly(pinned))
+            {
+                fromJasperFx = null;
+            }
+
+            ApplicationAssembly = fromJasperFx;
+
+            if (ApplicationAssembly == null)
+            {
+                establishApplicationAssembly(null);
+            }
+            else
+            {
+                // GH-3521: jasperfx.ApplicationAssembly is a process-wide value pinned by whichever host
+                // started first. If it differs from where this host was actually registered, handler
+                // discovery will silently scan the wrong assembly — warn loudly.
+                CheckForDivergentApplicationAssembly(ApplicationAssembly);
+            }
+        }
+        
+        if (!CodeGeneration.SourceCodeWritingEnabledHasChanged)
+        {
+            CodeGeneration.SourceCodeWritingEnabled = jasperfx.ActiveProfile.SourceCodeWritingEnabled;
+        }
+
+        if (!CodeGeneration.TypeLoadModeHasChanged)
+        {
+            CodeGeneration.TypeLoadMode = jasperfx.ActiveProfile.GeneratedCodeMode;
+        }
+
+        if (!Durability.TenantIdStyleHasChanged)
+        {
+            Durability.TenantIdStyle = jasperfx.TenantIdStyle;
+        }
+
+        if (_autoBuildMessageStorageOnStartup == null)
+        {
+            _autoBuildMessageStorageOnStartup = jasperfx.ActiveProfile.ResourceAutoCreate;
+        }
+
+        if (_resourceMigrationFailureMode == null)
+        {
+            _resourceMigrationFailureMode = jasperfx.ActiveProfile.ResourceMigrationFailureMode;
+        }
+
+        // Propagate GeneratedCodeOutputPath from JasperFxOptions if not explicitly set
+        if (CodeGeneration.GeneratedCodeOutputPath == "Internal/Generated" && jasperfx.GeneratedCodeOutputPath != null)
+        {
+            CodeGeneration.GeneratedCodeOutputPath = jasperfx.GeneratedCodeOutputPath;
+        }
+    }
+    
+    public void RegisterMessageType(Type messageType, string messageAlias)
+    {
+        HandlerGraph.RegisterMessageType(messageType, messageAlias);
+    }
+    
+}

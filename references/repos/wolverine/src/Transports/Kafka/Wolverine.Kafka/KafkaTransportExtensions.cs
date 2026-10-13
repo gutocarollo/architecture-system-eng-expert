@@ -1,0 +1,344 @@
+using System.Text;
+using Confluent.Kafka;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine.Configuration;
+using Wolverine.Kafka.Internal;
+using Wolverine.Kafka.Internals;
+using Wolverine.Runtime.Partitioning;
+
+namespace Wolverine.Kafka;
+
+public static class KafkaTransportExtensions
+{
+    /// <summary>
+    /// Direct Wolverine to connect to Kafka using the named connection string from IConfiguration.
+    /// This option is useful for Aspire integration between Wolverine and Kafka.
+    /// The connection string value should be the bootstrap servers address (e.g. "localhost:9092").
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="connectionStringName">Key of the expected connection string from IConfiguration</param>
+    /// <param name="configureConsumers">Optional extra configuration for all consumers</param>
+    /// <param name="configureProducers">Optional extra configuration for all producers</param>
+    /// <returns></returns>
+    public static KafkaTransportExpression UseKafkaUsingNamedConnection(this WolverineOptions options,
+        string connectionStringName, Action<ConsumerConfig>? configureConsumers = null,
+        Action<ProducerConfig>? configureProducers = null)
+    {
+        // Automatic failure acks do not work with Kafka serialization failures
+        options.EnableAutomaticFailureAcks = false;
+        var transport = options.KafkaTransport();
+
+        // GH-4527: declare the dependency so the runtime validates it -- together with every other named
+        // connection string this application needs -- in one pass at startup, before the message store
+        // migrates and before any transport connects, and so check-env can catch it before a deploy. The
+        // guard inside the factory below stays as a backstop for hosts assembled without IConfiguration.
+        var dependency = new NamedConfigurationDependency("Kafka", connectionStringName, "AddKafka");
+        options.RequireNamedConnectionString(dependency.Kind, dependency.Name, dependency.AspireResourceMethod);
+
+        options.Services.AddSingleton<KafkaNamedConnectionSource>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            var bootstrapServers = configuration.GetConnectionString(connectionStringName);
+            if (string.IsNullOrEmpty(bootstrapServers))
+                throw dependency.MissingException(configuration);
+
+            return new KafkaNamedConnectionSource(bootstrapServers);
+        });
+
+        if (configureConsumers != null) configureConsumers(transport.ConsumerConfig);
+        if (configureProducers != null) configureProducers(transport.ProducerConfig);
+
+        return new KafkaTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    ///     Quick access to the Kafka Transport within this application.
+    ///     This is for advanced usage
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <returns></returns>
+    internal static KafkaTransport KafkaTransport(this WolverineOptions endpoints, BrokerName? name = null)
+    {
+        var transports = endpoints.As<WolverineOptions>().Transports;
+
+        return transports.GetOrCreate<KafkaTransport>(name);
+    }
+
+    /// <summary>
+    /// Add a connection to an Kafka broker within this application
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static KafkaTransportExpression UseKafka(this WolverineOptions options, string bootstrapServers)
+    {
+        // Automatic failure acks do not work with Kafka serialization failures
+        options.EnableAutomaticFailureAcks = false;
+        var transport = options.KafkaTransport();
+        transport.ConsumerConfig.BootstrapServers = bootstrapServers;
+        transport.ProducerConfig.BootstrapServers = bootstrapServers;
+        transport.AdminClientConfig.BootstrapServers = bootstrapServers;
+
+        return new KafkaTransportExpression(transport, options);
+    }
+    
+    /// <summary>
+    /// Configure connection and authentication information for a secondary Kafka broker
+    /// to this application. Only use this overload if your Wolverine application needs to talk
+    /// to two or more Kafka brokers
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="name">Name of the additional Rabbit Mq broker</param>
+    /// <param name="configure"></param>
+    public static KafkaTransportExpression AddNamedKafkaBroker(this WolverineOptions options, BrokerName name,
+        string bootstrapServers)
+    {
+        var transport = options.KafkaTransport(name);
+        transport.ConsumerConfig.BootstrapServers = bootstrapServers;
+        transport.ProducerConfig.BootstrapServers = bootstrapServers;
+        transport.AdminClientConfig.BootstrapServers = bootstrapServers;
+
+        return new KafkaTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Make additive configuration to the Kafka integration for this application
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static KafkaTransportExpression ConfigureKafka(this WolverineOptions options, string bootstrapServers)
+    {
+        var transport = options.KafkaTransport();
+
+        return new KafkaTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Listen for incoming messages from multiple Kafka topics using a single consumer.
+    /// This reduces consumer group rebalances and startup time compared to creating
+    /// individual listeners for each topic.
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="topicNames">The names of the Kafka topics to subscribe to</param>
+    /// <returns></returns>
+    public static KafkaTopicGroupListenerConfiguration ListenToKafkaTopics(this WolverineOptions endpoints,
+        params string[] topicNames)
+    {
+        if (topicNames.Length == 0) throw new ArgumentException("At least one topic name is required", nameof(topicNames));
+
+        var transport = endpoints.KafkaTransport();
+
+        var group = new KafkaTopicGroup(transport, topicNames, EndpointRole.Application);
+        group.IsListener = true;
+        transport.TopicGroups.Add(group);
+
+        return new KafkaTopicGroupListenerConfiguration(group);
+    }
+
+    /// <summary>
+    ///     Listen for incoming messages at the designated Kafka topic name
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="topicName">The name of the Kafka topic</param>
+    /// <param name="configure">
+    ///     Optional configuration for this Rabbit Mq queue if being initialized by Wolverine
+    ///     <returns></returns>
+    public static KafkaListenerConfiguration ListenToKafkaTopic(this WolverineOptions endpoints, string topicName)
+    {
+        var transport = endpoints.KafkaTransport();
+
+        var endpoint = transport.Topics[topicName];
+        endpoint.EndpointName = topicName;
+        endpoint.IsListener = true;
+
+        return new KafkaListenerConfiguration(endpoint);
+    }
+    
+    /// <summary>
+    ///     Listen for incoming messages at the designated Kafka topic name
+    /// </summary>
+    /// <param name="endpoints"></param>
+    /// <param name="name">The name of the ancillary Kafka broker</param>
+    /// <param name="topicName">The name of the Rabbit MQ queue</param>
+    ///     <returns></returns>
+    public static KafkaListenerConfiguration ListenToKafkaTopicOnNamedBroker(this WolverineOptions endpoints, BrokerName name, string topicName)
+    {
+        var transport = endpoints.KafkaTransport(name);
+
+        var endpoint = transport.Topics[topicName];
+        endpoint.EndpointName = topicName;
+        endpoint.IsListener = true;
+
+        return new KafkaListenerConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Publish messages to an Kafka topic
+    /// </summary>
+    /// <param name="publishing"></param>
+    /// <param name="topicName"></param>
+    /// <returns></returns>
+    public static KafkaSubscriberConfiguration ToKafkaTopic(this IPublishToExpression publishing, string topicName)
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<KafkaTransport>();
+
+        var topic = transport.Topics[topicName];
+
+        // This is necessary unfortunately to hook up the subscription rules
+        publishing.To(topic.Uri);
+
+        return new KafkaSubscriberConfiguration(topic);
+    }
+    
+    /// <summary>
+    /// Publish messages to an Kafka topic
+    /// </summary>
+    /// <param name="publishing"></param>
+    /// <param name="topicName"></param>
+    /// <returns></returns>
+    public static KafkaSubscriberConfiguration ToKafkaTopicOnNamedBroker(this IPublishToExpression publishing, BrokerName name, string topicName)
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<KafkaTransport>(name);
+
+        var topic = transport.Topics[topicName];
+
+        // This is necessary unfortunately to hook up the subscription rules
+        publishing.To(topic.Uri);
+
+        return new KafkaSubscriberConfiguration(topic);
+    }
+
+    /// <summary>
+    /// Publish messages to Kafka topics based on Wolverine's rules for deriving topic
+    /// names from a message type
+    /// </summary>
+    /// <param name="publishing"></param>
+    /// <param name="topicName"></param>
+    /// <returns></returns>
+    public static KafkaSubscriberConfiguration ToKafkaTopics(this IPublishToExpression publishing)
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<KafkaTransport>();
+
+        var topic = transport.Topics[KafkaTopic.WolverineTopicsName];
+
+        // This is necessary unfortunately to hook up the subscription rules
+        publishing.To(topic.Uri);
+
+        return new KafkaSubscriberConfiguration(topic);
+    }
+    
+    /// <summary>
+    /// Publish messages to Kafka topics based on Wolverine's rules for deriving topic
+    /// names from a message type
+    /// </summary>
+    /// <param name="publishing"></param>
+    /// <param name="topicName"></param>
+    /// <returns></returns>
+    public static KafkaSubscriberConfiguration ToKafkaTopicsOnNamedBroker(this IPublishToExpression publishing, BrokerName name)
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<KafkaTransport>(name);
+
+        var topic = transport.Topics[KafkaTopic.WolverineTopicsName];
+
+        // This is necessary unfortunately to hook up the subscription rules
+        publishing.To(topic.Uri);
+
+        return new KafkaSubscriberConfiguration(topic);
+    }
+
+    internal static Envelope CreateEnvelope(this IKafkaEnvelopeMapper mapper, string topicName, Message<string, byte[]> message)
+    {
+        var envelope = new Envelope
+        {
+            PartitionKey = message.Key,
+            Data = message.Value,
+            TopicName = topicName
+        };
+
+        message.Headers ??= new Headers(); // prevent NRE
+
+        mapper.MapIncomingToEnvelope(envelope, message);
+
+        return envelope;
+    }
+
+    internal static async ValueTask<Message<string, byte[]>> CreateMessage(this IKafkaEnvelopeMapper mapper, Envelope envelope)
+    {
+        if (envelope.Message is KafkaTombstone tombstone)
+        {
+            return new Message<string, byte[]>
+            {
+                Key = tombstone.Key,
+                Value = null!,
+                Headers = new Headers()
+            };
+        }
+
+        var data = await envelope.GetDataAsync();
+        var message = new Message<string, byte[]>
+        {
+            Key = !string.IsNullOrEmpty(envelope.PartitionKey) ? envelope.PartitionKey : envelope.Id.ToString(),
+            Value = data!,
+            Headers = new Headers()
+        };
+
+        mapper.MapEnvelopeToOutgoing(envelope, message);
+
+        return message;
+    }
+
+    /// <summary>
+    /// Create a sharded message topology with Kafka topics named
+    /// baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="rules"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static MessagePartitioningRules PublishToShardedKafkaTopics(this MessagePartitioningRules rules, string baseName, int numberOfEndpoints, Action<PartitionedMessageTopologyWithTopics> configure)
+    {
+        rules.AddPublishingTopology((opts, _) =>
+        {
+            var topology = new PartitionedMessageTopologyWithTopics(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            topology.ConfigureListening(x => {});
+            configure(topology);
+            topology.AssertValidity();
+
+            return topology;
+        });
+
+        return rules;
+    }
+
+    /// <summary>
+    /// Use sharded Kafka topics for global partitioned message processing.
+    /// Topics will be named baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="topology"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static GlobalPartitionedMessageTopology UseShardedKafkaTopics(
+        this GlobalPartitionedMessageTopology topology, string baseName, int numberOfEndpoints,
+        Action<PartitionedMessageTopologyWithTopics>? configure = null)
+    {
+        topology.SetExternalTopology(opts =>
+        {
+            var t = new PartitionedMessageTopologyWithTopics(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            t.ConfigureListening(x => {});
+
+            configure?.Invoke(t);
+            return t;
+        }, baseName);
+        return topology;
+    }
+}

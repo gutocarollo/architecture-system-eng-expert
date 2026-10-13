@@ -1,0 +1,706 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DaemonTests.Aggregations;
+using DaemonTests.MultiTenancy;
+using JasperFx.Core;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events;
+using Marten.Subscriptions;
+using Marten.Testing.Harness;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Npgsql;
+using NSubstitute;
+using Shouldly;
+using Weasel.Postgresql;
+using Xunit;
+
+namespace DaemonTests.Subscriptions;
+
+public class subscriptions_end_to_end: OneOffConfigurationsContext
+{
+    private readonly FakeSubscription theSubscription = new();
+
+    public subscriptions_end_to_end()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Subscribe(theSubscription);
+        });
+    }
+
+    [Fact]
+    public async Task run_events_through()
+    {
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.EventsEncountered.Count.ShouldBe(16);
+
+        var progress = await theStore.Advanced.ProjectionProgressFor(new ShardName("Fake", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBe(16);
+    }
+
+    [Fact]
+    public async Task start_subscription_at_sequence_floor()
+    {
+        // Just need it reset to nothing
+        StoreOptions(opts => { });
+
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        var secondSubscription = new FakeSubscription();
+        var secondStore = SeparateStore(opts =>
+        {
+            opts.Projections.Subscribe(secondSubscription, o => o.Options.SubscribeFromSequence(8));
+        });
+
+        await daemon.StopAllAsync();
+
+        using var daemon2 = await secondStore.BuildProjectionDaemonAsync();
+        await daemon2.StartAllAsync();
+        await Task.Delay(2000, TestContext.Current.CancellationToken); // yeah, I know
+        await secondStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        secondSubscription.EventsEncountered.Count.ShouldBe(8);
+    }
+
+    [Fact]
+    public async Task run_events_through_and_rewind_from_scratch()
+    {
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.EventsEncountered.Clear();
+
+        await daemon.RewindSubscriptionAsync("Fake", CancellationToken.None);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(30.Seconds());
+
+        theSubscription.EventsEncountered.Count.ShouldBe(16);
+
+        var progress = await theStore.Advanced.ProjectionProgressFor(new ShardName("Fake", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBe(16);
+    }
+
+    [Fact]
+    public async Task run_events_through_and_rewind_from_middle()
+    {
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.EventsEncountered.Clear();
+
+        await daemon.RewindSubscriptionAsync("Fake", CancellationToken.None, 8);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.EventsEncountered.Count.ShouldBe(8);
+
+        var progress = await theStore.Advanced.ProjectionProgressFor(new ShardName("Fake", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBe(16);
+    }
+
+    [Fact]
+    public async Task listener_registered_by_a_subscription_is_called()
+    {
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.Listener.AfterCommitWasCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task run_events_through_with_event_filters()
+    {
+        theSubscription.IncludeType<EventSourcingTests.Aggregation.BEvent>();
+        theSubscription.IncludeType<EventSourcingTests.Aggregation.EEvent>();
+
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        theSubscription.EventsEncountered.Count.ShouldBe(5);
+        theSubscription.EventsEncountered
+            .All(x => x.Data is EventSourcingTests.Aggregation.BEvent or EventSourcingTests.Aggregation.EEvent)
+            .ShouldBeTrue();
+
+        var progress = await theStore.Advanced.ProjectionProgressFor(new ShardName("Fake", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBe(16);
+    }
+}
+
+public class using_simple_subscription_registrations: OneOffConfigurationsContext
+{
+    [Fact]
+    public async Task use_end_to_end()
+    {
+        SimpleSubscription.Clear();
+
+        StoreOptions(opts =>
+        {
+            opts.Projections.Subscribe(new SimpleSubscription(), x => x.Name = "Simple");
+        });
+
+        theStore.Options.Projections.AllShards().Select(x => x.Name.Identity)
+            .ShouldContain("Simple:All");
+
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        theSession.Events.StartStream(Guid.NewGuid(), events1);
+        theSession.Events.StartStream(Guid.NewGuid(), events2);
+        theSession.Events.StartStream(Guid.NewGuid(), events3);
+        theSession.Events.StartStream(Guid.NewGuid(), events4);
+
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await theStore.WaitForNonStaleProjectionDataAsync(20.Seconds());
+
+        SimpleSubscription.EventsEncountered[1].Count.ShouldBe(16);
+
+        var progress = await theStore.Advanced.ProjectionProgressFor(new ShardName("Simple", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBe(16);
+    }
+
+    [Fact]
+    public void subscription_wrapper_copies_the_filters_from_subscription_base()
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<FilteredSubscription>();
+
+        var provider = services.BuildServiceProvider();
+
+        var wrapper = new ScopedSubscriptionServiceWrapper<FilteredSubscription>(provider);
+
+        wrapper.IncludeArchivedEvents.ShouldBeTrue();
+        wrapper.IncludedEventTypes.Count.ShouldBe(2);
+        wrapper.IncludedEventTypes.ShouldContain(typeof(MTAEvent));
+        wrapper.IncludedEventTypes.ShouldContain(typeof(MTBEvent));
+    }
+
+    // Regression for #4318: any Options / Name / Version configured in
+    // the subscriber's constructor used to be silently dropped on the
+    // Scoped registration path. They must surface on the wrapper because
+    // it's the wrapper the daemon reads from at runtime.
+    [Fact]
+    public void scoped_subscription_wrapper_propagates_constructor_configured_options_4318()
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<ConstructorConfiguredSubscription>();
+
+        var provider = services.BuildServiceProvider();
+
+        var wrapper = new ScopedSubscriptionServiceWrapper<ConstructorConfiguredSubscription>(provider);
+
+        wrapper.Options.BatchSize.ShouldBe(123);
+        wrapper.Options.MaximumHopperSize.ShouldBe(7777);
+        wrapper.Name.ShouldBe("custom-subscription-name");
+        wrapper.Version.ShouldBe(7u);
+    }
+}
+
+public class subscription_registrations_through_host: HostedStoreContext
+{
+    private async Task rewindState()
+    {
+        SimpleSubscription.Clear();
+        await using var conn = new NpgsqlConnection(ConnectionSource.ConnectionString);
+        await conn.OpenAsync();
+        await conn.DropSchemaAsync(SchemaName);
+        await conn.DropSchemaAsync($"{SchemaName}_custom");
+        await conn.CloseAsync();
+    }
+
+    private void addCustomStore(IServiceCollection services, ServiceLifetime subscriptionLifetime)
+    {
+        services.AddMartenStore<ICustomStore>(opts =>
+        {
+            opts.Connection(ConnectionSource.ConnectionString);
+            opts.DisableNpgsqlLogging = true;
+            opts.DatabaseSchemaName = $"{SchemaName}_custom";
+        }).AddAsyncDaemon(DaemonMode.Solo).AddSubscriptionWithServices<SimpleSubscription>(
+            subscriptionLifetime,
+            o => o.Name = "Simple2");
+    }
+
+    private static async Task publishFourStreams(DocumentStore store)
+    {
+        var events1 = new object[]
+        {
+            new EventSourcingTests.Aggregation.AEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events2 = new object[]
+        {
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.BEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events3 = new object[]
+        {
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.AEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+        var events4 = new object[]
+        {
+            new EventSourcingTests.Aggregation.EEvent(), new EventSourcingTests.Aggregation.BEvent(),
+            new EventSourcingTests.Aggregation.DEvent(), new EventSourcingTests.Aggregation.CEvent()
+        };
+
+        await using var session = store.LightweightSession();
+
+        session.Events.StartStream(Guid.NewGuid(), events1);
+        session.Events.StartStream(Guid.NewGuid(), events2);
+        session.Events.StartStream(Guid.NewGuid(), events3);
+        session.Events.StartStream(Guid.NewGuid(), events4);
+
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task use_from_service_provider_as_singleton()
+    {
+        await rewindState();
+
+        var host = await StartHostAsync(_ => { }, DaemonMode.Solo,
+            configureMarten: marten => marten.AddSubscriptionWithServices<SimpleSubscription>(
+                ServiceLifetime.Singleton,
+                o => o.Name = "Simple2"));
+
+        var store = (DocumentStore)host.Services.GetRequiredService<IDocumentStore>();
+
+        store.Options.Projections.AllShards().Select(x => x.Name.Identity)
+            .ShouldContain("Simple2:All");
+
+        await publishFourStreams(store);
+
+        await store.WaitForNonStaleProjectionDataAsync(60.Seconds());
+
+        SimpleSubscription.EventsEncountered[1].Count.ShouldBeGreaterThanOrEqualTo(16);
+
+        var progress = await store.Advanced.ProjectionProgressFor(new ShardName("Simple2", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBeGreaterThanOrEqualTo(16);
+
+        await store.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task use_from_service_provider_as_singleton_with_martenStore()
+    {
+        await rewindState();
+
+        var host = await StartHostAsync(_ => { },
+            configureServices: services => addCustomStore(services, ServiceLifetime.Singleton));
+
+        var store = (DocumentStore)host.Services.GetRequiredService<ICustomStore>();
+
+        store.Options.Projections.AllShards().Select(x => x.Name.Identity)
+            .ShouldContain("Simple2:All");
+
+        await publishFourStreams(store);
+
+        await store.WaitForNonStaleProjectionDataAsync(60.Seconds());
+
+        SimpleSubscription.EventsEncountered[1].Count.ShouldBeGreaterThanOrEqualTo(16);
+
+        var progress = await store.Advanced.ProjectionProgressFor(new ShardName("Simple2", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBeGreaterThanOrEqualTo(16);
+
+        await store.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task use_from_service_provider_as_scoped()
+    {
+        await rewindState();
+
+        var host = await StartHostAsync(_ => { }, DaemonMode.Solo,
+            configureMarten: marten => marten.AddSubscriptionWithServices<SimpleSubscription>(
+                ServiceLifetime.Scoped,
+                o => o.Name = "Simple2"));
+
+        var store = (DocumentStore)host.Services.GetRequiredService<IDocumentStore>();
+
+        store.Options.Projections.AllShards().Select(x => x.Name.Identity)
+            .ShouldContain("Simple2:All");
+
+        await publishFourStreams(store);
+
+        await store.WaitForNonStaleProjectionDataAsync(60.Seconds());
+
+        SimpleSubscription.EventsEncountered.Sum(x => x.Count).ShouldBeGreaterThanOrEqualTo(16);
+
+        var progress = await store.Advanced.ProjectionProgressFor(new ShardName("Simple2", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBeGreaterThanOrEqualTo(16);
+
+        await store.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task use_from_service_provider_as_scoped_with_martenStore()
+    {
+        await rewindState();
+
+        var host = await StartHostAsync(_ => { },
+            configureServices: services => addCustomStore(services, ServiceLifetime.Scoped));
+
+        var store = (DocumentStore)host.Services.GetRequiredService<ICustomStore>();
+
+        store.Options.Projections.AllShards().Select(x => x.Name.Identity)
+            .ShouldContain("Simple2:All");
+
+        await publishFourStreams(store);
+
+        await store.WaitForNonStaleProjectionDataAsync(60.Seconds());
+
+        SimpleSubscription.EventsEncountered.Sum(x => x.Count).ShouldBeGreaterThanOrEqualTo(16);
+
+        var progress = await store.Advanced.ProjectionProgressFor(new ShardName("Simple2", "All", 1), token: TestContext.Current.CancellationToken);
+        progress.ShouldBeGreaterThanOrEqualTo(16);
+
+        await store.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task subscriptions_are_part_of_the_event_store_usage()
+    {
+        // Deliberately not through StartHostAsync: this asserts exactly one
+        // IEventStore registration, and the harness's main AddMarten store
+        // would add a second one.
+        using var host = await Host.CreateDefaultBuilder()
+            .ConfigureServices(services => addCustomStore(services, ServiceLifetime.Scoped))
+            .StartAsync(TestContext.Current.CancellationToken);
+
+        var capabilities = host.Services.GetServices<IEventStore>().ToArray();
+        capabilities.Length.ShouldBe(1);
+
+        var usage = await capabilities[0].TryCreateUsage(CancellationToken.None);
+
+        usage.ShouldNotBeNull();
+    }
+}
+
+public class ConstructorConfiguredSubscription: SubscriptionBase
+{
+    public ConstructorConfiguredSubscription()
+    {
+        Options.BatchSize = 123;
+        Options.MaximumHopperSize = 7777;
+        Name = "custom-subscription-name";
+        Version = 7;
+    }
+
+    public override Task<IChangeListener> ProcessEventsAsync(EventRange page, ISubscriptionController controller,
+        IDocumentOperations operations, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Substitute.For<IChangeListener>());
+    }
+}
+
+public class FilteredSubscription: SubscriptionBase, IDisposable
+{
+    public FilteredSubscription()
+    {
+        IncludeType<MTAEvent>();
+        IncludeType<MTBEvent>();
+        StreamType = typeof(SimpleAggregate);
+        IncludeArchivedEvents = true;
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public override Task<IChangeListener> ProcessEventsAsync(EventRange page, ISubscriptionController controller,
+        IDocumentOperations operations,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Substitute.For<IChangeListener>());
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // TODO release managed resources here
+        }
+    }
+}
+
+public class FilteredSubscription2: SubscriptionBase, IAsyncDisposable
+{
+    public FilteredSubscription2()
+    {
+        IncludeType<MTAEvent>();
+        IncludeType<MTBEvent>();
+        StreamType = typeof(SimpleAggregate);
+        IncludeArchivedEvents = true;
+    }
+
+    public override Task<IChangeListener> ProcessEventsAsync(EventRange page, ISubscriptionController controller,
+        IDocumentOperations operations,
+        CancellationToken cancellationToken)
+    {
+        return Task.FromResult(Substitute.For<IChangeListener>());
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // TODO release managed resources here
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+}
+
+public class SimpleSubscription: ISubscription
+{
+    public static int InstanceCounter;
+
+    public static LightweightCache<int, List<IEvent>> EventsEncountered = new(i => new List<IEvent>());
+
+    public SimpleSubscription()
+    {
+        Instance = ++InstanceCounter;
+    }
+
+    public int Instance { get; set; }
+
+    public static void Clear()
+    {
+        InstanceCounter = 0;
+        EventsEncountered.Clear();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return new ValueTask();
+    }
+
+    public Task<IChangeListener> ProcessEventsAsync(EventRange page, ISubscriptionController controller,
+        IDocumentOperations operations,
+        CancellationToken cancellationToken)
+    {
+        EventsEncountered[Instance].AddRange(page.Events);
+        return Task.FromResult(NullChangeListener.Instance);
+    }
+}
+
+public interface ICustomStore: IDocumentStore
+{
+}

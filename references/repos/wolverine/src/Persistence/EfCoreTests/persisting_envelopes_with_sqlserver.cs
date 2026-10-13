@@ -1,0 +1,199 @@
+using IntegrationTests;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using SharedPersistenceModels.Items;
+using Shouldly;
+using Wolverine;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.EntityFrameworkCore.Internals;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Microsoft.Data.SqlClient;
+using Npgsql;
+using Wolverine.SqlServer;
+using Wolverine.Tracking;
+
+namespace EfCoreTests;
+
+[Collection("sqlserver")]
+public class persisting_envelopes_with_sqlserver : IAsyncLifetime
+{
+    private IHost _host = null!;
+    private Envelope theIncomingEnvelope = null!;
+    private Envelope theOutgoingEnvelope = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Services.AddDbContext<SampleMappedDbContext>(
+                    x => x.UseSqlServer(Servers.SqlServerConnectionString));
+                opts.Services.AddDbContext<SampleDbContext>(x => x.UseSqlServer(Servers.SqlServerConnectionString));
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString);
+                opts.Services.AddResourceSetupOnStartup(StartupAction.ResetState);
+                opts.UseEntityFrameworkCoreTransactions();
+            }).StartAsync();
+
+        theIncomingEnvelope = new Envelope
+        {
+            Id = Guid.NewGuid(),
+            Status = EnvelopeStatus.Incoming,
+            OwnerId = 5,
+            ScheduledTime = new DateTimeOffset(DateTime.Today.AddHours(5)),
+            Attempts = 2,
+            Data = [1, 2, 3, 4],
+            ConversationId = Guid.NewGuid(),
+            CorrelationId = Guid.NewGuid().ToString(),
+            ParentId = Guid.NewGuid().ToString(),
+            SagaId = Guid.NewGuid().ToString(),
+            MessageType = "foo",
+            ContentType = "application/json",
+            ReplyRequested = "bar",
+            AckRequested = true,
+            ReplyUri = new Uri("rabbitmq://queue/incoming"),
+            Destination = new Uri("rabbitmq://queue/arrived"),
+            DeliverBy = new DateTimeOffset(DateTime.Today.AddHours(3)),
+            SentAt = new DateTimeOffset(DateTime.Today.AddHours(2))
+        };
+
+        theOutgoingEnvelope = new Envelope
+        {
+            Id = Guid.NewGuid(),
+            Status = EnvelopeStatus.Outgoing,
+            OwnerId = 5,
+            ScheduledTime = new DateTimeOffset(DateTime.Today.AddHours(5)),
+            Attempts = 2,
+            Data = [1, 2, 3, 4],
+            ConversationId = Guid.NewGuid(),
+            CorrelationId = Guid.NewGuid().ToString(),
+            ParentId = Guid.NewGuid().ToString(),
+            SagaId = Guid.NewGuid().ToString(),
+            MessageType = "foo",
+            ContentType = "application/json",
+            ReplyRequested = "bar",
+            AckRequested = true,
+            ReplyUri = new Uri("rabbitmq://queue/incoming"),
+            Destination = new Uri("rabbitmq://queue/arrived"),
+            DeliverBy = new DateTimeOffset(DateTime.Today.AddHours(3)),
+            SentAt = new DateTimeOffset(DateTime.Today.AddHours(2))
+        };
+
+        using var nested = _host.Services.CreateScope();
+        var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+
+        context.Add(new IncomingMessage(theIncomingEnvelope));
+        context.Add(new OutgoingMessage(theOutgoingEnvelope));
+
+        await context.SaveChangesAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+        SqlConnection.ClearAllPools();
+        NpgsqlConnection.ClearAllPools();
+    }
+
+    [Fact]
+    public void is_wolverine_enabled()
+    {
+        using var nested = _host.Services.CreateScope();
+        nested.ServiceProvider.GetRequiredService<SampleDbContext>().IsWolverineEnabled().ShouldBeFalse();
+        nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>().IsWolverineEnabled().ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task mapping_to_incoming_envelopes()
+    {
+        var storage = _host.Services.GetRequiredService<IMessageStore>();
+        var envelopes = await storage.Admin.AllIncomingAsync();
+
+        var envelope = envelopes.FirstOrDefault(x => x.Id == theIncomingEnvelope.Id);
+        envelope.ShouldNotBeNull();
+
+        envelope.Status.ShouldBe(theIncomingEnvelope.Status);
+        envelope.OwnerId.ShouldBe(theIncomingEnvelope.OwnerId);
+        envelope.ScheduledTime.ShouldBe(theIncomingEnvelope.ScheduledTime);
+        envelope.Attempts.ShouldBe(theIncomingEnvelope.Attempts);
+        envelope.Data.ShouldBe(theIncomingEnvelope.Data);
+        envelope.ConversationId.ShouldBe(theIncomingEnvelope.ConversationId);
+        envelope.CorrelationId.ShouldBe(theIncomingEnvelope.CorrelationId);
+        envelope.ParentId.ShouldBe(theIncomingEnvelope.ParentId);
+        envelope.SagaId.ShouldBe(theIncomingEnvelope.SagaId);
+        envelope.MessageType.ShouldBe(theIncomingEnvelope.MessageType);
+        envelope.ContentType.ShouldBe(theIncomingEnvelope.ContentType);
+        envelope.ReplyRequested.ShouldBe(theIncomingEnvelope.ReplyRequested);
+        envelope.AckRequested.ShouldBe(theIncomingEnvelope.AckRequested);
+        envelope.ReplyUri.ShouldBe(theIncomingEnvelope.ReplyUri);
+        envelope.Destination.ShouldBe(theIncomingEnvelope.Destination);
+        envelope.SentAt.ShouldBe(theIncomingEnvelope.SentAt);
+    }
+
+    [Fact]
+    public async Task persist_outgoing_batch_uses_add_range()
+    {
+        var runtime = _host.GetRuntime();
+        var context = new MessageContext(runtime);
+
+        using var scope = _host.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+
+        var envelopes = Enumerable.Range(0, 3).Select(_ => new Envelope
+        {
+            Id = Guid.NewGuid(),
+            Status = EnvelopeStatus.Outgoing,
+            OwnerId = 5,
+            Data = [1, 2, 3],
+            MessageType = "batch-test",
+            Destination = new Uri("rabbitmq://queue/batch")
+        }).ToArray();
+
+        var transaction = new EfCoreEnvelopeTransaction(dbContext, context);
+        await transaction.PersistOutgoingAsync(envelopes);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        if (dbContext.Database.CurrentTransaction != null)
+        {
+            await dbContext.Database.CurrentTransaction.CommitAsync(TestContext.Current.CancellationToken);
+        }
+
+        var storage = _host.Services.GetRequiredService<IMessageStore>();
+        var persisted = await storage.Admin.AllOutgoingAsync();
+
+        foreach (var envelope in envelopes)
+        {
+            persisted.ShouldContain(x => x.Id == envelope.Id);
+        }
+    }
+
+    [Fact]
+    public async Task mapping_to_outgoing_envelopes()
+    {
+        var storage = _host.Services.GetRequiredService<IMessageStore>();
+        var envelopes = await storage.Admin.AllOutgoingAsync();
+
+        var envelope = envelopes.FirstOrDefault(x => x.Id == theOutgoingEnvelope.Id);
+        envelope.ShouldNotBeNull();
+
+        envelope.OwnerId.ShouldBe(theOutgoingEnvelope.OwnerId);
+        envelope.Attempts.ShouldBe(theOutgoingEnvelope.Attempts);
+        envelope.Data.ShouldBe(theOutgoingEnvelope.Data);
+        envelope.ConversationId.ShouldBe(theOutgoingEnvelope.ConversationId);
+        envelope.CorrelationId.ShouldBe(theOutgoingEnvelope.CorrelationId);
+        envelope.ParentId.ShouldBe(theOutgoingEnvelope.ParentId);
+        envelope.SagaId.ShouldBe(theOutgoingEnvelope.SagaId);
+        envelope.MessageType.ShouldBe(theOutgoingEnvelope.MessageType);
+        envelope.ContentType.ShouldBe(theOutgoingEnvelope.ContentType);
+        envelope.ReplyRequested.ShouldBe(theOutgoingEnvelope.ReplyRequested);
+        envelope.AckRequested.ShouldBe(theOutgoingEnvelope.AckRequested);
+        envelope.ReplyUri.ShouldBe(theOutgoingEnvelope.ReplyUri);
+        envelope.Destination.ShouldBe(theOutgoingEnvelope.Destination);
+        envelope.DeliverBy.ShouldBe(theOutgoingEnvelope.DeliverBy);
+        envelope.SentAt.ShouldBe(theOutgoingEnvelope.SentAt);
+    }
+}

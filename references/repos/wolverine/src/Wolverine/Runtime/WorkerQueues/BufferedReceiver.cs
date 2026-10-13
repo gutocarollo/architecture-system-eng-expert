@@ -1,0 +1,436 @@
+using System.Diagnostics;
+using JasperFx.Blocks;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.Logging;
+using Wolverine.Runtime.Partitioning;
+using Wolverine.Runtime.Scheduled;
+using Wolverine.Transports;
+using Wolverine.Transports.Local;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.Runtime.WorkerQueues;
+
+internal class BufferedReceiver : ILocalQueue, IChannelCallback, ISupportNativeScheduling, ISupportDeadLetterQueue,
+    IFaultTrackingReceiver, ILatchedReceiver
+{
+    private readonly RetryBlock<Envelope> _completeBlock;
+
+    private readonly ISender? _deadLetterSender;
+    private readonly RetryBlock<Envelope> _deferBlock;
+    private readonly Endpoint _endpoint;
+    private readonly IWolverineRuntime _runtime;
+    private readonly ILogger _logger;
+    private readonly RetryBlock<Envelope>? _moveToErrors;
+    private readonly IBlock<Envelope> _receivingBlock;
+    private readonly InMemoryScheduledJobProcessor _scheduler;
+    private readonly DurabilitySettings _settings;
+
+    /// <summary>
+    /// GH-3710. Null unless the endpoint opted in with WithInMemoryIdempotency(). Only consulted on the
+    /// IReceiver.ReceivedAsync paths -- deliveries that came from a broker. Envelopes enqueued locally
+    /// (cascading messages, an in-process retry, a scheduled job firing) never pass through it, because
+    /// nothing redelivers those.
+    /// </summary>
+    private readonly IIncomingIdempotencyGuard? _idempotency;
+    private bool _latched;
+
+    public BufferedReceiver(Endpoint endpoint, IWolverineRuntime runtime, IHandlerPipeline pipeline)
+        : this(endpoint, runtime, pipeline, Block<Envelope>.DefaultBoundedCapacity)
+    {
+    }
+
+    /// <param name="boundedCapacity">
+    /// The in-memory buffer size before writers are back-pressured. Broker-backed buffered receivers keep
+    /// the bounded default so a fast broker can't flood memory. Local queues that may cascade onto
+    /// themselves pass <see cref="Block{T}.Unbounded"/> — a bounded buffer would deadlock a handler that
+    /// enqueues to its own queue faster than it drains (GH-3287).
+    /// </param>
+    protected BufferedReceiver(Endpoint endpoint, IWolverineRuntime runtime, IHandlerPipeline pipeline, int boundedCapacity)
+    {
+        _endpoint = endpoint;
+        _runtime = runtime;
+        Uri = endpoint.Uri;
+        _logger = runtime.LoggerFactory.CreateLogger<BufferedReceiver>();
+        _settings = runtime.DurabilitySettings;
+        _idempotency = endpoint.IdempotencyGuard;
+        Pipeline = pipeline;
+
+        _scheduler = new InMemoryScheduledJobProcessor(this, _logger);
+
+        // Guard against a listener-less envelope (e.g. the empty all-zero system/agent-handshake
+        // envelope produced during startup) reaching either retry block — env.Listener is null in
+        // that case, and an unguarded deref NREs into the retry loop. GH-3013.
+        _deferBlock = new RetryBlock<Envelope>(
+            (env, _) => env.Listener is { } l ? l.DeferAsync(env).AsTask() : Task.CompletedTask, runtime.Logger,
+            runtime.Cancellation);
+        _completeBlock = new RetryBlock<Envelope>(
+            (env, _) => env.Listener is { } l ? l.CompleteAsync(env).AsTask() : Task.CompletedTask, runtime.Logger,
+            runtime.Cancellation);
+
+        if (endpoint.GroupShardingSlotNumber == null)
+        {
+            _receivingBlock = new Block<Envelope>(endpoint.MaxDegreeOfParallelism, boundedCapacity, executeAsync);
+        }
+        else
+        {
+            var sharded = new ShardedExecutionBlock((int)endpoint.GroupShardingSlotNumber,
+                runtime.Options.MessagePartitioning, boundedCapacity, executeAsync,
+                // GH-3899: message types exempted from partitioned processing run at the
+                // endpoint's normal parallelism instead of a sequential GroupId slot
+                endpoint.MaxDegreeOfParallelism);
+            sharded.OnError = onBlockError;
+            _receivingBlock = sharded.DeserializeFirst(pipeline, runtime, this);
+        }
+
+        // Route block-level failures (an exception escaping the execution machinery itself, or the
+        // block faulting terminally per jasperfx#506) through real logging. The JasperFx default sink
+        // is stderr, which reads as a silent stall in any structured-logging deployment — and a
+        // faulted block freezes QueueCount, which permanently latches a back-pressured listener
+        // (GH CritterWatch#922).
+        _receivingBlock.OnError = onBlockError;
+
+        if (endpoint.TryBuildDeadLetterSender(runtime, out var dlq))
+        {
+            _deadLetterSender = dlq;
+
+            _moveToErrors = new RetryBlock<Envelope>(
+                async (envelope, _) => { await _deadLetterSender!.SendAsync(envelope).ConfigureAwait(false); }, _logger,
+                _settings.Cancellation);
+        }
+    }
+
+    /// <summary>CritterWatch#942 — set when the receiving block faults terminally (jasperfx#506).</summary>
+    public bool HasFaulted { get; private set; }
+
+    private void onBlockError(Envelope? envelope, Exception ex)
+    {
+        // A terminal block fault (jasperfx#506) reports with a null item. Record the fault FIRST —
+        // the flag is what lets ListeningAgent/BackPressureAgent rebuild this receiver — and only
+        // then attempt to log: under the memory pressure that typically causes the fault
+        // (CritterWatch#942), the logging call itself can throw.
+        if (envelope == null)
+        {
+            HasFaulted = true;
+            try
+            {
+                _logger.LogCritical(ex,
+                    "The local worker queue for {Uri} has faulted and stopped processing. Messages buffered locally will not be executed",
+                    Uri);
+            }
+            catch
+            {
+                // Logging failed (e.g. OOM at the GC ceiling). The flag is already set; recovery
+                // does not depend on this line landing.
+            }
+        }
+        else
+        {
+            try
+            {
+                _logger.LogError(ex, "Error processing envelope {EnvelopeId} ({MessageType}) in the local worker queue for {Uri}",
+                    envelope.Id, envelope.MessageType, Uri);
+            }
+            catch
+            {
+                // Swallow: an exception escaping this handler would fault the block terminally
+                // (Block's onError rung), converting one failed message into a dead listener.
+            }
+        }
+    }
+
+    internal async Task executeAsync(Envelope envelope, CancellationToken _)
+    {
+        if (_latched && envelope.Listener != null)
+        {
+            // GH-3710: deferring hands the delivery back to the broker, which may redeliver it. Forget the
+            // id, or that redelivery would be dropped as a duplicate of a message that never ran.
+            _idempotency?.Release(envelope);
+            await _deferBlock.PostAsync(envelope).ConfigureAwait(false);
+            return;
+        }
+
+        try
+        {
+            if (envelope.ContentType.IsEmpty())
+            {
+                envelope.ContentType = EnvelopeConstants.JsonContentType;
+            }
+
+            await Pipeline!.InvokeAsync(envelope, this).ConfigureAwait(false);
+
+            // GH-3710. HasBeenAcked answers "did this reach a terminal the broker will not undo?" --
+            // MessageContext.CompleteAsync sets it on success and on a native dead-letter move, while a
+            // requeue back to the broker (IChannelCallback.DeferAsync -> TryRequeueAsync) does not. Only the
+            // former may be remembered; remembering a requeued id would silently discard its redelivery.
+            recordOutcome(envelope);
+        }
+        catch (Exception? e)
+        {
+            // GH-3710: the pipeline never reached a terminal, so nothing about this id may be remembered.
+            _idempotency?.Release(envelope);
+
+            // This *should* never happen, but of course it will
+            try
+            {
+                _logger.LogError(e, "Unexpected error in Pipeline invocation");
+            }
+            catch
+            {
+                // CritterWatch#942 — if the log call itself throws (an OOM at the GC hard limit is
+                // the observed case), letting it escape here faults the receiving block terminally
+                // via Block's error rung, and a faulted block never recovers. Swallowing is the
+                // lesser evil: the message fails, the listener survives.
+            }
+        }
+    }
+
+    private void recordOutcome(Envelope envelope)
+    {
+        if (_idempotency == null) return;
+
+        if (envelope.HasBeenAcked)
+        {
+            _idempotency.MarkProcessed(envelope);
+        }
+        else
+        {
+            _idempotency.Release(envelope);
+        }
+    }
+
+    ValueTask IChannelCallback.CompleteAsync(Envelope envelope)
+    {
+        // When the durability agent recovers a persisted envelope and dispatches it to a
+        // non-durable local queue (DLQ replay per GH-1942, or scheduled-message firing),
+        // BufferedLocalQueue.EnqueueDirectlyAsync attaches a LocalQueueRecoveryListener so
+        // that successful pipeline completion marks the inbox row Handled. Without this,
+        // the row sits in wolverine_incoming forever.
+        if (envelope.Listener is LocalQueueRecoveryListener recovery)
+        {
+            return recovery.CompleteAsync(envelope);
+        }
+
+        // CritterWatch#942 — a grouped batch envelope reaching its terminal on a buffered local
+        // queue settles its members' pending-count against their originating listeners, so the
+        // listeners' back-pressure accounting sees the batching pipeline drain. All terminals
+        // (success, dead-letter move, discard) funnel through this channel callback.
+        if (envelope.Batch != null && _runtime is WolverineRuntime runtime)
+        {
+            runtime.BatchingPendingCounts.SettleBatch(envelope);
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    async ValueTask IChannelCallback.DeferAsync(Envelope envelope)
+    {
+        if (envelope.Listener == null)
+        {
+            await EnqueueAsync(envelope).ConfigureAwait(false);
+            return;
+        }
+
+        try
+        {
+            var nativelyRequeued = await envelope.Listener.TryRequeueAsync(envelope).ConfigureAwait(false);
+            if (!nativelyRequeued)
+            {
+                await EnqueueAsync(envelope).ConfigureAwait(false);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error trying to use native dead letter queue for {Uri}", Uri);
+            await EnqueueAsync(envelope).ConfigureAwait(false);
+        }
+    }
+
+    public IHandlerPipeline Pipeline { get; } = null!;
+
+    public Uri Uri { get; }
+
+    public int QueueCount => (int)_receivingBlock.Count;
+
+    /// <summary>
+    /// Immediately latch to stop processing new messages without draining.
+    /// </summary>
+    public void Latch()
+    {
+        _latched = true;
+    }
+
+    public async ValueTask DrainAsync()
+    {
+        // If _latched was already true, this drain was triggered during shutdown
+        // (after StopAndDrainAsync called Latch()). Safe to wait for in-flight items.
+        // If _latched was false, this drain may have been triggered from within the handler
+        // pipeline (e.g., rate limiting pause via PauseListenerContinuation). Waiting for
+        // the receiving block to complete would deadlock because the current message's
+        // execute function is still on the call stack.
+        var waitForCompletion = _latched;
+        _latched = true;
+        _receivingBlock.Complete();
+
+        if (waitForCompletion)
+        {
+            try
+            {
+                var completion = _receivingBlock.WaitForCompletionAsync();
+                await Task.WhenAny(completion, Task.Delay(_settings.DrainTimeout)).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.LogDebug(e, "Error waiting for in-flight message processing to complete at {Uri}", Uri);
+            }
+        }
+
+        await _completeBlock.DrainAsync().ConfigureAwait(false);
+        await _deferBlock.DrainAsync().ConfigureAwait(false);
+
+        if (_moveToErrors != null)
+        {
+            await _moveToErrors.DrainAsync().ConfigureAwait(false);
+        }
+    }
+
+    public void Enqueue(Envelope envelope)
+    {
+        if (envelope.IsPing())
+        {
+            return;
+        }
+
+        var activity = _endpoint.TelemetryEnabled ? WolverineTracing.StartReceiving(envelope) : null;
+        _receivingBlock.Post(envelope);
+        activity?.Stop();
+    }
+
+    public async ValueTask EnqueueAsync(Envelope envelope)
+    {
+        if (envelope.IsPing())
+        {
+            return;
+        }
+
+        var activity = _endpoint.TelemetryEnabled ? WolverineTracing.StartReceiving(envelope) : null;
+        await _receivingBlock.PostAsync(envelope).ConfigureAwait(false);
+        activity?.Stop();
+    }
+
+    async ValueTask IReceiver.ReceivedAsync(IListener listener, Envelope[] messages)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        if (_settings.Cancellation.IsCancellationRequested)
+        {
+            throw new OperationCanceledException();
+        }
+
+        foreach (var envelope in messages)
+        {
+            envelope.MarkReceived(listener, now, _settings, _endpoint.WireTap);
+            if (!envelope.IsExpired() && !isDuplicate(envelope))
+            {
+                await EnqueueAsync(envelope).ConfigureAwait(false);
+            }
+
+            await _completeBlock.PostAsync(envelope).ConfigureAwait(false);
+        }
+
+        _logger.IncomingBatchReceived(Uri, messages);
+    }
+
+    public async ValueTask ReceivedAsync(IListener listener, Envelope envelope)
+    {
+        var now = DateTimeOffset.UtcNow;
+        envelope.MarkReceived(listener, now, _settings, _endpoint.WireTap);
+
+        if (envelope.IsExpired())
+        {
+            await _completeBlock.PostAsync(envelope).ConfigureAwait(false);
+            return;
+        }
+
+        if (isDuplicate(envelope))
+        {
+            // Already acked by the _completeBlock post below, exactly as the durable path acks-and-drops a
+            // duplicate incoming envelope.
+            await _completeBlock.PostAsync(envelope).ConfigureAwait(false);
+            return;
+        }
+
+        if (envelope.Status == EnvelopeStatus.Scheduled)
+        {
+            _scheduler.Enqueue(envelope.ScheduledTime!.Value, envelope);
+        }
+        else
+        {
+            await EnqueueAsync(envelope).ConfigureAwait(false);
+        }
+
+        await _completeBlock.PostAsync(envelope).ConfigureAwait(false);
+
+        _logger.IncomingReceived(envelope, Uri);
+    }
+
+    /// <summary>
+    /// GH-3710. Claim this broker delivery for the in-memory idempotency guard, answering true when it is a
+    /// redelivery of something already handled (or in flight) within the window. Always false when the
+    /// endpoint did not opt in.
+    /// </summary>
+    private bool isDuplicate(Envelope envelope)
+    {
+        if (_idempotency == null || _idempotency.TryBeginProcessing(envelope)) return false;
+
+        _logger.LogDebug(
+            "Discarding duplicate delivery of envelope {EnvelopeId} ({MessageType}) at {Uri}; it was already handled within the in-memory idempotency window",
+            envelope.Id, envelope.MessageType, Uri);
+
+        return true;
+    }
+
+    public void Dispose()
+    {
+        _receivingBlock.Complete();
+        _completeBlock.Dispose();
+        _deferBlock.Dispose();
+
+        if (_deadLetterSender is IDisposable d)
+        {
+            d.SafeDispose();
+        }
+
+        _moveToErrors?.Dispose();
+    }
+
+    public Task MoveToErrorsAsync(Envelope envelope, Exception exception)
+    {
+        DeadLetterQueueConstants.StampFailureMetadata(envelope, exception);
+        return _moveToErrors!.PostAsync(envelope);
+    }
+
+    public bool NativeDeadLetterQueueEnabled => _deadLetterSender != null;
+
+    Task ISupportNativeScheduling.MoveToScheduledUntilAsync(Envelope envelope, DateTimeOffset time)
+    {
+        _logger.LogDebug("Moving envelope {EnvelopeId} ({MessageType}) to scheduled status in buffered receiver until {ScheduledTime}", envelope.Id, envelope.MessageType, time);
+        envelope.ScheduledTime = time;
+        ScheduleExecution(envelope);
+
+        return Task.CompletedTask;
+    }
+
+    public void ScheduleExecution(Envelope envelope)
+    {
+        if (!envelope.ScheduledTime.HasValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(envelope),
+                $"There is no {nameof(Envelope.ScheduledTime)} value");
+        }
+
+        _logger.LogDebug("Scheduling envelope {EnvelopeId} ({MessageType}) execution via in-memory scheduler at {ExecutionTime}", envelope.Id, envelope.MessageType, envelope.ScheduledTime.Value);
+        _scheduler.Enqueue(envelope.ScheduledTime.Value, envelope);
+    }
+}

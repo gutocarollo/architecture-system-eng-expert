@@ -1,0 +1,65 @@
+using JasperFx.Events;
+using Marten.Events;
+using Shouldly;
+using Wolverine.Marten;
+
+namespace MartenTests;
+
+public class EventWrapperForwarderTests
+{
+    [Fact]
+    public void positive_forward()
+    {
+        var messageType = typeof(FakeEvent<SecondEvent>);
+        var forwarder = new EventWrapperForwarder();
+        forwarder.TryFindHandledType(messageType, out var actual)
+            .ShouldBeTrue();
+
+        actual.ShouldBe(typeof(IEvent<SecondEvent>));
+    }
+
+    [Fact]
+    public void negative_forwarding()
+    {
+        var forwarder = new EventWrapperForwarder();
+        forwarder.TryFindHandledType(typeof(SecondEvent), out var actual)
+            .ShouldBeFalse();
+    }
+}
+
+public class FakeEvent<T> : IEvent<T> where T : notnull
+{
+    public void SetHeader(string key, object value)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object GetHeader(string key)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Guid Id { get; set; }
+    public long Version { get; set; }
+    public long Sequence { get; set; }
+    object IEvent.Data => Data!;
+
+    public T Data { get; } = default!;
+    public Guid StreamId { get; set; }
+    public string? StreamKey { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
+    public string TenantId { get; set; } = null!;
+    public Type EventType { get; } = null!;
+    public string EventTypeName { get; set; } = null!;
+    public string DotNetTypeName { get; set; } = null!;
+    public string? CausationId { get; set; }
+    public string? CorrelationId { get; set; }
+    public Dictionary<string, object>? Headers { get; set; }
+    public bool IsArchived { get; set; }
+    public string? AggregateTypeName { get; set; }
+    public string? UserName { get; set; }
+    public bool IsSkipped { get; set; }
+    public IReadOnlyList<JasperFx.Events.EventTag>? Tags => null;
+    public void AddTag<TTag>(TTag tag) where TTag : notnull { }
+    public void AddTag(JasperFx.Events.EventTag tag) { }
+}

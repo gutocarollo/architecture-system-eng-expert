@@ -1,0 +1,861 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using JasperFx.CommandLine.TextualDisplays;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.RemoteInvocation;
+using Wolverine.Transports;
+using Wolverine.Transports.Local;
+
+namespace Wolverine.Tracking;
+
+internal partial class TrackedSession : ITrackedSession
+{
+    private readonly IList<ITrackedCondition> _conditions = new List<ITrackedCondition>();
+
+    private Cache<Guid, EnvelopeHistory> _envelopes = new(id => new EnvelopeHistory(id));
+
+    // _statuses and _exceptions are appended from concurrent transport listener threads,
+    // so all access is synchronized by locking on the collection instance itself
+    private readonly List<EnvelopeRecord> _statuses = new();
+
+    private readonly IList<Exception> _exceptions = new List<Exception>();
+
+    // GH-4931: committed from handler threads too, so locked like _statuses
+    private readonly List<AppendedEvents> _appended = new();
+    private readonly List<ConcurrentAppendRecord> _concurrentAppends = new();
+
+    // GH-4940: loaded from handler threads too, so locked the same way
+    private readonly List<LoadedBoundary> _boundaries = new();
+
+    private readonly IList<WolverineRuntime> _otherHosts = new List<WolverineRuntime>();
+    private readonly IHost _primaryHost;
+    private readonly WolverineRuntime _primaryLogger;
+
+    private readonly TaskCompletionSource<TrackingStatus> _source;
+
+    private bool _executionComplete;
+
+    private Stopwatch _stopwatch = new();
+
+    // Custom, test-supplied ignore rules (via IgnoreMessageTypes). Framework + system-command
+    // filtering is handled directly in isIgnoredMessageType so the system-command rule can be
+    // toggled off by IncludeSystemCommands().
+    private readonly List<Func<Type, bool>> _ignoreMessageRules = [];
+
+    // GH-4704. Test-supplied ignore rules that see the whole envelope rather than just its message type,
+    // for when the same message type is legitimately in flight for more than one reason at once.
+    private readonly List<Func<Envelope, bool>> _ignoreEnvelopeRules = [];
+
+    // Host-wide ignore rules from WolverineOptions.Tracking, one set per host this session watches. Applied
+    // unless a session opts back in with IncludeHostIgnoredTraffic().
+    private readonly List<TrackingIgnoreRules> _hostRules = [];
+    private bool _applyHostRules = true;
+
+    // The ids of envelopes an ignore rule matched, so an exception reported against one of them by id alone
+    // (IMessageTracker.LogException) is not attributed to the session either
+    private readonly ConcurrentDictionary<Guid, byte> _ignoredEnvelopeIds = new();
+    private int _ignoredRecordCount;
+
+    private bool _ignoreSystemCommands = true;
+    private CancellationTokenSource _cancellation = new();
+
+    private TrackingStatus _status = TrackingStatus.Active;
+
+    // Framework/infrastructure traffic should never hold a tracked session open.
+    private bool isIgnoredMessageType(Type? messageType)
+    {
+        if (messageType == null)
+        {
+            return false;
+        }
+
+        // Acknowledgements are always tracked: the session's acknowledgement APIs
+        // (SendMessageAndWaitForAcknowledgementAsync, AssertAnyFailureAcknowledgements) depend on them.
+        if (messageType == typeof(Acknowledgement) || messageType == typeof(FailureAcknowledgement))
+        {
+            return false;
+        }
+
+        if (matchesIgnoredMessageType(messageType))
+        {
+            return true;
+        }
+
+        // A batch travels as an array of the batched message type, so a batch of ignored messages -- of
+        // system commands, or from an ignored assembly -- is ignored too
+        var elementType = messageType.IsArray ? messageType.GetElementType() : null;
+        return elementType != null && matchesIgnoredMessageType(elementType);
+    }
+
+    private bool matchesIgnoredMessageType(Type messageType)
+    {
+        // Wolverine's own agent commands are framework chatter, never test-relevant activity.
+        if (messageType.CanBeCastTo<IAgentCommand>())
+        {
+            return true;
+        }
+
+        // System commands — e.g. continuously-published monitoring telemetry — are ignored by default
+        // so a never-ending feed can't keep IsCompleted() false until the session times out.
+        // IncludeSystemCommands() opts them back in for tests that assert on that traffic. NOTE: this is
+        // deliberately NOT keyed off INotToBeRouted; that marker governs conventional routing, not
+        // tracking, and real messages (e.g. CritterWatch's monitoring commands) legitimately carry it
+        // while still needing to be trackable.
+        if (_ignoreSystemCommands && messageType.CanBeCastTo<ISystemCommand>())
+        {
+            return true;
+        }
+
+        if (_ignoreMessageRules.Any(x => x(messageType)))
+        {
+            return true;
+        }
+
+        return _applyHostRules && _hostRules.Any(rules => rules.MessageTypeRules.Any(x => x(messageType)));
+    }
+
+    /// <summary>
+    /// GH-4704. The whole ignore decision for one envelope: the message-type rules above, then any
+    /// envelope-level rules. Acknowledgements are checked first and never ignored, for the same reason
+    /// <see cref="isIgnoredMessageType"/> exempts them -- the session's acknowledgement APIs depend on
+    /// them being recorded, and an envelope predicate is far more likely to sweep one up by accident than
+    /// a message-type predicate is.
+    /// </summary>
+    private bool isIgnored(Envelope envelope)
+    {
+        var messageType = envelope.Message?.GetType();
+
+        if (messageType == typeof(Acknowledgement) || messageType == typeof(FailureAcknowledgement))
+        {
+            return false;
+        }
+
+        if (isIgnoredMessageType(messageType) || _ignoreEnvelopeRules.Any(x => x(envelope)) ||
+            (_applyHostRules && _hostRules.Any(rules => rules.EnvelopeRules.Any(x => x(envelope)))))
+        {
+            _ignoredEnvelopeIds.TryAdd(envelope.Id, 0);
+            Interlocked.Increment(ref _ignoredRecordCount);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Track the traffic the host-wide rules in <see cref="WolverineOptions.Tracking" /> would otherwise
+    /// ignore, for this session only. The session's own ignore rules still apply.
+    /// </summary>
+    public void IncludeHostIgnoredTraffic()
+    {
+        _applyHostRules = false;
+    }
+
+    private void addHostRules(WolverineRuntime runtime)
+    {
+        var rules = runtime.Options.Tracking.IgnoreRules;
+        if (!rules.IsEmpty && !_hostRules.Contains(rules))
+        {
+            _hostRules.Add(rules);
+        }
+    }
+
+    /// <summary>
+    /// Stop ignoring <see cref="ISystemCommand"/> traffic so this session tracks and can assert on it.
+    /// </summary>
+    public void IncludeSystemCommands()
+    {
+        _ignoreSystemCommands = false;
+    }
+
+    public TrackedSession(IHost host)
+    {
+        _primaryHost = host ?? throw new ArgumentNullException(nameof(host));
+        _source = new TaskCompletionSource<TrackingStatus>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _primaryLogger = host.GetRuntime();
+        addHostRules(_primaryLogger);
+    }
+
+    public TrackedSession(IServiceProvider services) : this(new HostWrapper(services))
+    {
+        
+    }
+
+    // Actions to carry out first before execute and track
+    public List<Func<IWolverineRuntime, CancellationToken, Task>> Befores { get; } = new();
+
+    // All previous TrackedSessions
+    public List<TrackedSession> Previous { get; } = new();
+    public Queue<ISecondStateExecution> SecondaryStages { get; } = new();
+
+    public TimeSpan Timeout { get; set; } = 5.Seconds();
+
+    /// <summary>GH-4931. The correlation id the tracked work runs under, when one was given (GH-4939: exposed on <see cref="ITrackedSession" />).</summary>
+    public string? CorrelationId { get; set; }
+
+    public bool AssertNoExceptions { get; set; } = true;
+
+    /// <summary>
+    /// GH-4125: deliberately separate from <see cref="AssertNoExceptions" />. Suppressing the timeout
+    /// assertion is a real requirement for a test that expects the activity NOT to happen -- asserting
+    /// a message was filtered out, or that a listener paused before the envelope could finish -- but it
+    /// has to be asked for by name. Sharing one flag with exception suppression meant a resiliency test
+    /// opted out of it by accident and went permanently green over a session that did nothing.
+    /// </summary>
+    public bool AssertNoTimeout { get; set; } = true;
+
+    public bool AssertAnyFailureAcknowledgements { get; set; } = true;
+
+    public Func<IMessageContext, Task> Execution { get; set; } = _ => Task.CompletedTask;
+
+    public bool AlwaysTrackExternalTransports { get; set; }
+
+    public TrackingStatus Status
+    {
+        get => _status;
+        private set
+        {
+            _status = value;
+            _source.TrySetResult(value);
+
+            if (value == TrackingStatus.Completed)
+            {
+                _stopwatch.Stop();
+            }
+        }
+    }
+
+    public T FindSingleTrackedMessageOfType<T>()
+    {
+        var messages = AllRecordsInOrder()
+            .Select(x => x.Envelope!.Message).Where(x => x != null)
+            .OfType<T>()
+            .Distinct().ToArray();
+
+        if (messages.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"No message of type {typeof(T).FullNameInCode()} was detected");
+        }
+
+        if (messages.Length > 1)
+        {
+            throw new InvalidOperationException(
+                $"Expected one message of type {typeof(T).FullNameInCode()}, but detected {messages.Length}: {messages.Select(x => x!.ToString())!.Join(", ")}");
+        }
+
+        return messages
+            .Single();
+    }
+
+    public T FindSingleTrackedMessageOfType<T>(MessageEventType eventType)
+    {
+        var messages = AllRecordsInOrder()
+            .Where(x => x.MessageEventType == eventType)
+            .Select(x => x.Envelope!.Message)
+            .Where(x => x != null)
+            .OfType<T>()
+            .Distinct().ToArray();
+
+
+        return messages.Length switch
+        {
+            0 => throw new InvalidOperationException(
+                BuildActivityMessage($"No message of type {typeof(T).FullNameInCode()} was detected")),
+            > 1 => throw new InvalidOperationException(
+                BuildActivityMessage(
+                    $"Expected one message of type {typeof(T).FullNameInCode()}, but detected {messages.Length}: {messages.Select(x => x!.ToString())!.Join(", ")}")),
+            _ => messages.Single()
+        };
+    }
+
+    public EnvelopeRecord[] FindEnvelopesWithMessageType<T>(MessageEventType eventType)
+    {
+        return _envelopes
+            .SelectMany(x => x.Records)
+            .Where(x => x.MessageEventType == eventType)
+            .Where(x => x.Envelope!.Message is T)
+            .ToArray();
+    }
+
+    public EnvelopeRecord[] FindEnvelopesWithMessageType<T>()
+    {
+        return _envelopes
+            .SelectMany(x => x.Records)
+            .Where(x => x.Envelope!.Message is T)
+            .ToArray();
+    }
+
+    // GH-3825: order by EnvelopeRecord.Sequence, not SessionTime. SessionTime is whole
+    // milliseconds, so an entire receive batch shares one value and OrderBy falls back to the
+    // enumeration order of _envelopes -- a Guid-keyed cache with no relationship to the order the
+    // activity actually happened in. Every ordering assertion written against Received/Sent was
+    // silently at the mercy of that.
+    public EnvelopeRecord[] AllRecordsInOrder()
+    {
+        return _envelopes.SelectMany(x => x.Records).Concat(statusesSnapshot()).OrderBy(x => x.Sequence).ToArray();
+    }
+
+    public EnvelopeRecord[] AllRecordsInOrder(MessageEventType eventType)
+    {
+        return _envelopes
+            .SelectMany(x => x.Records)
+            .Concat(statusesSnapshot())
+            .Where(x => x.MessageEventType == eventType)
+            .OrderBy(x => x.Sequence)
+            .ToArray();
+    }
+
+    public IReadOnlyList<Exception> AllExceptions()
+    {
+        return _envelopes.SelectMany(x => x.Records)
+            .Select(x => x.Exception).Where(x => x != null).Concat(exceptionsSnapshot())
+            .Distinct().ToList()!;
+    }
+
+    private EnvelopeRecord[] statusesSnapshot()
+    {
+        lock (_statuses)
+        {
+            return _statuses.ToArray();
+        }
+    }
+
+    private Exception[] exceptionsSnapshot()
+    {
+        lock (_exceptions)
+        {
+            return _exceptions.ToArray();
+        }
+    }
+
+    public void AssertCondition(string message, Func<bool> condition)
+    {
+        if (condition()) return;
+
+        var description = BuildActivityMessage(message);
+        throw new Exception(description);
+    }
+
+    public Task<ITrackedSession> PlayScheduledMessagesAsync(TimeSpan timeout)
+    {
+        var serviceName = _primaryHost.GetRuntime().Options.ServiceName;
+        var recordsInOrder = _envelopes.SelectMany(x => x.Records).Where(x => x.MessageEventType == MessageEventType.Scheduled || x.Envelope!.Status == EnvelopeStatus.Scheduled || x.WasScheduled).ToArray();
+        var records = recordsInOrder.Where(x => x.ServiceName == serviceName).ToArray();
+        if (!records.Any())
+        {
+            var message = BuildActivityMessage("No scheduled messages recorded.");
+            throw new Exception(message);
+        }
+
+        var trackedSessionConfiguration = _primaryHost.TrackActivity().Timeout(timeout).As<TrackedSessionConfiguration>();
+        var replayed = trackedSessionConfiguration.Session;
+        replayed.AlwaysTrackExternalTransports = AlwaysTrackExternalTransports;
+        replayed.AssertAnyFailureAcknowledgements = AssertAnyFailureAcknowledgements;
+        replayed.AssertNoExceptions = AssertNoExceptions;
+        replayed.AssertNoTimeout = AssertNoTimeout;
+        replayed._otherHosts.AddRange(_otherHosts);
+        
+        return trackedSessionConfiguration.ExecuteAndWaitAsync(c => ReplayAll(c, records));
+    }
+
+    internal async Task ReplayAll(IMessageContext context, EnvelopeRecord[] records)
+    {
+        var envelopes = records.Select(x => x.Envelope!).Distinct().ToArray();
+        var bus = context as MessageBus;
+
+        foreach (var capturedEnvelope in envelopes)
+        {
+            // Captured records for scheduled sends to non-native-scheduling
+            // transports are wrappers around the original envelope (see
+            // EnvelopeScheduleExtensions.ForScheduledSend). In production the
+            // durable scheduler eventually fires the wrapper through
+            // ScheduledSendEnvelopeHandler, which unwraps the inner and
+            // copies the wrapper's context-correlation fields onto it before
+            // forwarding. Replay doesn't go through that round-trip — there's
+            // no broker, no serialization — so we have to do the same unwrap
+            // and stamp here so the inner envelope's destination + tenant /
+            // correlation / user fields drive the replay. See GH-2571 / PR #2572.
+            var dispatched = capturedEnvelope;
+            if (capturedEnvelope.MessageType == TransportConstants.ScheduledEnvelope &&
+                capturedEnvelope.Message is Envelope inner)
+            {
+                inner.CopyContextCorrelationFrom(capturedEnvelope);
+                dispatched = inner;
+            }
+
+            // The replay context is fresh — its bus.TenantId / CorrelationId /
+            // UserName start out null. Propagate the dispatched envelope's
+            // values onto the bus so the outgoing envelope that InvokeAsync /
+            // SendAsync builds picks them up via TrackEnvelopeCorrelation.
+            // Without this, a scheduled message published under
+            // TenantId="red" would replay under no tenant.
+            if (bus != null)
+            {
+                bus.TenantId = dispatched.TenantId;
+                bus.CorrelationId = dispatched.CorrelationId;
+                bus.UserName = dispatched.UserName;
+            }
+
+            if (dispatched.Destination!.Scheme == TransportConstants.Local)
+            {
+                await context.InvokeAsync(dispatched.Message!);
+            }
+            else
+            {
+                await context.EndpointFor(dispatched.Destination).SendAsync(dispatched.Message);
+            }
+        }
+    }
+
+    public RecordCollection Scheduled => new ScheduledActivityRecordCollection(MessageEventType.Scheduled, this);
+
+    public RecordCollection Received => new(MessageEventType.Received, this);
+    public RecordCollection Sent => new(MessageEventType.Sent, this);
+    public RecordCollection ExecutionStarted => new(MessageEventType.ExecutionStarted, this);
+    public RecordCollection ExecutionFinished => new(MessageEventType.ExecutionFinished, this);
+    public RecordCollection MessageSucceeded => new(MessageEventType.MessageSucceeded, this);
+    public RecordCollection MessageFailed => new(MessageEventType.MessageFailed, this);
+    public RecordCollection NoHandlers => new(MessageEventType.NoHandlers, this);
+    public RecordCollection NoRoutes => new(MessageEventType.NoRoutes, this);
+    public RecordCollection MovedToErrorQueue => new(MessageEventType.MovedToErrorQueue, this);
+    public RecordCollection AutoFaultsPublished => new(MessageEventType.AutoFaultPublished, this);
+    public RecordCollection Requeued => new(MessageEventType.Requeued, this);
+    public RecordCollection Executed => new(MessageEventType.ExecutionFinished, this);
+
+    public RecordCollection Discarded => new(MessageEventType.Discarded, this);
+
+    public void WatchOther(IHost host)
+    {
+        if (ReferenceEquals(host, _primaryHost))
+        {
+            return;
+        }
+
+        var runtime = host.GetRuntime();
+        _otherHosts.Add(runtime);
+        addHostRules(runtime);
+    }
+
+    public void WatchOther(IServiceProvider services)
+    {
+        if (ReferenceEquals(services, _primaryHost.Services))
+        {
+            return;
+        }
+        
+        var runtime = (WolverineRuntime)services.GetRequiredService<IWolverineRuntime>();
+        _otherHosts.Add(runtime);
+        addHostRules(runtime);
+    }
+    
+    public void AssertNoExceptionsWereThrown()
+    {
+        var exceptions = exceptionsSnapshot();
+        if (exceptions.Length > 0)
+        {
+            throw new AggregateException(exceptions);
+        }
+    }
+
+    public void AssertNotTimedOut()
+    {
+        if (IsCompleted())
+        {
+            return;
+        }
+
+        if (Status == TrackingStatus.TimedOut)
+        {
+            var message =
+                BuildActivityMessage($"This {nameof(TrackedSession)} timed out before all activity completed.");
+
+            throw new TimeoutException(message);
+        }
+    }
+
+    /// <summary>
+    /// Cap the diagnostic envelope-record grid at this many rows when reporting a timeout.
+    /// A noisy test (e.g. a chaos-monkey'd integration scenario emitting thousands of
+    /// alert / heartbeat / DLQ envelopes during the tracked window) can otherwise OOM
+    /// the StringBuilder.ToString() inside Grid.Write before the timeout message is
+    /// ever surfaced to the test — the OOM masks the real timeout cause.
+    /// Truncate to the last <see cref="ActivityGridRowLimit"/> records (most recent
+    /// = most useful for diagnosing where things hung), and surface the omitted count.
+    /// </summary>
+    internal const int ActivityGridRowLimit = 500;
+
+    internal string BuildActivityMessage(string description)
+    {
+        var writer = new StringWriter();
+        writer.WriteLine(description);
+        writer.WriteLine("Activity detected:");
+
+        var grid = new Grid<EnvelopeRecord>();
+
+        var records = AllRecordsInOrder();
+
+        if (records.Length == 0)
+        {
+            writer.WriteLine("No activity detected!");
+        }
+        else
+        {
+            if (records.Length > ActivityGridRowLimit)
+            {
+                var skipped = records.Length - ActivityGridRowLimit;
+                writer.WriteLine($"(showing last {ActivityGridRowLimit} of {records.Length} envelope records — earlier {skipped} omitted for readability)");
+                records = records[^ActivityGridRowLimit..];
+            }
+            writeGrid(grid, records, writer);
+        }
+
+        var ignored = Volatile.Read(ref _ignoredRecordCount);
+        if (ignored > 0)
+        {
+            writer.WriteLine($"({ignored} envelope event(s) matched an ignore rule and are not shown or waited on)");
+        }
+
+        if (_conditions.Any())
+        {
+            writer.WriteLine();
+            writer.WriteLine("Conditions:");
+            foreach (var condition in _conditions) writer.WriteLine($"{condition} ({condition.IsCompleted()})");
+        }
+
+        var exceptions = exceptionsSnapshot();
+        if (exceptions.Any())
+        {
+            writer.WriteLine();
+            writer.WriteLine("Exceptions detected: ");
+            foreach (var exception in exceptions)
+            {
+                writer.WriteLine(exception.ToString());
+                writer.WriteLine();
+            }
+        }
+
+        return writer.ToString();
+    }
+
+    private void writeGrid(Grid<EnvelopeRecord> grid, EnvelopeRecord[] records, StringWriter writer)
+    {
+        if (_otherHosts.Any())
+        {
+            grid.AddColumn("Service (Node Id)", x => $"{x.ServiceName} ({x.UniqueNodeId})");
+        }
+
+        grid.AddColumn("Message Id", x => x.Envelope?.Id.ToString() ?? string.Empty);
+        grid.AddColumn("Message Type", x => x.Envelope?.MessageType ?? string.Empty);
+        grid.AddColumn("Time (ms)", x => x.SessionTime.ToString(), true);
+
+        grid.AddColumn("Event", x => x.MessageEventType.ToString());
+
+        var text = grid.Write(records);
+        writer.WriteLine(text);
+    }
+
+    private void setActiveSession(TrackedSession? session)
+    {
+        _primaryLogger.ActiveSession = session;
+        foreach (var runtime in _otherHosts) runtime.ActiveSession = session;
+    }
+    
+    public void AssertNoFailureAcksWereSent()
+    {
+        var records = AllRecordsInOrder().Where(x => x.Message is FailureAcknowledgement).ToArray();
+        if (records.Any())
+        {
+            var writer = new StringWriter();
+            writer.WriteLine($"{nameof(FailureAcknowledgement)} messages were detected. ");
+            writer.WriteLine($"Configure the tracked activity with {nameof(TrackedSessionConfiguration.IgnoreFailureAcks)}() to ignore these failure acks in the test.");
+            foreach (EnvelopeRecord record in records)
+            {
+                writer.WriteLine(record.Message!.As<FailureAcknowledgement>().Message);
+            }
+
+            throw new Exception(writer.ToString());
+        }
+        
+    }
+
+    public Task TrackAsync()
+    {
+        return ExecuteAndTrackAsync();
+    }
+
+    private void cleanUp()
+    {
+        setActiveSession(null);
+
+        _stopwatch.Stop();
+    }
+
+    private void startTimeoutTracking()
+    {
+#pragma warning disable 4014
+#pragma warning disable VSTHRD110
+        Task.Factory.StartNew(async () =>
+#pragma warning restore VSTHRD110
+#pragma warning restore 4014
+        {
+            await Task.Delay(Timeout);
+
+            Status = TrackingStatus.TimedOut;
+
+            await _cancellation.CancelAsync();
+        }, CancellationToken.None, TaskCreationOptions.RunContinuationsAsynchronously, TaskScheduler.Default);
+    }
+    
+    public void MaybeRecord(MessageEventType messageEventType, Envelope envelope, string serviceName, Guid uniqueNodeId)
+    {
+        if (envelope.Message is ValueTask)
+        {
+            throw new Exception("Whatcha you doing Willis?");
+        }
+
+        // Ignore these
+        if (isIgnored(envelope))
+        {
+            return;
+        }
+
+        // Really just doing this idempotently
+        var history = _envelopes[envelope.Id];
+        if (history.Records.Any(r =>
+                r.MessageEventType == messageEventType && object.ReferenceEquals(r.Envelope, envelope)))
+        {
+            return;
+        }
+        
+        Record(messageEventType, envelope, serviceName, uniqueNodeId);
+    }
+
+    public void Record(MessageEventType eventType, Envelope envelope, string? serviceName, Guid uniqueNodeId,
+        Exception? ex = null)
+    {
+        // Ignore these
+        if (isIgnored(envelope))
+        {
+            return;
+        }
+
+        var history = _envelopes[envelope.Id];
+
+        var record = new EnvelopeRecord(eventType, envelope, _stopwatch.ElapsedMilliseconds, ex)
+        {
+            ServiceName = serviceName,
+            UniqueNodeId = uniqueNodeId
+        };
+
+        if (AlwaysTrackExternalTransports || _otherHosts.Any())
+        {
+            history.RecordCrossApplication(record);
+        }
+        else
+        {
+            history.RecordLocally(record);
+        }
+
+        foreach (var condition in _conditions) condition.Record(record);
+
+        if (ex != null)
+        {
+            lock (_exceptions)
+            {
+                _exceptions.Add(ex);
+            }
+        }
+
+        // Auto-fault detection: if this is a Sent event for an envelope that the failure
+        // pipeline auto-published as a Fault<T>, also record an AutoFaultPublished event
+        // for assertion via ITrackedSession.AutoFaultsPublished.
+        if (eventType == MessageEventType.Sent
+            && envelope.Headers.TryGetValue(FaultHeaders.AutoPublished, out var marker)
+            && marker == "true")
+        {
+            var autoFaultRecord = new EnvelopeRecord(MessageEventType.AutoFaultPublished, envelope,
+                _stopwatch.ElapsedMilliseconds, null)
+            {
+                ServiceName = serviceName,
+                UniqueNodeId = uniqueNodeId
+            };
+
+            if (AlwaysTrackExternalTransports || _otherHosts.Any())
+            {
+                history.RecordCrossApplication(autoFaultRecord);
+            }
+            else
+            {
+                history.RecordLocally(autoFaultRecord);
+            }
+
+            foreach (var condition in _conditions) condition.Record(autoFaultRecord);
+        }
+
+        if (IsCompleted())
+        {
+            Status = TrackingStatus.Completed;
+        }
+    }
+
+    public bool IsCompleted()
+    {
+        if (!_executionComplete) return false;
+
+        if (_conditions.Any())
+        {
+            // ALL of the conditions, not ANY. This used to short-circuit on the first satisfied
+            // condition, which made the final All(...) check below unreachable and silently broke
+            // every session that registers more than one condition -- e.g. three chained
+            // WaitForMessageToBeReceivedAt calls for a fan-out exchange returned as soon as the
+            // FIRST receiver handled the message, so assertions against the other two receivers'
+            // state raced the handlers that were still running. With a single condition ANY and ALL
+            // are the same, which is why this survived: almost every session registers just one.
+            // GH-3824.
+            return _conditions.All(x => x.IsCompleted());
+        }
+
+        return _envelopes.All(x => x.IsComplete());
+    }
+
+    public void LogException(Exception exception, string? serviceName, object? correlationId = null)
+    {
+        // The pipeline reports an exception it could not otherwise attribute by the envelope's id alone. If
+        // an ignore rule already matched that envelope, the exception belongs to ignored traffic too.
+        if (correlationId is Guid envelopeId && _ignoredEnvelopeIds.ContainsKey(envelopeId))
+        {
+            return;
+        }
+
+        Debug.WriteLine($"Exception Occurred in {serviceName}: {exception}");
+        lock (_exceptions)
+        {
+            _exceptions.Add(exception);
+        }
+    }
+
+    public void AddCondition(ITrackedCondition condition)
+    {
+        Debug.WriteLine($"Condition Added: {condition}");
+        _conditions.Add(condition);
+    }
+
+    public override string ToString()
+    {
+        var conditions = $"Conditions:\n{_conditions.Select(x => x.ToString())!.Join("\n")}";
+        var activity = $"Activity:\n{AllRecordsInOrder().Select(x => x.ToString()).Join("\n")}";
+        var exceptions = $"Exceptions:\n{exceptionsSnapshot().Select(x => x.ToString()).Join("\n")}";
+
+        return $"{conditions}\n\n{activity}\\{exceptions}";
+    }
+
+    public void IgnoreMessageTypes(Func<Type, bool> filter)
+    {
+        _ignoreMessageRules.Add(filter);
+    }
+
+    public void IgnoreEnvelopes(Func<Envelope, bool> filter)
+    {
+        _ignoreEnvelopeRules.Add(filter);
+    }
+
+    public IReadOnlyList<AppendedEvents> AppendedEvents
+    {
+        get
+        {
+            lock (_appended)
+            {
+                return _appended.ToArray();
+            }
+        }
+    }
+
+    public IReadOnlyList<ConcurrentAppendRecord> ConcurrentAppends
+    {
+        get
+        {
+            lock (_concurrentAppends)
+            {
+                return _concurrentAppends.ToArray();
+            }
+        }
+    }
+
+    internal void RecordConcurrentAppend(ConcurrentAppendRecord record)
+    {
+        lock (_concurrentAppends)
+        {
+            _concurrentAppends.Add(record);
+        }
+    }
+
+    internal void RecordAppendedEvents(AppendedEvents appended)
+    {
+        if (appended.Envelope is not null && isIgnored(appended.Envelope)) return;
+
+        lock (_appended)
+        {
+            _appended.Add(appended);
+        }
+    }
+
+    public IReadOnlyList<LoadedBoundary> LoadedBoundaries
+    {
+        get
+        {
+            lock (_boundaries)
+            {
+                return _boundaries.ToArray();
+            }
+        }
+    }
+
+    internal void RecordLoadedBoundary(LoadedBoundary boundary)
+    {
+        if (boundary.Envelope is not null && isIgnored(boundary.Envelope)) return;
+
+        lock (_boundaries)
+        {
+            _boundaries.Add(boundary);
+        }
+    }
+
+    public void LogStatus(string message)
+    {
+        var record = new EnvelopeRecord(MessageEventType.Status, null, _stopwatch.ElapsedMilliseconds, null);
+        lock (_statuses)
+        {
+            _statuses.Add(record);
+        }
+    }
+}
+
+internal class HostWrapper : IHost
+{
+    public HostWrapper(IServiceProvider services)
+    {
+        Services = services;
+    }
+
+    public void Dispose()
+    {
+        if (Services is IDisposable disposable) disposable.Dispose();
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        return Task.CompletedTask;
+    }
+
+    public IServiceProvider Services { get; }
+}

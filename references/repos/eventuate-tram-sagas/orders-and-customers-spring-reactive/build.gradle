@@ -1,0 +1,19 @@
+
+dependencies {
+    api "io.eventuate.tram.core:eventuate-tram-spring-reactive-jdbc-kafka:${eventuateTramVersion}"
+    api "io.eventuate.tram.core:eventuate-tram-spring-reactive-commands:${eventuateTramVersion}"
+    api project(":eventuate-tram-sagas-spring-reactive-participant-starter")
+    api project(":eventuate-tram-sagas-spring-reactive-orchestration-simple-dsl-starter")
+    api "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+
+    testImplementation "io.eventuate.util:eventuate-util-test:$eventuateUtilVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:${springBootVersion}"
+}
+
+test {
+    def  profile = System.env['SPRING_PROFILES_ACTIVE']
+    if (profile != null && profile != "" && (!profile.toLowerCase().contains("mysql") || profile.toLowerCase().contains("activemq"))) {
+        exclude '**/**'
+    }
+    useJUnitPlatform()
+}

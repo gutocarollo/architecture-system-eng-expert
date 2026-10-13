@@ -1,0 +1,133 @@
+import java.time.Duration
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+          url "https://plugins.gradle.org/m2/"
+        }
+        eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
+    }
+    dependencies {
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:$dockerComposePluginVersion"
+        classpath "io.eventuate.plugins.gradle:eventuate-plugins-gradle-publish:$eventuatePluginsGradleVersion"
+    }
+}
+
+
+apply plugin: 'docker-compose'
+
+allprojects {
+    group = "io.eventuate.tram.sagas"
+}
+
+apply plugin: "io.eventuate.plugins.gradle.publish.EventuatePublish"
+apply plugin: "io.eventuate.plugins.gradle.publish.PublishMultiArchContainerImages"
+
+publishMultiArch {
+    image "eventuateio/eventuate-tram-sagas-mysql"
+}
+apply plugin: "io.eventuate.plugins.gradle.publish.EventuatePublishDockerImages"
+
+allprojects {
+
+    repositories {
+        mavenCentral()
+        eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
+    }
+
+
+    if (!project.name.endsWith("-bom"))
+      dependencies {
+          testImplementation "org.mockito:mockito-core:$mockitoVersion"
+      }
+
+}
+
+subprojects { project ->
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
+
+    dependencies {
+        if (!project.name.endsWith("-bom")) {
+            testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+            testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion"
+            testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    task aggregateJavaDocs(type: Javadoc) {
+        description = 'Aggregated Javadoc API documentation of all subprojects.'
+        group = JavaBasePlugin.DOCUMENTATION_GROUP
+
+        destinationDir file("$buildDir/docs/javadoc")
+    }
+
+    task("aggregateJavaDocsJar", type: org.gradle.api.tasks.bundling.Jar, dependsOn: project.aggregateJavaDocs) {
+        archiveClassifier = 'javadoc'
+        from 'build/docs/javadoc'
+    }
+
+    artifacts {
+        archives project.aggregateJavaDocsJar
+    }
+    
+    // Configure javadocJar to depend on aggregateJavaDocs to avoid task dependency issues
+    tasks.named("javadocJar") {
+        dependsOn aggregateJavaDocs
+    }
+
+}
+
+
+dockerCompose {
+    environment.put "EVENTUATE_COMMON_VERSION", eventuateCommonImageVersion
+    environment.put "EVENTUATE_CDC_VERSION", eventuateCdcImageVersion
+    environment.put "EVENTUATE_MESSAGING_KAFKA_IMAGE_VERSION", eventuateMessagingKafkaImageVersion
+
+    environment.put "DOCKER_IMAGE_TAG", dockerImageTag
+    retainContainersOnStartupFailure = true
+
+    waitForTcpPortsTimeout = Duration.ofMinutes(3)
+    waitForHealthyStateTimeout = Duration.ofMinutes(3)
+
+    activemqInfrastructure {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql-kafka.yml"]
+        startedServices = ["mysql", "activemq"]
+    }
+
+    mysqlKafkaAll {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql-kafka.yml"]
+    }
+
+    mysqlactivemqAll {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql-activemq.yml"]
+    }
+
+
+    postgresKafkaAll {
+        projectName = null
+        useComposeFiles = ["docker-compose-postgres.yml"]
+    }
+
+    mssqlKafkaAll {
+        projectName = null
+        useComposeFiles = ["docker-compose-mssql.yml"]
+    }
+
+    publish {
+        projectName = null
+        useComposeFiles = ["docker-compose-mysql-kafka.yml", "docker-compose-postgres.yml", "docker-compose-mssql.yml"]
+    }
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

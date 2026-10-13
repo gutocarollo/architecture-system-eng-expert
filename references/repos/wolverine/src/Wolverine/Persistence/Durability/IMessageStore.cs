@@ -1,0 +1,249 @@
+﻿using JasperFx.Descriptors;
+using JasperFx.MultiTenancy;
+using Wolverine.Persistence.Durability.ScheduledMessageManagement;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+
+namespace Wolverine.Persistence.Durability;
+
+public enum MessageStoreRole
+{
+    /// <summary>
+    ///     Denotes that this message store is the main message store for the application and where
+    ///     node information is stored
+    /// </summary>
+    Main,
+
+    /// <summary>
+    ///     Denotes that this message store is an additional message store for the application, but
+    ///     does not store the node information
+    /// </summary>
+    Ancillary,
+
+    /// <summary>
+    ///     This message store is strictly for one or more tenants
+    /// </summary>
+    Tenant,
+
+    /// <summary>
+    ///     This message store is a multi-tenanted composite of other message stores
+    /// </summary>
+    Composite
+}
+
+public interface IMessageInbox
+{
+    Task RescheduleExistingEnvelopeForRetryAsync(Envelope envelope);
+    Task ScheduleExecutionAsync(Envelope envelope);
+    Task MoveToDeadLetterStorageAsync(Envelope envelope, Exception? exception);
+    Task IncrementIncomingEnvelopeAttemptsAsync(Envelope envelope);
+    Task StoreIncomingAsync(Envelope envelope);
+    Task StoreIncomingAsync(IReadOnlyList<Envelope> envelopes);
+
+    Task<bool> ExistsAsync(Envelope envelope, CancellationToken cancellation);
+
+    Task MarkIncomingEnvelopeAsHandledAsync(Envelope envelope);
+
+    // Only called by DurableReceiver
+    Task MarkIncomingEnvelopeAsHandledAsync(IReadOnlyList<Envelope> envelopes);
+
+    /// <summary>
+    ///     Remove an incoming envelope's row outright, rather than retiring it as
+    ///     <see cref="EnvelopeStatus.Handled" />. GH-4645: this node parked a scheduled envelope in the inbox
+    ///     under its eventual remote destination, then forwarded it to that destination's transport when it
+    ///     came due -- so the message was never handled here and the parking row has to disappear completely.
+    ///     Marking it handled is not enough: the database-backed queue transports probe the inbox by
+    ///     <c>received_at</c> with no status filter to suppress duplicate queue rows, so a retained Handled row
+    ///     deletes the very message this node just sent.
+    /// </summary>
+    /// <remarks>
+    ///     The default implementation falls back to <see cref="MarkIncomingEnvelopeAsHandledAsync(Envelope)" />
+    ///     so that message stores outside this repository keep compiling. Every store Wolverine ships overrides
+    ///     it with a real delete, and any store used with a database-backed queue transport must.
+    /// </remarks>
+    Task DeleteIncomingEnvelopeAsync(Envelope envelope) => MarkIncomingEnvelopeAsHandledAsync(envelope);
+
+    // Good as is
+    Task ReleaseIncomingAsync(int ownerId, Uri receivedAt);
+}
+
+public interface IMessageOutbox
+{
+    Task<IReadOnlyList<Envelope>> LoadOutgoingAsync(Uri destination);
+
+    Task StoreOutgoingAsync(Envelope envelope, int ownerId);
+
+    /// <summary>
+    ///     GH-4319. Store a batch of outgoing envelopes in one round trip. The default implementation
+    ///     stores them one at a time, which is correct for every store and is exactly what the outbox
+    ///     did before this overload existed -- so an implementation that does not override it loses the
+    ///     batching and nothing else. Wrapping stores (ancillary, multi-tenanted) DO override it, because
+    ///     a batch that spans two databases has to be split before it reaches either of them.
+    /// </summary>
+    async Task StoreOutgoingAsync(IReadOnlyList<Envelope> envelopes, int ownerId)
+    {
+        foreach (var envelope in envelopes)
+        {
+            await StoreOutgoingAsync(envelope, ownerId);
+        }
+    }
+
+    Task DeleteOutgoingAsync(Envelope[] envelopes);
+    Task DeleteOutgoingAsync(Envelope envelope);
+
+    Task DiscardAndReassignOutgoingAsync(Envelope[] discards, Envelope[] reassigned, int nodeId);
+}
+
+public interface IMessageStoreWithAgentSupport : IMessageStore
+{
+    IAgent BuildAgent(IWolverineRuntime runtime);
+}
+
+public interface IMessageStore : IAsyncDisposable
+{
+    /// <summary>
+    ///     What is the role of this message store within the application?
+    /// </summary>
+    MessageStoreRole Role { get; }
+
+    /// <summary>
+    /// GH-4902. The <see cref="Wolverine.EnvelopeIdGeneration"/> this store's database keeps in index order, if it
+    /// has a preference. When the application has not set <see cref="WolverineOptions.EnvelopeIdGeneration"/>
+    /// explicitly and EVERY message store in the application reports the same preference, Wolverine switches to it
+    /// at startup. Null, the default, is "no preference", which also keeps every other store's preference from
+    /// applying.
+    /// </summary>
+    EnvelopeIdGeneration? PreferredEnvelopeIdGeneration => null;
+    
+    /// <summary>
+    /// In the case of multi-tenancy, this would hold one or more tenant ids
+    /// </summary>
+    List<string> TenantIds { get; }
+
+    /// <summary>
+    ///     Unique identifier for a message store in case of systems that use multiple message
+    ///     store databases. This value doubles as the store's durability agent Uri, so it MUST
+    ///     use the registered agent scheme (<see cref="Wolverine.Persistence.PersistenceConstants.AgentScheme"/>,
+    ///     "wolverinedb") and reflect the database connection — otherwise the NodeAgentController
+    ///     cannot resolve an agent family and the durability agent fails to start (see GH-3589).
+    /// </summary>
+    Uri Uri { get; }
+
+    // /// <summary>
+    // /// Let's consuming services in Wolverine know that this message store
+    // /// has been disposed and cannot be used in a "DrainAsync". This mostly
+    // /// happens when an IHost is disposed without being cleanly closed first
+    // /// </summary>
+    bool HasDisposed { get; }
+
+    IMessageInbox Inbox { get; }
+
+    IMessageOutbox Outbox { get; }
+
+    INodeAgentPersistence Nodes { get; }
+
+    /// <summary>
+    /// Registry of dynamic, runtime-registered listener URIs. Backed by a
+    /// transport-agnostic store (one URI per entry); each URI is turned into
+    /// an actual listener at runtime by <c>DynamicListenerAgentFamily</c> via
+    /// the appropriate transport. Opt-in via
+    /// <see cref="DurabilitySettings.EnableDynamicListeners"/>; providers must
+    /// return <see cref="NullListenerStore.Instance"/> (and skip schema
+    /// migrations for the listener table) when the flag is <c>false</c>.
+    /// </summary>
+    IListenerStore Listeners { get; }
+
+    /// <summary>
+    /// GH-4180. Storage for logical message deduplication ids. Opt-in via
+    /// <see cref="DurabilitySettings.MessageDeduplicationMode" />; providers must return
+    /// <see cref="NullDeduplicationStore.Instance" /> (and skip provisioning the deduplication
+    /// table) when the flag is <c>false</c>, so an upgrade is a no-op for anyone who has not asked
+    /// for the feature.
+    ///
+    /// <para>
+    /// Defaulted rather than abstract on purpose: a provider that has no answer for logical
+    /// deduplication should inherit the no-op instead of being forced to write one, and
+    /// <see cref="IDeduplicationStore.Enabled" /> is what code generation checks before it will emit
+    /// a deduplication assertion against this store.
+    /// </para>
+    /// </summary>
+    IDeduplicationStore Deduplication => NullDeduplicationStore.Instance;
+
+    /// <summary>
+    /// Tracking for recurring (cron) message schedules — schedule name to the envelope id(s) of
+    /// its pre-scheduled next occurrence plus pause state. Opt-in via
+    /// <see cref="DurabilitySettings.EnableRecurringMessages" /> (flipped by registering the first
+    /// schedule through <c>opts.Schedules</c>); providers must return
+    /// <see cref="NullRecurringMessageStore.Instance" /> (and skip provisioning the tracking
+    /// table) when the flag is <c>false</c>, so an upgrade is a no-op for anyone who has not asked
+    /// for the feature. Defaulted rather than abstract for the same reason as
+    /// <see cref="Deduplication" /> — a provider with no answer inherits the graceful no-op.
+    /// </summary>
+    IRecurringMessageStore RecurringMessages => NullRecurringMessageStore.Instance;
+
+    IMessageStoreAdmin Admin { get; }
+
+    IDeadLetters DeadLetters { get; }
+
+    IScheduledMessages ScheduledMessages { get; }
+
+
+    /// <summary>
+    ///     Descriptive name for cases of multiple message stores
+    /// </summary>
+    string Name { get; }
+
+    /// <summary>
+    ///     Called to initialize the Wolverine storage on application bootstrapping
+    /// </summary>
+    /// <param name="runtime"></param>
+    /// <returns></returns>
+    void Initialize(IWolverineRuntime runtime);
+
+    DatabaseDescriptor Describe();
+
+    Task DrainAsync();
+    IAgent StartScheduledJobs(IWolverineRuntime runtime);
+
+    Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress, int limit);
+    Task ReassignIncomingAsync(int ownerId, IReadOnlyList<Envelope> incoming);
+
+    void PromoteToMain(IWolverineRuntime runtime);
+    void DemoteToAncillary();
+}
+
+public record IncomingCount(Uri Destination, int Count);
+
+public class AncillaryMessageStoreApplication<T> 
+{
+    private readonly IMessageStore? _store;
+
+    public AncillaryMessageStoreApplication(IWolverineRuntime runtime)
+    {
+        _store = runtime.Stores.FindAncillaryStore(typeof(T));
+    }
+
+    public void Apply(MessageContext context)
+    {
+        context.Storage = _store!;
+    }
+}
+
+public class AncillaryMessageStore
+{
+    public Type MarkerType { get; }
+    public IMessageStore Inner { get; }
+
+    public AncillaryMessageStore(Type markerType, IMessageStore inner)
+    {
+        MarkerType = markerType;
+        Inner = inner;
+
+        inner.DemoteToAncillary();
+    }
+}
+
+public interface ITenantedMessageSource : ITenantedSource<IMessageStore>
+{
+    Task RefreshLiteAsync();
+}

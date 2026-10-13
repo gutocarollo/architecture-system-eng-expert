@@ -1,0 +1,289 @@
+using System.Text.Json;
+using JasperFx.Core.Reflection;
+using Wolverine.ErrorHandling;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Interop;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+
+namespace Wolverine.Configuration;
+
+public class InteroperableSubscriberConfiguration<TSelf, TEndpoint, TMapper, TConcreteMapper> : SubscriberConfiguration<TSelf, TEndpoint>
+    where TEndpoint : Endpoint<TMapper, TConcreteMapper>
+    where TSelf : ISubscriberConfiguration<TSelf>
+    where TConcreteMapper : IEnvelopeMapper, TMapper
+{
+    protected InteroperableSubscriberConfiguration(TEndpoint endpoint) : base(endpoint)
+    {
+    }
+
+    /// <summary>
+    /// Use a custom interoperability strategy to map Wolverine messages to a downstream
+    /// system's protocol
+    /// </summary>
+    /// <param name="mapper"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(TMapper mapper)
+    {
+        add(e => e.EnvelopeMapper = mapper);
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Customize the basic envelope mapping for interoperability. This mechanism
+    /// is suitable if you are mostly needing to modify how headers are communicated
+    /// from and to external systems through the underlying transport
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(Action<TEndpoint, TConcreteMapper> configure)
+    {
+        add(e => e.customizeMapping((m, _) => configure(e, m)));
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Create a completely customized mapper using the WolverineRuntime and the current
+    /// Endpoint. This is built lazily at system bootstrapping time
+    /// </summary>
+    /// <param name="factory"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(Func<IWolverineRuntime, TEndpoint, TMapper> factory)
+    {
+        add(e => e.registerMapperFactory(r => factory(r, e)));
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Interop with downstream systems by publishing messages with the CloudEvents specification
+    /// </summary>
+    /// <param name="jsonSerializerOptions"></param>
+    /// <returns></returns>
+    public TSelf InteropWithCloudEvents(JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        jsonSerializerOptions ??= new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        add(e => e.customizeMapping((m, r) =>
+        {
+            e.DefaultSerializer = new CloudEventsMapper(r.Options.HandlerGraph, jsonSerializerOptions);
+        }));
+
+        return this.As<TSelf>();
+    }
+}
+
+/// <summary>
+///     Base class for custom fluent interface expressions for external transport subscriber endpoints
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <typeparam name="TEndpoint"></typeparam>
+public class SubscriberConfiguration<T, TEndpoint> : DelayedEndpointConfiguration<TEndpoint>,
+    ISubscriberConfiguration<T>
+    where TEndpoint : Endpoint where T : ISubscriberConfiguration<T>
+{
+    protected SubscriberConfiguration(TEndpoint endpoint) : base(endpoint)
+    {
+    }
+
+    public T TelemetryEnabled(bool isEnabled)
+    {
+        add(e => e.TelemetryEnabled = isEnabled);
+        return this.As<T>();
+    }
+
+    public T UseDurableOutbox()
+    {
+        add(e => e.RequestSubscriberMode(EndpointMode.Durable));
+        return this.As<T>();
+    }
+
+    public T BufferedInMemory()
+    {
+        add(e => e.RequestSubscriberMode(EndpointMode.BufferedInMemory));
+        return this.As<T>();
+    }
+
+    public T SendInline()
+    {
+        add(e => e.RequestSubscriberMode(EndpointMode.Inline));
+        return this.As<T>();
+    }
+
+    public T GlobalSender()
+    {
+        add(e => e.TenancyBehavior = TenancyBehavior.Global);
+        return this.As<T>();
+    }
+
+    /// <summary>
+    /// Force this sender endpoint to use the AES-256-GCM encrypting serializer
+    /// for all outgoing messages. Requires the encrypting serializer to be
+    /// registered first via <see cref="WolverineOptions.UseEncryption"/> or
+    /// <see cref="WolverineOptions.RegisterEncryptionSerializer"/>; if it is not
+    /// registered, the host fails to start.
+    /// </summary>
+    public T Encrypted()
+    {
+        add(endpoint =>
+        {
+            var runtime = endpoint.Runtime
+                ?? throw new InvalidOperationException(
+                    "Endpoint runtime is not set. .Encrypted() requires a fully-configured endpoint.");
+
+            var encrypting = runtime.Options.TryFindSerializer(
+                    Wolverine.Runtime.Serialization.Encryption.EncryptionHeaders.EncryptedContentType)
+                ?? throw new InvalidOperationException(
+                    "No encrypting serializer is registered. Call " +
+                    "WolverineOptions.UseEncryption(provider) or " +
+                    "WolverineOptions.RegisterEncryptionSerializer(provider) " +
+                    "before configuring an endpoint with .Encrypted().");
+
+            var rule = new Wolverine.Runtime.Serialization.Encryption.EncryptOutgoingEndpointRule(encrypting);
+            endpoint.OutgoingRules.Add(rule);
+        });
+        return this.As<T>();
+    }
+
+    public T Named(string name)
+    {
+        add(e => e.EndpointName = name);
+        return this.As<T>();
+    }
+
+    public T ExternalSystem(string name)
+    {
+        add(e => e.ExternalSystemName = name);
+        return this.As<T>();
+    }
+
+
+    /// <summary>
+    /// For endpoints that send or receive messages in batches, this governs the maximum
+    /// number of messages that will be received or sent in one batch. Defaults to 100.
+    /// </summary>
+    public T MessageBatchSize(int batchSize)
+    {
+        add(e => e.MessageBatchSize = batchSize);
+        return this.As<T>();
+    }
+
+    /// <summary>
+    /// For endpoints that send messages in batches, this governs the maximum number
+    /// of concurrent outgoing batches. The default is 1 to ensure message order, but increase this
+    /// number to improve outgoing throughput
+    /// </summary>
+    public T MessageBatchMaxDegreeOfParallelism(int batchMaxDegreeOfParallelism)
+    {
+        add(e => e.MessageBatchMaxDegreeOfParallelism = batchMaxDegreeOfParallelism);
+        return this.As<T>();
+    }
+
+    /// <summary>
+    /// For endpoints that send messages in batches, this is the maximum time the
+    /// sender will wait to accumulate a full batch before flushing what it has.
+    /// Defaults to 250ms.
+    /// </summary>
+    public T MessageBatchTimeout(TimeSpan batchTimeout)
+    {
+        add(e => e.MessageBatchTimeout = batchTimeout);
+        return this.As<T>();
+    }
+
+    public T DefaultSerializer(IMessageSerializer serializer)
+    {
+        add(e =>
+        {
+            e.RegisterSerializer(serializer);
+            e.DefaultSerializer = serializer;
+        });
+
+        return this.As<T>();
+    }
+
+    public T CustomizeOutgoing(Action<Envelope> customize)
+    {
+        add(e => e.OutgoingRules.Add(new LambdaEnvelopeRule(customize)));
+
+        return this.As<T>();
+    }
+
+    public T CustomizeOutgoingMessagesOfType<TMessage>(Action<Envelope> customize)
+    {
+        add(e => e.OutgoingRules.Add(new LambdaEnvelopeRule<TMessage>(customize)));
+
+        return this.As<T>();
+    }
+
+    public T CustomizeOutgoingMessagesOfType<TMessage>(Action<Envelope, TMessage> customize)
+    {
+        return CustomizeOutgoing(env =>
+        {
+            if (env.Message is TMessage message)
+            {
+                customize(env, message);
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Fine-tune the circuit breaker parameters for this outgoing subscriber endpoint
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public T CircuitBreaking(Action<ICircuitParameters> configure)
+    {
+        add(configure);
+        return this.As<T>();
+    }
+
+    public T DeliverWithin(TimeSpan timeToLive)
+    {
+        add(e => e.OutgoingRules.Add(new DeliverWithinRule(timeToLive)));
+        return this.As<T>();
+    }
+
+    /// <summary>
+    ///     Add an outgoing envelope rule to modify how messages are sent from this
+    ///     endpoint
+    /// </summary>
+    /// <param name="rule"></param>
+    /// <returns></returns>
+    public T AddOutgoingRule(IEnvelopeRule rule)
+    {
+        add(e => e.OutgoingRules.Add(rule));
+        return this.As<T>();
+    }
+
+    public T ConfigureSending(Action<SendingFailurePolicies> configure)
+    {
+        add(e =>
+        {
+            e.SendingFailure ??= new SendingFailurePolicies();
+            configure(e.SendingFailure);
+        });
+        return this.As<T>();
+    }
+
+    public T UseWireTap()
+    {
+        add(e => e.UseWireTap = true);
+        return this.As<T>();
+    }
+
+    public T UseWireTap(string serviceKey)
+    {
+        add(e =>
+        {
+            e.UseWireTap = true;
+            e.WireTapServiceKey = serviceKey;
+        });
+        return this.As<T>();
+    }
+}
+
+internal class SubscriberConfiguration : SubscriberConfiguration<ISubscriberConfiguration, Endpoint>,
+    ISubscriberConfiguration
+{
+    public SubscriberConfiguration(Endpoint endpoint) : base(endpoint)
+    {
+    }
+}

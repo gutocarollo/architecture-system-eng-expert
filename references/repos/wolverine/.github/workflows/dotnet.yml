@@ -1,0 +1,112 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  config: Release
+  disable_test_parallelization: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Build Version
+        run: |
+          dotnet tool install --global minver-cli --version 4.2.0
+          version=$(minver --tag-prefix v)
+          echo "MINVERVERSIONOVERRIDE=$version" >> $GITHUB_ENV
+          echo "### Version: $version" >> $GITHUB_STEP_SUMMARY
+
+      - name: Test
+        # Names this run in the retry ledger written to the job summary (build/RetryLedger.cs).
+        env:
+          CI_JOB_NAME: dotnet-ci
+        run: ./build/run-with-cancellation-relay.sh ci
+
+      # GH-4098. This job wedged once and was cancelled at its cap, and every piece of evidence went
+      # with it: a cancelled job's logs are not truncated, they are DISCARDED (BlobNotFound), leaving
+      # only per-step timestamps in the API. The supervisor already writes a partial ledger inside the
+      # runner's grace window when it is cancelled (build/SupervisedTests.cs registerCancellationCapture,
+      # build/StallCapture.cs) -- naming the tests that were still in flight -- but this workflow never
+      # uploaded it, so the one artifact that survives a discarded log was being thrown away with the
+      # runner. tests.yml has had this since GH-3787; dotnet.yml is the workflow that actually wedged.
+      #
+      # `always()` and not `failure()`: a cancelled job is neither success nor failure, and cancellation
+      # is precisely the case this exists for.
+      - name: Upload retry ledger
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-ledger-dotnet-ci
+          path: artifacts/test-ledger/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # Only reachable when the runner itself survived. If the OOM killer took a *test* process rather
+      # than the runner service, the kill is recorded here and nowhere else. Same `always()` reasoning
+      # as the upload above.
+      - name: Kernel OOM report
+        if: always()
+        run: |
+          echo "::group::dmesg (OOM / kill events)"
+          sudo dmesg | grep -iE "out of memory|oom-kill|killed process" || echo "no OOM events in dmesg"
+          echo "::endgroup::"
+          free -m
+
+      # The CI target now also runs MessageRoutingTests, which boots a real
+      # RabbitMQ broker (started inline by the build target via docker compose).
+      # Tear it down on exit so the runner is clean for downstream steps and
+      # so no orphaned container lingers if the build fails.
+      - name: Stop containers
+        if: always()
+        run: docker compose down
+
+      - name: Package
+        if: github.event_name != 'pull_request'
+        run: ./build.sh pack
+
+
+      - name: Publish CI Packages
+        if: github.repository_owner == 'JasperFx' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          for package in $(find -name "*.nupkg" | grep "minver" -v); do
+          
+            # GitHub
+            if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+              echo "${0##*/}": Pushing $package to GitHub...
+              dotnet nuget push $package --source https://nuget.pkg.github.com/jasperfx/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+            fi
+          
+            # Feedz (remove once GitHub supports anonymous access)
+            if [ -n "${{ secrets.FEEDZ_KEY }}" ]; then
+              echo "${0##*/}": Pushing $package to Feedz...
+              dotnet nuget push $package --source https://f.feedz.io/jasperfx/wolverine/nuget --api-key ${{ secrets.FEEDZ_KEY }} --skip-duplicate
+            fi
+          
+          done
+
+      - name: Publish Release Packages
+        if: github.repository_owner == 'JasperFx' && github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+        run: |
+          for package in $(find -name "*.nupkg" | grep "minver" -v); do
+            echo "${0##*/}": Pushing $package...
+            dotnet nuget push $package --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          done

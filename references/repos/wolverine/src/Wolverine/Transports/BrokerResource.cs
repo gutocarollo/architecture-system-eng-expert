@@ -1,0 +1,197 @@
+using JasperFx;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using JasperFx.Resources;
+using Spectre.Console;
+using Spectre.Console.Rendering;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+
+namespace Wolverine.Transports;
+
+public class BrokerResource : IStatefulResource
+{
+    private readonly IWolverineRuntime _runtime;
+    private readonly IBrokerTransport _transport;
+
+    public BrokerResource(IBrokerTransport transport, IWolverineRuntime runtime)
+    {
+        _transport = transport;
+        _runtime = runtime;
+
+        SubjectUri = new Uri(runtime.Options.SubjectUri, "messagebroker");
+    }
+
+    public Uri SubjectUri { get; }
+    public Uri ResourceUri => _transport.ResourceUri;
+
+    public async Task Check(CancellationToken token)
+    {
+        // GH-4693. "The check said no" and "the check threw" are different findings, and folding them
+        // together made the summary assert the one thing this code does not know. An operator running
+        // `resources check` as a deploy gate was told "Missing known broker resources: ..." for queues
+        // that existed, while the actual cause -- an NRE out of the delta comparison, a permissions
+        // problem, a connectivity blip -- was only readable as a separate Error line further up the log.
+        // Both still fail the gate; they just have to say which one happened.
+        var missing = new List<Uri>();
+        var unverifiable = new List<(Uri Uri, Exception Exception)>();
+
+        await _transport.ConnectAsync(_runtime);
+
+        foreach (var endpoint in _transport.Endpoints().OfType<IBrokerEndpoint>().Where(x => x.Role == EndpointRole.Application))
+        {
+            try
+            {
+                var exists = await endpoint.CheckAsync();
+                if (!exists)
+                {
+                    missing.Add(endpoint.Uri);
+                }
+            }
+            catch (Exception e)
+            {
+                _runtime.Logger.LogError(e, "Error while checking the existence of required broker endpoint {Uri}",
+                    endpoint.Uri);
+                unverifiable.Add((endpoint.Uri, e));
+            }
+        }
+
+        if (missing.Count == 0 && unverifiable.Count == 0)
+        {
+            return;
+        }
+
+        var parts = new List<string>();
+
+        if (missing.Count != 0)
+        {
+            parts.Add($"Missing known broker resources: {missing.Select(x => x.ToString()).Join(", ")}");
+        }
+
+        if (unverifiable.Count != 0)
+        {
+            // The exception TYPE and message, not just the URI. The whole failure mode this replaces was
+            // a summary that named a cause it had not established, so the summary now carries the cause
+            // it actually has.
+            parts.Add(
+                $"Unable to check broker resources: {unverifiable.Select(x => $"{x.Uri} ({x.Exception.GetType().Name}: {x.Exception.Message})").Join(", ")}");
+        }
+
+        // The first unverifiable exception becomes the inner exception so a stack trace survives to
+        // anything catching this, rather than living only in the log.
+        throw new Exception(parts.Join(Environment.NewLine),
+            unverifiable.Count != 0 ? unverifiable[0].Exception : null);
+    }
+
+    public async Task ClearState(CancellationToken token)
+    {
+        await _transport.ConnectAsync(_runtime);
+        foreach (var queue in _transport.Endpoints().OfType<IBrokerQueue>()) await queue.PurgeAsync(_runtime.Logger);
+    }
+
+    public async Task Teardown(CancellationToken token)
+    {
+        await _transport.ConnectAsync(_runtime);
+
+        foreach (var endpoint in _transport.Endpoints().OfType<IBrokerEndpoint>())
+        {
+            try
+            {
+                await endpoint.TeardownAsync(_runtime.Logger);
+            }
+            catch (Exception e)
+            {
+                _runtime.Logger.LogError(e, "Error while attempting to tear down broker endpoint {Uri}", endpoint.Uri);
+            }
+        }
+    }
+
+    public async Task Setup(CancellationToken token)
+    {
+        await _transport.ConnectAsync(_runtime);
+
+        // Every endpoint is attempted before anything is thrown, so one broker object that cannot be
+        // provisioned does not hide the state of the others - the same collect-then-throw shape as Check
+        // above. Throwing at all is the point: this used to log and return, so "resources setup" reported
+        // success having created nothing, and a deploy step that provisions ahead of its hosts exited 0
+        // while the hosts then failed on the missing queue. Teardown below stays best-effort on purpose -
+        // tearing down what you can is the useful outcome there.
+        var failures = new List<Exception>();
+
+        foreach (var endpoint in _transport.Endpoints().OfType<IBrokerEndpoint>())
+        {
+            try
+            {
+                await endpoint.SetupAsync(_runtime.Logger);
+            }
+            catch (Exception e)
+            {
+                _runtime.Logger.LogError(e, "Error while attempting to setup broker endpoint {Uri}", endpoint.Uri);
+                failures.Add(new InvalidOperationException($"Unable to set up broker endpoint {endpoint.Uri}", e));
+            }
+        }
+
+        if (failures.Count == 0)
+        {
+            return;
+        }
+
+        // GH-4119: the same failure policy Wolverine already applies to its own message storage migration
+        // on startup (WolverineRuntime.HostService), and for the same reason -- this resource is swept by
+        // BOTH `resources setup` and JasperFx's AddResourceSetupOnStartup() hosted service, and those two
+        // want opposite things from an unprovisionable broker. FailFast (the default) keeps the behavior
+        // above: a deploy step that provisions ahead of its hosts must not exit 0 having created nothing.
+        // ContinueOnFailures is for the host that treats its broker topology as externally owned -- an
+        // Azure Service Bus emulator with no administration API at all, queues declared in the emulator's
+        // own config -- where an unreachable admin endpoint is an expected fact about the environment
+        // rather than a reason to refuse to start.
+        //
+        // Deliberately NOT keyed off AutoProvision. AddResourceSetupOnStartup() is the documented way to
+        // provision a broker WITHOUT AutoProvision (see the Redis listener's own error message), so
+        // skipping the resource whenever AutoProvision is off would break that supported path.
+        if (_runtime.Options.ResourceMigrationFailureMode == ResourceMigrationFailureMode.ContinueOnFailures)
+        {
+            _runtime.Logger.LogError(new AggregateException(failures),
+                "Unable to set up {Count} of the {Name} broker endpoints. Continuing anyway because ResourceMigrationFailureMode is ContinueOnFailures.",
+                failures.Count, _transport.Name);
+
+            return;
+        }
+
+        throw new AggregateException(
+            $"Unable to set up {failures.Count} of the {_transport.Name} broker endpoints", failures);
+    }
+
+    public async Task<IRenderable> DetermineStatus(CancellationToken token)
+    {
+        var table = new Table();
+
+        var columns = _transport.DiagnosticColumns().ToArray();
+        if (columns.Length == 0) return table;
+
+        foreach (var column in columns)
+            table.AddColumn(new TableColumn(column.Header) { Alignment = column.Alignment });
+
+        await _transport.ConnectAsync(_runtime);
+
+        foreach (var endpoint in _transport.Endpoints().OfType<IBrokerQueue>())
+        {
+            try
+            {
+                var dict = await endpoint.GetAttributesAsync();
+                var cells = columns.Select(x => x.BuildCell(dict));
+                table.AddRow(cells);
+            }
+            catch (Exception e)
+            {
+                _runtime.Logger.LogError(e, "Error while attempting to determine statist broker endpoint {Uri}",
+                    endpoint.Uri);
+            }
+        }
+
+        return table;
+    }
+
+    public string Type => TransportConstants.WolverineTransport;
+    public string Name => _transport.Name;
+}

@@ -1,0 +1,343 @@
+# Event Projections
+
+Sub-classing the `Marten.Events.Projections.EventProjection` class will let you efficiently write a projection where you can explicitly define document operations
+on individual events. 
+
+As of Marten 8.0, you can use the `EventProjection` base type to configure projection settings like the name or version,
+but otherwise write perfectly explicit code by overriding the `ApplyAsync()` method like this:
+
+<!-- snippet: sample_explicit_event_projection -->
+<a id='snippet-sample_explicit_event_projection'></a>
+```cs
+public partial class ExplicitSampleProjection: EventProjection
+{
+    public override ValueTask ApplyAsync(IDocumentOperations operations, IEvent e, CancellationToken cancellation)
+    {
+        switch (e.Data)
+        {
+            case Event1 e1:
+                // I'm creating a single new document, but
+                // I can do as many operations as I want
+                operations.Store(new Document1
+                {
+                    Id = e.Id
+                });
+                break;
+
+            case StopEvent1 stop:
+                operations.Delete<Document1>(e.Id);
+                break;
+
+            // and so on...
+        }
+
+        return new ValueTask();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/SampleEventProjection.cs#L111-L138' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_explicit_event_projection' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Or you can use the pre-V8 conventions as well:
+
+## Conventional Method Usage
+
+With conventional method usage, the `EventProjection` recipe does the pattern matching for you.
+
+::: warning Removed in Marten 9.0
+The inline-lambda `Project<TEvent>(action)` / `ProjectAsync<TEvent>(action)` calls in the constructors below are removed in Marten 9.0 alongside the JasperFx 2.0 line ([JasperFx/jasperfx#286](https://github.com/JasperFx/jasperfx/issues/286)). Replace them with `Project` / `ProjectAsync` method-convention overloads on the `partial` projection class so `JasperFx.Events.SourceGenerator` can emit a `[GeneratedEvolver]` dispatcher. See [Inline-lambda projection registration removed](/migration-guide#inline-lambda-projection-removal) for the migration walkthrough.
+:::
+
+To show off what `EventProjection` does, here's a sample that uses most features that `EventProjection` supports:
+
+<!-- snippet: sample_sampleeventprojection -->
+<a id='snippet-sample_sampleeventprojection'></a>
+```cs
+public partial class SampleEventProjection : EventProjection
+{
+    // JasperFx.Events 2.0 (JasperFx/jasperfx#276 / #286) removed the
+    // EventProjection.Project<TEvent>(action) / ProjectAsync<TEvent>(action)
+    // inline-lambda registration helpers. Method-convention overloads on a
+    // `partial` projection class are the supported replacement —
+    // JasperFx.Events.SourceGenerator picks up each method below at compile
+    // time and emits the dispatch.
+
+    // Equivalent to the removed `Project<Event1>(e => ops.Store(new Document1 { Id = e.Id }))`.
+    public Document1 Create(Event1 e) => new Document1 {Id = e.Id};
+
+    // Or with event metadata
+    public Document2 Create(IEvent<Event2> e) => new Document2 { Id = e.Data.Id, Timestamp = e.Timestamp };
+
+    public void Project(StopEvent1 e, IDocumentOperations ops)
+        => ops.Delete<Document1>(e.Id);
+
+    public async Task Project(Event3 e, IDocumentOperations ops)
+    {
+        var lookup = await ops.LoadAsync<Lookup>(e.LookupId);
+        // now use the lookup document and the event to carry
+        // out other document operations against the ops parameter
+    }
+
+    // This will apply to *any* event that implements the ISpecialEvent
+    // interface. Likewise, the pattern matching will also work with
+    // common base classes
+    public void Project(ISpecialEvent e, IDocumentOperations ops)
+    {
+
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/SampleEventProjection.cs#L73-L109' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_sampleeventprojection' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Do note that at any point you can access event metadata by accepting `IEvent<T>` where `T` is the event type instead of just the event type. You can also take in an additional variable for `IEvent` to just
+access the current event metadata (it's the same object regardless, but sometimes taking in both the event body and the event metadata results in simpler code);
+
+And that projection can run either inline or asynchronously with the registration as shown below:
+
+<!-- snippet: sample_register_event_projection -->
+<a id='snippet-sample_register_event_projection'></a>
+```cs
+var store = DocumentStore.For(opts =>
+{
+    opts.Connection("some connection string");
+
+    // Run inline...
+    opts.Projections.Add(new SampleEventProjection(), ProjectionLifecycle.Inline);
+
+    // Or nope, run it asynchronously
+    opts.Projections.Add(new SampleEventProjection(), ProjectionLifecycle.Async);
+});
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/SampleEventProjection.cs#L16-L29' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_register_event_projection' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Use either the `Create()` or `Project()` method conventions to define event handlers on your `EventProjection` subclass.
+
+## Create() Method Convention
+
+The `Create()` method can accept these arguments:
+
+* The actual event type or `IEvent<T>` where `T` is the event type. One of these is required
+* `IEvent` to get access to the event metadata
+* Optionally take in `IDocumentOperations` if you need to access other data. This interface supports all the functionality of `IQuerySession`
+
+The `Create()` method needs to return either:
+
+* The document to be created
+* Or `Task<T>` where the `T` is the document that is going to be created in this projection
+
+## Project() Method Convention
+
+The `Project()` methods can accept these arguments:
+
+* The actual event type or `IEvent<T>` where `T` is the event type. One of these is required.
+* `IEvent` to get access to the event metadata
+* `IDocumentOperations` is mandatory, and this is what you'd use to register any document operations
+
+The return value must be either `void` or `Task` depending on whether or not the method needs to be asynchronous
+
+## Rebuilds and Document Teardown
+
+::: warning
+Because an `EventProjection` writes documents through *ad-hoc* `IDocumentOperations` calls (`ops.Insert`, `ops.Store`, etc.) inside its `Project()` / `Create()` methods, Marten **cannot infer which document types the projection produces**. Unlike a single-stream or multi-stream aggregation (whose view type is known), an `EventProjection` therefore does **not** automatically wipe its documents when the projection is rebuilt.
+
+If you rebuild an `EventProjection` and want the previously-written documents cleared first (the normal rebuild semantics), **declare each written document type explicitly** so it participates in the rebuild teardown:
+
+```cs
+public class MyProjection: EventProjection
+{
+    public MyProjection()
+    {
+        // Tell Marten this projection writes MyDoc, so a rebuild TRUNCATEs it first
+        Options.DeleteViewTypeOnTeardown<MyDoc>();
+    }
+
+    public void Project(SomethingHappened e, IDocumentOperations ops)
+        => ops.Insert(new MyDoc { Id = e.Id /* ... */ });
+}
+```
+
+Without this declaration the old documents survive the rebuild. The per-row rebuild path tolerates that (re-inserting an existing id upserts), but the INSERT-only [binary `COPY` rebuild](/events/projections/rebuilding) (`Projections.RebuildWithBulkCopy`) requires an empty target table and will fail with a duplicate-key error. This is a long-standing `EventProjection` limitation, not specific to bulk-copy rebuilds.
+:::
+
+## Identifying the Event Parameter
+
+In both the `Create()` and `Project()` conventions above, the event parameter can be named anything — Marten identifies it **by type**, not by name. Given `Project(StopEvent1 e, IDocumentOperations ops)`, `StopEvent1` is the event because it's the only concrete event type in the signature (`IDocumentOperations` is an interface and is never treated as the event). The same applies to `IEvent<T>`, which is always recognized as the event regardless of the parameter name.
+
+You only need a conventional parameter **name** — `@event`, `event`, `e`, or `ev` — when a method's signature is ambiguous (more than one parameter could be the event) and type inference alone can't resolve it. This is the same rule used by aggregation projections; see [How Marten Identifies the Event Argument](/events/projections/conventions#how-marten-identifies-the-event-argument).
+
+## Reusing Documents in the Same Batch
+
+::: tip
+If you find yourself wanting this feature, maybe look to use one of the aggregation projection recipes instead that are heavily optimized for this use case.
+:::
+
+If there is any need within your `EventProjection` to use and/or modify the exact same document within the same batch of events -- and remember that event batches in projection rebuilds are measured in the hundreds -- you may want to force Marten to use its identity map tracking to cache those documents in memory rather than reloading them. And also to make sure you are applying changes to the correct version of the document as well if you are doing some kind of aggregation within an `EventProjection`.
+
+To use identity map tracking for a particular projection, you should enable it in its async option by setting the `EnableDocumentTrackingByIdentity` property.
+
+<!-- snippet: sample_using_enable_document_tracking_in_event_projection_registration -->
+<a id='snippet-sample_using_enable_document_tracking_in_event_projection_registration'></a>
+```cs
+var store = DocumentStore.For(opts =>
+{
+    opts.Connection("some connection string");
+
+    opts.Projections.Add(
+        new TrackedEventProjection(),
+        // Register projection to run it asynchronously
+        ProjectionLifecycle.Async,
+        // enable document tracking using identity map
+        asyncOptions => asyncOptions.EnableDocumentTrackingByIdentity = true
+    );
+});
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/TrackedEventProjection.cs#L13-L28' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_enable_document_tracking_in_event_projection_registration' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Usage of `EnableDocumentTrackingByIdentity` is shown below for an `EventProjection` that potentially makes several changes to the same document:
+
+::: danger
+Due to the async daemon processing projection operations in parallel to applying projection updates, directly mutating the content of a tracked object may result in an exception or unexpected behavior.
+
+When this feature is enabled, we recommend using immutable projection & collection types within the EventProjection to avoid any issues.
+:::
+
+<!-- snippet: sample_using_enable_document_tracking_in_event_projection -->
+<a id='snippet-sample_using_enable_document_tracking_in_event_projection'></a>
+```cs
+public enum Team
+{
+    VisitingTeam,
+    HomeTeam
+}
+
+public record Run(Guid GameId, Team Team, string Player);
+
+public record BaseballGame
+{
+    public Guid Id { get; init; }
+    public int HomeRuns { get; init; }
+    public int VisitorRuns { get; init; }
+
+    public int Outs { get; init; }
+    public ImmutableHashSet<string> PlayersWithRuns { get; init; }
+}
+
+public partial class TrackedEventProjection: EventProjection
+{
+    public TrackedEventProjection()
+    {
+        throw new NotImplementedException("Redo");
+        // ProjectAsync<Run>(async (run, ops) =>
+        // {
+        //     var game = await ops.LoadAsync<BaseballGame>(run.GameId);
+        //
+        //     var updatedGame = run.Team switch
+        //     {
+        //         Team.HomeTeam => game with
+        //         {
+        //             HomeRuns = game.HomeRuns + 1,
+        //             PlayersWithRuns = game.PlayersWithRuns.Add(run.Player)
+        //         },
+        //         Team.VisitingTeam => game with
+        //         {
+        //             VisitorRuns = game.VisitorRuns + 1,
+        //             PlayersWithRuns = game.PlayersWithRuns.Add(run.Player)
+        //         },
+        //     };
+        //
+        //     ops.Store(updatedGame);
+        // });
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/TrackedEventProjection.cs#L32-L80' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_enable_document_tracking_in_event_projection' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Event Enrichment <Badge type="tip" text="8.29" />
+
+::: warning
+Event enrichment is designed for **read model / query model** projections processed by the async
+daemon or inline during `SaveChangesAsync`. It is **not** called during `FetchForWriting()` or
+`FetchLatest()`. Avoid depending on enriched data in write model aggregates used with those APIs.
+:::
+
+`EventProjection` supports an `EnrichEventsAsync` hook that runs **before** individual events
+are processed. This allows you to batch-load reference data from the database and enrich events
+with it, avoiding N+1 query problems.
+
+This is the same pattern available on [aggregation projections](/events/projections/enrichment),
+now extended to `EventProjection`.
+
+### Basic Usage
+
+Override `EnrichEventsAsync` in your `EventProjection` subclass:
+
+```cs
+public partial class TaskSummaryProjection : EventProjection
+{
+    // The Project handler reads UserName that was set by EnrichEventsAsync
+    public void Project(TaskAssigned e, IDocumentOperations ops)
+    {
+        ops.Store(new TaskSummary
+        {
+            Id = e.TaskId,
+            AssignedUserName = e.UserName
+        });
+    }
+
+    public override async Task EnrichEventsAsync(
+        IQuerySession querySession,
+        IReadOnlyList<IEvent> events,
+        CancellationToken cancellation)
+    {
+        // 1. Find events that need enrichment
+        var assigned = events
+            .OfType<IEvent<TaskAssigned>>()
+            .ToArray();
+
+        if (assigned.Length == 0) return;
+
+        // 2. Batch-load reference data (one query, not N queries)
+        var userIds = assigned
+            .Select(e => e.Data.UserId)
+            .Distinct()
+            .ToArray();
+
+        var users = await querySession
+            .LoadManyAsync<User>(cancellation, userIds);
+        var lookup = users.ToDictionary(u => u.Id);
+
+        // 3. Set enriched properties on event data
+        foreach (var e in assigned)
+        {
+            if (lookup.TryGetValue(e.Data.UserId, out var user))
+            {
+                e.Data.UserName = $"{user.FirstName} {user.LastName}";
+            }
+        }
+    }
+}
+```
+
+### How It Works
+
+* `EnrichEventsAsync` is called **once per tenant batch** before any individual event handlers run
+* The `querySession` parameter provides read access to the database for loading reference data
+* Modifications to `e.Data` properties are visible to `Project<T>` and `ProjectAsync<T>` handlers
+* Works with both **Inline** and **Async** projection lifecycles
+* The method has a no-op default implementation -- only override it when you need enrichment
+
+### When to Use
+
+Use `EnrichEventsAsync` when your `EventProjection` handlers need data that isn't in the
+event itself. Common scenarios:
+
+* Looking up user names, product details, or other reference data by ID
+* Resolving business keys to internal identifiers
+* Loading configuration or lookup tables needed during projection
+
+Without enrichment, each handler would need to load this data individually, resulting in
+N+1 database queries when processing a batch of events.

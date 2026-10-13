@@ -1,0 +1,503 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Text;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Wolverine.Http.CodeGen;
+using Wolverine.Http.Policies;
+using Wolverine.Http.Resources;
+using Wolverine.Persistence.Codegen;
+using Wolverine.Logging;
+using Wolverine.Persistence;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Handlers;
+
+namespace Wolverine.Http;
+
+public partial class HttpChain
+{
+    /// <summary>
+    /// Used to cache variables like for IFormFile or IFormFileCollection
+    /// that might be reused between middleware and handler methods, but should
+    /// not be created more than once
+    /// </summary>
+    public List<Variable> ChainVariables { get; } = new();
+    
+    public string? SourceCode => _generatedType?.SourceCode;
+
+    private readonly object _locker = new();
+
+    void ICodeFile.AssembleTypes(GeneratedAssembly assembly)
+    {
+        if (_generatedType != null)
+        {
+            return;
+        }
+        
+        lock (_locker)
+        {
+            if (_generatedType != null) return;
+
+            assembly.UsingNamespaces!.Fill(typeof(RoutingHttpContextExtensions).Namespace);
+            assembly.UsingNamespaces.Fill("System.Linq");
+            assembly.UsingNamespaces.Fill("System");
+
+            // GH-4180. Weave logical deduplication here rather than in the constructor's attribute pass:
+            // [Deduplicated] is applied there, but IsTransactional is not settled until the HTTP policies
+            // have run, and the compensating-release frame depends on it. AssembleTypes is the first
+            // point after both. Idempotent, so a chain assembled into two GeneratedAssemblies (which
+            // happens under `codegen write` -- see GH-3692) is woven once.
+            this.ApplyDeduplication(assembly.Rules, _parent.Container);
+            applyDeduplicatedWithResponse();
+
+            _generatedType = assembly.AddType(_fileName!, typeof(HttpHandler));
+
+            assembly.ReferenceAssembly(Method.HandlerType.Assembly);
+            assembly.ReferenceAssembly(typeof(HttpContext).Assembly);
+            assembly.ReferenceAssembly(typeof(HttpChain).Assembly);
+
+            var handleMethod = _generatedType.MethodFor(nameof(HttpHandler.Handle));
+
+            handleMethod.DerivedVariables.AddRange(DerivedHttpContextVariables);
+
+            var loggedType = determineLogMarkerType();
+
+            handleMethod.Sources.Add(new LoggerVariableSource(loggedType));
+            handleMethod.Sources.Add(new MessageBusSource(_parent.Options.EnableRelayOfUserName,
+                _parent.ApplyCorrelationIdHeaderToAllEndpoints));
+
+            // Per-method scoping for SourceServiceFromHttpContext<T>(). Registering on the
+            // method (rather than WolverineOptions.CodeGeneration.Sources) keeps the
+            // httpContext-shaped frame out of non-HTTP message handler chains.
+            foreach (var serviceType in _parent.HttpContextSourcedTypes)
+            {
+                handleMethod.Sources.Add(new RequestServicesVariableSource(serviceType));
+            }
+
+            handleMethod.Frames.AddRange(DetermineFrames(assembly.Rules));
+        }
+    }
+
+    private Type determineLogMarkerType()
+    {
+        if (HasRequestType) return RequestType;
+
+        if (Method.HandlerType.IsStatic()) return typeof(HttpGraph);
+
+        return Method.HandlerType;
+    }
+
+    Task<bool> ICodeFile.AttachTypes(GenerationRules rules, Assembly assembly, IServiceProvider? services,
+        string containingNamespace)
+    {
+        var found = this.As<ICodeFile>().AttachTypesSynchronously(rules, assembly, services, containingNamespace);
+        return Task.FromResult(found);
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2074",
+        Justification = "_handlerType assignment from ExportedTypes / GetTypes scan — the generated HTTP handler type carries its codegen-emitted public constructor; trim preserves it because the type itself is rooted by the assembly load.")]
+    bool ICodeFile.AttachTypesSynchronously(GenerationRules rules, Assembly assembly, IServiceProvider? services,
+        string containingNamespace)
+    {
+        Debug.WriteLine(_generatedType?.SourceCode);
+
+        // GH-2908: resolve the generated handler by its full name (a targeted lookup, no GetTypes()
+        // enumeration in the pre-generated/Static case); fall back to the reflective scan only if it misses.
+        var found = assembly.GetType($"{containingNamespace}.{_fileName}")
+            ?? assembly.ExportedTypes.FirstOrDefault(x => x.Name == _fileName)
+            ?? assembly.GetTypes().FirstOrDefault(x => x.Name == _fileName);
+
+        // GH-4749: a miss must never discard a type that was already attached. Every call to
+        // InitializeSynchronously hands this chain a BRAND NEW GeneratedAssembly, and AssembleTypes
+        // above no-ops once _generatedType exists -- so a second initialization probes an assembly
+        // that cannot possibly contain this handler. Assigning unconditionally there would null out
+        // a perfectly good _handlerType and leave buildHandler() throwing for the life of the host.
+        // The return still keys off _handlerType so that a chain which has never attached anything
+        // reports false -- HttpGraph.AssertPreBuiltTypesExist relies on that for TypeLoadMode.Static.
+        if (found != null)
+        {
+            _handlerType = found;
+        }
+
+        return _handlerType != null;
+    }
+
+    string ICodeFile.FileName => _fileName!;
+
+    internal IEnumerable<Frame> DetermineFrames(GenerationRules rules)
+    {
+        // Add frames for any writers
+        if (ResourceType != typeof(void))
+        {
+            foreach (var writerPolicy in _parent.WriterPolicies)
+            {
+                if (writerPolicy.TryApply(this))
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            Postprocessors.Add(new WriteEmptyBodyStatusCode());
+        }
+
+        assertDeduplicatedWithResponseIsJson();
+
+        if (TryInferMessageIdentity(out var identity))
+        {
+            if (AuditedMembers.All(x => x.Member != identity))
+            {
+                Audit(identity!);
+            }
+        }
+        
+        if (AuditedMembers.Count != 0)
+        {
+            // When the endpoint binds via [AsParameters], an audited member (e.g. an inferred aggregate
+            // id) lives on the container type, not on InputType() — which a [FromBody] member may have
+            // overwritten to the body type. Resolve the audit variable from the container in that case
+            // so the member access is valid and the codegen doesn't fail to resolve a body-typed
+            // variable that has no standalone binding. See GH-3135.
+            Type? auditInputType = null;
+            if (AsParametersType != null && AuditedMembers.All(x => x.Member.DeclaringType == AsParametersType))
+            {
+                auditInputType = AsParametersType;
+            }
+
+            Middleware.Insert(0, new AuditToActivityFrame(this, auditInputType));
+        }
+
+        bufferRequestForDeduplicatedWithResponse();
+
+        // Allow for immutable request types that get overwritten by middleware
+        if (RequestBodyVariable != null)
+        {
+            foreach (var methodCall in Middleware.OfType<MethodCall>())
+            {
+                // Skip the frame that reads the request body in the first place
+                if (ReferenceEquals(methodCall.ReturnVariable, RequestBodyVariable)) continue;
+
+                methodCall.TryReplaceVariableCreationWithAssignment(RequestBodyVariable);
+            }
+        }
+
+        // GH-4339: a middleware type's Finally calls are nested INSIDE the try/finally wrapper frames
+        // below, not laid out in Middleware, so the `frame is MethodCall` loop that follows never sees
+        // them -- and unlike every sibling method kind (Before, After, AfterCommit, OnException), they
+        // are built without chain.ApplyParameterMatching. Both omissions together left a
+        // [FromQuery]/[FromHeader]/[FromRoute] parameter on a Finally with no binding at all, so
+        // JasperFx's name-then-type fallback either died on a parsed type or, worse, silently handed the
+        // parameter an unrelated variable of the same type (httpContext.TraceIdentifier for a string).
+        // Bound here from the method signature, exactly as GH-4308/GH-4314 bind postprocessors, so an
+        // unattributed parameter still resolves the way it does today.
+        foreach (var finallyCall in FinallyCalls())
+        {
+            tryApplyHttpBindingsFromSignature(finallyCall);
+        }
+
+        var index = 0;
+        foreach (var frame in Middleware)
+        {
+            // Try to add route value parameters
+            if (frame is MethodCall call)
+            {
+                RouteParameterStrategy.TryApplyRouteVariables(this, call);
+            }
+
+            foreach (var result in frame.Creates.Where(x => x.VariableType.CanBeCastTo<IResult>()))
+            {
+                result.OverrideName("result" + ++index);
+            }
+
+            foreach (var details in frame.Creates.Where(x => x.VariableType.CanBeCastTo<ProblemDetails>()))
+            {
+                details.OverrideName(details.Usage + ++index);
+            }
+
+            yield return frame;
+        }
+
+        foreach (var f in _parent.Container.TryCreateConstructorFrames(new MethodCall[]{this.Method}))
+        {
+            yield return f;
+        }
+
+        yield return Method;
+
+        // The endpoint ran, so a [Deduplicated] claim is now released only on a throw or a failure status.
+        if (Middleware.OfType<ReleaseDeduplicationIdOnHttpFailureFrame>().Any())
+        {
+            yield return new MethodCall(typeof(HttpHandler), nameof(HttpHandler.MarkDeduplicatedEndpointRan));
+        }
+
+        var actionsOnOtherReturnValues = (NoContent ? Method.Creates : Method.Creates.Skip(1))
+            .Select(x => x.ReturnAction(this)).SelectMany(x => x.Frames()).ToArray();
+        foreach (var frame in actionsOnOtherReturnValues) yield return frame;
+
+        if (requiresFlush(actionsOnOtherReturnValues))
+        {
+            var flush = Postprocessors.OfType<FlushOutgoingMessages>().FirstOrDefault();
+            if (flush != null)
+            {
+                Postprocessors.Remove(flush);
+            }
+
+            flush ??= new FlushOutgoingMessages();
+            Postprocessors.Add(flush);
+        }
+        
+        // CritterWatch #396 Phase 4 item 5: attribute endpoint-originated publishes to the route+verb.
+        // HTTP endpoints aren't MessageHandler subclasses, so MessageHandler.RecordCauseAndEffect never
+        // runs for them; this emits the parallel EndpointCausation call between the method/return-value
+        // frames (which enqueue cascading messages) and the postprocessor flush. Codegen-only gating,
+        // mirroring HandlerChain — off ⇒ no frame, no runtime cost.
+        if (_parent.Options.Tracking.EnableMessageCausationTracking)
+        {
+            var origin = $"{_httpMethods.Select(x => x.ToUpper()).Join("/")} {RoutePattern!.RawText}";
+            yield return new RecordEndpointCausationFrame(origin, Method.HandlerType.FullNameInCode());
+        }
+
+        // GH-4308 / GH-4314: postprocessors are deliberately NOT run through the full
+        // parameter-matching strategies (see the middleware-only loop in this chain's constructor and
+        // the GH-3601 notes in HttpChain.ApiDescription), but any parameter the OpenAPI description
+        // side claims an HTTP binding for still has to actually get that binding, or JasperFx's
+        // FindVariable falls back to name-then-type resolution and either dies (an
+        // UnResolvableVariableException for a parsed type like long) or, worse, silently hands the
+        // parameter an unrelated variable of the same type — e.g. the endpoint's response body into a
+        // [FromQuery] string. The claims mirrored here are exactly the description side's: a route
+        // claim (explicit [FromRoute], or a name collision with a route-template segment on a
+        // route-bindable type, matched case-sensitively per GH-3586), then simple-typed
+        // [FromQuery]/[FromHeader] per tryDescribePostprocessorBinding.
+        foreach (var call in Postprocessors.OfType<MethodCall>().Concat(PostCommitPostprocessors.OfType<MethodCall>()))
+        {
+            tryApplyHttpBindingsFromSignature(call);
+        }
+
+        foreach (var frame in Postprocessors) yield return frame;
+
+        // GH-3975: after EVERY postprocessor, including the persistence provider's commit frame.
+        foreach (var frame in PostCommitPostprocessors) yield return frame;
+    }
+
+    /// <summary>
+    /// GH-4339: every <see cref="MethodCall" /> this chain will generate into a <c>finally</c> block.
+    /// They live nested one level inside the wrapper frames in <see cref="IChain.Middleware" /> --
+    /// <see cref="Wolverine.Middleware.TryFinallyWrapperFrame" /> for a middleware type's Finally methods, and
+    /// <see cref="Wolverine.Middleware.TryCatchFinallyFrame" /> once that middleware (or the endpoint type) also contributes
+    /// OnException methods -- so walking Middleware does not reach them. Both the codegen binding pass
+    /// and the OpenAPI description side enumerate them from here so the two cannot drift apart. The
+    /// endpoint type's own Finally methods are already parameter-matched by
+    /// <c>Chain.ApplyImpliedMiddlewareFromHandlers</c>; they come back through here too, and both
+    /// consumers are idempotent for an argument that is already bound.
+    /// </summary>
+    internal IEnumerable<MethodCall> FinallyCalls()
+    {
+        // Both frame types are qualified because JasperFx.CodeGeneration.Frames has its own,
+        // unrelated TryFinallyWrapperFrame and that namespace is imported here.
+        foreach (var frame in Middleware)
+        {
+            switch (frame)
+            {
+                case Wolverine.Middleware.TryFinallyWrapperFrame wrapper:
+                    foreach (var call in wrapper.Finallys.OfType<MethodCall>()) yield return call;
+                    break;
+
+                case Wolverine.Middleware.TryCatchFinallyFrame tryCatchFinally:
+                    foreach (var call in tryCatchFinally.FinallyBlocks.OfType<MethodCall>()) yield return call;
+                    break;
+            }
+        }
+    }
+
+    private void tryApplyHttpBindingsFromSignature(MethodCall call)
+    {
+        var parameters = call.Method.GetParameters();
+        for (var i = 0; i < call.Arguments.Length; i++)
+        {
+            // Never override an argument something else has already bound
+            if (call.Arguments[i] != null) continue;
+
+            var parameter = parameters[i];
+
+            // Mirrors RouteParameterStrategy.TryMatch: an explicit [FromRoute(Name = ...)] names the
+            // route segment directly rather than matching on the parameter's own name
+            if (parameter.TryGetAttribute<FromRouteAttribute>(out var att) && att.Name.IsNotEmpty())
+            {
+                if (FindRouteVariable(parameter.ParameterType, att.Name!, out var named))
+                {
+                    call.Arguments[i] = named;
+                }
+
+                continue;
+            }
+
+            // GH-4314: [FromQuery]/[FromHeader] bind from the query string / header — unless the
+            // route claims the name (isBoundFromRouteValue, the same case-sensitive test the
+            // description side uses), in which case the route wins below exactly as the description
+            // renders only the Path parameter. A complex [FromQuery] is the flattening shape the
+            // description side also refuses to describe on a postprocessor, so it is deliberately
+            // left alone here.
+            if (!isBoundFromRouteValue(parameter))
+            {
+                if (parameter.TryGetAttribute<FromQueryAttribute>(out var fromQuery))
+                {
+                    if (!FromQueryAttributeUsage.IsComplexQueryStringType(parameter.ParameterType))
+                    {
+                        var key = fromQuery.Name.IsNotEmpty() ? fromQuery.Name! : parameter.Name!;
+                        if (tryFindOrCreatePostprocessorQuerystringValue(parameter.ParameterType,
+                                parameter.Name!, key, out var queryValue))
+                        {
+                            call.Arguments[i] = queryValue;
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (parameter.TryGetAttribute<FromHeaderAttribute>(out var fromHeader))
+                {
+                    var headerName = fromHeader.Name.IsNotEmpty() ? fromHeader.Name! : parameter.Name!;
+                    call.Arguments[i] = findOrCreatePostprocessorHeaderValue(parameter, headerName);
+                    continue;
+                }
+            }
+
+            if (FindRouteVariable(parameter, out var variable))
+            {
+                call.Arguments[i] = variable;
+            }
+        }
+    }
+
+    // Variables bound ONLY for postprocessor parameters (GH-4314). Deliberately kept out of
+    // _querystringVariables/_headerVariables: those collections feed the OpenAPI description, and
+    // this pass runs at codegen time, which is lazy — registering here would change the rendered
+    // description depending on whether the chain compiled before or after the ApiDescription was
+    // read. Postprocessor parameters are instead described straight from the method signature by
+    // tryDescribePostprocessorBinding.
+    private readonly List<HttpElementVariable> _postprocessorQuerystringVariables = [];
+    private readonly List<HttpElementVariable> _postprocessorHeaderVariables = [];
+
+    private bool tryFindOrCreatePostprocessorQuerystringValue(Type parameterType, string parameterName,
+        string key, [NotNullWhen(true)] out Variable? variable)
+    {
+        // When the main method or a middleware method already reads this query string value, reuse
+        // its variable rather than reading the same key into a second, identically-named local
+        var existing = _querystringVariables.FirstOrDefault(x => x.Name == key)
+                       ?? _postprocessorQuerystringVariables.FirstOrDefault(x => x.Name == key);
+
+        if (existing is not null)
+        {
+            if (existing.VariableType != parameterType)
+            {
+                throw new InvalidOperationException(
+                    $"The query string parameter '{key}' cannot be used for multiple target types");
+            }
+
+            variable = existing;
+            return true;
+        }
+
+        var created = createQuerystringValue(parameterType, parameterName, key);
+        if (created is null)
+        {
+            variable = null;
+            return false;
+        }
+
+        _postprocessorQuerystringVariables.Add(created);
+        variable = created;
+        return true;
+    }
+
+    private Variable findOrCreatePostprocessorHeaderValue(ParameterInfo parameter, string headerName)
+    {
+        var existing = _headerVariables
+                           .FirstOrDefault(x => x.Name == headerName && x.VariableType == parameter.ParameterType)
+                       ?? _postprocessorHeaderVariables
+                           .FirstOrDefault(x => x.Name == headerName && x.VariableType == parameter.ParameterType);
+
+        if (existing is not null) return existing;
+
+        var frame = new ReadHttpFrame(BindingSource.Header, parameter.ParameterType, parameter.Name!)
+        {
+            Key = headerName
+        };
+
+        _postprocessorHeaderVariables.Add(frame.Variable);
+        return frame.Variable;
+    }
+
+    private bool requiresFlush(Frame[] actionsOnOtherReturnValues)
+    {
+        if (Middleware.Any(x => x is IFlushesMessages)) return false;
+        if (Postprocessors.Any(x => x is IFlushesMessages)) return false;
+        if (Postprocessors.Any(x => x.MaySendMessages())) return true;
+        if (actionsOnOtherReturnValues.Any(x => x.MaySendMessages())) return true;
+
+        var dependencies = ServiceDependencies(_parent.Container, []).ToArray();
+        if (dependencies.Contains(typeof(IMessageBus))) return true;
+        if (dependencies.Contains(typeof(IMessageContext))) return true;
+
+        return false;
+    }
+
+    private string determineFileName()
+    {
+        // Escape hatch (GH-3282): an explicit [WolverineVerb(..., TypeName = "...")] override wins over
+        // the route-derived name. Still sanitized so a careless override can't produce invalid code.
+        if (_typeNameOverride.IsNotEmpty())
+        {
+            return SanitizeToTypeName(_typeNameOverride!);
+        }
+
+        var parts = RoutePattern!.RawText!.Replace("{", "").Replace("*", "").Replace(".", "_").Replace("?", "").Replace("}", "").Split('/').Select(x => x.Split(':').First());
+
+        var fileName = _httpMethods.Select(x => x.ToUpper()).Concat(parts).Join("_").Replace('-', '_').Replace("__", "_");
+
+        // Append content type suffix to make endpoint names unique when using [AcceptsContentType]
+        if (Method.Method.TryGetAttribute<AcceptsContentTypeAttribute>(out var acceptsAtt))
+        {
+            var suffix = acceptsAtt.ContentTypes[0]
+                .Replace("/", "_").Replace("+", "_").Replace(".", "_");
+            fileName = $"{fileName}_{suffix}";
+        }
+
+        return SanitizeToTypeName(fileName);
+    }
+
+    // The result is used verbatim as the generated C# type name (assembly.AddType(_fileName, ...)), so
+    // it must be a legal C# identifier. Route templates can contain characters that are legal in a URL
+    // path but not in an identifier (e.g. '$' in "/assets/$action", which previously produced CS1056).
+    // Map every character that isn't a valid identifier character to '_', collapse the runs of '_' that
+    // creates, and prefix '_' when the result would start with a digit. See GH-3282.
+    internal static string SanitizeToTypeName(string raw)
+    {
+        var builder = new StringBuilder(raw.Length);
+        foreach (var c in raw)
+        {
+            builder.Append(char.IsLetterOrDigit(c) || c == '_' ? c : '_');
+        }
+
+        var name = builder.ToString();
+        while (name.Contains("__"))
+        {
+            name = name.Replace("__", "_");
+        }
+
+        if (name.Length == 0)
+        {
+            return "_";
+        }
+
+        return char.IsDigit(name[0]) ? "_" + name : name;
+    }
+}

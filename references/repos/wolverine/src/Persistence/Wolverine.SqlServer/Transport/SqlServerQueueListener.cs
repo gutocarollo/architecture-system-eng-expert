@@ -1,0 +1,254 @@
+using JasperFx.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using Weasel.Core;
+using Weasel.SqlServer;
+using Wolverine.Configuration;
+using Wolverine.RDBMS;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+
+namespace Wolverine.SqlServer.Transport;
+
+internal class SqlServerQueueListener : IListener, IReportReceiveLoopHealth
+{
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly SqlServerQueue _queue;
+    private readonly IReceiver _receiver;
+    private readonly string _connectionString;
+    private readonly string? _databaseName;
+    private readonly ILogger<SqlServerQueueListener> _logger;
+    // GH-3236: the main poll loop runs on the shared BackgroundReceiveLoop (heartbeat + fault/hung detection).
+    private BackgroundReceiveLoop? _loop;
+    private readonly DurabilitySettings _settings;
+    private Task? _scheduledTask;
+    private readonly SqlServerQueueSender _sender;
+    private readonly string _tryPopMessagesDirectlySql;
+    private readonly string _tryPopMessagesToInboxSql;
+    private readonly string _moveScheduledToReadyQueueSql;
+    private readonly string _deleteExpiredSql;
+    private readonly TimeSpan _pollingInterval;
+
+    public SqlServerQueueListener(SqlServerQueue queue, IWolverineRuntime runtime, IReceiver receiver)
+        : this(queue, runtime, receiver, queue.Parent.Settings.ConnectionString!, null)
+    {
+    }
+
+    public SqlServerQueueListener(SqlServerQueue queue, IWolverineRuntime runtime, IReceiver receiver,
+        string connectionString, string? databaseName)
+    {
+        Address = SqlServerQueue.ToUri(queue.Name, databaseName);
+        _queue = queue;
+        _receiver = receiver;
+        _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _databaseName = databaseName;
+        _logger = runtime.LoggerFactory.CreateLogger<SqlServerQueueListener>();
+        _settings = runtime.DurabilitySettings;
+        _pollingInterval = queue.PollingInterval ?? _settings.ScheduledJobPollingTime;
+
+        _sender = new SqlServerQueueSender(queue, connectionString, databaseName);
+
+        var queueTableIdentifier = queue.QueueTable.Identifier;
+        var scheduledTableIdentifier = queue.ScheduledTable.Identifier;
+
+        // Ordering (seq under the high-throughput layout, else timestamp with the opt-in queue_order
+        // tie-breaker) and the reapplied order on the rows DELETE ... OUTPUT hands back live in
+        // SqlServerQueueSql, which the queue's own helper methods share. See GH-4862.
+        _tryPopMessagesDirectlySql = SqlServerQueueSql.TryPopDirectly(queue);
+        _tryPopMessagesToInboxSql = SqlServerQueueSql.TryPopToInbox(queue, Address);
+        _moveScheduledToReadyQueueSql =
+            SqlServerQueueSql.MoveScheduledToReadyQueue(queue, _settings.RecoveryBatchSize);
+
+        _deleteExpiredSql =
+            $"delete from {queueTableIdentifier} where {DatabaseConstants.KeepUntil} IS NOT NULL and {DatabaseConstants.KeepUntil} <= SYSDATETIMEOFFSET();delete from {scheduledTableIdentifier} where {DatabaseConstants.KeepUntil} IS NOT NULL and {DatabaseConstants.KeepUntil} <= SYSDATETIMEOFFSET()";
+    }
+
+    public IHandlerPipeline? Pipeline => _receiver.Pipeline;
+
+    // GH-3236: surface the poll loop's liveness (heartbeat + faulted/hung detection) for EndpointHealthSnapshot.
+    public ReceiveLoopStatus ReceiveLoopStatus => _loop?.ReceiveLoopStatus ?? ReceiveLoopStatus.NotStarted;
+    public DateTimeOffset? LastReceiveLoopActivityAt => _loop?.LastReceiveLoopActivityAt;
+
+    public ValueTask CompleteAsync(Envelope envelope)
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public async ValueTask DeferAsync(Envelope envelope)
+    {
+        await _sender.SendAsync(envelope, _cancellation.Token);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cancellation.CancelAsync();
+        if (_loop != null)
+        {
+            await _loop.DisposeAsync();
+        }
+        _scheduledTask?.SafeDispose();
+    }
+
+    public Uri Address { get; }
+
+    public async ValueTask StopAsync()
+    {
+        await _cancellation.CancelAsync();
+        if (_loop != null)
+        {
+            await _loop.StopAsync(_settings.DrainTimeout);
+        }
+        _scheduledTask?.SafeDispose();
+    }
+
+    public async Task StartAsync()
+    {
+        if (_queue.Parent.AutoProvision)
+        {
+            await _queue.EnsureSchemaExists(_databaseName ?? string.Empty, _connectionString);
+        }
+
+        _loop = new BackgroundReceiveLoop(Address, _logger, pollOnceAsync, _cancellation.Token, _pollingInterval);
+        _loop.Start();
+        _scheduledTask = Task.Run(lookForScheduledMessagesAsync, _cancellation.Token);
+    }
+
+    private async Task lookForScheduledMessagesAsync()
+    {
+        // Little bit of randomness to keep each node from hammering the
+        // table at the exact same time
+        await Task.Delay(_settings.ScheduledJobFirstExecution);
+
+        var failedCount = 0;
+
+        while (!_cancellation.Token.IsCancellationRequested)
+        {
+            try
+            {
+                var count = await MoveScheduledToReadyQueueAsync(_cancellation.Token);
+                if (count > 0)
+                {
+                    _logger.LogInformation(
+                        "Propagated {Number} scheduled messages to Sql Server-backed queue {Queue}", count,
+                        _queue.Name);
+                }
+
+                await DeleteExpiredAsync(CancellationToken.None);
+
+                failedCount = 0;
+
+                await Task.Delay(_pollingInterval);
+            }
+            catch (Exception e)
+            {
+                if (e is TaskCanceledException && _cancellation.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                failedCount++;
+                var pauseTime = failedCount > 5 ? 1.Seconds() : (failedCount * 100).Milliseconds();
+
+                _logger.LogError(e, "Error while trying to propagate scheduled messages from Sql Server Queue {Name}",
+                    _queue.Name);
+
+                await Task.Delay(pauseTime);
+            }
+        }
+    }
+
+    public async Task<int> MoveScheduledToReadyQueueAsync(CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        var count = (int)await conn.CreateCommand(_moveScheduledToReadyQueueSql)
+            .ExecuteScalarAsync(cancellationToken);
+
+        await conn.CloseAsync();
+
+        return count;
+    }
+
+    public async Task DeleteExpiredAsync(CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+        await using var cmd = conn.CreateCommand(_deleteExpiredSql);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        await conn.CloseAsync();
+    }
+
+    // One poll-and-process iteration, driven by BackgroundReceiveLoop (which owns the loop task, the
+    // log -> backoff -> continue policy on error, the idle delay = _pollingInterval, the heartbeat, and teardown).
+    // Returns true when messages were processed (loop continues immediately), false when idle (loop applies its
+    // idle delay) — exactly the previous "process, else wait the polling interval" pacing.
+    private async Task<bool> pollOnceAsync(CancellationToken token)
+    {
+        var messages = _queue.Mode == EndpointMode.Durable
+            ? await TryPopDurablyAsync(_queue.MaximumMessagesToReceive, _settings, _logger, token)
+            : await TryPopAsync(_queue.MaximumMessagesToReceive, _logger, token);
+
+        if (!messages.Any())
+        {
+            return false;
+        }
+
+        await _receiver.ReceivedAsync(this, messages.ToArray());
+        return true;
+    }
+
+    public async Task<IReadOnlyList<Envelope>> TryPopAsync(int count, ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        return await conn
+            .CreateCommand(_tryPopMessagesDirectlySql)
+            .With("count", count)
+            .FetchListAsync<Envelope>(async reader =>
+            {
+                var data = await reader.GetFieldValueAsync<byte[]>(0, cancellationToken);
+                try
+                {
+                    return EnvelopeSerializer.Deserialize(data);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e,
+                        "Error trying to deserialize Envelope data in Sql Transport Queue {Queue}, discarding",
+                        _queue.Name);
+                    return Envelope.ForPing(Address); // just a stand in
+                }
+            }, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Envelope>> TryPopDurablyAsync(int count, DurabilitySettings settings,
+        ILogger logger, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        return await conn
+            .CreateCommand(_tryPopMessagesToInboxSql)
+            .With("count", count)
+            .With("node", settings.AssignedNodeNumber)
+            .FetchListAsync<Envelope>(async reader =>
+            {
+                var data = await reader.GetFieldValueAsync<byte[]>(0, cancellationToken);
+                try
+                {
+                    return EnvelopeSerializer.Deserialize(data);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e,
+                        "Error trying to deserialize Envelope data in Sql Transport Queue {Queue}, discarding",
+                        _queue.Name);
+                    return Envelope.ForPing(Address); // just a stand in
+                }
+            }, cancellationToken);
+    }
+}

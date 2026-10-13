@@ -1,0 +1,821 @@
+# Using Pulsar <Badge type="tip" text="3.0" />
+
+::: info
+Fun fact, the Pulsar transport was actually the very first messaging broker to be supported
+by Jasper/Wolverine, but for whatever reason, wasn't officially released until Wolverine 3.0. 
+:::
+
+## Installing
+
+To use [Apache Pulsar](https://pulsar.apache.org/) as a messaging transport with Wolverine, first install the `WolverineFx.Pulsar` library via nuget to your project. Behind the scenes, this package uses the [DotPulsar client library](https://pulsar.apache.org/docs/next/client-libraries-dotnet/) managed library for accessing Pulsar brokers.
+
+```bash
+dotnet add package WolverineFx.Pulsar
+```
+
+To connect to Pulsar and configure senders and listeners, use this syntax:
+
+<!-- snippet: sample_configuring_pulsar -->
+<a id='snippet-sample_configuring_pulsar'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.UseWolverine(opts =>
+{
+    opts.UsePulsar(c =>
+    {
+        var pulsarUri = builder.Configuration.GetValue<Uri>("pulsar");
+        c.ServiceUrl(pulsarUri!);
+        
+        // Any other configuration you want to apply to your
+        // Pulsar client
+    });
+
+    // Publish messages to a particular Pulsar topic
+    opts.PublishMessage<Message1>()
+        .ToPulsarTopic("persistent://public/default/one")
+        
+        // And all the normal Wolverine options...
+        .SendInline();
+
+    // Listen for incoming messages from a Pulsar topic
+    opts.ListenToPulsarTopic("persistent://public/default/two")
+        .SubscriptionName("two")
+        .SubscriptionType(SubscriptionType.Exclusive)
+        
+        // And all the normal Wolverine options...
+        .Sequential();
+
+    // Listen for incoming messages from a Pulsar topic with a shared subscription and using RETRY and DLQ queues
+    opts.ListenToPulsarTopic("persistent://public/default/three")
+        .WithSharedSubscriptionType()
+        .DeadLetterQueueing(new DeadLetterTopic(DeadLetterTopicMode.Native))
+        .RetryLetterQueueing(new RetryLetterTopic([TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(5)]))
+        .Sequential();
+});
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/Pulsar/Wolverine.Pulsar.Tests/DocumentationSamples.cs#L12-L49' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_configuring_pulsar' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The topic name format is set by Pulsar itself, and you can learn more about its format in [Pulsar Topics](https://pulsar.apache.org/docs/next/concepts-messaging/#topics). 
+
+::: info
+Depending on demand, the Pulsar transport will be enhanced to support conventional routing topologies and more advanced
+topic routing later.
+::: 
+
+## Subscription Initial Position
+
+When a Wolverine listener creates a **brand-new** Pulsar subscription, you can control where that subscription
+starts reading. This is the Pulsar analogue of the Kafka transport's `BeginAtEarliest()` / `BeginAtLatest()`:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    // Replay from the earliest message still retained on the topic
+    .BeginAtEarliest();
+
+opts.ListenToPulsarTopic("persistent://public/default/notifications")
+    // Only consume messages published after the subscription is created (the default)
+    .BeginAtLatest();
+
+// Or set it explicitly with the DotPulsar enum:
+opts.ListenToPulsarTopic("persistent://public/default/audit")
+    .SubscriptionInitialPosition(SubscriptionInitialPosition.Earliest);
+```
+
+This only affects the **first** read of a not-yet-existing subscription. Once the subscription exists, Pulsar
+resumes from its committed cursor on every restart regardless of this setting, and `Earliest` can only replay
+messages that are still retained on the topic. The default is `SubscriptionInitialPosition.Latest`, matching
+DotPulsar's own default.
+
+### Hot-tail / broadcast consume <Badge type="tip" text="6.8" />
+
+Sometimes you want **every node** to see **every message** as it arrives — live dashboards, cache
+invalidation, fan-out-to-all-instances — rather than the competing-consumer model where each message goes to
+exactly one node on a shared subscription. Use `TailFromLatest()`:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/live-events").TailFromLatest();
+```
+
+Each process consumes through its own **ephemeral, non-durable [Reader](https://pulsar.apache.org/docs/concepts-clients/#reader-interface)**
+cursor starting at the tail, so every node receives all messages, never replays old data, and commits no
+subscription cursor. This is the idiomatic Pulsar pattern for broadcast — the analogue of the Kafka
+transport's `TailFromLatest()`.
+
+A few things to know:
+
+- Because the reader starts at the tail, only messages published **after** a node has attached its reader are
+  delivered — there is no backlog replay.
+- The reader cursor is throwaway and unacknowledged, so dead-letter / retry-letter queueing, native
+  redelivery, and acknowledgment strategies do not apply to a hot-tail listener.
+- Reach for `TailFromLatest()` when you want **all** nodes to process each message; use a normal `Shared` /
+  `KeyShared` subscription when you want each message processed **once** across the cluster.
+
+#### Handler failures on a hot-tail listener are dropped, not retried
+
+Losing a message because a node was down or had not attached its reader yet is inherent to choosing a
+non-durable cursor, and is the trade you accept when you call `TailFromLatest()`. Losing one because its
+**handler threw** is easier to be surprised by, so it is worth being explicit about what does and does not
+work here.
+
+A hot-tail listener commits no cursor, so there is nothing for the broker to redeliver from. Every
+requeue-shaped error policy therefore resolves to a no-op and the message is simply gone:
+
+| Error handling | On a hot-tail listener |
+| --- | --- |
+| `RetryTimes()`, `RetryWithCooldown()` | ✅ Works — the retry never leaves the process |
+| `ScheduleRetry()` | ✅ Works — rescheduled in memory, or in the durable inbox if one is configured |
+| `Requeue()`, `RequeueIndefinitely()`, `PauseThenRequeue()`, `MaximumAttempts()` | ❌ **Silently drops the message** |
+| Pulsar native dead letter topic (`DeadLetterQueueing()`) | ❌ Never reached — a native dead-letter move is a listener operation, and this listener is a `Reader` |
+| Wolverine's durable dead letter table | ✅ Works, if a message store is configured |
+
+Wolverine warns at bootstrap if a hot-tail listener is combined with any requeue-shaped policy, since none of
+it can run.
+
+In-process retries are the error handling to reach for on a hot-tail listener, and a configured message store
+is the only recovery route it can offer:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/live-events").TailFromLatest();
+
+// Retried inside this process; nothing is handed back to the broker.
+opts.Policies.OnException<TransientFailureException>().RetryWithCooldown(
+    50.Milliseconds(), 100.Milliseconds(), 250.Milliseconds());
+```
+
+If these are messages you cannot afford to lose on a handler failure, use an ordinary `Shared` / `KeyShared`
+subscription instead — the cursor is what makes redelivery possible.
+
+## Replaying a Topic <Badge type="tip" text="6.8" />
+
+When you need to **reprocess** a window of a topic's history — error recovery, rebuilding downstream state,
+replaying after a bug fix — Wolverine offers a **bounded, one-shot replay** that reads a range of a topic back
+through the **normal handler pipeline**. It uses a throwaway, non-durable Pulsar `Reader` cursor and **never
+touches any live durable subscription**, so steady-state consumption is completely untouched.
+
+```csharp
+// Programmatic API on IHost
+await host.ReplayPulsarTopicAsync(new PulsarReplayRequest
+{
+    Topic = "persistent://public/default/orders",
+    FromTimestamp = DateTimeOffset.UtcNow.AddHours(-1),  // or FromMessageId = someMessageId
+    // ToTimestamp / ToMessageId optional — defaults to "now" (the topic's last message at start)
+});
+```
+
+Start defaults to the earliest retained message and end defaults to the topic's last message at the moment the
+replay begins, so omitting the bounds replays the whole topic as it stands and never tails live traffic
+published after the replay started. Both `From`/`To` accept either a publish-time `DateTimeOffset` or a Pulsar
+`MessageId` (the two are mutually exclusive on each end).
+
+::: warning Replayed messages are re-handled
+Each replayed message flows through your handlers again, exactly like live consumption. Handlers should be
+**idempotent** (the same expectation as any at-least-once reprocessing). If you use the durable inbox, replayed
+envelopes pass through the same inbox + de-duplication path.
+:::
+
+Replay reads forward to the end boundary and stops cleanly. It is a discrete operation that runs on its own
+non-durable reader cursor, so it can safely run on a node that is also listening to the same topic on a durable
+subscription.
+
+## Multi-Topic & Pattern Subscriptions
+
+A single Pulsar listener can consume from more than one topic, or from every topic matching a
+regular expression — the Pulsar analogue of Kafka topic groups. This reduces the number of
+consumers you need and lets a listener automatically pick up new topics that match a pattern.
+
+```csharp
+// One listener over several explicit topics
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .Topics(
+        "persistent://public/default/orders-priority",
+        "persistent://public/default/orders-bulk");
+
+// One listener over every topic matching a regex pattern
+opts.ListenToPulsarTopic("persistent://public/default/events-all")
+    .TopicsPattern(new Regex("persistent://public/default/events-.*"));
+
+// Pattern, restricted to non-persistent topics (default is persistent only)
+opts.ListenToPulsarTopic("non-persistent://public/default/telemetry-all")
+    .TopicsPattern(new Regex("non-persistent://public/default/telemetry-.*"),
+        RegexSubscriptionMode.NonPersistent);
+```
+
+When a pattern is configured it takes precedence, and the topic the listener was created with is
+used only as the Wolverine endpoint identity. Pattern subscriptions match topics that exist at
+subscription time and pick up newly created matching topics as Pulsar discovers them.
+
+## Scheduled Delivery <Badge type="tip" text="6.21" />
+
+The Pulsar transport supports [scheduled message delivery](/guide/messaging/message-bus.html#scheduling-message-delivery-or-execution)
+natively at the broker. When you schedule or delay a message:
+
+```csharp
+// Send in 10 minutes
+await bus.ScheduleAsync(new OrderReminder(orderId), 10.Minutes());
+
+// Or at a specific time
+await bus.ScheduleAsync(new OrderReminder(orderId), DateTimeOffset.UtcNow.AddHours(4));
+
+// Or with delivery options on a plain send
+await bus.SendAsync(new OrderReminder(orderId), new DeliveryOptions { ScheduleDelay = 10.Minutes() });
+```
+
+Wolverine stamps the envelope's scheduled time onto the outgoing Pulsar message as
+[deliver-at metadata](https://pulsar.apache.org/docs/next/concepts-messaging/#delayed-message-delivery)
+(`DeliverAt` / `DeliverAfter`), so the **broker itself** holds the message until it is due. Nothing extra
+needs to be configured — this also works for storage-less applications with no message persistence, and the
+pending message survives application restarts because it is parked on the broker, not in the sending or
+receiving process. Delayed message delivery has been available (and enabled by default) on Pulsar brokers
+since Pulsar 2.4.
+
+::: warning The broker only honors delayed delivery for Shared / Key_Shared subscriptions
+Pulsar dispatches delayed messages only on `Shared` / `KeyShared` subscriptions — the same constraint as the
+retry-letter topics. An `Exclusive` or `Failover` consumer (and Wolverine's Pulsar listeners default to
+`Exclusive`) receives the message **immediately**. Wolverine listeners handle that gracefully: the scheduled
+time also round-trips as an envelope header, so a Wolverine listener that receives a not-yet-due message
+holds it locally and executes it at the right time (durable listeners park it in the durable inbox;
+buffered listeners hold it in memory). But if you want the message parked **on the broker** — or the
+consumer is a non-Wolverine application that knows nothing about Wolverine's envelope headers — configure the
+listening subscription as `Shared` or `KeyShared`:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/reminders")
+    .SubscriptionType(SubscriptionType.Shared);
+```
+:::
+
+If your broker is configured with delayed delivery disabled (`delayedDeliveryEnabled=false`), opt out of the
+native path and let Wolverine fall back to its own durable message scheduling:
+
+```csharp
+opts.UsePulsar(c => c.ServiceUrl(pulsarUri))
+    // Scheduled sends to Pulsar endpoints now go through Wolverine's
+    // durable scheduled message storage instead of broker deliver-at
+    .DisableNativeScheduledSend();
+```
+
+Scheduled delivery is independent of the [tiered retry-letter machinery](#tiered-retry-letter-policy) —
+retry-letter redelivery delays are stamped by the listener on its own retry-topic producer and are unaffected
+by this setting.
+
+## Per-Message Redelivery
+
+By default, when a message fails and is requeued, the Pulsar listener acknowledges it and
+re-publishes a fresh copy to the source topic. You can instead opt into Pulsar's native
+per-message redelivery, where the message is left **unacknowledged** and Pulsar redelivers just
+that one message (preserving its redelivery count) rather than creating a duplicate:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .UseNativeRedelivery();
+
+// Combine with a retry policy that requeues on failure:
+opts.Policies.OnException<TransientException>().Requeue(3);
+```
+
+For delayed / backoff redelivery (growing the delay between attempts), use the Pulsar
+retry-letter topics instead — DotPulsar's client does not expose negative-acknowledgment backoff
+or ack-timeout settings.
+
+## Native Resiliency and Your Own Error Policies
+
+`UsePulsar()` registers a failure rule that hands a failed message to Pulsar's own retry-letter /
+dead-letter machinery. That rule is registered globally, ahead of anything you configure afterwards,
+so it is worth being precise about when it takes over:
+
+| Where the failure happened | What handles it |
+| --- | --- |
+| A Pulsar listener with `RetryLetterQueueing(...)`, `DeadLetterQueueing(...)` (native mode), or `UseNativeRedelivery()` | **Pulsar's native retry/DLQ.** Your `opts.Policies.OnException<T>()` rules do not run for that endpoint. |
+| A Pulsar listener with none of the above configured | Your own Wolverine error policies, exactly as on any other transport |
+| A hot-tail listener (`TailFromLatest()`) | Your own Wolverine error policies — see the caveat below |
+| Any other endpoint in the application: another transport, a local queue | Your own Wolverine error policies |
+
+In other words the native path only claims a failure it can actually act on; everything else falls
+through to the policies you configured. Chain-level rules (`chain.OnException<T>()`) always sort
+ahead of global rules, so those take precedence even on a natively-configured Pulsar endpoint.
+
+### Where each policy actually lands on a plain Pulsar listener
+
+On a Pulsar listener with no native retry-letter or dead-letter topic configured (row two above),
+Wolverine's own error policies behave exactly as on any other broker transport. This is the
+configuration the Pulsar transport compliance suite runs, so each of these is covered end to end:
+
+| Policy | On a plain Pulsar listener |
+| --- | --- |
+| `RetryTimes()`, `RetryWithCooldown()` | ✅ Retried in the handler lane; the message never leaves the process |
+| `ScheduleRetry()` | ✅ Rescheduled in memory, or in the durable inbox if a message store is configured |
+| `Requeue()`, `RequeueIndefinitely()`, `MaximumAttempts()` | ✅ The listener acknowledges the message and re-publishes it to the same topic, carrying its `attempts` header forward. Turn this off with [`DisableRequeue()`](#read-only-subscriptions) if the topic is read-only to your application, or prefer [`UseNativeRedelivery()`](#per-message-redelivery) to redeliver in place instead of re-publishing a copy. |
+| `MoveToErrorQueue()` | ✅ The envelope is moved to **Wolverine's durable dead letter table** — see the note below |
+
+::: warning `MoveToErrorQueue()` needs either a native DLQ topic or a message store
+Pulsar dead-lettering is deliberately *not* wired through an endpoint-level dead letter sender, so
+there are exactly two destinations for a dead-lettered message and you have to pick one:
+
+- Configure a native dead-letter topic with `DeadLetterQueueing(new DeadLetterTopic(DeadLetterTopicMode.Native))`,
+  and failures land on the `{topic}-DLQ` topic with the full diagnostic headers, or
+- Configure a durable message store, and they land in Wolverine's `wolverine_dead_letters` table.
+
+With **neither** configured, a `MoveToErrorQueue()` is logged and the message is then discarded —
+there is nowhere for it to go. That is the same behaviour as any other transport running without a
+message store, but it is easy to miss on Pulsar because the native DLQ looks like it should apply
+and does not until you ask for it explicitly.
+:::
+
+::: warning
+On a hot-tail listener your error policies do run, but requeue-shaped ones (`Requeue()`,
+`RequeueIndefinitely()`, `PauseThenRequeue()`, `MaximumAttempts()`) still cannot redeliver anything —
+a non-durable `Reader` commits no cursor, so there is nothing to requeue from. Reach for the
+in-process retries (`RetryTimes()`, `RetryWithCooldown()`, `ScheduleRetry()`) there instead.
+:::
+
+## Tiered Retry-Letter Policy <Badge type="tip" text="6.8" />
+
+`RetryLetterQueueing(...)` configures Pulsar's native retry-letter topic per endpoint. For a
+first-class, discoverable **error policy** — the Pulsar analogue of the Kafka transport's
+`MoveToKafkaRetryTopic` — use `MoveToPulsarRetryTopic(...)`:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .SubscriptionType(SubscriptionType.Shared);
+
+// On failure: redeliver after 5s, then 30s, then 2m, then dead-letter.
+opts.OnException<TransientException>()
+    .MoveToPulsarRetryTopic(5.Seconds(), 30.Seconds(), 2.Minutes());
+```
+
+Each `TimeSpan` is one retry tier. On the first failure the message is routed to the retry-letter
+topic and redelivered after the first delay; on the next failure after the second delay; and so on.
+After the last tier is exhausted the message lands in the dead-letter topic. The delays are wired
+onto every Pulsar listener at startup (provisioning the retry-letter producer/consumer and the DLQ),
+so you don't also need an explicit `RetryLetterQueueing(...)` call.
+
+Messages moved to the retry-letter or dead-letter topic carry the standard Wolverine diagnostic headers
+(`exception-type`, `exception-message`, `exception-stack`, `failed-at`, `original-destination`) as message
+properties, with the delivery attempt count on the standard `attempts` header. See
+[diagnostic headers on dead letter messages](/tutorials/dead-letter-queues#diagnostic-headers-on-dead-letter-messages)
+for the full cross-transport header structure.
+
+::: warning Requires a Shared or Key_Shared subscription
+Pulsar message delaying only works on `Shared` / `KeyShared` subscriptions. Applying
+`MoveToPulsarRetryTopic` to an `Exclusive` / `Failover` listener emits a startup warning and the
+policy falls back to an inline retry. The policy is also Pulsar-only: a failure arriving over any
+other transport falls back to an inline retry (and a startup warning is emitted when non-Pulsar
+listeners are present).
+:::
+
+### By-key concurrency with Key_Shared
+
+Pulsar's `Key_Shared` subscription is the idiomatic, **zero-extra-code** path for intra-partition
+concurrency by key — the free Pulsar analogue of the Kafka transport's sticky by-key processing. With
+a `Key_Shared` subscription, Pulsar distributes messages across the connected consumers (nodes) by
+message key, so messages that share a key are always delivered to the **same** consumer in order,
+while different keys are processed concurrently across the cluster:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .SubscriptionType(SubscriptionType.KeyShared);
+```
+
+Set the key on the way out via the ordinary Wolverine `GroupId` / partition-key conventions (the
+producer stamps it as the Pulsar message key). This pairs naturally with `MoveToPulsarRetryTopic`,
+which also requires `Shared` / `Key_Shared`.
+
+## Customizing Consumers & Producers
+
+Beyond the global `IPulsarClientBuilder` passed to `UsePulsar(...)`, you can customize the
+individual DotPulsar consumer or producer per endpoint immediately before it is created — to set a
+consumer/producer name, compression, batching, receive-queue size, routing mode, priority level,
+and so on:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .ConfigureConsumer(consumer => consumer
+        .ConsumerName("orders-worker")
+        .PriorityLevel(1));
+
+opts.PublishMessage<OrderPlaced>()
+    .ToPulsarTopic("persistent://public/default/orders")
+    .ConfigureProducer(producer => producer
+        .ProducerName("orders-publisher")
+        .CompressionType(CompressionType.Lz4));
+```
+
+The callback receives the same `IConsumerBuilder` / `IProducerBuilder` Wolverine uses internally, so
+anything DotPulsar exposes is available. A listener also exposes `ConfigureProducer(...)` for the
+producer it uses on the requeue/redelivery path.
+
+## Acknowledgment Strategy
+
+By default the listener acknowledges each message individually as it completes. On high-volume
+subscriptions you can reduce broker chatter by acknowledging cumulatively or in batches:
+
+```csharp
+// Individual (default)
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .AcknowledgeIndividually();
+
+// Cumulative — one ack confirms everything up to a point. Exclusive/Failover only.
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .AcknowledgeCumulative();
+
+// Batched — individual acks flushed by count or interval
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .AcknowledgeInBatches(batchSize: 100, interval: TimeSpan.FromSeconds(1));
+```
+
+**Cumulative ack is only valid for Exclusive / Failover subscriptions** — configuring it on a
+Shared / Key_Shared subscription throws a clear error at startup. Because Wolverine's buffered
+listener can complete messages out of order, cumulative ack only ever advances to the highest
+**contiguous-completed** message: it will never acknowledge a message that is still being processed,
+so no in-flight work is lost. Batched ack has no such ordering constraint and is safe for any
+subscription type.
+
+**Cumulative ack cannot be combined with `ProcessInParallelWithNativeAcks()`** — see the section
+below. That pair is refused at bootstrap.
+
+## Native Ack Processing <Badge type="tip" text="6.30" />
+
+Pulsar listeners support [`EndpointMode.NativeAck`](/guide/messaging/listeners.html#native-ack-endpoints):
+the delivery is held unacknowledged while the message flows through an in-memory, optionally
+group-partitioned execution block, and is settled natively from the completion continuation.
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/webhooks")
+    .ProcessInParallelWithNativeAcks()
+    .PartitionProcessingByGroupId(PartitionSlots.Five)
+    .MaximumParallelMessages(10);
+```
+
+Pulsar qualifies for the mode because a consumer settles each delivery by its own `MessageId` and the
+subscription cursor tracks individually acknowledged messages, so settling out of delivery order
+leaves earlier unacked deliveries exactly where they were.
+
+::: warning Cumulative acknowledgment is refused in this mode
+`AcknowledgeCumulative()` together with `ProcessInParallelWithNativeAcks()` throws at bootstrap with a
+message naming both settings. A cumulative ack confirms *everything up to a point in the
+subscription*, and this mode completes messages in handler-completion order rather than delivery
+order — so acknowledging a later message would silently settle earlier deliveries that are still in
+flight, turning the mode's no-loss guarantee into silent message loss. Use `AcknowledgeIndividually()`
+(the default) or `AcknowledgeInBatches()`.
+
+`TailFromLatest()` is refused for the related reason that a hot-tail listener reads through a
+non-durable Pulsar `Reader` with no subscription cursor: there is nothing to acknowledge and nothing
+is ever redelivered.
+:::
+
+### Receiver queue size
+
+The DotPulsar consumer's receiver queue (`MessagePrefetchCount`, default 1000) is Pulsar's nearest
+equivalent of RabbitMQ's prefetch window. A native-ack listener defaults it instead to **twice the
+number of lanes that can be busy at once** — the partition slot count when the endpoint is
+group-partitioned, `MaximumParallelMessages` otherwise. Override it explicitly if you need to:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/webhooks")
+    .ProcessInParallelWithNativeAcks()
+    .ReceiverQueueSize(64);
+```
+
+Note what this does and does not bound. Pulsar replenishes flow-control permits as the receive loop
+drains the client-side queue, *not* as messages are acknowledged, so the receiver queue is not an
+unacked-message ceiling the way RabbitMQ's prefetch is. What actually applies back pressure is the
+execution block's own bounded capacity throttling the receive loop. What the receiver queue bounds is
+the buffer of prefetched-but-unstarted deliveries — which under this mode is pure redelivery cost
+when a node dies, and DotPulsar's default of 1000 makes that cost far larger than it needs to be.
+
+### Failure handling
+
+Prefer `UseNativeRedelivery()` (or a retry-letter / dead-letter topic) on a native-ack listener. The
+default requeue path acknowledges the original message and re-publishes a copy, which opens a small
+window in which a crash between the two loses the message; native redelivery never acknowledges at
+all. Pulsar has no client-side negative-acknowledgment backoff, so a redelivered message returns
+immediately — use the retry-letter topics for a growing delay between attempts, or Wolverine's own
+in-lane `RetryWithCooldown` so the retry never leaves the process.
+
+## Read Only Subscriptions <Badge type="tip" text="3.13" />
+
+As part of Wolverine's "Requeue" error handling action, the Pulsar transport tries to quietly create a matching sender
+for each Pulsar topic it's listening to. Great, but that will blow up if your application only has receive-only permissions
+to Pulsar. In this case, you probably want to disable Pulsar requeue actions altogether with this setting:
+
+<!-- snippet: sample_disable_requeue_for_pulsar -->
+<a id='snippet-sample_disable_requeue_for_pulsar'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.UseWolverine(opts =>
+{
+    opts.UsePulsar(c =>
+    {
+        var pulsarUri = builder.Configuration.GetValue<Uri>("pulsar");
+        c.ServiceUrl(pulsarUri!);
+    });
+
+    // Listen for incoming messages from a Pulsar topic
+    opts.ListenToPulsarTopic("persistent://public/default/two")
+        .SubscriptionName("two")
+        .SubscriptionType(SubscriptionType.Exclusive)
+        
+        // Disable the requeue for this topic
+        .DisableRequeue()
+        
+        // And all the normal Wolverine options...
+        .Sequential();
+
+    // Disable requeue for all Pulsar endpoints
+    opts.DisablePulsarRequeue();
+});
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/Pulsar/Wolverine.Pulsar.Tests/DocumentationSamples.cs#L54-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_disable_requeue_for_pulsar' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If you have an application that has receive only access to a subscription but not permissions to publish to Pulsar,
+you cannot use the Wolverine "Requeue" error handling policy.
+
+### Subscription behavior when closing connection
+
+By default, the Pulsar transport will automatically close the subscription when the endpoints is being stopped.
+If the subscription is created for you, and should be kept after application shut down, you can change this behavior.
+
+<!-- snippet: sample_pulsar_unsubscribe_on_close -->
+<a id='snippet-sample_pulsar_unsubscribe_on_close'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+builder.UseWolverine(opts =>
+{
+    opts.UsePulsar(c =>
+    {
+        var pulsarUri = builder.Configuration.GetValue<Uri>("pulsar");
+        c.ServiceUrl(pulsarUri!);
+    });
+
+    // Disable unsubscribe on close for all Pulsar endpoints
+    opts.UnsubscribePulsarOnClose(PulsarUnsubscribeOnClose.Disabled);
+});
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/Pulsar/Wolverine.Pulsar.Tests/DocumentationSamples.cs#L84-L98' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_pulsar_unsubscribe_on_close' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Global Partitioning
+
+Pulsar topics can be used as the external transport for [global partitioned messaging](/guide/messaging/partitioning#global-partitioning). This creates a set of sharded Pulsar topics with companion local queues for sequential processing across a multi-node cluster.
+
+Use `UseShardedPulsarTopics()` within a `GlobalPartitioned()` configuration:
+
+```cs
+using var host = await Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        opts.UsePulsar();
+
+        opts.MessagePartitioning.ByMessage<IMyMessage>(x => x.GroupId);
+
+        opts.MessagePartitioning.GlobalPartitioned(topology =>
+        {
+            // Creates 4 sharded Pulsar topics named "orders1" through "orders4"
+            // with matching companion local queues for sequential processing
+            topology.UseShardedPulsarTopics("persistent://public/default/orders", 4);
+            topology.MessagesImplementing<IMyMessage>();
+        });
+    }).StartAsync();
+```
+
+This creates Pulsar topics named `persistent://public/default/orders1` through `...orders4` with companion
+local queues `global-orders1` through `global-orders4`. Messages are routed to the correct shard based on
+their group id, and Wolverine handles the coordination between nodes automatically.
+
+::: warning
+Like every other Pulsar API in Wolverine, the base name must be a **full Pulsar topic path**
+(`persistent://{tenant}/{namespace}/{topic}`); a bare topic name is rejected. The companion local queues
+are named from just the topic's short name, so they read as `global-orders1` the way they do on the other
+transports.
+:::
+
+## Schema Support <Badge type="tip" text="6.8" />
+
+Schema is one of Pulsar's defining features: the broker stores a schema per topic and enforces schema
+**compatibility / evolution** rules when producers and consumers connect. Wolverine can register a **JSON
+schema** for a topic so you get that broker-side registration and compatibility checking, while Wolverine
+continues to own the message body (its normal `System.Text.Json` serialization):
+
+```csharp
+// Producing endpoint
+opts.PublishMessage<OrderPlaced>()
+    .ToPulsarTopic("persistent://public/default/orders")
+    .UseJsonSchema<OrderPlaced>();
+
+// Listening endpoint — register a compatible schema
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .UseJsonSchema<OrderPlaced>();
+```
+
+`UseJsonSchema<T>()` generates the Avro-format JSON schema Pulsar uses for `SchemaType.Json` from the CLR
+type's public properties and registers it with the broker when the producer/consumer connects. The schema
+covers the common POCO shapes (primitives, strings, enums and `Guid`/`DateTime` as strings, nullable value
+types as `["null", T]` unions, arrays, and nested records) and falls back to `string` for anything it
+can't map, so registration never fails on an exotic property.
+
+::: info The body stays Wolverine-serialized
+The schema is a **pass-through** over the bytes Wolverine already serializes — it declares the schema the
+broker stores and checks for compatibility, but does not change how the body is encoded. Existing
+raw-bytes and CloudEvents endpoints are unaffected (no schema is registered unless you opt in).
+:::
+
+For full control — a custom schema definition, a different `SchemaType`, or your own codec — supply an
+`ISchema<ReadOnlySequence<byte>>` directly:
+
+```csharp
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .UsePulsarSchema(myCustomSchema);
+```
+
+### Avro
+
+For genuine **Avro** on the wire, use `UseAvroSchema<T>()`. Unlike the JSON pass-through, the body is
+Avro-encoded by DotPulsar's built-in `Schema.AvroISpecificRecord<T>()` and the broker registers the Avro
+schema; Wolverine carries its metadata in the Pulsar message properties and feeds the decoded message
+straight into the handler pipeline.
+
+```csharp
+opts.PublishMessage<OrderPlaced>()
+    .ToPulsarTopic("persistent://public/default/orders")
+    .UseAvroSchema<OrderPlaced>();
+
+opts.ListenToPulsarTopic("persistent://public/default/orders")
+    .UseAvroSchema<OrderPlaced>();
+```
+
+`T` must be an Apache.Avro **`ISpecificRecord`** (the classes generated by `avrogen` from an `.avsc`
+schema, or a hand-written record exposing a static `_SCHEMA`). Protobuf and other schema types can be
+plugged in the same way through a custom codec behind `UsePulsarSchema(...)`.
+
+## Producer Deduplication <Badge type="tip" text="6.8" />
+
+Pulsar can deduplicate messages **at the broker** using a per-producer sequence id, so a message that is
+sent more than once — most commonly an outbox **resend** of the same envelope after a transient failure —
+is stored only once. Opt in on a sending endpoint with `EnableDeduplication()`:
+
+```csharp
+opts.PublishMessage<OrderPlaced>()
+    .ToPulsarTopic("persistent://public/default/orders")
+    .EnableDeduplication();
+```
+
+Wolverine creates the producer with a **stable producer name** and stamps a monotonic sequence id per
+message, reusing the same sequence id when the *same envelope* is sent again so the broker discards the
+duplicate. A brand-new message always gets a new id and is delivered normally.
+
+You must also enable deduplication on the broker side (it is off by default), e.g.:
+
+```bash
+pulsar-admin namespaces set-deduplication public/default --enable
+# or per topic:
+pulsar-admin topics set-deduplication-status persistent://public/default/orders --enable
+```
+
+::: warning Producer→broker only — not end-to-end exactly-once
+This suppresses duplicates on the **produce** side; it is not a transactional read-process-write
+exactly-once engine (a deliberate non-goal for the transport — and Pulsar transactions are not exposed by
+the DotPulsar client). Deduplication keys on `(producer name, sequence id)`, so pass a fixed
+`EnableDeduplication("my-producer")` name if you need it to hold across process restarts.
+:::
+
+## Interoperability
+
+::: tip
+Also see the more generic [Wolverine Guide on Interoperability](/tutorials/interop)
+:::
+
+Pulsar interoperability is done through the `IPulsarEnvelopeMapper` interface.
+
+## Connecting to Multiple Brokers
+
+If a single Wolverine application needs to talk to more than one Pulsar broker, register the additional
+broker(s) with `AddNamedPulsarBroker` using a `BrokerName`, then pin publishing or listening to a specific
+broker with the `*OnNamedBroker` overloads:
+
+<!-- snippet: sample_pulsar_named_broker -->
+<a id='snippet-sample_pulsar_named_broker'></a>
+```cs
+using var host = await Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        // The default Pulsar broker
+        opts.UsePulsar(c => c.ServiceUrl(new Uri("pulsar://localhost:6650")));
+
+        // An additional, independent Pulsar broker identified by name. The name doubles as the
+        // URI scheme of the named broker's endpoints (e.g. "secondary://..."), so its endpoints
+        // never collide with the default "pulsar://" broker.
+        opts.AddNamedPulsarBroker(new BrokerName("secondary"),
+            c => c.ServiceUrl(new Uri("pulsar://secondary-pulsar:6650")));
+
+        // Publish a message type to a topic on the named broker
+        opts.PublishMessage<Message1>()
+            .ToPulsarTopicOnNamedBroker(new BrokerName("secondary"),
+                "persistent://public/default/one");
+
+        // Listen to a topic on the named broker
+        opts.ListenToPulsarTopicOnNamedBroker(new BrokerName("secondary"),
+            "persistent://public/default/two");
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/Pulsar/Wolverine.Pulsar.Tests/DocumentationSamples.cs#L105-L126' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_pulsar_named_broker' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: info
+The Wolverine `Uri` scheme for any endpoint on a named broker is the broker name itself, so in the example
+above you would see endpoint URIs like `secondary://persistent/public/default/two`. The default broker keeps
+the canonical `pulsar://` scheme, which keeps the two brokers' endpoints from colliding.
+:::
+
+Connecting to multiple named brokers is a *static* topology — you target a specific broker explicitly — which
+is distinct from the *runtime* per-tenant routing described in [Multi-Tenancy / Broker per Tenant](#multi-tenancy-broker-per-tenant).
+
+## Multi-Tenancy / Broker per Tenant
+
+Broker-per-tenant gives each Wolverine [tenant](/guide/handlers/multi-tenancy) its own **dedicated Pulsar
+cluster** while sharing a single topic topology. Which cluster a message goes to — and which cluster an inbound
+message came from — is decided at runtime by the message's tenant id, typically stamped through
+`DeliveryOptions.TenantId`:
+
+<!-- snippet: sample_pulsar_broker_per_tenant -->
+<a id='snippet-sample_pulsar_broker_per_tenant'></a>
+```cs
+using var host = await Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        opts.UsePulsar(c => c.ServiceUrl(new Uri("pulsar://localhost:6650")))
+
+            // Route messages with an unknown/missing tenant id to the default broker above
+            .TenantIdBehavior(TenantedIdBehavior.FallbackToDefault)
+
+            // Each tenant is served by its own dedicated Pulsar CLUSTER. This is NOT the native
+            // Pulsar tenant segment in persistent://{tenant}/{namespace}/{topic} — the differentiator
+            // is the cluster connection (service URL + auth), and the native tenant/namespace stays
+            // whatever the shared topic topology declares.
+            .AddTenant("tenant-a", new Uri("pulsar://tenant-a-pulsar:6650"))
+
+            // The action overload runs against a fresh PulsarClient.Builder(), so it must FULLY
+            // specify the tenant cluster's ServiceUrl and any authentication.
+            .AddTenant("tenant-b", client =>
+            {
+                client.ServiceUrl(new Uri("pulsar://tenant-b-pulsar:6650"));
+                // client.Authentication(...); // tenant-specific auth if needed
+            });
+
+        // One shared topic topology; the cluster is chosen at runtime from each message's tenant id
+        opts.PublishMessage<Message1>().ToPulsarTopic("persistent://public/default/one");
+        opts.ListenToPulsarTopic("persistent://public/default/one");
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/Pulsar/Wolverine.Pulsar.Tests/DocumentationSamples.cs#L132-L158' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_pulsar_broker_per_tenant' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+To route a specific message to a tenant's cluster, stamp the tenant id on the send:
+
+```csharp
+await bus.SendAsync(new OrderPlaced("blue"), new DeliveryOptions { TenantId = "tenant-a" });
+```
+
+Wolverine wraps the outbound endpoint in a `TenantedSender` that dispatches on `Envelope.TenantId`, and builds a
+`CompoundListener` that runs one consumer per tenant cluster — each inbound envelope is stamped with the tenant
+id it was consumed under. This mirrors the RabbitMQ, Azure Service Bus, and NATS broker-per-tenant support.
+
+::: warning The Wolverine tenant id is NOT the native Pulsar tenant
+Pulsar has its own **native tenant** segment in the topic hierarchy `persistent://{tenant}/{namespace}/{topic}`
+(the `public` in `persistent://public/default/orders`). Wolverine's broker-per-tenant tenant id is an
+**orthogonal routing concept**: it selects a whole **cluster connection** (service URL + auth), *never* the
+native tenant segment. Two Wolverine tenants normally use the *same* native tenant/namespace on *different*
+clusters. Do not conflate the two.
+:::
+
+`TenantIdBehavior(...)` controls what happens when a message has a null or unregistered tenant id:
+
+* `FallbackToDefault` (the default) — route it to the default cluster passed to `UsePulsar`.
+* `TenantIdRequired` — throw; every message must carry a known tenant id.
+* `IgnoreUnknownTenants` — silently drop the message.
+
+::: info Each tenant is a separate cluster
+Because DotPulsar's client builder is not cloneable, each `AddTenant(...)` action runs against a fresh
+`PulsarClient.Builder()` and must fully specify its own `ServiceUrl` and authentication (the RabbitMQ transport
+has the same "fresh factory" caveat). Native retry-letter / dead-letter topics are provisioned per tenant
+cluster by that tenant's own listener. A broker-per-tenant setup genuinely requires distinct clusters — two
+competing durable subscriptions on a single broker would collide.
+:::
+
+## URI reference
+
+The `PulsarEndpointUri` helper class produces Wolverine endpoint URIs of the form `pulsar://persistent/{tenant}/{ns}/{topic}` or `pulsar://non-persistent/{tenant}/{ns}/{topic}` — the form Wolverine's parser accepts. Pulsar-native topic-path strings (`persistent://...`) used by the native Pulsar client are a separate concept and are not built by this helper.
+
+| Helper call | Resulting URI |
+|---|---|
+| `PulsarEndpointUri.PersistentTopic("public", "default", "orders")` | `pulsar://persistent/public/default/orders` |
+| `PulsarEndpointUri.NonPersistentTopic("public", "default", "orders")` | `pulsar://non-persistent/public/default/orders` |
+| `PulsarEndpointUri.Topic("public", "default", "orders", persistent: true)` | `pulsar://persistent/public/default/orders` |
+| `PulsarEndpointUri.Topic("persistent://public/default/orders")` | `pulsar://persistent/public/default/orders` |
+
+```csharp
+using Wolverine.Pulsar;
+
+var uri = PulsarEndpointUri.PersistentTopic("public", "default", "orders");
+```

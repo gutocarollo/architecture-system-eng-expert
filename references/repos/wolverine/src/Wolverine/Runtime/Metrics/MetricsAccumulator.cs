@@ -1,0 +1,158 @@
+using System.Collections.Immutable;
+using ImTools;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+
+namespace Wolverine.Runtime.Metrics;
+
+/// <summary>
+/// Top-level coordinator for message handling metrics collection. Maintains an immutable
+/// collection of <see cref="MessageTypeMetricsAccumulator"/> instances, one per unique
+/// (message type, destination) pair. Runs a background loop that periodically (every
+/// <c>WolverineOptions.Metrics.SamplingPeriod</c>, default 5 seconds) triggers each
+/// accumulator to export its snapshot via <see cref="IWolverineObserver.MessageHandlingMetricsExported"/>.
+/// Only snapshots with at least one tenant data point are published — an accumulator whose window
+/// saw no activity at all exports nothing rather than an all-zero snapshot, and tenants idle for
+/// <c>WolverineOptions.Metrics.TenantIdleEvictionCycles</c> consecutive exports are evicted from
+/// tracking (re-tracked automatically on next activity).
+/// </summary>
+// TODO -- make this lazy on WolverineRuntime
+public class MetricsAccumulator : IAsyncDisposable
+{
+    private readonly IWolverineRuntime _runtime;
+    private readonly object _syncLock = new();
+
+    private ImmutableArray<MessageTypeMetricsAccumulator> _accumulators = ImmutableArray<MessageTypeMetricsAccumulator>.Empty;
+
+    // GH-4324: FindAccumulator runs 2-4x per message, and the array above is only the right shape
+    // for the export loop's iteration. Lookups go through this copy-on-write trie instead — the
+    // previous linear scan paid an ordinal string compare plus a full component-wise Uri.Equals
+    // per entry over the whole (message type x destination) cross-product, per message.
+    private ImHashMap<string, ImHashMap<Uri, MessageTypeMetricsAccumulator>> _byMessageType =
+        ImHashMap<string, ImHashMap<Uri, MessageTypeMetricsAccumulator>>.Empty;
+
+    private Task _runner = null!;
+
+    /// <summary>
+    /// Creates a new metrics accumulator bound to the given runtime.
+    /// </summary>
+    /// <param name="runtime">The Wolverine runtime providing cancellation, options, and observer access.</param>
+    public MetricsAccumulator(IWolverineRuntime runtime)
+    {
+        _runtime = runtime;
+    }
+
+    /// <summary>
+    /// Finds or creates a <see cref="MessageTypeMetricsAccumulator"/> for the given message type
+    /// and endpoint. Uses lock-free reads with a fallback to a locked creation path.
+    /// </summary>
+    /// <param name="messageTypeName">The fully-qualified CLR message type name.</param>
+    /// <param name="endpoint">The endpoint whose URI identifies the destination.</param>
+    /// <returns>The accumulator for the given message type and destination.</returns>
+    public MessageTypeMetricsAccumulator FindAccumulator(string messageTypeName, Endpoint endpoint)
+    {
+        var endpointUri = endpoint.Uri;
+        return FindAccumulator(messageTypeName, endpointUri);
+    }
+
+    /// <summary>
+    /// Finds or creates a <see cref="MessageTypeMetricsAccumulator"/> for the given message type
+    /// and destination URI. Uses lock-free reads with a fallback to a locked creation path.
+    /// </summary>
+    /// <param name="messageTypeName">The fully-qualified CLR message type name.</param>
+    /// <param name="endpointUri">The destination endpoint URI.</param>
+    /// <returns>The accumulator for the given message type and destination.</returns>
+    public MessageTypeMetricsAccumulator FindAccumulator(string messageTypeName, Uri endpointUri)
+    {
+        if (_byMessageType.TryFind(messageTypeName, out var byUri) &&
+            byUri.TryFind(endpointUri, out var accumulator))
+        {
+            return accumulator;
+        }
+
+        lock (_syncLock)
+        {
+            if (_byMessageType.TryFind(messageTypeName, out byUri) &&
+                byUri.TryFind(endpointUri, out accumulator))
+            {
+                return accumulator;
+            }
+
+            accumulator = new MessageTypeMetricsAccumulator(messageTypeName, endpointUri);
+            _accumulators = _accumulators.Add(accumulator);
+
+            byUri ??= ImHashMap<Uri, MessageTypeMetricsAccumulator>.Empty;
+            _byMessageType = _byMessageType.AddOrUpdate(messageTypeName, byUri.AddOrUpdate(endpointUri, accumulator));
+
+            return accumulator;
+        }
+    }
+
+    /// <summary>
+    /// Drains all pending batched metrics data points across all accumulators by waiting
+    /// for their batching pipelines to complete.
+    /// </summary>
+    public async ValueTask DrainAsync()
+    {
+        var tasks = _accumulators.Select(x => x.EntryPoint.WaitForCompletionAsync());
+        await Task.WhenAll(tasks);
+    }
+
+    /// <summary>
+    /// The start time of the overall metrics collection. Set when the accumulator is created.
+    /// </summary>
+    public DateTimeOffset From { get; private set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// Starts the background export loop. On each <c>SamplingPeriod</c> tick, iterates all
+    /// accumulators, triggers export, and publishes non-empty snapshots to the runtime's
+    /// <see cref="IWolverineObserver"/>.
+    /// </summary>
+    public void Start()
+    {
+        _runner = Task.Run(async () =>
+        {
+            try
+            {
+                while (!_runtime.Cancellation.IsCancellationRequested)
+                {
+                    await Task.Delay(_runtime.Options.Metrics.SamplingPeriod);
+                    try
+                    {
+                        var idleTenantEvictionCycles = _runtime.Options.Metrics.TenantIdleEvictionCycles;
+                        foreach (var accumulator in _accumulators)
+                        {
+                            var metrics = accumulator.TriggerExport(
+                                _runtime.DurabilitySettings.AssignedNodeNumber,
+                                idleTenantEvictionCycles);
+
+                            // An idle window exports nothing. Because these snapshots carry
+                            // per-window delta counts (not cumulative counters), absence reads
+                            // as zero downstream — no consumer needs an explicit all-zero row
+                            // to compute rates.
+                            if (metrics.IsEmpty) continue;
+
+                            _runtime.Observer.MessageHandlingMetricsExported(metrics);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _runtime.Logger.LogError(e, "Error trying to export message handler metrics");
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Nothing
+            }
+        }, _runtime.Cancellation);
+    }
+
+    /// <inheritdoc />
+    public ValueTask DisposeAsync()
+    {
+        _runner.SafeDispose();
+        return new ValueTask();
+    }
+}

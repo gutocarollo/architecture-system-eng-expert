@@ -1,0 +1,237 @@
+networks:
+  app-tier:
+    driver: bridge
+  sb-emulator:
+  sb-emulator-2:
+
+services:
+  mosquitto:
+    image: "eclipse-mosquitto:2"
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  postgresql:
+    image: "postgres:17"
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DATABASE=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    # max_connections raised from the Postgres default of 100 (#2810). The
+    # Marten CI job now runs the whole MartenTests project in a single
+    # process (PR #2870), so Npgsql connection pools from every test class —
+    # including the MultiTenancy tests that each provision multiple per-tenant
+    # databases — accumulate within one process instead of dying with a
+    # per-class process. At the default 100 that overflowed with
+    # "53300: sorry, too many clients already". 500 matches the headroom the
+    # local dev Postgres already runs with (where the full single-process
+    # suite passes).
+    command: ["postgres", "-c", "max_connections=500"]
+
+  gcp-pubsub:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    ports:
+      - "8085:8085"
+    command:
+      [
+        "gcloud",
+        "--quiet",
+        "beta",
+        "emulators",
+        "pubsub",
+        "start",
+        "--host-port",
+        "0.0.0.0:8085",
+        "--project",
+        "wolverine",
+        "--verbosity",
+        "debug",
+        "--log-http",
+        "--user-output-enabled",
+      ]
+
+  # GCS emulator used by the WolverineFx.ClaimCheck.GoogleCloudStorage backend tests.
+  # Serves plain HTTP on 4443; tests point the client at it via STORAGE_EMULATOR_HOST.
+  fake-gcs-server:
+    # Pinned: :latest resolved to exactly this tag when it was pinned, so this is byte-for-byte what
+    # CI had been running. See the note on asb-emulator below for why a rolling tag is a trap here.
+    image: "fsouza/fake-gcs-server:1.55.1"
+    ports:
+      - "4443:4443"
+    command: ["-scheme", "http", "-host", "0.0.0.0", "-port", "4443", "-public-host", "localhost:4443"]
+
+  # Azure Storage emulator used by the WolverineFx.AzureBlobStorage tests -- blob document and saga
+  # persistence, and the claim check backend that moved into the same package.
+  # Without this service AzuriteFactAttribute skips EVERY test in that suite -- including on a dev
+  # machine -- so the Azure Blob claim-check backend had no executed coverage anywhere. See GH-4007.
+  # Pinned rather than :latest, for the same reason called out on fake-gcs-server above.
+  azurite:
+    image: "mcr.microsoft.com/azure-storage/azurite:3.36.0"
+    ports:
+      - "10000:10000"
+    # Blob only -- neither the documents nor the claim-check store ever touch queues or tables.
+    # --blobHost 0.0.0.0 is required for the port publish to be reachable from outside the container.
+    command: ["azurite-blob", "--blobHost", "0.0.0.0", "--blobPort", "10000"]
+
+  rabbitmq:
+    image: "rabbitmq:4-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # SQL Server 2025 is required by Polecat 2.0+ (UseNativeJsonType defaults to true,
+  # which uses the native `json` column type introduced in SQL Server 2025).
+  #
+  # If you're working locally on ARM and don't need Polecat tests, you can override this service 
+  # using `docker-compose -f docker-compose.yml -f docker-compose.azure-sql-edge.yml up -d`
+  sqlserver:
+    # 2025-latest is a rolling tag: it moves on every cumulative update, CI pulls it fresh every run,
+    # and a developer machine keeps whatever it pulled months ago. Pinned by digest rather than tag
+    # because no concrete 2025-CU* tag matches the 2025-latest manifest -- the same reason
+    # azure-sql-edge below is pinned by digest. This is byte-for-byte what CI was already running.
+    #
+    # Resolve this digest with `docker buildx imagetools inspect <image>:<tag>`, never with a curl of
+    # the registry's manifest endpoint. A HEAD with an Accept for a manifest LIST returns MCR a
+    # digest for a representation that does not exist as a pullable manifest here -- this tag is a
+    # single-platform manifest -- and the resulting pin fails every job that needs SQL Server with
+    # "manifest unknown". Ask the tool that will do the pulling.
+    image: mcr.microsoft.com/mssql/server@sha256:86cc6144ef39bb0fbed2329e1ad79b13ee82e7b2e4739213a0db0800e668a74a
+    ports:
+      - "1434:1433"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=P@55w0rd"
+      - "MSSQL_SA_PASSWORD=P@55w0rd"
+      - "MSSQL_PID=Developer"
+
+  pulsar:
+    # Kept in step with PulsarContainerFixture, which is what CI actually runs against (Testcontainers).
+    # This said 4.0.3 while the fixture said :latest -- two different Pulsars for the same test suite.
+    image: "apachepulsar/pulsar:4.2.4"
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    command: bin/pulsar standalone
+
+  localstack:
+    image: localstack/localstack:4
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - PERSISTENCE=${PERSISTENCE-}
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR-}
+      - LOCALSTACK_API_KEY=${LOCALSTACK_API_KEY-}  # only required for Pro
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  kafka:
+    # Kafka 4.0 broker (Confluent Platform 8.0.x) — required for the KIP-848 next-generation
+    # consumer rebalance protocol (group.protocol=consumer), which is GA and enabled by default
+    # on 4.0+ brokers. See GH-3473.
+    image: confluentinc/confluent-local:8.0.6
+    ports:
+      - "8082:8082"
+      - "9092:9092"
+      - "9101:9101"
+
+  redis-server:
+    # Kept in step with RedisContainerFixture, which is what the Redis tests actually run against
+    # (Testcontainers). Pinned rather than floating on "redis:8-alpine": XACKDEL, which
+    # DeleteStreamEntryOnAck(true) requires, only exists from 8.2 on, so a tag that could resolve
+    # to 8.0 or 8.1 would quietly take the GH-4058 coverage back out.
+    image: "redis:8.2.9-alpine"
+    command: redis-server
+    ports:
+      - "6379:6379"
+
+  nats:
+    # Kept in step with NatsContainerFixture.NatsImage, which is what the NATS tests actually run
+    # against (Testcontainers). 2.14.7 or later for native scheduling (nats-io/nats-server#8571).
+    image: "nats:2.14.7"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--jetstream", "-m", "8222"]
+
+  mysql:
+    image: "mysql:8.0"
+    ports:
+      - "3306:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=P@55w0rd"
+      - "MYSQL_DATABASE=wolverine"
+
+  oracle:
+    image: "gvenzl/oracle-free:23-slim"
+    ports:
+      - "1521:1521"
+    environment:
+      - "ORACLE_PASSWORD=P@55w0rd"
+      - "APP_USER=wolverine"
+      - "APP_USER_PASSWORD=wolverine"
+    volumes:
+      - ./docker/oracle:/container-entrypoint-initdb.d
+
+  # These two were on :latest, which is how CI changed behaviour with no commit behind it:
+  # servicebus-emulator:latest moved 2.0.0 -> 2.0.1, 2.0.1 takes longer to warm its management api, and
+  # CIAzureServiceBus started failing a whole test class on every run (retried green, so nobody saw it).
+  # It was also unreproducible locally, because a developer machine keeps whatever it pulled months ago
+  # while CI pulls fresh every run. Pinned so the version moves only when someone moves it.
+  # azure-sql-edge publishes no concrete tag matching its :latest manifest, hence the digest -- it is
+  # byte-for-byte what CI has been running.
+  asb-sql:
+    image: "mcr.microsoft.com/azure-sql-edge@sha256:902628a8be89e35dfb7895ca31d602974c7bafde4d583a0d0873844feb1c42cf"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_SA_PASSWORD=Strong_Passw0rd#2025"
+    networks:
+      sb-emulator:
+
+  asb-emulator:
+    image: "mcr.microsoft.com/azure-messaging/servicebus-emulator:2.0.1"
+    volumes:
+      - ./docker/asb/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json
+    ports:
+      - "5673:5672"
+      - "5300:5300"
+    environment:
+      SQL_SERVER: asb-sql
+      MSSQL_SA_PASSWORD: "Strong_Passw0rd#2025"
+      ACCEPT_EULA: "Y"
+      EMULATOR_HTTP_PORT: 5300
+    depends_on:
+      - asb-sql
+    networks:
+      sb-emulator:
+
+  asb-sql-2:
+    image: "mcr.microsoft.com/azure-sql-edge@sha256:902628a8be89e35dfb7895ca31d602974c7bafde4d583a0d0873844feb1c42cf"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_SA_PASSWORD=Strong_Passw0rd#2025"
+    networks:
+      sb-emulator-2:
+
+  asb-emulator-2:
+    image: "mcr.microsoft.com/azure-messaging/servicebus-emulator:2.0.1"
+    volumes:
+      - ./docker/asb/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json
+    ports:
+      - "5674:5672"
+      - "5301:5300"
+    environment:
+      SQL_SERVER: asb-sql-2
+      MSSQL_SA_PASSWORD: "Strong_Passw0rd#2025"
+      ACCEPT_EULA: "Y"
+      EMULATOR_HTTP_PORT: 5300
+    depends_on:
+      - asb-sql-2
+    networks:
+      sb-emulator-2:

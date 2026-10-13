@@ -1,0 +1,107 @@
+using Microsoft.Extensions.Hosting;
+using Wolverine.ComplianceTests;
+using Wolverine.ComplianceTests.Compliance;
+using Wolverine.Runtime.Routing;
+using Wolverine.Tracking;
+using Wolverine.Transports.Tcp;
+using Wolverine.Util;
+using Xunit;
+
+namespace CoreTests.Acceptance;
+
+public class sending_messages_to_named_endpoints : IAsyncLifetime, IDisposable
+{
+    private IHost _receiver1 = null!;
+    private IHost _receiver2 = null!;
+    private IHost _receiver3 = null!;
+    private IHost _sender = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        var port1 = PortFinder.GetAvailablePort();
+        var port2 = PortFinder.GetAvailablePort();
+        var port3 = PortFinder.GetAvailablePort();
+
+        _sender = await WolverineHost.ForAsync(opts =>
+        {
+            opts.Publish().ToPort(port1).Named("one");
+            opts.Publish().ToPort(port2).Named("two");
+            opts.Publish().ToPort(port3).Named("three");
+        });
+
+        _receiver1 = await WolverineHost.ForAsync(opts =>
+        {
+            opts.ListenAtPort(port1);
+            opts.ServiceName = "one";
+        });
+
+        _receiver2 = await WolverineHost.ForAsync(opts =>
+        {
+            opts.ListenAtPort(port2);
+            opts.ServiceName = "two";
+        });
+
+        _receiver3 = await WolverineHost.ForAsync(opts =>
+        {
+            opts.ListenAtPort(port3);
+            opts.ServiceName = "three";
+        });
+    }
+
+    ValueTask IAsyncDisposable.DisposeAsync() => ValueTask.CompletedTask;
+
+    public void Dispose()
+    {
+        _sender?.Dispose();
+        _receiver1?.Dispose();
+        _receiver2?.Dispose();
+        _receiver3?.Dispose();
+    }
+
+    [Fact]
+    public async Task blows_up_with_descriptive_exception_when_trying_to_send_to_an_endpoint_that_does_not_exist()
+    {
+        await Should.ThrowAsync<UnknownEndpointException>(async () =>
+        {
+            await _sender.SendToEndpointAsync("nonexistent", new Message1());
+        });
+    }
+
+    [Fact]
+    public async Task blow_up_with_descriptive_exception_when_executing_message_with_cascading_message_to_unknown_endpoint()
+    {
+        await Should.ThrowAsync<UnknownEndpointException>(async () =>
+        {
+            await _sender.InvokeAsync(new TriggerRoutedMessage("nonexistent"));
+        });
+    }
+
+    [Fact]
+    public async Task send_to_a_specific_endpoint()
+    {
+        var session = await _sender.TrackActivity()
+            .IncludeExternalTransports()
+            .AlsoTrack(_receiver1, _receiver2, _receiver3)
+            .ExecuteAndWaitAsync(c => c.EndpointFor("two").SendAsync( new TrackedMessage()));
+
+        session.FindEnvelopesWithMessageType<TrackedMessage>()
+            .Single(x => x.MessageEventType == MessageEventType.Received)
+            .ServiceName.ShouldBe("two");
+    }
+}
+
+public class TrackedMessage;
+
+public record TriggerRoutedMessage(string EndpointName);
+
+public class TrackedMessageHandler
+{
+    public void Handle(TrackedMessage message)
+    {
+    }
+
+    public object Handle(TriggerRoutedMessage message)
+    {
+        return new TrackedMessage().ToEndpoint("nonexistent");
+    }
+}

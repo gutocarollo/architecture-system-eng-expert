@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>WolverineFx.AzureServiceBus</PackageId>
+        <Description>Azure Service Bus transport for Wolverine applications</Description>
+        <!--
+          AOT-compatible (#2746). Reflective surface resolved:
+          - AzureServiceBusEnvelopeMapper ctor inherits EnvelopeMapper<,>
+            reflective property mapping (chunk X RabbitMQ pattern)
+          - AzureServiceBusQueue/Subscription/Topic.UseNServiceBusInterop:
+            Type.GetType(typeName) for NSB wire type names; AOT consumers
+            preserve NSB message types via TrimmerRootDescriptor
+          - Emulator/Code.cs: auto-generated QuickType output suppressed
+            namespace-wide via Emulator/GlobalSuppressions.cs
+        -->
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Wolverine\Wolverine.csproj"/>
+        <!--
+          UseNServiceBusInterop() / UseMassTransitInterop() pin a NewtonsoftSerializer
+          for wire-format compatibility with NSB / MT producers. Newtonsoft moved out
+          of WolverineFx core in 6.0; the transport carries the dependency so users
+          opting into the interop paths don't need the extra install by hand.
+        -->
+        <ProjectReference Include="..\..\..\Extensions\Wolverine.Newtonsoft\Wolverine.Newtonsoft.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Azure.Identity" />
+        <PackageReference Include="Azure.Messaging.ServiceBus" />
+
+    </ItemGroup>
+
+</Project>

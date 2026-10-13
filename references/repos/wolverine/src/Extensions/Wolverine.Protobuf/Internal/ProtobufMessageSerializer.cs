@@ -1,0 +1,67 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using Google.Protobuf;
+
+using Wolverine.Runtime.Serialization;
+
+namespace Wolverine.Protobuf.Internal;
+
+internal class ProtobufMessageSerializer(ProtobufSerializerOptions options) : IMessageSerializer
+{
+    // ReSharper disable once NotAccessedField.Local
+    private readonly ProtobufSerializerOptions _options = options;
+    public string ContentType => "binary/protobuf";
+
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "messageType is a Wolverine-handler-discovered IMessage type — statically rooted via HandlerDiscovery + the registration boundary. Generated protobuf message classes have a public parameterless constructor by design (Google.Protobuf code-gen contract).")]
+    public object ReadFromData(Type messageType, Envelope envelope)
+    {
+        if (envelope?.Data == null || envelope.Data.Length == 0)
+        {
+            throw new ArgumentNullException(nameof(envelope), "Envelope data cannot be null or empty");
+        }
+
+        if (!typeof(Google.Protobuf.IMessage).IsAssignableFrom(messageType))
+        {
+            throw new ArgumentException($"Type {messageType.FullName} must implement {nameof(Google.Protobuf.IMessage)}", nameof(messageType));
+        }
+
+        var instance = Activator.CreateInstance(messageType);
+
+        if (instance is not Google.Protobuf.IMessage protobufMessage)
+        {
+            throw new ArgumentException($"Type {messageType.FullName} must implement {nameof(Google.Protobuf.IMessage)}", nameof(messageType));
+        }
+
+        return protobufMessage.Descriptor.Parser.ParseFrom(envelope.Data);
+    }
+
+    public object ReadFromData(byte[] data)
+    {
+        throw new NotSupportedException("Protobuf deserialization requires message type information. Use the ReadFromData(Type, Envelope) overload instead.");
+    }
+
+    public byte[] Write(Envelope envelope)
+    {
+        if (envelope.Message is null)
+        {
+            throw new NullReferenceException("Envelope message is empty");
+        }
+
+        return WriteMessage(envelope.Message);
+    }
+
+    public byte[] WriteMessage(object message)
+    {
+        if (message is not Google.Protobuf.IMessage protobufMessage)
+        {
+            throw new ArgumentException($"Message must implement {nameof(Google.Protobuf.IMessage)}", nameof(message));
+        }
+
+        using (var stream = new MemoryStream())
+        {
+            protobufMessage.WriteTo(stream);
+            return stream.ToArray();
+        }
+    }
+}
+

@@ -1,0 +1,148 @@
+#nullable enable
+using System;
+using System.Linq;
+using ImTools;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Events;
+using Marten.Events;
+using Marten.Exceptions;
+using Marten.Internal.Storage;
+using Npgsql;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten.Internal.Sessions;
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public partial class QuerySession
+{
+    protected readonly IProviderGraph _providers;
+
+    private ImHashMap<Type, IDocumentStorage> _byType = ImHashMap<Type, IDocumentStorage>.Empty;
+
+    public IDocumentStorage StorageFor(Type documentType)
+    {
+        if (_byType.TryFind(documentType, out var storage))
+        {
+            return storage;
+        }
+
+        // #5328: prefer the AOT-safe registry. Every document type passes through a generic
+        // entry point (Query<T>, Include<TInclude>, Store<T>, ...) before it can reach here, and
+        // that entry point registers the closed-generic lookup. Falling back to the reflective
+        // shim keeps behaviour identical anywhere a JIT is available.
+        storage = DocumentStorageResolvers.TryResolve(documentType, this)
+                  ?? typeof(StorageFinder<>).CloseAndBuildAs<IStorageFinder>(documentType).Find(this);
+        _byType = _byType.AddOrUpdate(documentType, storage);
+
+        return storage;
+    }
+
+
+    internal bool TryGetStorageForLiveAggregation<T>(out IDocumentStorage<T>? storage) where T : notnull
+    {
+        storage = default!;
+        if (Options.LiveAggregateTypesWithNoIdentity.Enumerate().Contains(typeof(T)))
+        {
+            return false;
+        }
+
+        try
+        {
+            storage = StorageFor<T>();
+            return true;
+        }
+        catch (InvalidDocumentException)
+        {
+            Options.RegisterAggregateTypeWithNoIdentity(typeof(T));
+        }
+
+        return false;
+    }
+
+    public IDocumentStorage<T> StorageFor<T>() where T : notnull
+    {
+        if (_byType.TryFind(typeof(T), out var storage))
+        {
+            return (IDocumentStorage<T>)storage;
+        }
+
+        // #5328: this call site proves the closed instantiation exists, which is exactly what
+        // the Type-keyed StorageFor(Type) overload needs under Native AOT.
+        DocumentStorageResolvers.Register<T>();
+
+        return selectStorage(_providers.StorageFor<T>());
+    }
+
+    public IEventStorage EventStorage()
+    {
+        return (IEventStorage)selectStorage(_providers.StorageFor<IEvent>());
+    }
+
+    protected internal virtual IDocumentStorage<T> selectStorage<T>(DocumentProvider<T> provider) where T : notnull
+    {
+        return provider.QueryOnly;
+    }
+
+    internal IDocumentStorage<T, TId> StorageFor<T, TId>() where T : notnull where TId : notnull
+    {
+        var storage = StorageFor<T>();
+        if (storage is IDocumentStorage<T, TId> s)
+        {
+            return s;
+        }
+
+        throw new DocumentIdTypeMismatchException(storage, typeof(TId));
+    }
+
+    /// <summary>
+    ///     This returns the query-only version of the document storage
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TId"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="DocumentIdTypeMismatchException"></exception>
+    internal IDocumentStorage<T, TId> QueryStorageFor<T, TId>() where T : notnull where TId : notnull
+    {
+        var storage = _providers.StorageFor<T>().QueryOnly;
+        if (storage is IDocumentStorage<T, TId> s)
+        {
+            return s;
+        }
+
+
+        throw new DocumentIdTypeMismatchException(storage, typeof(TId));
+    }
+
+    private interface IStorageFinder
+    {
+        IDocumentStorage Find(QuerySession session);
+    }
+
+    private class StorageFinder<T>: IStorageFinder where T : notnull
+    {
+        public IDocumentStorage Find(QuerySession session)
+        {
+            return session.StorageFor<T>();
+        }
+    }
+
+    protected void overrideStorage(Type type, IDocumentStorage storage)
+    {
+        _byType = _byType.AddOrUpdate(type, storage);
+    }
+
+    /// <summary>
+    /// In the case of a lightweight session, this will direct Marten to opt into identity map mechanics
+    /// for only the document type T. This is a micro-optimization added for the event sourcing + projections
+    /// support
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public virtual void UseIdentityMapFor<T>() where T : notnull
+    {
+        // Nothing by default
+    }
+}

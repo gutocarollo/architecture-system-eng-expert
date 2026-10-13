@@ -1,0 +1,535 @@
+using System.Linq;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
+using Wolverine;
+using Wolverine.Configuration;
+using Wolverine.Redis;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.Redis.Internal;
+
+public class RedisStreamEndpoint : Endpoint<IRedisEnvelopeMapper, RedisEnvelopeMapper>, IBrokerEndpoint, IBrokerQueue,
+    IStorageBackedQueue
+{
+    private readonly RedisTransport _transport;
+    private int? _batchSize;
+
+    internal bool SupportsNativeScheduledSend { get; set; } = true;
+    
+    internal RedisStreamEndpoint(Uri uri, RedisTransport transport, EndpointRole role = EndpointRole.Application) 
+        : base(uri, role)
+    {
+        _transport = transport;
+        var (streamKey, databaseId) = ParseStreamKeyAndDatabase(uri);
+        StreamKey = streamKey;
+        DatabaseId = databaseId;
+        ConsumerGroup = ParseConsumerGroup(uri);
+        EndpointName = StreamKey;
+        BrokerRole = "stream";
+
+        // Redis Streams work well in buffered mode by default
+        Mode = EndpointMode.BufferedInMemory;
+    }
+
+    /// <summary>
+    /// The Redis Stream key name
+    /// </summary>
+    public string StreamKey { get; }
+    
+    /// <summary>
+    /// The Redis database ID (0-15 for standard Redis)
+    /// </summary>
+    public int DatabaseId { get; }
+    
+    /// <summary>
+    /// The Redis Sorted Set key for scheduled messages
+    /// </summary>
+    public string ScheduledMessagesKey => $"{StreamKey}:scheduled";
+
+    /// <summary>
+    /// Hash of consecutive read failures per scheduled entry, keyed by the entry's own payload. Bounds how
+    /// long an unreadable scheduled message can sit in the sorted set before being dead-lettered. See GH-3644.
+    /// </summary>
+    public string UnreadableScheduledMessagesKey => $"{StreamKey}:scheduled:unreadable";
+    
+    /// <summary>
+    /// The Redis Stream key for dead letter messages
+    /// </summary>
+    public string DeadLetterQueueKey => $"{StreamKey}:dead-letter";
+    
+    /// <summary>
+    /// Enable native dead letter queue support for this endpoint
+    /// </summary>
+    public bool NativeDeadLetterQueueEnabled { get; set; } = true;
+
+    public override DeadLetterStorageMode DeadLetterStorage => NativeDeadLetterQueueEnabled
+        ? DeadLetterStorageMode.Native
+        : DeadLetterStorageMode.Durable;
+
+    /// <summary>
+    /// The consumer group name for this endpoint (if listening)
+    /// </summary>
+    public string? ConsumerGroup { get; set; }
+    
+    /// <summary>
+    /// GH-4046. Redis Streams is the second transport to accept <see cref="EndpointMode.NativeAck" />, and it
+    /// qualifies on both counts the mode requires.
+    ///
+    /// <para>
+    /// <b>Settlement is per entry.</b> <c>RedisStreamListener.CompleteAsync</c> acks with
+    /// <c>XACK streamKey consumerGroup entryId</c>, where the entry id rides along on the envelope itself in the
+    /// <c>RedisEnvelopeMapper.RedisEntryIdHeader</c> header. The delivery identity therefore travels with the
+    /// envelope rather than living in the read loop's stack frame, so an arbitrary worker thread can settle one
+    /// delivery -- and only that one -- whenever its handler finishes. There is no cumulative form to get wrong:
+    /// unlike a Kafka offset commit, acking entry 5 says nothing about entries 1-4, which is exactly what
+    /// out-of-order completion out of a partitioned execution block needs.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Redelivery does not depend on a lease clock.</b> An entry that is read but never acked stays in the
+    /// consumer group's pending entries list, and <c>XAUTOCLAIM</c> is what hands it to another consumer. Nothing
+    /// expires on a timer while an envelope waits its turn in a lane, so -- unlike SQS visibility timeouts, Azure
+    /// Service Bus lock durations, Pub/Sub ack deadlines or JetStream <c>AckWait</c> -- there is no deadline to
+    /// renew for the (unbounded) time an envelope sits queued. That is what makes this the cheapest adopter.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Two operational caveats, neither a correctness hole in the mode itself.</b> First, PEL recovery is
+    /// opt-in on this transport: a node that dies holding unacked entries leaves them pending, and they come back
+    /// only when some consumer runs <c>XAUTOCLAIM</c>, which means <c>EnableAutoClaim()</c>. That is true of Inline
+    /// and Buffered listeners here too, not something this mode introduces. Second, once auto-claim IS on,
+    /// <see cref="AutoClaimMinIdle" /> behaves as a de facto lease: this mode holds a delivery for lane queue time
+    /// plus handler time rather than handler time alone, so a min-idle shorter than the worst-case lane residency
+    /// lets a consumer re-claim an entry it is still working on and process it twice. Size it above the slowest
+    /// lane, not just the slowest handler.
+    /// </para>
+    /// </summary>
+    protected override bool supportsNativeAck => true;
+
+    /// <summary>
+    /// Maximum number of messages to read in a single batch from Redis Stream (XREADGROUP / XAUTOCLAIM count).
+    /// Defaults to 10, or to twice the number of concurrently-busy lanes when this endpoint is in
+    /// <see cref="EndpointMode.NativeAck" /> mode.
+    /// </summary>
+    public int BatchSize
+    {
+        get
+        {
+            if (_batchSize.HasValue)
+            {
+                return _batchSize.Value;
+            }
+
+            if (Mode == EndpointMode.NativeAck)
+            {
+                // GH-4046. The read batch is this transport's prefetch equivalent, and it has to cover every lane
+                // that can be busy at once -- the partition slot count when the endpoint is group-partitioned and
+                // MaxDegreeOfParallelism otherwise (whichever is larger, since GH-3899 exempted message types run
+                // at the endpoint's parallelism rather than in a slot), doubled so a lane is never left idle
+                // waiting on the next poll. Ten -- the default for the other modes -- would starve a default
+                // MaxDegreeOfParallelism of Environment.ProcessorCount on any decent box.
+                //
+                // Note what this is NOT: unlike RabbitMQ's PreFetchCount it does not cap the unacked window.
+                // Redis has no unacked ceiling, and the consumer loop polls again the moment it has posted a
+                // batch, so what bounds the in-flight set is the bounded execution block -- the loop's
+                // ReceivedAsync await stops pulling entries once the block's channel is full.
+                var lanes = GroupShardingSlotNumber.HasValue
+                    ? Math.Max((int)GroupShardingSlotNumber.Value, MaxDegreeOfParallelism)
+                    : MaxDegreeOfParallelism;
+
+                return lanes * 2;
+            }
+
+            return 10;
+        }
+        set => _batchSize = value;
+    }
+    
+    /// <summary>
+    /// Consumer name within the consumer group. Defaults to machine name + process ID
+    /// </summary>
+    public string? ConsumerName { get; set; }
+    
+    /// <summary>
+    /// Block timeout in milliseconds when reading from streams
+    /// </summary>
+    public int BlockTimeoutMilliseconds { get; set; } = 1000;
+
+    /// <summary>
+    /// If true, purge the stream on startup. Useful for tests.
+    /// </summary>
+    public bool PurgeOnStartup { get; set; }
+
+    /// <summary>
+    /// Enable periodic auto-claiming of pending messages within the main consumer loop
+    /// </summary>
+    public bool AutoClaimEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Period between auto-claim attempts when integrated into the consumer loop (default: 30 seconds)
+    /// </summary>
+    public TimeSpan AutoClaimPeriod { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// Minimum idle time before claiming pending messages for auto-claim (default: 1 min)
+    /// </summary>
+    public TimeSpan AutoClaimMinIdle { get; set; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Determines where to start consuming when creating a new consumer group.
+    /// NewMessages (default): only consume messages added after group creation
+    /// Beginning: consume from the start of the stream including existing messages
+    /// </summary>
+    public StartFrom StartFrom { get; set; } = StartFrom.NewMessages;
+
+    private static (string streamKey, int databaseId) ParseStreamKeyAndDatabase(Uri uri)
+    {
+        // Only support the new format: redis://stream/{dbId}/{streamKey}
+        if (!uri.Host.Equals("stream", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($"Redis URI must use the format 'redis://stream/{{dbId}}/{{streamKey}}': {uri}");
+        }
+
+        if (uri.Segments.Length < 3)
+        {
+            throw new ArgumentException($"Redis URI must specify both database ID and stream key in format 'redis://stream/{{dbId}}/{{streamKey}}': {uri}");
+        }
+
+        var databaseSegment = uri.Segments[1].TrimEnd('/');
+        var streamKeySegment = uri.Segments[2].TrimEnd('/');
+
+        if (!int.TryParse(databaseSegment, out var databaseId) || databaseId < 0)
+        {
+            throw new ArgumentException($"Database ID must be a non-negative integer in Redis URI: {uri}");
+        }
+
+        if (string.IsNullOrEmpty(streamKeySegment))
+        {
+            throw new ArgumentException($"Stream key cannot be empty in Redis URI: {uri}");
+        }
+
+        return (streamKeySegment, databaseId);
+    }
+    
+    private static string? ParseConsumerGroup(Uri uri)
+    {
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        return query["consumerGroup"];
+    }
+
+    protected override RedisEnvelopeMapper buildMapper(IWolverineRuntime runtime)
+    {
+        return new RedisEnvelopeMapper(this);
+    }
+
+    public override async ValueTask<IListener> BuildListenerAsync(IWolverineRuntime runtime, IReceiver receiver)
+    {
+        if (string.IsNullOrEmpty(ConsumerGroup))
+        {
+            throw new InvalidOperationException($"Consumer group is required for listening to Redis stream '{StreamKey}'");
+        }
+
+        // The shared listener consumes the default connection (plus every tenant that reuses it).
+        var sharedListener = new RedisStreamListener(_transport, this, runtime, receiver);
+        await sharedListener.InitializeAsync();
+
+        // Broker-per-tenant: each tenant with its own connection publishes to a separate Redis server the
+        // shared listener can't see, so consume each over its own connection and stamp the tenant id onto
+        // inbound envelopes via a TenantIdRule. Mirrors the NATS / RabbitMQ CompoundListener pattern;
+        // per-envelope completion routes back to the right connection via Envelope.Listener. GH-3309.
+        var tenantAware = _transport.Tenants.Any() && TenancyBehavior == TenancyBehavior.TenantAware;
+        var dedicatedTenants = tenantAware
+            ? _transport.Tenants.Where(t => t.HasOwnConnection).ToArray()
+            : [];
+
+        if (dedicatedTenants.Length == 0)
+        {
+            return sharedListener;
+        }
+
+        var compound = new CompoundListener(Uri);
+        compound.Inner.Add(sharedListener);
+
+        foreach (var tenant in dedicatedTenants)
+        {
+            var tenantReceiver = new ReceiverWithRules(receiver, [new TenantIdRule(tenant.TenantId)]);
+            var tenantListener = new RedisStreamListener(_transport, this, runtime, tenantReceiver,
+                _transport.GetTenantConnection(tenant));
+            await tenantListener.InitializeAsync();
+            compound.Inner.Add(tenantListener);
+        }
+
+        return compound;
+    }
+    
+    public override bool TryBuildDeadLetterSender(IWolverineRuntime runtime, out ISender? deadLetterSender)
+    {
+        if (NativeDeadLetterQueueEnabled)
+        {
+            var deadLetterEndpoint = _transport.StreamEndpoint(DeadLetterQueueKey);
+            deadLetterSender = new InlineRedisStreamSender(
+                _transport,
+                deadLetterEndpoint,
+                runtime);
+            return true;
+        }
+
+        deadLetterSender = null;
+        return false;
+    }
+
+    public override async ValueTask InitializeAsync(ILogger logger)
+    {
+        // Honor AutoProvision/AutoPurge semantics similar to other transports
+        try
+        {
+            var db = _transport.GetDatabase(database: DatabaseId);
+
+            if (_transport.AutoProvision)
+            {
+                // Ensure group exists with appropriate starting position
+                if (!string.IsNullOrEmpty(ConsumerGroup) && IsListener)
+                {
+                    try
+                    {
+                        var startPosition = StartFrom == StartFrom.Beginning ? "0-0" : "$";
+                        await db.StreamCreateConsumerGroupAsync(StreamKey, ConsumerGroup, startPosition, true);
+                    }
+                    catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
+                    {
+                        // already exists
+                    }
+                }
+            }
+
+            if (PurgeOnStartup || _transport.AutoPurgeAllQueues)
+            {
+                // Trim entire stream
+                try { await PurgeAsync(logger); } catch { /* ignore */ }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error initializing Redis stream endpoint {Stream}", StreamKey);
+            throw;
+        }
+    }
+
+    protected override ISender CreateSender(IWolverineRuntime runtime)
+    {
+        EnvelopeMapper ??= BuildMapper(runtime);
+
+        if (_transport.Tenants.Any() && TenancyBehavior == TenancyBehavior.TenantAware)
+        {
+            // Broker-per-tenant: route by Envelope.TenantId. Both the tenant senders and the default
+            // fallback MUST be the fire-and-forget InlineRedisStreamSender — TenantedSender does not
+            // forward RegisterCallback, so a BatchedSender under it would silently drop every message
+            // (GH-2361). Each tenant sender targets its own dedicated multiplexer.
+            var defaultSender = new InlineRedisStreamSender(_transport, this, runtime);
+            var tenantedSender = new TenantedSender(Uri, _transport.TenantedIdBehavior, defaultSender);
+
+            foreach (var tenant in _transport.Tenants)
+            {
+                var tenantConnection = tenant.HasOwnConnection ? _transport.GetTenantConnection(tenant) : null;
+                var tenantSender = new InlineRedisStreamSender(_transport, this, runtime, tenantConnection);
+                tenantedSender.RegisterSender(tenant.TenantId, tenantSender);
+            }
+
+            return tenantedSender;
+        }
+
+        return SendsInline
+            ? new InlineRedisStreamSender(_transport, this, runtime)
+            : new BatchedSender(this, new RedisSenderProtocol(_transport, this), runtime.Cancellation,
+                runtime.LoggerFactory.CreateLogger<RedisSenderProtocol>());
+    }
+
+    public async ValueTask<bool> CheckAsync()
+    {
+        try
+        {
+            var database = _transport.GetDatabase(database: DatabaseId);
+            // Check if stream exists by getting stream info
+            var info = await database.StreamInfoAsync(StreamKey);
+            return true;
+        }
+        catch (RedisServerException ex) when (ex.Message.Contains("no such key"))
+        {
+            // Stream doesn't exist yet, which is fine
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async ValueTask TeardownAsync(ILogger logger)
+    {
+        if (Role == EndpointRole.System)
+        {
+            return; // Don't tear down system endpoints
+        }
+        
+        try
+        {
+            var database = _transport.GetDatabase(database: DatabaseId);
+            
+            // Delete consumer group if this endpoint created it
+            if (!string.IsNullOrEmpty(ConsumerGroup))
+            {
+                logger.LogInformation("Removing consumer group {ConsumerGroup} from Redis stream {StreamKey}", 
+                    ConsumerGroup, StreamKey);
+                await database.StreamDeleteConsumerGroupAsync(StreamKey, ConsumerGroup);
+            }
+            
+            logger.LogDebug("Teardown completed for Redis stream endpoint {StreamKey}", StreamKey);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to teardown Redis stream endpoint {StreamKey}", StreamKey);
+        }
+    }
+
+    // IBrokerQueue implementation for diagnostics and purge support
+    public async ValueTask PurgeAsync(ILogger logger)
+    {
+        try
+        {
+            var db = _transport.GetDatabase(database: DatabaseId);
+            if (await db.KeyDeleteAsync(StreamKey))
+                logger.LogInformation("Purged Redis stream {StreamKey}", StreamKey);
+
+            // GH-4035. The scheduled sorted set is part of this queue's storage just as the
+            // scheduled-message *table* is on the database queues, and PurgeAsync() is expected to
+            // leave a queue completely empty -- IHost.ClearAllWolverineStorageAsync() relies on it.
+            // Leaving it behind meant a scheduled message survived a "reset" and fired into the next test.
+            if (await db.KeyDeleteAsync(ScheduledMessagesKey))
+                logger.LogInformation("Purged scheduled messages for Redis stream {StreamKey}", StreamKey);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error purging Redis stream {StreamKey}", StreamKey);
+            throw;
+        }
+    }
+
+    public async ValueTask<Dictionary<string, string>> GetAttributesAsync()
+    {
+        var dict = new Dictionary<string, string>
+        {
+            { "streamKey", StreamKey }
+        };
+
+        try
+        {
+            var db = _transport.GetDatabase(database: DatabaseId);
+            var len = await db.StreamLengthAsync(StreamKey);
+            dict["messageCount"] = len.ToString();
+        }
+        catch
+        {
+            // ignore
+        }
+
+        if (!string.IsNullOrEmpty(ConsumerGroup))
+        {
+            dict["consumerGroup"] = ConsumerGroup!;
+        }
+
+        return dict;
+    }
+    
+    public async ValueTask SetupAsync(ILogger logger)
+    {
+        try
+        {
+            var database = _transport.GetDatabase(database: DatabaseId);
+            
+            // Create consumer group if specified and this is a listener
+            if (!string.IsNullOrEmpty(ConsumerGroup) && IsListener)
+            {
+                try
+                {
+                    var startPosition = StartFrom == StartFrom.Beginning ? "0-0" : "$";
+                    var positionDescription = StartFrom == StartFrom.Beginning ? "beginning" : "end";
+                    
+                    logger.LogDebug("Creating consumer group {ConsumerGroup} for Redis stream {StreamKey} starting from {Position}", 
+                        ConsumerGroup, StreamKey, positionDescription);
+                    
+                    await database.StreamCreateConsumerGroupAsync(StreamKey, ConsumerGroup, startPosition, true);
+                    
+                    logger.LogInformation("Created consumer group {ConsumerGroup} for Redis stream {StreamKey} starting from {Position}", 
+                        ConsumerGroup, StreamKey, positionDescription);
+                }
+                catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
+                {
+                    // Group already exists, which is fine
+                    logger.LogDebug("Consumer group {ConsumerGroup} already exists for stream {StreamKey}", 
+                        ConsumerGroup, StreamKey);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to setup Redis stream endpoint {StreamKey}", StreamKey);
+            throw;
+        }
+    }
+
+    /// <summary>
+    ///     Park a message in this stream's scheduled sorted set until <see cref="Envelope.ScheduledTime" />,
+    ///     when the listener's polling loop moves it back onto the stream. This is the Redis-native
+    ///     scheduled retry that Buffered and Inline listeners use through
+    ///     <see cref="Wolverine.Transports.ISupportNativeScheduling" /> on <see cref="RedisStreamListener" />.
+    /// </summary>
+    /// <remarks>
+    ///     GH-4028. This endpoint used to implement <c>IDatabaseBackedEndpoint</c> so that DurableReceiver
+    ///     would route scheduled retries here. That marker also told DurableReceiver to skip the inbox INSERT
+    ///     and complete the delivery on receipt -- so "UseDurableInbox()" on a Redis stream ACKed every
+    ///     message before its handler ran and never wrote the inbox at all. A Durable Redis listener now
+    ///     goes through the real inbox like every other transport, including for scheduled retries;
+    ///     Redis-native scheduling is for the non-durable modes.
+    /// </remarks>
+    public async Task ScheduleRetryAsync(Envelope envelope, CancellationToken cancellation)
+    {
+        try
+        {
+            var database = _transport.GetDatabase(database: DatabaseId);
+            
+            // Note: envelope.Attempts has already been incremented by Executor.ExecuteAsync
+            // before this method is called, so we don't increment it here
+            
+            // CRITICAL FIX: Ensure envelope.Data is populated before serialization
+            // EnvelopeSerializer requires Data to be non-null to serialize all properties correctly
+            if (envelope.Data == null && envelope.Message != null)
+            {
+                // Accessing the Data property will trigger serialization of the Message
+                _ = envelope.Data;
+            }
+            
+            envelope.Headers["attempts"] = envelope.Attempts.ToString();
+            // Serialize the envelope for storage - this includes ALL properties including Attempts
+            var serializedEnvelope = EnvelopeSerializer.Serialize(envelope);
+            
+            
+            // Calculate the score (execution time) for the sorted set
+            var scheduledTime = envelope.ScheduledTime ?? DateTimeOffset.UtcNow.AddSeconds(5); // Default 5 second retry delay
+            var score = scheduledTime.ToUnixTimeMilliseconds();
+            
+            // Add the envelope to the scheduled messages sorted set
+            await database.SortedSetAddAsync(ScheduledMessagesKey, serializedEnvelope, score);
+            
+            // Note: We don't need to add it to the stream yet - the polling mechanism in
+            // RedisStreamListener will move it to the stream when it's due for execution
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Failed to schedule retry for envelope {envelope.Id} on Redis stream '{StreamKey}' ({Uri}). The scheduled message could not be written to the sorted set '{ScheduledMessagesKey}'; see the inner exception.", ex);
+        }
+    }
+}

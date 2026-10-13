@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit.v3"/>
+        <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
+        <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All"/>
+        <PackageReference Include="coverlet.collector" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Persistence\Wolverine.Marten\Wolverine.Marten.csproj"/>
+        <ProjectReference
+                Include="..\..\..\Testing\Wolverine.ComplianceTests\Wolverine.ComplianceTests.csproj"/>
+        <ProjectReference Include="..\Wolverine.Pubsub\Wolverine.Pubsub.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\..\Servers.cs">
+            <Link>Servers.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="$(SolutionDir)xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+</Project>

@@ -1,0 +1,67 @@
+using JasperFx;
+using JasperFx.Resources;
+using Spectre.Console;
+using Spectre.Console.Rendering;
+
+namespace Wolverine.Persistence.Durability;
+
+internal class MessageStoreResource : IStatefulResource
+{
+    private readonly IMessageStore _persistence;
+
+    public MessageStoreResource(WolverineOptions options, IMessageStore persistence)
+    {
+        _persistence = persistence;
+        SubjectUri = new Uri(options.SubjectUri, "messagestore");
+        ResourceUri = persistence.Uri;
+    }
+
+    public Uri SubjectUri { get; }
+    public Uri ResourceUri { get; }
+
+    public async Task Check(CancellationToken token)
+    {
+        await _persistence.Admin.CheckConnectivityAsync(token);
+
+        // Connectivity alone isn't enough for "resources check" — verify the schema/tables actually
+        // exist so a missing or un-provisioned storage schema is reported as unhealthy.
+        await _persistence.Admin.AssertStorageExistsAsync(token);
+    }
+
+    public Task ClearState(CancellationToken token)
+    {
+        return _persistence.Admin.ClearAllAsync();
+    }
+
+    public Task Teardown(CancellationToken token)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task Setup(CancellationToken token)
+    {
+        // An explicit setup call ("resources setup" / IHost.SetupResources()) is itself the
+        // intent to provision the storage, so Setup always migrates with CreateOrUpdate
+        // regardless of the configured AutoCreate — including CreateOnly. This is deliberately
+        // broader than Weasel's DatabaseResource.Setup, which only promotes None to CreateOrUpdate;
+        // CreateOrUpdate never drops existing data, so it's safe for the explicit setup path
+        return _persistence.Admin.MigrateAsync(AutoCreate.CreateOrUpdate);
+    }
+
+    public async Task<IRenderable> DetermineStatus(CancellationToken token)
+    {
+        var counts = await _persistence.Admin.FetchCountsAsync();
+        var table = new Table();
+        table.AddColumns("Envelope Category", "Number");
+        table.AddRow("Incoming", counts.Incoming.ToString());
+        table.AddRow("Outgoing", counts.Outgoing.ToString());
+        table.AddRow("Scheduled", counts.Scheduled.ToString());
+        table.AddRow("Dead Letter", counts.DeadLetter.ToString());
+        table.AddRow("Handled", counts.Handled.ToString());
+
+        return table;
+    }
+
+    public string Type => "Wolverine";
+    public string Name => "Envelope Storage";
+}

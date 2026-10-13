@@ -1,0 +1,471 @@
+= Release Notes
+
+== Version 0.1.0
+* Initial version
+
+=== Version 0.1.1
+* Added the functionality to add exceptions with are ignored by the CircuitBreaker
+
+=== Version 0.1.2
+* Added the feature to get Metrics for function executions
+
+=== Version 0.1.3
+* Added a static factory method for the CircuitBreakerConfig builder
+
+=== Version 0.1.4
+* Added the feature to retry a failed function
+
+=== Version 0.1.5
+* Added builders to simplify chaining of decorators
+
+=== Version 0.1.6
+* Renamed project to javaslang-circuitbreaker
+
+=== Version 0.1.7
+* Fixed Issue #2
+* Issue #3 Added a listener mechanism for state transitions
+
+== Version 0.2.0
+* Removed Dropwizard Metrics, because its a too heavy dependency for such a lightweight library.
+* Changed the way exceptions can be handled. You have to provide a Predicate now instead of a list of exceptions to ignore.
+
+== Version 0.3.0
+* The CircuitBreaker is based on a Ring Bit Buffer and a failure rate now.
+
+=== Version 0.3.1
+* Changed the visibility of CircuitBreakerUtils.isCallPermitted to public.
+
+=== Version 0.3.2
+* CircuitBreakerRegistry has a new method which takes a Supplier of a CircuitBreakerConfig so that the CircuitBreakerConfig is only created when needed.
+
+=== Version 0.3.3
+* CircuitBreaker has a new method `+getCircuitBreakerConfig+` which allows to retrieve the CircuitBreakerConfig of the CircuitBreaker.
+* Renamed the state HALF_CLOSED to HALF_OPEN to match the pattern description of Martin Fowler.
+
+=== Version 0.3.4
+* Added a Metrics interface to the CircuitBreaker which allows to retrieve current statistics like failureRate and number of buffer calls.
+
+== Version 0.4.0
+* Updated javaslang from 2.0.0-RC4 to 2.0.1
+
+== Version 0.5.0
+* Updated javaslang from 2.0.1 to 2.0.2
+* Fixed issue #6: The CB changes to OPEN state when the failure rate is above (>) the threshold, but it should be above or equal (>=).
+
+== Version 0.6.0
+* Updated javaslang from 2.0.2 to 2.0.4
+
+== Version 0.7.0
+* Added rxjava 2.0.1 as a dependency
+* Issue #13: CircuitBreaker should publish events as an event stream and clients should be able to subscribe
+* Issue #10: Reorder arguments in decorator methods
+* PR #19: Add a backoff function feature, to modify the waiting interval between failures
+* Renamed root package from javaslang to io.github.resilience4j, because the project had to leave the Javaslang GitHub organisation
+
+=== Version 0.7.1
+* Changed Event stream return type from Observable to Flowable
+* Events contain a create time
+* Added getThrowable method to CircuitBreakerOnErrorEvent which was missing
+* Added CircuitBreakerOnIgnoredErrorEvent to signal exceptions which have been ignored because of a custom predicate
+* Added getMaxNumberOfBufferedCalls and getNumberOfSuccessfulCalls methods to Metrics interface
+
+== Version 0.8.0
+* Added the SingleOperator interface to CircuitBreakerOperator
+* Issue #12: Added a new RateLimiter decorator
+* Added a new Cache decorator
+* Removed CacheEventConsumer and CircuitBreakerEventConsumer and created a generic CircularEventConsumer
+* Added a StopWatch which is used to measure the elapsed time of decorated calls. CircuitBreakerEvents also contain the elapsed duration of a call now.
+* Issue #33: Added the ability to 'force' state transitions manually
+* Issue #38: A CircuitBreaker records not permitted calls when the state is OPEN and emits a event for each attempt. The metric "numberOfNotPermittedCalls" can be access via CircuitBreaker.Metrics
+* Issue #39: A CircuitBreaker should copy the previous RingBitSet values during state transition from HALF_OPEN to CLOSED
+* Updated javaslang from 2.0.4 to 2.0.5
+* Updated rxjava from 2.0.1 to 2.0.3
+
+=== Version 0.8.1
+* Issue #41: Added a method to the CircuitBreakerRegistry which returns a list of all managed CircuitBreaker instances
+* Issue #42: Added a new EventConsumerRegistry which can be used to create and manage instances of EventConsumers.
+
+=== Version 0.8.2
+* Issue #43: Added a new higher-order function to decorate a method which returns a CompletableFuture.
+* Issue #49: Added execute methods to CircuitBreaker interface and Decorators builder. This makes it easier to decorate and call a function at once.
+* Updated rxjava from 2.0.3 to 2.0.6
+* Updated slf4j-api from 1.7.12 to 1.7.24
+
+== Version 0.9.0
+* PR #59: Project has been renamed to resilience4j and has been modularized.
+* PR #59: Renamed packages from io.github.robwin to io.github.resilience4j.
+* PR #76: Module for integration with Retrofit.
+* PR #82: Module for integration with Ratpack.
+* PR #80: Resilience4j metrics reporting with Dropwizard metrics.
+* PR #81: Resilience4j metrics reporting with Prometheus.
+* PR #103, #104, #101: Various improvements of rxJava integration.
+* PR #119: Zero allocation rate for CircuitBreaker when it has no event subscribers.
+* Issue #70: Module with Spring Boot starter.
+* Issue #61: Permissions aren't available from the first cycle in AtomicRateLimiter.
+* Performance improvements of ConcurrentEvictingQueue
+
+NOTE: Braking changes:
+
+* PR #119 - changed API of CircuitBreaker interface.
+* The *groupId* has been changed from *io.github.robwin* to *io.github.resilience4j*
+
+Detailed https://github.com/resilience4j/resilience4j/milestone/6?closed=1[PR list]
+
+== Version 0.10.0
+* Issue #123: Autobuild Ratpack CircuitBreaker, Retry, RateLimiter registry from properties.
+* Issue #126: Created Ratpack CircuitBreaker, RateLimiter sse event streams.
+* Issue #139: Support CircuitBreaker failure rate threshold < 1.
+
+NOTE: Breaking changes:
+
+* Issue #51: Removed RxJava2 dependency to make Resilience4j more lightweight. Added a RxJava2 module.
+* Issue #148: Created an EventPublisher which replaces the RxJava Event Stream.
+
+=== Version 0.10.1
+* Issue #153: Fixed CircuitBreakerTransformer error messaging
+* Issue #161: Fixed Spring Boot Prometheus AutoConfiguration
+* Updated Vavr from 0.9.0 to 0.9.1
+* Updated RxJava from 2.1.0 to 2.1.3
+
+== Version 0.11.0
+* RP #164: Additional gauges to monitor the circuit breaker state
+* PR #165: Allow explicit ordering for CircuitBreaker and RateLimiter aspects in SpringBoot starter
+* PR #166: Bulkhead metrics for Dropwizard metrics module
+* PR #176: Retrofit enqueue support for circuit breaker and rate limiter
+* PR #177: Dynamic rate limiter configuration
+* PR #181: RxJava bulkhead operator for `+Maybe+` and `+Completable+`
+* PR #169: Bulkhead integration with Ratpack and call finished metric for bulkhead
+* PR #184: Dynamic bulkhead configuration
+
+* Issue #182: Fix for circuit breaker show only first state values in Dropwizard metrics
+
+== Version 0.12.0
+* PR #188: Added reset method to Circuit Breaker
+* PR #194: Added disable and force_open states to Circuit Breaker
+* PR #205: Added Reactor support for circuit breaker, bulkhead and rate limiter.
+* PR #206: Added support for Micrometer
+* PR #208: Updated Retrofit version from 2.1 to 2.3
+* PR #211: Make sure the Reactor operators can be used together on a Flux
+* Updated Vavr from 0.9.1 to 0.9.2
+* Updated RxJava from 2.1.3 to 2.1.10
+* Updated Vertx from 3.4.1 to 3.5.1
+* Updated Dropwizard Metrics from 3.1.2 to 3.2.5
+* Updated Spring Boot from 1.4.3.RELEASE to 1.5.5.RELEASE
+* Updated Ratpack from 1.4.6 to 1.5.4
+* Updated Prometheus from 0.0.21 to 0.3.0
+
+* Issue #47: OSGI Support. Fixed bnd configuration in publishing.gradle
+
+=== Version 0.12.1
+* Issue #212: Fixed r4j-reactor bug when onSubscribe throws an error
+
+== Version 0.13.0
+* PR #216: Added Circuit Breaker option to auto transition to half open
+* PR #217: Added ignoreExceptions() and recordExceptions() to CircuitBreakerConfig.Builder
+* PR #226: Ratpack does no longer depend on Dropwizard or Prometheus
+* PR #227: Ratpack module uses Spring Reactor now
+* PR #229: Publish retry event for every retry
+* PR #231: Added validation to Spring Boot CircuitBreakerProperties
+* PR #234: Non-blocking API for RateLimiter
+* PR #236: Added Spring 4, Spring Boot 1 and Spring Boot 2 modules
+
+=== Version 0.13.1
+* PR #243: Allow Spring to bind MeterBinders instead of directly binding
+
+=== Version 0.13.2
+* PR #244: Corrected link to Prometheus Metrics Integration
+* PR #246: Make async retrofit call not make the request when circuit is open
+* PR #248: Removed rxjava2 dependency for time limiter
+* PR #253: Fixed documentation
+* PR #254: Additional factory methods for Micrometer CircuitBreakerMetrics
+* PR #271: Remove deprecated usage of Mockito Matchers
+* PR #276: Add response predicate to retry sync and async for enhancement
+* PR #277: Generate BOM for resilience4j
+* PR #281: Avoid creating unnecessary logging strings
+* PR #284: Avoiding calling bulkheadConfigSupplier needlessly
+* Issue #245; PR #260: Fix CircuitBreakerSubscriber for Reactor doesn't count successes when using Mono/Flux.toFuture()
+* Issue #263; PR #264: Fix bulkhead on Single and Maybe
+
+== Version 0.14.0
+* Issue #196: Added a new resilience4j-feign module
+* Issue #241: Added support to configure automaticTransitionFromOpenToHalfOpenEnabled in Spring Boot
+* Issue #248: Support The Use Of @CircuitBreaker on methods that return a mono Or flux
+* Issue #286: Spring Boot emitted warnings about invalid actuator endpoint name
+* Issue #307: Bulkhead Support in Prometheus
+* Issue #331: Fixed Retry.decorateCallable which catched RuntimeException instead of Exception
+* Issue #332: Bulkhead reactor operator did not release semaphore on cancel
+* Issue #338: Fixed that SpringBoot2 auto-configuration fails when not specifying all properties
+* Issue #344: Exposed bulkhead max allowed concurrent calls metric
+* Issue #348: Added Spring Boot 2 support for resilience4j-retry
+* Issue #351: Fixed that CircuitBreaker AutoTransitioner prevents JVM shutdown
+* Issue #359: Support for retryOnResult method and Completable, Maybe types missing
+* Issue #383: Added Retry support to Spring Reactor
+* Updated Vavr from 0.9.2 to 0.10.0
+* Updated Spring 4 from 4.3.15.RELEASE to 4.3.22.RELEASE
+* Updated Spring Boot from 1.5.5.RELEASE to 1.5.19.RELEASE
+* Updated Spring Boot 2 from 2.0.2.RELEASE to 2.1.3.RELEASE
+* Updated Dropwizard Metrics from 3.2.5 to 3.2.6
+* Updated Ratpack from 1.5.4 to 1.6.0
+* Updated Micrometer from 1.0.5 to 1.1.3
+* Updated Prometheus Simple Client from 0.3.0 to 0.6.0
+* Updated Feign from 10.0.1 to 10.2.0
+* Updated Retrofit from 2.3.0 to 2.5.0
+* Updated Spring Reactor from 3.0.7.RELEASE to 3.2.6.RELEASE
+
+== Version 0.15.0
+* Issue #309: Added fallbackMethod support to annotations for Spring and Ratpack
+* Issue #268: Added a functionality to add configurations to registries and reuse them.
+* Issue #398: Added an event publisher to all registries which allows to execute code when entries are created, deleted or replaced.
+* Issue #273: Added a remove method to all registries
+* Issue #282: Added a replace method to all registries
+* Issue #291: Added support to overwrite all resilience4j beans in Spring Boot.
+* Issue #417: Allow to fully close a bulkhead
+* Issue #311, #336, #357, #361: Refactored resilience4j-reactor and resilience4j-rxJava2 so that they try to acquire a permission before the subscriptions happens.
+* Issue #343: CircuitBreaker only allows a configurable number of concurrent calls when in half-open state and rejects all further calls.
+
+== Version 0.16.0
+* Issue #325: Added instance methods to decorate functions with a CircuitBreaker
+* Issue #431: Don't prevent using other call adapters in CircuitBreakerCallAdapter
+* Issue #458: Fixed a bug where the reactor context was not available when using circuit breaker
+* Issue #469: Fixed a bug that registerHealthIndicator defined in a default config is not inherited
+* Issue #480: Fixed a bug in the decoration of a CompletionStage, if it's a Runnable which is executed async
+* Issue #486: Added bulkhead configs to resilience4j-ratpack
+* Issue #489: Set the proper order of spring aspects to make thread pool spring aspect work properly
+* PR #478: Added a find() method to all registries
+
+== Version 0.17.0
+* Removed all deprecated methods in preparation for v1.0.0
+* Issue #500: Fixed bug where default external configs in Ratpack apps are not honored
+* Issue #506: Fixed bug where resilience4j-ratpack fails to run when Dropwizard metrics in not on classpath
+* Issue #515: Added Aspect ordering feature in resilience4j-spring again
+* Issue #518: Added support for Vavr Try and Either return types
+* Issue #538: Removed minimum waitDuration constraint for retry
+* Issue #544: Fixed bug where CircuitBreaker gets stuck in HALF_OPEN when the last test request throws an ignored exception
+* Issue #530: Improved RxJava2OnClasspathCondition and ReactorOnClasspathCondition
+
+== Version 1.0.0
+* Issue #607: Spring Boot HealthIndicators are by default disabled now
+* Issue #546: Added support for Spring Cloud Config
+* Issue #581: Enhancement in resilience4j-reactor and resilience4j-rxjava2 to better support the zip operator.
+* Issue #559: Added support for @FeignClient annotation
+* Issue #560: Fixed bug when using a lambda fallback in Feign
+* Issue #547: Replaced the CircuitBreaker ring buffer implementation by a count-based and time-based sliding window implementation
+* Issue #562: Fixed bug: Illegal state transition from CLOSED to HALF_OPEN
+* Issue #568: Allow to configure exceptions which should be treated as a success in the CircuitBreaker.
+* Issue #381: Allow to configure a slow response time threshold. If too many slow calls are recorded the CircuitBreaker opens.
+* Issue #488: Micrometer support for ThreadPoolBulkhead
+* Issue #540: Fixed a bug where IDE did not recognize the auto config properties
+
+== Version 1.1.0
+* Issue #235: Added a TimeLimiter operator to resilience4j-reactor and resilience4j-rxjava2
+* Issue #625: Fixed reliability and security issues raised by sonar
+* Issue #626: Handle thread interruption consistently in Bulkhead and RateLimiter blocking methods
+* Issue #634: Adapted resilience4j-metrics to latest changes in the CircuitBreaker
+* Issue #646: Fixed CircuitBreaker 'XX' tried an illegal state transition from OPEN to OPEN
+* Issue #607: Added a new config parameter to enable the CircuitBreaker and RateLimiter health indicator. They are disabled by default now.
+
+== Version 1.2.0
+* Issue #642: Added weight support in RateLimiter
+* Issue #659: Added support for Kotlin Flows
+* Issue #668: Added util class to determine whether Circuit Breaker permits calls
+* Issue #671: Allow configurable wait times for circuit breakers to be open as a function of # of close attempts
+* Issue #674: CircuitBreaker tried an illegal state transition from HALF_OPEN to HALF_OPEN
+* Issue #682: Retrofit call cancellations are recorded as circuit breaker failures
+* Issue #687: context.onSuccess called in case of maximum amount of retries reached
+* Issue #691: Exceptions thrown from fallback methods shouldn't be wrapped
+* Issue #699: Added CircuitBreaker waitIntervalFunction to spring boot config
+* Issue #701: Allow custom Prometheus Histogram buckets
+* Issue #756: Spring Boot module must work without a Spring actuator
+* PR #722: Health indicator overall status can be controlled with allowHealthIndicatorToFail property
+
+== Version 1.3.0
+* Issue #822: Fixed the case where resilience4j rateLimiter seems to ignore configuration
+* Issue #816: Fixed Reactor RetryOperator throws exception wrapped by RetryExceptionWrapper
+* Issue #806: Switched aggregated retry.calls metric to a counter from a gauage
+* Issue #803: Added new Circuit breaker state -> METRICS_ONLY
+* Issue #799: Fixed WritableStackTraceEnabled config setting in ThreadPool bulkhead configuration
+* Issue #775: Added Getter for RetryOnRetryEvent
+* Issue #769: Fixed Duplicated auto complete support in IDEA
+* Issue #765: Added support to use Retry with Feign client
+* Issue #751: Vavr upgrade to 0.10.2
+* Issue #718: Fixed blocking behavior in Reactor Retry Operator
+* Issue #711: Added support to use SpEL in resilienec4j spring annoations
+* Issue #751: Fixed Resilience4j Spring boot modules MetricsAutoConfiguration
+* Issue #565: Added ThreadLocal passing support to the Threadpool bulkhead implementation
+* Issue #430: Added TimeLimiter spring boot starter support
+* Issue #509: Added support to extend Micrometer tags
+* PR #831: non backward compatible API change in ThreadPoolBulkhead decorateRunnable(ThreadPoolBulkhead bulkhead, Runnable runnable) now return Supplier<CompletionStage<Void>> instead of Runnable
+
+=== Version 1.3.1
+* Issue #596: Fixed a bug that a fallback method is not invoked when using CompletableFutures and a ThreadPoolBulkhead annotation
+
+== Version 1.4.0
+* Issue #703: Add a feature that allows to plug-in your own Registry implementation which can be based on a cache library if needed.
+* Issue #737: Updated reactor version to 3.3.0.RELEASE
+* Issue #933: Add RegistryStore and builder methods to create BulkheadRegistry and ThreadPoolBulkheadRegistry
+* Issue #924: Add RegistryStore and builder methods to create RetryRegistry
+* Issue #910: Add RegistryStore and builder methods to create RateLimiterRegistry
+* Issue #928: Fix TimeLimiter does not set a message for TimeoutException
+* Issue #916: Allow setting Retry Wait Duration Limit to value equal >= zero
+* Issue #887: Fixing Spring Boot Common and Spring Boot 2 modules share the same packages which is not allowed in the Java Module system
+* Issue #886: Add support for RxJava 3
+* Issue #913: Add proper graceful cleanup of resilience4j thread pool executors which make it properly cleaned on spring boot applications
+* Issue #939: Fix actuator shows Whitelabel error page with "Invalid Event"
+* Issue #958: Added missing method to set contextProgagators in ThreadPoolBulkheadConfigurationProperties
+* PR #914: Adding non-coroutine kotlin wrapper functions as a convenience
+* PR #943: Removed deprecated documentation
+
+== Version 1.5.0
+* Issue #855: Updated resilience4j-spring-boot2 to 2.3.0.RELEASE
+* Issue #855: Updated resilience4j-spring-cloud2 to 2.2.2.RELEASE
+* Issue #942: Introduced new CB metric "notPermittedCalls"
+* Issue #964: Added Kotlin DSL for building *Config and *Registry classes
+* Issue #979: Added fairCallHandlingEnabled flag to BulkheadConfig which controls whether FairSync or NonfairSync should be used in the Semaphore.
+* Issue #982: Added support to configure exponential random backoff via Spring config
+* Issue #991: Fixed bug that auto transition to half_open happens even if the state is forced open.
+* Issue #1000: Added toString to CircuitBreakerConfig
+* Issue #1003: Fixed bug that CircuitBreaker tries to obtain permission twice in circuitBreaker.decorateEitherSupplier()
+
+== Version 1.6.0
+
+=== Enhancements
+* RetryConfig.DEFAULT_MAX_ATTEMPTS should be public [#1180](https://github.com/resilience4j/resilience4j/issues/1180)
+* Circuitbreaker doesn't open when nested TimeLimiter throws TimeOutCancellationException [#1123](https://github.com/resilience4j/resilience4j/issues/1123)
+* Enhance Server Side Events  `+/circuitbreaker/events+`  [#1076](https://github.com/resilience4j/resilience4j/issues/1076)
+* CallNotPermittedException should contain circuit breaker name (and possibly other information) [#1062](https://github.com/resilience4j/resilience4j/issues/1062)
+* Retry: Exponential backoff with constant behaviour after certain time [#1044](https://github.com/resilience4j/resilience4j/issues/1044)
+* Respecting the clock set in the CircuitBreakerStateMachine for detecting slow calls [#734](https://github.com/resilience4j/resilience4j/issues/734)
+
+=== Bugs
+* Circuit breaker stuck in HALF_OPEN state [#935](https://github.com/resilience4j/resilience4j/issues/935)
+* Circuit breaker global fallback seems to not work when annotated method has more than 1 parameter [#1174](https://github.com/resilience4j/resilience4j/issues/1174)
+* Timelimiter metrics not calculated when using resilince4j-kotlin [#1168](https://github.com/resilience4j/resilience4j/issues/1168)
+* Problem with registering metrics for more than one circuit breaker [#1131](https://github.com/resilience4j/resilience4j/issues/1131)
+* ConcurrentModificationException warning log while consuming events [#1115](https://github.com/resilience4j/resilience4j/issues/1115)
+* CircuitBreakerConfig.Builder.waitDurationInOpenState() false documentation of when the function throws exception [#1092](https://github.com/resilience4j/resilience4j/issues/1092)
+
+=== Version 1.6.1
+
+==== Bugs
+* Springboot application failing on startup with version 1.6.0 [#1192](https://github.com/resilience4j/resilience4j/issues/1192)
+
+== Version 1.7.0
+
+=== Enhancements
+- RateLimiter: Reduce RateLimiter memory footprint of high cardinality keys [#1221](https://github.com/resilience4j/resilience4j/issues/1221)
+- CircuitBreaker: When waitDurationInOpenState and waitIntervalFunctionInOpenStat are used together, waitDurationInOpenState will be overridden [#1214](https://github.com/resilience4j/resilience4j/issues/1214)
+- TimeLimiterAspect does not refresh static timeLimiterExecutorService on Spring context shutdown and restart [#1203](https://github.com/resilience4j/resilience4j/issues/1203)
+- CircuitBreaker: Record a failure on result [#384](https://github.com/resilience4j/resilience4j/issues/384)
+- Added support for Micronaut
+- Updated Spring Boot from 2.3.0.RELEASE to 2.4.1
+- Updated Reactor from 3.3.0.RELEASE to 3.4.0
+- Updated Spring Cloud Context from 2.2.2.RELEASE to 3.0.0
+- Updated Spring Framework from 5.2.6.RELEASE to 5.3.2
+- Updated Spring Boot Open Feign from 2.2.2.RELEASE to 2.2.6.RELEASE
+- Updated Kotlin Coroutines from 1.3.2 to 1.4.2
+- Updated Dropwizard Metrics from 3.2.6 to 4.1.16
+- Prevent the decoration of default methods in feign client [#1245](https://github.com/resilience4j/resilience4j/pull/1245)
+- Added RateLimiter.drainPermissions method [#1240](https://github.com/resilience4j/resilience4j/pull/1240)
+- Added failAfterMaxAttempts flag to RetryConfig and a new MaxRetriesExceededException [#1293](https://github.com/resilience4j/resilience4j/pull/1293)
+
+=== Bugs
+- NullPointerException requesting actuator metrics for retries using retryOnResult [#1205](https://github.com/resilience4j/resilience4j/issues/1205)
+- CircuitBreakers events endpoint doesn't work after replacing instances at runtime  [#1116](https://github.com/resilience4j/resilience4j/issues/1116)
+
+=== Version 1.7.1
+
+==== Enhancements
+Issue #1414: SpEL expressions support passing runtime method arguments to bean methods
+
+==== Bugs
+
+* Issue #1268: Stream events from springboot2 stopped SSE after the 1st message.
+* Issue #1372: Kotlin Timelimiter executeSuspendFunction throws TimeoutException after coroutine is canceled
+* Issue #1432: CircuitBreaker permits more calls then expected when switching from OPEN to HALF_OPEN state
+* Issue #1437: Event can be published twice when CircuitBreaker in MetricsOnlyState
+
+== Version 2.0.0
+
+=== Enhancements
+
+* Removed Vavr as a dependency
+* Upgraded to Java 17
+* Upgraded to Kotlin 1.7.20
+* Upgraded to Spring Boot 2.7
+* Upgraded to Micronaut 3.7.3
+
+=== Version 2.0.1
+
+==== Enhancements
+* Support Spring Boot 3 by adding resilience4j-spring-boot3 and resilience4j-spring6
+* Issue #1787: Apply Spring Boot customizers even if there is no instance entry in the config file
+* Removed deprecated configuration properties [#1188](https://github.com/resilience4j/resilience4j/pull/1188)
+** Circutbreaker:
+*** `+ringBufferSizeInClosedState+` replaced by `+slidingWindowSize+`
+*** `+ringBufferSizeInHalfOpenState+` replaced by `+permittedNumberOfCallsInHalfOpenState+`
+** Retry:
+*** `+maxRetryAttempts+` replaced by `+maxAttempts+`
+** Bulkhead:
+*** `+contextPropagator+` list replaced by `+contextPropagators+`
+
+==== Bugs
+
+* Issue #1825: Aspectj must not be mandatory in Spring Boot modules
+* Issue #1809: Fixed concurrency issue in Cache module
+
+=== Version 2.0.1
+
+==== Bugs
+
+* Issue #1835: Fixed CircuitBreaker CheckedSupplier and CheckedFunction decorator not opening on recordResultPredicate
+
+=== Version 2.1.0
+
+==== Enhancements
+* Fallbackmethod supports usage of annotations in Spring
+* Issue #1955: RecordResultPredicate can be configured in Spring Boot config now
+
+==== Bugs
+* Issue #1980: Fixed API regression following removal of io.vavr dependencies in v2.0.0
+
+=== Version 2.2.0
+
+==== Enhancements
+* Support Micronaut 4
+* Issue #1962: Added apache commons configuration based registries
+
+==== Bugs
+* Issue #2052: Support class name using SpEL expression at @Circuitbreaker name field enhancement
+* Issue #2040: ThreadPoolBulkhead always uses the "default" configuration in micronaut application bug
+* Issue #2037: Removing stale retry configurations from configuration map enhancement
+* Issue #1625: New module that collects overall information enhancement
+* Issue #1565: Do not retry if IntervalFunction returns interval less than 0
+* Issue #1865: Timelimiter always uses the "default" configuration in micronaut application
+* Issue #2038: java.lang.StackOverflowError due to infinite loop in CircuitBreakerStateMachine$OpenState.tryAcquirePermission
+
+=== Version 2.3.0
+
+==== Enhancements
+* Issue #2234: Allow passing custom Clock to CircuitBreaker without needing to use internal API.
+* Issue #2131: Added support for RxJava3 in Spring projects.
+* Issue #2029: Include `decorateSupplier` as a `Retry` instance method.
+* Issue #2246: Add handling for the case where a non-checked retry consumer is interrupted during sleep.
+* Issue #2245: Refactor `Retry#executeSuspendExecute` condition to enhance consistency with `FlowRetry`.
+* Issue #2232: Convert `Synchronized` to `ReentrantLock` to avoid virtual-thread pinning issues.
+* Issue #2241: Implement a lock-free sliding window for internal CircuitBreaker metrics.
+* Issue #2239: Add a `Clock` to `CircuitBreakerConfig` and utilize it in the state machine.
+* Issue #2200: Ignore unknown exceptions in CircuitBreaker configuration.
+* Issue #2233: Improve exception message for failure rate threshold in CircuitBreaker configuration.
+* Issue #1404: Configure exponential backoff or randomized wait duration if base configuration allows it.
+* Issue #2179: Ensure `RateLimiter.executeSuspendFunction` respects `drainPermissionsOnResult` in the configuration.
+* Issue #2152: Ensure the randomize function always returns a number greater than 1.0.
+* Issue #2130: Add support for Feign 12.5+.
+* Issue #2121: Specify required `RateLimiter` permits in annotations.
+
+==== Bugs
+
+* Issue #2243: Fixed potential memory leak in `DefaultEventConsumerRegistry`.
+* Issue #2209: Resolved issue where `CompletionStage` does not complete on user-supplied predicate failures.
+* Issue #2190: Fixed `StackOverflowError` and circular reference in CircuitBreaker configuration handling.
+* Issue #2175: Fixed validation error message for `slowCallDurationThreshold`.
+

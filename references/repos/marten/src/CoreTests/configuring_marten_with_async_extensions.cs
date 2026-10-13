@@ -1,0 +1,131 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Core;
+using Marten;
+using Marten.Testing.Harness;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.FeatureManagement;
+using NSubstitute;
+using Shouldly;
+using Xunit;
+
+namespace CoreTests;
+
+public class configuring_marten_with_async_extensions: HostedStoreContext
+{
+    [Fact]
+    public async Task feature_flag_positive()
+    {
+        var featureManager = Substitute.For<IFeatureManager>();
+        featureManager.IsEnabledAsync("Module1").Returns(true);
+
+        var host = await StartHostAsync(opts =>
+            {
+                // #4552: ApplyAllDatabaseChangesOnStartup takes the global advisory lock
+                // (default id 4004) to apply schema changes. That id is shared by every
+                // store in the suite, and advisory locks are connection-scoped, so a pooled
+                // connection from another test's startup-apply can still hold 4004 and make
+                // this acquisition time out under CI load ("Unable to attain a global lock in
+                // time"). Use a distinct lock id so this test can't contend with the default.
+                opts.ApplyChangesLockId = opts.ApplyChangesLockId + 4552;
+            },
+            configureServices: services =>
+            {
+                #region sample_registering_async_config_marten
+
+                services.ConfigureMartenWithServices<FeatureManagementUsingExtension>();
+
+                #endregion
+                services.AddSingleton(featureManager);
+            },
+            configureMarten: marten => marten.ApplyAllDatabaseChangesOnStartup());
+
+        var store = (DocumentStore)host.Services.GetRequiredService<IDocumentStore>();
+
+        store.Events.EventMappingFor<Module1Event>()
+            .Alias.ShouldBe("module1:event");
+
+    }
+
+    [Fact]
+    public async Task feature_flag_negative()
+    {
+        var featureManager = Substitute.For<IFeatureManager>();
+
+        featureManager.IsEnabledAsync("Module1").Returns(false);
+
+        var host = await StartHostAsync(_ => { },
+            configureServices: services =>
+            {
+                services.ConfigureMartenWithServices<FeatureManagementUsingExtension>();
+                services.AddSingleton(featureManager);
+            });
+
+        var store = (DocumentStore)host.Services.GetRequiredService<IDocumentStore>();
+
+        store.Events.EventMappingFor<Module1Event>()
+            .Alias.ShouldBe("module_1_event");
+
+    }
+
+    [Fact]
+    public async Task bare_AddSingleton_IAsyncConfigureMarten_is_invoked()
+    {
+        // #4494 regression. Pre-fix, bare AddSingleton<IAsyncConfigureMarten, T>()
+        // registered the impl but never wired AsyncConfigureMartenApplication, so
+        // Configure() silently never ran. AddMarten now registers the hosted service
+        // unconditionally, matching how bare AddSingleton<IConfigureMarten, T>() works.
+        var host = await StartHostAsync(
+            opts => opts.DatabaseSchemaName = $"{SchemaName}_bare",
+            configureServices: services =>
+                services.AddSingleton<IAsyncConfigureMarten, RecordingAsyncConfig>());
+
+        var recorded = host.Services.GetServices<IAsyncConfigureMarten>()
+            .OfType<RecordingAsyncConfig>()
+            .Single();
+
+        recorded.Invoked.ShouldBeTrue();
+    }
+}
+
+internal sealed class RecordingAsyncConfig: IAsyncConfigureMarten
+{
+    public bool Invoked { get; private set; }
+
+    public ValueTask Configure(StoreOptions options, CancellationToken cancellationToken)
+    {
+        Invoked = true;
+        return ValueTask.CompletedTask;
+    }
+}
+
+#region sample_featuremanagementusingextension
+
+public class FeatureManagementUsingExtension: IAsyncConfigureMarten
+{
+    private readonly IFeatureManager _manager;
+
+    public FeatureManagementUsingExtension(IFeatureManager manager)
+    {
+        _manager = manager;
+    }
+
+    public async ValueTask Configure(StoreOptions options, CancellationToken cancellationToken)
+    {
+        if (await _manager.IsEnabledAsync("Module1"))
+        {
+            options.Events.MapEventType<Module1Event>("module1:event");
+        }
+    }
+}
+
+#endregion
+
+public class Module1Event
+{
+
+}
+

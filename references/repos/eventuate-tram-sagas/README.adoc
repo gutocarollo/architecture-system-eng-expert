@@ -1,0 +1,183 @@
+= An Eventuate project
+
+image::https://eventuate.io/i/logo.gif[]
+
+This project is part of http://eventuate.io[Eventuate], which is a microservices collaboration platform.
+
+= Eventuate Tram Sagas
+
+[cols="5%,20%a"]
+[cols="a,a"]
+|===
+| Spring/Micronaut
+| image::https://img.shields.io/maven-central/v/io.eventuate.tram.sagas/eventuate-tram-sagas-bom[link="https://search.maven.org/search?q=io.eventuate.tram.sagas"]
+| Quarkus
+| image::https://img.shields.io/maven-central/v/io.eventuate.tram.sagas/eventuate-tram-sagas-quarkus-bom[link="https://search.maven.org/search?q=io.eventuate.tram.sagas"]
+|===
+
+The Eventuate Tram Sagas framework is a saga framework for Java microservices that use JDBC/JPA and Spring Boot/Micronaut.
+
+
+A major challenge when implementing business applications using the microservice architecture is maintaining data consistency across services.
+Each service has its own private data and you can't use distributed transactions.
+The solution is to use sagas.
+
+A http://microservices.io/patterns/data/saga.html[saga] maintains consistency across multiple microservices by using a series of a local transactions that are coordinated using messages or events.
+A saga consists of a series of steps.
+Each step consists of either transaction, a compensating transaction or both.
+Each transaction is the invocation of a saga participant using a command message.
+A saga executes the forward transactions sequentially.
+If one of them fails then the saga executes the compensating transactions in reverse order to rollback the saga.
+
+Eventuate Tram Sagas is a saga orchestration framework for Spring Boot, Micronaut and Quarkus (using https://github.com/eventuate-tram/eventuate-tram-sagas-quarkus[Eventuate Tram for Quarkus]) applications.
+It is built on the https://github.com/eventuate-tram/eventuate-tram-core[Eventuate Tram framework], which enables an application to atomically update a database and publish a message without using JTA.
+Eventuate Tram Sagas is described in more detail in my book https://www.manning.com/books/microservice-patterns[Microservice Patterns].
+
+== Learn more
+
+Presentations, videos and articles:
+
+* Article https://chrisrichardson.net/post/sagas/2019/12/12/developing-sagas-part-4.html[Managing data consistency in a microservice architecture using Sagas - Implementing an orchestration-based saga]
+* Slides and video https://microservices.io/microservices/sagas/2019/07/09/microcph-sagas.html[MicroCPH - Managing data consistency in a microservice architecture using Sagas
+]
+
+Example applications:
+
+* https://github.com/eventuate-tram/eventuate-tram-sagas-examples-customers-and-orders[Spring Boot Customers and Orders]
+* https://github.com/eventuate-tram-examples/eventuate-tram-examples-micronaut-customers-and-orders[Micronaut Customers and Orders]
+* https://github.com/microservice-patterns/ftgo-application[FTGO Example application for Microservice Patterns book]
+
+
+== Writing an orchestrator
+
+The https://github.com/eventuate-tram/eventuate-tram-sagas-examples-customers-and-orders[Customers and Orders] uses a saga to create an `Order` in the `Order Service` and reserve credit in the `Customer Service`.
+The `CreateOrderSaga` consists of the following three steps:
+
+1. The `CreateOrderSaga` is instantiated after the `Order` is created.
+Consequently, the first step is simply a compensating transaction, which is executed in the credit cannot be reserved to reject the order.
+2. Requests the `CustomerService` to reserve credit for the order.
+If the reservation is success, the next step is executed.
+Otherwise, the compensating transactions are executed to roll back the saga.
+3. Approves the order, if the credit is reserved.
+
+Here is part of the definition of `CreateOrderSaga`.
+
+```java
+public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
+
+  private SagaDefinition<CreateOrderSagaData> sagaDefinition =
+          step()
+            .withCompensation(this::reject)
+          .step()
+            .invokeParticipant(this::reserveCredit)
+          .step()
+            .invokeParticipant(this::approve)
+          .build();
+
+
+  @Override
+  public SagaDefinition<CreateOrderSagaData> getSagaDefinition() {
+    return this.sagaDefinition;
+  }
+
+
+  private CommandWithDestination reserveCredit(CreateOrderSagaData data) {
+    long orderId = data.getOrderId();
+    Long customerId = data.getOrderDetails().getCustomerId();
+    Money orderTotal = data.getOrderDetails().getOrderTotal();
+    return send(new ReserveCreditCommand(customerId, orderId, orderTotal))
+            .to("customerService")
+            .build();
+
+...
+```
+
+The `reserveCredit()` creates a message to send to the `Customer Service` to reserve credit.
+
+== Creating an saga orchestrator
+
+The `OrderService` creates the saga:
+
+```java
+public class OrderService {
+
+  @Autowired
+  private SagaManager<CreateOrderSagaData> createOrderSagaManager;
+
+  @Autowired
+  private OrderRepository orderRepository;
+
+  @Transactional
+  public Order createOrder(OrderDetails orderDetails) {
+    ResultWithEvents<Order> oe = Order.createOrder(orderDetails);
+    Order order = oe.result;
+    orderRepository.save(order);
+    CreateOrderSagaData data = new CreateOrderSagaData(order.getId(), orderDetails);
+    createOrderSagaManager.create(data, Order.class, order.getId());
+    return order;
+  }
+
+}
+```
+
+== Writing a saga participant
+
+Here is the  `CustomerCommandHandler`, which handles the command to reserve credit:
+
+```java
+public class CustomerCommandHandler {
+
+  @Autowired
+  private CustomerRepository customerRepository;
+
+  public CommandHandlers commandHandlerDefinitions() {
+    return SagaCommandHandlersBuilder
+            .fromChannel("customerService")
+            .onMessage(ReserveCreditCommand.class, this::reserveCredit)
+            .build();
+  }
+
+  public Message reserveCredit(CommandMessage<ReserveCreditCommand> cm) {
+     ...
+  }
+  ...
+```
+
+== Maven/Gradle artifacts
+
+The artifacts are in https://bintray.com/eventuateio-oss/eventuate-maven-release/eventuate-tram-sagas[JCenter].
+The latest version is:
+
+[cols="5%,20%a"]
+|===
+| Release | image::https://api.bintray.com/packages/eventuateio-oss/eventuate-maven-release/eventuate-tram-sagas/images/download.svg[link="https://bintray.com/eventuateio-oss/eventuate-maven-release/eventuate-tram-sagas/_latestVersion"]
+| RC | image::https://api.bintray.com/packages/eventuateio-oss/eventuate-maven-rc/eventuate-tram-sagas/images/download.svg[link="https://bintray.com/eventuateio-oss/eventuate-maven-rc/eventuate-tram-sagas/_latestVersion"]
+|===
+
+If you are writing a Saga orchestrator add this dependency to your project:
+
+* `io.eventuate.tram.sagas:eventuate-tram-sagas-orchestration-simple-dsl:$eventuateTramSagasVersion`
+
+If you are writing a saga participant then add this dependency:
+
+* `io.eventuate.tram.sagas:eventuate-jpa-sagas-framework:$eventuateTramSagasVersion`
+
+You must also include one of the https://github.com/eventuate-tram/eventuate-tram-core[Eventuate Tram] 'implementation' artifacts:
+
+* `io.eventuate.tram.core:eventuate-tram-jdbc-kafka:$eventuateTramVersion` - JDBC database and Apache Kafka message broker
+* `io.eventuate.tram.core:eventuate-tram-in-memory:$eventuateTramVersion` - In-memory JDBC database and in-memory messaging for testing
+
+== Running the CDC service
+
+In addition to a database and message broker, you will need to run the Eventuate Tram CDC service.
+It reads messages and events inserted into the database and publishes them to Apache Kafka.
+It is written using Spring Boot.
+The easiest way to run this service during development is to use Docker Compose.
+The https://github.com/eventuate-tram/eventuate-tram-core-examples-basic[Eventuate Tram Code Basic examples] project has an example https://github.com/eventuate-tram/eventuate-tram-core-examples-basic/blob/master/docker-compose.yml[docker-compose.yml file].
+
+
+== Contributing
+
+Contributions are welcome.
+
+Please sign a https://chrisrichardson.net/legal/[contributor license agreement].

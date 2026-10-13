@@ -1,0 +1,643 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Events;
+using JasperFx.MultiTenancy;
+using Marten.Events;
+using Marten.Events.Daemon.Internals;
+using Marten.Exceptions;
+using Marten.Internal.Operations;
+using Marten.Internal.Storage;
+using Marten.Metadata;
+using Marten.Services;
+using Marten.Storage;
+
+namespace Marten.Internal.Sessions;
+
+[UnconditionalSuppressMessage("Trimming", "IL2067",
+    Justification = "Class-level: parameter receives a DAM-annotated Type from a reflective lookup whose source type is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public abstract partial class DocumentSessionBase: QuerySession, IDocumentSession, ITransactionParticipantRegistrar
+{
+    internal readonly ISessionWorkTracker _workTracker;
+    private readonly List<ITransactionParticipant> _transactionParticipants = new();
+
+    IServiceProvider? IStorageOperations.Services => Options.Services;
+
+    private Dictionary<string, NestedTenantSession>? _byTenant;
+
+    internal DocumentSessionBase(
+        DocumentStore store,
+        SessionOptions sessionOptions,
+        IConnectionLifetime connection): base(store, sessionOptions, connection)
+    {
+        Concurrency = sessionOptions.ConcurrencyChecks;
+        _workTracker = new UnitOfWork(this);
+    }
+
+    internal DocumentSessionBase(
+        DocumentStore store,
+        SessionOptions sessionOptions,
+        IConnectionLifetime connection,
+        ISessionWorkTracker workTracker, Tenant? tenant = default
+    ): base(store, sessionOptions, connection, tenant)
+    {
+        Concurrency = sessionOptions.ConcurrencyChecks;
+        _workTracker = workTracker;
+    }
+
+    internal ITenancy Tenancy => DocumentStore.As<DocumentStore>().Tenancy;
+
+    internal ISessionWorkTracker WorkTracker => _workTracker;
+
+    public virtual void AddTransactionParticipant(ITransactionParticipant participant)
+    {
+        _transactionParticipants.Add(participant);
+    }
+
+    /// <summary>
+    /// #5353: the message batch enlists itself as a participant for the life of one unit of work,
+    /// and drops out again when that unit of work commits. Everything else registered here is
+    /// session-scoped and stays until disposal.
+    /// </summary>
+    internal virtual void RemoveTransactionParticipant(ITransactionParticipant participant)
+    {
+        _transactionParticipants.Remove(participant);
+    }
+
+    internal IReadOnlyList<ITransactionParticipant> TransactionParticipants => _transactionParticipants;
+
+    // #5228: release anything a participant is holding open, however the save ended. Disposal on
+    // the participant side is idempotent, so a participant that already released itself on the
+    // success path of BeforeCommitAsync is a no-op here.
+    private protected override async ValueTask releaseTransactionParticipantsAsync()
+    {
+        foreach (var participant in _transactionParticipants)
+        {
+            switch (participant)
+            {
+                case IAsyncDisposable asyncDisposable:
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                    break;
+
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
+        }
+
+        _transactionParticipants.Clear();
+    }
+
+    private protected override void releaseTransactionParticipants()
+    {
+        foreach (var participant in _transactionParticipants.OfType<IDisposable>())
+        {
+            participant.Dispose();
+        }
+
+        _transactionParticipants.Clear();
+    }
+
+    public void EjectAllPendingChanges()
+    {
+        _workTracker.EjectAll();
+        ChangeTrackers.Clear();
+    }
+
+    public void Store<T>(IEnumerable<T> entities) where T : notnull
+    {
+        Store(entities?.ToArray()!);
+    }
+
+    public void Store<T>(params T[] entities) where T : notnull
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+
+        if (typeof(T).IsGenericEnumerable())
+        {
+            throw new ArgumentOutOfRangeException(typeof(T).Name,
+                "Do not use IEnumerable<T> here as the document type. Either cast entities to an array instead or use the IEnumerable<T> Store() overload instead.");
+        }
+
+        store(entities);
+    }
+
+    public void UpdateExpectedVersion<T>(T entity, Guid version) where T : notnull
+    {
+        assertNotDisposed();
+
+        var storage = StorageFor<T>();
+        storage.Store(this, entity, version);
+        var op = storage.Upsert(entity, this, TenantId);
+        _workTracker.Add(op);
+    }
+
+    public void UpdateRevision<T>(T entity, long revision) where T : notnull
+    {
+        assertNotDisposed();
+
+        var storage = StorageFor<T>();
+        storage.Store(this, entity, revision);
+        var op = storage.Upsert(entity, this, TenantId);
+        if (op is IRevisionedOperation r)
+        {
+            r.Revision = revision;
+        }
+
+        _workTracker.Add(op);
+    }
+
+    public void TryUpdateRevision<T>(T entity, long revision) where T : notnull
+    {
+        assertNotDisposed();
+
+        var storage = StorageFor<T>();
+        storage.Store(this, entity, revision);
+        var op = storage.Upsert(entity, this, TenantId);
+        if (op is IRevisionedOperation r)
+        {
+            r.Revision = revision;
+            r.IgnoreConcurrencyViolation = true;
+        }
+
+        _workTracker.Add(op);
+    }
+
+    public void Insert<T>(IEnumerable<T> entities) where T : notnull
+    {
+        Insert(entities.ToArray());
+    }
+
+    public void Insert<T>(params T[] entities) where T : notnull
+    {
+        assertNotDisposed();
+
+        ArgumentNullException.ThrowIfNull(entities);
+
+        if (typeof(T).IsGenericEnumerable())
+        {
+            throw new ArgumentOutOfRangeException(typeof(T).Name,
+                "Do not use IEnumerable<T> here as the document type. You may need to cast entities to an array instead.");
+        }
+
+        if (typeof(T) == typeof(object))
+        {
+            InsertObjects(entities.OfType<object>());
+        }
+        else
+        {
+            var storage = StorageFor<T>();
+
+            foreach (var entity in entities)
+            {
+                storage.Store(this, entity);
+                var op = storage.Insert(entity, this, TenantId);
+                if (op is IRevisionedOperation r)
+                {
+                    r.Revision = 1;
+                }
+
+                QueueInsertOperation(op, entity, typeof(T));
+            }
+        }
+    }
+
+    /// <summary>
+    ///     #4685 PR 3 — chokepoint for queueing document insert operations. When the session's
+    ///     work tracker is a rebuild-mode <see cref="ProjectionUpdateBatch"/> with
+    ///     <see cref="Events.Projections.ProjectionOptions.RebuildWithBulkCopy"/> enabled, the
+    ///     insert travels wrapped in a <see cref="BulkCopyableInsert"/> that carries the
+    ///     document and this session's tenant id (per-tenant daemon sessions share the batch as
+    ///     their tracker, so the tenant can't be recovered from the batch side), making it
+    ///     eligible for the BulkWriter (binary COPY) flush. Everything else queues the raw
+    ///     operation exactly as before.
+    /// </summary>
+    internal void QueueInsertOperation(Weasel.Storage.IStorageOperation op, object document, Type documentType)
+    {
+        if (_workTracker is ProjectionUpdateBatch { AcceptsBulkInserts: true })
+        {
+            _workTracker.Add(new BulkCopyableInsert(op, document, documentType, TenantId));
+            return;
+        }
+
+        _workTracker.Add(op);
+    }
+
+    public void Update<T>(IEnumerable<T> entities) where T : notnull
+    {
+        Update(entities.ToArray());
+    }
+
+    public void Update<T>(params T[] entities) where T : notnull
+    {
+        assertNotDisposed();
+
+        ArgumentNullException.ThrowIfNull(entities);
+
+        if (typeof(T).IsGenericEnumerable())
+        {
+            throw new ArgumentOutOfRangeException(typeof(T).Name,
+                "Do not use IEnumerable<T> here as the document type. You may need to cast entities to an array instead.");
+        }
+
+        if (typeof(T) == typeof(object))
+        {
+            InsertObjects(entities.OfType<object>());
+        }
+        else
+        {
+            var storage = StorageFor<T>();
+
+            if (Concurrency == ConcurrencyChecks.Disabled && storage.UseOptimisticConcurrency)
+            {
+                foreach (var entity in entities)
+                {
+                    storage.Store(this, entity);
+                    var op = storage.Update(entity, this, TenantId);
+                    _workTracker.Add(op);
+                }
+            }
+            else
+            {
+                foreach (var entity in entities)
+                {
+                    storeEntity(entity, storage);
+                    var op = storage.Update(entity, this, TenantId);
+                    _workTracker.Add(op);
+                }
+            }
+        }
+    }
+
+    public void InsertObjects(IEnumerable<object> documents)
+    {
+        assertNotDisposed();
+
+        documents.Where(x => x != null).GroupBy(x => x.GetType()).Each(group =>
+        {
+            // 9.0 (#4373): delegate-cached factory keyed on document type.
+            var handler = GenericFactoryCache.BuildAs<IObjectHandler>(
+                typeof(InsertHandler<>),
+                group.Key,
+                static closed => () => (IObjectHandler)Activator.CreateInstance(closed)!);
+            handler.Execute(this, group);
+        });
+    }
+
+    public void QueueSqlCommand(string sql, params object[] parameterValues)
+    {
+        QueueSqlCommand(DefaultParameterPlaceholder, sql, parameterValues);
+    }
+
+    public void QueueSqlCommand(char placeholder, string sql, params object[] parameterValues)
+    {
+        sql = sql.TrimEnd(';');
+        if (sql.Contains(';'))
+        {
+            throw new ArgumentOutOfRangeException(nameof(sql),
+                "You must specify one SQL command at a time because of Marten's usage of command batching. ';' cannot be used as a command separator here.");
+        }
+
+        var operation = new ExecuteSqlStorageOperation(placeholder, sql, parameterValues);
+        QueueOperation(operation);
+    }
+
+    public IUnitOfWork PendingChanges => _workTracker;
+
+    public void StoreObjects(IEnumerable<object> documents)
+    {
+        assertNotDisposed();
+
+        var documentsGroupedByType = documents
+            .Where(x => x != null)
+            .GroupBy(x => x.GetType());
+
+        foreach (var group in documentsGroupedByType)
+        {
+            // 9.0 (#4373): delegate-cached factory keyed on document type.
+            var handler = GenericFactoryCache.BuildAs<IObjectHandler>(
+                typeof(StoreHandler<>),
+                group.Key,
+                static closed => () => (IObjectHandler)Activator.CreateInstance(closed)!);
+            handler.Execute(this, group);
+        }
+    }
+
+    public new Marten.Events.IEventStoreOperations Events => (Marten.Events.IEventStoreOperations)base.Events;
+
+    // jasperfx#669: the write tier of the store-agnostic Events accessor. C# interface
+    // implementation is NOT return-type covariant, so the public property above -- typed as
+    // Marten.Events.IEventStoreOperations, which *derives* from the JasperFx one -- does not
+    // satisfy IDocumentSessionOperations.Events. Without this line the member silently binds to
+    // the interface's throwing default implementation, with no compile error anywhere; only a test
+    // calling through a contract-typed session notices. Pinned by DocumentSessionEventsCompliance.
+    JasperFx.Events.IEventStoreOperations JasperFx.Events.Documents.IDocumentSessionOperations.Events => Events;
+
+    // jasperfx#673 (#5250): the StreamActions this session has enlisted but not yet committed, so a
+    // store-agnostic listener or pre-commit hook can read what is about to be written without naming
+    // a store. Same non-covariance trap as the Events accessor above -- PendingChanges.Streams()
+    // returns IList<StreamAction>, and IList<T> is NOT assignable to IReadOnlyList<T>, so the public
+    // surface does not satisfy this member and it would otherwise bind to the interface's throwing
+    // default with no compile error anywhere. Pinned by PendingStreamActionsCompliance.
+    //
+    // Forwards to the work tracker's backing List<StreamAction> rather than PendingChanges.Streams()
+    // .ToArray(): a concrete List<T> DOES implement IReadOnlyList<T>, so this costs no per-call
+    // allocation. That makes it a live view rather than a snapshot, which the contract explicitly
+    // allows -- it says a store may hand back either, and that a caller needing stability across
+    // further appends should copy. The tracker clears this same list on commit rather than replacing
+    // it, so the "committing clears the collection" fact holds through the live view.
+    IReadOnlyList<StreamAction> JasperFx.Events.Documents.IDocumentSessionOperations.PendingStreams
+        => _workTracker.Streams;
+
+
+    public void QueueOperation(Weasel.Storage.IStorageOperation storageOperation)
+    {
+        _workTracker.Add(storageOperation);
+    }
+
+    public virtual void Eject<T>(T document) where T : notnull
+    {
+        StorageFor<T>().Eject(this, document);
+        _workTracker.Eject(document);
+
+        ChangeTrackers.RemoveAll(x => ReferenceEquals(document, x.Document));
+    }
+
+    public virtual void EjectAllOfType(Type type)
+    {
+        ItemMap.Remove(type);
+
+        _workTracker.EjectAllOfType(type);
+
+        ChangeTrackers.RemoveAll(x => x.Document.GetType().CanBeCastTo(type));
+    }
+
+    /// <summary>
+    /// Lazily-computed per-session cache of the JSON-encoded <see cref="Headers"/> dictionary,
+    /// invalidated whenever <see cref="SetHeader"/> mutates the contents. Storage operations
+    /// that bind the headers as a JSONB parameter use this to skip re-serializing on every
+    /// queued op in a batch — under load a single SaveChanges with N tagged operations can
+    /// otherwise serialize the same dictionary N times. See <see cref="GetCachedSerializedHeaders"/>.
+    /// </summary>
+    private byte[]? _serializedHeadersCache;
+
+    public void SetHeader(string key, object value)
+    {
+        Headers ??= new Dictionary<string, object>();
+
+        Headers[key] = value;
+        _serializedHeadersCache = null; // invalidate cached bytes
+    }
+
+    /// <summary>
+    /// Returns the JSON bytes for the session's current <see cref="Headers"/> dictionary,
+    /// computing and caching on first call. Returns <c>null</c> when there are no headers.
+    /// </summary>
+    public override byte[]? TryGetCachedSerializedHeaders() => GetCachedSerializedHeaders();
+
+    internal byte[]? GetCachedSerializedHeaders()
+    {
+        if (Headers is null || Headers.Count == 0) return null;
+
+        if (_serializedHeadersCache is not null) return _serializedHeadersCache;
+
+        using var buffer = new Services.PooledByteBufferWriter();
+        Serializer.WriteTo(buffer, Headers);
+        _serializedHeadersCache = buffer.ToSizedArray();
+        return _serializedHeadersCache;
+    }
+
+    public object? GetHeader(string key)
+    {
+        return Headers?.TryGetValue(key, out var value) ?? false ? value : null;
+    }
+
+    /// <summary>
+    ///     Access data from another tenant and apply document or event updates to this
+    ///     IDocumentSession for a separate tenant
+    /// </summary>
+    /// <param name="tenantId"></param>
+    /// <returns></returns>
+    public new ITenantOperations ForTenant(string tenantId)
+    {
+        // #5516: before anything keys off it. Untouched, the raw id became the cache key, the argument to
+        // IsTenantStoredInCurrentDatabase, AND the Tenant the nested session stamps its writes with — so
+        // ForTenant("RED") under ForceLowerCase wrote tenant_id = 'RED' rows that LightweightSession("RED")
+        // could never read back, because that path does normalise.
+        tenantId = DocumentStore.Options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+
+        _byTenant ??= new Dictionary<string, NestedTenantSession>();
+
+        if (_byTenant.TryGetValue(tenantId, out var tenantSession))
+        {
+            return tenantSession;
+        }
+
+        var isValid = DocumentStore.Options.Tenancy.IsTenantStoredInCurrentDatabase(Database, tenantId);
+        if (!isValid)
+        {
+            throw new InvalidTenantForDatabaseException(tenantId, Database);
+        }
+
+        var tenant = new Tenant(tenantId, Database);
+        tenantSession = new NestedTenantSession(this, tenant);
+        _byTenant[tenantId] = tenantSession;
+
+        return tenantSession;
+    }
+
+    protected override Marten.Events.IQueryEventStore CreateEventStore(DocumentStore store, Tenant tenant)
+    {
+        return new EventStore(this, store, tenant);
+    }
+
+    protected internal abstract void ejectById<T>(long id) where T : notnull;
+    protected internal abstract void ejectById<T>(int id) where T : notnull;
+    protected internal abstract void ejectById<T>(Guid id) where T : notnull;
+    protected internal abstract void ejectById<T>(string id) where T : notnull;
+
+    protected internal virtual void processChangeTrackers()
+    {
+        // Nothing
+    }
+
+    protected internal virtual void resetDirtyChecking()
+    {
+        // Nothing
+    }
+
+    private void store<T>(IEnumerable<T> entities) where T : notnull
+    {
+        assertNotDisposed();
+
+        if (typeof(T) == typeof(object))
+        {
+            StoreObjects(entities.OfType<object>());
+        }
+        else
+        {
+            var storage = StorageFor<T>();
+
+            if (Concurrency == ConcurrencyChecks.Disabled &&
+                (storage.UseOptimisticConcurrency || storage.UseNumericRevisions))
+            {
+                foreach (var entity in entities)
+                {
+                    // Put it in the identity map -- if necessary
+                    storage.Store(this, entity);
+
+                    var overwrite = storage.Overwrite(entity, this, TenantId);
+
+                    _workTracker.Add(overwrite);
+                }
+            }
+            else
+            {
+                foreach (var entity in entities)
+                {
+                    storeEntity(entity, storage);
+
+                    var upsert = storage.Upsert(entity, this, TenantId);
+
+                    _workTracker.Add(upsert);
+                }
+            }
+        }
+    }
+
+    private void storeEntity<T>(T entity, IDocumentStorage<T> storage) where T : notnull
+    {
+        switch (entity)
+        {
+            case IVersioned versioned when versioned.Version != Guid.Empty:
+                storage.Store(this, entity, versioned.Version);
+                return;
+            case IRevisioned revisioned when revisioned.Version != 0:
+                storage.Store(this, entity, revisioned.Version);
+                return;
+            case ILongVersioned longVersioned when longVersioned.Version != 0:
+                storage.Store(this, entity, longVersioned.Version);
+                return;
+        }
+
+        // #5372: a member mapped with Metadata.Version.MapTo(...) / Metadata.Revision.MapTo(...)
+        // carries the expected version exactly as the marker interfaces above do, but the session
+        // sees the storage only as IDocumentStorage<T>. Weasel 9.32.0 (weasel#590) puts the question
+        // on that interface as a default member returning null, so this is virtual dispatch and not a
+        // type test on the storage: a decorator that forwards is correct by construction, and one
+        // that does not cannot silently answer on behalf of its inner storage.
+        //
+        // The marker cases stay first and keep their exact behaviour. They cannot disagree with the
+        // mapped member anyway -- VersionedPolicy sets Metadata.Version.Member to the interface's own
+        // property -- so this only reaches documents that map a member without implementing a marker.
+        if (storage.MappedVersionFor(entity) is { } mappedVersion && mappedVersion != Guid.Empty)
+        {
+            storage.Store(this, entity, mappedVersion);
+            return;
+        }
+
+        if (storage.MappedRevisionFor(entity) is { } mappedRevision && mappedRevision != 0)
+        {
+            storage.Store(this, entity, mappedRevision);
+            return;
+        }
+
+        // Put it in the identity map -- if necessary
+        storage.Store(this, entity);
+    }
+
+    public void EjectPatchedTypes(IUnitOfWork changes)
+    {
+        var patchedTypes = changes.Operations().Where(x => x.Role() == OperationRole.Patch).Select(x => x.DocumentType)
+            .Distinct().ToArray();
+        foreach (var type in patchedTypes) EjectAllOfType(type);
+    }
+
+    internal void StoreDocumentInItemMap<TDoc, TId>(TId id, TDoc document) where TDoc : class where TId : notnull
+    {
+        if (ItemMap.TryGetValue(typeof(TDoc), out var existing))
+        {
+            if (existing is Dictionary<TId, TDoc> typedDict)
+            {
+                typedDict[id] = document;
+            }
+            // else: The identity map was created with a different key type (e.g., a strong-typed ID
+            // like PaymentId while TId is Guid). The document is already stored by the inline
+            // projection under the strong-typed key, so we skip storing it again to avoid
+            // replacing the dictionary with an incompatible key type.
+        }
+        else
+        {
+            var dict = new Dictionary<TId, TDoc>();
+            dict[id] = document;
+            ItemMap[typeof(TDoc)] = dict;
+        }
+    }
+
+    internal bool TryGetAggregateFromIdentityMap<TDoc, TId>(TId id, [NotNullWhen(true)] out TDoc? document)
+        where TDoc : notnull where TId : notnull
+    {
+        if (Options.EventGraph.UseIdentityMapForAggregates)
+        {
+            if (ItemMap.TryGetValue(typeof(TDoc), out var raw))
+            {
+                if (raw is Dictionary<TId, TDoc> dict)
+                {
+                    if (dict.TryGetValue(id, out var doc))
+                    {
+                        document = doc;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        document = default;
+        return false;
+    }
+
+    internal void EjectAggregateFromIdentityMap<TDoc, TId>(TId id)
+        where TDoc : notnull where TId : notnull
+    {
+        if (ItemMap.TryGetValue(typeof(TDoc), out var raw) && raw is Dictionary<TId, TDoc> dict)
+        {
+            dict.Remove(id);
+        }
+    }
+
+    internal interface IObjectHandler
+    {
+        void Execute(IDocumentSession session, IEnumerable<object> objects);
+    }
+
+    internal class StoreHandler<T>: IObjectHandler where T : notnull
+    {
+        public void Execute(IDocumentSession session, IEnumerable<object> objects)
+        {
+            // Delegate to the Store<T>() method
+            session.Store(objects.OfType<T>().ToArray());
+        }
+    }
+
+    internal class InsertHandler<T>: IObjectHandler where T : notnull
+    {
+        public void Execute(IDocumentSession session, IEnumerable<object> objects)
+        {
+            session.Insert(objects.OfType<T>().ToArray());
+        }
+    }
+
+    internal class DeleteHandler<T>: IObjectHandler where T : notnull
+    {
+        public void Execute(IDocumentSession session, IEnumerable<object> objects)
+        {
+            foreach (var document in objects.OfType<T>()) session.Delete(document);
+        }
+    }
+}

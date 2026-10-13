@@ -1,0 +1,538 @@
+using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
+using Wolverine.Configuration;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.RabbitMQ.Internal;
+
+public class RabbitMqTransportExpression : BrokerExpression<RabbitMqTransport, RabbitMqQueue, RabbitMqEndpoint,
+    RabbitMqListenerConfiguration, RabbitMqSubscriberConfiguration, RabbitMqTransportExpression>
+{
+    public RabbitMqTransportExpression(RabbitMqTransport transport, WolverineOptions options) : base(transport, options)
+    {
+    }
+
+    /// <summary>
+    /// When enabled, Wolverine will publish failed messages to the dead letter queue
+    /// with exception metadata headers (exception type, message, stack trace, timestamp)
+    /// instead of using RabbitMQ's native NACK-based dead lettering. This enables richer
+    /// error information at the cost of not using native RabbitMQ dead letter exchange mechanisms.
+    /// </summary>
+    public RabbitMqTransportExpression EnableEnhancedDeadLettering()
+    {
+        Transport.UseEnhancedDeadLettering = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Opt into making Wolverine "auto ping" new listeners by trying to send a fake Wolverine "ping" message
+    /// This *might* assist in Wolverine auto-starting rabbit mq connections that have failed on the Rabbit MQ side
+    /// Experimental
+    /// </summary>
+    public RabbitMqTransportExpression AutoPingListeners()
+    {
+        Transport.AutoPingListeners = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Override the sending logic behavior for unknown or missing tenant ids when
+    /// using multi-tenanted brokers / virtual hosts
+    /// </summary>
+    /// <param name="tenantedIdBehavior"></param>
+    /// <returns></returns>
+    public RabbitMqTransportExpression TenantIdBehavior(TenantedIdBehavior tenantedIdBehavior)
+    {
+        Transport.TenantedIdBehavior = tenantedIdBehavior;
+        return this;
+    }
+
+    /// <summary>
+    /// Add a separate Rabbit MQ connection for a specific tenant to a separate virtual
+    /// host
+    /// </summary>
+    /// <param name="tenantId"></param>
+    /// <param name="virtualHostName"></param>
+    /// <returns></returns>
+    public RabbitMqTransportExpression AddTenant(string tenantId, string virtualHostName)
+    {
+        Transport.Tenants[tenantId] = new RabbitMqTenant(tenantId, virtualHostName);
+        return this;
+    }
+
+    public RabbitMqTransportExpression AddTenant(string tenantId, Uri connectionUri)
+    {
+        var transport = new RabbitMqTransport();
+        transport.ConfigureFactory(f => f.Uri = connectionUri);
+        Transport.Tenants[tenantId] = new RabbitMqTenant(tenantId, transport);
+        return this;
+    }
+
+    public RabbitMqTransportExpression AddTenant(string tenantId, Action<ConnectionFactory> configure)
+    {
+        var transport = new RabbitMqTransport();
+        transport.ConfigureFactory(configure);
+        Transport.Tenants[tenantId] = new RabbitMqTenant(tenantId, transport);
+        return this;
+    }
+
+    /// <summary>
+    /// Make any necessary customizations to the Rabbit MQ client's ConnectionFactory
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public RabbitMqTransportExpression ConfigureConnection(Action<ConnectionFactory> configure)
+    {
+        if (configure == null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
+
+        configure(Transport.ConnectionFactory!);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Allows customization of the RabbitMQ client's channel creation behavior using the provided configuration options.
+    /// </summary>
+    /// <param name="configure">A delegate to configure <see cref="WolverineRabbitMqChannelOptions"/> for channel creation.</param>
+    /// <returns>Returns the current <see cref="RabbitMqTransportExpression"/> instance to allow method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the <paramref name="configure"/> parameter is null.</exception>
+    public RabbitMqTransportExpression ConfigureChannelCreation(Action<WolverineRabbitMqChannelOptions> configure)
+    {
+        if (configure == null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
+
+        Transport.ChannelCreationOptions += configure;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Add a RabbitMQ cluster node. Wolverine passes all configured nodes to the
+    /// RabbitMQ client, which selects one and handles failover between them. If
+    /// TLS is configured on the ConnectionFactory, the same SslOption values
+    /// are copied onto the new endpoint as a fresh SslOption instance, so TLS
+    /// applies to all cluster nodes by default. To control TLS or any other
+    /// AmqpTcpEndpoint setting per node, use the
+    /// <see cref="AddClusterNode(AmqpTcpEndpoint)"/> overload instead.
+    /// </summary>
+    /// <param name="hostName">Hostname of the broker node.</param>
+    /// <param name="port">Port. Defaults to -1, which the AmqpTcpEndpoint constructor
+    /// resolves to 5672 (or 5671 when TLS is enabled).</param>
+    public RabbitMqTransportExpression AddClusterNode(string hostName, int port = -1)
+    {
+        if (Transport.ConnectionFactory == null)
+        {
+            throw new InvalidOperationException(
+                "Call UseRabbitMq(...) or UseRabbitMqUsingNamedConnection(...) before adding cluster nodes so that connection settings (TLS, credentials) can be inherited.");
+        }
+
+        var ssl = CloneSslOption(Transport.ConnectionFactory.Ssl);
+        Transport.AmqpTcpEndpoints.Add(new AmqpTcpEndpoint(hostName, port, ssl));
+        return this;
+    }
+
+    /// <summary>
+    /// Add a RabbitMQ cluster node with full per-node control (e.g. per-node TLS
+    /// or non-default port). The supplied AmqpTcpEndpoint is used as-is — no
+    /// values are inherited from the ConnectionFactory.
+    /// </summary>
+    public RabbitMqTransportExpression AddClusterNode(AmqpTcpEndpoint endpoint)
+    {
+        if (endpoint == null)
+        {
+            throw new ArgumentNullException(nameof(endpoint));
+        }
+
+        if (Transport.ConnectionFactory == null)
+        {
+            throw new InvalidOperationException(
+                "Call UseRabbitMq(...) or UseRabbitMqUsingNamedConnection(...) before adding cluster nodes so that connection settings (TLS, credentials) can be inherited.");
+        }
+
+        Transport.AmqpTcpEndpoints.Add(endpoint);
+        return this;
+    }
+
+    private static SslOption CloneSslOption(SslOption? source)
+    {
+        if (source == null) return new SslOption();
+
+        return new SslOption
+        {
+            Enabled = source.Enabled,
+            ServerName = source.ServerName,
+            CertPath = source.CertPath,
+            CertPassphrase = source.CertPassphrase,
+            AcceptablePolicyErrors = source.AcceptablePolicyErrors,
+            Version = source.Version,
+            CheckCertificateRevocation = source.CheckCertificateRevocation,
+            CertificateValidationCallback = source.CertificateValidationCallback,
+            CertificateSelectionCallback = source.CertificateSelectionCallback
+        };
+    }
+
+    protected override RabbitMqListenerConfiguration createListenerExpression(RabbitMqQueue listenerEndpoint)
+    {
+        return new RabbitMqListenerConfiguration(listenerEndpoint, Transport);
+    }
+
+    protected override RabbitMqSubscriberConfiguration createSubscriberExpression(RabbitMqEndpoint subscriberEndpoint)
+    {
+        return new RabbitMqSubscriberConfiguration(subscriberEndpoint);
+    }
+
+    public BindingExpression BindExchange(string exchangeName, Action<IRabbitMqExchange>? configure = null)
+    {
+        DeclareExchange(exchangeName, configure);
+        return new BindingExpression(exchangeName, this);
+    }
+
+    /// <summary>
+    ///     Opt into using conventional Rabbit MQ routing based on the message types
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseConventionalRouting(
+        Action<RabbitMqMessageRoutingConvention>? configure = null)
+    {
+        var convention = new RabbitMqMessageRoutingConvention
+        {
+            BoundTransport = Transport
+        };
+        configure?.Invoke(convention);
+        Options.RoutingConventions.Add(convention);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Opt into using conventional Rabbit MQ routing with the specified naming source.
+    ///     Using <see cref="NamingSource.FromHandlerType"/> is appropriate for modular monolith
+    ///     scenarios where you have more than one handler for a given message type.
+    /// </summary>
+    /// <param name="namingSource"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseConventionalRouting(NamingSource namingSource,
+        Action<RabbitMqMessageRoutingConvention>? configure = null)
+    {
+        var convention = new RabbitMqMessageRoutingConvention
+        {
+            BoundTransport = Transport
+        };
+        convention.UseNaming(namingSource);
+        configure?.Invoke(convention);
+        Options.RoutingConventions.Add(convention);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Declare a new exchange without impacting message routing or listening. The default exchange type is "fan out". This
+    ///     does not respect identifier prefixes!
+    /// </summary>
+    /// <param name="exchangeName"></param>
+    /// <param name="configure"></param>
+    public RabbitMqTransportExpression DeclareExchange(string exchangeName,
+        Action<IRabbitMqBindableExchange>? configure = null)
+    {
+        var config = new RabbitMqExchangeConfigurationExpression(exchangeName, Transport);
+        configure?.Invoke(config);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Declare a binding from a Rabbit Mq exchange to a Rabbit MQ queue. This does not respect identifier prefixes!
+    /// </summary>
+    /// <param name="exchangeName"></param>
+    /// <returns></returns>
+    public BindingExpression BindExchange(string exchangeName, ExchangeType exchangeType)
+    {
+        return BindExchange(exchangeName, e => e.ExchangeType = exchangeType);
+    }
+
+    /// <summary>
+    ///     Declare that a queue should be created with the supplied name and optional configuration. . This does not respect
+    ///     identifier prefixes!
+    /// </summary>
+    /// <param name="queueName"></param>
+    /// <param name="configure"></param>
+    public RabbitMqTransportExpression DeclareQueue(string queueName, Action<IRabbitMqQueue>? configure = null)
+    {
+        var queue = Transport.Queues[queueName];
+        configure?.Invoke(queue);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Disable Wolverine's automatic dead letter queue setup, so it will not override
+    /// dead letter queue exchange usage per queue or try to create Rabbit Mq objects for
+    /// dead letter queueing
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public RabbitMqTransportExpression DisableDeadLetterQueueing()
+    {
+        Transport.DeadLetterQueue.Mode = DeadLetterQueueMode.WolverineStorage;
+        Transport.Exchanges.Remove(Transport.DeadLetterQueue.ExchangeName);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Enable a background listener on the RabbitMQ dead letter queue that recovers
+    /// dead-lettered messages into Wolverine's persistent dead letter storage (database).
+    /// This bridges RabbitMQ's native DLX with Wolverine's database-backed DLQ management,
+    /// enabling tools like CritterWatch to query, replay, and discard dead letters.
+    /// Use this when you want native RabbitMQ dead lettering AND database-backed DLQ visibility.
+    /// </summary>
+    public RabbitMqTransportExpression EnableDeadLetterQueueRecovery()
+    {
+        Transport.EnableDeadLetterQueueRecovery = true;
+        ensureRecoveryServicesRegistered();
+        return this;
+    }
+
+    /// <summary>
+    /// Enable a background listener on specific RabbitMQ dead letter queues that recovers
+    /// dead-lettered messages into Wolverine's persistent dead letter storage (database).
+    /// Use this overload when you have custom DLQ queue names beyond the default
+    /// wolverine-dead-letter-queue.
+    /// </summary>
+    /// <param name="queueNames">One or more RabbitMQ queue names to listen to for dead letter recovery</param>
+    public RabbitMqTransportExpression EnableDeadLetterQueueRecovery(params string[] queueNames)
+    {
+        Transport.EnableDeadLetterQueueRecovery = true;
+        var settings = ensureRecoveryServicesRegistered();
+        foreach (var name in queueNames)
+        {
+            if (!settings.QueueNames.Contains(name))
+            {
+                settings.QueueNames.Add(name);
+            }
+        }
+        return this;
+    }
+
+    private DeadLetterQueueRecoverySettings ensureRecoveryServicesRegistered()
+    {
+        // Check if already registered by looking for existing settings
+        var existing = Options.Services
+            .Where(s => s.ServiceType == typeof(DeadLetterQueueRecoverySettings))
+            .Select(s => s.ImplementationInstance)
+            .OfType<DeadLetterQueueRecoverySettings>()
+            .FirstOrDefault();
+
+        if (existing != null) return existing;
+
+        var settings = new DeadLetterQueueRecoverySettings();
+        Options.Services.AddSingleton(settings);
+        Options.Services.AddSingleton(Transport);
+        Options.Services.AddHostedService<DeadLetterQueueListener>();
+        return settings;
+    }
+
+    /// <summary>
+    /// Disable Wolverine's automatic Request/Reply queue declaration for a specific node
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression DisableSystemRequestReplyQueueDeclaration()
+    {
+        Transport.DeclareRequestReplySystemQueue = false;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Turn on listener connection only in case if you only need to listen for messages
+    /// The sender connection won't be activated in this case
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseListenerConnectionOnly()
+    {
+        Transport.UseListenerConnectionOnly = true;
+        Transport.UseSenderConnectionOnly = false;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Turn on sender connection only in case if you only need to send messages
+    /// The listener connection won't be created in this case
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseSenderConnectionOnly()
+    {
+        Transport.UseSenderConnectionOnly = true;
+        Transport.UseListenerConnectionOnly = false;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Direct Rabbit MQ queues as the control queues between Wolverine nodes
+    /// This is more efficient than the built in Wolverine database control
+    /// queues if Rabbit MQ is an option
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression EnableWolverineControlQueues()
+    {
+        var queueName = "wolverine.control." + Options.Durability.AssignedNodeNumber;
+        var queue = new RabbitMqQueue(queueName, Transport, EndpointRole.System)
+        {
+            AutoDelete = true,
+            IsDurable = true,
+            IsListener = true,
+            IsUsedForReplies = true,
+            ListenerCount = 5,
+            EndpointName = "Control",
+            QueueType = QueueType.classic,
+        };
+
+        // CLEAR OUT ANY DLQ here!
+        queue.DeadLetterQueue = null;
+
+        queue.Arguments["x-expires"] = 180000;
+
+        Transport.Queues[queueName] = queue;
+
+        Options.Transports.NodeControlEndpoint = queue;
+
+        return this;
+    }
+
+    public class BindingExpression
+    {
+        private readonly string _exchangeName;
+        private readonly RabbitMqTransportExpression _parent;
+
+        internal BindingExpression(string exchangeName, RabbitMqTransportExpression parent)
+        {
+            _exchangeName = exchangeName;
+            _parent = parent;
+        }
+
+        /// <summary>
+        ///     Bind the named exchange to a queue. The routing key will be
+        ///     [exchange name]_[queue name]
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure">Optional configuration of the Rabbit MQ queue</param>
+        public RabbitMqTransportExpression ToQueue(string queueName, Action<IRabbitMqQueue>? configure = null)
+        {
+            ToQueue(queueName, $"{_exchangeName}_{queueName}", configure);
+
+            return _parent;
+        }
+
+        /// <summary>
+        ///     Bind the named exchange to a queue with a user supplied binding key
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="bindingKey"></param>
+        /// <param name="configure">Optional configuration of the Rabbit MQ queue</param>
+        /// <param name="arguments">Optional configuration for arguments to the Rabbit MQ binding</param>
+        public RabbitMqTransportExpression ToQueue(string queueName, string bindingKey,
+            Action<IRabbitMqQueue>? configure = null, Dictionary<string, object>? arguments = null)
+        {
+            _parent.DeclareQueue(queueName, configure);
+            var queue = _parent.Transport.Queues[queueName];
+            var exchange = _parent.Transport.Exchanges[_exchangeName];
+            if (exchange.ExchangeType is ExchangeType.Direct)
+                exchange.DirectRoutingKey = bindingKey;
+            queue.BindExchange(exchange.Name, bindingKey, arguments);
+
+            return _parent;
+        }
+
+        /// <summary>
+        ///     Bind the named exchange to a destination exchange. The binding key will be
+        ///     [source exchange name]_[destination exchange name]
+        /// </summary>
+        /// <param name="destinationExchangeName"></param>
+        /// <param name="configure">Optional configuration of the destination Rabbit MQ exchange</param>
+        public RabbitMqTransportExpression ToExchange(string destinationExchangeName,
+            Action<IRabbitMqExchange>? configure = null)
+        {
+            return ToExchange(destinationExchangeName, $"{_exchangeName}_{destinationExchangeName}", configure);
+        }
+
+        /// <summary>
+        ///     Bind the named exchange to a destination exchange with a user supplied binding key
+        /// </summary>
+        /// <param name="destinationExchangeName"></param>
+        /// <param name="bindingKey"></param>
+        /// <param name="configure">Optional configuration of the destination Rabbit MQ exchange</param>
+        /// <param name="arguments">Optional configuration for arguments to the Rabbit MQ binding</param>
+        public RabbitMqTransportExpression ToExchange(string destinationExchangeName, string bindingKey,
+            Action<IRabbitMqExchange>? configure = null, Dictionary<string, object>? arguments = null)
+        {
+            _parent.DeclareExchange(destinationExchangeName, configure);
+            var destinationExchange = _parent.Transport.Exchanges[destinationExchangeName];
+            destinationExchange.BindExchange(_exchangeName, bindingKey, arguments);
+
+            return _parent;
+        }
+    }
+
+    /// <summary>
+    /// Customize the dead letter queueing to override the exchange or queue setup
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public RabbitMqTransportExpression CustomizeDeadLetterQueueing(DeadLetterQueue dlq)
+    {
+        // copying because this is a fallback to other queues by reference
+        Transport.DeadLetterQueue.Mode = dlq.Mode;
+        Transport.DeadLetterQueue.QueueName = dlq.QueueName;
+        Transport.DeadLetterQueue.ExchangeName = dlq.ExchangeName;
+        Transport.DeadLetterQueue.BindingName = dlq.BindingName;
+        Transport.DeadLetterQueue.ConfigureQueue = dlq.ConfigureQueue;
+        Transport.DeadLetterQueue.ConfigureExchange = dlq.ConfigureExchange;
+
+        return this;
+    }
+
+    /// <summary>
+    /// All application Rabbit MQ queues declared by this application should be quorum queues unless explicitly
+    /// overridden. Wolverine's internal queues will still be "classic"
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseQuorumQueues()
+    {
+        Options.Policies.Add(new LambdaEndpointPolicy<RabbitMqQueue>((queue, _) =>
+        {
+            if (queue.Role == EndpointRole.Application)
+            {
+                queue.QueueType = QueueType.quorum;
+            }
+        }));
+        return this;
+    }
+    
+    /// <summary>
+    /// All Rabbit MQ queues declared by this application should be streams unless explicitly
+    /// overridden. Wolverine's internal queues will still be "classic"
+    /// </summary>
+    /// <returns></returns>
+    public RabbitMqTransportExpression UseStreamsAsQueues()
+    {
+        Options.Policies.Add(new LambdaEndpointPolicy<RabbitMqQueue>((queue, _) =>
+        {
+            if (queue.Role == EndpointRole.Application)
+            {
+                queue.QueueType = QueueType.stream;
+            }
+        }));
+        return this;
+    }
+}

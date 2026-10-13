@@ -1,0 +1,158 @@
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Runtime;
+
+namespace Wolverine.Core.FSharpContracts;
+
+/// <summary>
+///     The "milestone 0" contract for the F# code-generation foundation (issue GH-2969). A generated
+///     adapter implements this interface; the foundation fixture exercises the smallest possible real
+///     Wolverine frame (<see cref="Wolverine.Runtime.Handlers.MessageContextFrame" />) emitting F#.
+/// </summary>
+/// <remarks>
+///     <see cref="Run" /> takes the <see cref="IWolverineRuntime" /> as a method argument purely so the
+///     hand-built <c>GeneratedAssembly</c> can resolve it as an in-scope variable for
+///     <c>MessageContextFrame</c> without standing up the full handler-discovery pipeline. Phase A swaps
+///     this hand-built assembly for a real <c>HandlerGraph</c> rendering and richer F# handlers.
+/// </remarks>
+public interface IFoundationProbe
+{
+    void Run(IWolverineRuntime runtime);
+}
+
+// -----------------------------------------------------------------------------
+// Phase A handler surface (issue GH-2969): the smallest in-process handler that
+// exercises message extraction, simple validation (abort), and a cascading
+// message. The driver discovers NameHandler, renders its real Wolverine handler
+// chain to F#, and the fixture compiles the generated adapter against these
+// public types. (Authoring handlers in F# is the separate concern of #2968;
+// this audit only proves the codegen frames emit F#.)
+// -----------------------------------------------------------------------------
+
+/// <summary>The command handled by <see cref="NameHandler" />. The <c>[Audit]</c> member also
+/// exercises <c>AuditToActivityFrame</c>.</summary>
+public record CreateName([property: Audit] string Name);
+
+/// <summary>The event cascaded back out by <see cref="NameHandler" />.</summary>
+public record NameCreated(string Name);
+
+/// <summary>
+///     A minimal async in-process handler with simple validation + a cascading return. Produces, in
+///     chain order: message extraction, OTel tags, a <c>Validate</c> continuation (abort-if-invalid),
+///     the handler call, and a cascaded <see cref="NameCreated" />. Exercises the abort guard inside a
+///     <c>task { }</c> body.
+/// </summary>
+public class NameHandler
+{
+    public IEnumerable<string> Validate(CreateName command)
+    {
+        return string.IsNullOrWhiteSpace(command.Name)
+            ? new[] { "Name is required" }
+            : Array.Empty<string>();
+    }
+
+    public NameCreated Handle(CreateName command)
+    {
+        return new NameCreated(command.Name);
+    }
+}
+
+/// <summary>The command handled by <see cref="CheckThingHandler" />.</summary>
+public record CheckThing(string Value);
+
+/// <summary>
+///     A synchronous handler whose <c>Before</c> returns a <see cref="RequirementResult" />, exercising
+///     <c>RequirementResultHandlerFrame</c> and the non-<c>task { }</c> abort path (the method returns
+///     <c>Task</c> and the abort branch yields <c>Task.CompletedTask</c>).
+/// </summary>
+public class CheckThingHandler
+{
+    public RequirementResult Before(CheckThing command)
+    {
+        return string.IsNullOrEmpty(command.Value)
+            ? new RequirementResult(HandlerContinuation.Stop, new[] { "Value is required" })
+            : RequirementResult.AllGood();
+    }
+
+    public void Handle(CheckThing command)
+    {
+    }
+}
+
+/// <summary>The command handled by <see cref="GateHandler" />.</summary>
+public record Gate(bool Ok);
+
+/// <summary>
+///     A synchronous handler whose <c>Before</c> returns a <see cref="HandlerContinuation" />,
+///     exercising <c>HandlerContinuationFrame</c>.
+/// </summary>
+public class GateHandler
+{
+    public HandlerContinuation Before(Gate command)
+    {
+        return command.Ok ? HandlerContinuation.Continue : HandlerContinuation.Stop;
+    }
+
+    public void Handle(Gate command)
+    {
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Phase B (issue GH-2969): a minimal in-memory stateful saga. Start creates the
+// saga state; Handle continues it. Exercises the Wolverine.Persistence.Sagas
+// frame set (saga-id resolution, create-new, load/assert-exists, store-or-delete)
+// against the default in-memory saga store — no external persistence.
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// TryFinallyWrapperFrame exercise (issue GH-2969): registering TickMiddleware
+// with both Before and Finally methods against TickHandler triggers the
+// TryFinallyWrapperFrame code path in MiddlewarePolicy.wrapBeforeFrame.
+// -----------------------------------------------------------------------------
+
+/// <summary>Command handled by <see cref="TickHandler" />.</summary>
+public record Tick(int Id);
+
+/// <summary>
+///     Middleware with a <c>Finally</c> method; when registered against <see cref="TickHandler" />
+///     it causes <see cref="Wolverine.Middleware.TryFinallyWrapperFrame" /> to wrap the Before call.
+/// </summary>
+public class TickMiddleware
+{
+    public void Before() { }
+    public void Finally() { }
+}
+
+/// <summary>Minimal handler to produce a chain that receives <see cref="TickMiddleware" />.</summary>
+public class TickHandler
+{
+    public void Handle(Tick command) { }
+}
+
+/// <summary>Starts a <see cref="CountingSaga" />.</summary>
+public record StartCount(string Id);
+
+/// <summary>Continues a <see cref="CountingSaga" />.</summary>
+public record IncrementCount(string Id);
+
+/// <summary>A minimal stateful saga over the in-memory store.</summary>
+public class CountingSaga : Saga
+{
+    public string? Id { get; set; }
+    public int Count { get; set; }
+
+    public static CountingSaga Start(StartCount command)
+    {
+        return new CountingSaga { Id = command.Id };
+    }
+
+    public void Handle(IncrementCount command)
+    {
+        Count++;
+        if (Count >= 3)
+        {
+            MarkCompleted();
+        }
+    }
+}

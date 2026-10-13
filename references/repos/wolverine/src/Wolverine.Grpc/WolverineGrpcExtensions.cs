@@ -1,0 +1,310 @@
+using System.Reflection;
+using Grpc.AspNetCore.Server;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.Core.Reflection;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Wolverine.Configuration;
+using Wolverine.Configuration.Capabilities;
+using Wolverine.Runtime;
+
+namespace Wolverine.Grpc;
+
+/// <summary>
+/// Extension methods for integrating Wolverine with ASP.NET Core gRPC services.
+/// </summary>
+public static class WolverineGrpcExtensions
+{
+    // Cache the open-generic MapGrpcService<TService> method to avoid repeated reflection.
+    private static readonly MethodInfo MapGrpcServiceMethod =
+        typeof(GrpcEndpointRouteBuilderExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(m => m.Name == nameof(GrpcEndpointRouteBuilderExtensions.MapGrpcService)
+                         && m.IsGenericMethodDefinition
+                         && m.GetParameters().Length == 1);
+
+    /// <summary>
+    /// Adds Wolverine's gRPC integration to the service collection. This method
+    /// registers the Wolverine-gRPC infrastructure. Callers must also register a
+    /// gRPC host separately — use <c>services.AddCodeFirstGrpc()</c> for code-first
+    /// services or <c>services.AddGrpc()</c> for proto-first services.
+    /// </summary>
+    /// <remarks>
+    /// The call is idempotent — only the first invocation wires registrations,
+    /// subsequent calls are no-ops (matching <c>opts.UseGrpcRichErrorDetails()</c>'s
+    /// marker pattern). Without this guard, repeat calls would stack the
+    /// <see cref="WolverineGrpcExceptionInterceptor"/> twice, doubling exception
+    /// translation work and log output.
+    /// </remarks>
+    public static IServiceCollection AddWolverineGrpc(this IServiceCollection services)
+        => AddWolverineGrpc(services, configure: null);
+
+    /// <summary>
+    /// Adds Wolverine's gRPC integration to the service collection and applies caller-supplied
+    /// configuration to the singleton <see cref="WolverineGrpcOptions"/>. Idempotent — repeat
+    /// invocations re-run <paramref name="configure"/> against the same options instance, so
+    /// additive registrations (e.g., <c>opts.AddMiddleware&lt;T&gt;()</c>) accumulate but service
+    /// registrations are not duplicated.
+    /// </summary>
+    /// <param name="services">The DI service collection.</param>
+    /// <param name="configure">Optional configuration callback for <see cref="WolverineGrpcOptions"/>.</param>
+    public static IServiceCollection AddWolverineGrpc(
+        this IServiceCollection services,
+        Action<WolverineGrpcOptions>? configure)
+    {
+        var options = EnsureOptionsRegistered(services);
+
+        if (services.Any(x => x.ServiceType == typeof(WolverineGrpcMarker)))
+        {
+            configure?.Invoke(options);
+            return services;
+        }
+
+        services.AddSingleton<WolverineGrpcMarker>();
+
+        services.AddSingleton<GrpcGraph>(sp =>
+        {
+            var runtime = (WolverineRuntime)sp.GetRequiredService<IWolverineRuntime>();
+            var container = sp.GetRequiredService<IServiceContainer>();
+            return new GrpcGraph(runtime.Options, container);
+        });
+
+        // GH-3235: expose the discovered gRPC endpoint -> message-type mapping via the core IGrpcEndpointManifest
+        // abstraction so diagnostic consumers (CritterWatch) can read it without referencing WolverineFx.Grpc.
+        services.AddSingleton<IGrpcEndpointManifest>(sp =>
+            new GrpcEndpointManifest(sp.GetRequiredService<GrpcGraph>(),
+                sp.GetRequiredService<WolverineGrpcOptions>()));
+
+        // GH-3267: surface the manifest along the ServiceCapabilities descriptor path (ServiceCapabilities.GrpcEndpoints)
+        // so a monitoring console can discover the gRPC services this app exposes, parallel to AspNet/HTTP endpoints.
+        // GH-4000: WolverineOptions comes along so each descriptor can carry the Event Model slice of the
+        // message its RPC forwards to the bus, not just the RPC's own shape.
+        services.AddSingleton<IGrpcEndpointDescriptorSource>(sp =>
+            new GrpcEndpointDescriptorSource(sp.GetRequiredService<IGrpcEndpointManifest>(),
+                sp.GetService<WolverineOptions>()));
+
+        services.AddSingleton<WolverineGrpcExceptionInterceptor>();
+        services.AddSingleton<WolverineGrpcServicePropagationInterceptor>();
+        services.Configure<GrpcServiceOptions>(opts =>
+        {
+            // Exception translation stays outermost so it can also translate anything thrown by
+            // the propagation interceptor itself, symmetric to the client-side interceptor order
+            // (see docs/guide/grpc/client.md "Ordering and composition").
+            opts.Interceptors.Add<WolverineGrpcExceptionInterceptor>();
+            opts.Interceptors.Add<WolverineGrpcServicePropagationInterceptor>();
+        });
+
+        configure?.Invoke(options);
+
+        return services;
+    }
+
+    private static WolverineGrpcOptions EnsureOptionsRegistered(IServiceCollection services)
+    {
+        // The options instance must be reachable for the configure callback BEFORE the
+        // marker check returns, so additive customizations on a second AddWolverineGrpc()
+        // call land on the same singleton rather than silently dropping.
+        var existing = services.FirstOrDefault(d => d.ServiceType == typeof(WolverineGrpcOptions))
+            ?.ImplementationInstance as WolverineGrpcOptions;
+        if (existing != null) return existing;
+
+        var options = new WolverineGrpcOptions();
+        services.AddSingleton(options);
+        return options;
+    }
+
+    internal sealed class WolverineGrpcMarker
+    {
+    }
+
+    /// <summary>
+    /// Discovers and maps all gRPC service types found in the assemblies already
+    /// scanned by Wolverine. A type is discovered when:
+    /// <list type="bullet">
+    ///   <item>Its name ends with <c>GrpcService</c>, or</item>
+    ///   <item>It is decorated with <see cref="WolverineGrpcServiceAttribute"/>.</item>
+    /// </list>
+    /// Proto-first abstract stubs decorated with <see cref="WolverineGrpcServiceAttribute"/>
+    /// trigger Wolverine code-generation of a concrete wrapper that forwards each
+    /// unary RPC to <see cref="IMessageBus.InvokeAsync{T}"/>.
+    ///
+    /// Call this inside <c>app.UseEndpoints()</c> or directly on the <see cref="WebApplication"/>
+    /// after <c>app.UseRouting()</c>.
+    /// </summary>
+    /// <param name="endpoints">The endpoint route builder from ASP.NET Core.</param>
+    /// <returns>The same builder, for chaining.</returns>
+    public static IEndpointRouteBuilder MapWolverineGrpcServices(this IEndpointRouteBuilder endpoints)
+    {
+        var services = endpoints.ServiceProvider;
+        var runtime = (WolverineRuntime)services.GetRequiredService<IWolverineRuntime>();
+        var assemblies = runtime.Options.Assemblies;
+
+        // Discover first so hand-written service classes that will receive generated wrappers
+        // are known before the direct-mapping loop runs, avoiding duplicate route registration.
+        var graph = services.GetService<GrpcGraph>();
+        if (graph != null && graph.Chains.Count == 0 && graph.CodeFirstChains.Count == 0 &&
+            graph.HandWrittenChains.Count == 0)
+        {
+            var grpcOptions = services.GetRequiredService<WolverineGrpcOptions>();
+            graph.DiscoverServices(grpcOptions);
+        }
+
+        // Map hand-written classes that have NO generated wrapper directly (i.e. those not
+        // claimed by a HandWrittenGrpcServiceChain in the graph). Under TypeLoadMode.Static this reads
+        // the pre-generated manifest instead of scanning assemblies (GH-2907).
+        foreach (var type in ResolveDirectMappedServiceTypes(runtime, assemblies, graph))
+        {
+            MapGrpcServiceMethod.MakeGenericMethod(type).Invoke(null, [endpoints]);
+        }
+
+        if (graph != null)
+        {
+            MapGeneratedServices(endpoints, services, graph);
+        }
+
+        return endpoints;
+    }
+
+    private static void MapGeneratedServices(IEndpointRouteBuilder endpoints, IServiceProvider services,
+        GrpcGraph graph)
+    {
+        // Discovery already happened in MapWolverineGrpcServices before this call.
+        if (graph.Chains.Count == 0 && graph.CodeFirstChains.Count == 0 &&
+            graph.HandWrittenChains.Count == 0) return;
+
+        var runtime = (WolverineRuntime)services.GetRequiredService<IWolverineRuntime>();
+
+        // Register with Options.Parts so CLI diagnostics ('dotnet run -- describe',
+        // 'wolverine-diagnostics describe-routing <MessageType>') list gRPC services
+        // alongside handlers and HTTP endpoints.
+        if (!runtime.Options.Parts.Contains(graph))
+        {
+            runtime.Options.Parts.Add(graph);
+        }
+
+        // Expose this graph to Wolverine's supplemental code-file pipeline so that 'dotnet run codegen'
+        // commands and Type load modes can see the generated wrappers alongside handler and HTTP chains.
+        var supplemental = services.GetRequiredService<WolverineSupplementalCodeFiles>();
+        if (!supplemental.Collections.Contains(graph))
+        {
+            supplemental.Collections.Add(graph);
+        }
+
+        foreach (var chain in graph.Chains)
+        {
+            chain.As<ICodeFile>().InitializeSynchronously(graph.Rules, graph, services);
+
+            if (chain.GeneratedType == null)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to resolve the generated wrapper type for proto-first gRPC stub {chain.StubType.FullNameInCode()}. "
+                    + $"Generated source was:\n{chain.SourceCode}");
+            }
+
+            mapAndApplyConventions(endpoints, chain.GeneratedType, chain.ApplyEndpointConventions);
+        }
+
+        foreach (var chain in graph.CodeFirstChains)
+        {
+            chain.As<ICodeFile>().InitializeSynchronously(graph.Rules, graph, services);
+
+            if (chain.GeneratedType == null)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to resolve the generated implementation type for code-first gRPC contract {chain.ServiceContractType.FullNameInCode()}. "
+                    + $"Generated source was:\n{chain.SourceCode}");
+            }
+
+            mapAndApplyConventions(endpoints, chain.GeneratedType, chain.ApplyEndpointConventions);
+        }
+
+        foreach (var chain in graph.HandWrittenChains)
+        {
+            chain.As<ICodeFile>().InitializeSynchronously(graph.Rules, graph, services);
+
+            if (chain.GeneratedType == null)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to resolve the generated wrapper type for hand-written gRPC service {chain.ServiceClassType.FullNameInCode()}. "
+                    + $"Generated source was:\n{chain.SourceCode}");
+            }
+
+            mapAndApplyConventions(endpoints, chain.GeneratedType, chain.ApplyEndpointConventions);
+        }
+    }
+
+    /// <summary>
+    ///     GH-4383. <c>MapGrpcService&lt;T&gt;</c> hands back a
+    ///     <c>GrpcServiceEndpointConventionBuilder</c>, and all three mapping loops used to drop it on the
+    ///     floor -- which is why there was no way, from anywhere, to attach a convention to a
+    ///     Wolverine-mapped gRPC endpoint. Wolverine generates the type that gets mapped, so an
+    ///     <c>[Authorize]</c> on a hand-written service class is invisible to the router and the only
+    ///     place a policy was ever picked up was the <c>[ServiceContract]</c> interface.
+    /// </summary>
+    private static void mapAndApplyConventions(IEndpointRouteBuilder endpoints, Type generatedType,
+        Action<IEndpointConventionBuilder> applyConventions)
+    {
+        var builder = (IEndpointConventionBuilder)MapGrpcServiceMethod
+            .MakeGenericMethod(generatedType)
+            .Invoke(null, [endpoints])!;
+
+        applyConventions(builder);
+    }
+
+    /// <summary>
+    ///     Returns all concrete, non-abstract types in <paramref name="assemblies"/> that qualify as
+    ///     hand-written Wolverine-managed gRPC services. Proto-first stubs (abstract classes), types that
+    ///     have a <see cref="HandWrittenGrpcServiceChain"/> in <paramref name="graph"/>, and types that
+    ///     implement a contract with a <see cref="CodeFirstGrpcServiceChain"/> in <paramref name="graph"/>
+    ///     are excluded — Wolverine maps the generated types for those instead.
+    /// </summary>
+    public static IEnumerable<Type> FindGrpcServiceTypes(IEnumerable<Assembly> assemblies,
+        GrpcGraph? graph = null)
+    {
+        return FindDirectMappedServiceTypes(assemblies, graph);
+    }
+
+    // Cold-start fast path (GH-2907): in TypeLoadMode.Static, read the direct-mapped service types from
+    // the pre-generated GrpcServiceRegistry instead of scanning assemblies. The manifest already excludes
+    // wrapper-claimed types (it was captured via FindGrpcServiceTypes at codegen write time). Never
+    // applies during `codegen write` itself — that must run a fresh scan to regenerate the registry.
+    private static IEnumerable<Type> ResolveDirectMappedServiceTypes(WolverineRuntime runtime,
+        IEnumerable<Assembly> assemblies, GrpcGraph? graph)
+    {
+        if (!DynamicCodeBuilder.WithinCodegenCommand &&
+            runtime.Options.CodeGeneration.TypeLoadMode == TypeLoadMode.Static &&
+            GrpcServiceRegistry.TryLoad(runtime.Options.ApplicationAssembly, out var registry))
+        {
+            return registry!.DirectMappedServiceTypes();
+        }
+
+        return FindDirectMappedServiceTypes(assemblies, graph);
+    }
+
+    private static IEnumerable<Type> FindDirectMappedServiceTypes(IEnumerable<Assembly> assemblies,
+        GrpcGraph? graph)
+    {
+        return assemblies
+            .SelectMany(a => a.GetExportedTypes())
+            .Where(t => t.IsClass && !t.IsAbstract
+                        && IsCodeFirstGrpcServiceType(t)
+                        && (graph == null || !isClaimedByGraph(graph, t)));
+    }
+
+    // Mapping a class that is already wrapped, or that implements a contract with a generated
+    // implementation, would put two services on the same route.
+    private static bool isClaimedByGraph(GrpcGraph graph, Type type)
+    {
+        return graph.HandWrittenChains.Any(c => c.ServiceClassType == type)
+               || graph.CodeFirstChains.Any(c => c.ServiceContractType.IsAssignableFrom(type));
+    }
+
+    private static bool IsCodeFirstGrpcServiceType(Type type)
+    {
+        return type.Name.EndsWith("GrpcService", StringComparison.Ordinal)
+               || type.IsDefined(typeof(WolverineGrpcServiceAttribute), inherit: false);
+    }
+}

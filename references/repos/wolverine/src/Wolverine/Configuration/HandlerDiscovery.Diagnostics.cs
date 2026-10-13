@@ -1,0 +1,156 @@
+using System.Diagnostics.CodeAnalysis;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+
+namespace Wolverine.Configuration;
+
+public sealed partial class HandlerDiscovery
+{
+    // GetMethods on a runtime-resolved candidate type used for diagnostic
+    // output (`dotnet run -- describe`). Same handler-discovery-as-assembly-
+    // scan story as actionsFromType (chunk Q sibling). Diagnostic-only path —
+    // not on dispatch hot path.
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Diagnostic GetMethods walk over candidate handler type; AOT-clean apps use TypeLoadMode.Static. See AOT guide.")]
+    internal string DescribeHandlerMatch(WolverineOptions options, Type candidateType)
+    {
+        if (candidateType.IsOpenGeneric())
+        {
+            return "MISS -- Wolverine cannot use open generic types as handlers";
+        }
+
+        if (!candidateType.IsStatic() && (candidateType.IsInterface || candidateType.IsAbstract))
+        {
+            return "MISS -- Handler types can only be concrete types";
+        }
+
+        var writer = new StringWriter();
+        if (!Assemblies.Contains(candidateType.Assembly))
+        {
+            writeAssemblyIsNotRegistered(options, candidateType, writer);
+            return writer.ToString();
+        }
+
+        var typeNotFound = false;
+        if (!HandlerQuery.Includes.Matches(candidateType))
+        {
+            writeTypeIncludeMiss(candidateType, writer);
+            typeNotFound = true;
+        }
+
+        if (HandlerQuery.Excludes.Matches(candidateType))
+        {
+            writeTypeExcludeMatch(candidateType, writer);
+            typeNotFound = true;
+        }
+
+        if (typeNotFound && !_conventionalDiscoveryDisabled)
+        {
+            return writer.ToString();
+        }
+
+        if (!_conventionalDiscoveryDisabled)
+        {
+            writer.WriteLine($"Successfully found {candidateType.FullNameInCode()} during scanning.");
+        }
+        writer.WriteLine("Methods:");
+        writer.WriteLine();
+
+        var methods = candidateType.GetMethods()
+            .Where(x => x.DeclaringType != typeof(object));
+
+        foreach (var method in methods)
+        {
+            writer.WriteLine(
+                $"Method: {method.Name}({method.GetParameters().Select(x => x.ParameterType.ShortNameInCode()).Join(", ")})");
+
+            foreach (var filter in MethodIncludes)
+            {
+                if (filter.Matches(method))
+                {
+                    writer.WriteLine("HIT -- " + filter.Description);
+                }
+                else
+                {
+                    writer.WriteLine("MISS -- " + filter.Description);
+                }
+            }
+
+            foreach (var filter in MethodExcludes)
+            {
+                if (filter.Matches(method))
+                {
+                    writer.WriteLine("EXCLUDED -- " + filter.Description);
+                }
+                else
+                {
+                    writer.WriteLine("OK -- " + filter.Description);
+                }
+            }
+
+            writer.WriteLine();
+        }
+
+        return writer.ToString();
+    }
+
+    private void writeTypeExcludeMatch(Type candidateType, StringWriter writer)
+    {
+        foreach (var filter in HandlerQuery.Excludes)
+        {
+            if (filter.Matches(candidateType))
+            {
+                writer.WriteLine("EXCLUDED -- " + filter.Description);
+            }
+            else
+            {
+                writer.WriteLine("OK -- " + filter.Description);
+            }
+        }
+    }
+
+    private void writeTypeIncludeMiss(Type candidateType, StringWriter writer)
+    {
+        foreach (var filter in HandlerQuery.Includes)
+        {
+            if (filter.Matches(candidateType))
+            {
+                writer.WriteLine("HIT -- " + filter.Description);
+            }
+            else
+            {
+                writer.WriteLine("MISS -- " + filter.Description);
+            }
+        }
+    }
+
+    private void writeAssemblyIsNotRegistered(WolverineOptions options, Type candidateType, StringWriter writer)
+    {
+        writer.WriteLine(
+            $"Handler type is in assembly {candidateType.Assembly.GetName().Name} that is not currently being scanned by Wolverine");
+        writer.WriteLine("To fix this, add the assembly to your application by either:");
+        writer.WriteLine("1. Either add the [assembly: WolverineModule] attribute to this assembly");
+        writer.WriteLine(
+            $"2. Or add `WolverineOptions.Discovery.IncludeAssembly(typeof({candidateType.FullNameInCode()}).Assembly);` within your UseWolverine() setup");
+        writer.WriteLine();
+
+        if (options.ApplicationAssembly != null)
+        {
+            writer.WriteLine($"The application assembly is {options.ApplicationAssembly}");
+        }
+        else
+        {
+            writer.WriteLine("There is no application assembly");
+        }
+
+        foreach (var assembly in Assemblies)
+        {
+            if (assembly == options.ApplicationAssembly)
+            {
+                continue;
+            }
+
+            writer.WriteLine("Scanning Assembly " + assembly.GetName().Name);
+        }
+    }
+}

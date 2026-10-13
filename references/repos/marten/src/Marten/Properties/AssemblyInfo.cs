@@ -1,0 +1,31 @@
+using System.Runtime.CompilerServices;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.TypeScanning;
+
+[assembly:IgnoreAssembly]
+[assembly:JasperFxTool]
+[assembly:JasperFxAssembly]
+
+[assembly: InternalsVisibleTo("Marten.Newtonsoft")]
+[assembly: InternalsVisibleTo("Marten.Testing")]
+[assembly: InternalsVisibleTo("Marten.CommandLine")]
+[assembly: InternalsVisibleTo("Marten.PgVector")]
+[assembly: InternalsVisibleTo("Marten.PLv8")]
+[assembly: InternalsVisibleTo("Marten.PLv8.Testing")]
+[assembly: InternalsVisibleTo("Marten.Schema.Testing")]
+[assembly: InternalsVisibleTo("DaemonTests")]
+[assembly: InternalsVisibleTo("ConfigurationTests")]
+[assembly: InternalsVisibleTo("CoreTests")]
+[assembly: InternalsVisibleTo("MultiTenancyTests")]
+[assembly: InternalsVisibleTo("TenantPartitionedEventsTests")]
+[assembly: InternalsVisibleTo("LinqTests")]
+[assembly: InternalsVisibleTo("DocumentDbTests")]
+[assembly: InternalsVisibleTo("EventSourcingTests")]
+[assembly: InternalsVisibleTo("Examples")]
+[assembly: InternalsVisibleTo("PatchingTests")]
+// #5600: so the AOT guard in ValueTypeIdGeneration.BuildSelectClause can be exercised under a JIT.
+[assembly: InternalsVisibleTo("ValueTypeTests")]
+[assembly: InternalsVisibleTo("StressTests")]
+[assembly: InternalsVisibleTo("ContainerScopedProjectionTests")]
+[assembly: InternalsVisibleTo("Marten.AspNetCore")]

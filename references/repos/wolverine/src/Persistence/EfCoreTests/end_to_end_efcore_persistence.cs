@@ -1,0 +1,644 @@
+using IntegrationTests;
+using JasperFx;
+using JasperFx.Core.Reflection;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using SharedPersistenceModels.Items;
+using Shouldly;
+using Weasel.Core;
+using Weasel.SqlServer;
+using Weasel.SqlServer.Tables;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.EntityFrameworkCore.Internals;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Wolverine.SqlServer;
+using Wolverine.Tracking;
+using Wolverine.Transports;
+
+namespace EfCoreTests;
+
+public class EFCorePersistenceContext : IAsyncLifetime
+{
+    public IHost theHost { get; private set; } = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        // Drop the schema first so Weasel migrations can cleanly create/alter columns
+        // without conflicting with stale data from previous test runs
+        await using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync();
+        await conn.DropSchemaAsync("mt_items");
+        await conn.CloseAsync();
+
+        theHost = await Host.CreateDefaultBuilder()
+            .ConfigureServices((c, services) =>
+            {
+                services.AddDbContext<ItemsDbContext>(x => x.UseSqlServer(Servers.SqlServerConnectionString));
+                services.AddDbContext<SampleMappedDbContext>(x => x.UseSqlServer(Servers.SqlServerConnectionString));
+            })
+            .UseWolverine(options =>
+            {
+                options.Services.AddSingleton<PassRecorder>();
+                options.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString);
+                options.Services.AddResourceSetupOnStartup(StartupAction.ResetState);
+                options.UseEntityFrameworkCoreTransactions();
+
+                options.Policies.ConfigureConventionalLocalRouting()
+                    .CustomizeQueues((_, q) => q.UseDurableInbox());
+
+                options.Policies.AutoApplyTransactions();
+
+                options.UseEntityFrameworkCoreWolverineManagedMigrations();
+            }).StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await theHost.StopAsync();
+        theHost.Dispose();
+    }
+}
+
+[Collection("sqlserver")]
+public class end_to_end_efcore_persistence : IClassFixture<EFCorePersistenceContext>
+{
+    public end_to_end_efcore_persistence(EFCorePersistenceContext context)
+    {
+        Host = context.theHost;
+    }
+
+    public IHost Host { get; }
+    
+    
+    [Fact]
+    public async Task using_dbcontext_in_middleware()
+    {
+        var item = new Item { Id = Guid.NewGuid(), Name = "Hey"};
+        await saveItem(item);
+
+        await Host.InvokeMessageAndWaitAsync(new ApproveItem2(item.Id));
+
+        var existing = await loadItem(item.Id);
+        existing.Approved.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task ef_core_middleware_is_marking_the_envelope_as_handled()
+    {
+        var item = new Item { Id = Guid.NewGuid(), Name = "Hey"};
+        await saveItem(item);
+
+        var tracked = await Host.SendMessageAndWaitAsync(new ApproveItem2(item.Id));
+        var envelope = tracked.Executed.SingleEnvelope<ApproveItem2>();
+
+        var fromStore = await Host.GetRuntime().Storage.Admin.AllIncomingAsync();
+        var persisted = fromStore.Single(x => x.Id == envelope.Id);
+        persisted.Status.ShouldBe(EnvelopeStatus.Handled);
+
+        persisted.KeepUntil.HasValue.ShouldBeTrue();
+    }
+
+    private async Task<Item> loadItem(Guid id)
+    {
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+        var item = await context.Items.FindAsync(id);
+
+        return item!;
+    }
+
+    private async Task saveItem(Item item)
+    {
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+        context.Items.Add(item);
+        await context.SaveChangesAsync();
+    }
+
+    [Fact]
+    public void service_registrations()
+    {
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        container.DefaultFor<IDbContextOutbox>()!.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+        container.DefaultFor(typeof(IDbContextOutbox<>))!.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+    }
+
+    [Fact]
+    public void outbox_for_specific_db_context_raw()
+    {
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+        var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<ItemsDbContext>>();
+
+        outbox.DbContext.ShouldBeSameAs(context);
+        outbox.ShouldBeOfType<DbContextOutbox<ItemsDbContext>>()
+            .Transaction.ShouldBeOfType<EfCoreEnvelopeTransaction>()
+            .DbContext.ShouldBeSameAs(context);
+    }
+
+    [Fact]
+    public void outbox_for_specific_db_context_maped()
+    {
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+        var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<SampleMappedDbContext>>();
+
+        outbox.DbContext.ShouldBeSameAs(context);
+        outbox.ShouldBeOfType<DbContextOutbox<SampleMappedDbContext>>()
+            .Transaction.ShouldBeOfType<EfCoreEnvelopeTransaction>()
+            .DbContext.ShouldBeSameAs(context);
+    }
+
+    [Fact]
+    public void outbox_for_db_context_raw()
+    {
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+        var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+        outbox.Enroll(context);
+
+        outbox.ActiveContext.ShouldBeSameAs(context);
+        outbox.ShouldBeOfType<DbContextOutbox>()
+            .Transaction.ShouldBeOfType<EfCoreEnvelopeTransaction>()
+            .DbContext.ShouldBeSameAs(context);
+    }
+
+    [Fact]
+    public void outbox_for_db_context_mapped()
+    {
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+        using var nested = Host.Services.CreateScope();
+
+        var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+        var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+        outbox.Enroll(context);
+
+        outbox.ActiveContext.ShouldBeSameAs(context);
+        outbox.ShouldBeOfType<DbContextOutbox>()
+            .Transaction.ShouldBeOfType<EfCoreEnvelopeTransaction>()
+            .DbContext.ShouldBeSameAs(context);
+    }
+
+    [Fact]
+    public async Task persisting_against_mapped_dbcontext_does_not_start_an_explicit_transaction()
+    {
+        await Host.ResetResourceState(cancellation: TestContext.Current.CancellationToken);
+
+        var envelope = new Envelope
+        {
+            Data = [1, 2, 3, 4],
+            OwnerId = 5,
+            Destination = TransportConstants.RepliesUri,
+            MessageType = "foo",
+            ContentType = EnvelopeConstants.JsonContentType,
+            Status = EnvelopeStatus.Scheduled,
+            ScheduledTime = DateTimeOffset.UtcNow.AddMinutes(1)
+        };
+
+        using var nested = Host.Services.CreateScope();
+        var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<SampleMappedDbContext>>()
+            .ShouldBeOfType<DbContextOutbox<SampleMappedDbContext>>();
+
+        // Regression for #3121 -- scheduling/incoming persistence against a Wolverine-mapped
+        // DbContext must NOT begin an explicit EF Core transaction. SaveChanges provides its
+        // own implicit transaction, and the outgoing path already behaves this way.
+        await messaging.Transaction!.PersistIncomingAsync(envelope);
+        messaging.DbContext.Database.CurrentTransaction.ShouldBeNull();
+
+        // Symmetry check: the outgoing path likewise leaves the transaction alone
+        await messaging.Transaction!.PersistOutgoingAsync(envelope);
+        messaging.DbContext.Database.CurrentTransaction.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task persist_an_outgoing_envelope_raw()
+    {
+        await Host.ResetResourceState(cancellation: TestContext.Current.CancellationToken);
+
+        var envelope = new Envelope
+        {
+            Data = [1, 2, 3, 4],
+            OwnerId = 5,
+            Destination = TransportConstants.RepliesUri,
+            DeliverBy = new DateTimeOffset(DateTime.Today),
+            MessageType = "foo",
+            ContentType = EnvelopeConstants.JsonContentType
+        };
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<ItemsDbContext>>()
+                .ShouldBeOfType<DbContextOutbox<ItemsDbContext>>();
+
+            await messaging.Transaction!.PersistOutgoingAsync(envelope);
+            messaging.DbContext.Items.Add(new Item { Id = Guid.NewGuid(), Name = Guid.NewGuid().ToString() });
+
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var persisted = await Host.Services.GetRequiredService<IMessageStore>()
+            .Admin.AllOutgoingAsync();
+
+        var loadedEnvelope = persisted.Single();
+
+        loadedEnvelope.Id.ShouldBe(envelope.Id);
+
+        loadedEnvelope.Destination.ShouldBe(envelope.Destination);
+        loadedEnvelope.DeliverBy.ShouldBe(envelope.DeliverBy);
+        loadedEnvelope.Data.ShouldBe(envelope.Data);
+
+
+        loadedEnvelope.OwnerId.ShouldBe(envelope.OwnerId);
+    }
+
+    [Fact]
+    public async Task persist_an_outgoing_envelope_mapped()
+    {
+        await Host.ResetResourceState(cancellation: TestContext.Current.CancellationToken);
+
+        var envelope = new Envelope
+        {
+            Data = [1, 2, 3, 4],
+            OwnerId = 5,
+            Destination = TransportConstants.RepliesUri,
+            DeliverBy = new DateTimeOffset(DateTime.Today),
+            MessageType = "foo",
+            ContentType = EnvelopeConstants.JsonContentType
+        };
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<SampleMappedDbContext>>()
+                .ShouldBeOfType<DbContextOutbox<SampleMappedDbContext>>();
+
+            await messaging.Transaction!.PersistOutgoingAsync(envelope);
+            messaging.DbContext.Items.Add(new Item { Id = Guid.NewGuid(), Name = Guid.NewGuid().ToString() });
+
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var persisted = await Host.Services.GetRequiredService<IMessageStore>()
+            .Admin.AllOutgoingAsync();
+
+        var loadedEnvelope = persisted.Single();
+
+        loadedEnvelope.Id.ShouldBe(envelope.Id);
+
+        loadedEnvelope.Destination.ShouldBe(envelope.Destination);
+        loadedEnvelope.DeliverBy.ShouldBe(envelope.DeliverBy);
+        loadedEnvelope.Data.ShouldBe(envelope.Data);
+
+
+        loadedEnvelope.OwnerId.ShouldBe(envelope.OwnerId);
+    }
+
+    [Fact]
+    public async Task use_non_generic_outbox_raw()
+    {
+        var id = Guid.NewGuid();
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        var waiter = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+            messaging.Enroll(context);
+
+            context.Items.Add(new Item { Id = id, Name = "Bill" });
+            await messaging.SendAsync(new OutboxedMessage { Id = id });
+
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var message = await waiter;
+        message.Id.ShouldBe(id);
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            (await context.Items.FindAsync(new object?[] { id }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task use_non_generic_outbox_mapped()
+    {
+        var id = Guid.NewGuid();
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        var waiter = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+            messaging.Enroll(context);
+
+            context.Items.Add(new Item { Id = id, Name = "Bill" });
+            await messaging.SendAsync(new OutboxedMessage { Id = id });
+
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var message = await waiter;
+        message.Id.ShouldBe(id);
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+            (await context.Items.FindAsync(new object?[] { id }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task use_generic_outbox_raw()
+    {
+        var id = Guid.NewGuid();
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        var waiter = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<ItemsDbContext>>();
+
+            outbox.DbContext.Items.Add(new Item { Id = id, Name = "Bill" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id });
+
+            await outbox.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var message = await waiter;
+        message.Id.ShouldBe(id);
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            (await context.Items.FindAsync(new object?[] { id }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task DbContextOutbox_generic_can_opt_into_multiple_save_changes_and_flush_calls_in_one_scope()
+    {
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+
+        var waiter1 = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<ItemsDbContext>>();
+            var context = outbox.ShouldBeOfType<DbContextOutbox<ItemsDbContext>>();
+
+            context.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            outbox.DbContext.Items.Add(new Item { Id = id1, Name = "First" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id1 });
+            await outbox.SaveChangesAndFlushMessagesAsync(MultiFlushMode.AllowMultiples, TestContext.Current.CancellationToken);
+            context.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            var message1 = await waiter1;
+            message1.Id.ShouldBe(id1);
+
+            var waiter2 = OutboxedMessageHandler.WaitForNextMessage();
+
+            outbox.DbContext.Items.Add(new Item { Id = id2, Name = "Second" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id2 });
+            await outbox.SaveChangesAndFlushMessagesAsync(MultiFlushMode.AllowMultiples, TestContext.Current.CancellationToken);
+            context.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            var message2 = await waiter2;
+            message2.Id.ShouldBe(id2);
+        }
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            (await context.Items.FindAsync(new object?[] { id1 }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+            (await context.Items.FindAsync(new object?[] { id2 }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task DbContextOutbox_non_generic_can_opt_into_multiple_save_changes_and_flush_calls_in_one_scope()
+    {
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+
+        var waiter1 = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+            var messageContext = outbox.ShouldBeOfType<DbContextOutbox>();
+
+            outbox.Enroll(context);
+            messageContext.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            context.Items.Add(new Item { Id = id1, Name = "First" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id1 });
+            await outbox.SaveChangesAndFlushMessagesAsync(MultiFlushMode.AllowMultiples, TestContext.Current.CancellationToken);
+            messageContext.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            var message1 = await waiter1;
+            message1.Id.ShouldBe(id1);
+
+            var waiter2 = OutboxedMessageHandler.WaitForNextMessage();
+
+            context.Items.Add(new Item { Id = id2, Name = "Second" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id2 });
+            await outbox.SaveChangesAndFlushMessagesAsync(MultiFlushMode.AllowMultiples, TestContext.Current.CancellationToken);
+            messageContext.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+
+            var message2 = await waiter2;
+            message2.Id.ShouldBe(id2);
+        }
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            (await context.Items.FindAsync(new object?[] { id1 }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+            (await context.Items.FindAsync(new object?[] { id2 }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task use_generic_outbox_mapped()
+    {
+        var id = Guid.NewGuid();
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        var waiter = OutboxedMessageHandler.WaitForNextMessage();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var outbox = nested.ServiceProvider.GetRequiredService<IDbContextOutbox<SampleMappedDbContext>>();
+
+            outbox.DbContext.Items.Add(new Item { Id = id, Name = "Bill" });
+            await outbox.SendAsync(new OutboxedMessage { Id = id });
+
+            await outbox.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var message = await waiter;
+        message.Id.ShouldBe(id);
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+            (await context.Items.FindAsync(new object?[] { id }, TestContext.Current.CancellationToken)).ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task persist_an_incoming_envelope_raw()
+    {
+        await Host.ResetResourceState(cancellation: TestContext.Current.CancellationToken);
+
+        var envelope = new Envelope
+        {
+            Data = [1, 2, 3, 4],
+            OwnerId = 5,
+            ScheduledTime = DateTime.Today.AddDays(1),
+            DeliverBy = new DateTimeOffset(DateTime.Today),
+            Status = EnvelopeStatus.Scheduled,
+            Attempts = 2,
+            MessageType = "foo",
+            ContentType = EnvelopeConstants.JsonContentType,
+            Destination = TransportConstants.DurableLocalUri
+        };
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<ItemsDbContext>();
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+            messaging.Enroll(context);
+
+            await messaging.As<MessageContext>().Transaction!.PersistIncomingAsync(envelope);
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var persisted = await Host.Services.GetRequiredService<IMessageStore>()
+            .Admin.AllIncomingAsync();
+
+        var loadedEnvelope = persisted.Single();
+
+        loadedEnvelope.Id.ShouldBe(envelope.Id);
+
+        loadedEnvelope.Destination.ShouldBe(envelope.Destination);
+        loadedEnvelope.ScheduledTime.ShouldBe(envelope.ScheduledTime);
+        loadedEnvelope.Data.ShouldBe(envelope.Data);
+        loadedEnvelope.OwnerId.ShouldBe(envelope.OwnerId);
+        loadedEnvelope.Attempts.ShouldBe(envelope.Attempts);
+    }
+
+    [Fact]
+    public async Task persist_an_incoming_envelope_mapped()
+    {
+        await Host.ResetResourceState(cancellation: TestContext.Current.CancellationToken);
+
+        var envelope = new Envelope
+        {
+            Data = [1, 2, 3, 4],
+            OwnerId = 5,
+            ScheduledTime = DateTime.Today.AddDays(1),
+            DeliverBy = new DateTimeOffset(DateTime.Today),
+            Status = EnvelopeStatus.Scheduled,
+            Attempts = 2,
+            MessageType = "foo",
+            ContentType = EnvelopeConstants.JsonContentType,
+            Destination = TransportConstants.DurableLocalUri
+        };
+
+        var container = Host.Services.GetRequiredService<IServiceContainer>();
+
+        using (var nested = Host.Services.CreateScope())
+        {
+            var context = nested.ServiceProvider.GetRequiredService<SampleMappedDbContext>();
+            var messaging = nested.ServiceProvider.GetRequiredService<IDbContextOutbox>();
+
+            messaging.Enroll(context);
+
+            await messaging.As<MessageContext>().Transaction!.PersistIncomingAsync(envelope);
+            await messaging.SaveChangesAndFlushMessagesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var persisted = await Host.Services.GetRequiredService<IMessageStore>()
+            .Admin.AllIncomingAsync();
+
+        var loadedEnvelope = persisted.Single();
+
+        loadedEnvelope.Id.ShouldBe(envelope.Id);
+
+        loadedEnvelope.Destination.ShouldBe(envelope.Destination);
+        loadedEnvelope.ScheduledTime.ShouldBe(envelope.ScheduledTime);
+        loadedEnvelope.Data.ShouldBe(envelope.Data);
+        loadedEnvelope.OwnerId.ShouldBe(envelope.OwnerId);
+        loadedEnvelope.Attempts.ShouldBe(envelope.Attempts);
+    }
+
+}
+
+public class PassRecorder
+{
+    private readonly TaskCompletionSource<Pass> _completion = new();
+
+    public Task<Pass> Actual => _completion.Task;
+
+    public void Record(Pass pass)
+    {
+        _completion.SetResult(pass);
+    }
+}
+
+public class PassHandler
+{
+    private readonly PassRecorder _recorder;
+
+    public PassHandler(PassRecorder recorder)
+    {
+        _recorder = recorder;
+    }
+
+    public void Handle(Pass pass)
+    {
+        _recorder.Record(pass);
+    }
+}
+
+public class Pass
+{
+    public string From { get; set; } = null!;
+    public string To { get; set; } = null!;
+}
+
+

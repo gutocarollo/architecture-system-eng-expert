@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- Swept for xUnit1051 (#5067): every call taking a CancellationToken is handed
+             TestContext.Current.CancellationToken, so a hung test is cancelled and reported
+             instead of running until CI's own timeout. Keeping the rule ON guards the sweep.
+             Must be set before Tests.props is imported. -->
+        <ThreadTestCancellationToken>true</ThreadTestCancellationToken>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <!-- #5363 rendered DaemonTests as Bobcat specifications. The generator reaches this
+             project along the ProjectReference to DaemonTests and emits BobcatStepInterceptors.g.cs
+             here too, so this project compiles generated interceptor code and declaring the
+             generator is simply the truth about it.
+
+             No longer load-bearing: Bobcat 0.17.1 ships the interceptor opt-in under
+             buildTransitive/ (JasperFx/bobcat#267), so it now reaches a project that gets the
+             generator second-hand and this builds clean without the reference. It was
+             load-bearing on 0.17.0, where the opt-in shipped under build/ and a package's build/
+             assets are private to the project that references it while an analyzer is not — 60
+             CS9137s, and the whole Release compile with them. That is the shape of failure that
+             broke the 9.33.0 publish, and no CI job builds this project to catch it. -->
+        <PackageReference Include="Bobcat.Generators" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <PackageReference Include="Bogus" />
+        <PackageReference Include="Confluent.Kafka" />
+        <PackageReference Include="Lamar.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Neovolve.Logging.Xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="xunit.v3" />
+
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\DaemonTests\DaemonTests.csproj"/>
+        <ProjectReference Include="..\EventSourcingTests\EventSourcingTests.csproj"/>
+        <ProjectReference Include="..\Marten.AspNetCore\Marten.AspNetCore.csproj"/>
+        <ProjectReference Include="..\Marten\Marten.csproj"/>
+    </ItemGroup>
+    <Import Project="../Tests.props" />
+
+</Project>

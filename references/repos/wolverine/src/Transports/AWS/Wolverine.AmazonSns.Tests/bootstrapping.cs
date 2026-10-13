@@ -1,0 +1,70 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Wolverine.ComplianceTests.Compliance;
+
+namespace Wolverine.AmazonSns.Tests;
+
+public class Bootstrapping
+{
+    [Fact]
+    public async Task create_an_open_client()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts => { opts.UseAmazonSnsTransportLocally(); }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var options = host.Services.GetRequiredService<WolverineOptions>();
+        var transport = options.AmazonSnsTransport();
+
+        // Just a smoke test on configuration here
+        var topicNames = await transport.SnsClient!.ListTopicsAsync("0", TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task create_new_topic_on_startup()
+    {
+        var topicName = "wolverine-" + Guid.NewGuid();
+
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseAmazonSnsTransportLocally().AutoProvision();
+
+                opts.PublishMessage<Message1>().ToSnsTopic(topicName);
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var options = host.Services.GetRequiredService<WolverineOptions>();
+        var transport = options.AmazonSnsTransport();
+
+        // Just a smoke test on configuration here
+        var topic = await transport.SnsClient!.FindTopicAsync(topicName);
+        topic.ShouldNotBeNull();
+        topic.TopicArn.ShouldNotBeNull();
+
+        await transport.SnsClient.DeleteTopicAsync(topic.TopicArn, TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task auto_purge_topic_on_startup_smoke_test()
+    {
+        var topicName = "wolverine-" + Guid.NewGuid();
+
+
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseAmazonSnsTransportLocally().AutoPurgeOnStartup().AutoProvision();
+
+                opts.PublishMessage<Message1>().ToSnsTopic(topicName);
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        var options = host.Services.GetRequiredService<WolverineOptions>();
+        var transport = options.AmazonSnsTransport();
+
+        var topic = await transport.SnsClient!.FindTopicAsync(topicName);
+        topic.ShouldNotBeNull();
+        topic.TopicArn.ShouldNotBeNull();
+
+        await transport.SnsClient.DeleteTopicAsync(topic.TopicArn, TestContext.Current.CancellationToken);
+    }
+}

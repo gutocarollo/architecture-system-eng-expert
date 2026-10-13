@@ -1,0 +1,655 @@
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using JasperFx.Events.Daemon;
+using JasperFx.MultiTenancy;
+using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
+using Weasel.Core;
+using Weasel.Oracle;
+using Wolverine.Oracle.Internals;
+using Wolverine.Oracle.Schema;
+using Wolverine.Oracle.Transport;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.Durability.ScheduledMessageManagement;
+using Wolverine.Persistence.Sagas;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Polling;
+using Wolverine.RDBMS.Sagas;
+using Wolverine.RDBMS.Transport;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using DbCommandBuilder = Weasel.Core.DbCommandBuilder;
+using Table = Weasel.Oracle.Tables.Table;
+
+namespace Wolverine.Oracle;
+
+internal partial class OracleMessageStore : IMessageDatabase, IMessageInbox, IMessageOutbox, IMessageStoreAdmin, IDeadLetters, IScheduledMessages, ISagaSupport, IExternalDbTransportStore
+{
+    private readonly OracleDataSource _dataSource;
+    private readonly DatabaseSettings _settings;
+    private readonly DurabilitySettings _durability;
+    private readonly ILogger _logger;
+    private readonly CancellationToken _cancellation;
+    private ImHashMap<Type, IDatabaseSagaSchema> _sagaStorage = ImHashMap<Type, IDatabaseSagaSchema>.Empty;
+    private readonly List<Table> _otherTables = new();
+    private bool _hasDisposed;
+    private string _schemaName;
+    private INodeAgentPersistence? _nodes;
+
+    public OracleMessageStore(DatabaseSettings databaseSettings, DurabilitySettings durability,
+        OracleDataSource dataSource, ILogger logger)
+        : this(databaseSettings, durability, dataSource, logger, Array.Empty<SagaTableDefinition>())
+    {
+    }
+
+    // typeof(OracleSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(...) at L74
+    // closes the saga schema generic over (sagaType, idType) at startup. Same
+    // chunk D / I / J / K / AE / AF / AG / AH CloseAndBuildAs pattern: AOT-clean
+    // apps preserve saga state types via TrimmerRootDescriptor. Cross-link to
+    // #2769.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "OracleSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "OracleSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    public OracleMessageStore(DatabaseSettings databaseSettings, DurabilitySettings durability,
+        OracleDataSource dataSource, ILogger logger, IEnumerable<SagaTableDefinition> sagaTypes)
+    {
+        _settings = databaseSettings;
+        _durability = durability;
+        _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+        _logger = logger;
+        _cancellation = durability.Cancellation;
+        _schemaName = databaseSettings.SchemaName ?? durability.MessageStorageSchemaName ?? "WOLVERINE";
+        _schemaName = _schemaName.ToUpperInvariant();
+
+        Role = databaseSettings.Role;
+        Settings = databaseSettings;
+
+        AdvisoryLock = new OracleAdvisoryLock(_dataSource, logger, _schemaName);
+
+        foreach (var sagaTableDefinition in sagaTypes)
+        {
+            var storage = typeof(OracleSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(sagaTableDefinition,
+                _settings, sagaTableDefinition.SagaType, sagaTableDefinition.IdMember.GetMemberType()!);
+            _sagaStorage = _sagaStorage.AddOrUpdate(sagaTableDefinition.SagaType, storage);
+        }
+
+        if (Role == MessageStoreRole.Main)
+        {
+            _nodes = new OracleNodePersistence(_settings, this, _dataSource);
+
+            // Dynamic-listener registry (GH-2685). Only the Main store hosts the
+            // registry; gated on the opt-in flag so existing apps see no schema
+            // migration churn on upgrade.
+            if (durability.EnableDynamicListeners)
+            {
+                Listeners = new OracleListenerStore(_dataSource, _schemaName);
+            }
+        }
+
+        var descriptor = Describe();
+        var parts = new List<string>
+        {
+            "oracle",
+            descriptor.ServerName.Split(',')[0],
+            descriptor.DatabaseName,
+            _schemaName
+        };
+
+        if (Role == MessageStoreRole.Main)
+        {
+            // Diagnostic identity only — the agent Uri below always carries the registered
+            // wolverinedb scheme so the NodeAgentController can dispatch the durability agent.
+            SubjectUri = new Uri("wolverine://messages/main");
+        }
+
+        // GH-3589: the durability agent family (MessageStoreCollection) registers under the
+        // "wolverinedb" scheme (PersistenceConstants.AgentScheme), and a message store's Uri IS
+        // its agent Uri. A "wolverine://messages/main" or "messagedb://..." scheme leaves the
+        // NodeAgentController unable to resolve a family ("Unrecognized agent scheme 'wolverine'"),
+        // so the Oracle durability agent never starts. Mirror MessageDatabase / RavenDb / CosmosDb
+        // and always build the Uri from the registered scheme regardless of role.
+        Uri = new Uri($"{PersistenceConstants.AgentScheme}://{parts.Where(x => x.IsNotEmpty()).Join("/")}");
+
+        Name = Uri.ToString();
+    }
+
+    public OracleDataSource OracleDataSource => _dataSource;
+    public DurabilitySettings Durability => _durability;
+
+    // IMessageStore
+    public MessageStoreRole Role { get; set; }
+    public List<string> TenantIds { get; } = new();
+    public Uri Uri { get; internal set; }
+
+    /// <summary>
+    /// Stable diagnostic identity for this store (e.g. "wolverine://messages/main"), kept
+    /// separate from <see cref="Uri"/>, which must carry the registered agent scheme. See GH-3589.
+    /// </summary>
+    public Uri SubjectUri { get; set; } = new Uri("wolverine://messages");
+    public bool HasDisposed => _hasDisposed;
+    public IMessageInbox Inbox => this;
+    public IMessageOutbox Outbox => this;
+    public INodeAgentPersistence Nodes => _nodes!;
+
+    // Real Oracle-backed listener store wired in once the schema bits land.
+    // Default no-op keeps the Wolverine boot path clean while
+    // EnableDynamicListeners is false (no schema, no behavior).
+    public IListenerStore Listeners { get; protected set; } = NullListenerStore.Instance;
+
+    public IMessageStoreAdmin Admin => this;
+    public IDeadLetters DeadLetters => this;
+    public string Name { get; set; }
+    public IAdvisoryLock AdvisoryLock { get; }
+
+    // IMessageDatabase
+    public DatabaseSettings Settings { get; }
+    public string SchemaName
+    {
+        get => _schemaName;
+        set => _schemaName = value.ToUpperInvariant();
+    }
+    public DbDataSource DataSource => _dataSource;
+    public ILogger Logger => _logger;
+
+    public void Initialize(IWolverineRuntime runtime)
+    {
+        // Mirror MessageDatabase.Initialize — when this is the main store and the host is
+        // running in Balanced durability mode, stand up the control transport and publish
+        // its endpoint as the NodeControlEndpoint so inter-node agent commands can flow
+        // without an external message broker. Without this, WolverineNode.For throws
+        // ArgumentOutOfRangeException("ControlEndpoint cannot be null for this usage") at
+        // startup.
+        //
+        // Oracle uses its own OracleControlTransport rather than the shared
+        // DatabaseControlTransport because the shared implementation assumes @-prefixed
+        // placeholders and Guid values that map directly to a DbParameter — both of which
+        // Oracle rejects (placeholders are :-prefixed and the id columns are RAW(16) so
+        // Guids must be passed as byte[]). See #2622.
+        if (Role == MessageStoreRole.Main
+            && runtime.Options.Transports.NodeControlEndpoint == null
+            && runtime.Options.Durability.Mode == DurabilityMode.Balanced)
+        {
+            var transport = new OracleControlTransport(this, runtime.Options);
+            runtime.Options.Transports.Add(transport);
+            runtime.Options.Transports.NodeControlEndpoint = transport.ControlEndpoint;
+        }
+    }
+
+    public IAgent BuildAgent(IWolverineRuntime runtime)
+    {
+        return new DurabilityAgent(runtime, this)
+        {
+            // GH-3376: a tenant database's polling rides the distributed agent, one node per database
+            AutoStartScheduledJobPolling = Role == MessageStoreRole.Tenant
+        };
+    }
+
+    public IAgent StartScheduledJobs(IWolverineRuntime runtime)
+    {
+        var agent = new DurabilityAgent(runtime, this);
+
+        // GH-3376: see MessageDatabase.StartScheduledJobs - this node-wide fan-out would otherwise poll
+        // every tenant database from every node. Main / ancillary stores keep polling here (every node
+        // already connects to them, and this starts at boot rather than after agent assignment), as do
+        // hosts running without durability agents, where this is the only pump.
+        if (!runtime.Options.Durability.DurabilityAgentEnabled || Role != MessageStoreRole.Tenant)
+        {
+            agent.StartScheduledJobPolling();
+        }
+
+        return agent;
+    }
+
+    public DatabaseDescriptor Describe()
+    {
+        var builder = new OracleConnectionStringBuilder(_dataSource.ConnectionString);
+        var descriptor = new DatabaseDescriptor
+        {
+            Engine = "Oracle",
+            ServerName = builder.DataSource ?? string.Empty,
+            DatabaseName = _schemaName,
+            Subject = GetType().FullNameInCode(),
+            SubjectUri = SubjectUri
+        };
+
+        descriptor.TenantIds.AddRange(TenantIds);
+
+        return descriptor;
+    }
+
+    public Task DrainAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public void PromoteToMain(IWolverineRuntime runtime)
+    {
+        Role = MessageStoreRole.Main;
+        // Only the diagnostic identity changes on promotion — Uri keeps its registered
+        // wolverinedb agent scheme so the durability agent stays dispatchable. See GH-3589.
+        SubjectUri = new Uri("wolverine://messages/main");
+        _nodes ??= new OracleNodePersistence(_settings, this, _dataSource);
+    }
+
+    public void DemoteToAncillary()
+    {
+        Role = MessageStoreRole.Ancillary;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _hasDisposed = true;
+        await AdvisoryLock.DisposeAsync();
+    }
+
+    public OracleConnection CreateConnection()
+    {
+        return _dataSource.CreateConnection();
+    }
+
+    public async Task<OracleCommand> CreateCommand(string sql)
+    {
+        var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        var cmd = conn.CreateCommand(sql);
+        return cmd;
+    }
+
+    public IEnumerable<ISchemaObject> AllObjects()
+    {
+        yield return new OutgoingEnvelopeTable(_durability, SchemaName);
+        yield return new IncomingEnvelopeTable(_durability, SchemaName);
+        yield return new DeadLettersTable(_durability, SchemaName);
+        yield return new LockTable(SchemaName);
+
+        if (Role == MessageStoreRole.Main)
+        {
+            var nodeTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.NodeTableName.ToUpperInvariant()));
+            nodeTable.AddColumn<Guid>("id").AsPrimaryKey();
+            // AutoIncrement() rather than the clause written into the type string: Oracle reports
+            // the column's type as plain NUMBER(10) and carries the identity separately in
+            // ALL_TAB_COLUMNS.IDENTITY_COLUMN, so a type of "NUMBER(10) GENERATED BY DEFAULT AS
+            // IDENTITY" could never equal what came back and the table drifted on every migration.
+            // Needs Weasel 9.38.0, where AutoIncrement() emits valid DDL (weasel#667).
+            nodeTable.AddColumn("node_number", "NUMBER(10)").AutoIncrement().NotNull()
+                .AddIndex(idx => idx.IsUnique = true);
+            nodeTable.AddColumn("description", "VARCHAR2(4000)").NotNull();
+            nodeTable.AddColumn("uri", $"VARCHAR2({AgentUri.MaximumLength})").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("started")
+                .DefaultValueByExpression("SYSTIMESTAMP AT TIME ZONE 'UTC'").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("health_check").NotNull()
+                .DefaultValueByExpression("SYSTIMESTAMP AT TIME ZONE 'UTC'");
+            nodeTable.AddColumn("version", "VARCHAR2(4000)");
+            nodeTable.AddColumn("capabilities", "VARCHAR2(4000)").AllowNulls();
+
+            // GH-4593, mirroring the PostgreSQL gate from GH-3959: provisioned only behind the opt-in so
+            // an upgrade migrates nothing, and OracleNodePersistence gates every statement naming it on
+            // the same flag. BINARY_DOUBLE rather than NUMBER: it is a true IEEE double with no precision
+            // or scale to declare, and it does not come back as OracleDecimal.
+            if (Durability.CapacityAwareAssignment)
+            {
+                nodeTable.AddColumn(DatabaseConstants.LoadFactor, "BINARY_DOUBLE").AllowNulls();
+            }
+
+            yield return nodeTable;
+
+            var assignmentTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.NodeAssignmentsTableName.ToUpperInvariant()));
+            assignmentTable.AddColumn("id", $"VARCHAR2({AgentUri.MaximumLength})").AsPrimaryKey();
+            assignmentTable.AddColumn<Guid>("node_id")
+                .ForeignKeyTo(nodeTable.Identifier, "id", onDelete: CascadeAction.Cascade);
+            assignmentTable.AddColumn<DateTimeOffset>("started")
+                .DefaultValueByExpression("SYSTIMESTAMP AT TIME ZONE 'UTC'").NotNull();
+
+            yield return assignmentTable;
+
+            if (_settings.CommandQueuesEnabled)
+            {
+                var queueTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.ControlQueueTableName.ToUpperInvariant()));
+                queueTable.AddColumn<Guid>("id").AsPrimaryKey();
+                queueTable.AddColumn("message_type", "VARCHAR2(4000)").NotNull();
+                queueTable.AddColumn<Guid>("node_id").NotNull();
+                queueTable.AddColumn(DatabaseConstants.Body, "BLOB").NotNull();
+                queueTable.AddColumn<DateTimeOffset>("posted").NotNull()
+                    .DefaultValueByExpression("SYSTIMESTAMP AT TIME ZONE 'UTC'");
+                queueTable.AddColumn<DateTimeOffset>("expires");
+
+                yield return queueTable;
+            }
+
+            if (_settings.AddTenantLookupTable)
+            {
+                var tenantTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.TenantsTableName.ToUpperInvariant()));
+                tenantTable.AddColumn("tenant_id", "VARCHAR2(100)").AsPrimaryKey();
+                tenantTable.AddColumn("connection_string", "VARCHAR2(500)").NotNull();
+                tenantTable.AddColumn("disabled", "NUMBER(1)").DefaultValueByExpression("0").NotNull();
+                yield return tenantTable;
+            }
+
+            var eventTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.NodeRecordTableName.ToUpperInvariant()));
+            eventTable.AddColumn("id", "NUMBER(10)").AutoIncrement().AsPrimaryKey();
+            eventTable.AddColumn<int>("node_number").NotNull();
+            eventTable.AddColumn("event_name", "VARCHAR2(500)").NotNull();
+            eventTable.AddColumn<DateTimeOffset>("timestamp")
+                .DefaultValueByExpression("SYSTIMESTAMP AT TIME ZONE 'UTC'").NotNull();
+            // GH-4246: widened for the same reason as the SQL Server and MySQL stores. Deliberately plain
+            // VARCHAR2 rather than the CHAR length semantics -- Oracle reports data_length in bytes, so a
+            // "1000 CHAR" declaration would read back as 4000 and report drift on every schema check.
+            eventTable.AddColumn("description", $"VARCHAR2({NodeRecord.DescriptionLength})").AllowNulls();
+            yield return eventTable;
+
+            var restrictionTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.AgentRestrictionsTableName.ToUpperInvariant()));
+            restrictionTable.AddColumn<Guid>("id").AsPrimaryKey();
+            restrictionTable.AddColumn("uri", "VARCHAR2(4000)").NotNull();
+            restrictionTable.AddColumn("type", "VARCHAR2(4000)").NotNull();
+            restrictionTable.AddColumn<int>("node").NotNull().DefaultValue(0);
+            yield return restrictionTable;
+
+            // Dynamic listener registry (GH-2685). Provisioned only when the opt-in
+            // flag is set so existing apps see no migration churn. Oracle uses
+            // VARCHAR2(500) for uri to match the node-table convention.
+            if (_durability.EnableDynamicListeners)
+            {
+                var listenerTable = new Table(new OracleObjectName(SchemaName, DatabaseConstants.ListenersTableName.ToUpperInvariant()));
+                listenerTable.AddColumn("uri", $"VARCHAR2({AgentUri.MaximumLength})").AsPrimaryKey();
+                yield return listenerTable;
+            }
+        }
+
+        foreach (var table in _otherTables)
+        {
+            yield return table;
+        }
+
+        foreach (var entry in _sagaStorage.Enumerate())
+        {
+            yield return entry.Value.Table;
+        }
+    }
+
+    public void AddTable(Table table)
+    {
+        _otherTables.Add(table);
+    }
+
+    public OracleSagaSchema<T, TId> SagaSchemaFor<T, TId>() where T : Saga
+    {
+        if (_sagaStorage.TryFind(typeof(T), out var raw))
+        {
+            if (raw is OracleSagaSchema<T, TId> sagaStorage)
+            {
+                return sagaStorage;
+            }
+        }
+
+        var definition = new SagaTableDefinition(typeof(T), null);
+        var storage = new OracleSagaSchema<T, TId>(definition, _settings);
+        _sagaStorage = _sagaStorage.AddOrUpdate(typeof(T), storage);
+
+        return storage;
+    }
+
+    // IMessageDatabase - extra methods
+    public Weasel.Core.DbCommandBuilder ToCommandBuilder()
+    {
+        // OracleDbCommandBuilder is a DbCommandBuilder, so it satisfies IMessageDatabase, but it emits
+        // Oracle's ':' bind markers instead of the generic '@', types parameters through OracleProvider
+        // (Guid as RAW(16), bool as NUMBER(1)), and -- because ODP.NET cannot execute several statements
+        // from one command -- splits at each StartNewCommand() boundary into one command per statement.
+        // Our dead letter methods use ToOracleCommandBuilder() instead.
+        return new Weasel.Oracle.OracleDbCommandBuilder();
+    }
+
+    internal Weasel.Oracle.CommandBuilder ToOracleCommandBuilder()
+    {
+        return new Weasel.Oracle.CommandBuilder();
+    }
+
+    // Oracle falls back to an unbounded delete for expired handled envelope cleanup
+    public string? BatchedDeleteExpiredHandledEnvelopesSql(int batchSize) => null;
+
+    // GH-3971. OracleMessageStore implements IMessageDatabase directly rather than deriving from
+    // MessageDatabase, so it restates the portable defaults here. The indexable `owner_id in (…)`
+    // predicate and the idx_wolverine_*_owner index both apply; only the bounded update does not, the
+    // same trade this store already makes for the expired-handled cleanup above.
+    public string DistinctOwnerIdsSql(DbObjectName table)
+        => $"select distinct {DatabaseConstants.OwnerId} from {table} where {DatabaseConstants.OwnerId} <> 0";
+
+    public string? BatchedReleaseOwnershipSql(DbObjectName table, string deadOwnerList, int batchSize) => null;
+
+    public Task EnqueueAsync(IDatabaseOperation operation)
+    {
+        // NOTE: this silently drops the operation. OracleMessageStore implements IMessageDatabase
+        // directly rather than deriving from MessageDatabase, so it has no DatabaseBatcher to hand
+        // the operation to. The durability agent does not use this path -- it builds its own
+        // DatabaseOperationBatch -- and the one caller that does, OracleNodePersistence.LogRecordsAsync,
+        // works around it by inserting directly. Tracked separately; see the comment there.
+        return Task.CompletedTask;
+    }
+
+    public void WriteLoadScheduledEnvelopeSql(DbCommandBuilder builder, DateTimeOffset utcNow)
+    {
+        builder.Append(
+            $"SELECT {DatabaseConstants.IncomingFields} FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE status = '{EnvelopeStatus.Scheduled}' AND execution_time <= ");
+        builder.AppendParameter(utcNow);
+        builder.Append($" ORDER BY execution_time FETCH FIRST {_durability.RecoveryBatchSize} ROWS ONLY");
+    }
+
+    // ISagaSupport
+    //
+    // GH-4805. Deliberately NOT an ISagaStorageCodeSource, unlike the other four relational stores.
+    // They inherit SagaSchemaFor as an `abstract` generic method on the generic MessageDatabase<T>,
+    // which makes it a generic VIRTUAL method that NativeAOT cannot dispatch -- so they need generated
+    // code to build the schema for them. This store is not a MessageDatabase<T> at all: it implements
+    // the store interfaces directly, so its SagaSchemaFor is a plain non-virtual generic method on a
+    // non-generic class, and ILC compiles it per instantiation like any other call. There is nothing to
+    // work around here. (Not verified in a native image -- no Oracle AOT lane exists -- but the GVM
+    // hazard that forced the change elsewhere is structurally absent.)
+    public async ValueTask<ISagaStorage<TId, TSaga>> EnrollAndFetchSagaStorage<TId, TSaga>(MessageContext context)
+        where TSaga : Saga
+    {
+        var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+        try
+        {
+            var tx = await conn.BeginTransactionAsync(_cancellation);
+
+            var schema = SagaSchemaFor<TSaga, TId>();
+
+            var transaction = new DatabaseEnvelopeTransaction(this, tx);
+            await context.EnlistInOutboxAsync(transaction);
+            return new DatabaseSagaStorage<TId, TSaga>(conn, tx, schema);
+        }
+        catch (Exception)
+        {
+            await conn.CloseAsync();
+            throw;
+        }
+    }
+
+    // ITenantDatabaseRegistry
+    public IDatabaseProvider Provider => OracleProvider.Instance;
+
+    private bool _hasAppliedDefaults;
+
+    public async Task<string> TryFindTenantConnectionString(string tenantId)
+    {
+        if (!_hasAppliedDefaults && _settings.AutoCreate != AutoCreate.None && _settings.TenantConnections != null)
+        {
+            await SeedDatabasesAsync(_settings.TenantConnections);
+            _hasAppliedDefaults = true;
+        }
+
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+
+        try
+        {
+            await using var cmd = conn.CreateCommand(
+                $"SELECT connection_string FROM {SchemaName}.{DatabaseConstants.TenantsTableName} WHERE tenant_id = :id");
+            cmd.With("id", tenantId);
+            await using var reader = await cmd.ExecuteReaderAsync(_cancellation);
+
+            if (await reader.ReadAsync(_cancellation))
+            {
+                return await reader.GetFieldValueAsync<string>(0, _cancellation);
+            }
+
+            await reader.CloseAsync();
+            return null!;
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task<IReadOnlyList<Assignment<string>>> LoadAllTenantConnectionStrings()
+    {
+        if (!_hasAppliedDefaults && _settings.AutoCreate != AutoCreate.None && _settings.TenantConnections != null)
+        {
+            await SeedDatabasesAsync(_settings.TenantConnections);
+            _hasAppliedDefaults = true;
+        }
+
+        var list = new List<Assignment<string>>();
+
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+
+        try
+        {
+            await using var cmd = conn.CreateCommand(
+                $"SELECT tenant_id, connection_string FROM {SchemaName}.{DatabaseConstants.TenantsTableName} WHERE disabled = 0");
+            await using var reader = await cmd.ExecuteReaderAsync(_cancellation);
+
+            while (await reader.ReadAsync(_cancellation))
+            {
+                var tid = await reader.GetFieldValueAsync<string>(0);
+                var cs = await reader.GetFieldValueAsync<string>(1);
+
+                list.Add(new Assignment<string>(tid, cs));
+            }
+
+            await reader.CloseAsync();
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+
+        return list;
+    }
+
+    public async Task SeedDatabasesAsync(ITenantedSource<string> tenantConnectionStrings)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+
+        try
+        {
+            foreach (var assignment in tenantConnectionStrings.AllActiveByTenant())
+            {
+                await using var deleteCmd = conn.CreateCommand(
+                    $"DELETE FROM {SchemaName}.{DatabaseConstants.TenantsTableName} WHERE tenant_id = :tid");
+                deleteCmd.With("tid", assignment.TenantId);
+                await deleteCmd.ExecuteNonQueryAsync(_cancellation);
+
+                await using var insertCmd = conn.CreateCommand(
+                    $"INSERT INTO {SchemaName}.{DatabaseConstants.TenantsTableName} (tenant_id, connection_string) VALUES (:tid, :cs)");
+                insertCmd.With("tid", assignment.TenantId);
+                insertCmd.With("cs", assignment.Value);
+                await insertCmd.ExecuteNonQueryAsync(_cancellation);
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task AddTenantRecordAsync(string tenantId, string connectionString)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+        try
+        {
+            // Oracle MERGE for upsert
+            await using var cmd = conn.CreateCommand(
+                $"MERGE INTO {SchemaName}.{DatabaseConstants.TenantsTableName} t USING (SELECT :id AS tenant_id FROM DUAL) s ON (t.tenant_id = s.tenant_id) WHEN MATCHED THEN UPDATE SET connection_string = :conn, disabled = 0 WHEN NOT MATCHED THEN INSERT (tenant_id, connection_string, disabled) VALUES (:id, :conn, 0)");
+            cmd.With("id", tenantId);
+            cmd.With("conn", connectionString);
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task SetTenantDisabledAsync(string tenantId, bool disabled)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+        try
+        {
+            await using var cmd = conn.CreateCommand(
+                $"UPDATE {SchemaName}.{DatabaseConstants.TenantsTableName} SET disabled = :disabled WHERE tenant_id = :id");
+            cmd.With("id", tenantId);
+            cmd.With("disabled", disabled ? 1 : 0);
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task DeleteTenantRecordAsync(string tenantId)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+        try
+        {
+            await using var cmd = conn.CreateCommand(
+                $"DELETE FROM {SchemaName}.{DatabaseConstants.TenantsTableName} WHERE tenant_id = :id");
+            cmd.With("id", tenantId);
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task<IReadOnlyList<string>> LoadDisabledTenantIdsAsync()
+    {
+        var list = new List<string>();
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+        try
+        {
+            await using var reader = await conn.CreateCommand(
+                    $"SELECT tenant_id FROM {SchemaName}.{DatabaseConstants.TenantsTableName} WHERE disabled = 1")
+                .ExecuteReaderAsync(_cancellation);
+
+            while (await reader.ReadAsync(_cancellation))
+            {
+                list.Add(await reader.GetFieldValueAsync<string>(0));
+            }
+
+            await reader.CloseAsync();
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+
+        return list;
+    }
+}

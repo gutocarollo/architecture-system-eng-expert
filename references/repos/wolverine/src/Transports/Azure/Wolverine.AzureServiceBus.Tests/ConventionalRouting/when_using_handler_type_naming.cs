@@ -1,0 +1,73 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Wolverine.AzureServiceBus.Internal;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Util;
+using Xunit;
+
+namespace Wolverine.AzureServiceBus.Tests.ConventionalRouting;
+
+public class when_using_handler_type_naming : IAsyncLifetime
+{
+    private IHost _host = null!;
+    private IWolverineRuntime _runtime = null!;
+
+    public ValueTask InitializeAsync()
+    {
+        _host = Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseAzureServiceBusTesting()
+                    .UseConventionalRouting(NamingSource.FromHandlerType)
+                    .AutoProvision()
+                    .AutoPurgeOnStartup();
+
+                opts.Discovery.DisableConventionalDiscovery()
+                    .IncludeType(typeof(AsbHandlerTypeNamingHandler));
+            }).Start();
+
+        _runtime = _host.Services.GetRequiredService<IWolverineRuntime>();
+        return ValueTask.CompletedTask;
+    }
+
+    [Fact]
+    public void listener_endpoint_should_be_named_after_handler_type()
+    {
+        // Azure SB sanitizes names by lowercasing
+        var expectedName = typeof(AsbHandlerTypeNamingHandler).ToMessageTypeName().ToLowerInvariant();
+        var transport = _runtime.Options.Transports.GetOrCreate<AzureServiceBusTransport>();
+
+        transport.Queues.Any(q => q.QueueName == expectedName)
+            .ShouldBeTrue($"Expected queue named '{expectedName}' for handler type, but found: {string.Join(", ", transport.Queues.Select(q => q.QueueName))}");
+    }
+
+    [Fact]
+    public void listener_should_be_active()
+    {
+        var expectedName = typeof(AsbHandlerTypeNamingHandler).ToMessageTypeName().ToLowerInvariant();
+
+        _runtime.Endpoints.ActiveListeners().Any(x => x.Uri.ToString().Contains(expectedName))
+            .ShouldBeTrue($"Expected active listener containing '{expectedName}'");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_host != null) await _host.StopAsync();
+        _host?.Dispose();
+
+        // Every class in this namespace has to hand the next one a clean namespace: the emulator caps
+        // it at 50 queues and reports the overflow as a broker-init timeout. GH-3786.
+        await AzureServiceBusTesting.DeleteAllEmulatorObjectsAsync();
+    }
+}
+
+public record AsbHandlerTypeNamingMessage;
+
+public class AsbHandlerTypeNamingHandler
+{
+    public void Handle(AsbHandlerTypeNamingMessage message)
+    {
+    }
+}

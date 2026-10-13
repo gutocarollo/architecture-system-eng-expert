@@ -1,0 +1,197 @@
+using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using Shouldly;
+using Wolverine.RabbitMQ.Internal;
+using Wolverine.Runtime;
+using Wolverine.Tracking;
+using Wolverine.SqlServer;
+using Wolverine.Persistence.Durability.DeadLetterManagement;
+using Xunit;
+using IntegrationTests;
+using Wolverine.Persistence.Durability;
+
+namespace Wolverine.RabbitMQ.Tests;
+
+public class wolverine_storage_dead_letter_queue_mechanics : IAsyncLifetime
+{
+    private readonly string QueueName = Guid.NewGuid().ToString();
+    private IHost _host = null!;
+    private RabbitMqTransport theTransport = null!;
+    private readonly string connectionString;
+
+    public wolverine_storage_dead_letter_queue_mechanics()
+    {
+        connectionString = Servers.SqlServerConnectionString;
+    }
+
+    public async ValueTask InitializeAsync() =>await  ValueTask.CompletedTask;
+    private async Task afterBootstrapping()
+    {
+        await CreateHost(QueueName, useDurableInbox: false);
+    }
+
+    private async Task CreateHost(string queueName, bool useDurableInbox = false)
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.PersistMessagesWithSqlServer(connectionString, "wolverine");
+                opts.Policies.AutoApplyTransactions();
+                opts.EnableAutomaticFailureAcks = false;
+                opts.UseRabbitMq().AutoProvision().AutoPurgeOnStartup().DisableDeadLetterQueueing();
+
+                if (useDurableInbox)
+                {
+                    opts.ListenToRabbitQueue(queueName).UseDurableInbox();
+                    opts.PublishMessage<WolverineStorageTestMessage>().ToRabbitQueue(queueName);
+                }
+                else
+                {
+                    opts.PublishAllMessages().ToRabbitQueue(queueName);
+                    opts.ListenToRabbitQueue(queueName);
+                }
+
+                opts.LocalRoutingConventionDisabled = true;
+                opts.Services.AddResourceSetupOnStartup(StartupAction.ResetState);
+            }).StartAsync();
+
+        await _host.ResetResourceState();
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Try to eliminate queues to keep them from accumulating
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            await _host.TeardownResources();
+            _host.Dispose();
+        }
+    }
+
+    private static async Task<DeadLetterEnvelopeResults> WaitForDeadLettersAsync(IMessageStore messageStore, int minimumCount = 1)
+    {
+        var query = new DeadLetterEnvelopeQuery { PageSize = 100 };
+        var deadline = DateTimeOffset.UtcNow.Add(30.Seconds());
+        DeadLetterEnvelopeResults? results = null;
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            results = await messageStore.DeadLetters.QueryAsync(query, CancellationToken.None);
+            if (results.Envelopes.Count() >= minimumCount) return results;
+            await Task.Delay(250.Milliseconds());
+        }
+        return results ?? await messageStore.DeadLetters.QueryAsync(query, CancellationToken.None);
+    }
+
+    [Fact]
+    public async Task should_not_have_native_dead_letter_objects_when_disabled()
+    {
+        await afterBootstrapping();
+
+        theTransport.Exchanges.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+        theTransport.Queues.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// GH-4559. "on created queues" means the broker's copy. <c>RabbitMqQueue.Arguments</c> is the
+    /// dictionary Wolverine assembles to PASS to <c>QueueDeclareAsync</c>, so asserting it is true whether
+    /// or not the declaration ever reached Rabbit -- and a negative assertion over that dictionary is
+    /// satisfied by a queue that was never created at all.
+    /// </summary>
+    [Fact]
+    public async Task should_not_set_dead_letter_queue_exchange_on_created_queues()
+    {
+        await afterBootstrapping();
+
+        using var probe = await RabbitManagementProbe.RequireAsync(TestContext.Current.CancellationToken);
+
+        var arguments = await probe.GetQueueArgumentsAsync(QueueName, token: TestContext.Current.CancellationToken);
+
+        arguments.ShouldNotBeNull("Auto provisioning never created the queue, so its arguments prove nothing");
+        arguments.ContainsKey(RabbitMqTransport.DeadLetterQueueHeader).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task should_have_wolverine_storage_mode()
+    {
+        await afterBootstrapping();
+
+        var queue = theTransport.Queues[QueueName];
+        queue.DeadLetterQueue?.Mode.ShouldBe(DeadLetterQueueMode.WolverineStorage);
+    }
+
+    [Fact]
+    public async Task should_save_failed_messages_to_sql_server_dlq()
+    {
+        await afterBootstrapping();
+
+        // Send a message that will fail
+        await _host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(new WolverineStorageTestMessage());
+
+        // Poll the SQL Server DLQ until the dead letter is recorded
+        var messageStore = _host.Services.GetRequiredService<IMessageStore>();
+        var deadLetterResults = await WaitForDeadLettersAsync(messageStore);
+
+        // Should have at least one dead letter message
+        deadLetterResults.Envelopes.ShouldNotBeEmpty("Failed messages should be saved to SQL Server DLQ when using WolverineStorage mode");
+
+        // Verify the message details
+        var deadLetter = deadLetterResults.Envelopes.First();
+        deadLetter.ExceptionType.ShouldBe(typeof(DivideByZeroException).FullName);
+        deadLetter.ExceptionMessage.ShouldBe("Boom.");
+    }
+
+    [Fact]
+    public async Task should_not_have_messages_in_rabbitmq_dlq()
+    {
+        await afterBootstrapping();
+
+        // Send a message that will fail
+        await _host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(new WolverineStorageTestMessage());
+
+        // Wait for processing to complete via DLQ persistence
+        var messageStore = _host.Services.GetRequiredService<IMessageStore>();
+        await WaitForDeadLettersAsync(messageStore);
+
+        // Check that there are no messages in any RabbitMQ DLQ
+        // Since we disabled dead letter queueing, there shouldn't be any DLQ
+        theTransport.Queues.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task should_work_with_durable_inbox()
+    {
+        var durableQueueName = $"durable-{Guid.NewGuid()}";
+
+        await CreateHost(durableQueueName, useDurableInbox: true);
+
+        // Send a message that will fail
+        await _host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(new WolverineStorageTestMessage());
+
+        // Poll the SQL Server DLQ until the dead letter is recorded
+        var messageStore = _host.Services.GetRequiredService<IMessageStore>();
+        var deadLetterResults = await WaitForDeadLettersAsync(messageStore);
+
+        // Should have at least one dead letter message
+        deadLetterResults.Envelopes.ShouldNotBeEmpty("Failed messages should be saved to SQL Server DLQ even with durable inbox");
+    }
+}
+
+public record WolverineStorageTestMessage;
+
+public static class WolverineStorageTestHandler
+{
+    public static void Handle(WolverineStorageTestMessage command)
+    {
+        throw new DivideByZeroException("Boom.");
+    }
+} 

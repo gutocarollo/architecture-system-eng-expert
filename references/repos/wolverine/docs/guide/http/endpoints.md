@@ -1,0 +1,605 @@
+# HTTP Endpoints
+
+::: warning
+While Wolverine.HTTP has a relaxed view of naming conventions since it depends on the routing attributes for discovery. It
+is very possible to utilize the same method as both an HTTP endpoint and Wolverine message handler if the method both
+follows the correct naming conventions for message handler discovery and is decorated with one of the `[WolverineVerb]` attributes.
+
+This can lead to unexpected code generation errors on the message handler side if the method refers to HTTP route arguments,
+query string values, or other AspNetCore services. Our strong advice is to use the `Endpoint` class name nomenclature for HTTP
+endpoints unless you are explicitly meaning for a method to be both an HTTP endpoint and message handler. 
+:::
+
+First, a little terminology about Wolverine HTTP endpoints. Consider the following endpoint method:
+
+<!-- snippet: sample_simple_wolverine_http_endpoint -->
+<a id='snippet-sample_simple_wolverine_http_endpoint'></a>
+```cs
+[WolverinePost("/question")]
+public static ArithmeticResults PostJson(Question question)
+{
+    return new ArithmeticResults
+    {
+        Sum = question.One + question.Two,
+        Product = question.One * question.Two
+    };
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/TestEndpoints.cs#L118-L129' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_simple_wolverine_http_endpoint' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+In the method signature above, `Question` is the "request" type (the payload sent from the client to the server) and `ArithmeticResults` is the "resource" type (what is being returned to the client).
+If instead that method were asynchronous like this:
+
+<!-- snippet: sample_simple_wolverine_http_endpoint_async -->
+<a id='snippet-sample_simple_wolverine_http_endpoint_async'></a>
+```cs
+[WolverinePost("/question2")]
+public static Task<ArithmeticResults> PostJsonAsync(Question question)
+{
+    var results = new ArithmeticResults
+    {
+        Sum = question.One + question.Two,
+        Product = question.One * question.Two
+    };
+
+    return Task.FromResult(results);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/TestEndpoints.cs#L131-L144' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_simple_wolverine_http_endpoint_async' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The resource type is still `ArithmeticResults`. Likewise, if an endpoint returns `ValueTask<ArithmeticResults>`, the resource type
+is also `ArithmeticResults`, and Wolverine will worry about the asynchronous (or `return Task.CompletedTask;`) mechanisms
+for you in the generated code.
+
+## Legal Endpoint Signatures
+
+::: info
+It's actually possible to create custom conventions for how Wolverine resolves method parameters to the endpoint methods
+using the `IParameterStrategy` plugin interface explained later in this page.
+:::
+
+First off, every endpoint method must be a `public` method on a `public` type to accommodate the runtime code generation.
+After that, you have quite a bit of flexibility. 
+
+In terms of what the legal parameters to your endpoint method, Wolverine uses these rules *in order of precedence*
+to determine how to source that parameter at runtime:
+
+| Type or Description                        | Behavior                                                                                                                |
+|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| Decorated with `[FromServices]`            | The argument is resolved as an IoC service                                                                              |
+| `IMessageBus`                              | Creates a new Wolverine message bus object                                                                              |
+| `HttpContext` or its members               | See the section below on accessing the HttpContext                                                                      |
+| Parameter name matches a route parameter   | See the [routing page](/guide/http/routing) for more information                                                        |
+| `DateTime now` or `DateTimeOffset now`     | The current UTC time. See [the current time](#the-current-time) below                                                   |
+| Decorated with `[FromHeader]`              | See [working with headers](/guide/http/headers) for more information                                                    |
+| `string`, `int`, `Guid`, etc.              | All other "simple" .NET types are assumed to be [query string values](/guide/http/querystring) |
+| The first concrete, "not simple" parameter | Deserializes the HTTP request body as JSON to this type                                                                 |
+| Every thing else                           | Wolverine will try to source the type as an IoC service |
+
+You can force Wolverine to ignore a parameter as the request body type by decorating
+the parameter with the `[NotBody]` attribute like this:
+
+<!-- snippet: sample_using_not_body_attribute -->
+<a id='snippet-sample_using_not_body_attribute'></a>
+```cs
+[WolverinePost("/notbody")]
+// The Recorder parameter will be sourced as an IoC service
+// instead of being treated as the HTTP request body
+public string PostNotBody([NotBody] Recorder recorder)
+{
+    recorder.Actions.Add("Called AttributesEndpoints.Post()");
+    return "all good";
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/AttributeEndpoints.cs#L15-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_not_body_attribute' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: warning
+You can return any type that can technically be serialized to JSON, which means even primitive
+values like numbers, strings, or dates. Just know that there is special handling for `int` and any
+invalid HTTP status code may result in a web browser hanging -- and that's not typically what you'd
+like to happen!
+:::
+
+In terms of the response type, you can use:
+
+| Type                           | Body         | Status Code       | Notes                                                                     |
+|--------------------------------|--------------|-------------------|---------------------------------------------------------------------------|
+| `void` / `Task` / `ValueTask`  | Empty        | 200               |                                                                           |
+| `string`                       | "text/plain" | 200               | Writes the result to the response                                         |
+| `int`                          | Empty        | Value of response | **Note**, this must be a valid HTTP status code or bad things may happen! |
+| Type that implements `IResult` | Varies       | Varies            | The `IResult.ExecuteAsync()` method is executed                           |
+| `CreationResponse` or subclass | JSON         | 201               | The response is serialized, and writes a `location` response header       |
+| `AcceptResponse` or subclass   | JSON         | 202               | The response is serialized, and writes a `location` response header       |
+| Any other type                 | JSON         | 200               | The response is serialized to JSON                                        |
+
+In all cases up above, if the endpoint method is asynchronous using either `Task<T>` or `ValueTask<T>`, the `T` is the 
+response type. In other words, a response of `Task<string>` has the same rules as a response of `string` and `ValueTask<int>`
+behaves the same as a response of `int`. 
+
+And now to complicate *everything*, but I promise this is potentially valuable, you can also use [Tuples](https://learn.microsoft.com/en-us/dotnet/api/system.tuple?view=net-7.0) as the return
+type of an HTTP endpoint. In this case, the first item in the tuple is the official response type that is treated by the 
+rules above. To make that concrete, consider this sample that we wrote in the introduction to Wolverine.Http:
+
+<!-- snippet: sample_using_wolverine_endpoint_for_create_todo -->
+<a id='snippet-sample_using_wolverine_endpoint_for_create_todo'></a>
+```cs
+// Introducing this special type just for the http response
+// gives us back the 201 status code
+public record TodoCreationResponse(int Id)
+    : CreationResponse("/todoitems/" + Id);
+
+// The "Endpoint" suffix is meaningful, but you could use
+// any name if you don't mind adding extra attributes or a marker interface
+// for discovery
+public static class TodoCreationEndpoint
+{
+    [WolverinePost("/todoitems")]
+    public static (TodoCreationResponse, TodoCreated) Post(CreateTodo command, IDocumentSession session)
+    {
+        var todo = new Todo { Name = command.Name };
+
+        // Just telling Marten that there's a new entity to persist,
+        // but I'm assuming that the transactional middleware in Wolverine is
+        // handling the asynchronous persistence outside of this handler
+        session.Store(todo);
+
+        // By Wolverine.Http conventions, the first "return value" is always
+        // assumed to be the Http response, and any subsequent values are
+        // handled independently
+        return (
+            new TodoCreationResponse(todo.Id),
+            new TodoCreated(todo.Id)
+        );
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Samples/TodoController.cs#L80-L111' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_wolverine_endpoint_for_create_todo' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+In the case above, `TodoCreationResponse` is the first item in the tuple, so Wolverine treats that as 
+the response for the HTTP endpoint. The second `TodoCreated` value in the tuple is treated as a [cascading message](/guide/messaging/transports/local)
+that will be published through Wolverine's messaging (or a local queue depending on the routing).
+
+How Wolverine handles those extra "return values" is the same [return value rules](/guide/handlers/return-values)
+from the messaging handlers.
+
+In the case of wanting to leverage Wolverine "return value" actions but you want your endpoint to return an
+empty response body, you can use the `[Wolverine.Http.EmptyResponse]` attribute to tell Wolverine *not*
+to use any return values as a the endpoint response and to return an empty response with a `204` status
+code. Here's an example from the tests:
+
+<!-- snippet: sample_using_emptyresponse -->
+<a id='snippet-sample_using_emptyresponse'></a>
+```cs
+[AggregateHandler]
+[WolverinePost("/orders/ship"), EmptyResponse]
+// The OrderShipped return value is treated as an event being posted
+// to a Marten even stream
+// instead of as the HTTP response body because of the presence of
+// the [EmptyResponse] attribute
+public static OrderShipped Ship(ShipOrder command, Order order)
+{
+    return new OrderShipped();
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Marten/Orders.cs#L122-L134' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_emptyresponse' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## The HTTP QUERY Method <Badge type="tip" text="6.17" />
+
+Wolverine.HTTP supports the [HTTP `QUERY` method (RFC 10008)](https://www.rfc-editor.org/rfc/rfc10008.html)
+through the `[WolverineQuery]` attribute. `QUERY` is a **safe, idempotent** method — like `GET` — but,
+unlike `GET`, it is allowed to carry a **request body**. It's intended for search/query endpoints whose
+criteria are too large or too structured to encode in the query string:
+
+<!-- snippet: sample_wolverine_query_endpoint -->
+<a id='snippet-sample_wolverine_query_endpoint'></a>
+```cs
+// QUERY (RFC 10008) is safe and idempotent like GET, but carries a request body — ideal for
+// search endpoints whose criteria are too large or structured for the query string. Wolverine
+// binds the request body just like it would for POST. Note that Wolverine's middleware rules
+// are not verb-aware: this endpoint stays free of transactional middleware because it takes
+// no IDocumentSession/DbContext dependency, not because it is a QUERY.
+[WolverineQuery("/search")]
+public static SearchResults Search(SearchRequest request)
+{
+    var hits = Enumerable.Range(1, request.Page)
+        .Select(i => $"{request.Term}-{i}")
+        .ToArray();
+
+    return new SearchResults(request.Term, request.Page, hits);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/QueryEndpoints.cs#L14-L30' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_query_endpoint' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The request body binds exactly as it would for a `POST` endpoint.
+
+::: tip
+Wolverine applies no verb-specific middleware rules to `QUERY` — the same dependency-based rules apply
+as for every other verb. Outbox middleware is gated on an `IMessageBus`/`IMessageContext` dependency,
+and transactional middleware is gated on a persistence dependency: a `QUERY` endpoint that takes an
+`IDocumentSession` (Marten) or a `DbContext` (EF Core) **is** wrapped in transactional middleware under
+`AutoApplyTransactions()`, exactly as a `POST` with the same dependency would be. To keep a `QUERY`
+endpoint that reads the database free of transactional middleware, take Marten's read-only
+`IQuerySession` instead of an `IDocumentSession`, or decorate the endpoint with `[NonTransactional]`
+when using EF Core.
+:::
+
+::: warning OpenAPI limitation
+`QUERY` only became a first-class operation in **OpenAPI 3.2**. The OpenAPI 3.1 document produced by the
+Swashbuckle / `Microsoft.OpenApi` stack cannot represent it, so — matching ASP.NET Core's own behavior on
+OpenAPI 3.1 — Wolverine **gracefully omits `QUERY` endpoints from the generated OpenAPI document** rather
+than break generation for the rest of the application. The endpoints are fully routable and functional;
+they are simply not described in the OpenAPI 3.1 output. First-class OpenAPI documentation can follow once
+the underlying OpenAPI stack emits 3.2.
+:::
+
+## The Current Time <Badge type="tip" text="6.28" />
+
+A parameter named `now` of type `DateTime` or `DateTimeOffset` is filled with the current UTC time rather
+than being bound from the request. This is the same convention
+[message handlers have always had](/guide/handlers/#message-handler-parameters), and it exists for
+testability's sake — the endpoint stays a pure function of its inputs instead of reaching for a static clock:
+
+```cs
+[WolverineGet("/api/orders/{id}/age")]
+public static TimeSpan GetAge([Entity] Order order, DateTimeOffset now)
+    => now - order.PlacedAt;
+```
+
+The value comes from whatever `IVariableSource` is registered for the type in
+`WolverineOptions.CodeGeneration.Sources`, so HTTP endpoints and message handlers cannot drift, and a custom
+clock registered as a variable source is honored by both.
+
+::: warning
+The convention is keyed on the parameter being **named** `now`, not on its type alone. That is deliberate: in
+an HTTP endpoint a `DateTimeOffset` is otherwise an ordinary [query string value](/guide/http/querystring),
+and `DateTimeOffset from` / `DateTimeOffset to` are far too common to hijack. Only `now` is special.
+
+An explicit route argument still wins — `[WolverineGet("/report/{now}")]` binds `now` from the route, because
+a parameter the author spelled out in the route is not a request for the clock. So do `[FromRoute]`,
+`[FromQuery]`, and `[FromHeader]`, which are all resolved before this convention.
+:::
+
+## JSON Handling
+
+See [JSON serialization for more information](/guide/http/json)
+
+## When the Response Body is Null <Badge type="tip" text="6.28" />
+
+When an endpoint's resource comes back `null`, Wolverine writes an empty **404**:
+
+```cs
+[WolverineGet("/api/alerts/config/services/{serviceName}")]
+public static async Task<ServiceAlertOverrides?> Get(string serviceName, IDocumentSession session)
+    // A miss here answers 404 with an empty body
+    => await session.LoadAsync<ServiceAlertOverrides>(serviceName);
+```
+
+A bare 404 is indistinguishable from "you called a Url that does not exist." If you would rather say
+"the Url is correct, but there is no body," decorate the endpoint method with `[NoContentIfMissing]` to
+get an empty **204** instead:
+
+```cs
+[WolverineGet("/api/alerts/config/services/{serviceName}"), NoContentIfMissing]
+public static async Task<ServiceAlertOverrides?> Get(string serviceName, IDocumentSession session)
+    // A miss now answers 204 with an empty body
+    => await session.LoadAsync<ServiceAlertOverrides>(serviceName);
+```
+
+The generated OpenAPI follows: the endpoint advertises `200` and `204` rather than `200` and `404`.
+
+`[NoContentIfMissing]` can also go on the endpoint *class*, where it applies to every endpoint method in
+that class. A method level declaration always wins over a class level one, and `[NotFoundIfMissing]` is
+how a single method opts back out.
+
+### An Application Wide Default
+
+Set `WolverineHttpOptions.OnMissingResponseBody` to change the default for the whole application:
+
+```cs
+app.MapWolverineEndpoints(opts =>
+{
+    opts.OnMissingResponseBody = OnMissingResponseBody.NoContent204;
+});
+```
+
+Use `[NotFoundIfMissing]` on any endpoint or endpoint class that should keep answering 404.
+
+::: warning
+`[NoContentIfMissing]` is only legal on `GET` and `QUERY` endpoints, and the application wide setting
+only reaches those methods. Those are the safe, side effect free reads where an empty answer is a benign
+outcome. On a `POST` or `PUT`, a 204 in place of a resource would turn a failed command into an apparent
+success for the caller, so Wolverine fails fast at bootstrapping time rather than let you ship it.
+
+Be deliberate about this even on reads. A 404 puts a miss on the failure branch of every HTTP client; a
+204 puts it on the success branch. Code that calls `response.EnsureSuccessStatusCode()` will start
+passing, and generated typed clients (NSwag, Kiota, Refit) will map the 204 onto their success path.
+:::
+
+::: tip
+This setting is strictly about the response *body*. What happens when a required entity cannot be loaded
+in the first place is a separate question, answered by
+[`OnMissing` on `[Entity]`](/guide/handlers/persistence#answering-204-instead-of-404) — including its own
+`OnMissing.EmptyContentWith204`. In an endpoint like
+`Get([Entity] Thing thing) => thing`, the entity guard runs *before* the endpoint body, so it is
+`OnMissing` — not `[NoContentIfMissing]` — that decides the answer.
+:::
+
+## Returning Strings
+
+To create an endpoint that writes a string with `content-type` = "text/plain", just return a string as your resource type, so `string`, `Task<string>`, or `ValueTask<string>`
+from your endpoint method like so:
+
+<!-- snippet: sample_hello_world_with_wolverine_http -->
+<a id='snippet-sample_hello_world_with_wolverine_http'></a>
+```cs
+public class HelloEndpoint
+{
+    [WolverineGet("/")]
+    public string Get() => "Hello.";
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/TodoWebService/TodoWebService/HelloEndpoint.cs#L5-L12' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_hello_world_with_wolverine_http' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Using IResult
+
+::: tip
+The `IResult` mechanics are applied to the return value of any type that can be cast to `IResult`
+:::
+
+Wolverine will execute an ASP.Net Core `IResult` object returned from an HTTP endpoint method. 
+
+<!-- snippet: sample_conditional_iresult_return -->
+<a id='snippet-sample_conditional_iresult_return'></a>
+```cs
+[WolverinePost("/choose/color")]
+public IResult Redirect(GoToColor request)
+{
+    switch (request.Color)
+    {
+        case "Red":
+            return Results.Redirect("/red");
+
+        case "Green":
+            return Results.Redirect("/green");
+
+        default:
+            return Results.Content("Choose red or green!");
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/Wolverine.Http.Tests/DocumentationSamples.cs#L30-L47' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_conditional_iresult_return' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+## Using IoC Services
+
+Wolverine HTTP endpoint methods happily support "method injection" of service
+types that are known in the IoC container. If there's any potential for confusion
+between the request type argument and what should be coming from the IoC
+container, you can decorate parameters with the `[FromServices]` attribute
+from ASP.Net Core to give Wolverine a hint. Otherwise, Wolverine is asking the underlying
+IoC container if it knows how to resolve the service from the parameter argument.
+
+
+## Accessing HttpContext
+
+Simply expose a parameter of any of these types to get either the current
+`HttpContext` for the current request or children members of `HttpContext`:
+
+1. `HttpContext`
+2. `HttpRequest`
+3. `HttpResponse`
+4. `CancellationToken`
+5. `ClaimsPrincipal`
+
+You can also get at the trace identifier for the current `HttpContext` by a parameter like this:
+
+<!-- snippet: sample_using_trace_identifier -->
+<a id='snippet-sample_using_trace_identifier'></a>
+```cs
+[WolverineGet("/http/identifier")]
+public string UseTraceIdentifier(string traceIdentifier)
+{
+    return traceIdentifier;
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/HttpContextEndpoints.cs#L35-L42' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_trace_identifier' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Customizing Parameter Handling
+
+There's actually a way to customize how Wolverine handles parameters in HTTP endpoints to create your own conventions.
+To do so, you'd need to write an implementation of the `IParameterStrategy` interface from Wolverine.Http:
+
+<!-- snippet: sample_iparameterstrategy -->
+<a id='snippet-sample_iparameterstrategy'></a>
+```cs
+/// <summary>
+/// Apply custom handling to a Wolverine.Http endpoint/chain based on a parameter within the
+/// implementing Wolverine http endpoint method
+/// </summary>
+/// <param name="variable">The Variable referring to the input of this parameter</param>
+public interface IParameterStrategy
+{
+    bool TryMatch(HttpChain chain, IServiceContainer container, ParameterInfo parameter, out Variable? variable);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/Wolverine.Http/CodeGen/IParameterStrategy.cs#L8-L19' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_iparameterstrategy' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+As an example, let's say that you want any parameter of type `DateTimeOffset` that's named "now" to receive the current
+system time. To do that, we can write this class:
+
+<!-- snippet: sample_nowparameterstrategy -->
+<a id='snippet-sample_nowparameterstrategy'></a>
+```cs
+public class NowParameterStrategy : IParameterStrategy
+{
+    public bool TryMatch(HttpChain chain, IServiceContainer container, ParameterInfo parameter, out Variable? variable)
+    {
+        if (parameter.Name == "now" && parameter.ParameterType == typeof(DateTimeOffset))
+        {
+            // This is tying into Wolverine's code generation model
+            variable = new Variable(typeof(DateTimeOffset),
+                $"{typeof(DateTimeOffset).FullNameInCode()}.{nameof(DateTimeOffset.UtcNow)}");
+            return true;
+        }
+
+        variable = default;
+        return false;
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Samples/CustomParameter.cs#L11-L29' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_nowparameterstrategy' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+and register that strategy within our `MapWolverineEndpoints()` set up like so:
+
+<!-- snippet: sample_adding_custom_parameter_handling -->
+<a id='snippet-sample_adding_custom_parameter_handling'></a>
+```cs
+// Customizing parameter handling
+opts.AddParameterHandlingStrategy<NowParameterStrategy>();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Program.cs#L375-L379' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_adding_custom_parameter_handling' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And lastly, here's the application within an HTTP endpoint for extra context:
+
+<!-- snippet: sample_http_endpoint_receiving_now -->
+<a id='snippet-sample_http_endpoint_receiving_now'></a>
+```cs
+[WolverineGet("/now")]
+public static string GetNow(DateTimeOffset now) // using the custom parameter strategy for "now"
+{
+    return now.ToString();
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/CustomParameterEndpoint.cs#L7-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_http_endpoint_receiving_now' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: info
+As of 6.28 a `now` parameter is [handled by Wolverine out of the box](#the-current-time), so this particular
+strategy is no longer necessary — it is kept here purely because it is a small, complete illustration of the
+plugin interface. It still works: strategies registered through `AddParameterHandlingStrategy()` are placed
+ahead of every built-in strategy, which is also how you would override built-in behavior deliberately.
+:::
+
+## Http Endpoint / Message Handler Combo
+
+Here's a common scenario that has come up from Wolverine users. Let's say that you have some kind of logical command message that 
+your system needs to handle that might come in from the outside from either HTTP clients or from asynchronous messaging. 
+Folks have frequently asked about how to reuse code between the message handling invocation and the HTTP endpoint. You've
+got a handful of options:
+
+1. Build a message handler and have the HTTP endpoint just delegate to `IMessageBus.InvokeAsync()` with the message
+2. Have both the message handler and HTTP endpoint delegate to shared code, whether that be a shared service, just a static method somewhere, or even
+   have the HTTP endpoint code directly call the concrete message handler
+3. Use a hybrid Message Handler / HTTP Endpoint because Wolverine can do that!
+
+To make a single class and method be both a message handler and HTTP endpoint, just add a `[Wolverine{HttpVerb}]` attribute
+with the route directly on your message handler. As long as that method follows Wolverine's normal naming rules for message
+discovery, Wolverine will treat it as both a message handler and as an HTTP endpoint. Here's an example from our tests:
+
+<!-- snippet: sample_using_problem_details_in_message_handler -->
+<a id='snippet-sample_using_problem_details_in_message_handler'></a>
+```cs
+public static class NumberMessageHandler
+{
+    public static ProblemDetails Validate(NumberMessage message)
+    {
+        if (message.Number > 5)
+        {
+            return new ProblemDetails
+            {
+                Detail = "Number is bigger than 5",
+                Status = 400
+            };
+        }
+        
+        // All good, keep on going!
+        return WolverineContinue.NoProblems;
+    }
+
+    // This "Before" method would only be utilized as
+    // an HTTP endpoint
+    [WolverineBefore(MiddlewareScoping.HttpEndpoints)]
+    public static void BeforeButOnlyOnHttp(HttpContext context)
+    {
+        Debug.WriteLine("Got an HTTP request for " + context.TraceIdentifier);
+        CalledBeforeOnlyOnHttpEndpoints = true;
+    }
+
+    // This "Before" method would only be utilized as
+    // a message handler
+    [WolverineBefore(MiddlewareScoping.MessageHandlers)]
+    public static void BeforeButOnlyOnMessageHandlers()
+    {
+        CalledBeforeOnlyOnMessageHandlers = true;
+    }
+
+    // Look at this! You can use this as an HTTP endpoint too!
+    [WolverinePost("/problems2")]
+    public static void Handle(NumberMessage message)
+    {
+        Debug.WriteLine("Handled " + message);
+        Handled = true;
+    }
+
+    // These properties are just a cheap trick in Wolverine internal tests
+    public static bool Handled { get; set; }
+    public static bool CalledBeforeOnlyOnMessageHandlers { get; set; }
+    public static bool CalledBeforeOnlyOnHttpEndpoints { get; set; }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/ProblemDetailsUsage.cs#L37-L86' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_problem_details_in_message_handler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If you are using Wolverine.HTTP in your application, Wolverine is able to treat `ProblemDetails` similar to the built in
+`HandlerContinuation` when running inside of message handlers.
+
+If you have some middleware methods that should only apply specifically when running as a handler or when running as an HTTP endpoint,
+you can utilize `MiddlewareScoping` directives with `[WolverineBefore]`, `[WolverineAfter]`, or `[WolverineFinally]` attributes to 
+limit the applicability of individual middleware methods. 
+
+::: info
+There is no runtime filtering here because the `MiddlewareScoping` impacts the generated code around your hybrid message handler / 
+HTTP endpoint method, and Wolverine already generates code separately for the two use cases. 
+:::
+
+As of Wolverine 5.7, you can also technically use `HttpContext` arguments in the message handler usage *if*
+you are carefully accounting for that being null as shown in this sample:
+
+<!-- snippet: sample_hybridhandler_with_null_httpcontext -->
+<a id='snippet-sample_hybridhandler_with_null_httpcontext'></a>
+```cs
+public record DoHybrid(string Message);
+
+public static class HybridHandler
+{
+    [WolverinePost("/hybrid")]
+    public static async Task HandleAsync(DoHybrid command, HttpContext? context)
+    {
+        // What this, because it will be null if this is used within 
+        // a message handler!
+        if (context != null)
+        {
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync(command.Message);
+        }
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/HybridHandler.cs#L5-L23' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_hybridhandler_with_null_httpcontext' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+
+

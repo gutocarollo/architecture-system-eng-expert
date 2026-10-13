@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Http\Wolverine.Http\Wolverine.Http.csproj" />
+      <ProjectReference Include="..\..\RabbitMQ\Wolverine.RabbitMQ\Wolverine.RabbitMQ.csproj" />
+      <ProjectReference Include="..\Wolverine.AmazonSqs\Wolverine.AmazonSqs.csproj" />
+    </ItemGroup>
+
+</Project>

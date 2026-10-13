@@ -1,0 +1,69 @@
+using System.Linq;
+using System.Threading.Tasks;
+using Marten.Testing.Documents;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+using Marten;
+
+namespace DocumentDbTests.Bugs;
+
+public class Bug_980_bulk_insert_with_subclass: BugIntegrationContext
+{
+    [Fact]
+    public async Task can_do_a_bulk_insert_against_the_parent()
+    {
+        StoreOptions(_ =>
+        {
+            _.Schema.For<User>()
+                .AddSubClass<AdminUser>()
+                .AddSubClass<SuperUser>();
+        });
+
+        // Both tests here write AdminUser/SuperUser into the shared "bugs" schema and assert
+        // exact counts, so whichever runs second sees the other's rows. See #5070.
+        await theStore.Advanced.Clean.DeleteDocumentsByTypeAsync(typeof(User));
+
+        var users = new User[]
+        {
+            new AdminUser { UserName = "foo" },
+            new SuperUser { UserName = "bar" },
+            new SuperUser { UserName = "myergen" }
+        };
+
+        await theStore.BulkInsertAsync(users);
+
+        await using var query = theStore.LightweightSession();
+        (await query.Query<AdminUser>().CountAsync()).ShouldBe(1);
+        (await query.Query<SuperUser>().CountAsync()).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task can_do_a_bulk_insert_against_the_child_type()
+    {
+        StoreOptions(_ =>
+        {
+            _.Schema.For<User>()
+                .AddSubClass<AdminUser>()
+                .AddSubClass<SuperUser>();
+        });
+
+        // Both tests here write AdminUser/SuperUser into the shared "bugs" schema and assert
+        // exact counts, so whichever runs second sees the other's rows. See #5070.
+        await theStore.Advanced.Clean.DeleteDocumentsByTypeAsync(typeof(User));
+
+        var users = new SuperUser[]
+        {
+            new SuperUser { UserName = "bar" },
+            new SuperUser { UserName = "myergen" },
+            new SuperUser { UserName = "else" },
+            new SuperUser { UserName = "more" }
+        };
+
+        await theStore.BulkInsertAsync(users);
+
+        await using var query = theStore.LightweightSession();
+        (await query.Query<SuperUser>().CountAsync()).ShouldBe(4);
+    }
+
+}

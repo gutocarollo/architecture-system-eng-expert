@@ -1,0 +1,261 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.connector.oracle.olr;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.kafka.connect.data.Field;
+
+import io.debezium.DebeziumException;
+import io.debezium.config.CommonConnectorConfig.BinaryHandlingMode;
+import io.debezium.connector.oracle.OracleConnection;
+import io.debezium.connector.oracle.OracleConnectorConfig;
+import io.debezium.connector.oracle.OracleValueConverters;
+import io.debezium.jdbc.TemporalPrecisionMode;
+import io.debezium.relational.Column;
+import io.debezium.util.Strings;
+
+import oracle.sql.INTERVALDS;
+import oracle.sql.INTERVALYM;
+import oracle.sql.RAW;
+
+/**
+ * Provides custom value converter behavior specific to OpenLogReplicator.
+ *
+ * OpenLogReplicator payloads are JSON-based and several value types are not serialized in the same format
+ * as we would normally get them from a JDBC result set or an Oracle JDBC driver equivalent type. So, this
+ * converter implementation is meant to pre-transform the values from OpenLogReplicator into a data type
+ * that is more appropriate for the column being converted. This avoids polluting the base implementation
+ * with any highly-specific OpenLogReplicator details.
+ *
+ * @author Chris Cranford
+ */
+public class OpenLogReplicatorValueConverter extends OracleValueConverters {
+
+    private static final String COLUMN_TYPE_DATE = "DATE";
+    private static final String COMMA = ",";
+    private static final BigInteger NANOS_PER_SECOND = BigInteger.valueOf(1_000_000_000L);
+    private static final BigInteger NANOS_PER_MILLISECOND = BigInteger.valueOf(1_000_000L);
+    private static final String PRECISION = "%precision%";
+    private static final String TIMESTAMP_TIME_ZONE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss." + PRECISION + "xxxxx";
+    private static final String TIMESTAMP_LOCAL_TIME_ZONE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss." + PRECISION + "XXXX";
+
+    private final Map<Integer, DateTimeFormatter> timestampWithTimeZoneFormatterCache = new HashMap<>();
+    private final Map<Integer, DateTimeFormatter> timestampWithLocalTimeZoneFormatterCache = new HashMap<>();
+
+    public OpenLogReplicatorValueConverter(OracleConnectorConfig connectorConfig, OracleConnection connection) {
+        super(connectorConfig, connection);
+    }
+
+    @Override
+    protected Object convertNumeric(Column column, Field fieldDefn, Object value) {
+        return super.convertNumeric(column, fieldDefn, toBigDecimal(column, fieldDefn, value));
+    }
+
+    @Override
+    protected Object convertFloat(Column column, Field fieldDefn, Object data) {
+        if (data instanceof Integer intData) {
+            return intData.floatValue();
+        }
+        else if (data instanceof Long longData) {
+            return longData.floatValue();
+        }
+        else if (data instanceof BigDecimal bigDecimalData) {
+            data = bigDecimalData.floatValue();
+        }
+        return super.convertFloat(column, fieldDefn, data);
+    }
+
+    @Override
+    protected Object convertDouble(Column column, Field fieldDefn, Object data) {
+        if (data instanceof Integer intData) {
+            return intData.doubleValue();
+        }
+        else if (data instanceof Long longData) {
+            return longData.doubleValue();
+        }
+        else if (data instanceof BigDecimal bigDecimalData) {
+            data = bigDecimalData.doubleValue();
+        }
+        return super.convertDouble(column, fieldDefn, data);
+    }
+
+    @Override
+    protected Object convertTimestampToEpochMillis(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            value = convertTimestampValue(column, value);
+        }
+        return super.convertTimestampToEpochMillis(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampToEpochMicros(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            value = convertTimestampValue(column, value);
+        }
+        return super.convertTimestampToEpochMicros(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampToEpochNanos(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            value = convertTimestampValue(column, value);
+        }
+        return super.convertTimestampToEpochNanos(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampToEpochMillisAsDate(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            value = convertTimestampValue(column, value);
+        }
+        return super.convertTimestampToEpochMillisAsDate(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampToStructured(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            value = convertTimestampValue(column, value);
+        }
+        return super.convertTimestampToStructured(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampToUtcIsoString(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            // Hand over an instant rather than going through convertTimestampValue(), which
+            // reduces a DATE column to milliseconds. A bare number is read here as nanoseconds,
+            // so those milliseconds would be taken for a time a few minutes after the epoch.
+            value = toInstantFromEpochNanos((Number) value);
+        }
+        return super.convertTimestampToUtcIsoString(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampWithZone(Column column, Field fieldDefn, Object value) {
+        if (value instanceof String) {
+            final String valueStr = (String) value;
+            if (!valueStr.contains(COMMA)) {
+                throw new DebeziumException("Unexpected timestamp with time zone value: " + value);
+            }
+
+            // Split the timestamp with time zone value based on ','.
+            // OpenLogReplicator provides the data in '<epoch>,<timezone>' format.
+            final String[] valueBits = valueStr.split(",");
+
+            final Instant instant = toInstantFromEpochNanos(new BigInteger(valueBits[0]));
+            final ZoneId zoneId = getZoneIdFromTimeZone(valueBits[1]);
+            if (temporalPrecisionMode == TemporalPrecisionMode.STRUCTURED) {
+                return super.convertTimestampWithZone(column, fieldDefn, OffsetDateTime.ofInstant(instant, zoneId));
+            }
+            return getTimestampWithTimeZoneFormatter(column).format(OffsetDateTime.ofInstant(instant, zoneId));
+        }
+        return super.convertTimestampWithZone(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertTimestampWithLocalZone(Column column, Field fieldDefn, Object value) {
+        if (value instanceof Number) {
+            final Instant instant = toInstantFromEpochNanos((Number) value);
+            if (temporalPrecisionMode == TemporalPrecisionMode.STRUCTURED) {
+                return super.convertTimestampWithLocalZone(column, fieldDefn, OffsetDateTime.ofInstant(instant, ZoneOffset.UTC));
+            }
+            return getTimestampWithLocalTimeZoneFormatter(column).format(OffsetDateTime.ofInstant(instant, ZoneOffset.UTC));
+        }
+        return super.convertTimestampWithLocalZone(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertBinary(Column column, Field fieldDefn, Object value, BinaryHandlingMode mode) {
+        if (value instanceof String) {
+            try {
+                value = RAW.hexString2Bytes((String) value);
+            }
+            catch (SQLException e) {
+                throw new DebeziumException("Failed to convert HEX string into byte array: " + value, e);
+            }
+        }
+        return super.convertBinary(column, fieldDefn, value, mode);
+    }
+
+    @Override
+    protected Object convertIntervalYearMonth(Column column, Field fieldDefn, Object value) {
+        if (value instanceof String) {
+            value = new INTERVALYM((String) value);
+        }
+        return super.convertIntervalYearMonth(column, fieldDefn, value);
+    }
+
+    @Override
+    protected Object convertIntervalDaySecond(Column column, Field fieldDefn, Object value) {
+        if (value instanceof String) {
+            // Values are separated by ",", we need them separated with spaces.
+            final String sanitizedValue = ((String) value).replaceAll(",", " ");
+            value = new INTERVALDS(sanitizedValue);
+        }
+        return super.convertIntervalDaySecond(column, fieldDefn, value);
+    }
+
+    private static Instant toInstantFromEpochNanos(Number epochNanos) {
+        final BigInteger[] secondsAndNanos = toBigInteger(epochNanos).divideAndRemainder(NANOS_PER_SECOND);
+        return Instant.ofEpochSecond(secondsAndNanos[0].longValueExact(), secondsAndNanos[1].longValueExact());
+    }
+
+    private static BigInteger toBigInteger(Number value) {
+        return value instanceof BigInteger bigIntegerValue ? bigIntegerValue : BigInteger.valueOf(value.longValue());
+    }
+
+    private Object convertTimestampValue(Column column, Object value) {
+        if (column.typeName().equalsIgnoreCase(COLUMN_TYPE_DATE)) {
+            // Value is being provided in nanoseconds based on OpenLogReplicator configuration
+            // We need to reduce the column's precision to milliseconds
+            value = toBigInteger((Number) value).divide(NANOS_PER_MILLISECOND).longValueExact();
+        }
+        else {
+            // TIMESTAMP(n)
+            value = toInstantFromEpochNanos((Number) value);
+        }
+        return value;
+    }
+
+    private ZoneId getZoneIdFromTimeZone(String timeZone) {
+        // OpenLogReplicator time zone varies, sometimes "HH:MM" and others Java TimeZone.
+        if (timeZone.contains(":")) {
+            return ZoneOffset.of(timeZone);
+        }
+        else {
+            return TimeZone.getTimeZone(timeZone).toZoneId();
+        }
+    }
+
+    private DateTimeFormatter getTimestampWithTimeZoneFormatter(Column column) {
+        int precision = column.scale().orElse(6); // Oracle defaults to 6
+        return timestampWithTimeZoneFormatterCache.computeIfAbsent(precision,
+                k -> createPrecisionBasedFormatter(precision, TIMESTAMP_TIME_ZONE_FORMAT));
+    }
+
+    private DateTimeFormatter getTimestampWithLocalTimeZoneFormatter(Column column) {
+        int precision = column.scale().orElse(6); // Oracle defaults to 6
+        return timestampWithLocalTimeZoneFormatterCache.computeIfAbsent(precision,
+                k -> createPrecisionBasedFormatter(precision, TIMESTAMP_LOCAL_TIME_ZONE_FORMAT));
+    }
+
+    private static DateTimeFormatter createPrecisionBasedFormatter(int precision, String format) {
+        final String precisionFormat = Strings.pad("", precision, 'S');
+        return DateTimeFormatter.ofPattern(format.replace(PRECISION, precisionFormat));
+    }
+
+}

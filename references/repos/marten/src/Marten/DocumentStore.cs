@@ -1,0 +1,828 @@
+#nullable enable
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Transactions;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using JasperFx.Events;
+using JasperFx.Events.Aggregation;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Descriptors;
+using JasperFx.Events.Projections;
+using JasperFx.MultiTenancy;
+using Marten.Events;
+using Marten.Events.Daemon;
+using Marten.Events.Projections;
+using Marten.Events.Daemon.HighWater;
+using Marten.Exceptions;
+using Marten.Internal.CodeGeneration;
+using Marten.Internal.Sessions;
+using Marten.Services;
+using Marten.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Weasel.Postgresql.Connections;
+using IsolationLevel = System.Data.IsolationLevel;
+using Weasel.Core;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten;
+
+/// <summary>
+///     The main entry way to using Marten
+/// </summary>
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2060",
+    Justification = "Class-level: Expression.Call(Type, string, ...) on framework Queryable / Enumerable intrinsics that the trimmer preserves.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public partial class DocumentStore: IDocumentStore, IDescribeMyself
+{
+    private readonly IMartenLogger _logger;
+    private readonly INpgsqlDataSourceFactory dataSourceFactory;
+
+    /// <summary>
+    ///     Creates a new DocumentStore with the supplied StoreOptions
+    /// </summary>
+    /// <param name="options"></param>
+    public DocumentStore(StoreOptions options)
+    {
+        dataSourceFactory = options.NpgsqlDataSourceFactory;
+        options.ApplyConfiguration();
+        options.Validate();
+
+        Options = options;
+        _logger = options.Logger();
+        Serializer = options.Serializer();
+
+        // Workaround to make database creation lazy so all StoreOptions
+        // customizations can be done first
+        if (Tenancy is DefaultTenancy d)
+        {
+            d.Initialize();
+        }
+
+        StorageFeatures.PostProcessConfiguration();
+        Events.Initialize(this);
+        // #4294 Lens-1 Row 1: discovery is gated on an opt-out flag and consumes a
+        // process-wide cached assembly snapshot to keep multi-tenanted host
+        // construction off the hot path. JasperFx already caches per-assembly
+        // evolver results inside DiscoverGeneratedEvolvers; the remaining wasted
+        // work was the per-construction AppDomain.CurrentDomain.GetAssemblies()
+        // call and the per-assembly framework-filter loop.
+        if (Options.Projections.DiscoverGeneratedEvolversOnStartup)
+        {
+            Options.Projections.DiscoverGeneratedEvolvers(ProjectionOptions.CachedLoadedAssemblies);
+        }
+        // Note: Natural key aggregates are discovered lazily when FetchForWriting
+        // is called with a type that has [NaturalKey]. Assembly-level scanning was
+        // removed because it caused spurious InvalidProjectionException failures
+        // when test projects share compile references with incompatible stream identity types.
+        Options.Projections.AssertValidity(Options);
+
+        if (Options.LogFactory != null)
+        {
+            Options.Projections.AttachLogging(Options.LogFactory);
+        }
+
+        Advanced = new AdvancedOperations(this);
+
+        Diagnostics = new Diagnostics(this);
+
+        _lightweightCompiledQueries = new CompiledQueryCollection(DocumentTracking.None, this);
+        _identityMapCompiledQueries = new CompiledQueryCollection(DocumentTracking.IdentityOnly, this);
+        _dirtyTrackedCompiledQueries = new CompiledQueryCollection(DocumentTracking.DirtyTracking, this);
+        _queryOnlyCompiledQueries = new CompiledQueryCollection(DocumentTracking.QueryOnly, this);
+
+        warnIfAsyncDaemonIsDisabledWithAsyncProjections();
+
+        options.ApplyMetricsIfAny();
+
+        // Check if we need to correct any events or streams for global tenancy
+        if (options.EventGraph.GlobalAggregates.Any())
+        {
+            var decorator = new GlobalEventAppenderDecorator(options.EventGraph.EventAppender);
+            options.EventGraph.EventAppender = decorator;
+
+            decorator.ReadEventTypes(options.EventGraph);
+        }
+
+        Identity = new(Options.StoreName.ToLowerInvariant(), "marten");
+
+        // #5409: Subject beside Identity, from the same StoreName, because they answer the same
+        // question and used to disagree. Subject was a property initializer holding the literal
+        // "marten://main" and was overwritten only for an ancillary store -- so naming a PRIMARY store
+        // moved its identity and left its subject on "main". An ancillary store still overrides this in
+        // SecondaryStoreConfig.Build, which resolves its marker type rather than the name (#5039).
+        Subject = Internal.StoreSubject.For(Options.StoreName);
+    }
+
+    public ITenancy Tenancy => Options.Tenancy;
+
+    public EventGraph Events => Options.EventGraph;
+
+    public StorageFeatures StorageFeatures => Options.Storage;
+
+    public ISerializer Serializer { get; }
+
+    public StoreOptions Options { get; }
+
+    IReadOnlyStoreOptions IDocumentStore.Options => Options;
+
+    public virtual void Dispose()
+    {
+        (dataSourceFactory as IDisposable)?.SafeDispose();
+        (Options.Events as IDisposable)?.SafeDispose();
+        Tenancy.Dispose();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return DisposableExtensions
+            .MaybeDisposeAllAsync<object>([dataSourceFactory, Options.Events, Tenancy]);
+    }
+
+    public AdvancedOperations Advanced { get; }
+
+    public Task BulkInsertEnlistTransactionAsync<T>(IReadOnlyCollection<T> documents,
+        Transaction transaction,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default) where T : notnull
+    {
+        var bulkInsertion = new BulkInsertion(Tenancy.Default, Options);
+        return bulkInsertion.BulkInsertEnlistTransactionAsync(documents, transaction, mode, batchSize, cancellation);
+    }
+
+    public async Task BulkInsertAsync<T>(string tenantId, IReadOnlyCollection<T> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly, int batchSize = 1000,
+        CancellationToken cancellation = default) where T : notnull
+    {
+        var bulkInsertion =
+            new BulkInsertion(
+                await Tenancy.GetTenantAsync(Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)).ConfigureAwait(false), Options);
+        await bulkInsertion.BulkInsertAsync(documents, mode, batchSize, cancellation).ConfigureAwait(false);
+    }
+
+    public Task BulkInsertAsync<T>(IReadOnlyCollection<T> documents, BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default) where T : notnull
+    {
+        var bulkInsertion = new BulkInsertion(Tenancy.Default, Options);
+        return bulkInsertion.BulkInsertAsync(documents, mode, batchSize, cancellation);
+    }
+
+    public Task BulkInsertDocumentsAsync(IEnumerable<object> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default)
+    {
+        var bulkInsertion = new BulkInsertion(Tenancy.Default, Options);
+        return bulkInsertion.BulkInsertDocumentsAsync(documents, mode, batchSize, cancellation);
+    }
+
+    public async Task BulkInsertDocumentsAsync(string tenantId, IEnumerable<object> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default)
+    {
+        var bulkInsertion =
+            new BulkInsertion(
+                await Tenancy.GetTenantAsync(Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)).ConfigureAwait(false), Options);
+        await bulkInsertion.BulkInsertDocumentsAsync(documents, mode, batchSize, cancellation).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Tracks which databases have already had the schema apply run on behalf of the bulk event
+    ///     insert path, keyed by database identifier. See <see cref="ensureBulkInsertSchemaAsync" />.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, Lazy<Task>> _bulkInsertSchemaApplications = new();
+
+    /// <summary>
+    ///     Test hook (GH-4946): how many times the bulk event insert path has actually executed the
+    ///     schema apply. The regression being guarded is *how many times* the apply runs, not whether
+    ///     the insert works.
+    /// </summary>
+    internal int BulkInsertSchemaApplicationCount;
+
+    /// <summary>
+    ///     GH-4946: the batch <c>BulkInsertEventsAsync</c> overloads used to call
+    ///     <c>Storage.ApplyAllConfiguredChangesToDatabaseAsync()</c> on *every* call — a full schema delta
+    ///     (partition introspection + information_schema sweeps) across *every* database in the store, per
+    ///     batch. A caller importing in 1,000-event batches paid that per batch, which collapsed import
+    ///     throughput and parked the connection pool on Weasel's partition introspection query.
+    ///     <para>
+    ///     The apply is now (a) skipped altogether when the effective <see cref="AutoCreate" /> is
+    ///     <see cref="AutoCreate.None" />, where it is a no-op by contract and only the introspection cost
+    ///     remains, and (b) otherwise run at most once per *database* — not per call, and not across
+    ///     databases the import never touches. A 512-database sharded store therefore applies at most once
+    ///     per database it actually imports into.
+    ///     </para>
+    ///     <para>
+    ///     Thread safety: batches may be imported concurrently. The per-database entry is a
+    ///     <see cref="Lazy{T}" /> with <see cref="LazyThreadSafetyMode.ExecutionAndPublication" />, so
+    ///     concurrent callers for the same database all await the single in-flight apply. A failed apply is
+    ///     evicted so a later call can retry rather than caching the failure forever.
+    ///     </para>
+    /// </summary>
+    private Task ensureBulkInsertSchemaAsync(IMartenDatabase database, CancellationToken cancellation)
+    {
+        if (Options.AutoCreateSchemaObjects == AutoCreate.None)
+        {
+            return Task.CompletedTask;
+        }
+
+        var lazy = _bulkInsertSchemaApplications.GetOrAdd(database.Identifier,
+            _ => new Lazy<Task>(() => applyAsync(database),
+                LazyThreadSafetyMode.ExecutionAndPublication));
+
+        // Await the shared apply under *this* caller's token. The apply itself deliberately does not
+        // take a caller's token: the first caller to arrive owns the in-flight task that every
+        // concurrent caller for the same database awaits, so honoring its token here would let one
+        // batch's cancellation fail a sibling batch that was never cancelled. A schema apply is short
+        // and idempotent, so letting it run to completion is the cheaper trade.
+        return lazy.Value.WaitAsync(cancellation);
+
+        async Task applyAsync(IMartenDatabase db)
+        {
+            try
+            {
+                Interlocked.Increment(ref BulkInsertSchemaApplicationCount);
+
+                // MA0040 suppressed deliberately: this task is SHARED by every concurrent caller for
+                // this database, so it must not be bound to any one caller's token. Each caller applies
+                // its own token at the await site above (`lazy.Value.WaitAsync(cancellation)`).
+#pragma warning disable MA0040
+                await db.ApplyAllConfiguredChangesToDatabaseAsync().ConfigureAwait(false);
+#pragma warning restore MA0040
+            }
+            catch
+            {
+                _bulkInsertSchemaApplications.TryRemove(db.Identifier, out _);
+                throw;
+            }
+        }
+    }
+
+    public async Task BulkInsertEventsAsync(IReadOnlyList<StreamAction> streams, int batchSize = 1000,
+        CancellationToken cancellation = default)
+    {
+        var tenant = Tenancy.Default;
+        await ensureBulkInsertSchemaAsync(tenant.Database, cancellation).ConfigureAwait(false);
+
+        var appender = new BulkEventAppender(Events, Options.Serializer());
+
+        await using var conn = tenant.Database.CreateConnection();
+        await conn.OpenAsync(cancellation).ConfigureAwait(false);
+        var tx = await conn.BeginTransactionAsync(cancellation).ConfigureAwait(false);
+
+        try
+        {
+            await appender.BulkInsertAsync(conn, streams, batchSize, cancellation).ConfigureAwait(false);
+            await tx.CommitAsync(cancellation).ConfigureAwait(false);
+        }
+        catch
+        {
+            await tx.RollbackAsync(cancellation).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    public async Task BulkInsertEventsAsync(string tenantId, IReadOnlyList<StreamAction> streams,
+        int batchSize = 1000, CancellationToken cancellation = default)
+    {
+        // #5516: normalise ONCE, at the boundary, so the id used to resolve the tenant is the same id
+        // that gets stamped. Correcting it only for the lookup routed the write to the right database or
+        // partition and then wrote the RAW id into tenant_id -- a row that no normalised read can see
+        // under conjoined tenancy, and the wrong key inside the right partition under
+        // UseTenantPartitionedEvents.
+        tenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+
+        var tenant = await Tenancy.GetTenantAsync(tenantId).ConfigureAwait(false);
+
+        await ensureBulkInsertSchemaAsync(tenant.Database, cancellation).ConfigureAwait(false);
+
+        var appender = new BulkEventAppender(Events, Options.Serializer());
+
+        // Set tenant on all streams
+        foreach (var stream in streams)
+        {
+            stream.TenantId = tenantId;
+            foreach (var e in stream.Events)
+            {
+                e.TenantId = tenantId;
+            }
+        }
+
+        await using var conn = tenant.Database.CreateConnection();
+        await conn.OpenAsync(cancellation).ConfigureAwait(false);
+        var tx = await conn.BeginTransactionAsync(cancellation).ConfigureAwait(false);
+
+        try
+        {
+            await appender.BulkInsertAsync(conn, streams, batchSize, cancellation).ConfigureAwait(false);
+            await tx.CommitAsync(cancellation).ConfigureAwait(false);
+        }
+        catch
+        {
+            await tx.RollbackAsync(cancellation).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Streaming, order-preserving bulk import of an existing event log for a single tenant. Unlike
+    /// <see cref="BulkInsertEventsAsync(string,IReadOnlyList{StreamAction},int,CancellationToken)"/> — which
+    /// materializes every event of the tenant in memory — this consumes <paramref name="orderedEvents"/>
+    /// lazily in batches, so a tenant with millions of events imports in bounded memory. The events MUST be
+    /// supplied in the exact order their <c>seq_id</c>s should be assigned (typically the source log's global
+    /// order): each is given the next ascending sequence in arrival order, so cross-stream ordering is
+    /// preserved. Per-stream versions are taken from the events. <paramref name="streamHeaders"/> seed
+    /// <c>mt_streams</c> (written first, for the foreign key). Runs as one transaction per tenant.
+    /// </summary>
+    public Task BulkInsertEventStreamAsync(string tenantId,
+        IReadOnlyList<BulkEventStreamHeader> streamHeaders, IAsyncEnumerable<IEvent> orderedEvents,
+        int batchSize = 1000, CancellationToken cancellation = default)
+    {
+        return BulkInsertEventStreamAsync(tenantId, streamHeaders, orderedEvents,
+            BulkEventSequenceMode.AssignFromSequence, batchSize, cancellation);
+    }
+
+    /// <summary>
+    /// Streaming, order-preserving bulk import with explicit <c>seq_id</c> assignment control.
+    /// <see cref="BulkEventSequenceMode.PreserveSourceSequence"/> keeps each event's carried
+    /// <c>Sequence</c> — the migration data policy is to never renumber history (marten#4682) —
+    /// then advances the target sequence past the imported maximum and, under per-tenant event
+    /// partitioning, seeds the tenant's <c>HighWaterMark:{tenant}</c> progression row.
+    /// </summary>
+    public async Task BulkInsertEventStreamAsync(string tenantId,
+        IReadOnlyList<BulkEventStreamHeader> streamHeaders, IAsyncEnumerable<IEvent> orderedEvents,
+        BulkEventSequenceMode sequenceMode, int batchSize = 1000, CancellationToken cancellation = default)
+    {
+        // #5516, same as BulkInsertEventsAsync above: the corrected id resolved the tenant while the raw
+        // one was handed to the appender and stamped on every row.
+        tenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+
+        var tenant = await Tenancy.GetTenantAsync(tenantId).ConfigureAwait(false);
+
+        // Deliberately NO schema work here — provisioning is the caller's contract: apply the base schema
+        // at startup and register the tenant first (AddMartenManagedTenantsAsync / the sharded
+        // AddTenantToShardAsync creates the tenant's own partitions + sequence). Any ensure/apply from the
+        // import path is O(registered tenants) worth of DDL per fresh database under a shared
+        // tenant-partition registry — measured grinding a 500-tenant migration to a near-halt as the
+        // registered count grew.
+        var appender = new BulkEventAppender(Events, Options.Serializer());
+
+        await using var conn = tenant.Database.CreateConnection();
+        await conn.OpenAsync(cancellation).ConfigureAwait(false);
+        var tx = await conn.BeginTransactionAsync(cancellation).ConfigureAwait(false);
+
+        try
+        {
+            await appender
+                .BulkInsertEventStreamAsync(conn, tenantId, streamHeaders, orderedEvents, sequenceMode,
+                    batchSize, cancellation)
+                .ConfigureAwait(false);
+            await tx.CommitAsync(cancellation).ConfigureAwait(false);
+        }
+        catch
+        {
+            await tx.RollbackAsync(cancellation).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    public IDiagnostics Diagnostics { get; }
+
+    public IDocumentSession OpenSession(SessionOptions options)
+    {
+        return openSession(options);
+    }
+
+    public IDocumentSession IdentitySession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+    {
+        return IdentitySession(new SessionOptions { IsolationLevel = isolationLevel });
+    }
+
+    public IDocumentSession IdentitySession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted
+    )
+    {
+        return IdentitySession(new SessionOptions
+        {
+            IsolationLevel = isolationLevel, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+        });
+    }
+
+    public IDocumentSession IdentitySession(SessionOptions options)
+    {
+        options.Tracking = DocumentTracking.IdentityOnly;
+        return openSession(options);
+    }
+
+    public Task<IDocumentSession> IdentitySerializableSessionAsync(
+        CancellationToken cancellation = default
+    )
+    {
+        return IdentitySerializableSessionAsync(
+            new SessionOptions { IsolationLevel = IsolationLevel.Serializable },
+            cancellation
+        );
+    }
+
+    public Task<IDocumentSession> IdentitySerializableSessionAsync(
+        string tenantId,
+        CancellationToken cancellation = default
+    )
+    {
+        return IdentitySerializableSessionAsync(
+            new SessionOptions
+            {
+                IsolationLevel = IsolationLevel.Serializable, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+            },
+            cancellation
+        );
+    }
+
+    public Task<IDocumentSession> IdentitySerializableSessionAsync(
+        SessionOptions options,
+        CancellationToken cancellation = default
+    )
+    {
+        options.IsolationLevel = IsolationLevel.Serializable;
+        options.Tracking = DocumentTracking.IdentityOnly;
+        return OpenSerializableSessionAsync(options, cancellation);
+    }
+
+    public IDocumentSession DirtyTrackedSession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+    {
+        return DirtyTrackedSession(new SessionOptions { IsolationLevel = isolationLevel });
+    }
+
+    public IDocumentSession DirtyTrackedSession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted
+    )
+    {
+        return DirtyTrackedSession(new SessionOptions
+        {
+            IsolationLevel = isolationLevel, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+        });
+    }
+
+    public IDocumentSession DirtyTrackedSession(SessionOptions options)
+    {
+        options.Tracking = DocumentTracking.DirtyTracking;
+        return openSession(options);
+    }
+
+    public Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(
+        CancellationToken cancellation = default
+    )
+    {
+        return DirtyTrackedSerializableSessionAsync(new SessionOptions { IsolationLevel = IsolationLevel.Serializable },
+            cancellation);
+    }
+
+    public Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(
+        string tenantId,
+        CancellationToken cancellation = default
+    )
+    {
+        return DirtyTrackedSerializableSessionAsync(
+            new SessionOptions
+            {
+                IsolationLevel = IsolationLevel.Serializable, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+            }, cancellation);
+    }
+
+    public Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(
+        SessionOptions options,
+        CancellationToken cancellation = default
+    )
+    {
+        options.IsolationLevel = IsolationLevel.Serializable;
+        options.Tracking = DocumentTracking.DirtyTracking;
+        return OpenSerializableSessionAsync(options, cancellation);
+    }
+
+    public IDocumentSession LightweightSession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+    {
+        return LightweightSession(new SessionOptions { IsolationLevel = isolationLevel });
+    }
+
+    public IDocumentSession LightweightSession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted
+    )
+    {
+        return LightweightSession(new SessionOptions
+        {
+            IsolationLevel = isolationLevel, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+        });
+    }
+
+    public IDocumentSession LightweightSession(SessionOptions options)
+    {
+        options.Tracking = DocumentTracking.None;
+        return openSession(options);
+    }
+
+    public Task<IDocumentSession> LightweightSerializableSessionAsync(
+        CancellationToken cancellation = default
+    )
+    {
+        return LightweightSerializableSessionAsync(new SessionOptions { IsolationLevel = IsolationLevel.Serializable },
+            cancellation);
+    }
+
+    public Task<IDocumentSession> LightweightSerializableSessionAsync(
+        string tenantId,
+        CancellationToken cancellation = default
+    )
+    {
+        return LightweightSerializableSessionAsync(
+            new SessionOptions
+            {
+                IsolationLevel = IsolationLevel.Serializable, TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId)
+            }, cancellation);
+    }
+
+    public Task<IDocumentSession> LightweightSerializableSessionAsync(
+        SessionOptions options,
+        CancellationToken cancellation = default
+    )
+    {
+        options.IsolationLevel = IsolationLevel.Serializable;
+        options.Tracking = DocumentTracking.None;
+        return OpenSerializableSessionAsync(options, cancellation);
+    }
+
+    public IQuerySession QuerySession(SessionOptions options)
+    {
+        var connection = options.Initialize(this, CommandRunnerMode.ReadOnly, Options.OpenTelemetry);
+
+        return new QuerySession(this, options, connection);
+    }
+
+    public IQuerySession QuerySession()
+    {
+        return QuerySession(StorageConstants.DefaultTenantId);
+    }
+
+    public IQuerySession QuerySession(string tenantId)
+    {
+        return QuerySession(new SessionOptions { TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId) });
+    }
+
+    public async Task<IQuerySession> QuerySerializableSessionAsync(
+        SessionOptions options,
+        CancellationToken cancellation = default
+    )
+    {
+        // #5586: the method name is a promise. SessionOptions.IsolationLevel defaults to ReadCommitted and
+        // is not nullable, so a caller who simply passes `new SessionOptions()` used to get a session that
+        // was not serializable at all -- and, because this path always builds a sticky
+        // TransactionalConnection, not auto-closing either. Pin it here rather than silently honouring a
+        // level that contradicts the method being called.
+        options.IsolationLevel = IsolationLevel.Serializable;
+
+        var connection = await options.InitializeAsync(this, CommandRunnerMode.ReadOnly, cancellation)
+            .ConfigureAwait(false);
+
+        return new QuerySession(this, options, connection);
+    }
+
+    public Task<IQuerySession> QuerySerializableSessionAsync(CancellationToken cancellation = default)
+    {
+        return QuerySerializableSessionAsync(StorageConstants.DefaultTenantId, cancellation);
+    }
+
+    public Task<IQuerySession> QuerySerializableSessionAsync(
+        string tenantId,
+        CancellationToken cancellation = default
+    )
+    {
+        return QuerySerializableSessionAsync(
+            new SessionOptions
+            {
+                TenantId = Options.TenantIdStyle.MaybeCorrectTenantId(tenantId), IsolationLevel = IsolationLevel.Serializable
+            }, cancellation);
+    }
+
+    public async ValueTask<IProjectionDaemon> BuildProjectionDaemonAsync(
+        string? tenantIdOrDatabaseIdentifier = null,
+        ILogger? logger = null
+    )
+    {
+        if (tenantIdOrDatabaseIdentifier.IsNotEmpty())
+        {
+            tenantIdOrDatabaseIdentifier = Options.TenantIdStyle.MaybeCorrectTenantId(tenantIdOrDatabaseIdentifier);
+        }
+
+        AssertTenantOrDatabaseIdentifierIsValid(tenantIdOrDatabaseIdentifier);
+
+        logger ??= Options.LogFactory?.CreateLogger<ProjectionDaemon>() ?? Options.DotNetLogger ?? NullLogger.Instance;
+
+        var database = tenantIdOrDatabaseIdentifier.IsEmpty()
+            ? Tenancy.Default.Database
+            : await Tenancy.FindOrCreateDatabase(tenantIdOrDatabaseIdentifier).ConfigureAwait(false);
+
+        await database.EnsureStorageExistsAsync(typeof(IEvent)).ConfigureAwait(false);
+
+        return database.As<MartenDatabase>().StartProjectionDaemon(this, logger);
+    }
+
+    public async ValueTask<IProjectionDaemon> BuildProjectionDaemonAsync(DatabaseId id)
+    {
+        var logger = Options.LogFactory?.CreateLogger<ProjectionDaemon>() ?? Options.DotNetLogger ?? NullLogger.Instance;
+
+        var database = await Tenancy.FindDatabase(id).ConfigureAwait(false);
+
+        await database.EnsureStorageExistsAsync(typeof(IEvent)).ConfigureAwait(false);
+
+        return database.As<MartenDatabase>().StartProjectionDaemon(this, logger);
+    }
+
+    public async Task<IDocumentSession> OpenSerializableSessionAsync(SessionOptions options,
+        CancellationToken token = default)
+    {
+        // #5586: the method name is a promise. SessionOptions.IsolationLevel defaults to ReadCommitted and
+        // is not nullable, so a caller who simply passes `new SessionOptions()` used to get a session that
+        // was not serializable at all -- and, because this path always builds a sticky
+        // TransactionalConnection, not auto-closing either. Pin it here rather than silently honouring a
+        // level that contradicts the method being called.
+        options.IsolationLevel = IsolationLevel.Serializable;
+
+        var connection = await options.InitializeAsync(this, CommandRunnerMode.Transactional, token)
+            .ConfigureAwait(false);
+
+        IDocumentSession session = options.Tracking switch
+        {
+            DocumentTracking.None => new LightweightSession(this, options, connection),
+            DocumentTracking.IdentityOnly => new IdentityMapDocumentSession(this, options, connection),
+            DocumentTracking.DirtyTracking => new DirtyCheckingDocumentSession(this, options, connection),
+            _ => throw new ArgumentOutOfRangeException(nameof(SessionOptions.Tracking))
+        };
+
+        return session;
+    }
+
+    private void warnIfAsyncDaemonIsDisabledWithAsyncProjections()
+    {
+        // Deliberately == Disabled, not != Solo/HotCold: DaemonMode.ExternallyManaged (jasperfx#490)
+        // means an external host (e.g. Wolverine's managed event-subscription distribution) runs the
+        // async projections, so they WILL execute — warning would be wrong there.
+        if (Options.Projections.HasAnyAsyncProjections() && Options.Projections.AsyncMode == DaemonMode.Disabled)
+        {
+            Console.WriteLine("Warning: The async daemon is disabled.");
+            var asyncProjectionList =
+                Options.Projections.All.Where(x => x.Lifecycle == ProjectionLifecycle.Async).Select(x => x.ToString())!
+                    .Join(", ");
+            Console.WriteLine(
+                $"Projections {asyncProjectionList} will not be executed without the async daemon enabled");
+        }
+    }
+
+    public IProjectionDaemon BuildProjectionDaemon(
+        string? tenantIdOrDatabaseIdentifier = null,
+        ILogger? logger = null
+    )
+    {
+        if (tenantIdOrDatabaseIdentifier.IsNotEmpty())
+        {
+            tenantIdOrDatabaseIdentifier = Options.TenantIdStyle.MaybeCorrectTenantId(tenantIdOrDatabaseIdentifier);
+        }
+
+        AssertTenantOrDatabaseIdentifierIsValid(tenantIdOrDatabaseIdentifier);
+
+        logger ??= new NulloLogger();
+
+        var database = tenantIdOrDatabaseIdentifier.IsEmpty()
+            ? Tenancy.Default.Database
+            : Tenancy.GetTenant(tenantIdOrDatabaseIdentifier).Database;
+
+        var detector = new HighWaterDetector((MartenDatabase)database, Events, logger);
+
+        return new ProjectionDaemon(this, (MartenDatabase)database, logger, detector);
+    }
+
+    /// <summary>
+    /// Scan loaded assemblies for types marked with [NaturalKeyAggregate] by the source generator
+    /// and auto-register Inline snapshot projections for any that don't already have a projection.
+    /// </summary>
+    private void DiscoverNaturalKeyAggregates(Assembly[] assemblies)
+    {
+        foreach (var assembly in assemblies)
+        {
+            IEnumerable<NaturalKeyAggregateAttribute> attrs;
+            try
+            {
+                attrs = assembly.GetCustomAttributes<NaturalKeyAggregateAttribute>();
+            }
+            catch
+            {
+                continue;
+            }
+
+            foreach (var attr in attrs)
+            {
+                if (!Options.Projections.TryFindAggregate(attr.AggregateType, out _))
+                {
+                    // Register Inline snapshot via reflection — this activates the full natural key pipeline:
+                    // NaturalKeyDefinition discovery, NaturalKeyTable creation, NaturalKeyProjection
+                    var snapshotMethod = typeof(ProjectionOptions)
+                        .GetMethods()
+                        .First(m => m.Name == "Snapshot" && m.IsGenericMethod &&
+                                    m.GetParameters().Length == 2 &&
+                                    m.GetParameters()[0].ParameterType == typeof(SnapshotLifecycle));
+
+                    snapshotMethod.MakeGenericMethod(attr.AggregateType)
+                        .Invoke(Options.Projections, new object?[] { SnapshotLifecycle.Inline, null });
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Quick way to stand up a DocumentStore to the given database connection
+    ///     in the "development" mode for auto-creating schema objects as needed
+    ///     with the default behaviors
+    /// </summary>
+    /// <param name="connectionString"></param>
+    /// <returns></returns>
+    public static DocumentStore For(string connectionString)
+    {
+        return For(_ =>
+        {
+            _.Connection(connectionString);
+        });
+    }
+
+    /// <summary>
+    ///     Configures a DocumentStore for an existing StoreOptions type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static DocumentStore For<T>() where T : StoreOptions, new()
+    {
+        return new DocumentStore(new T());
+    }
+
+    /// <summary>
+    ///     Configures a DocumentStore by defining the StoreOptions settings first
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+
+    #region sample_documentstore.For
+
+    public static DocumentStore For(Action<StoreOptions> configure)
+    {
+        var options = new StoreOptions();
+        configure(options);
+
+        return new DocumentStore(options);
+    }
+
+    #endregion
+
+    private IDocumentSession openSession(SessionOptions options)
+    {
+        var connection = options.Initialize(this, CommandRunnerMode.Transactional, Options.OpenTelemetry);
+
+        IDocumentSession session = options.Tracking switch
+        {
+            DocumentTracking.None => new LightweightSession(this, options, connection),
+            DocumentTracking.IdentityOnly => new IdentityMapDocumentSession(this, options, connection),
+            DocumentTracking.DirtyTracking => new DirtyCheckingDocumentSession(this, options, connection),
+            _ => throw new ArgumentOutOfRangeException(nameof(SessionOptions.Tracking))
+        };
+
+        session.CorrelationId = Activity.Current?.RootId;
+        session.CausationId = Activity.Current?.ParentId;
+
+        return session;
+    }
+
+    private void AssertTenantOrDatabaseIdentifierIsValid(string? tenantIdOrDatabaseIdentifier)
+    {
+        if (!Options.Advanced.DefaultTenantUsageEnabled
+            && Tenancy is not DefaultTenancy
+            && tenantIdOrDatabaseIdentifier.IsEmpty())
+        {
+            throw new DefaultTenantUsageDisabledException();
+        }
+    }
+
+    OptionsDescription IDescribeMyself.ToDescription()
+    {
+        return OptionsDescription.For(Options);
+    }
+}

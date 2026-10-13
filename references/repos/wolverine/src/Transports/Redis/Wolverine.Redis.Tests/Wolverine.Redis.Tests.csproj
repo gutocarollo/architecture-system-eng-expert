@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Testcontainers.Redis" />
+        <!-- Testcontainers depends on SSH.NET [2025.1.0, ), and every version through 2025.1.0
+             carries GHSA-q939-rpr3-3284 (high severity), which TreatWarningsAsErrors turns into a
+             hard build failure. Referencing the patched 2026.0.0 directly satisfies the open-ended
+             range and clears the advisory. Drop this once Testcontainers floors it itself. -->
+        <PackageReference Include="SSH.NET" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Testing\Wolverine.ComplianceTests\Wolverine.ComplianceTests.csproj" />
+        <ProjectReference Include="..\Wolverine.Redis\Wolverine.Redis.csproj" />
+        <!-- The global partitioning topology forces durable mode on every slot, so those tests need a real message store -->
+        <ProjectReference Include="..\..\..\Persistence\Wolverine.Postgresql\Wolverine.Postgresql.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\..\Servers.cs">
+            <Link>Servers.cs</Link>
+        </Compile>
+        <!-- The persistence suites skip rather than fail when no Redis answers at the address
+             RedisContainerFixture resolved. Shared probe, same as the object-store suites. -->
+        <Compile Include="..\..\..\EmulatorProbe.cs">
+            <Link>EmulatorProbe.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+</Project>

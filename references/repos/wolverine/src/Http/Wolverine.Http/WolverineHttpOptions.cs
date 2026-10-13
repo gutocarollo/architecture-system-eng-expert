@@ -1,0 +1,653 @@
+using System.Text.Json;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Core.TypeScanning;
+using Microsoft.AspNetCore.Builder;
+using Wolverine.Http.Antiforgery;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Wolverine.Configuration;
+using Wolverine.Http.ApiVersioning;
+using Wolverine.Http.CodeGen;
+using Wolverine.Http.Policies;
+using Wolverine.Http.Resources;
+using Wolverine.Http.Runtime;
+using Wolverine.Http.Runtime.MultiTenancy;
+using Wolverine.Http.Validation.Internals;
+using Wolverine.Middleware;
+
+using Wolverine.Persistence;
+
+namespace Wolverine.Http;
+
+public enum JsonUsage
+{
+    SystemTextJson,
+    NewtonsoftJson
+}
+
+public interface ITenantDetectionPolicies
+{
+    /// <summary>
+    /// Try to detect the tenant id from the named route argument
+    /// </summary>
+    /// <param name="routeArgumentName"></param>
+    void IsRouteArgumentNamed(string routeArgumentName);
+
+    /// <summary>
+    /// Try to detect the tenant id from an expected query string value
+    /// </summary>
+    /// <param name="key"></param>
+    void IsQueryStringValue(string key);
+
+    /// <summary>
+    /// Try to detect the tenant id from a request header
+    /// if it exists
+    /// </summary>
+    /// <param name="headerKey"></param>
+    void IsRequestHeaderValue(string headerKey);
+
+    /// <summary>
+    /// Try to detect the tenant id from the ClaimsPrincipal for the
+    /// current request
+    /// </summary>
+    /// <param name="claimType"></param>
+    void IsClaimTypeNamed(string claimType);
+
+
+    /// <summary>
+    /// Simplistic tenant id detection that uses the sub domain name of the current
+    /// request location as the tenant id
+    /// </summary>
+    void IsSubDomainName();
+
+    /// <summary>
+    /// Assert that the tenant id was successfully detected, and if no tenant id
+    /// is found, return a ProblemDetails with a 400 status code
+    /// </summary>
+    void AssertExists();
+
+    /// <summary>
+    /// Register a custom tenant detection strategy. Be aware though, this object
+    /// will be resolved from your application container, but will be done as with Singleton
+    /// scoping.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    void DetectWith<T>() where T : ITenantDetection;
+
+
+    /// <summary>
+    /// Register a custom tenant detection strategy
+    /// </summary>
+    /// <param name="detection"></param>
+    void DetectWith(ITenantDetection detection);
+
+    /// <summary>
+    /// If no tenant id is detected, this value should be used for the Tenant Id
+    /// </summary>
+    /// <param name="defaultTenantId"></param>
+    void DefaultIs(string defaultTenantId);
+}
+
+public enum RouteWarmup
+{
+    /// <summary>
+    /// Let Wolverine "warm up" the route on its first usage. This is the default.
+    /// </summary>
+    Lazy,
+    
+    /// <summary>
+    /// If there is a chance of near simultaneous requests on application startup, use
+    /// this option to eagerly warm up all routes as part of application startup. This
+    /// slows down the "cold start", but eliminates possible concurrency issues on startup
+    /// </summary>
+    Eager
+}
+
+public enum ServiceProviderSource
+{
+    /// <summary>
+    /// The default Wolverine behavior that uses an isolated and scoped IServiceProvider
+    /// within the generated code whenever it is necessary to use service location
+    /// </summary>
+    IsolatedAndScoped,
+    
+    /// <summary>
+    /// Utilize the IServiceProvider scoped to HttpContext.RequestServices when it is necessary to
+    /// use service location within HTTP endpoints. Use this option to shared scoped services with
+    /// AspNetCore middleware.
+    ///
+    /// Use with caution, as this can make your system harder to reason about -- even though this kind of
+    /// state smuggling through scoped IoC containers between middleware and controllers is unfortunately
+    /// common within AspNetCore
+    /// </summary>
+    FromHttpContextRequestServices
+}
+
+/// <summary>
+///     Governs the status code written when an HTTP endpoint's resource -- the response body -- turns out to be
+///     null. This is strictly about the body an endpoint returns; the behavior when a required entity cannot be
+///     loaded is controlled separately by <see cref="Wolverine.Persistence.OnMissing" />.
+/// </summary>
+public enum OnMissingResponseBody
+{
+    /// <summary>
+    ///     The default. A null response body is written as an empty 404, treating "there is nothing to return" as
+    ///     "there is nothing here."
+    /// </summary>
+    NotFound404,
+
+    /// <summary>
+    ///     A null response body is written as an empty 204, denoting "the Url is correct, but there is no body."
+    ///     Applied globally this only affects GET and QUERY endpoints, where an empty answer is a benign outcome
+    ///     rather than a failed command. Override per endpoint with <see cref="NotFoundIfMissingAttribute" />.
+    /// </summary>
+    NoContent204
+}
+
+public class WolverineHttpOptions
+{
+    public WolverineHttpOptions()
+    {
+        Policies.Add(new HttpAwarePolicy());
+        Policies.Add(new RequestIdPolicy());
+        Policies.Add(new RequiredEntityPolicy());
+        Policies.Add(new HttpChainResponseCacheHeaderPolicy());
+        Policies.Add(new TagHttpHandlerPolicy());
+
+        Policies.Add(TenantIdDetection);
+    }
+
+    /// <summary>
+    /// Use to control how Wolverine.HTTP resolves the scoped IServiceProvider during
+    /// HTTP requests. The default is to use an isolated IServiceProvider within the Wolverine execution, but
+    /// you can opt to instead use HttpContext.RequestServices to share scope with AspNetCore middleware and
+    /// who knows what else
+    /// </summary>
+    public ServiceProviderSource ServiceProviderSource { get; set; } = ServiceProviderSource.IsolatedAndScoped;
+    
+    /// <summary>
+    ///     The status code returned when an endpoint's logical deduplication id has already been claimed
+    ///     and the endpoint itself did not state a preference. Defaults to 409 Conflict.
+    ///
+    ///     <para>
+    ///     This is the application-wide default only. <c>[Deduplicated(DuplicateStatusCode = ...)]</c> on
+    ///     an individual endpoint always wins, including when it asks for the same 409 this defaults to.
+    ///     A 2xx value produces a bare status with no body, on the reasoning that a problem document
+    ///     describing a response the application has declared benign would be actively wrong; anything
+    ///     else is written as a <c>ProblemDetails</c> document so the caller gets a machine-readable
+    ///     reason.
+    ///     </para>
+    /// </summary>
+    public int DefaultDuplicateStatusCode { get; set; } = DeduplicationRequirement.DefaultDuplicateStatusCode;
+
+    /// <summary>
+    ///     Apply DataAnnotations Validation middleware to all Wolverine HTTP endpoints
+    /// </summary>
+    /// <param name="httpOptions"></param>
+    public void UseDataAnnotationsValidationProblemDetailMiddleware()
+    {
+        AddPolicy<HttpChainDataAnnotationsValidationPolicy>();
+    }
+
+    internal WolverineApiVersioningOptions? ApiVersioning { get; private set; }
+
+    /// <summary>
+    /// Enable native API versioning support. On the first call, creates the
+    /// <see cref="WolverineApiVersioningOptions"/> instance and registers an
+    /// <c>ApiVersioningPolicy</c> that applies versioning semantics at bootstrap time.
+    /// Subsequent calls accumulate configuration onto the same options instance without
+    /// registering a second policy.
+    /// </summary>
+    /// <param name="configure">An action to configure the <see cref="WolverineApiVersioningOptions"/>.</param>
+    public void UseApiVersioning(Action<WolverineApiVersioningOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        if (ApiVersioning is null)
+        {
+            ApiVersioning = new WolverineApiVersioningOptions();
+            Policies.Add(new ApiVersioningPolicy(ApiVersioning));
+        }
+        configure(ApiVersioning);
+    }
+    
+    public async ValueTask<string?> TryDetectTenantId(HttpContext httpContext)
+    {
+        foreach (var strategy in TenantIdDetection.Strategies)
+        {
+            var tenantId = await strategy.DetectTenant(httpContext);
+            if (tenantId.IsNotEmpty()) return tenantId;
+        }
+
+        return null;
+    }
+    
+    public string? TryDetectTenantIdSynchronously(HttpContext httpContext)
+    {
+        return TenantIdDetection
+            .Strategies
+            .OfType<ISynchronousTenantDetection>()
+            .Select(strategy => strategy.DetectTenantSynchronously(httpContext))
+            .FirstOrDefault(tenantId => tenantId.IsNotEmpty());
+    }
+
+    /// <summary>
+    ///     When true, the request's <c>X-Correlation-ID</c> header becomes the correlation id of <b>every</b>
+    ///     Wolverine.HTTP endpoint, applied where the endpoint's message context is created -- before any Marten,
+    ///     Polecat or Fisher session is opened from it -- so the events the endpoint appends record it too.
+    ///     <para>
+    ///     By default the header is applied by <c>RequestIdMiddleware</c>, and only to an endpoint that uses
+    ///     <c>IMessageBus</c> or <c>IMessageContext</c>. The messages such an endpoint sends carry it, but its event
+    ///     store session is opened before that middleware runs, and an endpoint that only uses a session never gets
+    ///     the middleware at all, so the events record an Activity id or a new Guid instead of the request's.
+    ///     </para>
+    ///     Turn this on when a caller's correlation id has to reach the events an endpoint appends, as when a test
+    ///     finds what a request caused by its correlation id. Off by default. See GH-4939.
+    /// </summary>
+    public bool ApplyCorrelationIdHeaderToAllEndpoints { get; set; }
+
+    /// <summary>
+    /// Potentially control how the Wolverine HTTP routes are "warmed up" at runtime
+    /// to alleviate concurrent access problems
+    /// </summary>
+    public RouteWarmup WarmUpRoutes { get; set; } = RouteWarmup.Lazy;
+
+    /// <summary>
+    /// When true, a query string value that is <b>present</b> but cannot be parsed to the expected
+    /// endpoint parameter type (enum, int, Guid, etc.) short-circuits the request with a
+    /// 400 Bad Request and a ProblemDetails body naming the offending query string parameter.
+    /// This matches the behavior of ASP.NET Core minimal API parameter binding. A <b>missing</b>
+    /// query string value still binds the parameter's default / property initializer value in
+    /// either mode. Applies to query string binding for endpoint method arguments and for
+    /// [AsParameters] members bound from the query string, including collection parameters
+    /// (arrays, List&lt;T&gt;, IEnumerable&lt;T&gt;, etc.) where a single unparseable element rejects the
+    /// entire binding. This is currently opt-in
+    /// (default false) to preserve the previous lenient behavior, but the default flips
+    /// to true (strict) in Wolverine 7.0. See https://github.com/JasperFx/wolverine/issues/3372
+    /// and https://github.com/JasperFx/wolverine/issues/3398
+    /// </summary>
+    public bool RejectUnparseableQueryValues { get; set; }
+
+    /// <summary>
+    ///     The application wide default for what status code is written when an endpoint's response body is null.
+    ///     The built in default is <see cref="OnMissingResponseBody.NotFound404" />. Setting this to
+    ///     <see cref="OnMissingResponseBody.NoContent204" /> only affects GET and QUERY endpoints -- a null body
+    ///     on any other HTTP method continues to be a 404, because turning a failed command into an apparent
+    ///     success is never what anyone wants. Individual endpoints override this with
+    ///     <see cref="NoContentIfMissingAttribute" /> or <see cref="NotFoundIfMissingAttribute" />.
+    /// </summary>
+    /// <remarks>
+    ///     This governs the response <i>body</i> only. Use <c>WolverineOptions.EntityDefaults.OnMissing</c> to
+    ///     control what happens when a required entity cannot be loaded in the first place.
+    /// </remarks>
+    public OnMissingResponseBody OnMissingResponseBody { get; set; } = OnMissingResponseBody.NotFound404;
+
+    internal TenantIdDetection TenantIdDetection { get; } = new();
+
+    internal Lazy<JsonSerializerOptions> JsonSerializerOptions { get; set; } = new(() => new JsonSerializerOptions());
+
+    /// <summary>
+    ///     Set by the WolverineFx.Http.Newtonsoft companion package's
+    ///     <c>UseNewtonsoftJsonForSerialization()</c> extension method to
+    ///     thread the user's <c>JsonSerializerSettings</c> customization
+    ///     into the singleton <c>NewtonsoftHttpSerialization</c> the
+    ///     extension package's <c>AddWolverineHttpNewtonsoft()</c>
+    ///     IServiceCollection extension registers. Untyped (object) so the
+    ///     core Wolverine.Http assembly does not have to reference
+    ///     Newtonsoft.Json.
+    /// </summary>
+    internal object? NewtonsoftSettingsConfiguration { get; set; }
+
+    internal HttpGraph? Endpoints { get; set; }
+
+    /// <summary>
+    ///     The route builder MapWolverineEndpoints() was called on. Its DataSources collection is the
+    ///     only place the host's minimal API / MVC endpoints can be seen before the host starts, which
+    ///     an ApiExplorer read that early depends on. See <see cref="HostEndpointDataSources" />.
+    /// </summary>
+    internal IEndpointRouteBuilder? RouteBuilder { get; set; }
+
+    /// <summary>
+    ///     Did MapWolverineEndpoints() manage to make the host's whole route table visible to a pre-start
+    ///     ApiExplorer read? False when Wolverine was mapped into a route group, or when ASP.NET Core's
+    ///     internals moved — either way a read before the host starts describes only part of the
+    ///     application, and <see cref="WolverineApiDescriptionProvider" /> says so out loud.
+    /// </summary>
+    internal bool HostEndpointsPublished { get; set; }
+
+    internal MiddlewarePolicy Middleware { get; } = new();
+
+    public List<IHttpPolicy> Policies { get; } = new();
+
+    public List<IResourceWriterPolicy> ResourceWriterPolicies { get; } = new();
+
+    internal string? GlobalRoutePrefix { get; set; }
+    internal List<(string Prefix, string Namespace)> NamespacePrefixes { get; } = new();
+
+    /// <summary>
+    /// Set a global route prefix that will be prepended to all Wolverine HTTP endpoint routes.
+    /// For example, RoutePrefix("api") will turn "/orders" into "/api/orders".
+    /// </summary>
+    /// <param name="prefix">The route prefix to prepend</param>
+    public void RoutePrefix(string prefix)
+    {
+        GlobalRoutePrefix = prefix?.Trim('/') ?? throw new ArgumentNullException(nameof(prefix));
+    }
+
+    /// <summary>
+    /// Set a route prefix for all Wolverine HTTP endpoints whose handler type
+    /// is in the specified namespace (or a child namespace).
+    /// For example, RoutePrefix("api/orders", forEndpointsInNamespace: "MyApp.Features.Orders")
+    /// will prefix all endpoints in that namespace.
+    /// </summary>
+    /// <param name="prefix">The route prefix to prepend</param>
+    /// <param name="forEndpointsInNamespace">The namespace to match against endpoint handler types</param>
+    public void RoutePrefix(string prefix, string forEndpointsInNamespace)
+    {
+        ArgumentNullException.ThrowIfNull(prefix);
+        ArgumentNullException.ThrowIfNull(forEndpointsInNamespace);
+        NamespacePrefixes.Add((prefix.Trim('/'), forEndpointsInNamespace));
+    }
+
+    // Null unless CustomizeHttpEndpointDiscovery() was called. HttpChainSource layers its Excludes
+    // (subtractive) and Includes (additive) on top of the built-in endpoint convention; while it stays
+    // null the discovery predicate applies only that built-in convention.
+    internal TypeQuery? EndpointDiscovery { get; private set; }
+
+    /// <summary>
+    /// Additive, opt-in customization of the type filtering used to discover Wolverine HTTP endpoints
+    /// from the scanned assemblies. This is the HTTP counterpart to
+    /// <see cref="Wolverine.Configuration.HandlerDiscovery.CustomizeHandlerDiscovery" />: use
+    /// <c>q.Excludes</c> to drop endpoint types — e.g.
+    /// <c>opts.CustomizeHttpEndpointDiscovery(q =&gt; q.Excludes.InNamespace("MyApp.Excluded"))</c> — so that
+    /// HTTP endpoints can be split across hosts the same way message handlers already can. Without this,
+    /// an HTTP endpoint in an excluded namespace of a scanned assembly still registers, and
+    /// <c>[WolverineIgnore]</c> on the type is the only lever. Rules added through <c>q.Includes</c> are
+    /// additive: they broaden discovery beyond the built-in <c>*Endpoint(s)</c> /
+    /// <c>[WolverineHttpMethod]</c> convention (an included type still only contributes methods carrying a
+    /// Wolverine HTTP verb attribute). When this method is never called, discovery applies only the
+    /// built-in endpoint convention.
+    /// </summary>
+    /// <param name="configure">Configures the excludes/includes applied during endpoint discovery.</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public void CustomizeHttpEndpointDiscovery(Action<TypeQuery> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        EndpointDiscovery ??= new TypeQuery(TypeClassification.All);
+        configure(EndpointDiscovery);
+    }
+
+    /// <summary>
+    /// Configure built in tenant id detection strategies
+    /// </summary>
+    public ITenantDetectionPolicies TenantId => TenantIdDetection;
+    
+    /// <summary>
+    /// Tell Wolverine that services of type T should always be sourced from the HttpContext.RequestServices.
+    /// This enables your system to use shared services with AspNetCore middleware while still allowing Wolverine
+    /// to generate inlined constructor invocation code otherwise. Scoped to HTTP chains — non-HTTP message
+    /// handlers that happen to consume the same service type continue to use normal constructor resolution.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public void SourceServiceFromHttpContext<T>()
+    {
+        Endpoints!.HttpContextSourcedTypes.Add(typeof(T));
+    }
+
+    // Newtonsoft.Json HTTP serialization moved to the WolverineFx.Http.Newtonsoft
+    // companion package in 6.0. The 5.x instance method
+    // WolverineHttpOptions.UseNewtonsoftJsonForSerialization(...) is now an
+    // extension method declared in that package; install it and add
+    // `using Wolverine.Http.Newtonsoft;` to bring the same call surface back
+    // into scope. See docs/guide/migration.md.
+
+    /// <summary>
+    ///     Customize Wolverine's handling of parameters to HTTP endpoint methods
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public void AddParameterHandlingStrategy<T>() where T : IParameterStrategy, new()
+    {
+        AddParameterHandlingStrategy(new T());
+    }
+
+    /// <summary>
+    ///     Customize Wolverine's handling of parameters to HTTP endpoint methods
+    /// </summary>
+    /// <param name="strategy"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void AddParameterHandlingStrategy(IParameterStrategy strategy)
+    {
+        Endpoints!.InsertParameterStrategy(strategy);
+    }
+
+    #region sample_requireauthorizeonall
+    /// <summary>
+    /// Equivalent of calling RequireAuthorization() on all wolverine endpoints
+    /// </summary>
+    public void RequireAuthorizeOnAll()
+    {
+        ConfigureEndpoints(e => e.RequireAuthorization());
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Automatically apply antiforgery token validation to form data and file upload
+    /// endpoints. Individual endpoints can opt out with <see cref="DisableAntiforgeryAttribute"/>.
+    /// Requires <c>app.UseAntiforgery()</c> in the middleware pipeline.
+    /// </summary>
+    public void AutoAntiforgeryOnFormEndpoints()
+    {
+        _autoAntiforgeryOnFormEndpoints = true;
+    }
+
+    internal bool _autoAntiforgeryOnFormEndpoints;
+
+    /// <summary>
+    /// Require antiforgery token validation on all Wolverine HTTP endpoints,
+    /// regardless of whether they use form binding. Individual endpoints can
+    /// opt out with <see cref="DisableAntiforgeryAttribute"/>.
+    /// </summary>
+    public void RequireAntiforgeryOnAll()
+    {
+        _autoAntiforgeryOnFormEndpoints = true;
+        ConfigureEndpoints(e => e.WithMetadata(WolverineAntiforgeryMetadata.Required));
+    }
+
+    /// <summary>
+    ///     Add a new IEndpointPolicy for the Wolverine endpoints
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public void AddPolicy<T>() where T : IHttpPolicy, new()
+    {
+        Policies.Add(new T());
+    }
+
+    /// <summary>
+    /// GH-4512. Map the Critter Stack's commit-time concurrency failures onto a 409 ProblemDetails response
+    /// instead of letting them escape as an unhandled 500, and advertise the 409 in the OpenAPI document.
+    ///
+    /// <para>
+    /// Covers everything deriving from <see cref="JasperFx.ConcurrencyException"/>:
+    /// <c>EventStreamUnexpectedMaxEventIdException</c>, document revision/version violations,
+    /// <c>DcbConcurrencyException</c> and <c>SagaConcurrencyException</c>.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>On Marten or Polecat, call that store's own overload instead</b> --
+    /// <c>MapMartenConcurrencyFailuresToConflict()</c> or <c>MapPolecatConcurrencyFailuresToConflict()</c>.
+    /// Their <c>StreamLockedException</c>, which <c>FetchForExclusiveWriting</c> throws on a contended
+    /// stream, does <b>not</b> derive from <see cref="JasperFx.ConcurrencyException"/> and is not
+    /// referenceable from this assembly, so this method alone leaves the exclusive locking path returning
+    /// 500s. The store overloads call this one and add their own type.
+    /// </para>
+    /// </summary>
+    /// <param name="filter">
+    /// Which chains the mapping applies to. Defaults to the transactional chains -- the only ones that
+    /// commit a unit of work, and so the only ones that can raise a commit-time concurrency failure.
+    /// </param>
+    public void MapConcurrencyFailuresToConflict(Func<HttpChain, bool>? filter = null)
+    {
+        filter ??= ConflictMapping.IsTransactional;
+
+        AddMiddleware(typeof(ConcurrencyExceptionMiddleware), filter);
+        Policies.Add(new ConflictProblemPolicy(filter));
+    }
+
+    /// <summary>
+    /// GH-4516. Map an <b>unknown</b> tenant id onto a 404 ProblemDetails instead of letting it escape as an
+    /// unhandled 500, and advertise the 404 in the OpenAPI document.
+    ///
+    /// <para>
+    /// A <b>missing</b> mandatory tenant id is already handled without this: <c>[RequiresTenant]</c> stops
+    /// the request with a 400 ProblemDetails. This covers the other case -- a tenant id that is present on
+    /// the request and simply has no database or registration behind it, which throws
+    /// <see cref="JasperFx.MultiTenancy.UnknownTenantIdException"/> from the store or from Wolverine's own
+    /// tenant sources. That is a client-side error, and it was answering 500.
+    /// </para>
+    ///
+    /// <para>
+    /// 404 rather than 400 on purpose: it reads as "the thing you addressed does not exist", and it keeps
+    /// 400 meaning "you did not say which tenant".
+    /// </para>
+    ///
+    /// <para>
+    /// A <i>disabled</i> tenant would deserve a 403 -- the tenant exists and access is refused -- but on
+    /// Marten and Polecat it is indistinguishable from unknown today, and JasperFx has no lifted
+    /// <c>DisabledTenantException</c> to catch. When it lands, it belongs here.
+    /// </para>
+    /// </summary>
+    /// <param name="filter">
+    /// Which chains the mapping applies to. Defaults to the tenanted chains -- those declared
+    /// <c>[RequiresTenant]</c> or <c>[MaybeTenanted]</c> -- since a chain that resolves no tenant cannot
+    /// fail to resolve one.
+    /// </param>
+    public void MapUnknownTenantToNotFound(Func<HttpChain, bool>? filter = null)
+    {
+        filter ??= TenancyProblemMapping.IsTenanted;
+
+        AddMiddleware(typeof(UnknownTenantMiddleware), filter);
+        Policies.Add(new UnknownTenantProblemPolicy(filter));
+    }
+
+    /// <summary>
+    ///     Add a new IResourceWriterPolicy for the Wolverine endpoints
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public void AddResourceWriterPolicy<T>() where T : IResourceWriterPolicy, new()
+    {
+        ResourceWriterPolicies.Add(new T());
+    }
+
+    /// <summary>
+    ///     Add a new IResourceWriterPolicy for the Wolverine endpoints
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public void AddResourceWriterPolicy<T>(T policy) where T : IResourceWriterPolicy
+    {
+        ResourceWriterPolicies.Add(policy);
+    }
+
+    /// <summary>
+    ///     Apply user-defined customizations to how endpoints are handled
+    ///     by Wolverine
+    /// </summary>
+    /// <param name="configure"></param>
+    public void ConfigureEndpoints(Action<HttpChain> configure)
+    {
+        var policy = new LambdaHttpPolicy((c, _, _) => configure(c));
+        Policies.Add(policy);
+    }
+
+    /// <summary>
+    ///     Add middleware only on handlers where the message type can be cast to the message
+    ///     type of the middleware type
+    /// </summary>
+    /// <param name="middlewareType"></param>
+    public void AddMiddlewareByMessageType(Type middlewareType)
+    {
+        Middleware.AddType(middlewareType, chain => chain is HttpChain).MatchByMessageType = true;
+    }
+
+    /// <summary>
+    ///     Add Wolverine middleware to message handlers
+    /// </summary>
+    /// <param name="filter">If specified, limits the applicability of the middleware to certain message types</param>
+    /// <typeparam name="T">The actual middleware type</typeparam>
+    public void AddMiddleware<T>(Func<HttpChain, bool>? filter = null)
+    {
+        AddMiddleware(typeof(T), filter);
+    }
+
+    /// <summary>
+    ///     Add Wolverine middleware to message handlers
+    /// </summary>
+    /// <param name="middlewareType">The actual middleware type</param>
+    /// <param name="filter">If specified, limits the applicability of the middleware to certain message types</param>
+    public void AddMiddleware(Type middlewareType, Func<HttpChain, bool>? filter = null)
+    {
+        Func<IChain, bool> chainFilter = c => c is HttpChain;
+        if (filter != null)
+        {
+            chainFilter = c => c is HttpChain e && filter(e);
+        }
+
+        Middleware.AddType(middlewareType, chainFilter);
+    }
+
+    /// <summary>
+    ///     From this url, forward a JSON serialized message by publishing through Wolverine
+    /// </summary>
+    /// <param name="httpMethod"></param>
+    /// <param name="url"></param>
+    /// <param name="customize">Optionally customize the HttpChain handling for elements like validation</param>
+    /// <typeparam name="T"></typeparam>
+    public RouteHandlerBuilder PublishMessage<T>(HttpMethod httpMethod, string url, Action<HttpChain>? customize = null)
+    {
+#pragma warning disable CS4014
+        var method = MethodCall.For<PublishingEndpoint<T>>(x => x.PublishAsync(default!, null!, null!));
+#pragma warning restore CS4014
+        // GH-3646: Add() maps the route through the constructor now, so the second MapToRoute() that used to
+        // sit here is gone -- it only re-ran parameter matching after the metadata was already built.
+        var chain = Endpoints!.Add(method, httpMethod, url);
+
+        chain.DisplayName = $"Forward {typeof(T).FullNameInCode()} to Wolverine";
+        chain.OperationId = $"Publish:{typeof(T).FullNameInCode()}";
+        customize?.Invoke(chain);
+
+        return chain.Metadata;
+    }
+
+    public RouteHandlerBuilder PublishMessage<T>(string url, Action<HttpChain>? customize = null)
+    {
+        return PublishMessage<T>(HttpMethod.Post, url, customize);
+    }
+
+    /// <summary>
+    ///     From this url, forward a JSON serialized message by sending through Wolverine
+    /// </summary>
+    /// <param name="httpMethod"></param>
+    /// <param name="url"></param>
+    /// <param name="customize">Optionally customize the HttpChain handling for elements like validation</param>
+    /// <typeparam name="T"></typeparam>
+    public RouteHandlerBuilder SendMessage<T>(HttpMethod httpMethod, string url, Action<HttpChain>? customize = null)
+    {
+#pragma warning disable CS4014
+        var method = MethodCall.For<SendingEndpoint<T>>(x => x.SendAsync(default!, null!, null!));
+#pragma warning restore CS4014
+        // GH-3646: see PublishMessage above.
+        var chain = Endpoints!.Add(method, httpMethod, url);
+
+        chain.DisplayName = $"Forward {typeof(T).FullNameInCode()} to Wolverine";
+        chain.OperationId = $"Send:{typeof(T).FullNameInCode()}";
+        customize?.Invoke(chain);
+
+        return chain.Metadata;
+    }
+
+    public RouteHandlerBuilder SendMessage<T>(string url, Action<HttpChain>? customize = null)
+    {
+        return SendMessage<T>(HttpMethod.Post, url, customize);
+    }
+}

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="ExactlyOnceIngester.fs" />
+        <Compile Include="Store.fs" />
+        <Compile Include="Streams.fs" />
+        <Compile Include="Types.fs" />
+        <Compile Include="RandomProductPriceCalculator.fs" />
+        <Compile Include="ShoppingCart.fs" />
+        <Compile Include="ShoppingCartSummary.fs" />
+        <Compile Include="ConfirmedEpoch.fs" />
+        <Compile Include="ConfirmedSeries.fs" />
+        <Compile Include="ConfirmedIngester.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Equinox.Core" />
+        <PackageReference Include="Equinox.CosmosStore" />
+        <PackageReference Include="Equinox.DynamoStore" />
+        <PackageReference Include="Equinox.EventStoreDb" />
+        <PackageReference Include="Equinox.SqlStreamStore" />
+        <PackageReference Include="Equinox.MemoryStore" />
+        <PackageReference Include="FsCodec.SystemTextJson" />
+        <PackageReference Include="Propulsion" />
+    </ItemGroup>
+
+</Project>

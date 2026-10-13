@@ -1,0 +1,164 @@
+using JasperFx.Core;
+using Wolverine;
+
+namespace DocumentationSamples;
+
+public class MyMessage;
+
+public class MyResponse;
+
+#region sample_nocascadinghandler
+public class NoCascadingHandler
+{
+    private readonly IMessageContext _bus;
+
+    public NoCascadingHandler(IMessageContext bus)
+    {
+        _bus = bus;
+    }
+
+    public ValueTask Consume(MyMessage message)
+    {
+        // do whatever work you need to for MyMessage,
+        // then send out a new MyResponse
+        return _bus.SendAsync(new MyResponse());
+    }
+}
+
+#endregion
+
+#region sample_cascadinghandler
+public class CascadingHandler
+{
+    public MyResponse Consume(MyMessage message)
+    {
+        return new MyResponse();
+    }
+}
+
+#endregion
+
+#region sample_Request/Replay_with_cascading
+
+public class Requester
+{
+    private readonly IMessageContext _bus;
+
+    public Requester(IMessageContext bus)
+    {
+        _bus = bus;
+    }
+
+    public ValueTask GatherResponse()
+    {
+        return _bus.SendAsync(new MyMessage(), DeliveryOptions.RequireResponse<MyResponse>());
+    }
+}
+
+#endregion
+
+public class DirectionRequest
+{
+    public string Direction { get; set; } = null!;
+}
+
+public class GoNorth;
+
+public class GoSouth;
+
+#region sample_conditionalresponsehandler
+public class ConditionalResponseHandler
+{
+    public object Consume(DirectionRequest request)
+    {
+        switch (request.Direction)
+        {
+            case "North":
+                return new GoNorth();
+            case "South":
+                return new GoSouth();
+        }
+
+        // This does nothing
+        return null!;
+    }
+}
+
+#endregion
+
+public class GoWest;
+
+public class GoEast;
+
+#region sample_delayedresponsehandler
+public class ScheduledResponseHandler
+{
+    public Envelope Consume(DirectionRequest request)
+    {
+        return new Envelope(new GoWest()).ScheduleDelayed(TimeSpan.FromMinutes(5));
+    }
+
+    public Envelope Consume(MyMessage message)
+    {
+        // Process GoEast at 8 PM local time
+        return new Envelope(new GoEast()).ScheduleAt(DateTime.Today.AddHours(20));
+    }
+}
+
+#endregion
+
+#region sample_multipleresponsehandler
+public class MultipleResponseHandler
+{
+    public IEnumerable<object> Consume(MyMessage message)
+    {
+        // Go North now
+        yield return new GoNorth();
+
+        // Go West in an hour
+        yield return new GoWest().DelayedFor(1.Hours());
+    }
+}
+
+#endregion
+
+#region sample_tupleresponsehandler
+public class TupleResponseHandler
+{
+    // Both GoNorth and GoWest will be interpreted as
+    // cascading messages
+    public (GoNorth, GoWest) Consume(MyMessage message)
+    {
+        return (new GoNorth(), new GoWest());
+    }
+}
+
+#endregion
+
+#region sample_manuallyroutedresponsehandler
+public class ManuallyRoutedResponseHandler
+{
+    public IEnumerable<object> Consume(MyMessage message)
+    {
+        // Go North now at the "important" queue
+        yield return new GoNorth().ToEndpoint("important");
+
+        // Go West in a lower priority queue
+        yield return new GoWest().ToDestination(new Uri("rabbitmq://queue/low"));
+    }
+}
+
+#endregion
+
+
+#region sample_cascaded_to_topic_message
+public class ManuallyRoutedTopicResponseHandler
+{
+    public IEnumerable<object> Consume(MyMessage message, Envelope envelope)
+    {
+        // Go North now at the "direction" queue
+        yield return new GoNorth().ToTopic($"direction/{envelope.TenantId}");
+    }
+}
+
+#endregion

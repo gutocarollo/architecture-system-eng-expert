@@ -1,0 +1,60 @@
+#nullable enable
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using Marten.Exceptions;
+using Marten.Internal.CompiledQueries;
+using Marten.Linq.Parsing;
+using Weasel.Postgresql;
+using Weasel.Postgresql.SqlGeneration;
+
+namespace Marten.Linq.Members.Dictionaries;
+
+internal class DictionaryContainsKeyFilter: ISqlFragment, ICompiledQueryAwareFilter
+{
+    private readonly string _keyText;
+    private readonly IDictionaryMember _member;
+
+    public DictionaryContainsKeyFilter(IDictionaryMember member, ISerializer serializer, ConstantExpression constant)
+    {
+        var value = constant.Value;
+        _keyText = (value is Enum) ? value.ToString()! : serializer.ToCleanJson(value);
+
+        _member = member;
+    }
+
+    public DictionaryContainsKeyFilter(IDictionaryMember member, ISerializer serializer, object value)
+    {
+        _keyText = serializer.ToCleanJson(value);
+        _member = member;
+    }
+
+    public void Apply(ICommandBuilder builder)
+    {
+        builder.Append("d.data #> '{");
+        foreach (var segment in _member.JsonPathSegments())
+        {
+            builder.Append(segment);
+            builder.Append(", ");
+        }
+
+        // The key text is inlined into a single-quoted '{ ... }' JSON-path literal. Depending
+        // on the serializer the raw value may contain unescaped single quotes (the Newtonsoft
+        // serializer leaves ' as-is, and the Enum branch bypasses the serializer entirely),
+        // so escape embedded single quotes to keep the key as data and prevent SQL injection.
+        builder.Append(_keyText.Replace("'", "''"));
+        builder.Append("}' is not null");
+    }
+
+    public bool TryMatchValue(object value, MemberInfo member)
+    {
+        throw new BadLinqExpressionException("Marten does not (yet) support Dictionary.ContainsKey() in compiled queries");
+    }
+
+    public Action<Npgsql.NpgsqlParameter, object> BuildSetter()
+    {
+        throw new BadLinqExpressionException("Marten does not (yet) support Dictionary.ContainsKey() in compiled queries");
+    }
+
+    public string ParameterName { get; } = "NONE";
+}

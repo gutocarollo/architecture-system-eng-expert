@@ -1,0 +1,326 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Marten.Exceptions;
+using Marten.Internal.Sessions;
+using Marten.Linq;
+using Marten.Linq.Includes;
+using Marten.Linq.Parsing;
+using Marten.Linq.SqlGeneration;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten.Internal.CompiledQueries;
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2067",
+    Justification = "Class-level: parameter receives a DAM-annotated Type from a reflective lookup whose source type is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+internal class QueryCompiler
+{
+    internal static readonly IList<IParameterFinder> Finders = new List<IParameterFinder> { new EnumParameterFinder() };
+
+    static QueryCompiler()
+    {
+        forType(count =>
+        {
+            var values = new string[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = Guid.NewGuid().ToString();
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var values = new Guid[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = Guid.NewGuid();
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = -100000;
+            var values = new int[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value--;
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = -200000L;
+            var values = new long[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value--;
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = -300000L;
+            var values = new float[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value--;
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = -300000L;
+            var values = new decimal[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value--;
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = new DateTime(1600, 1, 1);
+            var values = new DateTime[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value.AddDays(-1);
+            }
+
+            return values;
+        });
+
+        forType(count =>
+        {
+            var value = new DateTimeOffset(1600, 1, 1, 0, 0, 0, 0.Seconds());
+            var values = new DateTimeOffset[count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = value.AddDays(-1);
+            }
+
+            return values;
+        });
+
+        // Register array-type finders for compiled query members used with IsOneOf() etc.
+        forArrayType<string>(count =>
+        {
+            var values = new string[count];
+            for (var i = 0; i < count; i++) values[i] = $"_plan_{Guid.NewGuid():N}";
+            return values;
+        });
+        forArrayType<Guid>(count =>
+        {
+            var values = new Guid[count];
+            for (var i = 0; i < count; i++) values[i] = Guid.NewGuid();
+            return values;
+        });
+        forArrayType<int>(count =>
+        {
+            var values = new int[count];
+            for (var i = 0; i < count; i++) values[i] = -(500000 + i);
+            return values;
+        });
+        forArrayType<long>(count =>
+        {
+            var values = new long[count];
+            for (var i = 0; i < count; i++) values[i] = -(600000L + i);
+            return values;
+        });
+    }
+
+    private static void forType<T>(Func<int, T[]> uniqueValues)
+    {
+        var finder = new SimpleParameterFinder<T>(uniqueValues);
+        Finders.Add(finder);
+    }
+
+    private static void forArrayType<T>(Func<int, T[]> uniqueElementValues)
+    {
+        var finder = new ArrayParameterFinder<T>(uniqueElementValues);
+        Finders.Add(finder);
+    }
+
+    public static CompiledQueryPlan BuildQueryPlan(QuerySession session, Type queryType, StoreOptions storeOptions)
+    {
+        var querySignature = queryType.FindInterfaceThatCloses(typeof(ICompiledQuery<,>));
+        if (querySignature == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(queryType),
+                $"Cannot derive query type for {queryType.FullNameInCode()}");
+        }
+
+        var builder =
+            typeof(CompiledQueryPlanBuilder<,>).CloseAndBuildAs<ICompiledQueryPlanBuilder>(
+                querySignature.GetGenericArguments());
+
+        return builder.BuildPlan(session, queryType, storeOptions);
+    }
+
+    public static CompiledQueryPlan BuildQueryPlan<TDoc, TOut>(QuerySession session, ICompiledQuery<TDoc, TOut> query) where TDoc : notnull
+    {
+        eliminateStringNulls(query);
+
+        var plan = new CompiledQueryPlan(query.GetType(), typeof(TOut)){TenantId = session.TenantId};
+
+        assertValidityOfQueryType(plan, query.GetType(), ((IMartenSession)session).Options);
+
+        // This *could* throw
+        var queryTemplate = plan.CreateQueryTemplate(query);
+
+        var statistics = plan.GetStatisticsIfAny(query);
+        var parser = BuildDatabaseCommand(session, queryTemplate, statistics, plan);
+
+        plan.IncludePlans.AddRange(new List<IIncludePlan>());
+        var handler = parser.BuildHandler<TOut>();
+        if (handler is IIncludeQueryHandler<TOut> i)
+        {
+            handler = i.Inner;
+        }
+
+        plan.HandlerPrototype = handler;
+
+        return plan;
+    }
+
+    internal static LinqQueryParser BuildDatabaseCommand<TDoc, TOut>(QuerySession session,
+        ICompiledQuery<TDoc, TOut> queryTemplate,
+        QueryStatistics statistics,
+        CompiledQueryPlan queryPlan) where TDoc : notnull
+    {
+        Expression expression = queryTemplate.QueryIs();
+        if (expression is LambdaExpression lambda)
+        {
+            expression = lambda.Body;
+        }
+
+        var parser = new LinqQueryParser(
+            new MartenLinqQueryProvider(session, typeof(TDoc)) { Statistics = statistics }, session,
+            expression);
+
+        var statements = parser.BuildStatements();
+        var topStatement = statements.Top;
+        var selectClause = statements.MainSelector.SelectClause;
+        topStatement.Apply(queryPlan);
+
+        // #5233: a compiled query whose projection is applied on the client caches ONE compiled
+        // delegate, closing over the ICompiledQuery instance that built the plan. If that lambda
+        // reads anything off the instance, every later execution silently returns the plan-time
+        // value. Nothing can re-bind a baked-in closure, so refuse the plan instead.
+        if (selectClause is IClientSideProjectionSelectClause { ClosesOverCapturedState: true })
+        {
+            throw new InvalidCompiledQueryException(
+                $"Invalid compiled query type `{typeof(TDoc).FullNameInCode()}`. Its Select() projection cannot be translated to SQL, so Marten applies it on the client through a delegate that is compiled once per plan -- and it reads a value off the compiled query instance, which that delegate would freeze at plan time. Either simplify the projection so Marten can translate it (direct member access, and Count() over a child collection, both translate), or move the captured value into the Where() clause, or run this as a normal LINQ query instead of a compiled one.");
+        }
+
+        // #5233: the select clause can render parameters of its own, and AllFilters() only walks
+        // WHERE clauses. Most select-list parameters re-bind anyway through QueryMember's direct
+        // value match, but one whose value is buried in a composite parameter (a jsonpath vars
+        // payload) has no scalar to match and needs its own filter to reach MatchParameters.
+        var selectFragments = selectClause is IParameterBearingSelectClause parameterBearing
+            ? parameterBearing.SelectFragments()
+            : [];
+
+        var filters = topStatement.AllFilters()
+            .Concat(selectFragments)
+            .OfType<ICompiledQueryAwareFilter>()
+            .ToArray();
+
+        queryPlan.MatchParameters(((IMartenSession)session).Options, filters);
+
+        return parser;
+    }
+
+    private static void eliminateStringNulls(object query)
+    {
+        var type = query.GetType();
+
+        foreach (var propertyInfo in type.GetProperties().Where(x => x.CanWrite && x.PropertyType == typeof(string)))
+        {
+            var raw = propertyInfo.GetValue(query);
+            if (raw == null)
+            {
+                propertyInfo.SetValue(query, string.Empty);
+            }
+        }
+
+        foreach (var fieldInfo in type.GetFields().Where(x => x.FieldType == typeof(string)))
+        {
+            var raw = fieldInfo.GetValue(query);
+            if (raw == null)
+            {
+                fieldInfo.SetValue(query, string.Empty);
+            }
+        }
+    }
+
+
+    private static void assertValidityOfQueryType(CompiledQueryPlan plan, Type type, StoreOptions options)
+    {
+        if (plan.InvalidMembers.Any())
+        {
+            // Remove any value types here!
+            foreach (var member in plan.InvalidMembers.Where(x => !x.GetRawMemberType()!.IsNullable()).ToArray())
+            {
+                if (options.TryFindValueType(member.GetMemberType()!) != null)
+                {
+                    plan.InvalidMembers.Remove(member);
+                }
+            }
+
+            if (!plan.InvalidMembers.Any()) return;
+
+            var members = plan.InvalidMembers.Select(x => $"{x.GetRawMemberType()!.NameInCode()} {x.Name}")
+                .Join(", ");
+            var message = $"Members {members} cannot be used as parameters to a compiled query";
+
+            throw new InvalidCompiledQueryException(message);
+        }
+    }
+
+    public class CompiledQueryPlanBuilder<TDoc, TOut>: ICompiledQueryPlanBuilder where TDoc : notnull where TOut : notnull
+    {
+        public CompiledQueryPlan BuildPlan(QuerySession session, Type queryType, StoreOptions storeOptions)
+        {
+            object query;
+
+            try
+            {
+                query = Activator.CreateInstance(queryType)!;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to create query type {queryType.FullNameInCode()}. If you receive this message, add a no-arg constructor that can be either public or non-public",
+                    e);
+            }
+
+            return BuildQueryPlan(session, (ICompiledQuery<TDoc, TOut>)query);
+        }
+    }
+
+    public interface ICompiledQueryPlanBuilder
+    {
+        CompiledQueryPlan BuildPlan(QuerySession session, Type queryType, StoreOptions storeOptions);
+    }
+}

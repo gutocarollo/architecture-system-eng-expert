@@ -1,0 +1,142 @@
+# Marten and the PostgreSQL Schema
+
+Marten works by adding tables and functions (yes, Virginia, we've let stored procedures creep back into our life) to a PostgreSQL schema. Marten will generate and add a table and matching `upsert` function for each unique document type as needed. It also adds some other tables and functions for the [event store functionality](/events/) and [HiLo id generation](/documents/identity)
+
+In all cases, the Marten schema objects are all prefixed with `mt_.`
+
+As of Marten v0.8, you have much finer grained ability to control the automatic generation or updates of schema objects through the
+`StoreOptions.AutoCreateSchemaObjects` like so:
+
+<!-- snippet: sample_autocreateschemaobjects -->
+<a id='snippet-sample_autocreateschemaobjects'></a>
+```cs
+var store = DocumentStore.For(opts =>
+{
+    // Marten will create any new objects that are missing,
+    // attempt to update tables if it can, but drop and replace
+    // tables that it cannot patch. The only mode that can lose
+    // a whole table's data.
+    opts.AutoCreateSchemaObjects = AutoCreate.All;
+
+    // Marten will create any new objects that are missing and
+    // update tables in place where it can. It never drops a whole
+    // table -- but the update delta DOES drop columns, indexes and
+    // foreign keys that the configuration no longer declares. For
+    // example, removing a [DuplicateField] drops that column and
+    // the data in it.
+    opts.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
+
+    // Marten will create missing objects on demand, but
+    // will not change any existing schema objects
+    opts.AutoCreateSchemaObjects = AutoCreate.CreateOnly;
+
+    // Marten will neither create nor update any schema object --
+    // and will not validate one either. The lazy storage check
+    // simply returns, so a missing or stale table surfaces later
+    // as a raw PostgreSQL error ("42P01 relation does not exist").
+    // Use db-assert / AssertDatabaseMatchesConfigurationAsync()
+    // for the validation. Note that db-apply, "resources setup"
+    // and ApplyAllConfiguredChangesToDatabaseAsync() deliberately
+    // treat None as CreateOrUpdate and migrate anyway.
+    opts.AutoCreateSchemaObjects = AutoCreate.None;
+});
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/CoreTests/StoreOptionsTests.cs#L58-L93' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_autocreateschemaobjects' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+To prevent unnecessary loss of data, even in development, on the first usage of a document type, Marten will:
+
+1. Compare the current schema table to what's configured for that document type
+2. If the table matches, do nothing
+3. If the table is missing, try to create the table depending on the auto create schema setting shown above
+4. If the table has new, searchable columns, adds the new column and runs an "UPDATE" command to duplicate the
+   information in the JsonB data field. Do note that this could be expensive for large tables. This is also impacted
+   by the auto create schema mode shown above.
+
+Our thought is that in development you probably run in the "All" mode, but in production use one of the more restrictive auto creation modes.
+
+**As of Marten v0.9.2, Marten will also check if the existing _upsert_ function and any table indexes match
+what is configured in the document store, and attempts to update these objects if necessary based on the same
+All/None/CreateOnly/CreateOrUpdate rules as the table storage.**
+
+## Overriding Schema Name
+
+By default marten will use the default `public` database scheme to create the document tables and function. You may, however, choose to set a different document store database schema name, like so:
+
+```cs
+StoreOptions.DatabaseSchemaName = "other";
+```
+
+The `Hilo` sequence table is always created in this document store database schema.
+
+If you wish to assign certain document tables to different (new or existing) schemas, you can do so like that:
+
+```cs
+StoreOptions.Schema.For<User>().DatabaseSchemaName("other");
+```
+
+This will create the following tables in your database: `other.mt_doc_user`, `overriden.mt_doc_issue` and `public.mt_doc_company`. When a schema doesn't exist it will be generated in the database.
+
+### Event Store
+
+The EventStore database object are by default created in the document store DatabaseSchemaName. This can be overridden by setting the DatabaseSchemaName property of the event store options.
+
+```cs
+StoreOptions.Events.DatabaseSchemaName = "event_store";
+```
+
+This will ensure that all EventStore tables (mt_stream, mt_events, ...) and functions are created in the `event_store` schema.
+
+## Create Database
+
+::: warning
+You will probably need to use the `AddMarten().ApplyAllDatabaseChangesOnStartup()` option to force Marten to check and build additional databases on start up times by registering
+an `IHostedService` into your system that will run on startup.
+:::
+
+Marten can be configured to create (or drop & create) databases in case they do not exist. This is done via store options, through `StoreOptions.CreateDatabasesForTenants`.
+Note that this functionality is only available by bootstrapping Marten as part of an `IHost` and does not execute by 
+merely building a `DocumentStore`. This change was made in V7 so the database connectivity could run with asynchronous code. You 
+might need to add `Persist Security Info Property=true` to your connection string if there is any issue with PostgreSQL claiming
+that it is missing a password.
+
+<!-- snippet: sample_marten_create_database -->
+<a id='snippet-sample_marten_create_database'></a>
+```cs
+var maintenanceConnectionString = ConnectionSource.ConnectionString;
+var applicationConnectionString = "";
+var builder = Host.CreateApplicationBuilder();
+builder.Services.AddMarten(options =>
+{
+    // This might be different than the maintenance connection string
+    options.Connection(applicationConnectionString);
+
+    options.CreateDatabasesForTenants(c =>
+    {
+        // Specify a db to which to connect in case database needs to be created.
+        // If not specified, defaults to 'postgres' on the connection for a tenant.
+        c.MaintenanceDatabase(maintenanceConnectionString);
+        c.ForTenant()
+            .CheckAgainstPgDatabase()
+
+            .WithOwner("postgres")
+            .WithEncoding("UTF-8")
+            .ConnectionLimit(-1);
+    });
+});
+
+using var host = builder.Build();
+
+// NOTE: The new database will only be built upon the call to IHost.StartAsync()
+await host.StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/StressTests/create_database_Tests.cs#L21-L48' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_marten_create_database' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Databases are checked for existence upon store initialization. By default, connection attempts are made against the databases specified for tenants. If a connection attempt results in an invalid catalog error (3D000), database creation is triggered. `ITenantDatabaseCreationExpressions.CheckAgainstPgDatabase` can be used to alter this behavior to check for database existence from `pg_database`.
+
+Note that database creation requires the `CREATEDB` privilege. See PostgreSQL [CREATE DATABASE](https://www.postgresql.org/docs/current/static/sql-createdatabase.html) documentation for more.
+
+::: tip
+`MaintenanceDatabase()` also accepts a caller-owned `NpgsqlDataSource` instead of a connection string. Use that overload when the maintenance server authenticates with a rotating credential — for example an Azure Entra ID / managed-identity access token — so provisioning can log in through the data source's token provider. See [Azure Database for PostgreSQL with Entra ID](/configuration/azure-managed-identity#database-provisioning-with-a-rotating-credential).
+:::

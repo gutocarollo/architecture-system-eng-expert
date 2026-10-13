@@ -1,0 +1,141 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- Swept for xUnit1051 (#5067): every call taking a CancellationToken is handed
+             TestContext.Current.CancellationToken, so a hung test is cancelled and reported
+             instead of running until CI's own timeout. Keeping the rule ON guards the sweep.
+             Must be set before Tests.props is imported. -->
+        <ThreadTestCancellationToken>true</ThreadTestCancellationToken>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Marten\Marten.csproj" />
+        <ProjectReference Include="..\Marten.Newtonsoft\Marten.Newtonsoft.csproj" />
+        <ProjectReference Include="..\Marten.Testing.OtherAssembly\Marten.Testing.OtherAssembly.csproj" />
+        <ProjectReference Include="..\Marten.Testing.ThirdAssembly\Marten.Testing.ThirdAssembly.csproj" />
+        <!-- Marten.csproj sets PrivateAssets="all" on the SG; this project
+             defines its own SimpleAggregate so it needs the analyzer locally. -->
+        <PackageReference Include="JasperFx.Events.SourceGenerator" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FSharp.Core" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="Npgsql.DependencyInjection" />
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="System.IO.Hashing" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Marten.Testing\Documents\Account.cs">
+            <Link>Documents\Account.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\Company.cs">
+            <Link>Documents\Company.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\CriticalIssue.cs">
+            <Link>Documents\CriticalIssue.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\GuidDoc.cs">
+            <Link>Documents\GuidDoc.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\IntDoc.cs">
+            <Link>Documents\IntDoc.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\InvalidDocument.cs">
+            <Link>Documents\InvalidDocument.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\Issue.cs">
+            <Link>Documents\Issue.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\LongDoc.cs">
+            <Link>Documents\LongDoc.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\StringDoc.cs">
+            <Link>Documents\StringDoc.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\Target.cs">
+            <Link>Documents\Target.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\TargetIntId.cs">
+            <Link>Documents\TargetIntId.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\User.cs">
+            <Link>Documents\User.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Documents\UserWithInheritedId.cs">
+            <Link>Documents\UserWithInheritedId.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\BugIntegrationContext.cs">
+            <Link>Harness\BugIntegrationContext.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\ConnectionSource.cs">
+            <Link>ConnectionSource.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\DefaultStoreFixture.cs">
+            <Link>Harness\DefaultStoreFixture.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\DestructiveIntegrationContext.cs">
+            <Link>Harness\DestructiveIntegrationContext.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\IntegrationContext.cs">
+            <Link>Harness\IntegrationContext.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\OneOffConfigurationsContext.cs">
+            <Link>Harness\OneOffConfigurationsContext.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\SerializerTypeTargetedFact.cs">
+            <Link>SerializerTypeTargetedFact.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\SerializerTypeTargetedTheory.cs">
+            <Link>SerializerTypeTargetedTheory.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\SpecificationExtensions.cs">
+            <Link>SpecificationExtensions.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\StoreContext.cs">
+            <Link>Harness\StoreContext.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\TenantDatabases.cs">
+            <Link>Harness\TenantDatabases.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\StoreFixture.cs">
+            <Link>Harness\StoreFixture.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\TestOutputMartenLogger.cs">
+            <Link>Harness\TestOutputMartenLogger.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\Harness\TestsSettings.cs">
+            <Link>Harness\TestsSettings.cs</Link>
+        </Compile>
+        <Compile Include="..\Marten.Testing\SchemaMigrationExtensions.cs">
+            <Link>SchemaMigrationExtensions.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <NoWarn>xUnit1013</NoWarn>
+    </PropertyGroup>
+    <Import Project="../Tests.props" />
+
+</Project>

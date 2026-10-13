@@ -1,0 +1,1206 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Core;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Daemon.HighWater;
+using JasperFx.Events.Projections;
+using Marten.Events.Projections;
+using Marten.Events.Schema;
+using Marten.Services;
+using Marten.Storage;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Weasel.Core;
+using Weasel.Postgresql;
+
+namespace Marten.Events.Daemon.HighWater;
+
+internal enum DetectionType
+{
+    Normal,
+    SafeZoneSkipping
+}
+
+internal class HighWaterDetector: IHighWaterDetector
+{
+    private readonly HighWaterStatisticsDetector _highWaterStatisticsDetector;
+    private readonly ILogger _logger;
+    private readonly ISingleQueryRunner _runner;
+    private readonly MartenDatabase _database;
+    private readonly EventGraph _graph;
+    private readonly ProjectionOptions _settings;
+
+    // #4867: per-tenant stale clocks for the vectorized high-water path. When a tenant's mark is
+    // blocked by a gap immediately above it (an allocated-but-uncommitted — or rolled-back — seq_id),
+    // this records WHEN the detector first observed that tenant stuck at that mark, so the gap can be
+    // skipped once the tenant has been stale past StaleSequenceThreshold. This is the per-tenant
+    // analogue of HighWaterAgent's in-memory `_current` timestamp on the store-global path: the state
+    // is detector-scoped (one detector instance per running daemon) and resets on restart, which only
+    // means a stale tenant waits one fresh threshold before skipping — never that events are lost.
+    // #4953: value carries the snapshot xmax observed when the tenant first went stale so the
+    // liveness probe can fence to transactions that could have reserved the tenant's gap.
+    private readonly ConcurrentDictionary<string, TenantStaleObservation> _tenantStaleSince = new();
+
+    private sealed record TenantStaleObservation(DateTimeOffset Since, long Xmax);
+
+    // #4953: bookkeeping for the store-global sequence gap the mark is currently stuck under. Records
+    // WHEN the detector first saw the mark pinned at this position, plus the snapshot xmax and the
+    // highest reserved sequence from that same statistics reading. The stale threshold is measured
+    // from Since (never from mt_event_progression.last_updated, which is arbitrarily old on an idle
+    // store), Xmax fences the liveness probe to transactions that could have reserved the gap, and
+    // ReservedCeiling bounds how far a proven-dead skip may advance — sequence numbers reserved AFTER
+    // the observation belong to newer transactions whose fate is not proven. AllocationFence is the
+    // latest server time at which the highest ALLOCATED sequence number was still at or below Mark
+    // (#5091; null when no such poll is in memory — e.g. the detector restarted while the gap already
+    // existed, or the store is tenant-partitioned and has no store-global allocation reading), letting
+    // the liveness probe rule out sessions that have provably executed nothing since before the
+    // gap's sequence numbers were even allocated. Detector-scoped state: resets on restart, which
+    // only means a stuck gap waits one fresh threshold before skipping.
+    private sealed record StuckGapObservation(long Mark, DateTimeOffset Since, long Xmax, long ReservedCeiling,
+        DateTimeOffset? AllocationFence, DateTimeOffset? DurableSince);
+
+    private StuckGapObservation? _stuckGap;
+
+    // #4953 follow-up: (server timestamp, highest ALLOCATED sequence number) pairs from every
+    // statistics poll, so a stuck gap's AllocationFence can be looked up when it is first observed.
+    // Permanently-idle open transactions (Wolverine's advisory-lock listener sessions, a stranded
+    // coordinator lock) otherwise satisfy the liveness probe's open-transaction clause forever and a
+    // genuinely dead gap never skips. Bounded and compacted: consecutive polls at the same value
+    // collapse to one entry keeping the LATEST timestamp (the fence wants the last moment the value
+    // was still that low). Guarded by its own lock — Detect (poll loop) and DetectInSafeZone
+    // (rebuild/catch-up) can run concurrently.
+    //
+    // #5091: this tracks the highest ALLOCATED value, not the reserved ceiling (last_value). Postgres
+    // reports last_value = 1 / is_called = false for a sequence nothing has drawn from, so a history
+    // of reserved ceilings never contains a reading at or below a mark of 0 and a gap stuck there
+    // could never be fenced — the case in #5090. The allocated high reads 0 for a pristine sequence,
+    // which is the reading that makes mark 0 fenceable, and it is still a sound fence: everything
+    // above it was handed out strictly after the poll that observed it.
+    private readonly object _allocationHistoryLock = new();
+    private readonly List<AllocationObservation> _allocationHistory = new();
+    private const int AllocationHistoryCapacity = 128;
+
+    private sealed record AllocationObservation(DateTimeOffset Timestamp, long AllocatedHigh);
+
+    // #5125: the advisory lock ids this store's HotCold coordinator negotiates leadership with, so the
+    // liveness probe can rule out the daemon's own idle-in-transaction lock connections. Derived
+    // rather than plumbed: every input is known here, and ProjectionLockIds.Compute is the same
+    // formula the JasperFx distributors use, so no reference to the running coordinator is needed.
+    // SingleTenantProjectionDistributor computes one id per shard from the schema qualifier;
+    // MultiTenantedProjectionDistributor uses the base DaemonLockId as-is. Recomputed per probe (only
+    // while a gap is actually stuck) because the shard list moves at runtime under per-tenant
+    // expansion. Negative ids are dropped: those would encode into pg_locks with a non-zero classid
+    // and the probe's predicate deliberately only matches the classid = 0 space.
+    private long[] daemonAdvisoryLockIds()
+    {
+        try
+        {
+            var projections = _graph.Options.Projections;
+            var baseLockId = projections.DaemonLockId;
+
+            var ids = new HashSet<long> { baseLockId };
+            foreach (var shard in projections.AllShards())
+            {
+                ids.Add(ProjectionLockIds.Compute(_graph.DatabaseSchemaName, shard.Name, baseLockId));
+            }
+
+            return ids.Where(x => x >= 0).ToArray();
+        }
+        catch (Exception e)
+        {
+            // Never let lock-id derivation break gap detection — an empty set is exactly the
+            // pre-#5125 behavior (nothing excluded, the daemon holds).
+            _logger.LogDebug(e, "Unable to derive the daemon advisory lock ids for database {Database}",
+                DatabaseIdentity);
+            return [];
+        }
+    }
+
+    public HighWaterDetector(MartenDatabase runner, EventGraph graph, ILogger logger)
+    {
+        _runner = runner;
+        _database = runner;
+        _graph = graph;
+        _logger = logger;
+        _highWaterStatisticsDetector = new HighWaterStatisticsDetector(graph);
+        _settings = graph.Options.Projections;
+
+        DatabaseIdentity = runner.Identifier;
+        DatabaseUri = runner.Describe().DatabaseUri();
+    }
+
+    public Uri DatabaseUri { get; }
+
+    /// <summary>
+    /// #4596 Phase 2c — the SINGLE SWITCH that opts the running daemon into
+    /// vectorized per-tenant high-water + per-tenant rebuilds. JasperFx Phase 2b
+    /// wired both behaviors into <c>JasperFxAsyncDaemon</c> gated on this flag,
+    /// so flipping it on lights up <c>TenantedHighWaterCoordinator</c> +
+    /// per-tenant <c>RebuildProjectionAsync(name, tenantId, …)</c> without any
+    /// further plumbing on the Marten side. When the user has not opted into
+    /// <see cref="Marten.Events.IEventStoreOptions.UseTenantPartitionedEvents"/>
+    /// this stays false → today's single store-global mark + single-shard
+    /// rebuild, byte for byte.
+    /// </summary>
+    public bool SupportsTenantPartitioning => _graph.UseTenantPartitionedEvents;
+
+    /// <summary>
+    /// Advance the high water mark to the latest detected sequence
+    /// </summary>
+    /// <param name="token"></param>
+    public async Task AdvanceHighWaterMarkToLatest(CancellationToken token)
+    {
+        // #4953: advance to the highest COMMITTED sequence, never the reserved last_value of
+        // mt_events_sequence — reserved numbers can belong to transactions still in flight, and
+        // marking past them permanently skips their events once they commit.
+        var statistics = await loadCurrentStatistics(token).ConfigureAwait(false);
+        var committed = await _runner.Query(new CommittedSequenceHandler(_graph), token).ConfigureAwait(false);
+        if (committed > statistics.LastMark)
+        {
+            await MarkHighWaterMarkInDatabaseAsync(committed, token).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// #4953: the catch-up ceiling HighWaterAgent.CheckNowAsync loops toward (jasperfx#530) — the
+    /// highest COMMITTED sequence (max(seq_id)), never mt_events_sequence.last_value, which includes
+    /// numbers reserved by transactions still in flight.
+    /// </summary>
+    public Task<long> FetchCommittedHighWaterCeilingAsync(CancellationToken token)
+    {
+        return _runner.Query(new CommittedSequenceHandler(_graph), token);
+    }
+
+    internal class CommittedSequenceHandler: ISingleQueryHandler<long>
+    {
+        private readonly EventGraph _graph;
+
+        public CommittedSequenceHandler(EventGraph graph)
+        {
+            _graph = graph;
+        }
+
+        public NpgsqlCommand BuildCommand()
+        {
+            return new NpgsqlCommand(
+                $"select coalesce(max(seq_id), 0) from {_graph.DatabaseSchemaName}.mt_events");
+        }
+
+        public async Task<long> HandleAsync(DbDataReader reader, CancellationToken token)
+        {
+            if (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                return await reader.GetFieldValueAsync<long>(0, token).ConfigureAwait(false);
+            }
+
+            return 0;
+        }
+    }
+
+    public string DatabaseIdentity { get; }
+
+    public async Task<HighWaterStatistics> DetectInSafeZone(CancellationToken token)
+    {
+        var statistics = await loadCurrentStatistics(token).ConfigureAwait(false);
+
+        if (!_settings.UseTransactionEvidenceForGapSkipping)
+        {
+            return await detectInSafeZoneLegacy(statistics, token).ConfigureAwait(false);
+        }
+
+        // #4953: this method is reachable with NO staleness gating at all (rebuilds and catch-up call
+        // it through HighWaterAgent.CheckNowAsync), and even the threshold-gated route cannot tell a
+        // permanently dead sequence hole from one still held by an in-flight append. So: advance
+        // normally when possible, and only skip a gap that (a) has been stuck past the stale threshold
+        // measured from when THIS detector first observed it and (b) has no evidence of a live
+        // reserving transaction — or the configured escape-hatch cap has expired.
+
+        // Caught up / empty store: nothing to do. (A pristine store — last_value = 1 with nothing
+        // committed — falls through to the held walk, which finds no rows; trackStuckGap then refuses
+        // to observe it. A store with exactly ONE committed event must NOT be short-circuited here:
+        // its HighestSequence is also 1, but the held walk legitimately advances the mark to 1.)
+        if (statistics.LastMark == statistics.HighestSequence || statistics.HighestSequence == 0)
+        {
+            statistics.CurrentMark = statistics.LastMark;
+            _stuckGap = null;
+            return statistics;
+        }
+
+        // First: the same gap-holding walk the Normal path uses. Contiguous committed progress is
+        // taken as a plain advance — no skipping, no observability noise.
+        var held = await runGapDetectorAsync(statistics.SafeStartMark, true, token).ConfigureAwait(false);
+        if (held.HasValue && held.Value > statistics.LastMark)
+        {
+            statistics.CurrentMark = held.Value;
+            _stuckGap = null;
+            await persistDetectedMarkAsync(statistics, DetectionType.Normal, token).ConfigureAwait(false);
+            return statistics;
+        }
+
+        // The mark is pinned under a gap. Start (or continue) the per-gap clock.
+        statistics.CurrentMark = statistics.LastMark;
+        trackStuckGap(statistics);
+        var observed = _stuckGap;
+        if (observed == null)
+        {
+            return statistics;
+        }
+
+        // #5109: publish the sighting so the NEXT detector generation inherits this gap's clock. The
+        // upsert only restamps when the mark differs, so repeated polls preserve the original moment.
+        await persistStuckGapAsync(observed.Mark, token).ConfigureAwait(false);
+
+        var age = statistics.Timestamp.Subtract(observed.Since);
+        if (age < _settings.StaleSequenceThreshold)
+        {
+            // Give the gap a chance to fill in before even considering a skip
+            return statistics;
+        }
+
+        var liveness = await _runner
+            .Query(
+                new GapLivenessProbe(_graph, observed.Since, observed.Xmax, observed.AllocationFence,
+                    daemonAdvisoryLockIds()), token)
+            .ConfigureAwait(false);
+        if (liveness.IndicatesLiveReserver)
+        {
+            // #5109: the STALE THRESHOLD deliberately stays on the in-memory clock above, so a fresh
+            // detector always gives a just-appeared gap a full settle window before considering a skip.
+            // The CAP is the opposite: it exists to bound the stall itself, so it measures from the
+            // first sighting recorded durably for this mark. Without that, agent churn or restart
+            // cycles shorter than the cap postpone the documented bound forever.
+            var cap = _settings.SkipStaleGapsDespiteLiveTransactionsAfter;
+            var stuckAge = observed.DurableSince is { } durable
+                ? statistics.Timestamp.Subtract(durable)
+                : age;
+            if (stuckAge < age)
+            {
+                // Never let the durable clock read YOUNGER than what this detector has watched
+                stuckAge = age;
+            }
+
+            if (cap == null || stuckAge < cap.Value)
+            {
+                if (stuckAge > _settings.StaleSequenceThreshold * 5)
+                {
+                    _logger.LogWarning(
+                        "Daemon high water detection has held before the sequence gap above {Mark} for {Age} because a transaction that may still fill it appears to be alive ({Liveness}). Projections will not advance until it commits, aborts, or the SkipStaleGapsDespiteLiveTransactionsAfter cap expires",
+                        observed.Mark, stuckAge, liveness);
+                }
+                else
+                {
+                    _logger.LogInformation(
+                        "Daemon high water detection is holding before the sequence gap above {Mark}: {Liveness}",
+                        observed.Mark, liveness);
+                }
+
+                return statistics;
+            }
+
+            _logger.LogWarning(
+                "Daemon high water detection is skipping the sequence gap above {Mark} DESPITE evidence of a live transaction ({Liveness}) because the gap has been stuck for {Age}, past the configured SkipStaleGapsDespiteLiveTransactionsAfter cap of {Cap}. Events committed later inside the skipped range will NOT be projected",
+                observed.Mark, liveness, stuckAge, cap);
+        }
+
+        // Proven dead (or cap expired): clear the WHOLE dead span in one move, but never beyond the
+        // reserved ceiling recorded when the gap was first observed — sequence numbers reserved after
+        // that belong to newer transactions whose fate is not proven.
+        //
+        // #5108 §2: this used to advance to the next gap edge, so a field of N dead gaps took N
+        // detection cycles and each one re-paid StaleSequenceThreshold from a fresh observation —
+        // reported as a mark grinding 38 → 426 over 21 seconds, with the cost growing linearly in
+        // write contention. The evidence already in hand covers the entire span: every sequence number
+        // at or below the ceiling was handed out at or before the observation (nextval runs inside the
+        // reserving transaction, so its xact_start cannot postdate it), and the probe above just
+        // established that no transaction from before the observation is still alive. So every one of
+        // those numbers is now either committed or permanently dead — the same argument that licensed
+        // skipping the first gap, applied to all of them at once.
+        // When nothing at all is committed ABOVE the mark, the dead span runs to the end of the
+        // reserved range — reserved-but-never-committed numbers with no live reserver — and the ceiling
+        // is the target, which is the long-standing GH-2681 behavior the null walk used to express.
+        var committed = await _runner.Query(new CommittedSequenceHandler(_graph), token).ConfigureAwait(false);
+        var target = committed > statistics.LastMark
+            ? Math.Min(committed, observed.ReservedCeiling)
+            : observed.ReservedCeiling;
+        if (target <= statistics.LastMark)
+        {
+            return statistics;
+        }
+
+        _logger.LogWarning(
+            "Daemon high water detection is skipping the event sequence range ({Mark}, {Target}] after the gap above {Mark} was stuck for {Age} with no evidence of a live transaction that could still fill it ({Liveness}). Any sequence numbers in that range that never committed were lost to rolled-back appends",
+            observed.Mark, target, observed.Mark, age, liveness);
+
+        statistics.SafeStartMark = target;
+        statistics.CurrentMark = target;
+        _stuckGap = null;
+        await persistDetectedMarkAsync(statistics, DetectionType.SafeZoneSkipping, token).ConfigureAwait(false);
+
+        return statistics;
+    }
+
+    // Pre-#4953 behavior, kept verbatim behind ProjectionOptions.UseTransactionEvidenceForGapSkipping = false
+    private async Task<HighWaterStatistics> detectInSafeZoneLegacy(HighWaterStatistics statistics,
+        CancellationToken token)
+    {
+        // Skip gap and find next safe sequence. #4964: the SafeZone path must NOT hold before a leading
+        // gap — its whole purpose is to skip forward past a stuck (permanent) hole and record the skip.
+        var safeSequence = await runGapDetectorAsync(statistics.SafeStartMark + 1, false, token).ConfigureAwait(false);
+        if (safeSequence.HasValue)
+        {
+            _logger.LogInformation(
+                "Daemon projection high water detection skipping a gap in event sequence, determined that the 'safe harbor' sequence is at {SafeHarborSequence}",
+                safeSequence);
+        }
+        else
+        {
+            _logger.LogInformation("Daemon projection high water detection was not able to determine a safe harbor sequence, will try again soon");
+        }
+
+        if (safeSequence.HasValue)
+        {
+            statistics.SafeStartMark = safeSequence.Value;
+        }
+        else if (statistics.TryGetStaleAge(out var time))
+        {
+            // This is for GH-2681. What if there's a gap
+            // from the last good spot and the latest sequence?
+            // Instead of doing this in an infinite loop, advance
+            // the sequence
+            if (time > _settings.StaleSequenceThreshold)
+            {
+                // This has to take into account the 32 problem. If the
+                // HighestSequence is less than 32 higher than the LastMark or CurrentMark, do NOT advance
+                // https://github.com/JasperFx/marten/issues/3865
+                var safeSequenceNumber = statistics.HighestSequence - 32;
+                if (safeSequenceNumber > statistics.LastMark)
+                {
+                    statistics.SafeStartMark = safeSequenceNumber;
+                    statistics.CurrentMark = safeSequenceNumber;
+                }
+            }
+        }
+
+        await calculateHighWaterMark(statistics, DetectionType.SafeZoneSkipping, token).ConfigureAwait(false);
+
+        return statistics;
+    }
+
+    // #4953: one GapDetector instance per call — Detect (the poll loop) and DetectInSafeZone
+    // (rebuild/catch-up) can run concurrently, and shared mutable Start/Hold state between them was
+    // a race. Retains the long-standing open-data-reader retry.
+    private async Task<long?> runGapDetectorAsync(long start, bool holdBeforeLeadingGap, CancellationToken token)
+    {
+        var gapDetector = new GapDetector(_graph) { Start = start, HoldBeforeLeadingGap = holdBeforeLeadingGap };
+
+        try
+        {
+            return await _runner.Query(gapDetector, token).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException e)
+        {
+            if (e.Message.Contains("An open data reader exists for this command"))
+            {
+                await Task.Delay(250.Milliseconds(), token).ConfigureAwait(false);
+                return await _runner.Query(gapDetector, token).ConfigureAwait(false);
+            }
+
+            throw;
+        }
+    }
+
+    // #4953: per-gap observation bookkeeping — see StuckGapObservation
+    private void trackStuckGap(HighWaterStatistics statistics)
+    {
+        if (statistics.CurrentMark >= statistics.HighestSequence || statistics.CurrentMark > statistics.LastMark)
+        {
+            // caught up, or the mark advanced — whatever gap existed before is resolved
+            _stuckGap = null;
+            return;
+        }
+
+        if (statistics.CurrentMark == 0 && statistics.HighestSequence <= 1)
+        {
+            // pristine store (Postgres sequences report last_value = 1 before first use)
+            _stuckGap = null;
+            return;
+        }
+
+        var current = _stuckGap;
+        if (current == null || current.Mark != statistics.CurrentMark)
+        {
+            // #5109: the cap is meant to bound how long the GAP has been stuck, not how long THIS
+            // detector has watched it. A durable record of the first sighting — keyed on the pinned
+            // mark, so it only applies while the mark has not moved — is what makes daemon restarts
+            // and managed-distribution agent churn stop resetting the clock.
+            var durableSince = statistics is MartenHighWaterStatistics { PersistedStuckGap: { } stuck }
+                               && stuck.Mark == statistics.CurrentMark
+                ? stuck.FirstObservedAt
+                : (DateTimeOffset?)null;
+
+            _stuckGap = new StuckGapObservation(
+                statistics.CurrentMark,
+                statistics.Timestamp,
+                (statistics as MartenHighWaterStatistics)?.CurrentXmax ?? 0,
+                statistics.HighestSequence,
+                findAllocationFence(statistics, statistics.CurrentMark),
+                durableSince);
+        }
+    }
+
+
+    public async Task<HighWaterStatistics> Detect(CancellationToken token)
+    {
+        var statistics = await loadCurrentStatistics(token).ConfigureAwait(false);
+
+        await calculateHighWaterMark(statistics, DetectionType.Normal, token).ConfigureAwait(false);
+
+        // #4953: the poll loop is where a stuck gap is usually seen first — record it here so the
+        // per-gap stale clock starts as early as possible
+        trackStuckGap(statistics);
+        if (_stuckGap is { } polled)
+        {
+            await persistStuckGapAsync(polled.Mark, token).ConfigureAwait(false);
+        }
+
+        return statistics;
+    }
+
+    /// <summary>
+    /// #4596 Phase 2: vectorized per-tenant high-water polling. When
+    /// <see cref="Marten.Events.EventGraph.UseTenantPartitionedEvents"/> is on,
+    /// poll every supplied tenant's per-tenant sequence + per-tenant high-water
+    /// progression row in a single round-trip and return one
+    /// <see cref="HighWaterStatistics"/> per tenant with <c>TenantId</c>
+    /// populated. When the flag is off, inherit the default interface impl
+    /// (single store-global reading) so existing single-mark consumers keep
+    /// compiling and behaving unchanged.
+    /// </summary>
+    public async Task<HighWaterVector> DetectForTenantsAsync(
+        IReadOnlyCollection<string> tenantIds, CancellationToken token)
+    {
+        if (!_graph.UseTenantPartitionedEvents)
+        {
+            // Flag off → no per-tenant partitioning; collapse to store-global.
+            var global = await Detect(token).ConfigureAwait(false);
+            return HighWaterVector.ForGlobal(global);
+        }
+
+        if (tenantIds.Count == 0)
+        {
+            return new HighWaterVector([]);
+        }
+
+        var stats = await loadPerTenantStatistics(tenantIds, token).ConfigureAwait(false);
+        return new HighWaterVector(stats);
+    }
+
+    /// <summary>
+    /// Safe-zone variant of <see cref="DetectForTenantsAsync"/>. Same vectorized
+    /// shape; per-tenant gap detection + stale-threshold skipping are internal to
+    /// <see cref="loadPerTenantStatistics"/> (#4867), so both variants share one
+    /// implementation. When the flag is off, inherit the default interface impl
+    /// (store-global safe-zone reading).
+    /// </summary>
+    public async Task<HighWaterVector> DetectInSafeZoneForTenantsAsync(
+        IReadOnlyCollection<string> tenantIds, CancellationToken token)
+    {
+        if (!_graph.UseTenantPartitionedEvents)
+        {
+            var global = await DetectInSafeZone(token).ConfigureAwait(false);
+            return HighWaterVector.ForGlobal(global);
+        }
+
+        if (tenantIds.Count == 0)
+        {
+            return new HighWaterVector([]);
+        }
+
+        // The vectorized poll is identical to DetectForTenantsAsync: per-tenant
+        // advancement, gap holding, and threshold-gated gap skipping all live
+        // inside loadPerTenantStatistics because the JasperFx coordinator drives
+        // only the normal poll (there is no daemon-level per-tenant safe-zone
+        // scheduling to defer to).
+        var stats = await loadPerTenantStatistics(tenantIds, token).ConfigureAwait(false);
+        return new HighWaterVector(stats);
+    }
+
+    private async Task<IReadOnlyList<HighWaterStatistics>> loadPerTenantStatistics(
+        IReadOnlyCollection<string> tenantIds, CancellationToken token)
+    {
+        var schema = _graph.DatabaseSchemaName;
+        // #4681: the per-tenant high-water identity prefix is produced by
+        // HighWaterShardIdentity rather than hand-rolled here, so any future
+        // change to the high-water grammar (separator, version segment, escape
+        // rule) only needs to land in one place.
+        var highWaterPrefix = HighWaterShardIdentity.PerTenantPrefix;
+
+        // This method only runs under per-tenant event partitioning (the caller collapses to the
+        // store-global reading when the flag is off), so read each tenant's height from max(seq_id) of its
+        // own mt_events partition — NOT from the per-tenant sequence. Same reasoning as the store-global
+        // #4712 fix in HighWaterStatisticsDetector: under partitioning the per-tenant sequence
+        // (mt_events_sequence_{suffix}) is left at its initial value (last_value=1, is_called=false) for
+        // events appended via the shared sequence or reassigned by BulkInsertEventsAsync, so reading it
+        // reports a high-water of 0 for a fully-populated tenant and its projections never start. max(seq_id)
+        // is the authoritative committed height regardless of how the events were inserted, so a tenant with
+        // no persisted progression row yet still gets its true high-water and its per-tenant agent advances.
+        // The LEFT JOINs preserve a row per input tenant even when its partition / progression row does not
+        // exist yet (returns null → treated as zero downstream).
+        //
+        // #4867: the `walk` lateral is the per-tenant analogue of the store-global GapDetector — the
+        // highest committed seq_id reachable from the persisted mark without crossing a gap. Without it,
+        // CurrentMark was seeded straight from the persisted progression row, so a tenant's mark froze
+        // forever after the first persisted HighWaterMark:{tenant} row and second batches never projected.
+        // The walk is only computed when there is a persisted mark with committed events above it
+        // (the gates on prog.last_seq_id / ev.max_seq_id), so caught-up tenants stay cheap.
+        var sql = $@"
+with inputs(tenant_id) as (select unnest(:tenants))
+select
+    i.tenant_id,
+    coalesce(ev.max_seq_id, 0)         as last_value,
+    coalesce(prog.last_seq_id, 0)      as last_seq_id,
+    prog.last_updated                  as last_updated,
+    transaction_timestamp()            as ""timestamp"",
+    walk.current_bound                 as current_bound,
+    pg_snapshot_xmax(pg_current_snapshot())::text::bigint as current_xmax
+from inputs i
+left join lateral (
+    select max(e.seq_id) as max_seq_id
+    from {schema}.mt_events e
+    where e.tenant_id = i.tenant_id
+) ev on true
+left join {schema}.mt_event_progression prog
+    on prog.name = :prefix || i.tenant_id
+left join lateral (
+    select coalesce(
+        (select g.seq_id
+         from (select e.seq_id,
+                      lead(e.seq_id) over (order by e.seq_id) as next_seq
+               from {schema}.mt_events e
+               where e.tenant_id = i.tenant_id
+                 and e.seq_id >= prog.last_seq_id) g
+         where g.next_seq is not null
+           and g.next_seq - g.seq_id > 1
+         order by g.seq_id
+         limit 1),
+        ev.max_seq_id
+    ) as current_bound
+    where coalesce(prog.last_seq_id, 0) > 0
+      and coalesce(ev.max_seq_id, 0) > prog.last_seq_id
+) walk on true;";
+
+        await using var conn = _database.CreateConnection();
+        await conn.OpenAsync(token).ConfigureAwait(false);
+        try
+        {
+            var results = new List<HighWaterStatistics>(tenantIds.Count);
+            var staleTenants = new List<HighWaterStatistics>();
+
+            await using (var cmd = conn.CreateCommand(sql)
+                             .With("tenants", tenantIds.ToArray())
+                             .With("prefix", highWaterPrefix))
+            {
+                await using var reader = await cmd.ExecuteReaderAsync(token).ConfigureAwait(false);
+
+                while (await reader.ReadAsync(token).ConfigureAwait(false))
+                {
+                    var tenantId = await reader.GetFieldValueAsync<string>(0, token).ConfigureAwait(false);
+                    var lastValue = await reader.GetFieldValueAsync<long>(1, token).ConfigureAwait(false);
+                    var lastSeqId = await reader.GetFieldValueAsync<long>(2, token).ConfigureAwait(false);
+
+                    DateTimeOffset? lastUpdated = await reader.IsDBNullAsync(3, token).ConfigureAwait(false)
+                        ? null
+                        : await reader.GetFieldValueAsync<DateTimeOffset>(3, token).ConfigureAwait(false);
+                    var timestamp = await reader.GetFieldValueAsync<DateTimeOffset>(4, token).ConfigureAwait(false);
+                    long? currentBound = await reader.IsDBNullAsync(5, token).ConfigureAwait(false)
+                        ? null
+                        : await reader.GetFieldValueAsync<long>(5, token).ConfigureAwait(false);
+                    var currentXmax = await reader.GetFieldValueAsync<long>(6, token).ConfigureAwait(false);
+
+                    var statistics = new MartenHighWaterStatistics
+                    {
+                        TenantId = tenantId,
+                        HighestSequence = lastValue,
+                        LastMark = lastSeqId,
+                        LastUpdated = lastUpdated,
+                        Timestamp = timestamp,
+                        CurrentXmax = currentXmax
+                    };
+
+                    // CurrentMark = the latest sequence the daemon may treat as "caught up".
+                    // SafeStartMark mirrors CurrentMark — a per-tenant walker resumes from the
+                    // last good mark.
+                    if (lastSeqId == 0)
+                    {
+                        // No persisted progression row yet — seed from the tenant's committed
+                        // max(seq_id), exactly the pre-#4867 first-sighting behavior.
+                        statistics.CurrentMark = statistics.SafeStartMark = lastValue;
+                        _tenantStaleSince.TryRemove(tenantId, out _);
+                    }
+                    else if (lastValue <= lastSeqId)
+                    {
+                        // Caught up — and never rewind a persisted mark, even if committed
+                        // events were archived out from under it.
+                        statistics.CurrentMark = statistics.SafeStartMark = lastSeqId;
+                        _tenantStaleSince.TryRemove(tenantId, out _);
+                    }
+                    else if (currentBound > lastSeqId)
+                    {
+                        // #4867 THE fix: committed events reach contiguously above the persisted
+                        // mark, so advance immediately — this is what un-freezes a tenant's second
+                        // batch. The walk stops before any gap, so an allocated-but-uncommitted
+                        // lower seq_id is never silently skipped.
+                        statistics.CurrentMark = statistics.SafeStartMark = currentBound.Value;
+                        _tenantStaleSince.TryRemove(tenantId, out _);
+                    }
+                    else
+                    {
+                        // A gap sits immediately above the persisted mark (in-flight append or a
+                        // rolled-back sequence number). Hold the mark and let the stale clock run;
+                        // once the tenant has been stuck past StaleSequenceThreshold, skip the gap
+                        // below — the per-tenant mirror of the store-global DetectInSafeZone wait.
+                        statistics.CurrentMark = statistics.SafeStartMark = lastSeqId;
+                        var observation = _tenantStaleSince.GetOrAdd(tenantId,
+                            new TenantStaleObservation(timestamp, currentXmax));
+                        if (timestamp.Subtract(observation.Since) > _settings.StaleSequenceThreshold)
+                        {
+                            staleTenants.Add(statistics);
+                        }
+                    }
+
+                    results.Add(statistics);
+                }
+            }
+
+            foreach (var statistics in staleTenants)
+            {
+                await trySkipStaleTenantGapAsync(conn, statistics, token).ConfigureAwait(false);
+            }
+
+            return results;
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    // #4867: safe-harbor skip for one tenant that has been stale past StaleSequenceThreshold. Walks the
+    // tenant's committed events from just above the stuck mark (the store-global equivalent is
+    // DetectInSafeZone's `_gapDetector.Start = SafeStartMark + 1`) and lands on the highest seq_id
+    // reachable without crossing ANOTHER gap, so multiple gaps are skipped one threshold at a time —
+    // the same iterative cadence as the store-global agent.
+    private async Task trySkipStaleTenantGapAsync(NpgsqlConnection conn, HighWaterStatistics statistics,
+        CancellationToken token)
+    {
+        var sql = $@"
+select coalesce(
+    (select g.seq_id
+     from (select e.seq_id,
+                  lead(e.seq_id) over (order by e.seq_id) as next_seq
+           from {_graph.DatabaseSchemaName}.mt_events e
+           where e.tenant_id = :tenant
+             and e.seq_id > :mark) g
+     where g.next_seq is not null
+       and g.next_seq - g.seq_id > 1
+     order by g.seq_id
+     limit 1),
+    (select max(e.seq_id)
+     from {_graph.DatabaseSchemaName}.mt_events e
+     where e.tenant_id = :tenant
+       and e.seq_id > :mark));";
+
+        // #4953: same evidence rule as the store-global DetectInSafeZone — a tenant gap whose
+        // reserving transaction may still be alive is outstanding, not dead, and must not be skipped.
+        // The lock/transaction/xip fencing is store-wide rather than per-tenant (a lock on any
+        // mt_events partition blocks every tenant's skip), which errs on the conservative side.
+        // No allocation fence here: the vectorized poll reads committed max(seq_id) per tenant, not
+        // a reserved last_value, so there is no history to prove when the tenant's gap sequences
+        // were allocated — quiescent sessions are NOT ruled out on this path (conservative).
+        // #5125: the daemon's own advisory-lock sessions ARE still ruled out. That exclusion is
+        // structural rather than fence-derived — those connections exist only to hold the leadership
+        // lock and never append — so it holds on this path too, where no fence can ever exist.
+        if (_settings.UseTransactionEvidenceForGapSkipping
+            && _tenantStaleSince.TryGetValue(statistics.TenantId!, out var observation))
+        {
+            var age = statistics.Timestamp.Subtract(observation.Since);
+            var liveness = await _runner
+                .Query(
+                    new GapLivenessProbe(_graph, observation.Since, observation.Xmax, null,
+                        daemonAdvisoryLockIds()), token)
+                .ConfigureAwait(false);
+            if (liveness.IndicatesLiveReserver)
+            {
+                var cap = _settings.SkipStaleGapsDespiteLiveTransactionsAfter;
+                if (cap == null || age < cap.Value)
+                {
+                    _logger.LogInformation(
+                        "Daemon high water detection for tenant {TenantId} is holding before the sequence gap above {Mark}: {Liveness}",
+                        statistics.TenantId, statistics.LastMark, liveness);
+                    return;
+                }
+
+                _logger.LogWarning(
+                    "Daemon high water detection for tenant {TenantId} is skipping the sequence gap above {Mark} DESPITE evidence of a live transaction ({Liveness}) because the gap has been stuck for {Age}, past the configured SkipStaleGapsDespiteLiveTransactionsAfter cap of {Cap}",
+                    statistics.TenantId, statistics.LastMark, liveness, age, cap);
+            }
+        }
+
+        await using var cmd = conn.CreateCommand(sql)
+            .With("tenant", statistics.TenantId!)
+            .With("mark", statistics.LastMark);
+
+        var raw = await cmd.ExecuteScalarAsync(token).ConfigureAwait(false);
+        if (raw is not long safeSequence || safeSequence <= statistics.LastMark)
+        {
+            return;
+        }
+
+        _logger.LogWarning(
+            "Daemon projection high water detection for tenant {TenantId} is skipping the event sequence range ({Mark}, {SafeHarborSequence}] after being stale past the {Threshold} threshold. Any sequence numbers in that range that never committed were lost to rolled-back appends",
+            statistics.TenantId, statistics.LastMark, safeSequence, _settings.StaleSequenceThreshold);
+
+        statistics.CurrentMark = statistics.SafeStartMark = safeSequence;
+        statistics.IncludesSkipping = true;
+        _tenantStaleSince.TryRemove(statistics.TenantId!, out _);
+    }
+
+    private async Task calculateHighWaterMark(HighWaterStatistics statistics, DetectionType detectionType,
+        CancellationToken token)
+    {
+        // If the last high water mark is the same as the highest number
+        // assigned from the sequence, then the high water mark cannot
+        // have changed
+        if (statistics.LastMark == statistics.HighestSequence)
+        {
+            statistics.CurrentMark = statistics.LastMark;
+        }
+        else if (statistics.HighestSequence == 0)
+        {
+            statistics.CurrentMark = statistics.LastMark = 0;
+        }
+        else
+        {
+            statistics.CurrentMark = await findCurrentMark(statistics, detectionType, token).ConfigureAwait(false);
+        }
+
+        await persistDetectedMarkAsync(statistics, detectionType, token).ConfigureAwait(false);
+    }
+
+    private async Task persistDetectedMarkAsync(HighWaterStatistics statistics, DetectionType detectionType,
+        CancellationToken token)
+    {
+        if (!statistics.HasChanged)
+        {
+            await refreshHighWaterFreshnessAsync(token).ConfigureAwait(false);
+            return;
+        }
+
+        var currentMark = statistics.CurrentMark;
+
+        if (detectionType == DetectionType.SafeZoneSkipping)
+        {
+            if (_graph.EnableAdvancedAsyncTracking)
+            {
+                var actual = await TryMarkHighWaterSkippingAsync(currentMark, statistics.LastMark, token).ConfigureAwait(false);
+                if (actual == currentMark)
+                {
+                    statistics.IncludesSkipping = true;
+                }
+                else
+                {
+                    statistics.CurrentMark = actual;
+                    statistics.IncludesSkipping = false;
+                }
+            }
+            else
+            {
+                statistics.IncludesSkipping = true;
+                await MarkHighWaterMarkInDatabaseAsync(currentMark, token).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            await MarkHighWaterMarkInDatabaseAsync(currentMark, token).ConfigureAwait(false);
+        }
+
+        if (!statistics.LastUpdated.HasValue)
+        {
+            var current = await loadCurrentStatistics(token).ConfigureAwait(false);
+            statistics.LastUpdated = current.LastUpdated;
+        }
+    }
+
+    // #5541 / jasperfx#924: on a caught-up store the mark cannot move, so persistDetectedMarkAsync used to
+    // return without issuing any SQL at all -- mt_mark_event_progression was never called and the
+    // HighWaterMark row's last_updated froze at the last moment the mark actually advanced. That makes the
+    // column read as "abandoned weeks ago" on a perfectly healthy idle store, which is the exact confusion
+    // CritterWatch#1359 hit and the reason ShardState.LastUpdated has to be LIVENESS rather than progress:
+    // a monitor cannot otherwise tell "caught up, nothing new" from "no longer maintained".
+    //
+    // Deliberately a bare UPDATE of the one column on the one row:
+    //   * last_seq_id is untouched, so this can never nudge the mark -- the whole safety property of the
+    //     detector is that the mark only moves through the paths that proved it may;
+    //   * `where name =` and no upsert, so an idle poll before the mark has ever been written creates
+    //     nothing. The row appears when the first real mark does, and a no-op UPDATE of zero rows is the
+    //     correct answer until then;
+    //   * the store-global row only. The per-tenant rows under UseTenantPartitionedEvents are already
+    //     rewritten by MarkHighWaterForTenantAsync on every vectorized poll, and projection shard rows
+    //     are UpdateProjectionProgress's business, not the detector's.
+    //
+    // Once per SlowPollingTime (1s by default) on an idle daemon, and cheap: it is one HOT update of a
+    // single row in a cycle that already upserts the allocation fence row unconditionally.
+    private async Task refreshHighWaterFreshnessAsync(CancellationToken token)
+    {
+        try
+        {
+            await using var cmd = new NpgsqlCommand(
+                $"update {_graph.DatabaseSchemaName}.mt_event_progression set last_updated = transaction_timestamp() where name = '{HighWaterShardIdentity.StoreGlobal}'");
+
+            await _runner.SingleCommit(cmd, token).ConfigureAwait(false);
+        }
+        catch (Exception e) when (!token.IsCancellationRequested)
+        {
+            // A liveness stamp is strictly an observability aid on top of a mark that has not moved.
+            // Losing it costs a monitor its freshness signal and nothing else, so it must never be
+            // allowed to fail a poll -- same reasoning as the allocation fence below.
+            _logger.LogDebug(e,
+                "Unable to refresh the high water mark's last_updated stamp for database {Database}",
+                DatabaseIdentity);
+        }
+    }
+
+    public Task MarkHighWaterMarkInDatabaseAsync(long currentMark, CancellationToken token)
+    {
+        return _runner.Query(new MarkHighWaterQueryHandler(_graph, currentMark), token);
+    }
+
+    // #4717: persist a durable per-tenant high-water row (HighWaterMark:<tenant>) so each tenant's mark
+    // survives a daemon restart. Under per-tenant event partitioning the store-global mt_events_sequence
+    // is never advanced and a single HighWaterMark row cannot represent multiple tenants. Invoked by
+    // JasperFx's TenantedHighWaterCoordinator on each vectorized per-tenant poll.
+    public Task MarkHighWaterForTenantAsync(string tenantId, long sequence, CancellationToken token)
+    {
+        return _runner.Query(new MarkTenantHighWaterQueryHandler(_graph, tenantId, sequence), token);
+    }
+
+    public class MarkTenantHighWaterQueryHandler: ISingleQueryHandler<bool>
+    {
+        private readonly EventGraph _graph;
+        private readonly string _tenantId;
+        private readonly long _currentMark;
+
+        public MarkTenantHighWaterQueryHandler(EventGraph graph, string tenantId, long currentMark)
+        {
+            _graph = graph;
+            _tenantId = tenantId;
+            _currentMark = currentMark;
+        }
+
+        public NpgsqlCommand BuildCommand()
+        {
+            return new NpgsqlCommand(
+                    $"select {_graph.DatabaseSchemaName}.mt_mark_event_progression(:name, :seq);")
+                .With("name", HighWaterShardIdentity.PerTenant(_tenantId))
+                .With("seq", _currentMark);
+        }
+
+        public Task<bool> HandleAsync(DbDataReader reader, CancellationToken token)
+        {
+            return Task.FromResult(true);
+        }
+    }
+
+    public class MarkHighWaterQueryHandler: ISingleQueryHandler<bool>
+    {
+        private readonly EventGraph _graph;
+        private readonly long _currentMark;
+
+        public MarkHighWaterQueryHandler(EventGraph graph, long currentMark)
+        {
+            _graph = graph;
+            _currentMark = currentMark;
+        }
+
+        public NpgsqlCommand BuildCommand()
+        {
+            return new NpgsqlCommand(
+                    $"select {_graph.DatabaseSchemaName}.mt_mark_event_progression('{HighWaterShardIdentity.StoreGlobal}', :seq);")
+                .With("seq", _currentMark);
+        }
+
+        public Task<bool> HandleAsync(DbDataReader reader, CancellationToken token)
+        {
+            return Task.FromResult(true);
+        }
+    }
+
+    public Task<long> TryMarkHighWaterSkippingAsync(long endingMark, long currentMark, CancellationToken token)
+    {
+        if (endingMark <= currentMark)
+            throw new ArgumentOutOfRangeException(nameof(endingMark),
+                "Ending sequence should be greater than the current mark");
+
+        return _runner.Query(new TryMarkHighWaterSkippingHandler(_graph, endingMark, currentMark), token);
+    }
+
+    public class TryMarkHighWaterSkippingHandler: ISingleQueryHandler<long>
+    {
+        private readonly NpgsqlCommand _command;
+
+        public TryMarkHighWaterSkippingHandler(EventGraph graph, long endingMark, long currentMark)
+        {
+            _command = new NpgsqlCommand(
+                    $"select {graph.DatabaseSchemaName}.mt_mark_progression_with_skip('{HighWaterShardIdentity.StoreGlobal}', :ending, :starting);")
+                .With("ending", endingMark)
+                .With("starting", currentMark)
+                ;
+
+        }
+
+        public NpgsqlCommand BuildCommand()
+        {
+            return _command;
+        }
+
+        public async Task<long> HandleAsync(DbDataReader reader, CancellationToken token)
+        {
+            if (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                return await reader.GetFieldValueAsync<long>(0, token).ConfigureAwait(false);
+            }
+
+            return 0;
+        }
+    }
+
+    public async Task TryCorrectProgressInDatabaseAsync(CancellationToken token)
+    {
+        var statistics = await loadCurrentStatistics(token).ConfigureAwait(false);
+        if (statistics.LastMark > statistics.HighestSequence)
+        {
+            // #5108: every row EXCEPT the allocation fence. The fence row's last_seq_id is an observed
+            // sequence allocation, not projection progress — restamping it here would have it claim
+            // that nothing above an arbitrary sequence had been handed out at a moment when that was
+            // never observed, and a fence that is too late wrongly excludes a live reserver.
+            await using var cmd =
+                new NpgsqlCommand(
+                        $"update {_graph.DatabaseSchemaName}.mt_event_progression set last_seq_id = :seq, last_updated = transaction_timestamp() where name <> :fence and name <> :stuck")
+                    .With("seq", statistics.HighestSequence)
+                    .With("fence", HighWaterAllocationFence.ProgressionName)
+                    .With("stuck", HighWaterStuckGap.ProgressionName);
+
+            await _runner.SingleCommit(cmd, token).ConfigureAwait(false);
+        }
+    }
+
+    public Task<IReadOnlyList<HighWaterDetectionSkip>> FetchLastProgressionSkipsAsync(int limit, CancellationToken cancellationToken)
+    {
+        return _runner.Query(new EventProgressionSkipsHandler(_graph, limit), cancellationToken);
+    }
+
+    private async Task<HighWaterStatistics> loadCurrentStatistics(CancellationToken token)
+    {
+        var statistics = await _runner.Query(_highWaterStatisticsDetector, token).ConfigureAwait(false);
+        recordAllocationObservation(statistics);
+        await persistAllocationFenceAsync(statistics, token).ConfigureAwait(false);
+        return statistics;
+    }
+
+    // #5109: durable first-sighting clock for the SkipStaleGapsDespiteLiveTransactionsAfter cap. The
+    // row records "the mark was already pinned HERE at this moment"; because the mark only ever moves
+    // forward, that stays true for as long as the mark has not moved, which makes it a sound lower
+    // bound on how long the gap has been stuck. Keyed on the mark so it self-invalidates: a different
+    // mark means a different gap and the clock restarts.
+    //
+    // Deliberately server time only. The obvious alternative — dating the stall from the earliest
+    // committed event above the mark — reads mt_events.timestamp, which is client-written in Rich
+    // append mode (the default) and skewed by the server's UTC offset in Quick mode (#5136), so a
+    // behind-clock client or a non-UTC server could age a gap past the cap and drop a live append's
+    // events.
+    private async Task persistStuckGapAsync(long mark, CancellationToken token)
+    {
+        try
+        {
+            await using var cmd = new NpgsqlCommand($@"
+insert into {_graph.DatabaseSchemaName}.mt_event_progression(name, last_seq_id, last_updated)
+values (:name, :mark, transaction_timestamp())
+on conflict (name) do update
+   set last_seq_id = excluded.last_seq_id, last_updated = excluded.last_updated
+ where {_graph.DatabaseSchemaName}.mt_event_progression.last_seq_id <> excluded.last_seq_id")
+                .With("name", HighWaterStuckGap.ProgressionName)
+                .With("mark", mark);
+
+            await _runner.SingleCommit(cmd, token).ConfigureAwait(false);
+        }
+        catch (Exception e) when (!token.IsCancellationRequested)
+        {
+            // Losing the durable clock only costs the cap its head start — the in-memory clock still
+            // governs, which is the pre-#5109 behavior. Never fail a poll over bookkeeping.
+            _logger.LogDebug(e, "Unable to record the stuck gap observation for database {Database}",
+                DatabaseIdentity);
+        }
+    }
+
+    // #5108: the in-memory allocation history above dies with the detector instance, and a daemon that
+    // starts or resumes AFTER a gap formed therefore has no fence at all — the liveness probe falls
+    // back to counting every old open transaction as a possible reserver, so a permanently
+    // idle-in-transaction session (Wolverine's advisory-lock listeners, the daemon's own leadership
+    // lock) holds a dead gap forever. Persisting the fence hands the next detector generation what its
+    // predecessor observed.
+    //
+    // No history is needed in the database: findAllocationFence wants the NEWEST observation whose
+    // allocated high is at or below the mark, and both values only ever move forward, so a single row
+    // maintained incrementally is exactly equivalent. Promote while the store is caught up; the moment
+    // a gap opens, allocation passes the mark, promotion stops, and the row is frozen at the last
+    // moment nothing above the mark had been handed out — precisely the fence.
+    //
+    // Soundness does NOT rest on the mark used here. The row records "at time T, nothing above H had
+    // been allocated", which is true of the statement's own snapshot because the statement re-reads the
+    // sequence itself rather than trusting the reading from the poll above — a timestamp stamped
+    // against a stale allocation reading could sit LATER than the moment it claims, and a fence that is
+    // too late wrongly excludes a genuine reserver. The mark only decides WHEN to refresh; the
+    // read-back independently requires the stored high to be at or below the stuck mark.
+    private async Task persistAllocationFenceAsync(HighWaterStatistics statistics, CancellationToken token)
+    {
+        // Under per-tenant event partitioning tenants draw from their own sequences, so the
+        // store-global sequence says nothing about allocation — same reason AllocatedSequenceHigh is
+        // null there. No sound fence exists to persist.
+        if (_graph.UseTenantPartitionedEvents)
+        {
+            return;
+        }
+
+        try
+        {
+            await using var cmd = new NpgsqlCommand($@"
+insert into {_graph.DatabaseSchemaName}.mt_event_progression(name, last_seq_id, last_updated)
+select '{HighWaterAllocationFence.ProgressionName}', alloc.high, transaction_timestamp()
+from (select case when is_called then last_value else last_value - 1 end as high
+      from {_graph.DatabaseSchemaName}.mt_events_sequence) alloc
+where alloc.high <= :mark
+on conflict (name) do update
+   set last_seq_id = excluded.last_seq_id, last_updated = excluded.last_updated
+ where excluded.last_updated > {_graph.DatabaseSchemaName}.mt_event_progression.last_updated")
+                .With("mark", statistics.LastMark);
+
+            await _runner.SingleCommit(cmd, token).ConfigureAwait(false);
+        }
+        catch (Exception e) when (!token.IsCancellationRequested)
+        {
+            // The fence is an optimization on top of a conservative default: without it the detector
+            // simply holds, which is the pre-#5108 behavior. Never let recording it take down a poll.
+            _logger.LogDebug(e, "Unable to record the high water allocation fence for database {Database}",
+                DatabaseIdentity);
+        }
+    }
+
+    // #4953 follow-up: feed the allocation history from every statistics poll — see _allocationHistory
+    private void recordAllocationObservation(HighWaterStatistics statistics)
+    {
+        // #5091: the reading has to be the highest ALLOCATED sequence number. Under per-tenant event
+        // partitioning there is none to be had — tenants draw from their own sequences, and
+        // HighestSequence is the committed max(seq_id) (#4712), where "committed height <= mark at
+        // time T" says nothing about what was ALLOCATED by then. AllocatedSequenceHigh is null in
+        // exactly those cases, so no sound fence is built from them.
+        if (statistics is not MartenHighWaterStatistics marten || marten.AllocatedSequenceHigh is not { } allocatedHigh
+            || statistics.Timestamp == default)
+        {
+            return;
+        }
+
+        lock (_allocationHistoryLock)
+        {
+            var count = _allocationHistory.Count;
+            if (count > 0)
+            {
+                var last = _allocationHistory[count - 1];
+                if (allocatedHigh == last.AllocatedHigh)
+                {
+                    if (statistics.Timestamp > last.Timestamp)
+                    {
+                        _allocationHistory[count - 1] = last with { Timestamp = statistics.Timestamp };
+                    }
+
+                    return;
+                }
+
+                // Readings can complete out of order across concurrent callers; only ever append a
+                // strictly newer, strictly higher reading so the list stays monotone in both fields
+                if (allocatedHigh < last.AllocatedHigh || statistics.Timestamp <= last.Timestamp)
+                {
+                    return;
+                }
+            }
+
+            _allocationHistory.Add(new AllocationObservation(statistics.Timestamp, allocatedHigh));
+            if (_allocationHistory.Count > AllocationHistoryCapacity)
+            {
+                _allocationHistory.RemoveAt(0);
+            }
+        }
+    }
+
+    // The latest server time at which the highest ALLOCATED sequence number was still at or below the
+    // stuck mark — every sequence number above the mark was therefore handed out strictly after this
+    // moment. Null when neither this detector's own history nor the persisted row offers a qualifying
+    // reading. #5091: reading allocation rather than the reserved ceiling is what lets a gap stuck at
+    // mark 0 be fenced at all, since a pristine sequence reserves 1 while having allocated nothing.
+    // #5108: the persisted row is what carries a fence across detector restarts — see
+    // persistAllocationFenceAsync. Take the LATER of the two: both are sound, and a later fence rules
+    // out strictly more sessions.
+    private DateTimeOffset? findAllocationFence(HighWaterStatistics statistics, long mark)
+    {
+        DateTimeOffset? fence = null;
+
+        lock (_allocationHistoryLock)
+        {
+            for (var i = _allocationHistory.Count - 1; i >= 0; i--)
+            {
+                if (_allocationHistory[i].AllocatedHigh <= mark)
+                {
+                    fence = _allocationHistory[i].Timestamp;
+                    break;
+                }
+            }
+        }
+
+        if (statistics is MartenHighWaterStatistics { PersistedAllocationFence: { } persisted }
+            && persisted.AllocatedHigh <= mark
+            && (fence == null || persisted.ObservedAt > fence.Value))
+        {
+            fence = persisted.ObservedAt;
+        }
+
+        return fence;
+    }
+
+    private async Task<long> findCurrentMark(HighWaterStatistics statistics, DetectionType detectionType,
+        CancellationToken token)
+    {
+        // #4964: only the Normal path holds before a leading gap. The SafeZone path deliberately skips
+        // forward past a permanent hole (and records the skip), so it must keep the old skip-to-max behavior.
+        var current = await runGapDetectorAsync(statistics.SafeStartMark,
+            detectionType == DetectionType.Normal, token).ConfigureAwait(false);
+
+        if (current.HasValue)
+        {
+            return current.Value;
+        }
+
+        // This happens when the agent is restarted with persisted
+        // state, and has no previous current mark.
+        if (statistics is { CurrentMark: 0, LastMark: > 0 })
+        {
+            return statistics.LastMark;
+        }
+
+        return statistics.CurrentMark;
+    }
+}

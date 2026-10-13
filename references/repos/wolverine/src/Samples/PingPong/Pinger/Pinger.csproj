@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <UserSecretsId>dotnet-Pinger-819CA4EE-78C2-4B8C-93A5-0F271BCB1705</UserSecretsId>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Wolverine\Wolverine.csproj"/>
+        <ProjectReference Include="..\Messages\Messages.csproj"/>
+    </ItemGroup>
+</Project>

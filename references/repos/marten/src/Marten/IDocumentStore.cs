@@ -1,0 +1,414 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Transactions;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Documents;
+using Marten.Events;
+using Marten.Events.Daemon;
+using Marten.Services;
+using Microsoft.Extensions.Logging;
+using IsolationLevel = System.Data.IsolationLevel;
+using Weasel.Core;
+
+namespace Marten;
+
+/// <summary>
+///     The core abstraction for a Marten document and event store. This should probably be scoped as a
+///     singleton in your system
+/// </summary>
+public interface IDocumentStore: IDisposable, IAsyncDisposable,
+    IDocumentSessionFactory<IDocumentSession, IQuerySession>
+{
+    // #5216: Marten's LightweightSession() is an overload with a defaulted IsolationLevel rather
+    // than a genuinely parameterless method, so it does not bind to the contract on its own.
+    // QuerySession() is parameterless and already satisfies the generic form. Default interface
+    // implementations forward both, and the non-generic form is forwarded separately because it
+    // differs from the generic one only by return type.
+    IDocumentSession IDocumentSessionFactory<IDocumentSession, IQuerySession>.LightweightSession()
+        => LightweightSession();
+
+    IDocumentSessionOperations IDocumentSessionFactory.LightweightSession() => LightweightSession();
+
+    IDocumentReadOperations IDocumentSessionFactory.QuerySession() => QuerySession();
+
+    // #5517 / jasperfx#898: the same covariance trap as the parameterless pair above, for the
+    // tenant-scoped overloads the contract added. LightweightSession(string, IsolationLevel) has a
+    // defaulted second parameter rather than being a genuine one-argument method, so it satisfies
+    // neither contract member on its own; QuerySession(string) is exact, so it binds the generic
+    // member and needs only the non-generic forwarder. Without these the shared compliance suites
+    // fail on tenancy that is entirely correct, because they would be calling the throwing defaults.
+    //
+    // Deliberately NOT accompanied by a public `LightweightSession(string tenantId)` for symmetry,
+    // even though the shape is asymmetric with QuerySession. C# prefers the candidate with no omitted
+    // optional parameters, so adding it would steal every existing LightweightSession("tenant") call
+    // from the two-argument overload -- the overload-resolution hazard CLAUDE.md records from #5404.
+    // The two are behaviourally identical today, which is exactly what would make such a change look
+    // safe and make a later divergence between them silent.
+    IDocumentSession IDocumentSessionFactory<IDocumentSession, IQuerySession>.LightweightSession(string tenantId)
+        => LightweightSession(tenantId);
+
+    IDocumentSessionOperations IDocumentSessionFactory.LightweightSession(string tenantId)
+        => LightweightSession(tenantId);
+
+    IDocumentReadOperations IDocumentSessionFactory.QuerySession(string tenantId) => QuerySession(tenantId);
+
+    /// <summary>
+    ///     Information about the current configuration of this IDocumentStore
+    /// </summary>
+    IReadOnlyStoreOptions Options { get; }
+
+    /// <summary>
+    ///     Administration and diagnostic information about the underlying database storage
+    /// </summary>
+    IMartenStorage Storage { get; }
+
+    /// <summary>
+    ///     Infrequently used operations like document cleaning and the initial store configuration
+    /// </summary>
+    AdvancedOperations Advanced { get; }
+
+    /// <summary>
+    ///     Access to Marten's diagnostics for trouble shooting
+    /// </summary>
+    IDiagnostics Diagnostics { get; }
+
+    /// <summary>
+    ///     Uses Postgresql's COPY ... FROM STDIN BINARY feature to efficiently store
+    ///     a large number of documents of type "T" to the database. This operation enlists an existing transaction.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="documents"></param>
+    /// <param name="transaction">an existing transaction</param>
+    /// <param name="mode"></param>
+    /// <param name="batchSize"></param>
+    Task BulkInsertEnlistTransactionAsync<T>(IReadOnlyCollection<T> documents, Transaction transaction,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly, int batchSize = 1000,
+        CancellationToken cancellation = default) where T : notnull;
+
+    /// <summary>
+    ///     Uses Postgresql's COPY ... FROM STDIN BINARY feature to efficiently store
+    ///     a large number of documents of type "T" to the database. This operation is transactional.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="tenantId"></param>
+    /// <param name="documents"></param>
+    /// <param name="mode"></param>
+    /// <param name="batchSize"></param>
+    Task BulkInsertAsync<T>(string tenantId, IReadOnlyCollection<T> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly, int batchSize = 1000,
+        CancellationToken cancellation = default) where T : notnull;
+
+    /// <summary>
+    ///     Uses Postgresql's COPY ... FROM STDIN BINARY feature to efficiently store
+    ///     a large number of documents of type "T" to the database. This operation is transactional.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="tenantId"></param>
+    /// <param name="documents"></param>
+    /// <param name="mode"></param>
+    /// <param name="batchSize"></param>
+    Task BulkInsertAsync<T>(IReadOnlyCollection<T> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly, int batchSize = 1000,
+        CancellationToken cancellation = default) where T : notnull;
+
+    /// <summary>
+    ///     Open a new IDocumentSession with the supplied options
+    /// </summary>
+    /// <param name="options">Additional options for session</param>
+    /// <returns></returns>
+    IDocumentSession OpenSession(SessionOptions options);
+
+    /// <summary>
+    ///     Open a new IDocumentSession with the supplied options and immediately open
+    ///     the database connection and start the transaction for the session. This is approapriate
+    ///     for Serializable transaction sessions
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    Task<IDocumentSession> OpenSerializableSessionAsync(SessionOptions options, CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession LightweightSession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession LightweightSession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted
+    );
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession LightweightSession(SessionOptions options);
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> LightweightSerializableSessionAsync(CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> LightweightSerializableSessionAsync(
+        string tenantId,
+        CancellationToken token = default
+    );
+
+    /// <summary>
+    ///     Convenience method to create a new "lightweight" IDocumentSession with no IdentityMap
+    ///     or automatic dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> LightweightSerializableSessionAsync(SessionOptions options, CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession IdentitySession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession IdentitySession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted
+    );
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession IdentitySession(SessionOptions options);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> IdentitySerializableSessionAsync(CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> IdentitySerializableSessionAsync(
+        string tenantId,
+        CancellationToken token = default
+    );
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with IdentityMap but without automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> IdentitySerializableSessionAsync(SessionOptions options, CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession DirtyTrackedSession(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession DirtyTrackedSession(
+        string tenantId,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    IDocumentSession DirtyTrackedSession(SessionOptions options);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(CancellationToken token = default);
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(
+        string tenantId,
+        CancellationToken token = default
+    );
+
+    /// <summary>
+    ///     Convenience method to create an IDocumentSession with both IdentityMap and automatic
+    ///     dirty checking
+    /// </summary>
+    /// <returns></returns>
+    Task<IDocumentSession> DirtyTrackedSerializableSessionAsync(SessionOptions options, CancellationToken token = default);
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <returns></returns>
+    IQuerySession QuerySession();
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <returns></returns>
+    IQuerySession QuerySession(string tenantId);
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <param name="options">Additional options for session. DocumentTracking is not applicable for IQuerySession.</param>
+    /// <returns></returns>
+    IQuerySession QuerySession(SessionOptions options);
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <returns></returns>
+    Task<IQuerySession> QuerySerializableSessionAsync(CancellationToken token = default);
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <returns></returns>
+    Task<IQuerySession> QuerySerializableSessionAsync(string tenantId, CancellationToken token = default);
+
+    /// <summary>
+    ///     Opens a read-only IQuerySession to the current document store for efficient
+    ///     querying without any underlying object tracking.
+    /// </summary>
+    /// <param name="options">Additional options for session. DocumentTracking is not applicable for IQuerySession.</param>
+    /// <returns></returns>
+    Task<IQuerySession> QuerySerializableSessionAsync(SessionOptions options, CancellationToken token = default);
+
+    /// <summary>
+    ///     Bulk insert a potentially mixed enumerable of document types
+    /// </summary>
+    /// <param name="documents"></param>
+    /// <param name="mode"></param>
+    /// <param name="batchSize"></param>
+    Task BulkInsertDocumentsAsync(IEnumerable<object> documents, BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Bulk insert a potentially mixed enumerable of document types
+    /// </summary>
+    /// <param name="documents"></param>
+    /// <param name="mode"></param>
+    /// <param name="batchSize"></param>
+    Task BulkInsertDocumentsAsync(string tenantId, IEnumerable<object> documents,
+        BulkInsertMode mode = BulkInsertMode.InsertsOnly,
+        int batchSize = 1000, CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Uses PostgreSQL's COPY ... FROM STDIN BINARY feature to efficiently bulk-load
+    ///     a large number of events into the event store. This bypasses the normal append pipeline
+    ///     (no inline projections, no optimistic concurrency) and is intended for seeding,
+    ///     migration, and load testing scenarios.
+    /// </summary>
+    /// <param name="streams">The stream actions containing events to insert</param>
+    /// <param name="batchSize">Number of rows per COPY batch</param>
+    /// <param name="cancellation"></param>
+    Task BulkInsertEventsAsync(IReadOnlyList<StreamAction> streams, int batchSize = 1000,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Uses PostgreSQL's COPY ... FROM STDIN BINARY feature to efficiently bulk-load
+    ///     a large number of events into the event store for a specific tenant.
+    /// </summary>
+    /// <param name="tenantId">The tenant to insert events for</param>
+    /// <param name="streams">The stream actions containing events to insert</param>
+    /// <param name="batchSize">Number of rows per COPY batch</param>
+    /// <param name="cancellation"></param>
+    Task BulkInsertEventsAsync(string tenantId, IReadOnlyList<StreamAction> streams, int batchSize = 1000,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Streaming, order-preserving bulk import of an existing event log for a single tenant. Consumes
+    ///     <paramref name="orderedEvents" /> lazily in batches (bounded memory), so a tenant with millions of
+    ///     events imports without materializing them all. Events MUST be supplied in the order their
+    ///     <c>seq_id</c>s should be assigned (the source log's global order): each gets the next ascending
+    ///     sequence in arrival order, preserving cross-stream ordering. Per-stream versions are taken from the
+    ///     events; <paramref name="streamHeaders" /> seed <c>mt_streams</c> first (for the foreign key). One
+    ///     transaction per tenant. Intended for migrating an existing event store. Does no schema work:
+    ///     apply the schema and register the tenant before importing.
+    /// </summary>
+    /// <param name="tenantId">The tenant to insert events for</param>
+    /// <param name="streamHeaders">One header per stream, to seed mt_streams</param>
+    /// <param name="orderedEvents">The tenant's events, in the order seq_ids should be assigned</param>
+    /// <param name="batchSize">Number of rows per COPY batch and sequence-allocation block</param>
+    /// <param name="cancellation"></param>
+    Task BulkInsertEventStreamAsync(string tenantId, IReadOnlyList<BulkEventStreamHeader> streamHeaders,
+        IAsyncEnumerable<IEvent> orderedEvents, int batchSize = 1000, CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Streaming, order-preserving bulk import of an existing event log for a single tenant, with explicit
+    ///     control over <c>seq_id</c> assignment. <see cref="BulkEventSequenceMode.AssignFromSequence" /> is the
+    ///     behavior of the other overload; <see cref="BulkEventSequenceMode.PreserveSourceSequence" /> keeps each
+    ///     event's carried <c>Sequence</c> (historical events are never renumbered), requires strictly ascending
+    ///     input, advances the target sequence past the imported maximum, and — under per-tenant event
+    ///     partitioning — seeds the tenant's high-water progression row. This is the engine of the
+    ///     conjoined-to-partitioned migration. Does no schema work: apply the schema and register the tenant
+    ///     before importing.
+    /// </summary>
+    /// <param name="tenantId">The tenant to insert events for</param>
+    /// <param name="streamHeaders">One header per stream, to seed mt_streams</param>
+    /// <param name="orderedEvents">The tenant's events, in ascending target seq_id order</param>
+    /// <param name="sequenceMode">How seq_ids are assigned to the imported events</param>
+    /// <param name="batchSize">Number of rows per COPY batch and sequence-allocation block</param>
+    /// <param name="cancellation"></param>
+    Task BulkInsertEventStreamAsync(string tenantId, IReadOnlyList<BulkEventStreamHeader> streamHeaders,
+        IAsyncEnumerable<IEvent> orderedEvents, BulkEventSequenceMode sequenceMode, int batchSize = 1000,
+        CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Build a new instance of the asynchronous projection daemon to use interactively
+    ///     in your own code
+    /// </summary>
+    /// <param name="tenantIdOrDatabaseIdentifier">
+    ///     If using multi-tenancy with multiple databases, supplying this will choose
+    ///     the database to target
+    /// </param>
+    /// <param name="logger">Override the logger inside this instance of the async daemon</param>
+    /// <returns></returns>
+    ValueTask<IProjectionDaemon> BuildProjectionDaemonAsync(string? tenantIdOrDatabaseIdentifier = null,
+        ILogger? logger = null);
+}

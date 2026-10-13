@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <Description>Marten-backed Persistence for Wolverine Applications</Description>
+        <PackageId>WolverineFx.Marten</PackageId>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+        <!--
+          AOT-compatible (#2746). All ~142 IL warnings resolved via
+          namespace-scoped UnconditionalSuppressMessage in GlobalSuppressions.cs
+          covering the Wolverine.Marten codegen surface (and descendants:
+          Codegen, Subscriptions, Persistence.Sagas, Distribution, Publishing,
+          Requirements). Same chunk AC (Wolverine.Http) approach.
+        -->
+        <IsAotCompatible>true</IsAotCompatible>
+        <!--
+          NU5104: intentionally consuming a prerelease Marten (9.13.0-alpha.2)
+          from a stable-versioned package while the Marten 9.13 line stabilizes.
+          Remove this suppression when the pin moves back to a stable Marten.
+        -->
+        <NoWarn>$(NoWarn);NU5104</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Wolverine.Postgresql\Wolverine.Postgresql.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Marten" />
+      <!-- Referenced directly so the pinned Weasel.Storage beats the older one Marten asks for,
+           keeping it on the same Weasel line as the Weasel.Core this already runs against. See the
+           Weasel.Storage note in Directory.Packages.props. -->
+      <PackageReference Include="Weasel.Storage" />
+    </ItemGroup>
+</Project>

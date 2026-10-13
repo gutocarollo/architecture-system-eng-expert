@@ -1,0 +1,88 @@
+using JasperFx.Core;
+using Wolverine;
+
+namespace DocumentationSamples;
+
+public class ScheduledExecutionSamples
+{
+    #region sample_schedulesend_in_3_days
+    public async Task schedule_send(IMessageContext context, Guid issueId)
+    {
+        var timeout = new WarnIfIssueIsStale
+        {
+            IssueId = issueId
+        };
+
+        // Process the issue timeout logic 3 days from now
+        await context.ScheduleAsync(timeout, 3.Days());
+
+        // The code above is short hand for this:
+        await context.PublishAsync(timeout, new DeliveryOptions
+        {
+            ScheduleDelay = 3.Days()
+        });
+    }
+
+    #endregion
+
+    #region sample_schedulesend_at_5_pm_tomorrow
+    public async Task schedule_send_at_5_tomorrow_afternoon(IMessageContext context, Guid issueId)
+    {
+        var timeout = new WarnIfIssueIsStale
+        {
+            IssueId = issueId
+        };
+
+        var time = DateTime.Today.AddDays(1).AddHours(17);
+
+
+        // Process the issue timeout at 5PM tomorrow
+        // Do note that Wolverine quietly converts this
+        // to universal time in storage
+        await context.ScheduleAsync(timeout, time);
+    }
+
+    #endregion
+
+
+    #region sample_schedulelocally_in_3_days
+    public async Task schedule_locally(IMessageContext context, Guid issueId)
+    {
+        var timeout = new WarnIfIssueIsStale
+        {
+            IssueId = issueId
+        };
+
+        // Process the issue timeout logic 3 days from now
+        // in *this* system
+        await context.ScheduleAsync(timeout, 3.Days());
+    }
+
+    #endregion
+
+
+    #region sample_schedulelocally_at_5_pm_tomorrow
+    public async Task schedule_locally_at_5_tomorrow_afternoon(IMessageContext context, Guid issueId)
+    {
+        var timeout = new WarnIfIssueIsStale
+        {
+            IssueId = issueId
+        };
+
+        var time = DateTime.Today.AddDays(1).AddHours(17);
+
+
+        // Process the issue timeout at 5PM tomorrow
+        // in *this* system
+        // Do note that Wolverine quietly converts this
+        // to universal time in storage
+        await context.ScheduleAsync(timeout, time);
+    }
+
+    #endregion
+}
+
+public class WarnIfIssueIsStale
+{
+    public Guid IssueId { get; set; }
+}

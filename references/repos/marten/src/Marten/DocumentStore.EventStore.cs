@@ -1,0 +1,861 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using JasperFx.Events;
+using JasperFx.Events.Aggregation;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Descriptors;
+using JasperFx.Events.Projections;
+using Marten.Events;
+using Marten.Events.Archiving;
+using Marten.Events.Daemon;
+using Marten.Events.Daemon.Internals;
+using Marten.Events.Daemon.Progress;
+using Marten.Events.Projections;
+using Marten.Exceptions;
+using Marten.Internal;
+using Marten.Internal.OpenTelemetry;
+using Marten.Internal.Sessions;
+using Marten.Schema;
+using Marten.Services;
+using Marten.Storage;
+using Marten.Subscriptions;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Polly;
+using Weasel.Postgresql.SqlGeneration;
+using EventTypeFilter = Marten.Events.Daemon.Internals.EventTypeFilter;
+using System.Diagnostics.CodeAnalysis;
+using Marten.Util;
+
+namespace Marten;
+
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public partial class DocumentStore: IEventStore<IDocumentOperations, IQuerySession>, ISubscriptionRunner<ISubscription>
+{
+    static DocumentStore()
+    {
+        ProjectionExceptions.RegisterTransientExceptionType<NpgsqlException>();
+        ProjectionExceptions.RegisterTransientExceptionType<MartenCommandException>();
+    }
+
+    DatabaseCardinality IEventStore.DatabaseCardinality => Options.Tenancy.Cardinality;
+
+    // #750: gate the daemon's ExtendedProgressionWriter observer on the store's opt-in — without this
+    // the observer (which reads IEventStore.ExtendedProgressionEnabled, default false) never fires and
+    // the heartbeat/agent_status/pause_reason/running_on_node columns stay NULL. Both the direct
+    // opt-in (opts.Events.EnableExtendedProgressionTracking) and CritterWatch's instrumentation
+    // adapter converge on this same flag (see SetEventStoreInstrumentation).
+    bool IEventStore.ExtendedProgressionEnabled => Options.EventGraph.EnableExtendedProgressionTracking;
+
+    /// <summary>
+    ///     jasperfx#914 — Marten's own <c>EventGraph.IsActive</c>: any registered event type other than
+    ///     <c>Archived</c>, or any projection or subscription. Computed on every read, never cached: an
+    ///     event type registered lazily on first append makes a store that started document-only active.
+    /// </summary>
+    bool IEventStore.HasEventStore => Options.EventGraph.IsActive(Options);
+
+    bool IEventStore.HasMultipleTenants
+    {
+        get
+        {
+            if (Options.Tenancy.Cardinality != DatabaseCardinality.Single) return true;
+
+            if (Options.Events.TenancyStyle == TenancyStyle.Conjoined) return true;
+
+            // 9.0: AllDocumentMappings is lazy now (#4303); materialize
+            // before scanning for a Conjoined document type.
+            Options.Storage.BuildAllMappings();
+            if (Options.Storage.AllDocumentMappings.Any(x => x.TenancyStyle == TenancyStyle.Conjoined)) return true;
+
+            return false;
+        }
+    }
+
+    // wolverine#3280 + #4862: under per-tenant event partitioning every tenant draws its own
+    // mt_events_sequence_<tenant> — independent, overlapping sequences co-located in the one events
+    // table. That is true for ANY database topology (a single conjoined database exactly as much as a
+    // shard housing multiple tenants), so a store-global agent has no correct progression semantics:
+    // the store-global high water is the max across partitions and silently skips a lagging tenant's
+    // events (#4862). Hosts that start agents per-identity (Wolverine-managed distribution's
+    // StartAgentAsync) must therefore fan out one agent per (database, tenant) whenever the store is
+    // tenant-partitioned. The native daemon is unaffected either way — its StartAllAsync already fans
+    // out per tenant internally.
+    bool IEventStore.DistributesAgentsPerTenant
+        => Options.Events.UseTenantPartitionedEvents;
+
+    // jasperfx#420 / marten#4710: the resolved per-database rebuild concurrency cap read by the
+    // CLI rebuild path (ProjectionHost.TryRebuildShardsAsync). Explicit configuration on
+    // StoreOptions.Projections wins; otherwise derive max(1, MaxPoolSize / 8) from the default
+    // database's Npgsql pool so a wide store cannot blow the connection pool during a rebuild
+    // while leaving headroom for application traffic. Falls back to null (the historical
+    // unbounded fan-out) when no pool signal is reachable.
+    int? IEventStore.MaxConcurrentRebuildsPerDatabase
+    {
+        get
+        {
+            if (Options.Projections.MaxConcurrentRebuildsPerDatabase.HasValue)
+            {
+                var configured = Options.Projections.MaxConcurrentRebuildsPerDatabase.Value;
+                return configured > 0 ? configured : null;
+            }
+
+            try
+            {
+                using var connection = Options.Tenancy.Default.Database.CreateConnection();
+                var poolSize = new NpgsqlConnectionStringBuilder(connection.ConnectionString).MaxPoolSize;
+                return Math.Max(1, poolSize / 8);
+            }
+            catch (Exception)
+            {
+                // No resolvable default database / connection string (e.g. tenancy models that
+                // cannot answer Default before runtime discovery) — stay unbounded.
+                return null;
+            }
+        }
+    }
+
+    async ValueTask<IReadOnlyList<IEventDatabase>> IEventStore.AllDatabases()
+    {
+        // Straight delegation to ITenancy, mirroring IMartenStorage.AllDatabases(). The IMartenDatabase
+        // interface does not itself extend IEventDatabase (only the concrete MartenDatabase does), so this
+        // projects rather than returning the list directly. See #4570.
+        var databases = await Tenancy.BuildDatabases().ConfigureAwait(false);
+        return databases.OfType<IEventDatabase>().ToList();
+    }
+
+    public EventStoreIdentity Identity { get; }
+
+    IEventRegistry IEventStore<IDocumentOperations, IQuerySession>.Registry => Options.EventGraph;
+
+    public Type IdentityTypeForProjectedType(Type aggregateType)
+    {
+        return new DocumentMapping(aggregateType, Options).DocumentType;
+    }
+
+    string IEventStore<IDocumentOperations, IQuerySession>.DefaultDatabaseName =>
+        Options.Tenancy.Default.Database.Identifier;
+
+    ErrorHandlingOptions IEventStore<IDocumentOperations, IQuerySession>.ContinuousErrors =>
+        Options.Projections.Errors;
+
+    ErrorHandlingOptions IEventStore<IDocumentOperations, IQuerySession>.RebuildErrors =>
+        Options.Projections.RebuildErrors;
+
+    IReadOnlyList<AsyncShard<IDocumentOperations, IQuerySession>> IEventStore<IDocumentOperations, IQuerySession>.
+        AllShards()
+    {
+        return Options.Projections.AllShards();
+    }
+
+    Meter IEventStore.Meter => Options.OpenTelemetry.Meter;
+
+    ActivitySource IEventStore.ActivitySource => MartenTracing.ActivitySource;
+
+    TimeProvider IEventStore<IDocumentOperations, IQuerySession>.TimeProvider => Options.Events.TimeProvider;
+
+    string IEventStore.MetricsPrefix => "marten";
+
+    AutoCreate IEventStore<IDocumentOperations, IQuerySession>.AutoCreateSchemaObjects =>
+        Options.AutoCreateSchemaObjects;
+
+    async Task IEventStore<IDocumentOperations, IQuerySession>.RewindSubscriptionProgressAsync(
+        IEventDatabase database, string subscriptionName, CancellationToken token,
+        long? sequenceFloor)
+    {
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+        sessionOptions.AllowAnyTenant = true;
+        await using var session = LightweightSession(sessionOptions);
+
+        var names = Options
+            .Projections
+            .AllShards()
+            .Where(x => x.Name.Name.EqualsIgnoreCase(subscriptionName) || x.Name.Identity == subscriptionName)
+            .Select(x => x.Name)
+            .ToArray();
+
+        if (names.Length == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subscriptionName),
+                $"Unknown subscription name '{subscriptionName}'. Available options are {Options.Projections.AllShards().Select(x => x.Name.Name).Distinct().Join(", ")}");
+        }
+
+        foreach (var name in names)
+        {
+            if (sequenceFloor.Value == 0)
+            {
+                session.QueueSqlCommand($"delete from {Options.EventGraph.ProgressionTable} where name = ?",
+                    name.Identity);
+            }
+            else
+            {
+                session.QueueSqlCommand(
+                    // #4981: keep last_updated in step with the rewound progress on the update branch
+                $"insert into {Options.EventGraph.ProgressionTable} (name, last_seq_id) values (?, ?) on conflict (name) do update set last_seq_id = ?, last_updated = transaction_timestamp()",
+                    name.Identity, sequenceFloor, sequenceFloor);
+            }
+        }
+
+        // Rewind previous DeadLetterEvents because you're going to replay them all anyway
+        session.DeleteWhere<DeadLetterEvent>(x =>
+            x.ProjectionName == subscriptionName && x.EventSequence >= sequenceFloor);
+
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    async Task IEventStore<IDocumentOperations, IQuerySession>.RewindAgentProgressAsync(IEventDatabase database,
+        string shardName, CancellationToken token, long sequenceFloor)
+    {
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+        sessionOptions.AllowAnyTenant = true;
+        await using var session = LightweightSession(sessionOptions);
+
+        if (sequenceFloor > 0)
+        {
+            session.QueueSqlCommand(
+                // #4981: keep last_updated in step with the rewound progress on the update branch
+                $"insert into {Options.EventGraph.ProgressionTable} (name, last_seq_id) values (?, ?) on conflict (name) do update set last_seq_id = ?, last_updated = transaction_timestamp()",
+                shardName, sequenceFloor, sequenceFloor);
+        }
+
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    async Task IEventStore<IDocumentOperations, IQuerySession>.TeardownExistingProjectionStateAsync(IEventDatabase database, string subscriptionName, CancellationToken token)
+    {
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+        sessionOptions.AllowAnyTenant = true;
+        await using var session = LightweightSession(sessionOptions);
+
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(subscriptionName));
+
+        if (source == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subscriptionName));
+        }
+
+        if (source is CompositeProjection composite)
+        {
+            foreach (var leafSource in composite.AllProjections())
+            {
+                teardownProjectionStorage(leafSource, session);
+            }
+
+            // #5175: the parent composite goes through the SAME teardown as any other source rather
+            // than only having its progression rows dropped. Previously its own AsyncOptions were
+            // never consulted at all, so `composite.Options.DeleteViewTypeOnTeardown<T>()` and
+            // `composite.Options.TeardownDataOnRebuild = false` were silent no-ops.
+            teardownProjectionStorage(composite, session);
+        }
+        else
+        {
+            teardownProjectionStorage(source, session);
+        }
+
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    async Task IEventStore<IDocumentOperations, IQuerySession>.DeleteProjectionProgressAsync(IEventDatabase database, string subscriptionName, CancellationToken token)
+    {
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+        sessionOptions.AllowAnyTenant = true;
+        await using var session = LightweightSession(sessionOptions);
+
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(subscriptionName));
+
+        if (source == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subscriptionName));
+        }
+
+        foreach (var agent in source.Shards())
+        {
+            session.QueueOperation(new DeleteProjectionProgress(Events, agent.Name.Identity));
+        }
+
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// #4596 Phase 1 Session 4 + Phase 2c — override the jasperfx#407
+    /// default-throwing per-tenant overload. Non-null <paramref name="tenantId"/>
+    /// scopes the whole pre-rebuild reset to that one tenant:
+    /// <list type="bullet">
+    ///   <item><description>Per-tenant progression row(s) for every registered shard
+    ///   (the <c>{ProjName}:{ShardKey}:{tenantId}</c> identities) — Session 4 work.</description></item>
+    ///   <item><description><b>Per-tenant projected documents</b> for every leaf
+    ///   (composite member or single source) of the projection — Phase 2c. Uses
+    ///   <see cref="AsyncOptionsExtensions.TeardownForTenant"/> which emits
+    ///   <c>DELETE FROM &lt;table&gt; WHERE tenant_id = '$tenant'</c> instead of
+    ///   TRUNCATE, so other tenants' rows are untouched.</description></item>
+    ///   <item><description>Tenant-scoped <see cref="DeadLetterEvent"/>s for the projection.</description></item>
+    /// </list>
+    /// JasperFx Phase 2b's <c>rebuildProjectionForTenant</c> explicitly does NOT call
+    /// the store-global <c>TeardownExistingProjectionStateAsync</c> (that would wipe
+    /// every other tenant's data) — this method is the only Marten-side hook fired
+    /// before a per-tenant rebuild starts, so the tenant-scoped doc teardown rides
+    /// along with the progression delete. Null <paramref name="tenantId"/> preserves
+    /// today's "drop every shard progression row for this projection" semantics
+    /// (no docs touched — the rebuild path uses TeardownExistingProjectionStateAsync
+    /// for that).
+    /// </summary>
+    async Task IEventStore<IDocumentOperations, IQuerySession>.DeleteProjectionProgressAsync(
+        IEventDatabase database, string subscriptionName, string? tenantId, CancellationToken token)
+    {
+        if (tenantId == null)
+        {
+            await ((IEventStore<IDocumentOperations, IQuerySession>)this)
+                .DeleteProjectionProgressAsync(database, subscriptionName, token).ConfigureAwait(false);
+            return;
+        }
+
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+        sessionOptions.AllowAnyTenant = true;
+        await using var session = LightweightSession(sessionOptions);
+
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(subscriptionName));
+        if (source == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(subscriptionName));
+        }
+
+        // Tenant-scoped doc teardown — same set of leaves the store-global
+        // TeardownExistingProjectionStateAsync visits, but DELETE WHERE tenant_id
+        // = $tenant instead of TRUNCATE.
+        if (source is CompositeProjection composite)
+        {
+            foreach (var leafSource in composite.AllProjections())
+            {
+                teardownProjectionStorageForTenant(leafSource, session, tenantId);
+            }
+
+            // #5175: same as the store-global twin -- the composite's own teardown rules apply too.
+            teardownProjectionStorageForTenant(composite, session, tenantId);
+        }
+        else
+        {
+            teardownProjectionStorageForTenant(source, session, tenantId);
+        }
+
+        foreach (var agent in source.Shards())
+        {
+            // Compose the per-tenant ShardName so its Identity carries the
+            // trailing :tenantId — that's the row this DELETE targets.
+            var tenantShardName = ShardName.Compose(agent.Name.Name, agent.Name.ShardKey, tenantId, agent.Name.Version);
+            session.QueueOperation(new DeleteProjectionProgress(Events, tenantShardName.Identity));
+        }
+
+        // Note: DeadLetterEvent intentionally NOT wiped here. The store-global
+        // teardown wipes them blanket-style, but jasperfx#407 Phase 2b's
+        // per-tenant rebuild is single-tenant-scoped — the dead-letter table is
+        // store-global and doesn't have a `tenant_id` column to scope on. Stale
+        // entries from a previous failed apply will re-fire (or not) on the
+        // rebuild and self-correct.
+
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    private void teardownProjectionStorageForTenant(IProjectionSource<IDocumentOperations, IQuerySession> source,
+        IDocumentSession session, string tenantId)
+    {
+        if (source.Options.TeardownDataOnRebuild)
+        {
+            source.Options.TeardownForTenant(session, tenantId, Options);
+        }
+    }
+
+    private void teardownProjectionStorage(IProjectionSource<IDocumentOperations, IQuerySession> source, IDocumentSession session)
+    {
+        if (source.Options.TeardownDataOnRebuild)
+        {
+            source.Options.Teardown(session, Options);
+        }
+
+        foreach (var agent in source.Shards())
+        {
+            session.QueueOperation(new DeleteProjectionProgress(Events, agent.Name.Identity));
+        }
+
+        // Rewind previous DeadLetterEvents because you're going to replay them all anyway
+        session.DeleteWhere<DeadLetterEvent>(x => x.ProjectionName == source.Name);
+
+        // #4788: a [NaturalKey] aggregate maintains its mt_natural_key_X lookup table via the
+        // auto-registered NaturalKeyProjection on the inline-append path. Teardown of the parent
+        // projection must also wipe the natural-key table so the rebuild path repopulates it from
+        // scratch (the rebuild itself re-emits the upserts via StartProjectionBatchAsync).
+        if (source is IAggregateProjection aggregateSource && aggregateSource.NaturalKeyDefinition != null)
+        {
+            var naturalKeyTable =
+                $"{Events.DatabaseSchemaName}.mt_natural_key_{aggregateSource.NaturalKeyDefinition.AggregateType.Name.ToLowerInvariant()}";
+            session.QueueSqlCommand($"delete from {naturalKeyTable}");
+        }
+    }
+
+    public async ValueTask<IProjectionBatch<IDocumentOperations, IQuerySession>> StartProjectionBatchAsync(
+        EventRange range, IEventDatabase database, ShardExecutionMode mode,
+        AsyncOptions projectionOptions,
+        CancellationToken token)
+    {
+        await database.EnsureStorageExistsAsync(typeof(IEvent), token).ConfigureAwait(false);
+        var sessionOptions = SessionOptions.ForDatabase((IMartenDatabase)database);
+
+        // This can only cause problems, so shut this down!
+        sessionOptions.AllowAnyTenant = true;
+
+        // Opt into identity mechanics for Event Projections that require that
+        if (projectionOptions.EnableDocumentTrackingByIdentity)
+        {
+            sessionOptions.Tracking = DocumentTracking.IdentityOnly;
+        }
+        else
+        {
+            sessionOptions.Tracking = DocumentTracking.None;
+        }
+
+        var session = (DocumentSessionBase)OpenSession(sessionOptions);
+
+        // #4685: pass the actual execution mode through. This used to hardcode
+        // ShardExecutionMode.Rebuild — harmless while ProjectionUpdateBatch.Mode was unused,
+        // but the BulkWriter (binary COPY) rebuild flush keys off the batch's mode, and a
+        // continuous batch masquerading as Rebuild would wrongly opt into it.
+        var batch = new ProjectionUpdateBatch(Options.Projections, session, mode, token)
+        {
+            ShouldApplyListeners = mode == ShardExecutionMode.Continuous && range.Events.Any()
+        };
+
+        if (mode == ShardExecutionMode.Continuous)
+        {
+            await batch.SpinUpMessageBatchAsync(session).ConfigureAwait(false);
+        }
+
+        var projectionBatch = new ProjectionBatch(session, batch, mode);
+
+        await projectionBatch.RecordProgress(range).ConfigureAwait(false);
+
+        // #4788: when rebuilding a snapshot whose aggregate has a [NaturalKey], re-emit the
+        // natural-key upserts for this page's events. ApplyAsync on the inline path drives off
+        // newly-appended StreamActions and never fires during rebuild — without this hook the
+        // mt_natural_key_X table stays empty after teardown. Routing the upsert SQL through
+        // ProjectionBatch.SessionForTenant returns a ProjectionDocumentSession whose work-tracker
+        // IS the ProjectionUpdateBatch, so the operations flush alongside the rebuilt snapshots
+        // inside the same batch transaction.
+        if (mode == ShardExecutionMode.Rebuild && range.Events.Any())
+        {
+            var naturalKeySource = Options.Projections.All
+                .FirstOrDefault(s => s.Name.EqualsIgnoreCase(range.ShardName.Name))
+                as IAggregateProjection;
+            if (naturalKeySource?.NaturalKeyDefinition == null)
+            {
+                naturalKeySource = null;
+            }
+
+            if (naturalKeySource != null)
+            {
+                var naturalKeyProjection = new NaturalKeyProjection(Options.EventGraph, naturalKeySource.NaturalKeyDefinition!);
+                foreach (var byTenant in range.Events.GroupBy(e => e.TenantId ?? StorageConstants.DefaultTenantId))
+                {
+                    var ops = projectionBatch.SessionForTenant(byTenant.Key);
+                    naturalKeyProjection.QueueUpsertsForEvents(ops, byTenant);
+                }
+            }
+        }
+
+        return projectionBatch;
+    }
+
+    /// <summary>
+    ///     #5587. The pipeline handed to <see cref="ResilientEventLoader" />, which is deliberately empty.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         The decorator used to be given <c>Options.ResiliencePipeline</c>, which is the same object the
+    ///         <see cref="QuerySession" /> underneath it already runs every command through
+    ///         (<c>QuerySession.Execution.cs</c>). <see cref="EventLoader" /> opens a session per call, so the two
+    ///         nested: both 3-retry, so one handled failure was executed up to <b>sixteen</b> times, with the
+    ///         backoff compounding the same way.
+    ///     </para>
+    ///     <para>
+    ///         The inner one is the right place to keep it. That is where the command actually runs, and where
+    ///         <see cref="AutoClosingLifetime" /> opens a fresh connection for every attempt -- the outer one
+    ///         would replay through a session it did not create and cannot reason about. So the decorator keeps
+    ///         what only it can do (loading metrics, and the <c>EventLoaderException</c> wrap that carries the
+    ///         shard name and database) and stops retrying.
+    ///     </para>
+    ///     <para>
+    ///         This matters more since JasperFx 2.80.1 (jasperfx#948): until then
+    ///         <c>ResilientEventLoader.LoadAsync</c> returned the pipeline's task without awaiting it inside its
+    ///         own try, so the outer pipeline's handler was largely unreachable for an async failure. Fixing that
+    ///         upstream is what turned this from latent into live.
+    ///     </para>
+    /// </remarks>
+    internal static ResiliencePipeline DaemonLoaderPipeline => ResiliencePipeline.Empty;
+
+    IEventLoader IEventStore<IDocumentOperations, IQuerySession>.BuildEventLoader(IEventDatabase database,
+        ILogger loggerFactory, EventFilterable filtering, AsyncOptions shardOptions)
+    {
+        var filters = buildEventLoaderFilters(filtering).ToArray();
+        var inner = new EventLoader(this, (MartenDatabase)database, shardOptions, filters,
+            filtering.IncludeArchivedEvents);
+        return new ResilientEventLoader(DaemonLoaderPipeline, inner, database);
+    }
+
+    /// <summary>
+    /// #4596 Phase 2c — consume jasperfx#407 Phase 2c's 5-arg BuildEventLoader
+    /// overload, which threads <see cref="ShardName"/> (and therefore the
+    /// shard's tenant slot) into the loader. Per-tenant rebuilds rebind the
+    /// shard via <c>ShardName.ForTenant(tenantId)</c> before reaching here, so
+    /// the loader can add a literal <c>d.tenant_id = '{tenantId}'</c> predicate
+    /// to its SQL — partition-pruning <c>mt_events</c> AND ensuring the
+    /// per-tenant execution never sees another tenant's events (which would
+    /// route doc writes via <see cref="IEvent.TenantId"/> to the wrong tenant
+    /// on a rebuild for someone else). The 4-arg explicit-interface override
+    /// above stays compiled in case any caller (or out-of-tree composite stage)
+    /// still routes through it.
+    /// </summary>
+    IEventLoader IEventStore<IDocumentOperations, IQuerySession>.BuildEventLoader(IEventDatabase database,
+        ILogger loggerFactory, EventFilterable filtering, AsyncOptions shardOptions, ShardName shardName)
+    {
+        var filters = buildEventLoaderFilters(filtering).ToArray();
+        var inner = new EventLoader(this, (MartenDatabase)database, shardOptions, filters,
+            filtering.IncludeArchivedEvents, shardName);
+        return new ResilientEventLoader(DaemonLoaderPipeline, inner, database);
+    }
+
+    private IEnumerable<ISqlFragment> buildEventLoaderFilters(EventFilterable filterable)
+    {
+        if (filterable.IncludedEventTypes.Any() && !filterable.IncludedEventTypes.Any(x => x.IsAbstract || x.IsInterface))
+        {
+            // We want to explicitly add in the archived event
+            var allTypes = filterable.IncludedEventTypes.Concat([typeof(Archived)]).ToArray();
+            if (filterable is IAggregateProjection aggregateProjection)
+            {
+                var compactedType = typeof(Compacted<>).MakeGenericType(aggregateProjection.AggregateType);
+                allTypes = allTypes.Concat([compactedType])
+                    .ToArray();
+            }
+
+            yield return new EventTypeFilter(Options.EventGraph, allTypes);
+
+
+        }
+
+        if (filterable.StreamType != null)
+        {
+            yield return new AggregateTypeFilter(filterable.StreamType, Options.EventGraph);
+        }
+
+        if (!filterable.IncludeArchivedEvents)
+        {
+            yield return IsNotArchivedFilter.Instance;
+        }
+
+        if (Options.EventGraph.EnableEventSkippingInProjectionsOrSubscriptions)
+        {
+            yield return IsNotSkippedFilter.Instance;
+        }
+    }
+
+    IDocumentOperations IEventStore<IDocumentOperations, IQuerySession>.OpenSession(IEventDatabase database)
+    {
+        return LightweightSession(SessionOptions.ForDatabase((IMartenDatabase)database));
+    }
+
+    IDocumentOperations IEventStore<IDocumentOperations, IQuerySession>.OpenSession(IEventDatabase database,
+        string tenantId)
+    {
+        return LightweightSession(SessionOptions.ForDatabase(tenantId, (IMartenDatabase)database));
+    }
+
+    ErrorHandlingOptions IEventStore<IDocumentOperations, IQuerySession>.ErrorHandlingOptions(ShardExecutionMode mode)
+    {
+        return mode == ShardExecutionMode.Rebuild ? Options.Projections.RebuildErrors : Options.Projections.Errors;
+    }
+
+    async Task ISubscriptionRunner<ISubscription>.ExecuteAsync(ISubscription subscription, IEventDatabase database, EventRange range, ShardExecutionMode mode,
+        CancellationToken token)
+    {
+        var db = (IMartenDatabase)database;
+        await using var parent = (DocumentSessionBase)OpenSession(SessionOptions.ForDatabase(db));
+
+        var batch = new ProjectionUpdateBatch(Options.Projections, parent, mode, token)            {
+            ShouldApplyListeners = mode == ShardExecutionMode.Continuous && range.Events.Any()
+        };;
+
+        // Mark the progression
+        await batch.Queue.PostAsync(range.BuildProgressionOperation(Events)).ConfigureAwait(false);
+
+        await using var session = new ProjectionDocumentSession(this, batch,
+            new SessionOptions
+            {
+                Tracking = DocumentTracking.IdentityOnly,
+                Tenant = new Tenant(StorageConstants.DefaultTenantId, db)
+            }, mode);
+
+
+        var listener = await subscription.ProcessEventsAsync(range, range.Agent, session, token)
+            .ConfigureAwait(false);
+
+        batch.Listeners.Add(listener);
+        await batch.WaitForCompletion().ConfigureAwait(false);
+
+        // Polly is already around the basic retry here, so anything that gets past this
+        // probably deserves a full circuit break
+        await session.ExecuteBatchAsync(batch, token).ConfigureAwait(false);
+    }
+
+    async Task<EventStoreUsage?> IEventStore.TryCreateUsage(CancellationToken token)
+    {
+        var usage = new EventStoreUsage(Subject, this)
+        {
+            Database = await Options.Tenancy.DescribeDatabasesAsync(token).ConfigureAwait(false)
+        };
+
+        // MaxEventSequence is a single-valued descriptor; in multi-database setups
+        // the per-database max isn't representable here, so leave it null.
+        if (Options.Tenancy.Cardinality == DatabaseCardinality.Single)
+        {
+            try
+            {
+                var defaultDb = (MartenDatabase)Options.Tenancy.Default.Database;
+                usage.MaxEventSequence = await defaultDb.FetchMaxEventSequenceAsync(token).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // Storage may not exist yet (no events table) — leave null.
+            }
+        }
+
+        Options.Projections.Describe(usage, this);
+
+        // JasperFx/ProductSupport#3 — surface the async-daemon error-handling
+        // policy on the wire so monitoring tools (CritterWatch) can render the
+        // right "shard halts on error" vs "view related dead letters" affordance.
+        // Normal-run + rebuild-mode are mirrored as separate descriptors because
+        // they carry independent ErrorHandlingOptions on the store.
+        usage.ProjectionErrors = new ProjectionErrorHandlingDescriptor
+        {
+            SkipApplyErrors = Options.Projections.Errors.SkipApplyErrors,
+            SkipUnknownEvents = Options.Projections.Errors.SkipUnknownEvents,
+            SkipSerializationErrors = Options.Projections.Errors.SkipSerializationErrors
+        };
+        usage.ProjectionRebuildErrors = new ProjectionErrorHandlingDescriptor
+        {
+            SkipApplyErrors = Options.Projections.RebuildErrors.SkipApplyErrors,
+            SkipUnknownEvents = Options.Projections.RebuildErrors.SkipUnknownEvents,
+            SkipSerializationErrors = Options.Projections.RebuildErrors.SkipSerializationErrors
+        };
+
+        // jasperfx#434 / marten#4710: surface the effective rebuild cap so monitoring tools
+        // (CritterWatch#309's rebuild dispatcher) can size their orchestration off the wire.
+        usage.MaxConcurrentRebuildsPerDatabase = ((IEventStore)this).MaxConcurrentRebuildsPerDatabase;
+
+        foreach (var eventMapping in Options.EventGraph.AllEvents())
+        {
+            var descriptor =
+                new EventDescriptor(eventMapping.EventTypeName, TypeDescriptor.For(eventMapping.DocumentType));
+
+            usage.Events.Add(descriptor);
+        }
+
+        // DCB tag-type registrations — flatten ITagTypeRegistration onto the
+        // wire-friendly TagTypeDescriptor (4 strings; configuration shape only,
+        // no row counts).
+        foreach (var registration in Options.EventGraph.TagTypes)
+        {
+            usage.TagTypes.Add(new TagTypeDescriptor
+            {
+                TagType = registration.TagType.FullName ?? registration.TagType.Name,
+                SimpleType = registration.SimpleType.FullName ?? registration.SimpleType.Name,
+                TableSuffix = registration.TableSuffix,
+                AggregateType = registration.AggregateType?.FullName,
+            });
+
+            // Richer descriptor used by the event store explorer's tag-list view —
+            // carries the strong TypeDescriptor and an operator-facing description
+            // (currently null until Marten exposes a description on the registration).
+            usage.DcbTagTypes.Add(new DcbTagDescriptor(
+                registration.TagType.Name,
+                registration.SimpleType.FullName ?? registration.SimpleType.Name,
+                TypeDescriptor.For(registration.TagType),
+                Description: null));
+        }
+
+        // Configured event-type registrations — surface every event alias the store
+        // knows about so the explorer can render the registered event surface.
+        foreach (var eventMapping in Options.EventGraph.AllEvents())
+        {
+            usage.RegisteredEventTypes.Add(new EventTypeDescriptor(
+                TypeDescriptor.For(eventMapping.DocumentType),
+                eventMapping.EventTypeName,
+                Description: null));
+        }
+
+        // Aggregates that live outside the multi-tenant boundary in tenanted
+        // setups — flat list of CLR type identities.
+        foreach (var aggregateType in Options.EventGraph.GlobalAggregates)
+        {
+            usage.GlobalAggregates.Add(TypeDescriptor.For(aggregateType));
+        }
+
+        // jasperfx#475 — advertise WHICH event/stream metadata this store captures
+        // so store-aware consumers (CritterWatch) can gate query facets by what is
+        // actually persisted, rather than sniffing Marten's MetadataConfig directly.
+        // The event flags are opt-in columns and map straight off MetadataConfig.
+        // The stream flags are universal in Marten (mt_streams always exposes the
+        // aggregate-type / version / created+updated / tenant / archived columns),
+        // so they keep the EventMetadataCapabilities defaults of true.
+        var metadata = Options.EventGraph.MetadataConfig;
+        usage.EventMetadata = new EventMetadataCapabilities
+        {
+            StoreType = "Marten",
+            CorrelationId = metadata.CorrelationIdEnabled,
+            CausationId = metadata.CausationIdEnabled,
+            Headers = metadata.HeadersEnabled,
+            UserName = metadata.UserNameEnabled
+        };
+
+        return usage;
+    }
+
+    /// <summary>
+    ///     Identifies this STORE, not the database behind it — see <c>Marten.Internal.StoreSubject</c>.
+    /// </summary>
+    /// <remarks>
+    ///     Set from <c>StoreOptions.StoreName</c> in the constructor (#5409), and overwritten for an
+    ///     ancillary store by <c>SecondaryStoreConfig.Build</c>, which resolves the marker type instead.
+    ///     The initializer is the fallback for a store built by something that bypasses the constructor.
+    /// </remarks>
+    public Uri Subject { get; internal set; } = Internal.StoreSubject.For(StoreOptions.DefaultStoreName);
+
+    IReadOnlyEventStore IEventStore.OpenReadOnlyEventStore()
+    {
+        var session = QuerySession();
+        return (IReadOnlyEventStore)session.Events;
+    }
+
+    /// <summary>
+    ///     jasperfx#885 / marten#5513. Until this overload existed the read-only event store tier could
+    ///     only ever be opened on the DEFAULT session, so on a store with
+    ///     <c>Advanced.DefaultTenantUsageEnabled = false</c> — the automatic state once database-per-tenant
+    ///     tenancy is configured — the whole surface was unreachable: the session is refused before any
+    ///     tenant scope is applied, which is why <c>QueryStreamStates(tenantId)</c>'s own parameter could
+    ///     not work around it and the stream-compaction policy selector could not select streams at all.
+    /// </summary>
+    /// <remarks>
+    ///     The returned reader is bound to a tenant-scoped session, so its tenant-LESS members
+    ///     (<c>FetchStreamAsync</c>, <c>FetchStreamStateAsync</c>) answer within that tenant, which is the
+    ///     contract JasperFx states for this overload. Tenant id casing runs through
+    ///     <c>TenantIdStyle.MaybeCorrectTenantId</c> exactly as every other <c>QuerySession(tenantId)</c>
+    ///     call does. A null tenant keeps today's store-global behavior.
+    /// </remarks>
+    IReadOnlyEventStore IEventStore.OpenReadOnlyEventStore(string? tenantId)
+    {
+        // Mirrors the tenant-less overload in holding the session alive behind the returned reader —
+        // IReadOnlyEventStore exposes no disposal, so the session's lifetime is the reader's either way.
+        var session = tenantId == null ? QuerySession() : QuerySession(tenantId);
+        return (IReadOnlyEventStore)session.Events;
+    }
+
+    // #5153 lifted both CompactStreamAsync<T> overloads off Marten.Events.IEventStoreOperations and
+    // onto JasperFx.Events.IEventStoreOperations, which left the reflective lookup here resolving to
+    // null on every call. Type.GetMethod does not walk an interface's base interfaces, and its
+    // closed-parameter-signature overload cannot match an open generic method definition either, so
+    // aiming at the moved interface would still have returned null. Reflecting at a private generic
+    // helper instead keeps the resolved signature one Marten owns, and leaves the SaveChangesAsync
+    // and the token that the session level overload expects from its caller in compiled code.
+    private static readonly Lazy<MethodInfo> _compactByStreamId = new(() =>
+        typeof(DocumentStore).RequireMethod(nameof(compactStreamAsync), BindingFlags.NonPublic | BindingFlags.Static));
+
+    private static readonly Lazy<MethodInfo> _compactByStreamKey = new(() =>
+        typeof(DocumentStore).RequireMethod(nameof(compactStreamByKeyAsync), BindingFlags.NonPublic | BindingFlags.Static));
+
+    private static async Task compactStreamAsync<T>(IDocumentSession session, Guid streamId, CancellationToken token)
+        where T : class
+    {
+        await session.Events.CompactStreamAsync<T>(streamId, x => x.CancellationToken = token).ConfigureAwait(false);
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    private static async Task compactStreamByKeyAsync<T>(IDocumentSession session, string streamKey,
+        CancellationToken token) where T : class
+    {
+        await session.Events.CompactStreamAsync<T>(streamKey, x => x.CancellationToken = token).ConfigureAwait(false);
+        await session.SaveChangesAsync(token).ConfigureAwait(false);
+    }
+
+    Task IEventStore.CompactStreamAsync(Guid streamId, CancellationToken token)
+        => compactUntypedAsync(streamId, null, token);
+
+    Task IEventStore.CompactStreamAsync(string streamKey, CancellationToken token)
+        => compactUntypedAsync(streamKey, null, token);
+
+    /// <summary>
+    ///     jasperfx#910 — the untyped compaction run in one tenant's scope: the stream-state read and the
+    ///     compaction both run on a session opened for <paramref name="tenantId" />.
+    /// </summary>
+    /// <remarks>
+    ///     The action-side twin of <c>OpenReadOnlyEventStore(tenantId)</c> (marten#5513). A compaction
+    ///     policy selects a tenant's streams through that reader; the tenant-less overload then opened the
+    ///     DEFAULT session, which a store with <c>DefaultTenantUsageEnabled = false</c> refuses outright,
+    ///     and which on any conjoined store reads stream state where that tenant's stream is not. Tenant id
+    ///     casing runs through <c>TenantIdStyle</c> exactly as every other <c>LightweightSession(tenantId)</c>
+    ///     call does; a null tenant keeps today's store-global behavior.
+    /// </remarks>
+    Task IEventStore.CompactStreamAsync(Guid streamId, string? tenantId, CancellationToken token)
+        => compactUntypedAsync(streamId, tenantId, token);
+
+    /// <inheritdoc cref="IEventStore.CompactStreamAsync(Guid, string?, CancellationToken)" />
+    Task IEventStore.CompactStreamAsync(string streamKey, string? tenantId, CancellationToken token)
+        => compactUntypedAsync(streamKey, tenantId, token);
+
+    private async Task compactUntypedAsync(Guid streamId, string? tenantId, CancellationToken token)
+    {
+        await using var session = tenantId == null ? LightweightSession() : LightweightSession(tenantId);
+
+        // Assert the identity BEFORE looking the stream up, because FetchStreamStateAsync does not
+        // guard on StreamIdentity itself and neither pre-existing outcome named the actual mistake:
+        // the string overload on a Guid store matched nothing and fell into the "stream not found"
+        // guard below (a misdiagnosis — the stream is there, just identified the other way), while
+        // this Guid overload on a string store reached Npgsql with a null parameter and surfaced
+        // "Parameter '' cannot be null, DBNull.Value should be used instead."
+        Options.EventGraph.EnsureAsGuidStorage((IMartenSession)session);
+
+        var state = await session.Events.FetchStreamStateAsync(streamId, token).ConfigureAwait(false);
+        if (state?.AggregateType == null)
+        {
+            throw new InvalidOperationException(
+                $"Cannot compact stream {streamId}: stream not found or no aggregate type associated.");
+        }
+
+        var genericMethod = _compactByStreamId.Value.MakeGenericMethod(state.AggregateType);
+        await ((Task)genericMethod.Invoke(null, [session, streamId, token])!).ConfigureAwait(false);
+    }
+
+    private async Task compactUntypedAsync(string streamKey, string? tenantId, CancellationToken token)
+    {
+        await using var session = tenantId == null ? LightweightSession() : LightweightSession(tenantId);
+
+        // See the Guid overload above.
+        Options.EventGraph.EnsureAsStringStorage((IMartenSession)session);
+
+        var state = await session.Events.FetchStreamStateAsync(streamKey, token).ConfigureAwait(false);
+        if (state?.AggregateType == null)
+        {
+            throw new InvalidOperationException(
+                $"Cannot compact stream '{streamKey}': stream not found or no aggregate type associated.");
+        }
+
+        var genericMethod = _compactByStreamKey.Value.MakeGenericMethod(state.AggregateType);
+        await ((Task)genericMethod.Invoke(null, [session, streamKey, token])!).ConfigureAwait(false);
+    }
+}

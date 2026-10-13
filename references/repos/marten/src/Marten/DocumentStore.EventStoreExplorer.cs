@@ -1,0 +1,1428 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using JasperFx.Events;
+using JasperFx.Events.Aggregation;
+using JasperFx.Events.Projections;
+using JasperFx.Events.Tags;
+using JasperFx.MultiTenancy;
+using Marten.Events;
+using Marten.Events.Projections;
+using Marten.Internal.Sessions;
+using Marten.Services;
+using Marten.Storage;
+using Npgsql;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten;
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2060",
+    Justification = "Class-level: Expression.Call(Type, string, ...) on framework Queryable / Enumerable intrinsics that the trimmer preserves.")]
+[UnconditionalSuppressMessage("Trimming", "IL2067",
+    Justification = "Class-level: parameter receives a DAM-annotated Type from a reflective lookup whose source type is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070",
+    Justification = "Class-level: reflects PublicMethods/PublicProperties on a Type whose runtime instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public partial class DocumentStore
+{
+    /// <summary>
+    /// Hard cap on the count <see cref="GetRecentStreamsAsync"/> will honour, regardless
+    /// of the value the caller passes in. Bounds the explorer's stream-list view at a
+    /// page size that any single Postgres index scan can satisfy without surprise cost.
+    /// </summary>
+    private const int RecentStreamsCap = 1000;
+
+    /// <summary>
+    /// marten#5383 — whether a tenant-scoped explorer read has to filter rows by <c>tenant_id</c>, as
+    /// against merely opening the right database.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// These are <b>two independent axes</b>, and the explorer used to decide both from one:
+    /// <see cref="DatabaseCardinality"/> answers <i>which database do I open</i>, and the event
+    /// <see cref="TenancyStyle"/> answers <i>do I filter rows once I am there</i>. Deciding the second
+    /// from the first is right for the two configurations that were in mind when it was written —
+    /// conjoined single-database (filter, one database) and database-per-tenant (no filter, many
+    /// databases) — and wrong for the one that needs both.
+    /// </para>
+    /// <para>
+    /// <b>Sharded tenancy is that one.</b> It distributes tenants across a POOL of databases with
+    /// conjoined events, so many tenants share each database: opening the tenant's database narrows
+    /// the answer to its shard and no further. Reproduced before this was changed, in
+    /// <c>sharded_explorer_tenant_scoping_5383</c>: two tenants co-located on one shard, and
+    /// <c>GetRecentStreamsAsync(50, "alpha")</c> listed beta's stream, while
+    /// <c>ReadStreamAsync(id, "alpha")</c> returned <c>["alpha", "beta"]</c> events interleaved into a
+    /// single version-ordered sequence for a stream key both tenants use — which is worse than a leak,
+    /// because it is a coherent-looking document that never existed.
+    /// </para>
+    /// <para>
+    /// Filtering whenever events are conjoined is safe on every other layout: on a database-per-tenant
+    /// store with conjoined events every row in the opened database already carries that tenant id, so
+    /// the predicate is redundant rather than wrong, and on a non-conjoined store there is no
+    /// <c>tenant_id</c> to scope by in the first place.
+    /// </para>
+    /// </remarks>
+    private bool eventsAreConjoined => Options.Events.TenancyStyle == TenancyStyle.Conjoined;
+
+    private static readonly JsonSerializerOptions ExplorerJson = new()
+    {
+        PropertyNamingPolicy = null
+    };
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Returns the most recently updated streams across every tenant, ordered by the
+    /// stream's <c>timestamp</c> column (last append) descending. Hard-capped at
+    /// <see cref="RecentStreamsCap"/> regardless of the requested count to keep the
+    /// explorer's stream-list view bounded. Archived streams are included.
+    /// </remarks>
+    Task<IReadOnlyList<StreamSummary>> IEventStore.GetRecentStreamsAsync(int count, CancellationToken ct)
+        => ((IEventStore)this).GetRecentStreamsAsync(count, null, ct);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #782 / jasperfx#503 — tenant-scoped recent-streams listing, mirroring the two tenancy
+    /// models <see cref="IEventStore.GetProjectionStatusesAsync(string?,CancellationToken)"/>
+    /// distinguishes (jasperfx#502):
+    /// <list type="bullet">
+    /// <item><b>Single database</b> (conjoined tenancy): the tenant is co-located in the one
+    /// database, so the listing is bounded by a <c>tenant_id</c> predicate on the same
+    /// <c>AllowAnyTenant</c> explorer session.</item>
+    /// <item><b>Database-per-tenant</b>: the argument names a physical database, so the session is
+    /// opened against that tenant's own database.</item>
+    /// <item><b>Sharded</b>: BOTH — the tenant's database is opened <em>and</em> the
+    /// <c>tenant_id</c> predicate applies, because a shard holds many tenants (marten#5383). The
+    /// premise this list used to carry — "no tenant_id filter is needed, every stream in that
+    /// database already belongs to the tenant" — is true of database-per-tenant and false here.</item>
+    /// </list>
+    /// A null <paramref name="tenantId"/> preserves the store-global (across every tenant) listing.
+    /// </remarks>
+    async Task<IReadOnlyList<StreamSummary>> IEventStore.GetRecentStreamsAsync(int count, string? tenantId, CancellationToken ct)
+    {
+        // #5383 part 3 — a store-global listing on a multi-database store used to answer from whichever
+        // database the default session resolved, which is indistinguishable from a complete answer. A
+        // listing HAS a well-defined union, so it fans out and merges rather than refusing.
+        if (tenantId == null && Options.Tenancy.Cardinality != DatabaseCardinality.Single)
+        {
+            return await recentStreamsAcrossDatabasesAsync(count, ct).ConfigureAwait(false);
+        }
+
+        return await recentStreamsAsync(null, count, tenantId, ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #5383 / jasperfx#810 — the listing from ONE database, so a tool can enumerate
+    /// <c>AllDatabases()</c> and attribute every row to the database it came from.
+    /// </remarks>
+    Task<IReadOnlyList<StreamSummary>> IEventStore.GetRecentStreamsAsync(
+        IEventDatabase database, int count, string? tenantId, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        return recentStreamsAsync(database, count, tenantId, ct);
+    }
+
+    /// <summary>
+    /// #5383 part 3 — every database's most recent streams, merged newest-first and capped.
+    /// </summary>
+    /// <remarks>
+    /// Exact rather than approximate: each database is asked for the same <paramref name="count"/> and
+    /// the merge keeps the newest of the union, so no database can hide a stream newer than one this
+    /// returns. The cost is one query per database, which is the honest price of the question — the
+    /// alternative that was here before cost one query and answered for one database.
+    /// </remarks>
+    private async Task<IReadOnlyList<StreamSummary>> recentStreamsAcrossDatabasesAsync(int count, CancellationToken ct)
+    {
+        var limit = Math.Clamp(count, 0, RecentStreamsCap);
+        if (limit == 0) return Array.Empty<StreamSummary>();
+
+        // IMartenDatabase does not itself extend IEventDatabase — only the concrete MartenDatabase does
+        // (#4570) — so this projects the same way IEventStore.AllDatabases() does, and a tool that
+        // enumerated AllDatabases() sees exactly the set this merged.
+        var merged = new List<StreamSummary>();
+        foreach (var database in (await Tenancy.BuildDatabases().ConfigureAwait(false)).OfType<IEventDatabase>())
+        {
+            merged.AddRange(await recentStreamsAsync(database, limit, null, ct).ConfigureAwait(false));
+        }
+
+        return merged
+            .OrderByDescending(x => x.LastUpdatedAt)
+            .Take(limit)
+            .ToList();
+    }
+
+    private async Task<IReadOnlyList<StreamSummary>> recentStreamsAsync(
+        IEventDatabase? database, int count, string? tenantId, CancellationToken ct)
+    {
+        var limit = Math.Clamp(count, 0, RecentStreamsCap);
+        if (limit == 0) return Array.Empty<StreamSummary>();
+
+        var scopeByColumn = tenantId != null && eventsAreConjoined;
+
+        await using var session = await openExplorerSessionAsync(database, tenantId).ConfigureAwait(false);
+        await session.Database.EnsureStorageExistsAsync(typeof(IEvent), ct).ConfigureAwait(false);
+
+        // The leading six columns deliberately mirror IEventStorage.StreamStateSelectSql
+        // (#4359) so readStreamRowAsync below can read them with the same column
+        // ordering the codegen path uses for FetchStreamStateAsync. The
+        // event_storage_stream_state_selector test (added in #4359) enforces the column
+        // list against the selector's Resolve method; this site's matching SELECT is
+        // verified by the explorer tests in EventSourcingTests/Explorer.
+        var schema = Options.EventGraph.DatabaseSchemaName;
+        var tenantFilter = scopeByColumn ? "where tenant_id = @tenant_id " : "";
+        var cmd = new NpgsqlCommand(
+            $"select id, version, type, timestamp, created, is_archived, tenant_id from {schema}.mt_streams " +
+            $"{tenantFilter}order by timestamp desc limit @limit");
+        cmd.Parameters.AddWithValue("limit", limit);
+        if (scopeByColumn) cmd.Parameters.AddWithValue("tenant_id", tenantId!);
+
+        var summaries = new List<StreamSummary>(limit);
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            var row = await readStreamRowAsync(reader, ct).ConfigureAwait(false);
+            var tenant = await reader.IsDBNullAsync(StreamStateColumnCount, ct).ConfigureAwait(false)
+                ? null
+                : reader.GetString(StreamStateColumnCount);
+
+            summaries.Add(new StreamSummary(row.StreamId, row.StreamType, row.Version, row.Created, row.LastUpdated, tenant));
+        }
+
+        return summaries;
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Streams the events of a single stream from oldest to newest as raw JSON, suitable
+    /// for the explorer's stream-detail timeline view. The body and metadata are returned
+    /// as untyped <see cref="JsonElement"/> instances so the descriptor stays untyped at
+    /// the JasperFx layer; tag data is intentionally <see langword="null"/> here because
+    /// the per-event tag join would multiply the row cost — explorers that need tags
+    /// should use <c>QueryByTagsAsync</c>.
+    /// </remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.ReadStreamAsync(string streamId, CancellationToken ct)
+        => ((IEventStore)this).ReadStreamAsync(streamId, null, ct);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #782 / jasperfx#503 — tenant-scoped stream read. On a conjoined multi-tenant store the
+    /// same stream id can exist under two tenants; the tenant-less overload reads across every
+    /// tenant and returns their ambiguous union. This overload isolates a single tenant, using
+    /// the same two-model scoping as
+    /// <see cref="IEventStore.GetProjectionStatusesAsync(string?,CancellationToken)"/>
+    /// (jasperfx#502): a <c>tenant_id</c> predicate for a tenant co-located in one database, or
+    /// the tenant's own database session for a database-per-tenant / sharded store. Null preserves
+    /// the store-global read.
+    /// </remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.ReadStreamAsync(
+        string streamId, string? tenantId, CancellationToken ct)
+    {
+        // #5383 part 3 — a single-stream read has ONE answer, and a stream id is unique within a
+        // database rather than across them, so there is no union to take. Refuse instead of answering
+        // from whichever database the default session resolved.
+        if (tenantId == null && Options.Tenancy.Cardinality != DatabaseCardinality.Single)
+        {
+            throw storeGlobalReadNotSupported(nameof(IEventStore.ReadStreamAsync));
+        }
+
+        return readStreamAsync(null, streamId, tenantId, ct);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>#5383 / jasperfx#810 — one stream, read from the database the caller names.</remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.ReadStreamAsync(
+        IEventDatabase database, string streamId, string? tenantId, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        return readStreamAsync(database, streamId, tenantId, ct);
+    }
+
+    private async IAsyncEnumerable<EventRecord> readStreamAsync(
+        IEventDatabase? database, string streamId, string? tenantId, [EnumeratorCancellation] CancellationToken ct)
+    {
+        var scopeByColumn = tenantId != null && eventsAreConjoined;
+
+        var schema = Options.EventGraph.DatabaseSchemaName;
+        var tenantFilter = scopeByColumn ? " and tenant_id = @tenant_id" : "";
+        var sql =
+            $"select id, seq_id, version, stream_id, type, data, timestamp, tenant_id " +
+            $"from {schema}.mt_events " +
+            $"where stream_id = @stream_id{tenantFilter} " +
+            $"order by version asc";
+
+        await using var session = await openExplorerSessionAsync(database, tenantId).ConfigureAwait(false);
+        await session.Database.EnsureStorageExistsAsync(typeof(IEvent), ct).ConfigureAwait(false);
+
+        var cmd = new NpgsqlCommand(sql);
+        cmd.Parameters.AddWithValue("stream_id", parseStreamId(streamId));
+        if (scopeByColumn) cmd.Parameters.AddWithValue("tenant_id", tenantId!);
+
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            yield return await readEventRecordAsync(reader, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Returns full diagnostic metadata for a single stream — version, timestamps,
+    /// archive flag, tenant. <see cref="StreamMetadata.SnapshotVersion"/> and
+    /// <see cref="StreamMetadata.LastSnapshotAt"/> are always <see langword="null"/> on
+    /// Marten 9.0+ because <c>mt_streams</c> no longer carries snapshot-version columns
+    /// (#4316). The Tags map is empty because Marten stores tags per-event rather than
+    /// per-stream; future work could surface the union of tags applied to the stream's
+    /// events. Returns <see langword="null"/> when no row exists for the requested id.
+    /// </remarks>
+    Task<StreamMetadata?> IEventStore.GetStreamMetadataAsync(string streamId, CancellationToken ct)
+    {
+        // #5383 part 3 — one answer, and a stream id is unique within a database rather than across
+        // them. Refuse rather than answer from whichever database the default session resolved.
+        if (Options.Tenancy.Cardinality != DatabaseCardinality.Single)
+        {
+            throw storeGlobalReadNotSupported(nameof(IEventStore.GetStreamMetadataAsync));
+        }
+
+        return streamMetadataAsync(null, streamId, null, ct);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #5383 part 4 — the tenant-scoped read this sibling never had.
+    /// <para>
+    /// 🩸 It also closes a defect of its own: the SQL was <c>where id = @stream_id limit 1</c> with no
+    /// tenant predicate, and under conjoined tenancy <c>mt_streams</c> holds one row per
+    /// <c>(tenant_id, id)</c> — so a store where two tenants share a stream id returned whichever row
+    /// the scan reached first, with nothing saying which tenant it belonged to. Polecat fixed the same
+    /// thing outright in polecat#593.
+    /// </para>
+    /// </remarks>
+    Task<StreamMetadata?> IEventStore.GetStreamMetadataAsync(string streamId, string? tenantId, CancellationToken ct)
+    {
+        if (tenantId == null && Options.Tenancy.Cardinality != DatabaseCardinality.Single)
+        {
+            throw storeGlobalReadNotSupported(nameof(IEventStore.GetStreamMetadataAsync));
+        }
+
+        return streamMetadataAsync(null, streamId, tenantId, ct);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>#5383 / jasperfx#810 — one stream's metadata, from the database the caller names.</remarks>
+    Task<StreamMetadata?> IEventStore.GetStreamMetadataAsync(
+        IEventDatabase database, string streamId, string? tenantId, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        return streamMetadataAsync(database, streamId, tenantId, ct);
+    }
+
+    private async Task<StreamMetadata?> streamMetadataAsync(
+        IEventDatabase? database, string streamId, string? tenantId, CancellationToken ct)
+    {
+        var scopeByColumn = tenantId != null && eventsAreConjoined;
+
+        await using var session = await openExplorerSessionAsync(database, tenantId).ConfigureAwait(false);
+        await session.Database.EnsureStorageExistsAsync(typeof(IEvent), ct).ConfigureAwait(false);
+
+        // Same shared-column-ordering story as GetRecentStreamsAsync — the leading
+        // six columns match IEventStorage.StreamStateSelectSql (#4359). The trailing
+        // ordinals are addressed off StreamStateColumnCount so any future change to
+        // the shared selector's column count surfaces here as a single update site.
+        var schema = Options.EventGraph.DatabaseSchemaName;
+        var tenantFilter = scopeByColumn ? " and tenant_id = @tenant_id" : "";
+        var cmd = new NpgsqlCommand(
+            $"select id, version, type, timestamp, created, is_archived, tenant_id from {schema}.mt_streams " +
+            $"where id = @stream_id{tenantFilter} limit 1");
+        cmd.Parameters.AddWithValue("stream_id", parseStreamId(streamId));
+        if (scopeByColumn) cmd.Parameters.AddWithValue("tenant_id", tenantId!);
+
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        if (!await reader.ReadAsync(ct).ConfigureAwait(false)) return null;
+
+        var row = await readStreamRowAsync(reader, ct).ConfigureAwait(false);
+        var rowTenantId = await reader.IsDBNullAsync(StreamStateColumnCount, ct).ConfigureAwait(false)
+            ? null
+            : reader.GetString(StreamStateColumnCount);
+
+        return new StreamMetadata(
+            row.StreamId,
+            row.StreamType,
+            row.Version,
+            row.Created,
+            row.LastUpdated,
+            // LastSnapshotAt / LastSnapshotVersion are null under Marten 9.0+ —
+            // the mt_streams snapshot columns were dropped in #4316 as vestigial.
+            LastSnapshotAt: null,
+            LastSnapshotVersion: null,
+            row.IsArchived,
+            rowTenantId,
+            new Dictionary<string, string>(0));
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Streams events whose tag set matches every entry in <paramref name="tags"/> (AND
+    /// semantics across keys). Each key is the tag-type's CLR short name (e.g.
+    /// <c>"StudentId"</c>) — looked up against <see cref="EventGraph.TagTypes"/>. Values
+    /// are compared as text against the <c>value</c> column of each tag table; this is
+    /// permissive (works for string, Guid, integer tag inner types) at the cost of always
+    /// going through Postgres' text cast. Throws <see cref="ArgumentException"/> when a
+    /// tag name is not registered.
+    /// </remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.QueryByTagsAsync(
+        IReadOnlyDictionary<string, string> tags,
+        CancellationToken ct)
+        => ((IEventStore)this).QueryByTagsAsync(tags, null, ct);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #5021 / jasperfx#555 — tenant-scoped DCB tag query, companion to the jasperfx#503 stream reads.
+    /// On a conjoined multi-tenant store the same tag value can be attached to events living under two
+    /// tenants, so the tenant-less overload resolves an ambiguous cross-tenant union. This overload
+    /// isolates a single tenant using the same two-model scoping as
+    /// <see cref="IEventStore.ReadStreamAsync(string,string?,CancellationToken)"/> and
+    /// <see cref="IEventStore.GetProjectionStatusesAsync(string?,CancellationToken)"/> (jasperfx#502):
+    /// <list type="bullet">
+    /// <item><b>Single database</b> (conjoined tenancy): the tenant is co-located in the one database,
+    /// so the outer <c>mt_events</c> scan is bounded by an <c>e.tenant_id</c> predicate on the same
+    /// <c>AllowAnyTenant</c> explorer session. The tag sub-selects need no tenant filter — they match by
+    /// the globally-unique <c>seq_id</c>, and the outer predicate discards any matched seq_id belonging
+    /// to another tenant.</item>
+    /// <item><b>Database-per-tenant / sharded</b>: the argument names a physical database, so the session
+    /// is opened against that tenant's own database and no <c>tenant_id</c> filter is needed.</item>
+    /// </list>
+    /// A null <paramref name="tenantId"/> preserves the store-global (across every tenant) query.
+    /// </remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.QueryByTagsAsync(
+        IReadOnlyDictionary<string, string> tags,
+        string? tenantId,
+        CancellationToken ct)
+    {
+        if (tags == null) throw new ArgumentNullException(nameof(tags));
+
+        // #5383 part 3 — a tag query is a LISTING, so a union across databases is well defined and it
+        // fans out rather than refusing, the same call the recent-streams listing makes.
+        return tenantId == null && Options.Tenancy.Cardinality != DatabaseCardinality.Single
+            ? queryByTagsAcrossDatabasesAsync(tags, ct)
+            : queryByTagsAsync(null, tags, tenantId, ct);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>#5383 / jasperfx#810 — the tag query against one named database.</remarks>
+    IAsyncEnumerable<EventRecord> IEventStore.QueryByTagsAsync(
+        IEventDatabase database,
+        IReadOnlyDictionary<string, string> tags,
+        string? tenantId,
+        CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        if (tags == null) throw new ArgumentNullException(nameof(tags));
+
+        return queryByTagsAsync(database, tags, tenantId, ct);
+    }
+
+    private async IAsyncEnumerable<EventRecord> queryByTagsAcrossDatabasesAsync(
+        IReadOnlyDictionary<string, string> tags, [EnumeratorCancellation] CancellationToken ct)
+    {
+        foreach (var database in (await Tenancy.BuildDatabases().ConfigureAwait(false)).OfType<IEventDatabase>())
+        {
+            await foreach (var record in queryByTagsAsync(database, tags, null, ct).WithCancellation(ct).ConfigureAwait(false))
+            {
+                yield return record;
+            }
+        }
+    }
+
+    private async IAsyncEnumerable<EventRecord> queryByTagsAsync(
+        IEventDatabase? database,
+        IReadOnlyDictionary<string, string> tags,
+        string? tenantId,
+        [EnumeratorCancellation] CancellationToken ct)
+    {
+        var scopeByColumn = tenantId != null && eventsAreConjoined;
+
+        await using var session = await openExplorerSessionAsync(database, tenantId).ConfigureAwait(false);
+        await session.Database.EnsureStorageExistsAsync(typeof(IEvent), ct).ConfigureAwait(false);
+
+        if (tags.Count == 0) yield break;
+
+        var schema = Options.EventGraph.DatabaseSchemaName;
+        var registered = Options.EventGraph.TagTypes;
+
+        var subqueries = new List<string>(tags.Count);
+        var parameters = new List<NpgsqlParameter>(tags.Count);
+        var idx = 0;
+        foreach (var (tagName, tagValue) in tags)
+        {
+            // #5365 / jasperfx#801: name resolution and value comparison are contract, not local
+            // choices, so both go through the shared matcher. This path used to match the CLR type
+            // name ONLY and compare the value case-sensitively, while Polecat accepted either
+            // spelling and compared case-insensitively — so the same dictionary answered differently
+            // per store, and a caller holding a store descriptor had no way to discover which
+            // spelling to send. It went unnoticed because this overload has no compliance coverage;
+            // EventQuery.TagValues, which does, now shares the same two rules.
+            var registration = registered.RequireByTagName(tagName, nameof(tags));
+
+            var tagTable = $"{schema}.mt_event_tag_{registration.TableSuffix}";
+            var paramName = $"@tag_value_{idx}";
+
+            // Both sides lowered: Postgres renders a Guid lowercase through ::text and SQL Server
+            // renders it uppercase, so an operator's copy-pasted id must not depend on which store
+            // answered. Lowering rather than ILIKE, which would treat _ and % in a tag value as
+            // wildcards.
+            subqueries.Add($"e.seq_id in (select seq_id from {tagTable} where lower(value::text) = {paramName})");
+            parameters.Add(new NpgsqlParameter($"tag_value_{idx}", tagValue.ToLowerInvariant()));
+            idx++;
+        }
+
+        var tenantFilter = scopeByColumn ? " and e.tenant_id = @tenant_id" : "";
+        var sql =
+            $"select e.id, e.seq_id, e.version, e.stream_id, e.type, e.data, e.timestamp, e.tenant_id " +
+            $"from {schema}.mt_events e " +
+            $"where {subqueries.Join(" and ")}{tenantFilter} " +
+            $"order by e.seq_id asc";
+
+        var cmd = new NpgsqlCommand(sql);
+        foreach (var p in parameters) cmd.Parameters.Add(p);
+        if (scopeByColumn) cmd.Parameters.AddWithValue("tenant_id", tenantId!);
+
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            yield return await readEventRecordAsync(reader, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Looks up the named projection on <see cref="StoreOptions.Projections"/>, runs the
+    /// tag-matched events through it via Marten's aggregator infrastructure, and returns
+    /// the projected state serialized as JSON. Returns <see langword="null"/> when the
+    /// projection is not registered or no events match the tag set.
+    /// </remarks>
+    async Task<DcbProjectedState?> IEventStore.GetProjectedStateForTagsAsync(
+        string projectionName,
+        IReadOnlyDictionary<string, string> tags,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrEmpty(projectionName)) throw new ArgumentNullException(nameof(projectionName));
+
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(projectionName));
+        if (source is not IAggregateProjection aggregate) return null;
+
+        var events = new List<EventRecord>();
+        await foreach (var ev in ((IEventStore)this).QueryByTagsAsync(tags, ct).ConfigureAwait(false))
+        {
+            events.Add(ev);
+        }
+        if (events.Count == 0) return null;
+
+        var aggregateType = aggregate.AggregateType;
+        var (state, _) = await replayAggregatorAsync(aggregateType, startingState: null, events, ct).ConfigureAwait(false);
+        if (state == null) return null;
+
+        var stateJson = JsonSerializer.SerializeToElement(state, aggregateType, ExplorerJson);
+        return new DcbProjectedState(projectionName, events[^1].Sequence, stateJson, events.Count);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Rehydrates an aggregate to a specific stream version using Marten's existing
+    /// <c>AggregateStreamAsync</c> API. Identity may be a <see cref="Guid"/>, a string
+    /// stream key, or a strongly-typed identifier — the override dispatches on
+    /// <see cref="EventGraph.StreamIdentity"/>.
+    /// </remarks>
+    async Task<AggregateAtVersion<TAggregate>> IEventStore.RehydrateAtVersionAsync<TAggregate>(
+        object identity, long version, CancellationToken ct) where TAggregate : class
+    {
+        await using var session = QuerySession();
+        TAggregate? state;
+        if (Options.EventGraph.StreamIdentity == StreamIdentity.AsGuid)
+        {
+            var streamId = identity is Guid g ? g : Guid.Parse(identity.ToString()!);
+            state = await session.Events.AggregateStreamAsync<TAggregate>(streamId, version, token: ct).ConfigureAwait(false);
+        }
+        else
+        {
+            var streamKey = identity.ToString()!;
+            state = await session.Events.AggregateStreamAsync<TAggregate>(streamKey, version, token: ct).ConfigureAwait(false);
+        }
+
+        return new AggregateAtVersion<TAggregate>(state, version, version);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Looks up the projection by aggregate-type name (matches CLR <see cref="Type.FullName"/>
+    /// or short <see cref="Type.Name"/>), dispatches to the strong-typed rehydration path
+    /// via reflection, and returns the result as JSON so consumers don't need the
+    /// aggregate's CLR type. Returns <see langword="null"/> when no matching aggregate
+    /// type is registered.
+    /// </remarks>
+    async Task<AggregateAtVersion?> IEventStore.RehydrateAtVersionByNameAsync(
+        string aggregateTypeName, object identity, long version, CancellationToken ct)
+    {
+        if (string.IsNullOrEmpty(aggregateTypeName)) throw new ArgumentNullException(nameof(aggregateTypeName));
+
+        var aggregateType = findAggregateTypeByName(aggregateTypeName);
+        if (aggregateType == null) return null;
+
+        await using var session = QuerySession();
+        var aggregate = await invokeAggregateStreamAsync(aggregateType, session, identity, version, ct).ConfigureAwait(false);
+        if (aggregate == null)
+        {
+            return new AggregateAtVersion(aggregateType.FullNameInCode(), default, version, 0);
+        }
+
+        var stateJson = JsonSerializer.SerializeToElement(aggregate, aggregateType, ExplorerJson);
+        return new AggregateAtVersion(aggregateType.FullNameInCode(), stateJson, version, version);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Builds a per-projection snapshot from <see cref="StoreOptions.Projections"/>: each
+    /// registered projection contributes one <see cref="ProjectionStatus"/>, and each
+    /// shard contributes a <see cref="ShardStatus"/> populated from
+    /// <c>mt_event_progression</c>. The current event-store head sequence is read once
+    /// up-front so every shard reports the same reference point. Live state (<c>"Running"</c>,
+    /// <c>"Paused"</c>, ...) is not snapshotted here — operators get that via the existing
+    /// <c>ShardStatesChanged</c> event; this method always reports <c>"Unknown"</c>.
+    /// </remarks>
+    async Task<IReadOnlyList<ProjectionStatus>> IEventStore.GetProjectionStatusesAsync(CancellationToken ct)
+    {
+        return await ((IEventStore)this).GetProjectionStatusesAsync(tenantId: null, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// #4596 Phase 1 Session 4 — override the jasperfx#407 default-throwing per-tenant overload.
+    ///
+    /// <para>
+    /// The argument means one of two things, depending on how the store is tenanted, exactly as it does for
+    /// <see cref="BuildProjectionDaemonAsync(string?, ILogger?)"/>:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><b>Single database</b> (conjoined tenancy with per-tenant event partitioning): the argument names a
+    /// tenant co-located in the one database. Each registered projection reports its per-tenant slice — the shard
+    /// identities carry the trailing <c>{ProjName}:{ShardKey}:{tenantId}</c> suffix that Phase 1 Session 3 writes,
+    /// and their ProcessedSequence comes from the matching tenant-bearing progression row.</item>
+    /// <item><b>Database-per-tenant / sharded tenancy</b>: the argument names a physical database. Its shards are
+    /// NOT tenant-suffixed — each database runs its own daemon over the same shard identities — so the statuses
+    /// are read from that database with the plain shard names. This is the path that previously threw
+    /// <c>DefaultTenantUsageDisabledException</c>, because the session was always opened against the default
+    /// tenant no matter what was passed. See jasperfx#502.</item>
+    /// </list>
+    ///
+    /// <para>
+    /// A null argument preserves the "every registered shard, no tenant suffix, default database" semantics.
+    /// </para>
+    /// </summary>
+    async Task<IReadOnlyList<ProjectionStatus>> IEventStore.GetProjectionStatusesAsync(string? tenantId, CancellationToken ct)
+    {
+        // On a store spanning several databases the argument selects the physical database whose progression
+        // rows we read. On a single-database store it selects a tenant living inside the one database, and only
+        // then does the shard identity carry the tenant suffix.
+        var spansSeveralDatabases = Options.Tenancy.Cardinality != DatabaseCardinality.Single;
+
+        // #5382. A store with a database per tenant has no default tenant, so a tenant-less call has no
+        // single database to read and no session to open: MasterTableTenancy.Default and
+        // ShardedTenancy.Default both throw NotSupportedException outright. The registry is not per-database
+        // though — the registered projections and their shards are configuration, identical in every
+        // database — so answer that much rather than throwing. "Is this projection still registered?" is the
+        // only store-agnostic way to ask, and orphan detection in a monitoring console is built on it.
+        if (tenantId == null && spansSeveralDatabases)
+        {
+            return registryOnlyStatuses();
+        }
+
+        return await projectionStatusesAsync(null, tenantId, ct).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// #5383 / jasperfx#810 — real per-database progression, which is what the tenant-less registry
+    /// answer (#5382) deliberately cannot give: that one reports every sequence as 0 because it reads
+    /// nothing, and this is the read that reports what the named database actually holds.
+    /// </remarks>
+    Task<IReadOnlyList<ProjectionStatus>> IEventStore.GetProjectionStatusesAsync(
+        IEventDatabase database, string? tenantId, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        return projectionStatusesAsync(database, tenantId, ct);
+    }
+
+    private async Task<IReadOnlyList<ProjectionStatus>> projectionStatusesAsync(
+        IEventDatabase? database, string? tenantId, CancellationToken ct)
+    {
+        var shardsAreTenantScoped = tenantId != null && eventsAreConjoined;
+
+        await using var session = await openExplorerSessionAsync(database, tenantId).ConfigureAwait(false);
+        await session.Database.EnsureStorageExistsAsync(typeof(IEvent), ct).ConfigureAwait(false);
+
+        var schema = Options.EventGraph.DatabaseSchemaName;
+        var headSequence = await readHeadSequenceAsync(session, schema, ct).ConfigureAwait(false);
+        var progression = await readProgressionAsync(session, schema, ct).ConfigureAwait(false);
+
+        // #5392 (jasperfx#818). ShardStatus.State is a fact about the RUNNING DAEMON, which no
+        // progression table knows. A store that can reach one reports what it says; a store that
+        // cannot reports Unknown, which means "there is no daemon here to ask" and is a genuinely
+        // different operational situation from Stopped -- the reading an operator acts on.
+        var agentStates = await readAgentStatesAsync().ConfigureAwait(false);
+
+        var statuses = new List<ProjectionStatus>();
+        foreach (var source in Options.Projections.All)
+        {
+            var shards = source.Shards();
+            var shardStatuses = new List<ShardStatus>(shards.Count);
+            foreach (var shard in shards)
+            {
+                // For a tenant co-located in a single database, compose the tenant-bearing ShardName so the
+                // reported identity AND the progression-row lookup both carry the trailing :tenantId suffix that
+                // Phase 1 Session 3 writes. A database-per-tenant store's shards carry no suffix — we already
+                // read them from that tenant's own database.
+                var effectiveName = shardsAreTenantScoped
+                    ? ShardName.Compose(shard.Name.Name, shard.Name.ShardKey, tenantId, shard.Name.Version)
+                    : shard.Name;
+
+                var processed = progression.TryGetValue(effectiveName.Identity, out var seq) ? seq : 0L;
+                shardStatuses.Add(new ShardStatus(
+                    effectiveName.Identity,
+                    State: agentStates.TryGetValue(effectiveName.Identity, out var agentState)
+                        ? ShardStatusState.From(agentState)
+                        : ShardStatusState.Unknown,
+                    ProcessedSequence: processed,
+                    EventStoreSequence: headSequence,
+                    Error: null));
+            }
+
+            statuses.Add(new ProjectionStatus(source.Name, source.Lifecycle.ToString(), shardStatuses));
+        }
+
+        return statuses;
+    }
+
+    /// <summary>
+    /// #5382 — the projection registry with nothing read against it: every registered projection and its
+    /// shards, with zeroed sequences and <see cref="ShardStatusState.Unknown"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For the tenant-less overload on a store spanning several databases, where no single database is the
+    /// right one to read and there is no default tenant to open a session against.
+    /// </para>
+    /// <para>
+    /// <b>The sequences are 0 because none was read — NOT because a shard has never run</b>, which is what a
+    /// 0 <c>ProcessedSequence</c> otherwise means. The two are indistinguishable to a caller, and that
+    /// ambiguity is the honest cost of answering here at all. The database-scoped overloads (#5383) are the
+    /// real fix: name a database and every field is read rather than defaulted.
+    /// </para>
+    /// <para>
+    /// State is Unknown rather than what <c>readAgentStatesAsync</c> would report. That lookup needs no
+    /// session and would answer, but a multi-database store runs a daemon per database over the SAME shard
+    /// identities, so its dictionary keeps an arbitrary one — last writer wins. Reporting it would name one
+    /// database's daemon as though it spoke for the store, and <see cref="ShardStatus.State"/> is explicit
+    /// that a wrong concrete state is worse than none: it is the reading an operator acts on.
+    /// </para>
+    /// </remarks>
+    private IReadOnlyList<ProjectionStatus> registryOnlyStatuses()
+    {
+        var statuses = new List<ProjectionStatus>();
+        foreach (var source in Options.Projections.All)
+        {
+            var shards = source.Shards();
+            var shardStatuses = new List<ShardStatus>(shards.Count);
+            foreach (var shard in shards)
+            {
+                shardStatuses.Add(new ShardStatus(
+                    shard.Name.Identity,
+                    State: ShardStatusState.Unknown,
+                    ProcessedSequence: 0,
+                    EventStoreSequence: 0,
+                    Error: null));
+            }
+
+            statuses.Add(new ProjectionStatus(source.Name, source.Lifecycle.ToString(), shardStatuses));
+        }
+
+        return statuses;
+    }
+
+    /// <summary>
+    /// #5392 (jasperfx#818): the per-shard <c>AgentStatus</c> of whichever daemons are running against
+    /// THIS store, keyed by shard identity. Empty when no daemon is visible, which is why the caller
+    /// falls back to <see cref="ShardStatusState.Unknown" />.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Read through <c>IProjectionCoordinator.AllDaemonsAsync()</c> and never through
+    /// <c>DaemonForDatabase</c>, which is contractually allowed to go looking and <em>start</em> a
+    /// daemon. A projections page that starts one by being opened is a monitoring tool with a side
+    /// effect on the system it monitors — pinned upstream by
+    /// <c>reading_the_statuses_does_not_start_a_daemon</c>.
+    /// </para>
+    /// <para>
+    /// No coordinator means no daemon to ask, and that is the common case rather than an edge:
+    /// <c>DaemonMode.ExternallyManaged</c>, a monitoring console in another process, and a store built
+    /// by hand (<c>new DocumentStore(options)</c>, where Options.Services is null) all land here. The
+    /// answer for it is Unknown, which is a genuinely different operational situation from Stopped —
+    /// answering Stopped sends an operator looking for why a projection was stopped that was never
+    /// started.
+    /// </para>
+    /// <para>
+    /// Daemons are matched to this store by <c>IProjectionDaemon.StoreUri</c> against
+    /// <see cref="Subject" /> rather than by trusting whichever coordinator the container hands back.
+    /// An application with an ancillary store registers a coordinator per store and the non-generic
+    /// IProjectionCoordinator resolves the primary one, so without the check an ancillary store would
+    /// report the PRIMARY store's shard states as its own.
+    /// </para>
+    /// </remarks>
+    private async Task<Dictionary<string, AgentStatus>> readAgentStatesAsync()
+    {
+        var states = new Dictionary<string, AgentStatus>();
+
+        var services = Options.Services;
+        if (services == null)
+        {
+            return states;
+        }
+
+        var subject = Subject.ToString();
+
+        foreach (var coordinator in Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                     .GetServices<JasperFx.Events.Daemon.IProjectionCoordinator>(services))
+        {
+            IReadOnlyList<JasperFx.Events.Daemon.IProjectionDaemon> daemons;
+
+            try
+            {
+                daemons = await coordinator.AllDaemonsAsync().ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // A coordinator that cannot enumerate its daemons is the same operational situation as
+                // there being none, and a diagnostics read must not throw on the way to saying so.
+                continue;
+            }
+
+            foreach (var daemon in daemons)
+            {
+                // A daemon built without a store reports no StoreUri (test scaffolding); anything with
+                // one that is not ours belongs to another store in the same host.
+                if (daemon.StoreUri != null && daemon.StoreUri != subject)
+                {
+                    continue;
+                }
+
+                foreach (var source in Options.Projections.All)
+                {
+                    foreach (var shard in source.Shards())
+                    {
+                        var identity = shard.Name.Identity;
+
+                        // StatusFor answers Stopped for a shard it has no agent for, which is a
+                        // daemon's own answer and legitimate once a daemon has been reached. It is
+                        // only wrong as a stand-in for "no daemon", which is why nothing calls this
+                        // when none was found.
+                        states[identity] = daemon.StatusFor(identity);
+                    }
+                }
+            }
+        }
+
+        return states;
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Strong-typed projection step-through: feeds <paramref name="events"/> into the
+    /// named projection one at a time and captures Before / After state plus elapsed time
+    /// at each step. Per-step exceptions are caught and surfaced on
+    /// <see cref="ProjectionStepResult{TState}.Error"/> — the timeline continues so the
+    /// UI can show "this event broke this projection." Stateless: nothing is persisted.
+    /// </remarks>
+    async Task<ProjectionTimeline<TState>> IEventStore.RunProjectionAsync<TState>(
+        string projectionName,
+        object identity,
+        IReadOnlyList<EventRecord> events,
+        TState? startingState,
+        CancellationToken ct)
+        where TState : default
+    {
+        var aggregateType = findProjectionAggregateType(projectionName);
+        if (aggregateType != typeof(TState))
+        {
+            throw new ArgumentException(
+                $"Projection '{projectionName}' is over '{aggregateType.FullNameInCode()}', not '{typeof(TState).FullNameInCode()}'.",
+                nameof(projectionName));
+        }
+
+        var rawSteps = await runProjectionStepsAsync(aggregateType, startingState, events, ct).ConfigureAwait(false);
+
+        var typedSteps = new List<ProjectionStepResult<TState>>(rawSteps.Count);
+        foreach (var s in rawSteps)
+        {
+            typedSteps.Add(new ProjectionStepResult<TState>(s.Event, castToTState<TState>(s.Before), castToTState<TState>(s.After), s.Elapsed, s.Error));
+        }
+
+        var finalState = rawSteps.LastOrDefault(x => x.Error == null)?.After ?? rawSteps.LastOrDefault()?.After;
+        return new ProjectionTimeline<TState>(typedSteps, castToTState<TState>(finalState));
+    }
+
+    private static TState? castToTState<TState>(object? value)
+    {
+        if (value is null) return default;
+        return (TState)value;
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Untyped projection step-through: looks up the projection by name, resolves its
+    /// aggregate CLR type from <see cref="IAggregateProjection.AggregateType"/>, runs the
+    /// events through it, and serializes each per-step state snapshot to
+    /// <see cref="JsonElement"/>. The error is reduced to its message so the record can
+    /// round-trip over the wire.
+    /// </remarks>
+    async Task<ProjectionTimelineRaw> IEventStore.RunProjectionByNameAsync(
+        string projectionName,
+        object identity,
+        IReadOnlyList<EventRecord> events,
+        JsonElement? startingState,
+        CancellationToken ct)
+    {
+        var aggregateType = findProjectionAggregateType(projectionName);
+        var startObj = startingState?.Deserialize(aggregateType, ExplorerJson);
+
+        var rawSteps = await runProjectionStepsAsync(aggregateType, startObj, events, ct).ConfigureAwait(false);
+
+        var stepRecords = new List<ProjectionStepResultRaw>(rawSteps.Count);
+        foreach (var s in rawSteps)
+        {
+            JsonElement? beforeJson = s.Before == null ? null : JsonSerializer.SerializeToElement(s.Before, aggregateType, ExplorerJson);
+            JsonElement? afterJson = s.After == null ? null : JsonSerializer.SerializeToElement(s.After, aggregateType, ExplorerJson);
+            stepRecords.Add(new ProjectionStepResultRaw(s.Event, beforeJson, afterJson, s.Elapsed, s.Error?.Message));
+        }
+
+        var finalObj = rawSteps.LastOrDefault(x => x.Error == null)?.After ?? rawSteps.LastOrDefault()?.After;
+        JsonElement? finalJson = finalObj == null ? null : JsonSerializer.SerializeToElement(finalObj, aggregateType, ExplorerJson);
+
+        return new ProjectionTimelineRaw(stepRecords, finalJson);
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Multi-stream projection step-through: unlike <see cref="IEventStore.RunProjectionByNameAsync"/>
+    /// (a single-identity, reflection-<c>Apply</c>, sessionless replay) this drives the projection's
+    /// REAL execution path — the same slicer/grouper the async daemon uses, <c>EnrichEventsAsync</c> per
+    /// group, then a one-event-at-a-time fold through <c>Create</c>/<c>Apply</c>/<c>ShouldDelete</c> —
+    /// against a read-only <see cref="IQuerySession"/>. A flat event list spanning multiple streams fans
+    /// out into one <see cref="ProjectionTimelineRaw"/> per resulting aggregate identity; a single-stream
+    /// projection collapses to exactly one. The shared fold lives in JasperFx.Events
+    /// (<see cref="ISteppableAggregation{TQuerySession}.BuildTimelinesAsync"/>) so Marten and Polecat
+    /// can't diverge. Stateless: nothing is persisted.
+    /// </remarks>
+    async Task<MultiAggregateProjectionResult> IEventStore.RunMultiStreamProjectionAsync(
+        string projectionName,
+        IReadOnlyList<EventRecord> events,
+        CancellationToken ct)
+    {
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(projectionName))
+            ?? throw new ArgumentOutOfRangeException(nameof(projectionName),
+                $"No projection named '{projectionName}' is registered. Available projections: {Options.Projections.All.Select(p => p.Name).Join(", ")}");
+
+        if (source is not ISteppableAggregation<IQuerySession> steppable)
+        {
+            throw new ArgumentException(
+                $"Projection '{projectionName}' is not an aggregate projection that supports multi-stream step-through.",
+                nameof(projectionName));
+        }
+
+        // Rebuild real IEvent instances from the wire records so the projection's slicer/grouper can run.
+        // Remember the source record per event (by reference) so the fold can map each folded event back
+        // to exactly the record the caller supplied — preserving the original Data/Metadata JSON verbatim.
+        var recordByEvent = new Dictionary<IEvent, EventRecord>(ReferenceEqualityComparer.Instance);
+        var domainEvents = new List<IEvent>(events.Count);
+        foreach (var record in events)
+        {
+            var built = buildEventFromRecord(record);
+            recordByEvent[built] = record;
+            domainEvents.Add(built);
+        }
+
+        await using var session = openExplorerSession();
+
+        JsonElement? serialize(object? state) =>
+            state is null ? null : JsonSerializer.SerializeToElement(state, state.GetType(), ExplorerJson);
+
+        EventRecord toRecord(IEvent e) =>
+            recordByEvent.TryGetValue(e, out var record) ? record : buildRecordFromEvent(e);
+
+        return await steppable
+            .BuildTimelinesAsync(domainEvents, session, serialize, toRecord, observer: null, ct)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Rebuild a real Marten <see cref="IEvent"/> from an explorer <see cref="EventRecord"/> so the
+    /// projection's slicer/grouper (which read stream id, version, and the deserialized event body) can
+    /// run against it. The event body is deserialized to its registered CLR type and wrapped via
+    /// <see cref="EventGraph.BuildEvent"/>; stream identity, version, sequence, timestamp, and tenant are
+    /// copied across so grouping-by-stream and grouping-by-event-data both behave as in the daemon.
+    /// </summary>
+    private IEvent buildEventFromRecord(EventRecord record)
+    {
+        var data = deserializeEventBody(record);
+        var e = Options.EventGraph.BuildEvent(data);
+
+        e.Id = record.EventId;
+        e.Sequence = record.Sequence;
+        e.Version = record.StreamVersion;
+        e.Timestamp = record.Timestamp;
+        e.TenantId = record.TenantId ?? StorageConstants.DefaultTenantId;
+
+        if (Options.EventGraph.StreamIdentity == StreamIdentity.AsGuid)
+        {
+            if (Guid.TryParse(record.StreamId, out var streamGuid))
+            {
+                e.StreamId = streamGuid;
+            }
+        }
+        else
+        {
+            e.StreamKey = record.StreamId;
+        }
+
+        return e;
+    }
+
+    /// <summary>
+    /// Fallback used by <see cref="IEventStore.RunMultiStreamProjectionAsync"/>'s <c>toRecord</c> when a
+    /// folded event isn't one of the instances we built (defensive — the slicer preserves references, so
+    /// this normally never runs). Reconstructs an <see cref="EventRecord"/> straight off the
+    /// <see cref="IEvent"/>.
+    /// </summary>
+    private EventRecord buildRecordFromEvent(IEvent e)
+    {
+        var streamId = Options.EventGraph.StreamIdentity == StreamIdentity.AsGuid
+            ? e.StreamId.ToString()
+            : e.StreamKey ?? string.Empty;
+
+        var data = JsonSerializer.SerializeToElement(e.Data, e.Data.GetType(), ExplorerJson);
+
+        return new EventRecord(e.Id, e.Sequence, e.Version, streamId, e.EventTypeName, data, null,
+            e.Timestamp, e.TenantId, null);
+    }
+
+    private Type findProjectionAggregateType(string projectionName)
+    {
+        var source = Options.Projections.All.FirstOrDefault(x => x.Name.EqualsIgnoreCase(projectionName))
+            ?? throw new ArgumentOutOfRangeException(nameof(projectionName),
+                $"No projection named '{projectionName}' is registered. Available projections: {Options.Projections.All.Select(p => p.Name).Join(", ")}");
+
+        if (source is not IAggregateProjection aggregateProjection)
+        {
+            throw new ArgumentException(
+                $"Projection '{projectionName}' is not an aggregate projection.",
+                nameof(projectionName));
+        }
+
+        return aggregateProjection.AggregateType;
+    }
+
+    /// <summary>
+    /// Replay events through a projection's Apply methods one event at a time using
+    /// reflection. Stateless: no database session is opened, no persistence happens.
+    /// Per-step exceptions are caught and surfaced on the step result so the caller's
+    /// timeline can show "this event broke this projection." Suitable for the
+    /// explorer's stepper view; not for projections that depend on session lookups
+    /// inside Apply (those need the full aggregator machinery).
+    /// </summary>
+    private Task<IReadOnlyList<ObjectStepResult>> runProjectionStepsAsync(
+        Type aggregateType, object? startingState, IReadOnlyList<EventRecord> events, CancellationToken ct)
+    {
+        var steps = new List<ObjectStepResult>(events.Count);
+        var current = startingState;
+
+        foreach (var record in events)
+        {
+            ct.ThrowIfCancellationRequested();
+            var before = cloneViaJson(current, aggregateType);
+            var sw = Stopwatch.StartNew();
+            object? after;
+            Exception? error = null;
+            try
+            {
+                var domainEventData = deserializeEventBody(record);
+                current = applyEventToAggregate(aggregateType, current, domainEventData);
+                after = cloneViaJson(current, aggregateType);
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+                after = before;
+            }
+            sw.Stop();
+            steps.Add(new ObjectStepResult(record, before, after, sw.Elapsed, error));
+        }
+
+        return Task.FromResult<IReadOnlyList<ObjectStepResult>>(steps);
+    }
+
+    private async Task<(object? state, long count)> replayAggregatorAsync(
+        Type aggregateType, object? startingState, IReadOnlyList<EventRecord> records, CancellationToken ct)
+    {
+        if (records.Count == 0) return (startingState, 0);
+
+        var current = startingState;
+        foreach (var record in records)
+        {
+            ct.ThrowIfCancellationRequested();
+            var data = deserializeEventBody(record);
+            current = applyEventToAggregate(aggregateType, current, data);
+        }
+        return await Task.FromResult((current, (long)records.Count)).ConfigureAwait(false);
+    }
+
+    private object? applyEventToAggregate(Type aggregateType, object? state, object eventData)
+    {
+        state ??= Activator.CreateInstance(aggregateType)
+            ?? throw new InvalidOperationException(
+                $"Cannot construct projection state of type '{aggregateType.FullNameInCode()}' — no parameterless constructor.");
+
+        var eventDataType = eventData.GetType();
+        // Direct Apply(TEvent) — the canonical Marten projection shape.
+        var applyMethod = aggregateType.GetMethod("Apply", new[] { eventDataType });
+        if (applyMethod != null)
+        {
+            try { applyMethod.Invoke(state, new[] { eventData }); }
+            catch (TargetInvocationException tie) when (tie.InnerException != null)
+            {
+                throw tie.InnerException;
+            }
+            return state;
+        }
+
+        // Fallback: Apply(IEvent<TEvent>) — shape used by projections that need event metadata.
+        var ieventOfT = typeof(IEvent<>).MakeGenericType(eventDataType);
+        var wrappedApply = aggregateType.GetMethod("Apply", new[] { ieventOfT });
+        if (wrappedApply != null)
+        {
+            var eventCtor = typeof(Event<>).MakeGenericType(eventDataType).GetConstructor(new[] { eventDataType })!;
+            var wrapped = eventCtor.Invoke(new[] { eventData });
+            try { wrappedApply.Invoke(state, new[] { wrapped }); }
+            catch (TargetInvocationException tie) when (tie.InnerException != null)
+            {
+                throw tie.InnerException;
+            }
+            return state;
+        }
+
+        // No Apply method matched — silently skip. The step records this by reporting
+        // the event but leaving state unchanged (no error).
+        return state;
+    }
+
+    private object deserializeEventBody(EventRecord record)
+    {
+        var mapping = Options.EventGraph.AllEvents().FirstOrDefault(m => m.EventTypeName.EqualsIgnoreCase(record.EventTypeName))
+            ?? throw new InvalidOperationException(
+                $"Event type '{record.EventTypeName}' is not registered. Add it via StoreOptions.Events.AddEventType.");
+
+        var dataObj = record.Data.Deserialize(mapping.DocumentType, ExplorerJson)
+            ?? throw new InvalidOperationException(
+                $"Failed to deserialize event of type '{record.EventTypeName}' from supplied JSON.");
+        return dataObj;
+    }
+
+    private static object? cloneViaJson(object? value, Type type)
+    {
+        if (value is null) return null;
+        var json = JsonSerializer.SerializeToElement(value, type, ExplorerJson);
+        return json.Deserialize(type, ExplorerJson);
+    }
+
+    private async Task<object?> invokeAggregateStreamAsync(
+        Type aggregateType, IQuerySession session, object identity, long version, CancellationToken ct)
+    {
+        var streamIdentity = Options.EventGraph.StreamIdentity;
+        var idArgType = streamIdentity == StreamIdentity.AsGuid ? typeof(Guid) : typeof(string);
+
+        var aggregateMethod = typeof(JasperFx.Events.IQueryEventStore).GetMethods()
+            .FirstOrDefault(m =>
+                m.Name == nameof(JasperFx.Events.IQueryEventStore.AggregateStreamAsync) &&
+                m.IsGenericMethodDefinition &&
+                m.GetParameters().Length >= 1 &&
+                m.GetParameters()[0].ParameterType == idArgType);
+
+        if (aggregateMethod == null) return null;
+        var closed = aggregateMethod.MakeGenericMethod(aggregateType);
+
+        object idValue;
+        if (streamIdentity == StreamIdentity.AsGuid)
+        {
+            idValue = identity is Guid g ? g : Guid.Parse(identity.ToString()!);
+        }
+        else
+        {
+            idValue = identity.ToString()!;
+        }
+
+        var paramInfos = closed.GetParameters();
+        var args = new object?[paramInfos.Length];
+        args[0] = idValue;
+        for (var i = 1; i < paramInfos.Length; i++)
+        {
+            args[i] = paramInfos[i].Name switch
+            {
+                "version" => version,
+                "token" => ct,
+                _ => paramInfos[i].HasDefaultValue ? paramInfos[i].DefaultValue : null
+            };
+        }
+
+        var task = (Task)closed.Invoke(session.Events, args)!;
+        await task.ConfigureAwait(false);
+        return task.GetType().GetProperty("Result")?.GetValue(task);
+    }
+
+    private Type? findAggregateTypeByName(string aggregateTypeName)
+    {
+        foreach (var projection in Options.Projections.All.OfType<IAggregateProjection>())
+        {
+            var t = projection.AggregateType;
+            if (t.FullName == aggregateTypeName || t.Name == aggregateTypeName)
+            {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// #5400 — resolve the database an explorer read was pointed at, WITHOUT provisioning one.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// These four reads used to call <c>Tenancy.FindOrCreateDatabase(tenantId)</c>, and several tenancy
+    /// models take the "or create" literally: <see cref="ShardedTenancy"/> assigns an unknown tenant to a
+    /// shard and runs partition + sequence DDL for it, and <see cref="SingleServerMultiTenancy"/> issues
+    /// CREATE DATABASE for a name it has never seen. A monitoring console polling a retired or mistyped
+    /// tenant id would therefore bring that tenant into existence — a diagnostics read with a write for a
+    /// side effect, which is the same principle <see cref="ShardStatus.State"/> encodes for daemons:
+    /// reading must not change what is running.
+    /// </para>
+    /// <para>
+    /// An unresolvable id now throws <see cref="UnknownTenantIdException"/>, which is what
+    /// <c>StaticMultiTenancy</c> and <c>MasterTableTenancy</c> already did for an unknown id, so the
+    /// explorer answers the same way across every tenancy model instead of one per store. On the two
+    /// <c>IAsyncEnumerable</c> reads that surfaces at first enumeration rather than at the call, which is
+    /// inherent to an iterator method and not a difference in the rule being applied.
+    /// </para>
+    /// </remarks>
+    private async ValueTask<IMartenDatabase> findExplorerDatabaseAsync(string tenantIdOrDatabaseIdentifier)
+    {
+        var database = await Tenancy.TryFindDatabase(tenantIdOrDatabaseIdentifier).ConfigureAwait(false);
+
+        return database ?? throw new UnknownTenantIdException(tenantIdOrDatabaseIdentifier);
+    }
+
+    /// <summary>
+    /// #5383 — the session an explorer read runs on, given the scope the caller named.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Three cases, in the order they are decided: an explicit <paramref name="database"/> wins (the
+    /// database-scoped overloads, jasperfx#810); otherwise a tenant on a multi-database store resolves
+    /// to the database that tenant lives in; otherwise the store's default session.
+    /// </para>
+    /// <para>
+    /// Note this answers only <em>which database</em>. Whether the SQL also carries a
+    /// <c>tenant_id</c> predicate is the independent question <see cref="eventsAreConjoined"/> answers —
+    /// see its remarks for the sharded case that needs both.
+    /// </para>
+    /// </remarks>
+    private async ValueTask<DocumentSessionBase> openExplorerSessionAsync(IEventDatabase? database, string? tenantId)
+    {
+        if (database is not null) return openExplorerSession(requireMartenDatabase(database));
+
+        var spansSeveralDatabases = Options.Tenancy.Cardinality != DatabaseCardinality.Single;
+
+        return tenantId != null && spansSeveralDatabases
+            ? openExplorerSession(await findExplorerDatabaseAsync(tenantId).ConfigureAwait(false))
+            : openExplorerSession();
+    }
+
+    /// <summary>
+    /// #5383 — the Marten database behind an <see cref="IEventDatabase"/> handed to a database-scoped
+    /// read. Every database this store hands out through <c>AllDatabases()</c> is one; anything else is
+    /// a caller mixing stores, which is worth saying plainly rather than a cast exception.
+    /// </summary>
+    private static IMartenDatabase requireMartenDatabase(IEventDatabase database) =>
+        database as IMartenDatabase
+        ?? throw new ArgumentOutOfRangeException(nameof(database),
+            $"'{database.GetType().FullName}' is not a Marten database. Pass one of the databases this "
+            + "store returns from AllDatabases().");
+
+    /// <summary>
+    /// #5383 part 3 — the refusal a STORE-GLOBAL single-answer read gives on a multi-database store.
+    /// </summary>
+    /// <remarks>
+    /// A stream id is unique WITHIN a database and not across them, so there is no merge that produces
+    /// the one answer these signatures return. Answering from whichever database the default session
+    /// resolved is the one option that is indistinguishable from a complete answer, which is the whole
+    /// of jasperfx#810. Listings are different and fan out instead — a union is well defined there.
+    /// </remarks>
+    private NotSupportedException storeGlobalReadNotSupported(string member) =>
+        new($"Store-global {member} cannot answer on this Marten store, whose DatabaseCardinality is "
+            + $"{Options.Tenancy.Cardinality} — it spans several databases, and a stream id is unique "
+            + "within one of them rather than across them. Enumerate AllDatabases() and call the "
+            + $"IEventDatabase overload of {member} per database, or pass a tenant id.");
+
+    private DocumentSessionBase openExplorerSession()
+    {
+        var sessionOptions = new SessionOptions
+        {
+            AllowAnyTenant = true,
+            Tracking = DocumentTracking.None
+        };
+        return (DocumentSessionBase)LightweightSession(sessionOptions);
+    }
+
+    /// <summary>
+    /// jasperfx#502 — an explorer session bound to one physical database. A store with a database per tenant
+    /// has no default tenant to resolve a session against, so the argument-less overload throws there.
+    /// </summary>
+    private DocumentSessionBase openExplorerSession(IMartenDatabase database)
+    {
+        var sessionOptions = SessionOptions.ForDatabase(database);
+        sessionOptions.Tracking = DocumentTracking.None;
+        return (DocumentSessionBase)LightweightSession(sessionOptions);
+    }
+
+    private object parseStreamId(string streamId)
+    {
+        if (Options.EventGraph.StreamIdentity == StreamIdentity.AsGuid)
+        {
+            return Guid.Parse(streamId);
+        }
+        return streamId;
+    }
+
+    private static string readStreamIdAsString(System.Data.Common.DbDataReader reader, int ordinal)
+    {
+        var value = reader.GetValue(ordinal);
+        return value switch
+        {
+            Guid g => g.ToString(),
+            string s => s,
+            _ => value.ToString() ?? string.Empty
+        };
+    }
+
+    /// <summary>
+    /// Number of columns in <see cref="IEventStorage.StreamStateSelectSql"/>'s select
+    /// list. Any caller that appends explorer-specific columns to that SELECT addresses
+    /// the trailing ordinals as <c>StreamStateColumnCount + n</c> so the two stay in
+    /// lockstep without each call site having to count.
+    /// </summary>
+    private const int StreamStateColumnCount = 6;
+
+    /// <summary>
+    /// Read the <see cref="IEventStorage.StreamStateSelectSql"/>-shaped columns out of
+    /// the reader and project them into the explorer's diagnostic-row shape. We don't
+    /// route through <see cref="Marten.Linq.Selectors.ISelector{StreamState}"/> here
+    /// because <see cref="EventGraph.AggregateTypeFor"/> throws on unknown aggregate
+    /// names — fine for the production read path, fatal for an explorer that has to
+    /// surface legacy / unregistered streams as data.
+    /// </summary>
+    private static async Task<(string StreamId, string? StreamType, long Version, DateTimeOffset Created, DateTimeOffset LastUpdated, bool IsArchived)>
+        readStreamRowAsync(DbDataReader reader, CancellationToken ct)
+    {
+        var streamId = readStreamIdAsString(reader, 0);
+        var version = await reader.IsDBNullAsync(1, ct).ConfigureAwait(false) ? 0L : reader.GetInt64(1);
+        var streamType = await reader.IsDBNullAsync(2, ct).ConfigureAwait(false) ? null : reader.GetString(2);
+        var lastUpdated = await reader.GetFieldValueAsync<DateTimeOffset>(3, ct).ConfigureAwait(false);
+        var created = await reader.GetFieldValueAsync<DateTimeOffset>(4, ct).ConfigureAwait(false);
+        var isArchived = !await reader.IsDBNullAsync(5, ct).ConfigureAwait(false) && reader.GetBoolean(5);
+        return (streamId, streamType, version, created, lastUpdated, isArchived);
+    }
+
+    /// <summary>
+    /// Read a single mt_events row out of an explorer command into the explorer's
+    /// untyped <see cref="EventRecord"/>. Both <c>ReadStreamAsync</c> and
+    /// <c>QueryByTagsAsync</c> use this — they project the same eight columns
+    /// (<c>id, seq_id, version, stream_id, type, data, timestamp, tenant_id</c>) into
+    /// the same record shape. We don't route through
+    /// <see cref="Marten.Linq.Selectors.ISelector{IEvent}"/> here because the explorer
+    /// surfaces the event body as raw JSON for UI / tooling consumption rather than
+    /// CLR-deserialized; the typed selector would round-trip through deserialization
+    /// and re-serialization and would also break for events whose CLR type isn't
+    /// registered with the EventGraph.
+    /// </summary>
+    private static async Task<EventRecord> readEventRecordAsync(DbDataReader reader, CancellationToken ct)
+    {
+        var eventId = reader.GetGuid(0);
+        var sequence = reader.GetInt64(1);
+        var version = reader.GetInt64(2);
+        var streamIdValue = readStreamIdAsString(reader, 3);
+        var typeName = reader.GetString(4);
+        var dataText = reader.GetString(5);
+        var timestamp = await reader.GetFieldValueAsync<DateTimeOffset>(6, ct).ConfigureAwait(false);
+        var tenantId = await reader.IsDBNullAsync(7, ct).ConfigureAwait(false) ? null : reader.GetString(7);
+
+        using var doc = JsonDocument.Parse(dataText);
+        return new EventRecord(
+            eventId,
+            sequence,
+            version,
+            streamIdValue,
+            typeName,
+            doc.RootElement.Clone(),
+            Metadata: null,
+            timestamp,
+            tenantId,
+            Tags: null);
+    }
+
+    private static async Task<long> readHeadSequenceAsync(DocumentSessionBase session, string schema, CancellationToken ct)
+    {
+        var cmd = new NpgsqlCommand($"select coalesce(max(seq_id), 0) from {schema}.mt_events");
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        if (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            return await reader.IsDBNullAsync(0, ct).ConfigureAwait(false) ? 0L : reader.GetInt64(0);
+        }
+        return 0L;
+    }
+
+    private static async Task<Dictionary<string, long>> readProgressionAsync(DocumentSessionBase session, string schema, CancellationToken ct)
+    {
+        var cmd = new NpgsqlCommand($"select name, last_seq_id from {schema}.mt_event_progression");
+        var map = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
+        await using var reader = await session.ExecuteReaderAsync(cmd, ct).ConfigureAwait(false);
+        while (await reader.ReadAsync(ct).ConfigureAwait(false))
+        {
+            var name = reader.GetString(0);
+            var seq = await reader.IsDBNullAsync(1, ct).ConfigureAwait(false) ? 0L : reader.GetInt64(1);
+            map[name] = seq;
+        }
+        return map;
+    }
+
+    private sealed record ObjectStepResult(EventRecord Event, object? Before, object? After, TimeSpan Elapsed, Exception? Error);
+}

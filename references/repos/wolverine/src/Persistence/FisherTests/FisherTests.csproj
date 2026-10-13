@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <TargetFrameworks>net10.0</TargetFrameworks>
+        <NoWarn>$(NoWarn);NU1202;NETSDK1005</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+
+        <!-- GH-4605: the HTTP deduplication mirror needs an Alba host. It lives here rather than in
+             Wolverine.Http.Tests so a Fisher endpoint type stays out of the shared HTTP test assembly,
+             which every other host in that project scans. See PolecatTests.csproj for the twin. -->
+        <PackageReference Include="Alba" />
+
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="xunit.v3"/>
+        <PackageReference Include="xunit.runner.visualstudio">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="NSubstitute" />
+        <!-- GH-4515: Fisher had zero strong typed identifier coverage; this is what the Marten and Polecat
+             test projects already reference for the same suites. -->
+        <PackageReference Include="StronglyTypedId" />
+        <!-- The JasperFx.Events source generator must run on THIS assembly so the aggregate
+             evolvers / projection dispatchers for the test aggregates are emitted; there is no
+             runtime fallback. Same reasoning as PolecatTests. -->
+        <PackageReference Include="JasperFx.Events.SourceGenerator">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Wolverine.Fisher\Wolverine.Fisher.csproj" />
+        <ProjectReference Include="..\..\Http\Wolverine.Http.Fisher\Wolverine.Http.Fisher.csproj" />
+        <ProjectReference Include="..\..\Testing\Wolverine.ComplianceTests\Wolverine.ComplianceTests.csproj" />
+    </ItemGroup>
+
+  <!-- Fisher 0.7.0 started bundling JasperFx.Events.SourceGenerator inside its own nupkg
+       (analyzers/dotnet/cs/), exactly as Polecat already does. With the explicit reference above it
+       loads as two analyzer instances, each emitting every aggregate's .Evolver dispatcher into this
+       assembly, and the compile fails with CS0433 ("type exists in both FisherTests and
+       FisherTests"). The generator dedupes within one instance but cannot coordinate across two.
+       Drop Fisher's bundled copy and keep the explicit one — same store-agnostic generator, and it
+       still emits dispatchers for every aggregate in the compilation. See PolecatTests.csproj for
+       the twin. -->
+  <Target Name="DropDuplicateBundledEventSourceGenerator" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)"
+                Condition="'%(Filename)' == 'JasperFx.Events.SourceGenerator' and $([System.String]::Copy('%(Identity)').Replace('\', '/').Contains('/fisher/'))" />
+    </ItemGroup>
+  </Target>
+</Project>

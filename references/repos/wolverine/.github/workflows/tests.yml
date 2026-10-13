@@ -1,0 +1,228 @@
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+    # A markdown-only change cannot alter a single test outcome, and this matrix costs ~211 runner-minutes
+    # per run (35 jobs). Those minutes are the binding constraint on this repo's CI, not wall clock: a merge
+    # wave on 2026-08-23 put 26 runs in the queue with 0 in progress for ~2.5 hours, which left three merges
+    # to main unverifiable for the duration. Skipping docs is the cheapest minute back. See #4033.
+    #
+    # SAFE ONLY WHILE THESE CHECKS ARE NOT REQUIRED. A required status check that never reports because its
+    # workflow was path-filtered leaves a PR permanently unmergeable -- the classic version of this mistake.
+    # Confirmed at the time of writing: `main` has no branch protection, and the only ruleset ("Copilot")
+    # carries deletion / non_fast_forward / copilot_code_review and no required_status_checks. If required
+    # checks are ever added for these jobs, this filter has to go, or gain a companion job that reports
+    # success on the skipped path.
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  workflow_dispatch:
+
+env:
+  config: Release
+  disable_test_parallelization: true
+
+jobs:
+  test:
+    name: ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # For fetch-duration-baseline.sh: downloading the previous main run's artifact crosses
+      # runs, which the default token cannot do.
+      actions: read
+    # The 20 minute cap is deliberately a REAL signal: a job that needs longer than this is a job that
+    # needs to be split, not a job that needs a bigger number. The two suites that used to blow through it
+    # (CIAWS and CIPolecat) are now sharded across parallel jobs instead. See #3350.
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          # AWS is split three ways: the SQS project is far and away the heavier of the two, so it is further
+          # split into its compliance batteries and everything else. See #3350.
+          - CIAWSSqs
+          - CIAWSSqsCompliance
+          - CIAWSSns
+          - CIAmazonS3
+          - CIAzureBlobStorage
+          # GH-4833: WolverineFx.Bobcat (net9.0) and WolverineFx.Bobcat.Http (net10.0, Alba 9) against Postgres.
+          - CIBobcat
+          # Wolverine.AzureServiceBus.Tests is one project sharded three ways by CLASS, balanced on
+          # MEASURED per-class durations. Namespaces cannot split it — 264 of its 306 tests are in the
+          # root namespace. CIAzureServiceBus is the "everything else" shard, so a newly added class
+          # still runs somewhere. It sat at 84% of the 20 minute cap as a single job. See #3790, #3350.
+          - CIAzureServiceBus
+          - CIAzureServiceBusLeader
+          - CIAzureServiceBusRouting
+          - CICosmosDb
+          - CIEfCore
+          # GH-4635: the EF suites multi-target net9.0;net10.0, but the `--framework net9.0` this
+          # workflow passes to every target meant EF Core 10 was compiled and never run. This is the
+          # EF 10 half, as its own job rather than a second framework inside CIEfCore -- the matrix is
+          # runner-MINUTE bound and the 20 minute per-job cap is there to stop a lane doubling its work.
+          - CIEfCoreNet10
+          # Fisher is an embedded SQLite file - no container, no service dependency.
+          - CIFisher
+          - CIGrpc
+          - CIKafka
+          # MartenTests is one Postgres project sharded three ways by namespace, each shard strictly
+          # sequential against a single database, balanced on MEASURED per-namespace durations. CIMarten
+          # is the "everything else" shard, so a newly added namespace still runs somewhere. Replaces the
+          # worker-lane split that got the runner OOM-killed. See #3771, #3762, #3350.
+          - CIMarten
+          - CIMartenDistribution
+          - CIMartenTenancy
+          - CIMQTT
+          - CIMQTT5
+          - CIMySql
+          - CINATS
+          - CIOracle
+          - CIOtel
+          - CIPersistence
+          # PolecatTests is one serial SqlServer project sharded three ways by namespace. CIPolecat is the
+          # "everything else" shard, so a newly added namespace still runs somewhere. See #3350.
+          - CIPolecat
+          - CIPolecatWorkflow
+          - CIPolecatSagas
+          - CIPubsub
+          - CIPulsar
+          - CIRabbitMQ
+          - CIRavenDb
+          - CIRedis
+          - CISqlite
+          - CISqlServer
+          - CICircuitBreaking
+          - CIClaimCheck
+          - CIAotSmoke
+          - CIExtensions
+          # NOTE: CISlowTests is deliberately NOT here. It is wall-clock bound by design and blew
+          # through the 20 minute cap on its first run; it lives in slow-tests.yml as a manual job.
+        # HISTORY: from 2026-08 to 2026-08-24 an `include:` block here carried per-target
+        # stall_deadline overrides for build/ci-memory-sampler.sh — a shell watchdog that sampled
+        # RSS from outside the process, guessed which pid was the test host, inferred stalls from
+        # flat memory + idle CPU, and captured async stacks before the cap could take them
+        # (#3771, #4083, #4089). Retired when Bobcat 0.8.0 moved all of it inside the supervisor
+        # (JasperFx/bobcat#145-#150), which states as facts what the watchdog inferred: the TEST
+        # in flight past its budget (named at +5 minutes, per test — no per-target deadline table
+        # to maintain), a 30s progress heartbeat, per-test RSS attribution, the pre-kill dump
+        # seam, and a partial ledger written on cancellation so a capped job is no longer
+        # unmeasured. See build/SupervisedTests.cs and build/StallCapture.cs.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      # Best-effort: feeds Supervisor.KnownTestDurations so lanes balance by measured duration
+      # instead of test count (build/TestDurations.cs). Lands OUTSIDE artifacts/ because the
+      # build's Clean wipes artifacts/ on every invocation. Nothing downstream fails when this
+      # finds nothing — the run balances by count exactly as before.
+      - name: Fetch duration baseline
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./build/fetch-duration-baseline.sh previous-durations
+
+      - name: Run Tests
+        env:
+          # Names this job in the retry ledger (build/RetryLedger.cs). GITHUB_JOB is the matrix's
+          # job id -- the same string, "test", for all thirty of these -- so it cannot be used.
+          CI_JOB_NAME: ${{ matrix.target }}
+        # Through the relay so a cancellation's SIGTERM reaches the build process's handler
+        # (build/run-with-cancellation-relay.sh) — the partial ledger and the wedged
+        # worker's async stacks both depend on it.
+        run: ./build/run-with-cancellation-relay.sh ${{ matrix.target }} --framework net9.0
+
+      # Only reachable when the runner itself survived. If the OOM killer took a *test* process
+      # rather than the runner service, the kill is recorded here and nowhere else.
+      #
+      # GH-4098: `always()`, not `failure()`. A job cancelled at the 20-minute cap is neither success
+      # nor failure, so `failure()` skipped this step on exactly the wedges it was written for --
+      # #4083's CIMarten cancellations among them.
+      - name: Kernel OOM report
+        if: always()
+        run: |
+          echo "::group::dmesg (OOM / kill events)"
+          sudo dmesg | grep -iE "out of memory|oom-kill|killed process" || echo "no OOM events in dmesg"
+          echo "::endgroup::"
+          free -m
+
+      # The per-job half of GH-3787. `if: always()` because a job that FAILED is exactly the one
+      # whose retry count is worth having -- and a job killed by the 20-minute cap uploads nothing
+      # at all, which the roll-up below reports as unmeasured rather than as clean.
+      - name: Upload retry ledger
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-ledger-${{ matrix.target }}
+          path: artifacts/test-ledger/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
+
+  # The run-level half of GH-3787. Aggregates every job's ledger into one table on the run summary
+  # and diffs it against the last `main` run that published one.
+  #
+  # This exists because the absolute retry count was never the signal: CIAzureServiceBus sat at 22 of
+  # 25 retries for four consecutive GREEN main runs, and the step from 1 to 22 between two adjacent
+  # runs was the thing worth seeing. Nowhere had that number ever been written down to compare
+  # against. Informational only -- it never fails the run.
+  flakiness:
+    name: Flakiness roll-up
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      # Fails when nothing matches, which is a legitimate state: every test job can have died before
+      # it wrote a ledger. The roll-up reports that as unmeasured, so it must survive to run.
+      - name: Download retry ledgers
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: test-ledger-*
+          path: ledgers
+          merge-multiple: false
+
+      - name: Roll up
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./build/flakiness-report.sh ledgers rollup
+
+      # This run's aggregate becomes the next run's baseline. Only from `main`: a PR's numbers are
+      # measured against main, never the other way round, or one noisy branch would move the bar.
+      - name: Publish this run's baseline
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-ledger-run
+          # Both under rollup/, so aggregate.json stays at the artifact root — the shape the
+          # baseline walk in flakiness-report.sh and fetch-duration-baseline.sh both read.
+          path: |
+            rollup/aggregate.json
+            rollup/durations/
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,725 @@
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Security.Claims;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Attributes;
+using Wolverine.Logging;
+using Wolverine.Middleware;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Codegen;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Handlers;
+
+namespace Wolverine.Configuration;
+
+public interface IModifyChain<T> where T : IChain
+{
+    void Modify(T chain, GenerationRules rules);
+}
+
+public abstract class Chain<TChain, TModifyAttribute> : IChain
+    where TChain : Chain<TChain, TModifyAttribute>
+    where TModifyAttribute : Attribute, IModifyChain<TChain>
+{
+    private readonly List<Type> _dependencies = [];
+    public abstract void ApplyParameterMatching(MethodCall call);
+    public List<Frame> Middleware { get; } = [];
+
+    public abstract MiddlewareScoping Scoping { get; }
+
+    public abstract IdempotencyStyle Idempotency { get; set; }
+
+    /// <summary>
+    ///     GH-4180. Logical message deduplication for this chain, or null for none. A real property here
+    ///     rather than the interface's default so that every chain type Wolverine ships — handler, HTTP,
+    ///     and all three gRPC flavours — round-trips a set value instead of swallowing it.
+    /// </summary>
+    public DeduplicationRequirement? Deduplication { get; set; }
+
+    /// <inheritdoc />
+    public virtual bool RequiresDeduplication() => Deduplication is not null;
+
+    /// <inheritdoc />
+    public virtual Frame[] BuildDeduplicationStopCondition(Variable condition, DeduplicationOutcome outcome,
+        DeduplicationRequirement requirement)
+        => throw new NotSupportedException(
+            $"{GetType().FullNameInCode()} does not support logical message deduplication (GH-4180)");
+
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Mirrors the <see cref="IChain" /> default as a <c>virtual</c>, for the same reason
+    ///     <see cref="ResolveDeduplicationId" /> does: a default interface member cannot be overridden from
+    ///     within the class hierarchy.
+    /// </remarks>
+    public virtual Frame BuildDeduplicationReleaseFrame(Variable deduplicationId)
+        => new ReleaseDeduplicationIdOnFailureFrame(deduplicationId, AncillaryStoreType);
+
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Mirrors the <see cref="IChain" /> default. It exists here as a <c>virtual</c> so that the chain
+    ///     types Wolverine ships can override it — a default interface member cannot be overridden by a
+    ///     class in the hierarchy, only reimplemented on the interface, which would not be picked up
+    ///     through a <see cref="Chain{TChain,TModifyAttribute}" />-typed reference.
+    /// </remarks>
+    public virtual Variable ResolveDeduplicationId(DeduplicationRequirement requirement)
+    {
+        var source = requirement.Source == ValueSource.Anything ? ValueSource.Header : requirement.Source;
+        var key = requirement.Key ?? DeduplicationRequirement.DefaultHeaderName;
+
+        if (TryFindVariable(key, source, typeof(string), out var variable))
+        {
+            return variable;
+        }
+
+        throw new InvalidOperationException(
+            $"Cannot resolve a logical deduplication id for {Description}. No {source} value named '{key}' could be found. See GH-4180");
+    }
+
+    public List<Frame> Postprocessors { get; } = [];
+
+    /// <summary>
+    ///     GH-3975. Runs after everything in <see cref="Postprocessors" />, including the transactional commit.
+    ///     See <see cref="IChain.PostCommitPostprocessors" /> for why this is a separate list rather than a
+    ///     position.
+    /// </summary>
+    public List<Frame> PostCommitPostprocessors { get; } = [];
+
+    [IgnoreDescription]
+    public Dictionary<string, object> Tags { get; } = new();
+
+    public abstract string Description { get; }
+    public List<AuditedMember> AuditedMembers { get; } = [];
+
+    /// <inheritdoc />
+    public Type? AncillaryStoreType { get; set; }
+
+    public abstract bool TryInferMessageIdentity(out PropertyInfo? property);
+
+    private int _continuationVariableCount;
+
+    /// <summary>
+    /// GH-4714. The suffix for the next continuation variable generated into THIS chain's method. Index 0
+    /// takes the bare name, so the overwhelmingly common single-frame chain generates a stable
+    /// <c>handlerContinuation</c> forever.
+    /// </summary>
+    /// <remarks>
+    /// These frames used to number from a process-wide <c>static int _count</c>, so a variable's name
+    /// depended on how many frames of that kind had been constructed EARLIER IN THE PROCESS, in other
+    /// chains. Adding one DI singleton renumbered ~48 unrelated generated handlers, which is a steady source
+    /// of merge conflicts in committed <c>Internal/Generated</c> code and makes drift gates fire on files the
+    /// author never touched. The static was also not atomic, so chains compiled concurrently could race on it.
+    /// A chain's generated code now depends only on that chain.
+    /// </remarks>
+    public virtual int NextContinuationVariableIndex()
+    {
+        return _continuationVariableCount++;
+    }
+
+    /// <summary>
+    /// Default implementation for message handlers: log validation messages and return
+    /// </summary>
+    public virtual Frame? CreateSimpleValidationFrame(Variable variable)
+    {
+        return new SimpleValidationHandlerFrame(variable, NextContinuationVariableIndex());
+    }
+
+    public virtual Frame? CreateRequirementResultFrame(Variable variable)
+    {
+        return new RequirementResultHandlerFrame(variable, NextContinuationVariableIndex());
+    }
+
+    public bool IsTransactional { get; set; }
+    public abstract bool ShouldFlushOutgoingMessages();
+    public abstract bool RequiresOutbox();
+
+    public abstract MethodCall[] HandlerCalls();
+
+    public void AddDependencyType(Type type)
+    {
+        _dependencies.Add(type);
+    }
+
+    public IReturnVariableActionSource ReturnVariableActionSource { get; set; } = new CascadingMessageActionSource();
+
+    /// <summary>
+    ///     Find all of the service dependencies of the current chain
+    /// </summary>
+    /// <param name="container"></param>
+    /// <param name="stopAtTypes"></param>
+    /// <param name="chain"></param>
+    /// <returns></returns>
+    public IEnumerable<Type> ServiceDependencies(IServiceContainer container, IReadOnlyList<Type> stopAtTypes)
+    {
+        return serviceDependencies(container, stopAtTypes).Concat(_dependencies).Distinct();
+    }
+
+    public abstract bool HasAttribute<T>() where T : Attribute;
+    public abstract Type? InputType();
+
+    /// <summary>
+    ///     Add a member of the message type to be audited during execution
+    /// </summary>
+    /// <param name="member"></param>
+    /// <param name="heading"></param>
+    public void Audit(MemberInfo member, string? heading = null)
+    {
+        AuditedMembers.Add(new AuditedMember(member, heading ?? member.Name,
+            member.Name.SplitPascalCase().Replace(' ', '.').ToLowerInvariant()));
+    }
+
+    private bool isConfigureMethod(MethodInfo method)
+    {
+        if (method.Name != "Configure")
+        {
+            return false;
+        }
+
+        var parameters = method.GetParameters();
+        if (parameters.Length != 1)
+        {
+            return false;
+        }
+
+        return typeof(TChain).CanBeCastTo(parameters.Single().ParameterType);
+    }
+
+    // Walks GetProperties + GetFields on a runtime-resolved message type to find
+    // [Audit]-decorated members. Audit attributes are opt-in; user message types
+    // that opt in are statically rooted via handler discovery (which carries
+    // RUC propagation upstream after chunk Q). Same chunk Q / R pattern.
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "[Audit] is opt-in on user message types; member walk fires at codegen time only. See AOT guide.")]
+    protected void applyAuditAttributes(Type type)
+    {
+        foreach (var property in type.GetProperties())
+        {
+            if (property.TryGetAttribute<AuditAttribute>(out var ratt))
+            {
+                Audit(property, ratt.Heading);
+            }
+        }
+
+        foreach (var field in type.GetFields())
+        {
+            if (field.TryGetAttribute<AuditAttribute>(out var ratt))
+            {
+                Audit(field, ratt.Heading);
+            }
+        }
+    }
+
+    // GetMethods on runtime-resolved handler types to find static `Configure(IChain)`
+    // methods. Handler types are statically rooted via HandlerDiscovery; this fires
+    // at codegen time only. Same chunk Q (HandlerDiscovery.actionsFromType) pattern.
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Handler-type method walk for static Configure methods at codegen time; handler types are statically rooted via HandlerDiscovery. See AOT guide.")]
+    protected void applyAttributesAndConfigureMethods(GenerationRules rules, IServiceContainer container)
+    {
+        var handlers = HandlerCalls();
+        var handlerTypes = handlers.Select(x => x.HandlerType).Distinct().ToList();
+
+        // Interface-based configuration (compile-time safe): check for IHandlerConfiguration implementors first
+        var interfaceHandled = new HashSet<Type>();
+        foreach (var handlerType in handlerTypes)
+        {
+            if (handlerType.IsAssignableTo(typeof(IHandlerConfiguration)))
+            {
+                // Invoke via interface map to call the concrete type's static implementation
+                var map = handlerType.GetInterfaceMap(typeof(IHandlerConfiguration));
+                map.TargetMethods[0].Invoke(null, [this]);
+                interfaceHandled.Add(handlerType);
+            }
+        }
+
+        // Convention-based configuration (backward compatible): skip types already handled by the interface
+        var configureMethods = handlerTypes
+            .Where(t => !interfaceHandled.Contains(t))
+            .SelectMany(x => x.GetMethods())
+            .Where(isConfigureMethod);
+
+        foreach (var method in configureMethods) method.Invoke(null, [this]);
+
+        var handlerAtts = handlers.SelectMany(x => x.HandlerType
+            .GetCustomAttributes<TModifyAttribute>());
+
+        var methodAtts = handlers.SelectMany(x => x.Method.GetCustomAttributes<TModifyAttribute>());
+
+        foreach (var attribute in handlerAtts.Concat(methodAtts)) attribute.Modify(this.As<TChain>(), rules);
+
+        var genericHandlerAtts = handlers.SelectMany(x => x.HandlerType
+            .GetCustomAttributes<ModifyChainAttribute>());
+
+        var genericMethodAtts = handlers.SelectMany(x => x.Method.GetCustomAttributes<ModifyChainAttribute>());
+
+        foreach (var attribute in genericHandlerAtts.Concat(genericMethodAtts))
+        {
+            attribute.Modify(this, rules, container);
+        }
+
+        tryApplyResponseAware();
+    }
+    
+
+    /// <summary>
+    ///     Find all variables returned by any handler call in this chain
+    ///     that can be cast to T
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public IEnumerable<Variable> ReturnVariablesOfType<T>()
+    {
+        return HandlerCalls().SelectMany(x => x.Creates).Where(x => x.VariableType.CanBeCastTo<T>());
+    }
+    
+    /// <summary>
+    ///     Find all variables returned by any handler call in this chain
+    ///     that can be cast to the supplied type
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<Variable> ReturnVariablesOfType(Type interfaceType)
+    {
+        return HandlerCalls().SelectMany(x => x.Creates).Where(x => x.VariableType.CanBeCastTo(interfaceType));
+    }
+
+    public abstract bool TryFindVariable(string valueName, ValueSource source, Type valueType, out Variable variable);
+    public abstract Frame[] AddStopConditionIfNull(Variable variable);
+
+    public virtual Frame[] AddStopConditionIfNull(Variable data, Variable? identity, IDataRequirement requirement)
+    {
+        return AddStopConditionIfNull(data);
+    }
+
+    public virtual bool IsDataRequired(IDataRequirement requirement)
+    {
+        return requirement.Required;
+    }
+
+    private static Type[] _typesToIgnore = new Type[]
+    {
+        typeof(DateOnly),
+        typeof(TimeSpan),
+        typeof(DateTimeOffset),
+        typeof(BinaryReader),
+        typeof(BinaryWriter),
+        typeof(ClaimsIdentity),
+        typeof(ClaimsPrincipal),
+        typeof(Guid),
+        typeof(byte[]),
+        typeof(decimal),
+    };
+    
+    private static bool isMaybeServiceDependency(Type type)
+    {
+        if (type.IsPrimitive) return false;
+        if (type.IsSimple()) return false;
+        if (type.IsDateTime()) return false;
+
+        if (_typesToIgnore.Contains(type)) return false;
+
+        if (type.IsNullable())
+        {
+            var innerType = type.GenericTypeArguments[0];
+            if (_typesToIgnore.Contains(innerType)) return false;
+            if (innerType.IsPrimitive) return false;
+            if (innerType.IsSimple()) return false;
+            if (innerType.IsDateTime()) return false;
+        }
+
+        if (type.IsArray)
+        {
+            return isMaybeServiceDependency(type.GetElementType()!);
+        }
+
+        if (ServiceContainer.IsEnumerable(type))
+        {
+            var elementType = type.GetGenericArguments()[0];
+            return isMaybeServiceDependency(elementType);
+        }
+
+        if (type.IsInNamespace("System.Web")) return false;
+        if (type.IsInNamespace("Microsoft.AspNetCore.Http")) return false;
+        
+        return true;
+    }
+
+    private IEnumerable<Type> serviceDependencies(IServiceContainer container, IReadOnlyList<Type> stopAtTypes)
+    {
+        var calls = Middleware.OfType<MethodCall>().Concat(HandlerCalls());
+
+        foreach (var call in calls)
+        {
+            yield return call.HandlerType;
+
+            if (!call.Method.IsStatic)
+            {
+                foreach (var type in container.ServiceDependenciesFor(call.HandlerType))
+                {
+                    yield return type;
+                }
+            }
+
+            foreach (var parameter in call.Method.GetParameters())
+            {
+                // Absolutely do NOT let the dependency discovery go into the command/input/request types
+                if (parameter.ParameterType != InputType() && isMaybeServiceDependency(parameter.ParameterType))
+                {
+                    yield return parameter.ParameterType;
+
+                    if (stopAtTypes.Contains(parameter.ParameterType))
+                    {
+                        continue;
+                    }
+
+                    if (parameter.ParameterType.Assembly != GetType().Assembly ||
+                        !stopAtTypes.Contains(parameter.ParameterType))
+                    {
+                        foreach (var dependencyType in container.ServiceDependenciesFor(parameter.ParameterType))
+                        {
+                            yield return dependencyType;
+                        }
+                    }
+                }
+            }
+
+            // Don't have to consider dependencies of a static handler
+            if (call.HandlerType.IsStatic())
+            {
+                continue;
+            }
+        }
+    }
+
+    private bool _appliedImpliedMiddleware;
+    private int _middlewareOutgoingCounter = 100;
+    
+    // GetMethods walks on runtime-resolved handler types to discover
+    // [WolverineBefore]/[WolverineAfter]/[WolverineOnException]/[WolverineFinally]
+    // attribute-marked methods. Handler types are statically rooted via
+    // HandlerDiscovery; this fires at codegen time only. Same chunk Q pattern.
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Handler-type method walks for [Wolverine*] attributes at codegen time; handler types statically rooted via HandlerDiscovery. See AOT guide.")]
+    public void ApplyImpliedMiddlewareFromHandlers(GenerationRules generationRules)
+    {
+        if (_appliedImpliedMiddleware) return;
+        _appliedImpliedMiddleware = true;
+
+        var handlerTypes = HandlerCalls().Select(x => x.HandlerType).Distinct();
+        foreach (var handlerType in handlerTypes)
+        {
+            var befores = MiddlewarePolicy.FilterMethods<WolverineBeforeAttribute>(this, handlerType.GetMethods(),
+                MiddlewarePolicy.BeforeMethodNames);
+
+            foreach (var before in befores)
+            {
+                var frame = new MethodCall(handlerType, before);
+                AddMiddleware(generationRules, frame);
+            }
+
+            var afters = MiddlewarePolicy.FilterMethods<WolverineAfterAttribute>(this, handlerType.GetMethods(),
+                MiddlewarePolicy.AfterMethodNames).ToArray();
+
+            if (afters.Any())
+            {
+                for (int i = 0; i < afters.Length; i++)
+                {
+                    var frame = new MethodCall(handlerType, afters[i]);
+                    Postprocessors.Insert(i, frame);
+                }
+            }
+
+            // GH-3975: AfterCommit methods are APPENDED to a separate list rather than inserted into
+            // Postprocessors. The commit frame is itself a postprocessor contributed by the persistence
+            // provider, so the Insert() above deliberately puts After methods BEFORE the commit; there was
+            // previously no supported way to ask for the other side of it.
+            var afterCommits = MiddlewarePolicy.FilterMethods<WolverineAfterCommitAttribute>(this,
+                handlerType.GetMethods(), MiddlewarePolicy.AfterCommitMethodNames);
+
+            foreach (var afterCommit in afterCommits)
+            {
+                var frame = new MethodCall(handlerType, afterCommit);
+                ApplyParameterMatching(frame);
+                PostCommitPostprocessors.Add(frame);
+            }
+
+            // Discover OnException methods from handler types
+            var onExceptions = MiddlewarePolicy.FilterMethods<WolverineOnExceptionAttribute>(this,
+                handlerType.GetMethods(), MiddlewarePolicy.OnExceptionMethodNames).ToArray();
+
+            foreach (var onException in onExceptions)
+            {
+                var parameters = onException.GetParameters();
+                if (parameters.Length == 0 || !typeof(Exception).IsAssignableFrom(parameters[0].ParameterType))
+                {
+                    throw new InvalidWolverineMiddlewareException(
+                        $"OnException method '{onException.Name}' on type '{handlerType.FullName}' must have an Exception type as its first parameter.");
+                }
+
+                var exceptionType = parameters[0].ParameterType;
+                var call = new MethodCall(handlerType, onException);
+                ApplyParameterMatching(call);
+                MiddlewarePolicy.DisambiguateOnExceptionReturnValue(call);
+
+                var frames = new List<Frame> { call };
+
+                var outgoings = call.Creates.Where(x => x.VariableType == typeof(OutgoingMessages)).ToArray();
+                foreach (var outgoing in outgoings)
+                {
+                    // GH-4416. This has to be the catch-SAFE frame, the same one
+                    // MiddlewarePolicy.ApplyExceptionHandling already uses for this job on a middleware
+                    // class. CaptureCascadingMessages is a MethodCall, so its FindVariables exposes the
+                    // dependency on this OnException call's return variable; the codegen arranger then
+                    // pre-links the two catch frames' Next pointers, and TryCatchFinallyFrame chains its
+                    // catch frames manually -- so that second assignment throws "Frame chain is being
+                    // re-arranged" and code generation fails outright rather than degrading.
+                    //
+                    // The emitted code is the same either way: EnqueueCascadingAsync unwraps
+                    // OutgoingMessages (and IEnumerable) internally.
+                    frames.Add(new CaptureCascadingMessagesInCatch(outgoing));
+                }
+
+                if (generationRules.TryFindContinuationHandler(this, call, out var continuation))
+                {
+                    frames.Add(continuation!);
+                }
+
+                GetOrCreateTryCatchFinallyFrame().AddCatchBlock(exceptionType, frames.ToArray());
+            }
+
+            // Discover Finally methods from handler types
+            // When there are OnException handlers, Finally goes into the TryCatchFinallyFrame
+            // Otherwise they stand alone (existing TryFinallyWrapperFrame behavior handles them from middleware)
+            var finals = MiddlewarePolicy.FilterMethods<WolverineFinallyAttribute>(this,
+                handlerType.GetMethods(), MiddlewarePolicy.FinallyMethodNames).ToArray();
+
+            if (finals.Length > 0)
+            {
+                var tryCatchFinally = GetOrCreateTryCatchFinallyFrame();
+                foreach (var final in finals)
+                {
+                    var finalCall = new MethodCall(handlerType, final);
+                    ApplyParameterMatching(finalCall);
+                    tryCatchFinally.AddFinallyBlock(finalCall);
+                }
+            }
+        }
+
+        applyDeferredMiddlewareVariables();
+    }
+
+    private void applyDeferredMiddlewareVariables()
+    {
+        const string key = "DeferredMiddlewareVariables";
+        if (!Tags.TryGetValue(key, out var raw)) return;
+        if (raw is not List<(string Name, Variable Variable)> assignments) return;
+
+        foreach (var (name, variable) in assignments)
+        {
+            foreach (var methodCall in Middleware.OfType<MethodCall>())
+            {
+                if (!methodCall.TrySetArgument(name, variable))
+                {
+                    methodCall.TrySetArgument(variable);
+                }
+            }
+        }
+    }
+
+    private TryCatchFinallyFrame? _tryCatchFinallyFrame;
+
+    public TryCatchFinallyFrame GetOrCreateTryCatchFinallyFrame()
+    {
+        if (_tryCatchFinallyFrame == null)
+        {
+            _tryCatchFinallyFrame = new TryCatchFinallyFrame();
+            Middleware.Insert(0, _tryCatchFinallyFrame);
+        }
+
+        return _tryCatchFinallyFrame;
+    }
+
+    public void AddMiddleware(GenerationRules generationRules, MethodCall frame)
+    {
+        MiddlewarePolicy.AssertMethodDoesNotHaveDuplicateReturnValues(frame);
+
+        Middleware.Add(frame);
+
+        // TODO -- might generalize this a bit. Have a more generic mode of understanding return values
+        // like the HTTP support has
+        var outgoings = frame.Creates.Where(x => x.VariableType == typeof(OutgoingMessages)).ToArray();
+        foreach (var outgoing in outgoings)
+        {
+            outgoing.OverrideName(outgoing.Usage + (++_middlewareOutgoingCounter));
+            Middleware.Add(new CaptureCascadingMessages(outgoing));
+        }
+
+        // Potentially add handling for IResult or HandlerContinuation
+        if (generationRules.TryFindContinuationHandler(this, frame, out var continuation))
+        {
+            Middleware.Add(continuation!);
+        }
+    }
+
+    public abstract void UseForResponse(MethodCall methodCall);
+
+    // Closes Applier<T> over the chain's IResponseAware return type so the static abstract
+    // ConfigureResponse hook can be invoked -- there is no non-generic way to reach a static abstract
+    // interface member, so this generic is the dispatch mechanism and cannot be replaced by taking the
+    // type as a constructor argument the way GH-4752/#4764 did for frames that only need a type identity.
+    //
+    // GH-4778: this runs at STARTUP, while the chain model is built, and it runs under
+    // TypeLoadMode.Static with the generated code already compiled in. The suppression that used to sit
+    // here claimed the opposite -- "closed ... at codegen time; user types statically rooted via handler
+    // return discovery" -- and both halves were false: the type needing the root is Applier<T> itself,
+    // which no return-type discovery ever names. That false justification is why this site survived
+    // #4764. Deleted rather than reworded, as #4764 did with its own.
+    //
+    // What makes it safe now is that `codegen write` emits a [DynamicDependency] for each closed
+    // Applier<T> into the AotRoots block (see HandlerRegistryCodeFile.buildAotRoots), so ILC has the
+    // instantiation and this close resolves. The same technique GH-4287 used for MessageRouter<T>, until
+    // GH-4848 de-genericized the routers and removed that close altogether.
+    //
+    // The suppressions stay because the call stays -- #4764 could delete its own only because it removed
+    // the CloseAndBuildAs entirely, which a static abstract member does not allow. They are justified by
+    // the emitted root, not by a claim that the close never runs.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification =
+            "The only instantiation closed here is Applier<T> over a type from ReturnVariablesOfType(typeof(IResponseAware)), and `codegen write` emits a [DynamicDependency] root for exactly those closed types (HandlerRegistryCodeFile.buildAotRoots), so the trimmer keeps them. An AOT app with no pre-generated code has no roots -- and is already unsupported, because runtime Roslyn codegen cannot run in a native image at all.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification =
+            "MakeGenericType over the closed Applier<T> needs no runtime code generation once ILC has emitted that instantiation, which the [DynamicDependency] root from `codegen write` guarantees. The arrangement MessageRouter<T> used from GH-4287 until GH-4848 removed its close.")]
+    protected internal void tryApplyResponseAware()
+    {
+        var responseAwares = ReturnVariablesOfType(typeof(IResponseAware)).ToArray();
+        if (responseAwares.Length == 0) return;
+        if (responseAwares.Length > 1)
+            throw new InvalidOperationException(
+                $"Cannot use more than one IResponseAware policy per chain. Chain {this} has {responseAwares.Select(x => x.ToString()).Join(", ")}");
+
+        typeof(Applier<>).CloseAndBuildAs<IApplier>(this, responseAwares[0].VariableType).Apply();
+
+        responseAwares[0]
+            .UseReturnAction(new CommentReturnAction(
+                $"{responseAwares[0].VariableType.FullNameInCode()} generates special response handling"));
+    }
+    
+    /// <summary>
+    /// Set to <see langword="true"/> when this chain's compiled code resolves at least one
+    /// dependency via service location (i.e., reaches into <see cref="IServiceProvider"/>
+    /// rather than receiving the dependency through a constructor / handler-method parameter).
+    /// Recorded at codegen time by <see cref="AssertServiceLocationsAreAllowed"/>.
+    ///
+    /// When a chain service-locates, the generated code creates a child scope, and Wolverine primes
+    /// that scope so a service-located <see cref="IMessageContext"/> / <see cref="IMessageBus"/>
+    /// (and integration-contributed instances such as Marten's <c>IDocumentSession</c>, via
+    /// <c>WolverineOptions.ScopingFrameSources</c>) resolves to the same instance the handler
+    /// received rather than a duplicate. See GH-3001 (which replaced the earlier AsyncLocal handoff
+    /// from GH-2583).
+    /// </summary>
+    public bool UsesServiceLocation { get; private set; }
+
+    public void AssertServiceLocationsAreAllowed(ServiceLocationReport[] reports, IServiceProvider? services)
+    {
+        if (!reports.Any()) return;
+
+        var logger = services.GetLoggerOrDefault<ICodeFile>();
+        var options = services!.GetService<WolverineOptions>() ?? new WolverineOptions();
+
+        switch (options.ServiceLocationPolicy)
+        {
+            case ServiceLocationPolicy.AllowedButWarn:
+                UsesServiceLocation = true;
+                foreach (var report in reports)
+                {
+                    if (report.ServiceDescriptor.IsKeyedService)
+                    {
+                        logger.LogWarning("Utilizing service location for {Chain} for Service {ServiceType} ({Key}): {Reason}. Under the default ServiceLocationPolicy.NotAllowed this is an error. See https://wolverinefx.net/guide/codegen.html", Description, report.ServiceDescriptor.ServiceType, report.ServiceDescriptor.ServiceKey, report.Reason);
+                    }
+                    else
+                    {
+                        logger.LogWarning("Utilizing service location for {Chain} for Service {ServiceType}: {Reason}. Under the default ServiceLocationPolicy.NotAllowed this is an error. See https://wolverinefx.net/guide/codegen.html", Description, report.ServiceDescriptor.ServiceType, report.Reason);
+                    }
+                }
+                break;
+
+            case ServiceLocationPolicy.NotAllowed:
+                throw new InvalidServiceLocationException(this, reports);
+
+            default:
+                // ServiceLocationPolicy.AlwaysAllowed — no warning, but the chain still
+                // resolves at least one dependency via service location, so flag it for
+                // the executor wrap.
+                UsesServiceLocation = true;
+                return;
+        }
+
+
+    }
+}
+
+public class InvalidServiceLocationException : Exception
+{
+    public static string ToMessage(IChain chain, ServiceLocationReport[] reports)
+    {
+        var writer = new StringWriter();
+        writer.WriteLine($"Found service locations while generating code for {chain.Description}, but {nameof(ServiceLocationPolicy)}.{nameof(ServiceLocationPolicy.NotAllowed)} is in effect (it is the default).");
+        writer.WriteLine("See https://wolverinefx.net/guide/codegen.html for more information");
+        writer.WriteLine("Service location(s):");
+        foreach (var report in reports)
+        {
+            if (report.ServiceDescriptor.IsKeyedService)
+            {
+                writer.WriteLine($"Service {report.ServiceDescriptor.ServiceType.FullNameInCode()} ({report.ServiceDescriptor.ServiceKey}): {report.Reason}");
+            }
+            else
+            {
+                writer.WriteLine($"Service {report.ServiceDescriptor.ServiceType.FullNameInCode()}: {report.Reason}");
+            }
+            
+        }
+
+        return writer.ToString();
+    }
+    
+    public InvalidServiceLocationException(IChain chain, ServiceLocationReport[] reports) : base(ToMessage(chain, reports))
+    {
+    }
+}
+
+
+
+internal interface IApplier
+{
+    void Apply();
+}
+
+/// <summary>
+///     Invokes <see cref="IResponseAware.ConfigureResponse" /> — a static abstract interface member, which can
+///     only be reached through a type parameter. GH-4778: public, not internal, solely so that
+///     <c>codegen write</c> can name a closed <c>Applier&lt;T&gt;</c> inside the <c>[DynamicDependency]</c>
+///     rooting block it emits. A type the generated file cannot see cannot appear inside a <c>typeof()</c>,
+///     and without that root ILC never emits the instantiation, so closing it at startup throws in a native
+///     image. Not intended for use by application code.
+/// </summary>
+public class Applier<T> : IApplier where T : IResponseAware
+{
+    private readonly IChain _chain;
+
+    public Applier(IChain chain)
+    {
+        _chain = chain;
+    }
+
+
+    public void Apply()
+    {
+        T.ConfigureResponse(_chain);
+    }
+}

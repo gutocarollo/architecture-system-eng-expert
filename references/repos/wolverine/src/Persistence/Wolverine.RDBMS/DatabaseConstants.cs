@@ -1,0 +1,206 @@
+﻿namespace Wolverine.RDBMS;
+
+public class DatabaseConstants
+{
+    public const string Id = "id";
+    public const string OwnerId = "owner_id";
+    public const string Destination = "destination";
+    public const string DeliverBy = "deliver_by";
+    public const string Body = "body";
+    public const string Version = "version";
+    public const string Status = "status";
+    
+    public const string ExecutionTime = "execution_time";
+    public const string Attempts = "attempts";
+    public const string Source = "source";
+    public const string MessageType = "message_type";
+
+    public const string ExceptionType = "exception_type";
+    public const string ExceptionMessage = "exception_message";
+    public const string Replayable = "replayable";
+
+    public const string OutgoingTable = "wolverine_outgoing_envelopes";
+    public const string IncomingTable = "wolverine_incoming_envelopes";
+    public const string DeadLetterTable = "wolverine_dead_letters";
+
+    public const string ControlQueueTableName = "wolverine_control_queue";
+
+    public const string NodeTableName = "wolverine_nodes";
+    public const string NodeAssignmentsTableName = "wolverine_node_assignments";
+    public const string TenantsTableName = "wolverine_tenants";
+    public const string DisabledColumn = "disabled";
+
+    public const string Timestamp = "timestamp";
+
+    public const string ReceivedAt = "received_at"; // add to all
+    public const string SentAt = "sent_at"; // add to all
+
+    public const string KeepUntil = "keep_until";
+    public const string NodeRecordTableName = "wolverine_node_records";
+
+    public const string AgentRestrictionsTableName = "wolverine_agent_restrictions";
+
+    /// <summary>
+    /// Table backing the dynamic listener registry (GH-2685). One row per
+    /// runtime-registered listener URI; the URI itself is the primary key.
+    /// Provisioned only when <c>DurabilitySettings.EnableDynamicListeners</c>
+    /// is set, so existing apps see no schema migration churn on upgrade.
+    /// </summary>
+    public const string ListenersTableName = "wolverine_listeners";
+
+    /// <summary>
+    /// GH-4180. Table backing logical message deduplication. One row per claimed
+    /// application-defined deduplication id, with its own expiry.
+    ///
+    /// <para>
+    /// Deliberately NOT a column on <see cref="IncomingTable"/>. Under
+    /// <c>DurabilitySettings.EnableInboxPartitioning</c> that table is PARTITION BY LIST (status),
+    /// and PostgreSQL will not create a unique index on a partitioned table unless the index
+    /// carries the partition key -- but marking an envelope handled UPDATEs status, which moves
+    /// the row between partitions, so a (deduplication_id, status) index would let the same
+    /// logical id exist once as Incoming and once as Handled. A separate table sidesteps the
+    /// whole problem, carries its own retention window (which has to outlive the inbox row it
+    /// came from), and means the small, hot, constantly-written inbox table never migrates for
+    /// this feature at all.
+    /// </para>
+    ///
+    /// <para>
+    /// Provisioned only when <c>DurabilitySettings.MessageDeduplicationMode</c> is
+    /// <c>CompareByString</c>. <c>CompareByHash</c> provisions
+    /// <see cref="HashedDeduplicationTableName"/> instead and never touches this one.
+    /// </para>
+    /// </summary>
+    public const string DeduplicationTableName = "wolverine_deduplication";
+
+    /// <summary>
+    /// GH-4757. Table backing logical message deduplication under
+    /// <c>MessageDeduplicationMode.CompareByHash</c>. Same job as
+    /// <see cref="DeduplicationTableName"/>, keyed on <see cref="DeduplicationHash"/> instead of on
+    /// the readable id.
+    ///
+    /// <para>
+    /// <b>A separate table rather than a reshaping of the original, and that is the whole design.</b>
+    /// Moving the primary key from <see cref="DeduplicationId"/> onto a binary column is a primary KEY
+    /// swap, which is the one thing Weasel's <c>TableDelta</c> cannot express under
+    /// <c>AutoCreate.CreateOrUpdate</c> — on SQLite it is the twelve-step table rebuild. Reshaping in
+    /// place therefore meant either a startup failure on upgrade or dropping live claims. A table Weasel
+    /// has never seen is simply created, so an application switching modes keeps the other table intact,
+    /// its claims expiring naturally on <see cref="Expires"/>, and can switch back losslessly.
+    /// </para>
+    /// </summary>
+    public const string HashedDeduplicationTableName = "wolverine_deduplication_hashed";
+
+    /// <summary>
+    /// GH-4180. The application-defined logical id, and the primary key of
+    /// <see cref="DeduplicationTableName"/>. The uniqueness of this column IS the guarantee there --
+    /// the claim is an INSERT that either succeeds or trips this constraint, never a SELECT
+    /// followed by an INSERT.
+    ///
+    /// <para>
+    /// GH-4757. On <see cref="HashedDeduplicationTableName"/> the same column carries the same value but
+    /// is a plain, NON-unique column: the key is <see cref="DeduplicationHash"/> and this is kept purely
+    /// so a stuck claim can be identified by eye. It must NOT be unique there -- a case-insensitive
+    /// collation would still refuse <c>abc</c> after <c>Abc</c> and the whole fix would be inert.
+    /// </para>
+    /// </summary>
+    public const string DeduplicationId = "deduplication_id";
+
+    /// <summary>
+    /// GH-4757. The SHA-256 of <see cref="DeduplicationId"/>'s UTF-8 bytes, and the primary key of
+    /// <see cref="HashedDeduplicationTableName"/>.
+    ///
+    /// <para>
+    /// A BINARY column, not a hex string: binary is collation-proof by TYPE, where hex would be safe
+    /// only because its alphabet happens to contain no case variants and no accented characters. The
+    /// difference matters the first time someone changes the encoding.
+    /// </para>
+    /// </summary>
+    public const string DeduplicationHash = "deduplication_hash";
+
+    public const string Expires = "expires";
+
+    /// <summary>
+    /// GH-4742. Claims for <c>[DeduplicatedWithResponse]</c> HTTP endpoints: the id, expiry, request
+    /// fingerprint and, once answered, the response. Separate from <see cref="DeduplicationTableName"/> so
+    /// that table never migrates for this feature. Provisioned only when
+    /// <c>DurabilitySettings.EnableDeduplicatedResponses</c> is set.
+    /// </summary>
+    public const string DeduplicatedResponsesTableName = "wolverine_deduplicated_responses";
+
+    public const string Fingerprint = "fingerprint";
+    public const string ClaimToken = "claim_token";
+    public const string ResponseStatusCode = "status_code";
+    public const string ResponseBody = "body";
+    public const string ResponseLocation = "location";
+
+    /// <summary>
+    /// Tracking table for recurring (cron) message schedules — one row per registered schedule,
+    /// mapping the schedule name to the envelope id(s) of its pre-scheduled next occurrence plus
+    /// pause state. Bookkeeping beside the inbox, never a delivery path: the scheduled inbox row
+    /// IS the materialized next occurrence. Provisioned only on the Main store and only when
+    /// <c>DurabilitySettings.EnableRecurringMessages</c> is set (i.e. at least one schedule is
+    /// registered), so an upgrade forces no migration on applications without the feature.
+    /// </summary>
+    public const string RecurringMessagesTableName = "wolverine_recurring_messages";
+
+    public const string ScheduleName = "schedule_name";
+    public const string CronExpression = "cron_expression";
+    public const string EnvelopeIds = "envelope_ids";
+    public const string NextOccurrence = "next_occurrence";
+    public const string Paused = "paused";
+    public const string PausedAt = "paused_at";
+
+    // GH-4446. An operator's outstanding "run now" request, cleared by the agent once it has
+    // published the manual occurrence. Nullable, so an existing table migrates by gaining a column
+    // that is null for every schedule that has never been triggered.
+    public const string TriggerRequestedAt = "trigger_requested_at";
+
+    public const string LastUpdated = "last_updated";
+
+    public static readonly string IncomingFields =
+        $"{Body}, {Id}, {Status}, {OwnerId}, {ExecutionTime}, {Attempts}, {MessageType}, {ReceivedAt}, {KeepUntil}";
+
+    public static readonly string OutgoingFields =
+        $"{Body}, {Id}, {OwnerId}, {Destination}, {DeliverBy}, {Attempts}, {MessageType}";
+
+    /// <summary>
+    /// GH-4375. Parameters the per-envelope builders add for ONE envelope. Used to work out how many
+    /// envelopes fit under a provider's parameter ceiling before a batch has to be split.
+    /// </summary>
+    /// <remarks>
+    /// Kept next to the field lists above because that is what they count, and pinned by
+    /// <c>batched_command_parameter_counts</c> so adding a column fails a test rather than silently
+    /// moving a chunk boundary. Outgoing is one fewer than its field list: <c>owner_id</c> is a single
+    /// shared parameter reused by every values-clause.
+    /// </remarks>
+    public const int IncomingParametersPerEnvelope = 9;
+
+    /// <inheritdoc cref="IncomingParametersPerEnvelope" />
+    public const int OutgoingParametersPerEnvelope = 6;
+
+    /// <summary>
+    /// Parameters the outgoing builder adds ONCE for the whole batch rather than per envelope: the
+    /// shared <c>owner_id</c>. Subtracted from the budget before dividing, or the chunk boundary lands
+    /// one envelope past what fits.
+    /// </summary>
+    public const int OutgoingSharedParameters = 1;
+
+    public static readonly string DeadLetterFields =
+        $"{Id}, {ExecutionTime}, {Body}, {MessageType}, {ReceivedAt}, {Source}, {ExceptionType}, {ExceptionMessage}, {SentAt}, {Replayable}";
+
+    public static readonly string NodeNumber = "node_number";
+    public static readonly string NodeId = "node_id";
+    public static readonly string Description = "description";
+    public static readonly string Uri = "uri";
+    public static readonly string Started = "started";
+    public static readonly string HealthCheck = "health_check";
+    public static readonly string Capabilities = "capabilities";
+
+    // GH-3959, extended to every store by GH-4593: per-node load advertisement. Deliberately NOT part of
+    // NodeColumns -- every store's readNode is a positional read over that shared list, and this column is
+    // only provisioned when DurabilitySettings.CapacityAwareAssignment asked for it. Each store appends it
+    // through its own `nodeColumns` property and reads it back by NAME rather than by ordinal.
+    public static readonly string LoadFactor = "load_factor";
+
+    public static readonly string NodeColumns = $"{Id}, {NodeNumber}, {Description}, {Uri}, {Started}, {HealthCheck}, {Version}, {Capabilities}";
+}

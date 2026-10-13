@@ -1,0 +1,241 @@
+using Microsoft.Extensions.Hosting;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Configuration;
+using Wolverine.RabbitMQ;
+using Wolverine.Runtime.Partitioning;
+
+namespace DocumentationSamples;
+
+public class PartitioningSamples
+{
+    public static async Task listening_with_partitioned_processing()
+    {
+        #region sample_configuring_partitioned_processing_on_any_listener
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            opts.UseRabbitMq();
+
+            // You still need rules for determining the message group id
+            // of incoming messages!
+            opts.MessagePartitioning
+                .ByMessage<IOrderCommand>(x => x.OrderId);
+            
+            // We're going to listen
+            opts.ListenToRabbitQueue("incoming")
+                // To really keep our system from processing Order related
+                // messages for the same order id concurrently, we'll
+                // make it so that only one node actively processes messages
+                // from this queue
+                .ExclusiveNodeWithParallelism()
+
+                // We're going to partition the message processing internally
+                // based on the message group id while allowing up to 7 parallel
+                // messages to be executed at once
+                .PartitionProcessingByGroupId(PartitionSlots.Seven);
+        });
+
+        #endregion
+    }
+    
+    public static async Task configure_local_partitioning()
+    {
+        #region sample_opting_into_local_partitioned_routing
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            opts.MessagePartitioning
+                // First, we're going to tell Wolverine how to determine the 
+                // message group id 
+                .ByMessage<IOrderCommand>(x => x.OrderId)
+
+                // Next we're setting up a publishing rule to local queues 
+                .PublishToPartitionedLocalMessaging("orders", 4, topology =>
+                {
+                    topology.MessagesImplementing<IOrderCommand>();
+                    
+                    
+                    // this feature exists
+                    topology.MaxDegreeOfParallelism = PartitionSlots.Five;
+                    
+                    // Just showing you how to make additional Wolverine configuration
+                    // for all the local queues built from this usage
+                    topology.ConfigureQueues(queue =>
+                    {
+                        queue.TelemetryEnabled(true);
+                    });
+                });
+        });
+
+        #endregion
+    }
+
+    public static async Task configure_topology_scoped_grouping()
+    {
+        #region sample_topology_scoped_grouping
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            // Invoices of one tenant share that tenant's invoice number series,
+            // so the invoice messages -- and only those -- are grouped by tenant
+            opts.MessagePartitioning.PublishToPartitionedLocalMessaging("invoices", 4, topology =>
+            {
+                topology.MessagesImplementing<IInvoiceCommand>();
+                topology.GroupByTenantId();
+            });
+
+            // The tenant rule above cannot reach these, whatever order the two are declared in
+            opts.MessagePartitioning.PublishToPartitionedLocalMessaging("orders", 4, topology =>
+            {
+                topology.MessagesImplementing<IOrderCommand>();
+                topology.GroupBy<IOrderCommand>(x => x.OrderId);
+            });
+
+            // Still reached by both topologies for any message their own rules don't match --
+            // the topology rules narrow the grouping, they don't replace this
+            opts.MessagePartitioning.UseInferredMessageGrouping();
+        });
+
+        #endregion
+    }
+
+    public class MySpecialGroupingRule : IGroupingRule
+    {
+        public bool TryFindIdentity(Envelope envelope, out string groupId)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public static async Task configuring_message_grouping_rules()
+    {
+        #region sample_configuring_message_grouping_rules
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            opts.MessagePartitioning
+                // Use saga identity or aggregate handler workflow identity
+                // from messages as the group id
+                .UseInferredMessageGrouping()
+
+                // First, we're going to tell Wolverine how to determine the 
+                // message group id for any message type that can be 
+                // cast to this interface. Also works for concrete types too
+                .ByMessage<IOrderCommand>(x => x.OrderId)
+
+                // Use the Envelope.TenantId as the message group id
+                // this could be valuable to partition work by tenant
+                .ByTenantId()
+
+                // Use a custom rule implementing IGroupingRULE with explicit code to determine
+                // the group id
+                .ByRule(new MySpecialGroupingRule());
+        });
+
+        #endregion
+    }
+
+    public static async Task configuring_by_property_name()
+    {
+        #region sample_configuring_by_property_name
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            opts.MessagePartitioning
+                // Look for a property named "StreamId" or "Id" on the message type
+                // and use its value as the GroupId for partitioned processing.
+                // The first matching property name wins.
+                // This is particularly useful when message types are auto-generated
+                // (e.g. from .proto files) and cannot implement a marker interface.
+                .ByPropertyNamed("StreamId", "Id");
+        });
+
+        #endregion
+    }
+
+    #region sample_send_message_with_group_id
+    public static async Task SendMessageToGroup(IMessageBus bus)
+    {
+        await bus.PublishAsync(
+            new ApproveInvoice("AAA"),
+            new() { GroupId = "agroup" });
+    }
+
+    #endregion
+
+    public static async Task exempting_message_types_from_partitioned_processing()
+    {
+        #region sample_exempting_message_types_from_partitioned_processing
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            opts.UseRabbitMq();
+
+            // Group all order-related messages by their order id...
+            opts.MessagePartitioning
+                .ByMessage<IOrderCommand>(x => x.OrderId)
+
+                // ...but order telemetry needs no ordering guarantees at all, so
+                // exempt it from partitioned processing. Exempted message types
+                // execute at the endpoint's normal MaxDegreeOfParallelism instead
+                // of being serialized behind a GroupId slot, so one dominant
+                // GroupId can't collapse the whole listener to sequential
+                // processing for messages that never asked for ordering.
+                // There is also an overload taking a Func<Type, bool> filter.
+                .ExemptFromPartitionedProcessing<OrderTelemetry>();
+
+            opts.ListenToRabbitQueue("incoming")
+                .PartitionProcessingByGroupId(PartitionSlots.Seven);
+        });
+
+        #endregion
+    }
+
+    public static async Task propagate_group_id_to_partition_key()
+    {
+        #region sample_propagate_group_id_to_partition_key
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            // Automatically propagate the originating message's GroupId
+            // to the PartitionKey of all cascaded outgoing messages.
+            // This is particularly useful with Kafka where you want
+            // cascaded messages to land on the same partition as the
+            // originating message without manually specifying
+            // DeliveryOptions on every outgoing message.
+            opts.Policies.PropagateGroupIdToPartitionKey();
+        });
+
+        #endregion
+    }
+}
+
+public record PayInvoice(string Id);
+
+[WolverineIgnore]
+public static class ApproveInvoiceHandler
+{
+    #region sample_using_with_group_id_as_cascading_message
+    public static IEnumerable<object> Handle(ApproveInvoice command)
+    {
+        yield return new PayInvoice(command.Id).WithGroupId("aaa");
+    }
+
+    #endregion
+}
+
+public interface IInvoiceCommand;
+
+#region sample_order_commands_for_partitioning
+public interface IOrderCommand
+{
+    public string OrderId { get; }
+}
+
+public record ApproveOrder(string OrderId) : IOrderCommand;
+public record CancelOrder(string OrderId) : IOrderCommand;
+
+#endregion
+
+public record OrderTelemetry(string OrderId, double ElapsedMilliseconds);

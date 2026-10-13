@@ -1,0 +1,99 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Marten.Linq;
+using Marten.Linq.Members;
+using Weasel.Core;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten.Schema;
+
+/// <summary>
+///     IDocumentMapping implementation for a document type that's a subclass of a parent type, and
+///     maps to the parent storage
+/// </summary>
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+public class SubClassMapping: IDocumentMapping
+{
+    public SubClassMapping(Type documentType, DocumentMapping parent, StoreOptions storeOptions,
+        string? alias = null)
+    {
+        DocumentType = documentType;
+        Inner = new DocumentMapping(documentType, storeOptions);
+        Parent = parent;
+        Alias = alias ?? GetTypeMartenAlias(documentType);
+        Aliases = new[] { Alias };
+
+        // #4916: inherit the parent's column-backed members (duplicated fields, the id column, the
+        // soft-delete flag) so a subclass query filtering on one of them hits the shared table's column
+        // instead of falling through to JSONB. Resolved lazily — the parent registers these during store
+        // compilation, after this constructor runs.
+        QueryMembers = new DocumentQueryableMemberCollection(this, storeOptions, parent.QueryMembers);
+    }
+
+    public SubClassMapping(Type documentType, DocumentMapping parent, StoreOptions storeOptions,
+        IEnumerable<MappedType> otherSubclassTypes, string? alias = null)
+        : this(documentType, parent, storeOptions, alias)
+    {
+        Aliases = otherSubclassTypes
+            .Where(
+                t =>
+                    t.Type.GetTypeInfo().IsSubclassOf(documentType) ||
+                    (documentType.GetTypeInfo().IsInterface && t.Type.GetInterfaces().Contains(documentType)) ||
+                    t.Type == documentType)
+            .Select(GetTypeMartenAlias).Concat(Aliases).ToArray();
+    }
+
+    public PropertySearching PropertySearching => Parent.PropertySearching;
+
+    public IQueryableMemberCollection QueryMembers { get; }
+
+    public DocumentMapping Inner { get; }
+
+    public DocumentMapping Parent { get; }
+
+    public string[] Aliases { get; }
+    public string Alias { get; set; }
+
+
+    public DeleteStyle DeleteStyle => Parent.DeleteStyle;
+    public bool UseVersionFromMatchingStream { get; set; }
+
+    public MemberInfo IdMember => Parent.IdMember;
+
+    IDocumentMapping IDocumentMapping.Root => Parent;
+    public Type DocumentType { get; }
+
+    public DbObjectName TableName => Parent.TableName;
+
+    public Type IdType => Parent.IdType;
+
+
+    private static string GetTypeMartenAlias(Type documentType)
+    {
+        return GetTypeMartenAlias(new MappedType(documentType));
+    }
+
+    private static string GetTypeMartenAlias(MappedType documentType)
+    {
+        var typeName = documentType.Type.Name;
+
+        if (documentType.Type.GetTypeInfo().IsGenericType)
+        {
+            typeName = documentType.Type.GetPrettyName();
+        }
+
+        return documentType.Alias ??
+               (documentType.Type.IsNested
+                   ? $"{documentType.Type.DeclaringType!.Name}.{typeName}"
+                   : typeName)
+               .Replace(".", "_")
+               .SplitCamelCase()
+               .Replace(" ", "_")
+               .ToLowerInvariant();
+    }
+}

@@ -1,0 +1,443 @@
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using JasperFx;
+using Marten;
+using Marten.Schema;
+using Marten.Testing;
+using Marten.Testing.Documents;
+using Marten.Testing.Harness;
+using Shouldly;
+using Weasel.Core;
+using Weasel.Postgresql.Tables;
+using Xunit;
+
+namespace DocumentDbTests.Indexes;
+
+public class computed_indexes: OneOffConfigurationsContext
+{
+    [Fact]
+    public async Task example()
+    {
+        #region sample_using-a-simple-calculated-index
+        var store = DocumentStore.For(_ =>
+        {
+            _.Connection(ConnectionSource.ConnectionString);
+
+            _.DatabaseSchemaName = "examples";
+
+            // This creates
+            _.Schema.For<User>().Index(x => x.UserName);
+        });
+
+        await using (var session = store.QuerySession())
+        {
+            // Postgresql will be able to use the computed
+            // index generated from above
+            var somebody = await session
+                .Query<User>()
+                .FirstOrDefaultAsync(x => x.UserName == "somebody");
+        }
+        #endregion
+
+        store.Dispose();
+    }
+
+    [Fact]
+    public async Task smoke_test()
+    {
+        StoreOptions(_ => _.Schema.For<Target>().Index(x => x.Number));
+
+        var data = Target.GenerateRandomData(100).ToArray();
+        await theStore.BulkInsertAsync(data.ToArray());
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        table.HasIndex("mt_doc_target_idx_number").ShouldBeTrue();
+
+        await using var session = theStore.QuerySession();
+        var cmd = session.Query<Target>().Where(x => x.Number == 3)
+            .ToCommand();
+
+        (await session.Query<Target>().Where(x => x.Number == data.First().Number)
+            .Select(x => x.Id).ToListAsync()).ShouldContain(data.First().Id);
+    }
+
+    [Fact]
+    public void specify_a_deep_index()
+    {
+        #region sample_deep-calculated-index
+        var store = DocumentStore.For(_ =>
+        {
+            _.Connection(ConnectionSource.ConnectionString);
+
+            _.Schema.For<Target>().Index(x => x.Inner.Color);
+        });
+        #endregion
+    }
+
+    [Fact]
+    public void specify_a_different_mechanism_to_customize_the_index()
+    {
+        #region sample_customizing-calculated-index
+        var store = DocumentStore.For(_ =>
+        {
+            _.Connection(ConnectionSource.ConnectionString);
+
+            // The second, optional argument to Index()
+            // allows you to customize the calculated index
+            _.Schema.For<Target>().Index(x => x.Number, x =>
+            {
+                // Change the index method to "brin"
+                x.Method = IndexMethod.brin;
+
+                // Force the index to be generated with casing rules
+                x.Casing = ComputedIndex.Casings.Lower;
+
+                // Override the index name if you want
+                x.Name = "mt_my_name";
+
+                // Toggle whether or not the index is concurrent
+                // Default is false
+                x.IsConcurrent = true;
+
+                // Toggle whether or not the index is a UNIQUE
+                // index
+                x.IsUnique = true;
+
+                // Toggle whether index value will be constrained unique in scope of whole document table (Global)
+                // or in a scope of a single tenant (PerTenant)
+                // Default is Global
+                x.TenancyScope = Marten.Schema.Indexing.Unique.TenancyScope.PerTenant;
+
+                // Partial index by supplying a condition
+                x.Predicate = "(data ->> 'Number')::int > 10";
+            });
+
+            // For B-tree indexes, it's also possible to change
+            // the sort order from the default of "ascending"
+            _.Schema.For<User>().Index(x => x.LastName, x =>
+            {
+                // Change the sort order to descending
+                x.SortOrder = SortOrder.Desc;
+            });
+        });
+        #endregion
+    }
+
+
+
+    [Fact]
+    public async Task create_multi_property_index()
+    {
+        StoreOptions(_ =>
+        {
+            var columns = new Expression<Func<Target, object>>[]
+            {
+                x => x.UserId,
+                x => x.Flag
+            };
+            _.Schema.For<Target>().Index(columns);
+        });
+
+        var data = Target.GenerateRandomData(100).ToArray();
+        await theStore.BulkInsertAsync(data.ToArray());
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_user_idflag");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_user_idflag ON computed_indexes.mt_doc_target USING btree (CAST(data ->> 'UserId' as uuid), CAST(data ->> 'Flag' as boolean));");
+    }
+
+    public static void configuration_samples()
+    {
+        #region sample_multi_column_index
+
+        var store = DocumentStore.For(opts =>
+        {
+            // This creates a single index against both FirstName and ListName
+            opts.Schema.For<User>().Index(x => new { x.FirstName, x.LastName });
+        });
+
+        #endregion
+    }
+
+    [Fact]
+    public async Task create_multi_property_index_with_complex_expression()
+    {
+        StoreOptions(_ =>
+        {
+            var columns = new Expression<Func<Target, object>>[]
+            {
+                x => x.UserId,
+                x => x.Flag
+            };
+            _.Schema.For<Target>().Index(x => new {x.UserId, x.Flag});
+        });
+
+        var data = Target.GenerateRandomData(100).ToArray();
+        await theStore.BulkInsertAsync(data.ToArray());
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_user_idflag");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_user_idflag ON computed_indexes.mt_doc_target USING btree (CAST(data ->> 'UserId' as uuid), CAST(data ->> 'Flag' as boolean));");
+    }
+
+    [Fact]
+    public async Task fsharp_date_related_options_indexes_are_created()
+    {
+        /* In this test, we ensure that the indexes can be created without error.
+          There was a bug such that the family of immutable functions  mt_immutable_timestamp & Cie weren't used which resulted in an exception when the
+          index definition was executed in postgresql.
+        */
+
+        StoreOptions(_ =>
+        {
+            _.RegisterFSharpOptionValueTypes();
+            var columns = new Expression<Func<Target, object>>[]
+            {
+                x => x.FSharpDateOption,
+                x => x.FSharpDateOnlyOption,
+                x => x.FSharpTimeOnlyOption,
+                x => x.FSharpDateTimeOffsetOption,
+            };
+            _.Schema.For<Target>().Index(columns, opt =>
+            {
+                opt.Name = "mt_doc_target_idx_fsharp_date_options";
+            });
+        });
+
+        var data = Target.GenerateRandomData(100).ToArray();
+        await theStore.BulkInsertAsync(data.ToArray());
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_fsharp_date_options");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_fsharp_date_options ON computed_indexes.mt_doc_target USING btree (computed_indexes.mt_immutable_timestamp((data ->> 'FSharpDateOption')), computed_indexes.mt_immutable_date((data ->> 'FSharpDateOnlyOption')), computed_indexes.mt_immutable_time((data ->> 'FSharpTimeOnlyOption')), computed_indexes.mt_immutable_timestamptz((data ->> 'FSharpDateTimeOffsetOption')));");
+
+    }
+
+    [Fact]
+    public async Task create_multi_property_string_index_with_casing()
+    {
+        StoreOptions(_ =>
+        {
+            var columns = new Expression<Func<Target, object>>[]
+            {
+                x => x.String,
+                x => x.StringField
+            };
+            _.Schema.For<Target>().Index(columns, c => c.Casing = ComputedIndex.Casings.Upper);
+        });
+
+        var data = Target.GenerateRandomData(100).ToArray();
+        await theStore.BulkInsertAsync(data.ToArray());
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_stringstring_field");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_stringstring_field ON computed_indexes.mt_doc_target USING btree (upper((data ->> 'String')), upper((data ->> 'StringField')));");
+    }
+
+    [Fact]
+    public async Task creating_index_using_date_should_work()
+    {
+        StoreOptions(_ =>
+        {
+            _.Schema.For<ApiResponseRecord>().Index(x => x.RequestTimeUtc);
+            _.AutoCreateSchemaObjects = AutoCreate.All;
+        });
+        var diff = await theStore.Storage.Database.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.CreateOrUpdate);
+
+        diff.ShouldBe(SchemaPatchDifference.Create);
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(ApiResponseRecord));
+        var index = table.IndexFor("mt_doc_apiresponserecord_idx_request_time_utc");
+
+        index.ShouldNotBeNull();
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_apiresponserecord_idx_request_time_utc ON computed_indexes.mt_doc_apiresponserecord USING btree (computed_indexes.mt_immutable_timestamp((data ->> 'RequestTimeUtc')));");
+
+        using var otherStore = SeparateStore(_ =>
+        {
+            _.Schema.For<ApiResponseRecord>().Index(x => x.RequestTimeUtc);
+            _.AutoCreateSchemaObjects = AutoCreate.All;
+        });
+
+        var diff2 = await otherStore.Storage.Database.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.CreateOrUpdate);
+        diff2.ShouldBe(SchemaPatchDifference.None);
+    }
+
+    [Fact]
+    public async Task create_index_with_custom_name()
+    {
+        StoreOptions(_ => _.Schema.For<Target>().Index(x => x.String, x =>
+        {
+            x.Name = "mt_banana_index_created_by_nigel";
+        }));
+
+        var testString = "MiXeD cAsE sTrInG";
+
+        await using (var session = theStore.LightweightSession())
+        {
+            var item = Target.GenerateRandomData(1).First();
+            item.String = testString;
+            session.Store(item);
+            await session.SaveChangesAsync();
+        }
+
+        (await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target)))
+            .HasIndex("mt_banana_index_created_by_nigel");
+
+    }
+
+
+    [Fact]
+    public async Task patch_if_missing()
+    {
+        using (var store1 = SeparateStore())
+        {
+            await store1.Advanced.Clean.CompletelyRemoveAllAsync();
+
+            await store1.EnsureStorageExistsAsync(typeof(Target));
+        }
+
+        using (var store2 = DocumentStore.For(_ =>
+               {
+                   _.Connection(ConnectionSource.ConnectionString);
+                   _.Schema.For<Target>().Index(x => x.Number);
+               }))
+        {
+            var patch = await store2.Storage.Database.CreateMigrationAsync();
+
+            patch.UpdateSql().ShouldContain( "mt_doc_target_idx_number", Case.Insensitive);
+        }
+    }
+
+    [Fact]
+    public async Task create_index_on_collection()
+    {
+        StoreOptions(_ => _.Schema.For<Target>().Index(x => x.StringList));
+
+        await using (var session = theStore.LightweightSession())
+        {
+            var item = Target.GenerateRandomData(1).First();
+            item.StringList.Add("item1");
+            item.StringList.Add("item2");
+            session.Store(item);
+            await session.SaveChangesAsync();
+        }
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_string_list");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_string_list ON computed_indexes.mt_doc_target USING btree (CAST(data ->> 'StringList' as jsonb));");
+
+    }
+
+    [Fact]
+    public async Task create_multi_index_including_collection()
+    {
+        var columns = new Expression<Func<Target, object>>[]
+        {
+            x => x.UserId,
+            x => x.StringList
+        };
+
+        StoreOptions(_ => _.Schema.For<Target>().Index(columns));
+
+        await using (var session = theStore.LightweightSession())
+        {
+            var item = Target.GenerateRandomData(1).First();
+            item.UserId = Guid.NewGuid();
+            item.StringList.Add("item1");
+            item.StringList.Add("item2");
+            session.Store(item);
+            await session.SaveChangesAsync();
+        }
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Target));
+        var index = table.IndexFor("mt_doc_target_idx_user_idstring_list");
+
+        index.ToDDL(table).ShouldBe("CREATE INDEX mt_doc_target_idx_user_idstring_list ON computed_indexes.mt_doc_target USING btree (CAST(data ->> 'UserId' as uuid), CAST(data ->> 'StringList' as jsonb));");
+    }
+}
+
+public class ApiResponseRecord
+{
+    public Guid Id { get; set; }
+    public string Request { get; set; }
+    public string Response { get; set; }
+    public DateTime RequestTimeUtc { get; set; }
+}
+
+public class computed_indexes_jsonpropertyname : OneOffConfigurationsContext
+{
+    [Fact]
+    public async Task datetimeoffset_index_ddl_uses_json_property_name()
+    {
+        StoreOptions(_ =>
+        {
+            _.UseSystemTextJsonForSerialization(EnumStorage.AsInteger, Casing.Default);
+            _.Schema.For<Bug4253Doc>().Index(x => x.Timestamp, c => c.Name = "idx_b4253_ts");
+            _.AutoCreateSchemaObjects = AutoCreate.All;
+        });
+
+        await theStore.Storage.Database.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.CreateOrUpdate);
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Bug4253Doc));
+        var index = table.IndexFor("idx_b4253_ts");
+
+        index.ShouldNotBeNull();
+        var ddl = index.ToDDL(table);
+
+        // Must reference the JSON key 'ts' from [JsonPropertyName], not the C# name 'Timestamp'
+        ddl.ShouldContain("'ts'");
+        ddl.ShouldNotContain("'Timestamp'");
+    }
+
+    [Fact]
+    public async Task datetimeoffset_required_init_index_ddl_uses_json_property_name()
+    {
+        StoreOptions(_ =>
+        {
+            _.UseSystemTextJsonForSerialization(EnumStorage.AsInteger, Casing.Default);
+            _.Schema.For<Bug4253RequiredInitDoc>().Index(x => x.Timestamp, c => c.Name = "idx_b4253_req_ts");
+            _.AutoCreateSchemaObjects = AutoCreate.All;
+        });
+
+        await theStore.Storage.Database.ApplyAllConfiguredChangesToDatabaseAsync(AutoCreate.CreateOrUpdate);
+
+        var table = await theStore.Tenancy.Default.Database.ExistingTableFor(typeof(Bug4253RequiredInitDoc));
+        var index = table.IndexFor("idx_b4253_req_ts");
+
+        index.ShouldNotBeNull();
+        var ddl = index.ToDDL(table);
+
+        ddl.ShouldContain("'ts'");
+        ddl.ShouldNotContain("'Timestamp'");
+    }
+}
+
+public class Bug4253Doc
+{
+    public Guid Id { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("ts")]
+    public DateTimeOffset Timestamp { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("auid")]
+    public int ActorUserId { get; set; }
+}
+
+public class Bug4253RequiredInitDoc
+{
+    public Guid Id { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("ts")]
+    public required DateTimeOffset Timestamp { get; init; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("auid")]
+    public required int ActorUserId { get; init; }
+}

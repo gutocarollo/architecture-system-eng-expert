@@ -1,0 +1,414 @@
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.IoC;
+using JasperFx.Core.Reflection;
+using JasperFx.Events.Subscriptions;
+using Marten;
+using Marten.Events.Daemon.Coordination;
+using Marten.Internal;
+using Marten.Storage;
+using Marten.Subscriptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.Postgresql;
+using Wolverine.Marten.Distribution;
+using Wolverine.Marten.Publishing;
+using Wolverine.Runtime.Agents;
+using Wolverine.Marten.Subscriptions;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Postgresql;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.MultiTenancy;
+using Wolverine.Runtime;
+
+namespace Wolverine.Marten;
+
+public class AncillaryMartenIntegration
+{
+    /// <summary>
+    /// Optionally move the Wolverine envelope storage to a separate schema.
+    /// The recommendation would be to either leave this null, or use the same
+    /// schema name as the main Marten store
+    /// </summary>
+    public string? SchemaName { get; set; }
+    
+    /// <summary>
+    ///     In the case of Marten using a database per tenant, you may wish to
+    ///     explicitly determine the master database for Wolverine where Wolverine will store node and envelope information.
+    ///     This does not have to be one of the tenant databases
+    ///     Wolverine will try to use the master database from the Marten configuration when possible
+    /// </summary>
+    public string? MainConnectionString { get; set; }
+    
+    /// <summary>
+    ///     In the case of Marten using a database per tenant, you may wish to
+    ///     explicitly determine the master database for Wolverine where Wolverine will store node and envelope information.
+    ///     This does not have to be one of the tenant databases
+    ///     Wolverine will try to use the master database from the Marten configuration when possible
+    /// </summary>
+    public NpgsqlDataSource? MainDataSource { get; set; }
+    
+    /// <summary>
+    /// Optionally override whether to automatically create message database schema objects. Defaults to <see cref="StoreOptions.AutoCreateSchemaObjects"/>.
+    /// </summary>
+    public AutoCreate? AutoCreate { get; set; }
+
+    /// <summary>
+    /// Opt into Wolverine-managed distribution of this store's async projections and event
+    /// subscriptions (GH-3438), mirroring the main store's
+    /// <see cref="MartenIntegration.UseWolverineManagedEventSubscriptionDistribution"/>. This is what an
+    /// ancillary-only host — one with no main <c>AddMarten</c> that already enables it — must set to run
+    /// managed distribution and to expose the store to tooling (e.g. CritterWatch's projection admin)
+    /// that resolves the agent family through <c>IEventSubscriptionAgentFamily</c>. When a main store
+    /// already enables it, that registration wins and setting it here is redundant but harmless.
+    /// </summary>
+    public bool UseWolverineManagedEventSubscriptionDistribution { get; set; }
+
+    internal void AssertValidity()
+    {
+        if (SchemaName.IsNotEmpty() && SchemaName != SchemaName.ToLowerInvariant())
+        {
+            throw new ArgumentOutOfRangeException(nameof(SchemaName),
+                "The schema name must be in all lower case characters");
+        }
+    }
+}
+
+public static class AncillaryWolverineOptionsMartenExtensions
+{
+    /// <summary>
+    ///     Integrate Marten with Wolverine's persistent outbox and add Marten-specific middleware
+    ///     to Wolverine
+    /// </summary>
+    /// <param name="configure">Optional configuration of ancillary Marten integration</param>
+    public static MartenServiceCollectionExtensions.MartenStoreExpression<T> IntegrateWithWolverine<T>(
+        this MartenServiceCollectionExtensions.MartenStoreExpression<T> expression, 
+        Action<AncillaryMartenIntegration>? configure = null) where T : class, IDocumentStore
+    {
+        var integration = new AncillaryMartenIntegration();
+        configure?.Invoke(integration);
+        integration.AssertValidity();
+
+        // GH-4456: the codegen strategies, chain policies and handler discovery rules that make Marten
+        // usable from a handler are a fact about Marten being in the application, not about the main
+        // store -- so an ancillary store has to establish them too. Before this, a host whose only Marten
+        // stores were ancillary never registered MartenPersistenceFrameProvider at all: [Entity] and its
+        // siblings silently resolved to the catch-all InMemoryPersistenceFrameProvider, read the document
+        // out of a dictionary nothing populates, and the not-null guard stopped the chain before the
+        // handler ran. Idempotent, so a host that also has a main store is unaffected in either call order.
+        expression.Services.AddCoreMartenWiring(null);
+
+        expression.Services.AddSingleton<IConfigureMarten<T>, MartenOverrides<T>>();
+
+        expression.Services.AddSingleton<AncillaryMessageStore>(s =>
+        {
+            var store = s.GetRequiredService<T>().As<DocumentStore>();
+
+            var runtime = s.GetRequiredService<IWolverineRuntime>();
+            var logger = s.GetRequiredService<ILogger<PostgresqlMessageStore>>();
+
+            integration.SchemaName ??= runtime.Options.Durability.MessageStorageSchemaName ?? store.Options.DatabaseSchemaName;
+
+            // Dispatch on database cardinality, mirroring the main-store integration. The old
+            // exact-type-name check ("DefaultTenancy") misrouted Marten's
+            // TenantPartitionedSingleDatabaseTenancy (marten#4864, a DefaultTenancy subclass for
+            // single-database stores with UseTenantPartitionedEvents) to the multi-tenanted
+            // message-database path, which then failed for lack of a master database.
+            if (store.Tenancy.Cardinality == JasperFx.Descriptors.DatabaseCardinality.Single)
+            {
+                return BuildSinglePostgresqlMessageStore<T>(integration.SchemaName, integration.AutoCreate, store, runtime, logger);
+            }
+
+            return BuildMultiTenantedMessageDatabase<T>(integration.SchemaName, integration.AutoCreate, integration.MainConnectionString, integration.MainDataSource, store, runtime);
+        });
+
+        expression.Services.AddType(typeof(IDatabaseSource), typeof(MessageDatabaseDiscovery),
+            ServiceLifetime.Singleton);
+
+        // The concrete family already takes IEnumerable<IEventStore>, so one instance manages every
+        // registered store including the ancillaries.
+        expression.Services.AddSingleton<EventSubscriptionAgentFamily>();
+
+        // GH-3438: the main-store integration aliases the family to IAgentFamily /
+        // IEventSubscriptionAgentFamily, but an ancillary-only host has no main integration to do that,
+        // so managed distribution and any tooling resolving the family through those interfaces get
+        // nothing. Register the aliases from here too when managed distribution is opted in. TryAdd so
+        // that a main store which already aliased them wins and we don't double-register (one family
+        // instance covers all stores either way). Gated on the flag because NodeAgentController
+        // distributes the agents of every registered IAgentFamily — an ancillary host that never asked
+        // for managed distribution must not suddenly start distributing.
+        if (integration.UseWolverineManagedEventSubscriptionDistribution)
+        {
+            expression.Services.TryAddSingleton<IAgentFamily>(s => s.GetRequiredService<EventSubscriptionAgentFamily>());
+            expression.Services.TryAddSingleton<IEventSubscriptionAgentFamily>(s => s.GetRequiredService<EventSubscriptionAgentFamily>());
+        }
+
+        expression.Services.AddSingleton<IProjectionCoordinator<T>>(s =>
+        {
+            var mainIntegration = s.GetService<MartenIntegration>();
+            var store = s.GetRequiredService<T>();
+
+            // Managed when the main store opted in (main+ancillary), or when this ancillary store did
+            // (ancillary-only) — the captured integration carries the ancillary flag.
+            var managed = integration.UseWolverineManagedEventSubscriptionDistribution
+                          || (mainIntegration?.UseWolverineManagedEventSubscriptionDistribution ?? false);
+
+            if (!managed)
+            {
+                return new ProjectionCoordinator<T>(store, s.GetRequiredService<ILogger<ProjectionCoordinator>>());
+            }
+
+            var agents = s.GetRequiredService<EventSubscriptionAgentFamily>();
+            return new WolverineProjectionCoordinator<T>(agents, store);
+        });
+        
+        // Limitation is that the wolverine objects go in the same schema
+        
+        expression.Services.AddSingleton<OutboxedSessionFactory<T>>();
+
+        return expression;
+    }
+
+    internal static NpgsqlDataSource findMasterDataSource(DocumentStore store,
+        DatabaseSettings masterSettings) 
+    {
+        if (store.Tenancy is ITenancyWithMasterDatabase m) return m.TenantDatabase.DataSource;
+
+        if (masterSettings.DataSource != null) return (NpgsqlDataSource)masterSettings.DataSource;
+
+        if (masterSettings.ConnectionString.IsNotEmpty()) return NpgsqlDataSource.Create(masterSettings.ConnectionString);
+
+        throw new InvalidOperationException(
+                   "There is no configured connectivity for the required master PostgreSQL message database");
+    }
+
+    internal static AncillaryMessageStore BuildMultiTenantedMessageDatabase<T>(string schemaName,
+        AutoCreate? autoCreate,
+        string? masterDatabaseConnectionString,
+        NpgsqlDataSource? masterDataSource,
+        DocumentStore store,
+        IWolverineRuntime runtime) where T : IDocumentStore
+    {
+        var mainSettings = new DatabaseSettings
+        {
+            ConnectionString = masterDatabaseConnectionString,
+            SchemaName = schemaName,
+            AutoCreate = autoCreate ?? store.Options.AutoCreateSchemaObjects,
+            Role = MessageStoreRole.Ancillary,
+            CommandQueuesEnabled = true,
+            DataSource = masterDataSource
+        };
+
+        var dataSource = findMasterDataSource(store, mainSettings);
+        var master = new PostgresqlMessageStore(mainSettings, runtime.Options.Durability, dataSource,
+            runtime.LoggerFactory.CreateLogger<PostgresqlMessageStore>())
+        {
+            Name = "Master",
+            SubjectUri = new Uri($"wolverine://messages/{typeof(T).Name.ToLowerInvariant()}")
+        };
+
+        var source = new MartenMessageDatabaseSource<T>(schemaName, autoCreate ?? store.Options.AutoCreateSchemaObjects, store.As<T>(), runtime);
+
+        master.Initialize(runtime);
+
+        return new(typeof(T), new MultiTenantedMessageStore(master, runtime, source));
+    }
+
+    internal static AncillaryMessageStore BuildSinglePostgresqlMessageStore<T>(
+        string schemaName, 
+        AutoCreate? autoCreate,
+        DocumentStore store,
+        IWolverineRuntime runtime, 
+        ILogger<PostgresqlMessageStore> logger) where T : IDocumentStore
+    {
+        var settings = new DatabaseSettings
+        {
+            SchemaName = schemaName,
+            AutoCreate = autoCreate ?? store.Options.AutoCreateSchemaObjects,
+            Role = MessageStoreRole.Ancillary,
+            ScheduledJobLockId = $"{schemaName ?? "public"}:scheduled-jobs".GetDeterministicHashCode()
+        };
+
+        var dataSource = store.Storage.Database.As<PostgresqlDatabase>().DataSource;
+
+        var messageStore = new PostgresqlMessageStore(settings, runtime.Options.Durability, dataSource, logger);
+        messageStore.SubjectUri = new Uri($"wolverine://messages/{typeof(T).Name.ToLowerInvariant()}");
+
+        return new(typeof(T), messageStore);
+    }
+
+    /// <summary>
+    /// Register a custom subscription that will process a batch of Marten events at a time with
+    /// a user defined action
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="subscription"></param>
+    /// <returns></returns>
+    public static MartenServiceCollectionExtensions.MartenStoreExpression<T> SubscribeToEvents<T>(
+        this MartenServiceCollectionExtensions.MartenStoreExpression<T> expression,
+        IWolverineSubscription subscription) where T : class, IDocumentStore
+    {
+        expression.Services.SubscribeToEvents<T>(subscription);
+        return expression;
+    }
+
+    /// <summary>
+    /// Register a custom subscription that will process a batch of Marten events at a time with
+    /// a user defined action
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="subscription"></param>
+    /// <returns></returns>
+    public static IServiceCollection SubscribeToEvents<T>(this IServiceCollection services, IWolverineSubscription subscription) where T : IDocumentStore
+    {
+        services.ConfigureMarten<T>((sp, opts) =>
+        {
+            var runtime = sp.GetRequiredService<IWolverineRuntime>();
+            opts.Projections.Subscribe(new WolverineSubscriptionRunner(subscription, runtime));
+        });
+
+        return services;
+    }
+    
+    /// <summary>
+    /// Register a custom subscription that will process a batch of Marten events at a time with
+    /// a user defined action
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="lifetime">Service lifetime of the subscription class within the application's IoC container
+    /// <returns></returns>
+    public static MartenServiceCollectionExtensions.MartenStoreExpression<T> SubscribeToEventsWithServices<T, TSubscription>(
+        this MartenServiceCollectionExtensions.MartenStoreExpression<T> expression, ServiceLifetime lifetime) where TSubscription : class, IWolverineSubscription where T : class, IDocumentStore
+    {
+        expression.Services.SubscribeToEventsWithServices<T, TSubscription>(lifetime);
+
+        return expression;
+    }
+
+    /// <summary>
+    /// Add a subscription built by the IoC container to a separate Marten IDocumentStore
+    /// </summary>
+    /// <param name="lifetime"></param>
+    /// <param name="services"></param>
+    /// <typeparam name="TStore">The marker type for the separate Marten document store</typeparam>
+    /// <typeparam name="TSubscription">The subscription type</typeparam>
+    /// <returns></returns>
+    public static IServiceCollection SubscribeToEventsWithServices<TStore, TSubscription>(this IServiceCollection services, ServiceLifetime lifetime)
+        where TSubscription : class, IWolverineSubscription
+        where TStore : IDocumentStore
+    {
+        switch (lifetime)
+        {
+            case ServiceLifetime.Singleton:
+                services.AddSingleton<TSubscription>();
+                services.ConfigureMarten<TStore>((sp, opts) =>
+                {
+                    var subscription = sp.GetRequiredService<TSubscription>();
+                    var runtime = sp.GetRequiredService<IWolverineRuntime>();
+                    opts.Projections.Subscribe(new WolverineSubscriptionRunner(subscription, runtime));
+                });
+                break;
+
+            default:
+                services.AddScoped<TSubscription>();
+                services.ConfigureMarten<TStore>((sp, opts) =>
+                {
+                    var runtime = sp.GetRequiredService<IWolverineRuntime>();
+                    opts.Projections.Subscribe(new ScopedWolverineSubscriptionRunner<TSubscription>(sp, runtime));
+                });
+                break;
+        }
+
+        return services;
+    }
+
+    /// <summary>
+    /// Create a subscription for Marten events to be processed in strict order by Wolverine
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="subscriptionName">Descriptive name for this event subscription for tracking with Marten</param>
+    /// <param name="configure">Fine tune the asynchronous daemon behavior of this subscription</param>
+    /// <returns></returns>
+    public static MartenServiceCollectionExtensions.MartenStoreExpression<T> ProcessEventsWithWolverineHandlersInStrictOrder<T>(
+        this MartenServiceCollectionExtensions.MartenStoreExpression<T> expression,
+        string subscriptionName, Action<ISubscriptionOptions>? configure = null) where T : class, IDocumentStore
+    {
+        expression.Services.ProcessEventsWithWolverineHandlersInStrictOrder<T>(subscriptionName, configure);
+
+        return expression;
+    }
+
+    /// <summary>
+    /// Create a subscription for Marten events to be processed in strict order by Wolverine
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="subscriptionName">Descriptive name for this event subscription for tracking with Marten</param>
+    /// <param name="configure">Fine tune the asynchronous daemon behavior of this subscription</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static IServiceCollection ProcessEventsWithWolverineHandlersInStrictOrder<T>(this IServiceCollection services,
+        string subscriptionName, Action<ISubscriptionOptions>? configure) where T : IDocumentStore
+    {
+        if (subscriptionName.IsEmpty()) throw new ArgumentNullException(nameof(subscriptionName));
+        services.ConfigureMarten<T>((sp, opts) =>
+        {
+            var runtime = sp.GetRequiredService<IWolverineRuntime>();
+
+            var invoker = new InlineInvoker(subscriptionName, runtime);
+            var subscription = new WolverineSubscriptionRunner(invoker, runtime);
+
+            configure?.Invoke(subscription);
+
+            opts.Projections.Subscribe(subscription);
+        });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Relay events captured by Marten to Wolverine message publishing
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="subscriptionName">Descriptive name for this event subscription for tracking with Marten</param>
+    /// <param name="configure">Fine tune the asynchronous daemon behavior of this subscription</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static MartenServiceCollectionExtensions.MartenStoreExpression<T> PublishEventsToWolverine<T>(
+        this MartenServiceCollectionExtensions.MartenStoreExpression<T> expression,
+        string subscriptionName, Action<IPublishingRelay>? configure = null) where T : class, IDocumentStore
+    {
+        expression.Services.PublishEventsToWolverine<T>(subscriptionName, configure);
+
+        return expression;
+    }
+
+    /// <summary>
+    /// Relay events captured by Marten to Wolverine message publishing
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="subscriptionName">Descriptive name for this event subscription for tracking with Marten</param>
+    /// <param name="configure">Fine tune the asynchronous daemon behavior of this subscription</param>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static IServiceCollection PublishEventsToWolverine<T>(this IServiceCollection services, string subscriptionName, Action<IPublishingRelay>? configure) where T : IDocumentStore
+    {
+        if (subscriptionName.IsEmpty()) throw new ArgumentNullException(nameof(subscriptionName));
+        services.ConfigureMarten<T>((sp, opts) =>
+        {
+            var runtime = sp.GetRequiredService<IWolverineRuntime>();
+
+            var relay = new PublishingRelay(subscriptionName, opts.Events.TenancyStyle);
+            configure?.Invoke(relay);
+
+            var subscription = new WolverineSubscriptionRunner(relay, runtime);
+
+            opts.Projections.Subscribe(subscription);
+        });
+
+        return services;
+    }
+}

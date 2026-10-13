@@ -1,0 +1,141 @@
+using IntegrationTests;
+
+namespace KafkaPerfRig;
+
+/// <summary>
+/// All rig knobs come from environment variables so rig.sh can define a scenario as a
+/// one-line env prefix. Every value has a default that produces the GH-3490 client-shaped
+/// baseline when run as-is.
+/// </summary>
+public class RigConfig
+{
+    public string BootstrapServers { get; } = env("RIG_BOOTSTRAP", "localhost:9092");
+    public string RunId { get; } = env("RIG_RUN_ID", "dev");
+
+    // Topics are suffixed with the run id so every run starts on fresh topics and
+    // AutoOffsetReset=Earliest can never replay a previous run's records.
+    public string SmallTopic => $"rig.small.{RunId}";
+    public string LargeTopic => $"rig.large.{RunId}";
+
+    public int Partitions { get; } = envInt("RIG_PARTITIONS", 12);
+
+    // Client shape: 1Kb flow at ~8/s, 100Kb flow at ~0.6/s
+    public double SmallRate { get; } = envDouble("RIG_SMALL_RATE", 8.0);
+    public double LargeRate { get; } = envDouble("RIG_LARGE_RATE", 0.6);
+    public int Games { get; } = envInt("RIG_GAMES", 20);
+
+    public int WarmupSeconds { get; } = envInt("RIG_WARMUP_S", 30);
+    public int DurationSeconds { get; } = envInt("RIG_DURATION_S", 120);
+
+    // wolverine consumer endpoint mode: buffered | durable | inline
+    public string ConsumerMode { get; } = env("RIG_MODE", "buffered");
+
+    // wolverine publisher sending: batched | inline
+    public string SendMode { get; } = env("RIG_SEND_MODE", "batched");
+    public int BatchSize { get; } = envInt("RIG_BATCH_SIZE", 10);
+    public int BatchTimeoutMs { get; } = envInt("RIG_BATCH_TIMEOUT_MS", 10);
+
+    // simulated handler work in ms (client's native handler p50 was ~9ms); 0 = no-op handler
+    public int HandlerMs { get; } = envInt("RIG_HANDLER_MS", 9);
+
+    // sequencing shape inside the consumer: none | semaphore (client-shaped per-game SemaphoreSlim)
+    public string Sequencing { get; } = env("RIG_SEQ", "semaphore");
+
+    // 0 = leave Wolverine's default (max(ProcessorCount, 5))
+    public int MaxParallel { get; } = envInt("RIG_MAX_PARALLEL", 0);
+
+    public string OutDir { get; } = env("RIG_OUT", Path.Combine("rig-results", env("RIG_RUN_ID", "dev")));
+
+    public string PostgresSchema { get; } = env("RIG_PG_SCHEMA", "kafka_rig");
+
+    // GH-4319. Durable local queue publishes now coalesce into one batched inbox INSERT.
+    // 0 leaves Wolverine's default (100); 1 gives every publish its own round trip, which is the
+    // pre-GH-4319 shape reproduced INSIDE the same build -- the A/B this lane exists for.
+    public int StoreIncomingBatchSize { get; } = envInt("RIG_STORE_BATCH", 0);
+
+    // 0 = leave the endpoint's default listener count
+    public int ListenerCount { get; } = envInt("RIG_LISTENER_COUNT", 0);
+
+    // GH-3492 RO6: per-endpoint consumer dispatch concurrency. 0 leaves the transport-wide default.
+    public int DispatchConcurrency { get; } = envInt("RIG_DISPATCH_CONCURRENCY", 0);
+
+    // GH-4026: listen to both Kafka topics through ONE KafkaTopicGroup consumer (ListenToKafkaTopics)
+    // instead of one KafkaListener per topic.
+    public bool KafkaTopicGroup { get; } = envInt("RIG_KAFKA_TOPIC_GROUP", 0) == 1;
+
+    // GH-4026: MaximumMessagesToReceive for durable Kafka listeners; 0 leaves the default (100).
+    // 1 is the pre-GH-4026 topic-group behavior (one record per inbox insert), so a cell pair of
+    // RIG_MAX_RECEIVE=1 vs default measures the drain inside one build.
+    public int MaxReceive { get; } = envInt("RIG_MAX_RECEIVE", 0);
+
+    // --- RabbitMQ (GH-3492) ---
+    public string RabbitUri { get; } = env("RIG_RABBIT_URI", "amqp://guest:guest@localhost:5672");
+    public string SmallQueue => $"rig-small-{RunId}";
+    public string LargeQueue => $"rig-large-{RunId}";
+
+    // native Rabbit twin prefetch; match Wolverine's listener PreFetchCount default of 100
+    public ushort RabbitPrefetch { get; } = (ushort)envInt("RIG_RABBIT_PREFETCH", 100);
+
+    // --- NATS JetStream (GH-4026) ---
+    // GH-4329: Redis Streams lane. Per-run stream keys so concurrent/aborted cells never share
+    // entries; the consumer deletes both keys on shutdown.
+    public string RedisConnection { get; } = env("RIG_REDIS", "localhost:6379");
+    public string RedisSmallStream => $"rig-{RunId}-small";
+    public string RedisLargeStream => $"rig-{RunId}-large";
+
+    // GH-4331: Azure Service Bus lane. Defaults to the local emulator connection string.
+    // Defaults to the canonical emulator string from Servers.cs -- note port 5673, not 5672:
+    // docker-compose maps the emulator's AMQP port there to stay clear of RabbitMQ.
+    public string AsbConnection { get; } = env("RIG_ASB", Servers.AzureServiceBusConnectionString);
+
+    // The emulator serves AMQP on 5673 and its management API on a DIFFERENT port (5300), and
+    // AutoProvision goes through management -- so the emulator needs both strings. Empty means
+    // "a real namespace", where one connection string covers both.
+    public string AsbManagementConnection { get; } =
+        env("RIG_ASB_MANAGEMENT", Servers.AzureServiceBusManagementConnectionString);
+    public string AsbSmallQueue => $"rig-{RunId}-small";
+    public string AsbLargeQueue => $"rig-{RunId}-large";
+    // 0 is the shipping shape: no prefetch on anything but NativeAck, after GH-4331's computed
+    // Buffered/Durable default measured as a null result here and was reverted. Set a positive value
+    // to A/B the GH-4331 proposal inside one build (20 == one receive batch).
+    public int AsbPrefetch { get; } = envInt("RIG_ASB_PREFETCH", 0);
+
+    public string NatsUrl { get; } = env("RIG_NATS_URL", "nats://localhost:4222");
+    // Stream names are uppercase identifiers; subjects are dotted. Both suffixed with the run id so every
+    // run starts on a fresh stream + consumers.
+    public string NatsStream => $"RIG_{RunId.ToUpperInvariant().Replace('-', '_')}";
+    public string NatsSubjectPrefix => $"rig.{RunId}";
+    public string NatsSmallSubject => $"{NatsSubjectPrefix}.small";
+    public string NatsLargeSubject => $"{NatsSubjectPrefix}.large";
+
+    // GH-4026: concurrent publish loops in max-throughput mode (rate < 0). 1 = the original single loop.
+    public int Publishers { get; } = envInt("RIG_PUBLISHERS", 1);
+
+    // --- Pulsar (GH-4026) ---
+    public string PulsarUrl { get; } = env("RIG_PULSAR_URL", "pulsar://localhost:6650");
+    public string PulsarSmallTopic => $"persistent://public/default/rig-small-{RunId}";
+    public string PulsarLargeTopic => $"persistent://public/default/rig-large-{RunId}";
+
+    private static string env(string key, string fallback)
+    {
+        return Environment.GetEnvironmentVariable(key) is { Length: > 0 } value ? value : fallback;
+    }
+
+    private static int envInt(string key, int fallback)
+    {
+        return int.TryParse(Environment.GetEnvironmentVariable(key), out var value) ? value : fallback;
+    }
+
+    private static double envDouble(string key, double fallback)
+    {
+        return double.TryParse(Environment.GetEnvironmentVariable(key), out var value) ? value : fallback;
+    }
+
+    public string Describe()
+    {
+        return
+            $"run={RunId} mode={ConsumerMode} send={SendMode} batch=({BatchSize},{BatchTimeoutMs}ms) " +
+            $"seq={Sequencing} handler={HandlerMs}ms rates=({SmallRate}/s small, {LargeRate}/s large) " +
+            $"warmup={WarmupSeconds}s duration={DurationSeconds}s partitions={Partitions}";
+    }
+}

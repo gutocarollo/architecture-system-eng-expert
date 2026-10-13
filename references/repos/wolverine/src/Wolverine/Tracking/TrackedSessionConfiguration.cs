@@ -1,0 +1,453 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Wolverine.Runtime;
+using Wolverine.Runtime.RemoteInvocation;
+
+namespace Wolverine.Tracking;
+
+public class TrackedSessionConfiguration
+{
+    internal TrackedSessionConfiguration(TrackedSession session)
+    {
+        Session = session;
+    }
+
+    internal TrackedSession Session { get; }
+
+    private WaitForExecutionCount? _executionCounts;
+
+    /// <summary>
+    ///     Override the default timeout threshold to wait for all
+    ///     activity to finish
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration Timeout(TimeSpan timeout)
+    {
+        Session.Timeout = timeout;
+        return this;
+    }
+
+    /// <summary>
+    ///     GH-4931. Run the tracked work under this correlation id, which every message it causes carries on,
+    ///     and which an event store with correlation ids enabled records on every event they append — so a
+    ///     test can find what its act caused even across an asynchronous boundary the session does not see,
+    ///     such as an event subscription.
+    /// </summary>
+    public TrackedSessionConfiguration WithCorrelationId(string correlationId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(correlationId);
+        Session.CorrelationId = correlationId;
+        return this;
+    }
+
+    /// <summary>
+    /// Do not track any messages of this type
+    /// Helpful for polling operations that maybe happening during your testing
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public TrackedSessionConfiguration IgnoreMessageType<T>()
+    {
+        return IgnoreMessagesMatchingType(t => t == typeof(T));
+    }
+
+    /// <summary>
+    /// Register an action that gets called before the actual execution
+    /// Typically meant for clean up work
+    /// </summary>
+    /// <param name="before"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration BeforeExecution(Func<IWolverineRuntime, CancellationToken, Task> before)
+    {
+        Session.Befores.Add(before);
+        return this;
+    }
+
+    /// <summary>
+    /// Add a secondary stage of the tracked session that will execute like a nested tracked session
+    /// </summary>
+    /// <param name="stage"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration AddStage(Func<IWolverineRuntime, IMessageContext, CancellationToken, Task> stage)
+    {
+        Session.SecondaryStages.Enqueue(new TrackedSession.SecondaryStage(Session, stage));
+        return this;
+    }
+    
+    /// <summary>
+    /// Add a secondary action against the current Wolverine application *after* the tracked session
+    /// has completed
+    /// </summary>
+    /// <param name="stage"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration AfterExecution(Func<IWolverineRuntime, CancellationToken, Task> func)
+    {
+        Session.SecondaryStages.Enqueue(new TrackedSession.SecondaryAction(Session, func));
+        return this;
+    }
+
+    /// <summary>
+    /// Do not track any messages where the message type matches this filter.
+    /// Helpful for polling operations that maybe happening during your testing
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration IgnoreMessagesMatchingType(Func<Type, bool> filter)
+    {
+        Session.IgnoreMessageTypes(filter);
+        return this;
+    }
+
+    /// <summary>
+    /// GH-4704. Do not track any envelope matching this filter. The envelope-level twin of
+    /// <see cref="IgnoreMessagesMatchingType"/>, for when the message type alone cannot tell the traffic
+    /// apart -- a shared host running background subscriptions or another test's tail alongside the flow
+    /// under test, where the same message type is legitimately in flight for more than one reason at once.
+    /// The predicate sees the whole <see cref="Envelope"/>, so it can filter on destination, tenant id,
+    /// correlation id, headers, or anything else the caller stamped.
+    /// </summary>
+    /// <remarks>
+    /// Two things worth knowing before reaching for this. It narrows what gets <em>recorded</em>, not what
+    /// completion requires: a session can still time out waiting on a message it deliberately never
+    /// consumes. And acknowledgements are never ignored regardless of the filter, because the session's own
+    /// acknowledgement APIs depend on them being recorded.
+    /// </remarks>
+    /// <param name="filter">Return true for an envelope this session should not track</param>
+    public TrackedSessionConfiguration IgnoreEnvelopes(Func<Envelope, bool> filter)
+    {
+        Session.IgnoreEnvelopes(filter);
+        return this;
+    }
+
+    /// <summary>
+    /// Do not track any message whose type is declared in <paramref name="assembly" />, a batch of them
+    /// included. The per-session twin of <see cref="TrackingOptions.IgnoreMessagesFromAssembly" />, which
+    /// applies to every tracked session against the host.
+    /// </summary>
+    public TrackedSessionConfiguration IgnoreMessagesFromAssembly(System.Reflection.Assembly assembly)
+    {
+        Session.IgnoreMessageTypes(TrackingIgnoreRules.FromAssembly(assembly));
+        return this;
+    }
+
+    /// <summary>
+    /// Do not track traffic to or through the endpoint at <paramref name="endpointUri" />: any envelope whose
+    /// destination is that endpoint, sent there or received by its listener. The per-session twin of
+    /// <see cref="TrackingOptions.IgnoreEndpoint" />.
+    /// </summary>
+    public TrackedSessionConfiguration IgnoreEndpoint(Uri endpointUri)
+    {
+        Session.IgnoreEnvelopes(TrackingIgnoreRules.ForEndpoint(endpointUri));
+        return this;
+    }
+
+    /// <summary>
+    /// Track, for this session only, the traffic that the host-wide ignore rules configured through
+    /// <see cref="WolverineOptions.Tracking" /> (<see cref="TrackingOptions.IgnoreMessagesFromAssembly" />,
+    /// <see cref="TrackingOptions.IgnoreEndpoint" /> and their siblings) would otherwise ignore. Use it for a
+    /// test that asserts on that traffic, such as an extension's own tests of the messages it marks
+    /// ignored. This session's own ignore rules, and the default ignoring of system commands, still apply.
+    /// </summary>
+    public TrackedSessionConfiguration IncludeHostIgnoredTraffic()
+    {
+        Session.IncludeHostIgnoredTraffic();
+        return this;
+    }
+
+    /// <summary>
+    /// Track — and allow assertions on — messages marked <see cref="ISystemCommand"/>, which a tracked
+    /// session ignores by default. Use this when the traffic under test IS the system/monitoring traffic
+    /// (e.g. asserting a monitoring host received a telemetry message). A never-ending system feed can
+    /// still hold the session open, so pair this with <see cref="IgnoreMessagesMatchingType"/> for any
+    /// continuously-published types you don't want to wait on.
+    /// </summary>
+    public TrackedSessionConfiguration IncludeSystemCommands()
+    {
+        Session.IncludeSystemCommands();
+        return this;
+    }
+
+    /// <summary>
+    ///     Track activity across an additional Wolverine application
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration AlsoTrack(params IHost?[] hosts)
+    {
+        // It's actually important to ignore null here
+        foreach (var host in hosts)
+        {
+            if (host != null)
+            {
+                Session.WatchOther(host);
+            }
+        }
+
+        return this;
+    }
+    
+    /// <summary>
+    ///     Track activity across an additional Wolverine application if you happen to be bootstrapping
+    /// the IoC container for testing harnesses outside of IHost usage
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    public TrackedSessionConfiguration AlsoTrack(params IServiceProvider?[] serviceProviders)
+    {
+        // It's actually important to ignore null here
+        foreach (var serviceProvider in serviceProviders)
+        {
+            if (serviceProvider != null)
+            {
+                Session.WatchOther(serviceProvider);
+            }
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Force the message tracking to include outgoing activity to
+    ///     external transports
+    /// </summary>
+    /// <returns></returns>
+    public TrackedSessionConfiguration IncludeExternalTransports()
+    {
+        Session.AlwaysTrackExternalTransports = true;
+        return this;
+    }
+
+    /// <summary>
+    ///     Do not assert or fail if exceptions where thrown during the
+    ///     message activity. This is useful for testing resiliency features
+    ///     and exception handling with message failures.
+    ///
+    ///     This governs exceptions thrown by the message activity itself. It does NOT suppress the
+    ///     session's own timeout assertion -- a session that times out having completed none of its
+    ///     work still throws <see cref="TimeoutException" />, and that exception carries the full
+    ///     activity grid for diagnosis. See GH-4125.
+    /// </summary>
+    /// <returns></returns>
+    public TrackedSessionConfiguration DoNotAssertOnExceptionsDetected()
+    {
+        Session.AssertNoExceptions = false;
+        return this;
+    }
+
+    /// <summary>
+    ///     Do not assert or fail if this session times out before all tracked activity completes.
+    ///     Use this ONLY where the activity is expected not to happen -- asserting that a message was
+    ///     filtered out and never arrived, or that a listener was paused before its envelope could
+    ///     finish. It is deliberately separate from <see cref="DoNotAssertOnExceptionsDetected" />,
+    ///     which governs exceptions only: a session that times out having achieved nothing is the one
+    ///     failure a tracked test cannot afford to hide by accident. See GH-4125.
+    /// </summary>
+    /// <returns></returns>
+    public TrackedSessionConfiguration DoNotAssertOnTimeout()
+    {
+        Session.AssertNoTimeout = false;
+        return this;
+    }
+
+    /// <summary>
+    /// Do not assert or fail if failure acks were sent during the message activity.
+    /// This might be useful if using request/reply mechanics where you are testing
+    /// cases where you want to see if failure acks are sent. Maybe only useful
+    /// inside of Wolverine's own testing to be honest:-)
+    /// </summary>
+    /// <returns></returns>
+    public TrackedSessionConfiguration IgnoreFailureAcks()
+    {
+        Session.AssertAnyFailureAcknowledgements = false;
+        return this;
+    }
+
+    /// <summary>
+    ///     Continue tracking until an expected message is received at this host
+    /// </summary>
+    /// <param name="host"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public TrackedSessionConfiguration WaitForMessageToBeReceivedAt<T>(IHost host)
+    {
+        var condition = new WaitForMessage<T>
+        {
+            UniqueNodeId = host.Services.GetRequiredService<IWolverineRuntime>().Options.UniqueNodeId
+        };
+
+        Session.AddCondition(condition);
+
+        return this;
+    }
+
+    public TrackedSessionConfiguration WaitForCondition(ITrackedCondition condition)
+    {
+        Session.AddCondition(condition);
+        return this;
+    }
+
+    /// <summary>
+    ///     Continue tracking until at least <paramref name="count" /> distinct messages assignable to
+    ///     <typeparamref name="T" /> have finished execution. Multiple calls combine into a single
+    ///     condition that requires every registered count to be reached. Use this when handled
+    ///     messages are published out-of-band from the tracked execution — e.g. a Marten async
+    ///     daemon subscription or projection side effect relaying messages to Wolverine after its
+    ///     page commits — where the tracked session could otherwise observe a momentary lull in
+    ///     activity and complete before all expected messages have even been published.
+    /// </summary>
+    /// <param name="count">The minimum number of distinct messages of this type that must finish execution</param>
+    /// <typeparam name="T">The expected message type</typeparam>
+    /// <returns></returns>
+    public TrackedSessionConfiguration WaitForExecutionOf<T>(int count = 1)
+    {
+        if (_executionCounts == null)
+        {
+            _executionCounts = new WaitForExecutionCount();
+            Session.AddCondition(_executionCounts);
+        }
+
+        _executionCounts.ExpectMessage<T>(count);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Execute a user defined Lambda against an IMessageContext
+    ///     and wait for all activity to end
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public async Task<ITrackedSession> ExecuteAndWaitAsync(Func<IMessageContext, Task> action)
+    {
+        Session.Execution = action;
+        await Session.ExecuteAndTrackAsync();
+        return Session;
+    }
+
+    /// <summary>
+    ///     Execute a user defined Lambda against an IMessageContext
+    ///     and wait for all activity to end
+    /// </summary>
+    /// <param name="action"></param>
+    /// <returns></returns>
+    public async Task<ITrackedSession> ExecuteAndWaitAsync(Func<IMessageContext, ValueTask> action)
+    {
+        Session.Execution = c => action(c).AsTask();
+        await Session.ExecuteAndTrackAsync();
+        return Session;
+    }
+
+    /// <summary>
+    ///     Invoke a message inline from the current Wolverine application
+    ///     and wait for all cascading activity to complete
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    public Task<ITrackedSession> InvokeMessageAndWaitAsync(object message)
+    {
+        return ExecuteAndWaitAsync(c => c.InvokeAsync(message));
+    }
+
+    /// <summary>
+    ///     Send a message from the current Wolverine application and wait for
+    ///     all cascading activity to complete
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    public Task<ITrackedSession> SendMessageAndWaitAsync(object message, DeliveryOptions? options = null)
+    {
+        return ExecuteAndWaitAsync(c => c.SendAsync(message, options));
+    }
+
+    /// <summary>
+    ///     Send a message from the current Wolverine application to a specified topic name and wait for
+    ///     all cascading activity to complete
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    public Task<ITrackedSession> BroadcastMessageToTopicAndWaitAsync(string topicName, object message,
+        DeliveryOptions? options = null)
+    {
+        return ExecuteAndWaitAsync(c => c.BroadcastToTopicAsync(topicName, message, options));
+    }
+
+    /// <summary>
+    ///     Send a message from the current Wolverine application and wait for
+    ///     all cascading activity to complete
+    /// </summary>
+    /// <param name="destination"></param>
+    /// <param name="message"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public Task<ITrackedSession> SendMessageAndWaitAsync(Uri destination, object message,
+        DeliveryOptions? options = null)
+    {
+        return ExecuteAndWaitAsync(c => c.EndpointFor(destination).SendAsync(message, options));
+    }
+
+    /// <summary>
+    ///     Publish a message from the current Wolverine application and wait for
+    ///     all cascading activity to complete
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    public Task<ITrackedSession> PublishMessageAndWaitAsync(object? message, DeliveryOptions? options = null)
+    {
+        return ExecuteAndWaitAsync(c => c.PublishAsync(message, options));
+    }
+
+    /// <summary>
+    ///     Execute a request with expected reply
+    /// </summary>
+    /// <param name="requestInvocation"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public async Task<(ITrackedSession, T?)> InvokeAndWaitAsync<T>(object request, TimeSpan? timeout = null)
+    {
+        T? response = default;
+
+        Func<IMessageContext, Task> invocation = async c => { response = await c.InvokeAsync<T>(request, timeout:timeout); };
+
+        var session = await ExecuteAndWaitAsync(invocation);
+
+        return (session, response);
+    }
+
+    /// <summary>
+    ///     Execute a request with expected reply
+    /// </summary>
+    /// <param name="requestInvocation"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public async Task<(ITrackedSession, T?)> InvokeAndWaitAsync<T>(object request, Uri address) where T : class
+    {
+        T? response = default;
+
+        Func<IMessageContext, Task> invocation = async c =>
+        {
+            response = await c.EndpointFor(address).InvokeAsync<T>(request, timeout: Session.Timeout);
+        };
+
+        var session = await ExecuteAndWaitAsync(invocation);
+
+        return (session, response);
+    }
+
+    /// <summary>
+    ///     Execute a send and wait operation
+    /// </summary>
+    /// <param name="sendAndWaitInvocation"></param>
+    /// <returns></returns>
+    public async Task<(ITrackedSession, Acknowledgement?)> SendMessageAndWaitForAcknowledgementAsync(
+        Func<IMessageContext, Task<Acknowledgement>> sendAndWaitInvocation)
+    {
+        Acknowledgement? response = default;
+
+        Func<IMessageContext, Task> invocation = async c => { response = await sendAndWaitInvocation(c); };
+
+        var session = await ExecuteAndWaitAsync(invocation);
+
+        return (session, response);
+    }
+}

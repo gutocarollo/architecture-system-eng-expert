@@ -1,0 +1,513 @@
+using Alba;
+using IntegrationTests;
+using JasperFx;
+using Marten.Exceptions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using SharedPersistenceModels;
+using SharedPersistenceModels.Items;
+using SharedPersistenceModels.Orders;
+using Shouldly;
+using Wolverine;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.EntityFrameworkCore.Codegen;
+using Wolverine.EntityFrameworkCore.Internals;
+using Wolverine.Runtime;
+using Wolverine.Tracking;
+
+namespace EfCoreTests.MultiTenancy;
+
+public enum DatabaseEngine
+{
+    SqlServer,
+    PostgreSQL
+}
+
+[Collection("multi-tenancy")]
+public abstract class MultiTenancyCompliance : IAsyncLifetime, IWolverineExtension
+{
+    protected IDbContextBuilder<ItemsDbContext> theBuilder = null!;
+    private readonly DatabaseEngine _engine;
+    protected IAlbaHost theHost = null!;
+    protected string tenant1ConnectionString = null!;
+    protected string tenant2ConnectionString = null!;
+    protected string tenant3ConnectionString = null!;
+    
+    protected MultiTenancyCompliance(DatabaseEngine engine)
+    {
+        TestingOverrides.Extension = this;
+        
+        _engine = engine;
+        if (engine == DatabaseEngine.SqlServer)
+        {
+            var builder = new SqlConnectionStringBuilder(Servers.SqlServerConnectionString);
+            builder.InitialCatalog = "db1";
+            tenant1ConnectionString = builder.ConnectionString;
+
+            builder.InitialCatalog = "db2";
+            tenant2ConnectionString = builder.ConnectionString;
+
+            builder.InitialCatalog = "db3";
+            tenant3ConnectionString = builder.ConnectionString;
+        }
+        else
+        {
+            var builder = new NpgsqlConnectionStringBuilder(Servers.PostgresConnectionString);
+            builder.Database = "db1";
+            tenant1ConnectionString = builder.ConnectionString;
+
+            builder.Database = "db2";
+            tenant2ConnectionString = builder.ConnectionString;
+
+            builder.Database = "db3";
+            tenant3ConnectionString = builder.ConnectionString;
+        }
+        
+    }
+
+    public async ValueTask InitializeAsync()
+    {
+        if (_engine == DatabaseEngine.PostgreSQL)
+        {
+            theHost = await AlbaHost.For<MultiTenantedEfCoreWithPostgreSQL.Program>(x => {});
+        }
+        else
+        {
+            theHost = await AlbaHost.For<MultiTenantedEfCoreWithSqlServer.Program>(x => {});
+        }
+        
+        theBuilder = theHost.Services.GetRequiredService<IDbContextBuilder<ItemsDbContext>>();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            await theHost.StopAsync(cts.Token);
+        }
+        catch (Exception)
+        {
+            // Swallow shutdown errors - host may have already stopped or timed out
+        }
+
+        try
+        {
+            theHost.Dispose();
+        }
+        catch (Exception)
+        {
+            // Swallow errors from inner WebApplicationFactory dispose
+        }
+
+        NpgsqlConnection.ClearAllPools();
+        SqlConnection.ClearAllPools();
+    }
+
+#pragma warning disable xUnit1013 // Public method should be marked as test
+    public abstract void Configure(WolverineOptions options);
+#pragma warning restore xUnit1013 // Public method should be marked as test
+
+    [Fact]
+    public async Task db_context_is_wolverine_enabled()
+    {
+        var messageContext = new MessageContext(theHost.GetRuntime());
+        messageContext.TenantId = "blue";
+
+        var dbContext = await theBuilder.BuildAndEnrollAsync(messageContext, CancellationToken.None);
+        dbContext.IsWolverineEnabled().ShouldBeTrue();
+    }
+    
+    [Fact]
+    public void can_resolve_db_context_options()
+    {
+        theHost.Services.GetRequiredService<DbContextOptions<ItemsDbContext>>()
+            .ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void resolves_a_tenanted_entity_to_its_db_context_on_a_cache_miss_and_a_hit()
+    {
+        var container = theHost.Services.GetRequiredService<IServiceContainer>();
+        var provider = new EFCorePersistenceFrameProvider();
+
+        provider.TryDetermineDbContextType(typeof(Item), container).ShouldBe(typeof(ItemsDbContext));
+        provider.TryDetermineDbContextType(typeof(Item), container).ShouldBe(typeof(ItemsDbContext));
+    }
+
+    [Fact]
+    public async Task can_build_a_db_context_at_all()
+    {
+        var messageContext = new MessageContext(theHost.GetRuntime());
+        messageContext.TenantId = "blue";
+
+        var dbContext = await theBuilder.BuildAndEnrollAsync(messageContext, CancellationToken.None);
+        dbContext.ShouldNotBeNull();
+    }
+    
+    [Fact]
+    public async Task message_context_has_correct_envelope_transaction()
+    {
+        var messageContext = new MessageContext(theHost.GetRuntime());
+        messageContext.TenantId = "blue";
+
+        var dbContext = await theBuilder.BuildAndEnrollAsync(messageContext, CancellationToken.None);
+
+        messageContext.Transaction.ShouldBeOfType<EfCoreEnvelopeTransaction>()
+            .DbContext.ShouldBe(dbContext);
+    }
+    
+    [Fact]
+    public async Task end_to_end_with_commands()
+    {
+        var blueId = Guid.NewGuid();
+        var redId = Guid.NewGuid();
+        var greenId = Guid.NewGuid();
+
+        await theHost.InvokeMessageAndWaitAsync(new StartNewItem(blueId, "Blue!"), "blue");
+        await theHost.InvokeMessageAndWaitAsync(new StartNewItem(redId, "Red!"), "red");
+        await theHost.InvokeMessageAndWaitAsync(new StartNewItem(greenId, "Green!"), "green");
+
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+
+        (await blueDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken))!.Name.ShouldBe("Blue!");
+        (await greenDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await redDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+
+        (await blueDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await greenDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await redDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken))!.Name.ShouldBe("Red!");
+
+        (await blueDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await greenDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken))!.Name.ShouldBe("Green!");
+        (await redDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+    }
+    
+    [Fact]
+    public async Task end_to_end_with_default_database()
+    {
+        try
+        {
+            var defaultId = Guid.NewGuid();
+
+            await theHost.InvokeMessageAndWaitAsync(new StartNewItem(defaultId, "The Default!"));
+        
+            var defaultDbContext = theBuilder.BuildForMain();
+            var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+            var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+            var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+
+            (await defaultDbContext.FindAsync<Item>(new object?[] { defaultId }, TestContext.Current.CancellationToken))!.Name.ShouldBe("The Default!");
+        }
+        catch (DefaultTenantUsageDisabledException)
+        {
+            // For Marten, just let this go
+        }
+    }
+
+    [Fact]
+    public async Task end_to_end_with_cascading_messages()
+    {
+        var blueId = Guid.NewGuid();
+        var redId = Guid.NewGuid();
+        var greenId = Guid.NewGuid();
+
+        await theHost.InvokeMessageAndWaitAsync(new StartAndTriggerApproval(blueId, "Blue!"), "blue");
+        await theHost.InvokeMessageAndWaitAsync(new StartAndTriggerApproval(redId, "Red!"), "red");
+        await theHost.InvokeMessageAndWaitAsync(new StartAndTriggerApproval(greenId, "Green!"), "green");
+
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+
+        var blue = (await blueDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken))!;
+        blue.Name.ShouldBe("Blue!");
+        blue.Approved.ShouldBeTrue();
+        (await greenDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await redDbContext.Items.FindAsync(new object?[] { blueId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+
+        (await blueDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await greenDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        var red = (await redDbContext.Items.FindAsync(new object?[] { redId }, TestContext.Current.CancellationToken))!;
+        red.Name.ShouldBe("Red!");
+        red.Approved.ShouldBeTrue();
+
+        (await blueDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        var green = (await greenDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken))!;
+        green.Name.ShouldBe("Green!");
+        green.Approved.ShouldBeTrue();
+        (await redDbContext.Items.FindAsync(new object?[] { greenId }, TestContext.Current.CancellationToken)).ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task with_http_posts_using_storage_actions()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+        await theHost.Scenario(x =>
+        {
+            x.StatusCodeShouldBe(204);
+            x.Post.Json(command).ToUrl("/item").QueryString("tenant", "blue");
+            
+        });
+        
+        var defaultDbContext = theBuilder.BuildForMain();
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+
+        
+        (await defaultDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await redDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await greenDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        
+        (await blueDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Name.ShouldBe(command.Name);
+    }
+
+    [Fact]
+    public async Task with_http_posts_using_storage_actions_using_default_tenant_id()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+        await theHost.Scenario(x =>
+        {
+            // NO TENANT ID HERE!
+            x.Post.Json(command).ToUrl("/item");
+            x.StatusCodeShouldBe(204);
+        });
+        
+        var defaultDbContext = theBuilder.BuildForMain();
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+        
+        (await blueDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await redDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await greenDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken)).ShouldBeNull();
+        
+        (await defaultDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Name.ShouldBe(command.Name);
+    }
+
+    [Fact]
+    public async Task http_get_with_direct_dependency()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+
+        await theHost.InvokeMessageAndWaitAsync(command, "red");
+
+        var result = await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id).QueryString("tenant", "red");
+        });
+
+        var item = await result.ReadAsJsonAsync<Item>();
+        item.Name.ShouldBe(command.Name);
+
+        // Not found in other tenants
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id).QueryString("tenant", "blue");
+            x.StatusCodeShouldBe(404);
+        });
+        
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id).QueryString("tenant", "green");
+            x.StatusCodeShouldBe(404);
+        });
+        
+        // Not in the default tenant
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id);
+            x.StatusCodeShouldBe(404);
+        });
+    }
+    
+    [Fact]
+    public async Task http_get_entity_attribute()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+
+        await theHost.InvokeMessageAndWaitAsync(command, "red");
+
+        var result = await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item2/" + command.Id).QueryString("tenant", "red");
+        });
+
+        var item = await result.ReadAsJsonAsync<Item>();
+        item.Name.ShouldBe(command.Name);
+
+        // Not found in other tenants
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id).QueryString("tenant", "blue");
+            x.StatusCodeShouldBe(404);
+        });
+        
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id).QueryString("tenant", "green");
+            x.StatusCodeShouldBe(404);
+        });
+        
+        // Not in the default tenant
+        await theHost.Scenario(x =>
+        {
+            x.Get.Url("/item1/" + command.Id);
+            x.StatusCodeShouldBe(404);
+        });
+    }
+
+    [Fact]
+    public async Task http_post_with_direct_reference()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+
+        await theHost.InvokeMessageAndWaitAsync(command, "green");
+        await theHost.InvokeMessageAndWaitAsync(command, "blue");
+        await theHost.InvokeMessageAndWaitAsync(command, "red");
+
+        await theHost.Scenario(x =>
+        {
+            x.StatusCodeShouldBe(204);
+            x
+                .Post
+                .Json(new ApproveItem1(command.Id))
+                .QueryString("tenant", "green")
+                .ToUrl("/item/approve1");
+        });
+        
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+        
+        (await blueDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+        (await redDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+
+        // Only approved this one
+        (await greenDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task http_post_with_direct_reference_in_middleware()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+
+        await theHost.InvokeMessageAndWaitAsync(command, "green");
+        await theHost.InvokeMessageAndWaitAsync(command, "blue");
+        await theHost.InvokeMessageAndWaitAsync(command, "red");
+
+        await theHost.Scenario(x =>
+        {
+            x.StatusCodeShouldBe(204);
+            x
+                .Post
+                .Json(new ApproveItem2(command.Id))
+                .QueryString("tenant", "green")
+                .ToUrl("/item/approve2");
+        });
+        
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+        
+        (await blueDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+        (await redDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+
+        // Only approved this one
+        (await greenDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task http_post_with_by_entity_attribute_and_storage_action()
+    {
+        var command = new StartNewItem(Guid.NewGuid(), Guid.NewGuid().ToString());
+
+        await theHost.InvokeMessageAndWaitAsync(command, "green");
+        await theHost.InvokeMessageAndWaitAsync(command, "blue");
+        await theHost.InvokeMessageAndWaitAsync(command, "red");
+
+        await theHost.Scenario(x =>
+        {
+            x.StatusCodeShouldBe(204);
+            x
+                .Post
+                .Json(new ApproveItem3(command.Id))
+                .QueryString("tenant", "green")
+                .ToUrl("/item/approve3");
+        });
+        
+        var blueDbContext = await theBuilder.BuildAsync("blue", CancellationToken.None);
+        var greenDbContext = await theBuilder.BuildAsync("green", CancellationToken.None);
+        var redDbContext = await theBuilder.BuildAsync("red", CancellationToken.None);
+        
+        (await blueDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+        (await redDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeFalse();
+
+        // Only approved this one
+        (await greenDbContext.FindAsync<Item>(new object?[] { command.Id }, TestContext.Current.CancellationToken))!.Approved.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_sagas()
+    {
+        var command = new StartOrder(Guid.NewGuid().ToString());
+
+        await theHost.Scenario(x =>
+        {
+            x.Post.Json(command).ToUrl("/orders/start").QueryString("tenant", "red");
+            x.StatusCodeShouldBe(204);
+        });
+
+        await theHost.SendMessageAndWaitAsync(new CreditReserved(command.Id, "C1"),
+            new DeliveryOptions { TenantId = "red" });
+
+        var result = await theHost.Scenario(x =>
+        {
+            x.Get.Url("/orders/" + command.Id).QueryString("tenant", "red");
+        });
+
+        var order = await result.ReadAsJsonAsync<Order>();
+        order.OrderStatus.ShouldBe(OrderStatus.CreditReserved);
+
+    }
+
+    [Fact]
+    public async Task use_db_context_outbox_end_to_end()
+    {
+        var factory = theHost.Services.GetRequiredService<IDbContextOutboxFactory>();
+        var outbox = await factory.CreateForTenantAsync<ItemsDbContext>("blue", CancellationToken.None);
+
+        outbox.TenantId.ShouldBe("blue");
+
+        var id = Guid.NewGuid();
+        
+        await theHost.ExecuteAndWaitAsync(async _ =>
+        {
+            
+            var item = new Item
+            {
+                Id = id,
+                Name = "This one"
+            };
+
+            await outbox.PublishAsync(new ApproveItem1(id));
+            outbox.DbContext.Items.Add(item);
+
+            await outbox.SaveChangesAndFlushMessagesAsync();
+
+        }, 120000);
+        
+
+        var builder = theHost.Services.GetRequiredService<IDbContextBuilder<ItemsDbContext>>();
+        var dbContext = await builder.BuildAsync("blue", CancellationToken.None);
+
+        var item2 = await dbContext.Items.FindAsync(new object?[] { id }, TestContext.Current.CancellationToken);
+        item2!.Approved.ShouldBeTrue();
+    }
+
+}

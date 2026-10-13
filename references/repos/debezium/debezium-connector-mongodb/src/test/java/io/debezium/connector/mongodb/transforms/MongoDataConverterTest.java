@@ -1,0 +1,612 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.connector.mongodb.transforms;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.data.Timestamp;
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonTimestamp;
+import org.bson.BsonType;
+import org.bson.BsonValue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import io.debezium.DebeziumException;
+import io.debezium.connector.mongodb.MongoDbSchema;
+import io.debezium.connector.mongodb.transforms.ExtractNewDocumentState.ArrayEncoding;
+import io.debezium.connector.mongodb.transforms.ExtractNewDocumentState.BsonTimestampHandlingMode;
+import io.debezium.doc.FixFor;
+import io.debezium.schema.FieldNameSelector;
+import io.debezium.schema.SchemaNameAdjuster;
+
+/**
+ * Unit test for {@code MongoDataConverter}.
+ *
+ * @author Sairam Polavarapu
+ */
+public class MongoDataConverterTest {
+
+    private String record;
+    private BsonDocument val;
+    private SchemaBuilder builder;
+    private MongoDataConverter converter;
+
+    @BeforeEach
+    void setup() throws Exception {
+        record = getFile("restaurants5.json");
+        val = BsonDocument.parse(record);
+        builder = SchemaBuilder.struct().name("pub");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = { 0L, 1L, 2_147_483_647L, 2_147_483_648L, 4_294_967_295L })
+    @FixFor("debezium/dbz#1715")
+    void shouldConvertUnsignedTimestampSecondsInFieldsAndArrays(long seconds) {
+        final var timestamp = new BsonTimestamp((int) seconds, 0);
+        final var sameSecond = new BsonTimestamp((int) seconds, -1);
+        final var document = new BsonDocument("timestamp", timestamp)
+                .append("nested", new BsonDocument("timestamp", sameSecond))
+                .append("timestamps", new BsonArray(List.of(timestamp, sameSecond)));
+        converter.buildSchema(converter.parseBsonDocument(document), builder);
+        final var schema = builder.build();
+        final var result = new Struct(schema);
+        document.entrySet().forEach(entry -> converter.buildStruct(entry, schema, result));
+
+        final var expected = new Date(seconds * 1_000);
+        assertThat(result.get("timestamp")).isEqualTo(expected);
+        assertThat(result.getStruct("nested").get("timestamp")).isEqualTo(expected);
+        assertThat(result.<Date> getArray("timestamps")).containsExactly(expected, expected);
+        result.validate();
+    }
+
+    @Test
+    void shouldCreateCorrectStructFromInsertJson() {
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        assertThat(struct.toString()).isEqualToIgnoringWhitespace("""
+                Struct{
+                    address=Struct{
+                        building=1007,
+                        floor=Struct{
+                            level=17,
+                            description=level 17
+                        },
+                        coord=[-73.856077, 40.848447],
+                        street=Morris Park Ave,
+                        zipcode=10462
+                    },
+                    borough=Bronx,
+                    cuisine=Bakery,
+                    grades=[
+                        Struct{date=Mon Mar 03 00:00:00 UTC 2014,grade=A,score=2},
+                        Struct{date=Wed Sep 11 00:00:00 UTC 2013,grade=A,score=6},
+                        Struct{date=Thu Jan 24 00:00:00 UTC 2013,grade=A,score=10},
+                        Struct{date=Wed Nov 23 00:00:00 UTC 2011,grade=A,score=9},
+                        Struct{date=Thu Mar 10 00:00:00 UTC 2011,grade=B,score=14}
+                    ],
+                    name=Morris Park Bake Shop,
+                    restaurant_id=30075445
+                }""");
+    }
+
+    @Test
+    void shouldCreateCorrectSchemaFromInsertJson() {
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        assertThat(finalSchema).isEqualTo(SchemaBuilder.struct().name("pub")
+                .field("address", SchemaBuilder.struct().name("pub.address").optional()
+                        .field("building", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("floor", SchemaBuilder.struct().name("pub.address.floor").optional()
+                                .field("level", Schema.OPTIONAL_INT32_SCHEMA)
+                                .field("description", Schema.OPTIONAL_STRING_SCHEMA)
+                                .build())
+                        .field("coord", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build())
+                        .field("street", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("zipcode", Schema.OPTIONAL_STRING_SCHEMA)
+                        .build())
+                .field("borough", Schema.OPTIONAL_STRING_SCHEMA)
+                .field("cuisine", Schema.OPTIONAL_STRING_SCHEMA)
+                .field("grades", SchemaBuilder.array(SchemaBuilder.struct().name("pub.grades").optional()
+                        .field("date", Timestamp.builder().optional().build())
+                        .field("grade", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("score", Schema.OPTIONAL_INT32_SCHEMA)
+                        .build())
+                        .optional()
+                        .build())
+                .field("name", Schema.OPTIONAL_STRING_SCHEMA)
+                .field("restaurant_id", Schema.OPTIONAL_STRING_SCHEMA)
+                .build());
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2560")
+    void shouldProcessJavaScriptWithScope() {
+        val = BsonDocument.parse("""
+                {
+                    "function": {
+                        "$code": "function() { return x; }",
+                        "$scope": {
+                            "x": { "$numberInt": "1" },
+                            "nested": { "value": "test" }
+                        }
+                    }
+                }
+                """);
+        builder = SchemaBuilder.struct().name("javascript");
+
+        final Map<String, Map<Object, BsonType>> schemaMap = converter.parseBsonDocument(val);
+        converter.buildSchema(schemaMap, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (final Map.Entry<String, BsonValue> entry : val.entrySet()) {
+            converter.buildStruct(entry, finalSchema, struct);
+        }
+
+        final Schema functionSchema = finalSchema.field("function").schema();
+        assertThat(functionSchema.name()).isEqualTo("javascript.function");
+        assertThat(functionSchema.fields()).extracting("name").containsExactly("code", "scope");
+        assertThat(functionSchema.field("code").schema()).isEqualTo(Schema.OPTIONAL_STRING_SCHEMA);
+
+        final Schema scopeSchema = functionSchema.field("scope").schema();
+        assertThat(scopeSchema.name()).isEqualTo("javascript.function.scope");
+        assertThat(scopeSchema.fields()).extracting("name").containsExactly("x", "nested");
+        assertThat(scopeSchema.field("x").schema()).isEqualTo(Schema.OPTIONAL_INT32_SCHEMA);
+
+        final Schema nestedSchema = scopeSchema.field("nested").schema();
+        assertThat(nestedSchema.name()).isEqualTo("javascript.function.scope.nested");
+        assertThat(nestedSchema.field("value").schema()).isEqualTo(Schema.OPTIONAL_STRING_SCHEMA);
+
+        final Struct function = struct.getStruct("function");
+        assertThat(function.getString("code")).isEqualTo("function() { return x; }");
+        assertThat(function.getStruct("scope").getInt32("x")).isEqualTo(1);
+        assertThat(function.getStruct("scope").getStruct("nested").getString("value")).isEqualTo("test");
+    }
+
+    private String getFile(final String fileName) throws IOException, URISyntaxException {
+        final URL jsonResource = getClass().getClassLoader().getResource(fileName);
+        return new String(
+                Files.readAllBytes(Paths.get(jsonResource.toURI())),
+                StandardCharsets.UTF_8);
+    }
+
+    @Test
+    @FixFor("DBZ-928")
+    public void shouldProcessNullValue() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : ObjectId(\"51e5619ee4b01f9fbdfba9fc\"),\n" +
+                "    \"delivery\" : {\n" +
+                "        \"hour\" : null,\n" +
+                "        \"hourId\" : 10\n" +
+                "    }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withnull");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        assertThat(finalSchema).isEqualTo(
+                SchemaBuilder.struct().name("withnull")
+                        .field("_id", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("delivery", SchemaBuilder.struct().name("withnull.delivery").optional()
+                                .field("hour", Schema.OPTIONAL_STRING_SCHEMA)
+                                .field("hourId", Schema.OPTIONAL_INT32_SCHEMA)
+                                .build())
+                        .build());
+        assertThat(struct.toString()).isEqualTo(
+                "Struct{"
+                        + "_id=51e5619ee4b01f9fbdfba9fc,"
+                        + "delivery=Struct{"
+                        + "hourId=10"
+                        + "}"
+                        + "}");
+    }
+
+    @Test
+    @FixFor("DBZ-1315")
+    public void shouldProcessUnsupportedValue() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : ObjectId(\"518cc94bc27cfa20d9693e5d\"),\n" +
+                "    \"name\" : undefined,\n" +
+                "    \"address\" : {\n" +
+                "        \"building\" : undefined,\n" +
+                "        \"floor\" : 10\n" +
+                "    }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withundefined");
+        converter = new MongoDataConverter(ArrayEncoding.DOCUMENT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+        assertThat(finalSchema).isEqualTo(
+                SchemaBuilder.struct().name("withundefined")
+                        .field("_id", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("address", SchemaBuilder.struct().name("withundefined.address").optional()
+                                .field("floor", Schema.OPTIONAL_INT32_SCHEMA)
+                                .build())
+                        .build());
+        assertThat(struct.toString()).isEqualTo(
+                "Struct{"
+                        + "_id=518cc94bc27cfa20d9693e5d,"
+                        + "address=Struct{"
+                        + "floor=10"
+                        + "}"
+                        + "}");
+
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2569")
+    public void shouldProcessSymbolMinKeyAndMaxKeyValues() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"symbol-1\",\n" +
+                "    \"symbol_value\" : { \"$symbol\" : \"symbolic\" },\n" +
+                "    \"min_key_value\" : { \"$minKey\" : 1 },\n" +
+                "    \"max_key_value\" : { \"$maxKey\" : 1 }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withsymbol");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+        assertThat(finalSchema).isEqualTo(
+                SchemaBuilder.struct().name("withsymbol")
+                        .field("_id", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("symbol_value", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("min_key_value", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("max_key_value", Schema.OPTIONAL_STRING_SCHEMA)
+                        .build());
+        assertThat(struct.toString()).isEqualTo(
+                "Struct{"
+                        + "_id=symbol-1,"
+                        + "symbol_value=symbolic,"
+                        + "min_key_value=MinKey,"
+                        + "max_key_value=MaxKey"
+                        + "}");
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2569")
+    public void shouldProcessSymbolArray() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"symbol-array-1\",\n" +
+                "    \"symbols\" : [ { \"$symbol\" : \"a\" }, { \"$symbol\" : \"b\" } ]\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withsymbolarray");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+        assertThat(finalSchema).isEqualTo(
+                SchemaBuilder.struct().name("withsymbolarray")
+                        .field("_id", Schema.OPTIONAL_STRING_SCHEMA)
+                        .field("symbols", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build())
+                        .build());
+        assertThat(struct.toString()).isEqualTo(
+                "Struct{"
+                        + "_id=symbol-array-1,"
+                        + "symbols=[a, b]"
+                        + "}");
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldPreserveBsonTimestampComponentsInStructMode() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"timestamp-1\",\n" +
+                "    \"ts_a\" : { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } },\n" +
+                "    \"ts_b\" : { \"$timestamp\" : { \"t\": 1710000000, \"i\": 8 } }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withtimestamp");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY,
+                FieldNameSelector.defaultNonRelationalSelector(SchemaNameAdjuster.NO_OP), false,
+                BsonTimestampHandlingMode.STRUCT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        assertThat(finalSchema.field("ts_a").schema().name()).isEqualTo(MongoDbSchema.SCHEMA_NAME_TIMESTAMP);
+        final Struct tsA = (Struct) struct.get("ts_a");
+        final Struct tsB = (Struct) struct.get("ts_b");
+        assertThat(tsA.get("time")).isEqualTo(1710000000L);
+        assertThat(tsA.get("increment")).isEqualTo(7L);
+        assertThat(tsB.get("time")).isEqualTo(1710000000L);
+        assertThat(tsB.get("increment")).isEqualTo(8L);
+        // Two BSON values with the same time and a different increment must stay distinguishable
+        assertThat(tsA).isNotEqualTo(tsB);
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldPreserveBsonTimestampComponentsInArraysInStructMode() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"timestamp-array-1\",\n" +
+                "    \"ts_values\" : [ { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } }, { \"$timestamp\" : { \"t\": 1710000000, \"i\": 8 } } ]\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withtimestamparray");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY,
+                FieldNameSelector.defaultNonRelationalSelector(SchemaNameAdjuster.NO_OP), false,
+                BsonTimestampHandlingMode.STRUCT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        @SuppressWarnings("unchecked")
+        final List<Struct> timestamps = (List<Struct>) struct.get("ts_values");
+        assertThat(timestamps).hasSize(2);
+        assertThat(timestamps.get(0).get("increment")).isEqualTo(7L);
+        assertThat(timestamps.get(1).get("increment")).isEqualTo(8L);
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldPreserveNestedBsonTimestampInStructMode() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"nested-timestamp-1\",\n" +
+                "    \"meta\" : { \"ts\" : { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } }, \"label\": \"x\" }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withnestedtimestamp");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY,
+                FieldNameSelector.defaultNonRelationalSelector(SchemaNameAdjuster.NO_OP), false,
+                BsonTimestampHandlingMode.STRUCT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        final Struct nestedTimestamp = struct.getStruct("meta").getStruct("ts");
+        assertThat(nestedTimestamp.schema().name()).isEqualTo(MongoDbSchema.SCHEMA_NAME_TIMESTAMP);
+        assertThat(nestedTimestamp.get("time")).isEqualTo(1710000000L);
+        assertThat(nestedTimestamp.get("increment")).isEqualTo(7L);
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldEncodeMixedDateAndTimestampArrayAsDocumentInStructMode() {
+        // In struct mode a BSON timestamp no longer shares a schema with a date/time value, so an
+        // array mixing the two cannot be encoded as 'array'; 'document' encoding indexes each element
+        // under its own field and preserves both types.
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"mixed-1\",\n" +
+                "    \"times\" : [ { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } }, { \"$date\": 1710000000000 } ]\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withmixedarray");
+        converter = new MongoDataConverter(ArrayEncoding.DOCUMENT,
+                FieldNameSelector.defaultNonRelationalSelector(SchemaNameAdjuster.NO_OP), false,
+                BsonTimestampHandlingMode.STRUCT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        final Struct times = struct.getStruct("times");
+
+        // The timestamp element keeps the struct schema with both components...
+        final Struct ts0 = times.getStruct("_0");
+        assertThat(ts0.schema().name()).isEqualTo(MongoDbSchema.SCHEMA_NAME_TIMESTAMP);
+        assertThat(ts0.get("time")).isEqualTo(1710000000L);
+        assertThat(ts0.get("increment")).isEqualTo(7L);
+
+        // ...while the date/time element stays a Connect Timestamp (java.util.Date).
+        assertThat(times.get("_1")).isInstanceOf(Date.class);
+        assertThat(((Date) times.get("_1")).getTime()).isEqualTo(1710000000000L);
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldRejectMixedDateAndTimestampArrayInArrayModeInStructMode() {
+        // Documented side effect: in struct mode a timestamp and a date/time no longer share a schema,
+        // so 'array' encoding cannot represent an array that mixes them (use 'document' encoding instead).
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"mixed-array-fail-1\",\n" +
+                "    \"times\" : [ { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } }, { \"$date\": 1710000000000 } ]\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withmixedarrayfail");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY,
+                FieldNameSelector.defaultNonRelationalSelector(SchemaNameAdjuster.NO_OP), false,
+                BsonTimestampHandlingMode.STRUCT);
+
+        assertThatThrownBy(() -> {
+            Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+            converter.buildSchema(entry, builder);
+        }).isInstanceOf(DebeziumException.class)
+                .hasMessageContaining("different Bson types");
+    }
+
+    @Test
+    @FixFor("debezium/dbz#2570")
+    public void shouldConvertBsonTimestampToConnectTimestampByDefault() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : \"timestamp-2\",\n" +
+                "    \"ts_a\" : { \"$timestamp\" : { \"t\": 1710000000, \"i\": 7 } },\n" +
+                "    \"ts_b\" : { \"$timestamp\" : { \"t\": 1710000000, \"i\": 8 } }\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("withtimestampdefault");
+        converter = new MongoDataConverter(ArrayEncoding.ARRAY);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        assertThat(finalSchema.field("ts_a").schema()).isEqualTo(Timestamp.builder().optional().build());
+        assertThat(struct.get("ts_a")).isEqualTo(new Date(1710000000000L));
+        // The default representation retains only the time component
+        assertThat(struct.get("ts_a")).isEqualTo(struct.get("ts_b"));
+    }
+
+    @Test
+    @FixFor("DBZ-1392")
+    public void shouldProcessHeterogeneousArrayWithEmptyNestedDocument() {
+        val = BsonDocument.parse("{\n" +
+                "    \"_id\" : ObjectId(\"66bf4a1c2f8e3b4d5a7c9e12\"),\n" +
+                "    \"users\" : [\n" +
+                "        {\"name\" : \"John\", \"age\" : 30, \"address\" : {\"street\" : \"123 Main St\", \"city\" : \"NYC\"}},\n" +
+                "        {\"name\" : \"Jane\", \"email\" : \"jane@example.com\", \"address\" : {}},\n" +
+                "        {\"name\" : \"Bob\", \"age\" : 25, \"phone\" : \"555-1234\"}\n" +
+                "    ]\n" +
+                "}");
+        builder = SchemaBuilder.struct().name("heterogeneous");
+        converter = new MongoDataConverter(ArrayEncoding.DOCUMENT);
+
+        Map<String, Map<Object, BsonType>> entry = converter.parseBsonDocument(val);
+        converter.buildSchema(entry, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+        for (Map.Entry<String, BsonValue> bsonValueEntry : val.entrySet()) {
+            converter.buildStruct(bsonValueEntry, finalSchema, struct);
+        }
+
+        // The schema name for array elements will be the parent field name plus index (e.g., users._0)
+        assertThat(finalSchema.field("users")).isNotNull();
+
+        // Verify struct was built successfully and contains the expected data
+        // For heterogeneous arrays in DOCUMENT mode, elements are indexed as _0, _1, _2...
+        assertThat(struct.getStruct("users")).isNotNull();
+        Struct usersStruct = struct.getStruct("users");
+
+        assertThat(usersStruct.getStruct("_0").get("name")).isEqualTo("John");
+        assertThat(usersStruct.getStruct("_1").get("email")).isEqualTo("jane@example.com");
+        assertThat(usersStruct.getStruct("_2").get("age")).isEqualTo(25);
+
+        // This ensures the empty address document didn't cause a crash and was handled
+        assertThat(usersStruct.getStruct("_1").getStruct("address")).isNotNull();
+        assertThat(usersStruct.getStruct("_1").getStruct("address").schema().fields()).isEmpty();
+    }
+
+    @Test
+    @FixFor("debezium/dbz#1901")
+    public void shouldHandleIdenticalArrayElementsWithDocumentEncoding() {
+        val = BsonDocument.parse("""
+                {
+                    "_id": {"$oid": "6a24288af2e947561dd394aa"},
+                    "items": [
+                        {
+                            "title": "Product",
+                            "image": "dummy img",
+                            "price": 899,
+                            "qty": 2
+                        },
+                        {
+                            "title": "Product",
+                            "image": "dummy img",
+                            "price": 899,
+                            "qty": 2
+                        }
+                    ]
+                }
+                """);
+
+        builder = SchemaBuilder.struct().name("test");
+        converter = new MongoDataConverter(ArrayEncoding.DOCUMENT);
+
+        final Map<String, Map<Object, BsonType>> schemaMap = converter.parseBsonDocument(val);
+        converter.buildSchema(schemaMap, builder);
+
+        final Schema finalSchema = builder.build();
+        final Struct struct = new Struct(finalSchema);
+
+        for (final Map.Entry<String, BsonValue> entry : val.entrySet()) {
+            converter.buildStruct(entry, finalSchema, struct);
+        }
+
+        final Struct itemsStruct = struct.getStruct("items");
+        assertThat(itemsStruct).isNotNull();
+        assertThat(itemsStruct.getStruct("_0")).isNotNull();
+        assertThat(itemsStruct.getStruct("_1")).isNotNull();
+        assertThat(itemsStruct.getStruct("_0").get("title")).isEqualTo("Product");
+        assertThat(itemsStruct.getStruct("_0").get("price")).isEqualTo(899);
+        assertThat(itemsStruct.getStruct("_1").get("title")).isEqualTo("Product");
+        assertThat(itemsStruct.getStruct("_1").get("price")).isEqualTo(899);
+    }
+}

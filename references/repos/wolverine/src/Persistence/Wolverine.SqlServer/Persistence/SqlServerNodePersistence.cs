@@ -1,0 +1,513 @@
+using System.Data.Common;
+using JasperFx.Core;
+using Microsoft.Data.SqlClient;
+using Weasel.Core;
+using Weasel.SqlServer;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Durability;
+using Wolverine.Runtime.Agents;
+using Wolverine.Transports;
+using CommandExtensions = Weasel.Core.CommandExtensions;
+
+namespace Wolverine.SqlServer.Persistence;
+
+internal class SqlServerNodePersistence : DatabaseConstants, INodeAgentPersistence
+{
+    public static string LeaderLockId = "9999999";
+
+    private readonly DatabaseSettings _settings;
+    private readonly IMessageDatabase _database;
+    private readonly DbObjectName _nodeTable;
+    private readonly DbObjectName _assignmentTable;
+    private readonly int _lockId;
+    private readonly DbObjectName _restrictionTable;
+    private readonly DurabilitySettings _durability;
+
+    public SqlServerNodePersistence(DatabaseSettings settings, IMessageDatabase database,
+        DurabilitySettings durability)
+    {
+        _settings = settings;
+        _database = database;
+        _durability = durability;
+        var schemaName = settings.SchemaName ?? "dbo";
+        _nodeTable = new DbObjectName(schemaName, DatabaseConstants.NodeTableName);
+        _assignmentTable = new DbObjectName(schemaName, DatabaseConstants.NodeAssignmentsTableName);
+        _lockId = schemaName.GetDeterministicHashCode();
+        _restrictionTable = new DbObjectName(schemaName, DatabaseConstants.AgentRestrictionsTableName);
+    }
+
+    // GH-4593: load_factor is only provisioned behind this flag (SqlServerMessageStore.AllObjects), so
+    // every statement naming it is gated on it too -- otherwise an un-migrated database (AutoCreate.None,
+    // or no DDL rights) fails node startup on an invalid column name. Read live rather than captured:
+    // this is constructed before the flag is reliably set.
+    private bool advertisesLoad => _durability.CapacityAwareAssignment;
+
+    private string nodeColumns => advertisesLoad ? $"{NodeColumns}, {LoadFactor}" : NodeColumns;
+
+    public bool AdvertisesNodeLoad => true;
+
+    public async Task ClearAllAsync(CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        await using var cmd = conn.CreateCommand($"delete from {_nodeTable}");
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<int> PersistAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        var raw = await persistNode(conn, node, cancellationToken);
+
+        await conn.CloseAsync();
+
+        return (int)raw;
+    }
+
+    private async Task<object> persistNode(SqlConnection conn, WolverineNode node, CancellationToken cancellationToken)
+    {
+        // GH-3165: join capabilities with a newline, NOT a comma. SQL Server has no array column type
+        // (unlike Postgres, which stores capabilities as text[]), so we serialize to a single delimited
+        // string. A comma is unsafe because an agent capability URI can legitimately contain a comma —
+        // an event-subscription agent URI embeds the DatabaseId, and a SQL Server DatabaseId's server name
+        // is "host,port" (e.g. "localhost,1434"). Comma-splitting then shredded one URI into invalid
+        // fragments and threw on read. A newline can never appear in a Uri.ToString() (it would be
+        // percent-encoded), so it is a safe delimiter.
+        var strings = node.Capabilities.Select(x => x.ToString()).Join("\n");
+
+        await using var cmd = conn.CreateCommand($"insert into {_nodeTable} (id, uri, capabilities, description, version) OUTPUT Inserted.node_number values (@id, @uri, @capabilities, @description, @version) ")
+            .With("id", node.NodeId)
+            .With("uri", (node.ControlUri ?? TransportConstants.LocalUri).ToString()).With("description", node.Description)
+            .With("capabilities", strings)
+            .With("version", node.Version.ToString());
+
+        var raw = await cmd.ExecuteScalarAsync(cancellationToken);
+        return raw;
+    }
+
+    public async Task DeleteAsync(Guid nodeId, int assignedNodeNumber)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync();
+
+        // GH-4739: the `owner_id <> 0` clauses are what let these two updates seek the FILTERED owner
+        // indexes (predicate `owner_id <> 0`) rather than scan the tables. A parameterized
+        // `owner_id = @number` alone cannot use a filtered index -- the cached plan must stay correct for
+        // @number = 0 -- so a departing node held update locks across the whole inbox while the fleet was
+        // mid-deploy, which is exactly the statement the GH-4739 reporter caught in Query Store.
+        await CommandExtensions.CreateCommand(conn, $"delete from {_nodeTable} where id = @id;update {_settings.SchemaName}.{IncomingTable} set {OwnerId} = 0 where {OwnerId} = @number and {OwnerId} <> 0;update {_settings.SchemaName}.{OutgoingTable} set {OwnerId} = 0 where {OwnerId} = @number and {OwnerId} <> 0;")
+            .With("id", nodeId)
+            .With("number", assignedNodeNumber)
+            .ExecuteNonQueryAsync();
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<IReadOnlyList<WolverineNode>> LoadAllNodesAsync(CancellationToken cancellationToken)
+    {
+        var nodes = new List<WolverineNode>();
+
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        await using var cmd = conn.CreateCommand($"select {nodeColumns} from {_nodeTable};select {Id}, {NodeId}, {Started} from {_assignmentTable}");
+
+        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var node = await readNodeAsync(reader);
+            nodes.Add(node);
+        }
+
+        var dict = nodes.ToDictionary(x => x.NodeId);
+
+        await reader.NextResultAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var agentId = new Uri(await reader.GetFieldValueAsync<string>(0, cancellationToken));
+            var nodeId = await reader.GetFieldValueAsync<Guid>(1, cancellationToken);
+
+            dict[nodeId].ActiveAgents.Add(agentId);
+        }
+
+        await reader.CloseAsync();
+        await conn.CloseAsync();
+
+        return nodes;
+    }
+
+    public async Task PersistAgentRestrictionsAsync(IReadOnlyList<AgentRestriction> restrictions,
+        CancellationToken cancellationToken)
+    {
+        // No changes to persist. Compiling/executing an empty BatchBuilder yields a single command with
+        // an empty CommandText, which throws "CommandText property has not been initialized" — so no-op
+        // instead. The empty case happens on an idempotent restriction apply (no delta). See wolverine#3252.
+        if (restrictions.Count == 0) return;
+
+        var builder = new BatchBuilder();
+        foreach (var restriction in restrictions)
+        {
+            builder.StartNewCommand();
+
+            if (restriction.Type == AgentRestrictionType.None)
+            {
+                builder.Append($"delete from {_restrictionTable} where id = ");
+                builder.AppendParameter(restriction.Id);
+            }
+            else
+            {
+                builder.Append($"delete from {_restrictionTable} where id = ");
+                builder.AppendParameter(restriction.Id);
+                builder.StartNewCommand();
+                builder.Append(
+                    $"insert into {_restrictionTable} (id, uri, type, node) values (");
+                builder.AppendParameters(restriction.Id, restriction.AgentUri.ToString(), restriction.Type.ToString(), restriction.NodeNumber);
+                builder.Append(")");
+            }
+        }
+
+        await using var batch = builder.Compile();
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+        batch.Connection = conn;
+        await batch.ExecuteNonQueryAsync(cancellationToken);
+        await conn.CloseAsync();
+    }
+
+    public async Task<NodeAgentState> LoadNodeAgentStateAsync(CancellationToken cancellationToken)
+    {
+        var nodes = new List<WolverineNode>();
+        var restrictions = new List<AgentRestriction>();
+        
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+        
+        await using var cmd = conn.CreateCommand(
+            $"select {nodeColumns} from {_nodeTable};select {Id}, {NodeId}, {Started} from {_assignmentTable};select id, uri, type, node from {_restrictionTable}");
+        
+        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var node = await readNodeAsync(reader);
+            nodes.Add(node);
+        }
+        
+        var dict = nodes.ToDictionary(x => x.NodeId);
+        
+        await reader.NextResultAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var agentId = new Uri(await reader.GetFieldValueAsync<string>(0, cancellationToken));
+            var nodeId = await reader.GetFieldValueAsync<Guid>(1, cancellationToken);
+        
+            dict[nodeId].ActiveAgents.Add(agentId);
+        }
+
+        await reader.NextResultAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var id = await reader.GetFieldValueAsync<Guid>(0, cancellationToken);
+            var uriString = await reader.GetFieldValueAsync<string>(1, cancellationToken);
+            var typeString = await reader.GetFieldValueAsync<string>(2, cancellationToken);
+            var nodeNumber = await reader.GetFieldValueAsync<int>(3, cancellationToken);
+
+            // TODO -- harden this against garbage data
+            var restriction = new AgentRestriction(id, new Uri(uriString),
+                Enum.Parse<AgentRestrictionType>(typeString), nodeNumber);
+                
+            restrictions.Add(restriction);
+        }
+        
+        await reader.CloseAsync();
+        await conn.CloseAsync();
+
+        return new(nodes, new AgentRestrictions(restrictions.ToArray()));
+    }
+
+    public async Task OverwriteHealthCheckTimeAsync(Guid nodeId, DateTimeOffset lastHeartbeatTime)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync();
+
+        await conn.CreateCommand($"update {_nodeTable} set health_check = @now where id = @id")
+            .With("id", nodeId)
+            .With("now", lastHeartbeatTime)
+            .ExecuteNonQueryAsync();
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<WolverineNode?> LoadNodeAsync(Guid nodeId, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        await using var cmd = CommandExtensions.CreateCommand(conn,
+                $"select {nodeColumns} from {_nodeTable} where id = @id;select id, node_id, started from {_assignmentTable} where node_id = @id;")
+            .With("id", nodeId);
+
+        WolverineNode returnValue = default!;
+
+        await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+        if (await reader.ReadAsync(cancellationToken))
+        {
+            returnValue = await readNodeAsync(reader);
+
+            await reader.NextResultAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var agentId = new Uri(await reader.GetFieldValueAsync<string>(0, cancellationToken));
+                returnValue.ActiveAgents.Add(agentId);
+            }
+        }
+
+        await reader.CloseAsync();
+
+        return returnValue;
+    }
+
+    public async Task<bool> MarkHealthCheckAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        // GH-4593: the load advertisement rides the same single-statement heartbeat write, so the leader
+        // never places agents against a reading older than one HealthCheckPollingTime.
+        var cmd = conn.CreateCommand(advertisesLoad
+                ? $"update {_nodeTable} set health_check = GETUTCDATE(), {LoadFactor} = @load where id = @id"
+                : $"update {_nodeTable} set health_check = GETUTCDATE() where id = @id")
+            .With("id", node.NodeId);
+
+        if (advertisesLoad)
+        {
+            cmd = cmd.With("load", (object?)node.LoadFactor ?? DBNull.Value);
+        }
+
+        var count = await cmd.ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+
+        // GH-3604 / D2: a miss means a peer deleted this still-live node's row; report it to the caller
+        // instead of blindly re-inserting a skeleton (fresh node_number, empty capabilities) here.
+        return count != 0;
+    }
+
+    public async Task ReregisterNodeAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        // node_number is an IDENTITY column, so an explicit value requires IDENTITY_INSERT. Preserve the
+        // existing number + capabilities so the resurrected row matches the identity the process still uses
+        // in memory. The delete cascades any surviving assignment rows; the caller restores them.
+        var strings = node.Capabilities.Select(x => x.ToString()).Join("\n");
+
+        // GH-4593: delete-then-insert rather than an upsert, so the load column only joins the column and
+        // value lists -- there is no "do update set" half to splice here.
+        var loadColumn = advertisesLoad ? $", {LoadFactor}" : string.Empty;
+        var loadValue = advertisesLoad ? ", @load" : string.Empty;
+
+        var cmd = conn.CreateCommand(
+                $"SET IDENTITY_INSERT {_nodeTable} ON; delete from {_nodeTable} where id = @id; insert into {_nodeTable} (id, node_number, uri, capabilities, description, version, health_check{loadColumn}) values (@id, @number, @uri, @capabilities, @description, @version, GETUTCDATE(){loadValue}); SET IDENTITY_INSERT {_nodeTable} OFF;")
+            .With("id", node.NodeId)
+            .With("number", node.AssignedNodeNumber)
+            .With("uri", (node.ControlUri ?? TransportConstants.LocalUri).ToString())
+            .With("capabilities", strings)
+            .With("description", node.Description)
+            .With("version", node.Version.ToString());
+
+        if (advertisesLoad)
+        {
+            cmd = cmd.With("load", (object?)node.LoadFactor ?? DBNull.Value);
+        }
+
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+    }
+
+    private async Task<WolverineNode> readNodeAsync(DbDataReader reader)
+    {
+        var node = new WolverineNode
+        {
+            NodeId = await reader.GetFieldValueAsync<Guid>(0),
+            AssignedNodeNumber = await reader.GetFieldValueAsync<int>(1),
+            Description = await reader.GetFieldValueAsync<string>(2),
+            ControlUri = (await reader.GetFieldValueAsync<string>(3)).ToUri(),
+            Started = await reader.GetFieldValueAsync<DateTimeOffset>(4),
+            LastHealthCheck = await reader.GetFieldValueAsync<DateTimeOffset>(5)
+        };
+        
+        if (!(await reader.IsDBNullAsync(6)))
+        {
+            var rawVersion = await reader.GetFieldValueAsync<string>(6);
+            node.Version = System.Version.Parse(rawVersion);
+        }
+
+        var capabilities = await reader.GetFieldValueAsync<string>(7);
+        if (capabilities.IsNotEmpty())
+        {
+            // GH-3165: split on newline (see persistNode) — a comma can appear inside an agent URI, so it
+            // is not a safe delimiter. Tolerate legacy comma-joined rows that carried no comma-bearing URI
+            // by also treating a lone comma-free string as a single entry (newline-split yields one element).
+            node.Capabilities.AddRange(capabilities
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => new Uri(x)));
+        }
+
+        // GH-4593: resolved by name -- a select that stops appending the column should fail loudly here
+        // rather than read a wrong hard-coded ordinal.
+        if (advertisesLoad)
+        {
+            var loadFactor = reader.GetOrdinal(LoadFactor);
+            if (!await reader.IsDBNullAsync(loadFactor))
+            {
+                node.LoadFactor = await reader.GetFieldValueAsync<double>(loadFactor);
+            }
+        }
+
+        return node;
+    }
+
+    public async Task AssignAgentsAsync(Guid nodeId, IReadOnlyList<Uri> agents, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        var builder = new BatchBuilder();
+
+        foreach (var agent in agents)
+        {
+            builder.StartNewCommand();
+            builder.Append($"delete from {_assignmentTable} where id = ");
+            builder.AppendParameter(agent.ToString());
+            builder.StartNewCommand();
+            builder.Append($"insert into {_assignmentTable} (id, node_id) values (");
+            builder.AppendParameters(agent.ToString(), nodeId);
+            builder.Append(")");
+        }
+
+        await using var batch = builder.Compile();
+        batch.Connection = conn;
+        await batch.ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+    }
+
+    public async Task RemoveAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        await conn.CreateCommand($"delete from {_assignmentTable} where id = @id and node_id = @node")
+            .With("id", agentUri.ToString())
+            .With("node", nodeId)
+            .ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+    }
+
+    public async Task AddAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        await conn.CreateCommand($"delete from {_assignmentTable} where id = @id;insert into {_assignmentTable} (id, node_id) values (@id, @node);")
+            .With("id", agentUri.ToString())
+            .With("node", nodeId)
+            .ExecuteNonQueryAsync(cancellationToken);
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<bool> TryClaimAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+
+        // GH-4407: insert only if nobody owns the agent yet -- UPDLOCK/HOLDLOCK so two claimants can't both pass
+        // the NOT EXISTS -- then report whether the row is ours
+        var owned = await conn.CreateCommand(
+                $"insert into {_assignmentTable} (id, node_id) select @id, @node where not exists (select 1 from {_assignmentTable} with (updlock, holdlock) where id = @id);" +
+                $"select count(*) from {_assignmentTable} where id = @id and node_id = @node;")
+            .With("id", agentUri.ToString())
+            .With("node", nodeId)
+            .ExecuteScalarAsync(cancellationToken);
+
+        await conn.CloseAsync();
+
+        return Convert.ToInt64(owned) > 0;
+    }
+
+    public Task LogRecordsAsync(params NodeRecord[] records)
+    {
+        if (records.Any())
+        {
+            var op = new PersistNodeRecord(_settings, records);
+            return _database.EnqueueAsync(op);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<NodeRecord>> FetchRecentRecordsAsync(int count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Must be a positive number");
+
+        Func<DbDataReader, Task<NodeRecord>> readRecord = async reader =>
+        {
+            return new NodeRecord
+            {
+                NodeNumber = await reader.GetFieldValueAsync<int>(0),
+                RecordType = Enum.Parse<NodeRecordType>(await reader.GetFieldValueAsync<string>(1)),
+                Timestamp = await reader.GetFieldValueAsync<DateTimeOffset>(2),
+                Description = await reader.GetFieldValueAsync<string>(3)
+
+            };
+        };
+
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync();
+
+        var result = await conn.CreateCommand($"select top {count} node_number, event_name, timestamp, description from {_settings.SchemaName}.{DatabaseConstants.NodeRecordTableName} order by id desc")
+            .FetchListAsync(readRecord);
+
+        await conn.CloseAsync();
+
+        return result;
+    }
+
+    public async Task DeleteOldNodeRecordsAsync(int retainCount)
+    {
+        if (retainCount <= 0) return;
+
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync();
+
+        await conn.CreateCommand(
+                $"delete from {_settings.SchemaName}.{DatabaseConstants.NodeRecordTableName} where id not in (select top {retainCount} id from {_settings.SchemaName}.{DatabaseConstants.NodeRecordTableName} order by id desc)")
+            .ExecuteNonQueryAsync();
+
+        await conn.CloseAsync();
+    }
+
+    public bool HasLeadershipLock()
+    {
+        return _database.AdvisoryLock.HasLock(_lockId);
+    }
+
+    public Task<bool> TryAttainLeadershipLockAsync(CancellationToken token)
+    {
+        return _database.AdvisoryLock.TryAttainLockAsync(_lockId, token);
+    }
+
+    public Task ReleaseLeadershipLockAsync()
+    {
+        return _database.AdvisoryLock.ReleaseLockAsync(_lockId);
+    }
+}

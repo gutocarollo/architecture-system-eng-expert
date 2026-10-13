@@ -1,0 +1,146 @@
+using JasperFx.Events.EventModeling;
+using Wolverine.Configuration.EventModeling;
+
+namespace Wolverine.Http.Diagnostics;
+
+/// <summary>
+///     The Wolverine.HTTP-derived <see cref="IEventModelDefinitionSource" /> (GH-3988): one Event Model
+///     slice per <see cref="HttpChain" />, triggered by the route and verb, with the command being the
+///     request body and the roles derived off the endpoint signature by <see cref="EventModelRoles" />
+///     exactly as for a message handler chain. Contributes to the same model as Wolverine core's source —
+///     named for the service — so the assembled picture is one model per service.
+/// </summary>
+internal sealed class HttpEventModelSource : IEventModelDefinitionSource
+{
+    private readonly WolverineHttpOptions _options;
+    private readonly WolverineOptions _wolverineOptions;
+
+    public HttpEventModelSource(WolverineHttpOptions options, WolverineOptions wolverineOptions)
+    {
+        _options = options;
+        _wolverineOptions = wolverineOptions;
+    }
+
+    /// <summary>
+    ///     GH-4425. Also stamped on every slice this source emits, as
+    ///     <see cref="EventModelSliceDescriptor.Origin" />, so a same-rung collision with Wolverine
+    ///     core's source reads as <c>event-model://wolverine-http</c> against
+    ///     <c>event-model://wolverine</c> — a file to go and look at — rather than <c>Derived</c> twice.
+    /// </summary>
+    public static readonly Uri SourceSubject = new($"{WolverineEventModelSource.Scheme}://wolverine-http");
+
+    public Uri Subject => SourceSubject;
+
+    /// <summary>
+    ///     GH-4147/GH-4152. Roles here are derived off compiled <see cref="HttpChain" />s, so this source
+    ///     sits on the same <see cref="EventModelProvenance.Derived" /> rung as Wolverine core's
+    ///     (jasperfx#703), which is what replaced the <c>services.Insert(0, ...)</c> registration hack.
+    ///     Two sources on the same rung union rather than clobber, so this and
+    ///     <see cref="WolverineEventModelSource" /> still both contribute to the one model per service.
+    /// </summary>
+    public EventModelProvenance Provenance => EventModelProvenance.Derived;
+
+    public async Task<EventModelDescriptor?> TryCreateAsync(IServiceProvider services, CancellationToken token)
+    {
+        var graph = _options.Endpoints;
+        if (graph is null) return null;
+
+        // GH-4829: the domain policies the declared models carry decide each slice's Domain
+        var domains = await EventModelSliceDomains.DeclaredAssignmentsAsync(services, token).ConfigureAwait(false);
+
+        return Describe(_wolverineOptions, graph.Chains, domains);
+    }
+
+    /// <summary>Describe every routed HTTP chain as an Event Model slice.</summary>
+    public static EventModelDescriptor Describe(WolverineOptions options, IEnumerable<HttpChain> chains)
+        => Describe(options, chains, Array.Empty<DomainAssignmentDescriptor>());
+
+    /// <summary>
+    ///     Describe every routed HTTP chain as an Event Model slice, giving each the domain that
+    ///     <paramref name="domains" /> or a <see cref="DomainAttribute" /> declares for its endpoint (GH-4829).
+    /// </summary>
+    public static EventModelDescriptor Describe(WolverineOptions options, IEnumerable<HttpChain> chains,
+        IReadOnlyList<DomainAssignmentDescriptor> domains)
+    {
+        var chainList = chains.ToList();
+        var model = Describe(options.ServiceName, chainList, domains);
+
+        var knownTypes = new Dictionary<string, Type>(StringComparer.Ordinal);
+        foreach (var chain in chainList)
+        {
+            if (chain.RequestType?.FullName is { } request) knownTypes.TryAdd(request, chain.RequestType);
+            foreach (var variable in chain.Method.Creates)
+            {
+                if (variable.VariableType.FullName is { } fullName) knownTypes.TryAdd(fullName, variable.VariableType);
+            }
+        }
+
+        // GH-3989: an endpoint publishing to a named external system puts that system on the far end
+        // of the HTTP slice too; HTTP chains have no listener, so only outbound edges apply
+        return WolverineEventModelSource.ApplyExternalSystems(model, options, knownTypes: knownTypes, includeInbound: false);
+    }
+
+    /// <summary>Describe every routed HTTP chain as an Event Model slice, without endpoint-derived external systems.</summary>
+    public static EventModelDescriptor Describe(string serviceName, IEnumerable<HttpChain> chains)
+        => Describe(serviceName, chains, Array.Empty<DomainAssignmentDescriptor>());
+
+    private static EventModelDescriptor Describe(string serviceName, IEnumerable<HttpChain> chains,
+        IReadOnlyList<DomainAssignmentDescriptor> domains)
+    {
+        var slices = new List<EventModelSliceDescriptor>();
+        var aggregates = new List<AggregateDescriptor>();
+        var aggregateNames = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var chain in chains.Where(x => x.RoutePattern is not null)
+                     .OrderBy(x => x.RoutePattern!.RawText, StringComparer.Ordinal)
+                     .ThenBy(x => x.HttpMethods.OrderBy(m => m).FirstOrDefault(), StringComparer.Ordinal))
+        {
+            slices.Add(EventModelSliceDomains.ApplyDomain(ForChain(chain), chain.EndpointType, chain.Method.Method, domains));
+            foreach (var aggregate in EventModelRoles.AggregatesFor(chain))
+            {
+                if (aggregateNames.Add(aggregate.Type.FullName)) aggregates.Add(aggregate);
+            }
+        }
+
+        // GH-4425: stamp Origin after FinishModel, with THIS source's subject. The shared FinishModel
+        // cannot do it — both sources call it, so stamping there would label these slices as core's.
+        return WolverineEventModelSource.StampOrigin(
+            WolverineEventModelSource.FinishModel(
+                new EventModelDescriptor(serviceName, slices) { Aggregates = aggregates }),
+            SourceSubject);
+    }
+
+    /// <summary>
+    ///     Describe one HTTP chain. The slice is named for the request type when there is one — the same
+    ///     key a message handler for that type would use, so an endpoint and a handler for the same command
+    ///     fold into one slice — else for the verb and route.
+    /// </summary>
+    public static EventModelSliceDescriptor ForChain(HttpChain chain)
+    {
+        var route = chain.RoutePattern?.RawText ?? string.Empty;
+        var methods = chain.HttpMethods.OrderBy(x => x, StringComparer.Ordinal).ToArray();
+        var verb = methods.FirstOrDefault() ?? "GET";
+        var requestType = chain.RequestType is { } req && req != typeof(void) ? req : null;
+        var resourceType = chain.ResourceType is { } res && res != typeof(void) ? res : null;
+
+        var seed = new EventModelSliceSeed(
+            (requestType == null ? null : EventModelRoles.DisplayNameFor(requestType)) ?? $"{verb} {route}",
+            TriggerKind.Http,
+            // jasperfx PublisherOrigin.HttpRouteName: the endpoint's ASP.NET Core route name, when it has one
+            new PublisherOrigin { HttpRoute = route, HttpMethod = verb, HttpRouteName = chain.RouteName, Label = $"{verb} {route}" },
+            requestType,
+            chain.EndpointType)
+        {
+            // the user's endpoint method, never the generated HttpHandler's Handle override
+            HandlerMethod = chain.Method.Method,
+            ResponseType = resourceType,
+            // Wolverine.HTTP's convention: the first return value is the response body unless the
+            // endpoint is [EmptyResponse] / NoContent, in which case every return value is a message
+            // (or an event) — mirrors HttpGraphUsageSource's cascading-message rule
+            FirstReturnValueIsResponse = !chain.NoContent && chain.Method.Creates.Any(),
+            IsQuery = methods.All(m => m is "GET" or "HEAD")
+        };
+
+        return EventModelRoles.Describe(chain, seed);
+    }
+}

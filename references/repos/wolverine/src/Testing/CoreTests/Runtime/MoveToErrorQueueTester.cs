@@ -1,0 +1,158 @@
+﻿using NSubstitute;
+using Shouldly;
+using Wolverine.ComplianceTests;
+using Wolverine.ErrorHandling;
+using Wolverine.Transports;
+using Xunit;
+
+namespace CoreTests.Runtime;
+
+public class MoveToErrorQueueTester
+{
+    private readonly MoveToErrorQueue theContinuation;
+    private readonly Envelope theEnvelope = ObjectMother.Envelope();
+
+    private readonly Exception theException = new DivideByZeroException();
+    private readonly IEnvelopeLifecycle theLifecycle = Substitute.For<IEnvelopeLifecycle>();
+    private readonly MockWolverineRuntime theRuntime = new();
+
+    public MoveToErrorQueueTester()
+    {
+        theContinuation = new MoveToErrorQueue(theException);
+        theLifecycle.Envelope.Returns(theEnvelope);
+    }
+
+    [Fact]
+    public async Task should_send_a_failure_ack_if_not_local()
+    {
+        theRuntime.Options.EnableAutomaticFailureAcks = true;
+        
+        theEnvelope.Destination = new Uri("tcp://localhost:9000");
+        
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        await theLifecycle
+                .Received()
+                .SendFailureAcknowledgementAsync($"Moved message {theEnvelope.Id} to the Error Queue.\n{theException}")
+            ;
+    }
+    
+    [Fact]
+    public async Task should_not_send_a_failure_ack_if_wolverine_options_latches_that()
+    {
+        theEnvelope.Destination = new Uri("local://foo");
+        theRuntime.Options.EnableAutomaticFailureAcks = false;
+        
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        await theLifecycle
+                .DidNotReceive()
+                .SendFailureAcknowledgementAsync($"Moved message {theEnvelope.Id} to the Error Queue.\n{theException}")
+            ;
+    }
+    
+    [Fact]
+    public async Task should_not_send_a_failure_ack_if_local()
+    {
+        theEnvelope.Destination = new Uri("local://foo");
+        
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        await theLifecycle
+                .DidNotReceive()
+                .SendFailureAcknowledgementAsync($"Moved message {theEnvelope.Id} to the Error Queue.\n{theException}")
+            ;
+    }
+
+    [Fact]
+    public async Task a_move_the_transport_could_not_make_leaves_the_envelope_unsettled()
+    {
+        // The transport left the delivery with the broker, which delivers it again. Completing it would settle,
+        // and so lose, the only copy
+        theLifecycle.MoveToDeadLetterQueueAsync(theException)
+            .Returns(Task.FromException(new DeadLetterMoveFailedException("no dead letter stream", null)));
+
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        await theLifecycle.DidNotReceive().CompleteAsync();
+        theRuntime.MessageTracking.DidNotReceive().MovedToErrorQueue(theEnvelope, theException);
+        theRuntime.MessageTracking.Received().Requeued(theEnvelope);
+    }
+
+    [Fact]
+    public async Task a_move_handed_back_for_redelivery_sends_no_failure_ack()
+    {
+        // The redelivery is a new envelope that comes back through here, so an ack now would be one per redelivery
+        theRuntime.Options.EnableAutomaticFailureAcks = true;
+        theEnvelope.Destination = new Uri("tcp://localhost:9000");
+        theLifecycle.MoveToDeadLetterQueueAsync(theException)
+            .Returns(Task.FromException(new DeadLetterMoveFailedException("no dead letter stream", null)));
+
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        await theLifecycle.DidNotReceive().SendFailureAcknowledgementAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task the_failure_ack_is_sent_after_the_move()
+    {
+        theRuntime.Options.EnableAutomaticFailureAcks = true;
+        theEnvelope.Destination = new Uri("tcp://localhost:9000");
+
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        Received.InOrder(() =>
+        {
+            _ = theLifecycle.MoveToDeadLetterQueueAsync(theException);
+            _ = theLifecycle.SendFailureAcknowledgementAsync(Arg.Any<string>());
+        });
+    }
+
+    [Fact]
+    public async Task any_other_failure_of_the_move_still_sends_the_failure_ack()
+    {
+        theRuntime.Options.EnableAutomaticFailureAcks = true;
+        theEnvelope.Destination = new Uri("tcp://localhost:9000");
+        var moveFailure = new InvalidOperationException("the database is down");
+        theLifecycle.MoveToDeadLetterQueueAsync(theException).Returns(Task.FromException(moveFailure));
+
+        var thrown = await Should.ThrowAsync<InvalidOperationException>(() =>
+            theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null).AsTask());
+
+        thrown.ShouldBeSameAs(moveFailure);
+        await theLifecycle.Received(1).SendFailureAcknowledgementAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task logging_calls()
+    {
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        theRuntime.MessageTracking.Received().MovedToErrorQueue(theEnvelope, theException);
+
+        // GH-4136: exactly ONE terminal tracking event on this path. A terminal record sweeps every
+        // earlier record for the envelope complete, and the durable transports' dead-letter move emits
+        // a trailing Sent that nothing else completes -- so a second terminal record here cannot be
+        // ordered to satisfy both that sweep and the guarantee that the ending record is present.
+        // MessageFailed's dead-letter counter, effective time and failure wire tap moved into
+        // MovedToErrorQueue rather than being dropped.
+        theRuntime.MessageTracking.DidNotReceive().MessageFailed(theEnvelope, theException);
+    }
+
+    [Fact]
+    public async Task does_not_NRE_when_envelope_has_no_destination()
+    {
+        // GH-3013: a malformed system envelope (no Destination) must not NRE on the
+        // `lifecycle.Envelope!.Destination!.Scheme` read before EnableAutomaticFailureAcks
+        // even gets a chance to short-circuit. Enabling acks reproduces the pre-fix bug.
+        theRuntime.Options.EnableAutomaticFailureAcks = true;
+        theEnvelope.Destination = null;
+
+        // A throw here fails the test — pre-fix this NRE'd at the `scheme` variable init.
+        await theContinuation.ExecuteAsync(theLifecycle, theRuntime, DateTimeOffset.Now, null);
+
+        // No scheme → no failure ack attempted, and the move-to-DLQ still happens.
+        await theLifecycle.DidNotReceive().SendFailureAcknowledgementAsync(Arg.Any<string>());
+        await theLifecycle.Received().MoveToDeadLetterQueueAsync(theException);
+    }
+}

@@ -1,0 +1,108 @@
+using IntegrationTests;
+using JasperFx.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Weasel.Core;
+using Weasel.SqlServer.Tables;
+using Wolverine;
+using Wolverine.ComplianceTests;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Durability;
+using Wolverine.RDBMS.Polling;
+using Wolverine.Runtime;
+using Wolverine.SqlServer;
+using Wolverine.Tracking;
+
+namespace SqlServerTests;
+
+public class bumping_stale_outbox_messages : IAsyncLifetime
+{
+    private IHost theHost = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        theHost = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "stale_outbox");
+                opts.Durability.OutboxStaleTime = 1.Hours();
+            }).StartAsync();
+
+        await theHost.RebuildAllEnvelopeStorageAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await theHost.StopAsync();
+        theHost.Dispose();
+    }
+
+    [Fact]
+    public async Task got_the_right_column()
+    {
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync(TestContext.Current.CancellationToken);
+
+        var table = await new Table(new DbObjectName("stale_outbox", DatabaseConstants.OutgoingTable)).FetchExistingAsync(conn, TestContext.Current.CancellationToken);
+        
+        table!.HasColumn(DatabaseConstants.Timestamp).ShouldBeTrue();
+        
+    }
+
+    [Fact]
+    public async Task smoke_test_on_the_persist()
+    {
+        var envelope = ObjectMother.Envelope();
+        var messageStore = theHost.GetRuntime().Storage;
+        await messageStore.Outbox.StoreOutgoingAsync(envelope, 0);
+    }
+
+    [Fact]
+    public async Task using_the_operation()
+    {
+        var envelope1 = ObjectMother.Envelope();
+        var envelope2 = ObjectMother.Envelope();
+        var envelope3 = ObjectMother.Envelope();
+        var envelope4 = ObjectMother.Envelope();
+        var envelope5 = ObjectMother.Envelope();
+        
+        
+        var messageStore = theHost.GetRuntime().Storage;
+        await messageStore.Outbox.StoreOutgoingAsync(envelope1, 3);
+        await messageStore.Outbox.StoreOutgoingAsync(envelope2, 3);
+        await messageStore.Outbox.StoreOutgoingAsync(envelope3, 3);
+        await messageStore.Outbox.StoreOutgoingAsync(envelope4, 3);
+        await messageStore.Outbox.StoreOutgoingAsync(envelope5, 3);
+        
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync(TestContext.Current.CancellationToken);
+        await conn.CreateCommand("update stale_outbox.wolverine_outgoing_envelopes set \"timestamp\" = @time where id = @id")
+            .With("time", DateTimeOffset.UtcNow.Subtract(2.Hours()))
+            .With("id", envelope1.Id)
+            .ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        
+        await conn.CreateCommand("update stale_outbox.wolverine_outgoing_envelopes set \"timestamp\" = @time where id = @id")
+            .With("time", DateTimeOffset.UtcNow.Subtract(2.Hours()))
+            .With("id", envelope3.Id)
+            .ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        
+        await conn.CreateCommand("update stale_outbox.wolverine_outgoing_envelopes set \"timestamp\" = @time where id = @id")
+            .With("time", DateTimeOffset.UtcNow.Subtract(2.Hours()))
+            .With("id", envelope5.Id)
+            .ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        
+        var envelopesBefore = await messageStore.Admin.AllOutgoingAsync();
+        envelopesBefore.Count(x => x.OwnerId == 0).ShouldBe(0);
+
+        var operation = new BumpStaleOutgoingEnvelopesOperation(
+            new DbObjectName("stale_outbox", DatabaseConstants.OutgoingTable), theHost.GetRuntime().Options.Durability, DateTimeOffset.UtcNow);
+        
+        var batch = new DatabaseOperationBatch((IMessageDatabase)messageStore, [operation]);
+        await theHost.InvokeAsync(batch);
+
+        var envelopesAfter = await messageStore.Admin.AllOutgoingAsync();
+        envelopesAfter.Count(x => x.OwnerId == 0).ShouldBe(3);
+
+    }
+}

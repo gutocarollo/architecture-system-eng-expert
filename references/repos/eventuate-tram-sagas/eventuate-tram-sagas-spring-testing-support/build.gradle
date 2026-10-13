@@ -1,0 +1,9 @@
+
+dependencies {
+    api project(":eventuate-tram-sagas-testing-support")
+
+    api "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

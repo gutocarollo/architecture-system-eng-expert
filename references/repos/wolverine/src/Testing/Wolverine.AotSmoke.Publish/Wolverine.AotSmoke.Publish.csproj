@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+
+        <!--
+        AOT smoke test #3 (GH-4287).
+
+        The other two smoke projects never leave CoreCLR: Wolverine.AotSmoke is
+        trim ANALYSIS (compile-time IL warnings), and Wolverine.AotSmoke.Static
+        runs the static-load contract under `dotnet run`. Neither executes a
+        real `PublishAot` binary — which is exactly why every crash in GH-4287
+        shipped unseen: GetReferencedAssemblies() throwing, the stack walk with
+        no frame metadata, and Activator.CreateInstance over trimmed closed
+        generics all behave fine under the JIT and only fail in a native image.
+
+        This project closes that gap. CIAotSmoke publishes it with Native AOT
+        and RUNS the produced binary; the program boots a Wolverine host through
+        the ordinary public UseWolverine path (TypeLoadMode.Static, committed
+        pre-gen under Internal/Generated/), dispatches a message, and asserts
+        the handler fired.
+
+        The pinned JasperFx (2.63.1+) carries the jasperfx#742 bootstrap guard,
+        so this smoke asserts the FULL boot + dispatch: any startup crash or a
+        handler that never fires exits non-zero and fails the lane.
+
+        Refresh procedure for the committed pre-gen when codegen output drifts.
+        Run it FROM THIS PROJECT'S DIRECTORY — a plain console host writes
+        relative to the working directory, not to the project folder, so driving
+        it from the repo root with a project switch instead silently writes an
+        Internal/Generated tree at the root and leaves this one untouched:
+
+          dotnet run codegen write
+
+        then commit the result. As of GH-4426 there is nothing to hand-maintain
+        alongside it. `codegen write` emits the [DynamicDependency] rooting block
+        itself, as an AotRoots companion anchored by [ModuleInitializer], and this
+        project deliberately carries NO hand-written roots of its own — so a
+        regression in that emission fails this lane outright instead of hiding
+        behind a hand-written block that happens to cover the same types.
+        -->
+        <PublishAot>true</PublishAot>
+        <StripSymbols>false</StripSymbols>
+        <InvariantGlobalization>true</InvariantGlobalization>
+
+        <!-- This smoke exercises RUNTIME behavior of a native image. The trim-analysis
+             warning wall is Wolverine.AotSmoke's job; here it would only obscure the signal. -->
+        <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+        <NoWarn>$(NoWarn);IL2026;IL2046;IL2055;IL2065;IL2067;IL2070;IL2072;IL2075;IL2087;IL2090;IL2091;IL2104;IL2111;IL3000;IL3050;IL3051;IL3053</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Wolverine\Wolverine.csproj" />
+    </ItemGroup>
+
+</Project>

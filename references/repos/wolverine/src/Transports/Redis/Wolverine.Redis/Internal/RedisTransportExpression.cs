@@ -1,0 +1,256 @@
+using StackExchange.Redis;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.Redis.Internal;
+
+public class RedisTransportExpression : BrokerExpression<RedisTransport, RedisStreamEndpoint, RedisStreamEndpoint, RedisListenerConfiguration, RedisSubscriberConfiguration, RedisTransportExpression>
+{
+    private readonly RedisTransport _transport;
+
+    public RedisTransportExpression(RedisTransport transport, WolverineOptions options) : base(transport, options)
+    {
+        _transport = transport;
+    }
+
+    protected override RedisListenerConfiguration createListenerExpression(RedisStreamEndpoint listenerEndpoint)
+    {
+        return new RedisListenerConfiguration(listenerEndpoint);
+    }
+
+    protected override RedisSubscriberConfiguration createSubscriberExpression(RedisStreamEndpoint subscriberEndpoint)
+    {
+        return new RedisSubscriberConfiguration(subscriberEndpoint);
+    }
+    
+    /// <summary>
+    /// Set the Redis database ID used for the per-node reply stream endpoint (request/reply mechanics)
+    /// </summary>
+    public RedisTransportExpression UseReplyStreamDatabase(int databaseId)
+    {
+        if (databaseId < 0) throw new ArgumentOutOfRangeException(nameof(databaseId));
+        _transport.ReplyDatabaseId = databaseId;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure a default consumer name selector applied to all Redis listeners
+    /// when an endpoint-level ConsumerName is not explicitly set.
+    /// Example: transport.ConfigureDefaultConsumerName((rt, ep) => $"{rt.Options.ServiceName}-{rt.DurabilitySettings.AssignedNodeNumber}");
+    /// </summary>
+    public RedisTransportExpression ConfigureDefaultConsumerName(
+        Func<IWolverineRuntime, RedisStreamEndpoint, string> selector)
+    {
+        _transport.DefaultConsumerNameSelector = selector;
+        return this;
+    }
+
+    /// <summary>
+    /// Control whether or not the system queues for intra-Wolverine communication and request/reply
+    /// mechanics are enabled
+    /// </summary>
+    /// <param name="enabled"></param>
+    /// <returns></returns>
+    public RedisTransportExpression SystemQueuesEnabled(bool enabled)
+    {
+        _transport.SystemQueuesEnabled = enabled;
+        return this;
+    }
+    
+    public RedisTransportExpression DeleteStreamEntryOnAck(bool deleteStreamEntryOnAck){
+        _transport.DeleteStreamEntryOnAck = deleteStreamEntryOnAck;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure how Wolverine routes messages that carry a tenant id when broker-per-tenant connections
+    /// have been registered with <see cref="AddTenant(string,string)"/>. GH-3309.
+    /// </summary>
+    public RedisTransportExpression ConfigureMultiTenancy(
+        TenantedIdBehavior behavior = TenantedIdBehavior.FallbackToDefault)
+    {
+        _transport.TenantedIdBehavior = behavior;
+        return this;
+    }
+
+    /// <summary>
+    /// Add a tenant that uses its own dedicated Redis server, addressed by a StackExchange.Redis connection
+    /// string. Messages tagged with this tenant id are published and consumed over the tenant's own
+    /// connection. GH-3309.
+    /// </summary>
+    public RedisTransportExpression AddTenant(string tenantId, string connectionString)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tenantId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+
+        _transport.Tenants[tenantId] = new RedisTenant(tenantId) { ConnectionString = connectionString };
+        return this;
+    }
+
+    /// <summary>
+    /// Add a tenant that uses its own dedicated Redis server, addressed by caller-supplied
+    /// <see cref="ConfigurationOptions"/>. Wolverine builds and owns (disposes) the tenant multiplexer. GH-3309.
+    /// </summary>
+    public RedisTransportExpression AddTenant(string tenantId, ConfigurationOptions configurationOptions)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tenantId);
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+
+        _transport.Tenants[tenantId] = new RedisTenant(tenantId) { ConfigurationOptions = configurationOptions };
+        return this;
+    }
+
+    /// <summary>
+    /// Add a tenant that uses a caller-managed <see cref="IConnectionMultiplexer"/>. Wolverine uses it as-is
+    /// and does NOT dispose it — the caller owns its lifetime. GH-3309.
+    /// </summary>
+    public RedisTransportExpression AddTenant(string tenantId, IConnectionMultiplexer connectionMultiplexer)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tenantId);
+        ArgumentNullException.ThrowIfNull(connectionMultiplexer);
+
+        _transport.Tenants[tenantId] = new RedisTenant(tenantId) { ExternalConnection = connectionMultiplexer };
+        return this;
+    }
+}
+
+public class RedisListenerConfiguration : ListenerConfiguration<RedisListenerConfiguration, RedisStreamEndpoint>
+{
+    public RedisListenerConfiguration(RedisStreamEndpoint endpoint) : base(endpoint)
+    {
+    }
+
+    internal RedisListenerConfiguration(Func<RedisStreamEndpoint> source) : base(source)
+    {
+    }
+    
+    /// <summary>
+    /// Configure the batch size for reading messages from Redis streams
+    /// </summary>
+    public RedisListenerConfiguration BatchSize(int batchSize)
+    {
+        _endpoint!.BatchSize = batchSize;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the consumer name for this endpoint
+    /// </summary>
+    public RedisListenerConfiguration ConsumerName(string consumerName)
+    {
+        _endpoint!.ConsumerName = consumerName;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the block timeout when reading from Redis streams
+    /// </summary>
+    public RedisListenerConfiguration BlockTimeout(TimeSpan timeout)
+    {
+        _endpoint!.BlockTimeoutMilliseconds = (int)timeout.TotalMilliseconds;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the consumer group to start consuming from the beginning of the stream,
+    /// including any existing messages (equivalent to Redis "0-0" position)
+    /// </summary>
+    public RedisListenerConfiguration StartFromBeginning()
+    {
+        _endpoint!.StartFrom = StartFrom.Beginning;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the consumer group to start consuming only new messages added after
+    /// group creation (equivalent to Redis "$" position). This is the default behavior.
+    /// </summary>
+    public RedisListenerConfiguration StartFromNewMessages()
+    {
+        _endpoint!.StartFrom = StartFrom.NewMessages;
+        return this;
+    }
+
+    /// <summary>
+    /// Enable auto-claiming of pending entries within the consumer loop every specified period
+    /// </summary>
+    /// <remarks>This can cause out of order messages.  It is recommended to manually deal with expired claimed message if you are using .Inline() or desire ordered message processing.</remarks>
+    /// <param name="period">Period between auto-claim attempts (default: 30 seconds)</param>
+    /// <param name="minIdle">Minimum idle time before claiming pending messages (if null, uses MinIdleBeforeClaimMilliseconds)</param>
+    /// <returns>This endpoint for method chaining</returns>
+    public RedisListenerConfiguration EnableAutoClaim(TimeSpan? period = null, TimeSpan? minIdle = null)
+    {
+        _endpoint!.AutoClaimEnabled = true;
+        if (period.HasValue) _endpoint.AutoClaimPeriod = period.Value;
+        if (minIdle.HasValue) _endpoint.AutoClaimMinIdle = minIdle.Value;
+        return this;
+    }
+
+    /// <summary>
+    /// Disable auto-claiming of pending entries within the consumer loop
+    /// </summary>
+    /// <returns>This endpoint for method chaining</returns>
+    public RedisListenerConfiguration DisableAutoClaim()
+    {
+        _endpoint!.AutoClaimEnabled = false;
+        return this;
+    }
+
+    /// <summary>
+    /// Enable native dead letter queue support for this endpoint.
+    /// Failed messages will be moved to a dead letter stream: {StreamKey}:dead-letter
+    /// </summary>
+    /// <returns>This endpoint for method chaining</returns>
+    public RedisListenerConfiguration EnableNativeDeadLetterQueue()
+    {
+        _endpoint!.NativeDeadLetterQueueEnabled = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Disable native dead letter queue support for this endpoint.
+    /// Failed messages will use Wolverine's default dead letter handling (database persistence).
+    /// </summary>
+    /// <returns>This endpoint for method chaining</returns>
+    public RedisListenerConfiguration DisableNativeDeadLetterQueue()
+    {
+        _endpoint!.NativeDeadLetterQueueEnabled = false;
+        return this;
+    }
+}
+
+public class RedisSubscriberConfiguration : SubscriberConfiguration<RedisSubscriberConfiguration, RedisStreamEndpoint>
+{
+    internal RedisSubscriberConfiguration(RedisStreamEndpoint endpoint) : base(endpoint)
+    {
+    }
+
+    /// <summary>
+    /// Configure the batch size for reading messages from Redis streams
+    /// </summary>
+    public RedisSubscriberConfiguration BatchSize(int batchSize)
+    {
+        _endpoint!.BatchSize = batchSize;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the consumer name for this endpoint
+    /// </summary>
+    public RedisSubscriberConfiguration ConsumerName(string consumerName)
+    {
+        _endpoint!.ConsumerName = consumerName;
+        return this;
+    }
+
+    /// <summary>
+    /// Configure the block timeout when reading from Redis streams
+    /// </summary>
+    public RedisSubscriberConfiguration BlockTimeout(TimeSpan timeout)
+    {
+        _endpoint!.BlockTimeoutMilliseconds = (int)timeout.TotalMilliseconds;
+        return this;
+    }
+}

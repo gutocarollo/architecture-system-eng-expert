@@ -1,0 +1,37 @@
+﻿using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Wolverine.ComplianceTests;
+using Wolverine.Logging;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Xunit;
+
+namespace CoreTests.Acceptance;
+
+public class discarding_expired_envelopes
+{
+    [Fact]
+    public async Task can_discard_an_envelope_if_expired()
+    {
+        var logger = Substitute.For<IMessageTracker>();
+
+        using var runtime = await WolverineHost.ForAsync(x =>
+        {
+            x.DisableConventionalDiscovery();
+            x.Services.AddSingleton(logger);
+        });
+
+        var pipeline = runtime.Get<IHandlerPipeline>();
+
+        var envelope = ObjectMother.Envelope();
+        envelope.DeliverBy = DateTimeOffset.Now.Subtract(1.Minutes());
+        var channel = Substitute.For<IChannelCallback>();
+
+        await pipeline.InvokeAsync(envelope, channel);
+
+#pragma warning disable 4014
+        channel.Received().CompleteAsync(envelope);
+#pragma warning restore 4014
+    }
+}

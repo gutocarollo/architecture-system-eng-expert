@@ -1,0 +1,504 @@
+﻿using System.Buffers.Text;
+using System.Globalization;
+using System.Text;
+using System.Text.Json;
+using Amazon.SQS.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Newtonsoft.Json;
+using Wolverine.AmazonSqs.Internal;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Runtime.Interop;
+using Wolverine.Runtime.Interop.MassTransit;
+using Wolverine.Newtonsoft;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+using Wolverine.Util;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
+namespace Wolverine.AmazonSqs;
+
+public class AmazonSqsListenerConfiguration : ListenerConfiguration<AmazonSqsListenerConfiguration, AmazonSqsQueue>
+{
+    internal AmazonSqsListenerConfiguration(AmazonSqsQueue endpoint) : base(endpoint)
+    {
+    }
+
+    /// <summary>
+    ///     Completely disable all SQS dead letter queueing for just this queue
+    /// </summary>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration DisableDeadLetterQueueing()
+    {
+        add(e => e.DeadLetterQueueName = null);
+        return this;
+    }
+
+    /// <summary>
+    ///     Customize the dead letter queueing for just this queue
+    /// </summary>
+    /// <param name="deadLetterQueue"></param>
+    /// <param name="configure">Optionally configure properties of the dead letter queue itself</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public AmazonSqsListenerConfiguration ConfigureDeadLetterQueue(string deadLetterQueue,
+        Action<AmazonSqsQueue>? configure = null)
+    {
+        if (deadLetterQueue == null)
+        {
+            throw new ArgumentNullException(nameof(deadLetterQueue));
+        }
+
+        add(e =>
+        {
+            e.DeadLetterQueueName = AmazonSqsTransport.SanitizeSqsName(deadLetterQueue);
+            if (configure != null)
+            {
+                e.ConfigureDeadLetterQueue(configure);
+            }
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Add circuit breaker exception handling to this listener
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration CircuitBreaker(Action<CircuitBreakerOptions>? configure = null)
+    {
+        add(e =>
+        {
+            e.CircuitBreakerOptions = new CircuitBreakerOptions();
+            configure?.Invoke(e.CircuitBreakerOptions);
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    ///     How many completed messages this listener coalesces into a single SQS
+    ///     <c>DeleteMessageBatch</c> call, and how long a completion waits for that batch to fill.
+    ///     Deleting per message costs one HTTP round trip -- and one billable API call -- each,
+    ///     which is 10 deletes for every 10 message receive. Valid sizes are 1 through 10; pass 1
+    ///     to go back to a delete per message. Defaults are 10 and 50 milliseconds. See GH-3493.
+    /// </summary>
+    /// <param name="size">Messages per delete request, 1 to 10</param>
+    /// <param name="timeout">Maximum age of a pending delete batch. Defaults to 50 milliseconds</param>
+    public AmazonSqsListenerConfiguration DeleteMessageBatchSize(int size, TimeSpan? timeout = null)
+    {
+        add(e =>
+        {
+            e.DeleteMessageBatchSize = size;
+            if (timeout.HasValue)
+            {
+                e.DeleteMessageBatchTimeout = timeout.Value;
+            }
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    ///     For an inline (<c>ProcessInline()</c>) listener: keep the messages of each received batch
+    ///     invisible to other consumers by extending their visibility timeout while they wait for, and
+    ///     run through, their handlers. Without this, Wolverine sets the visibility timeout once on
+    ///     receive, and an inline listener handles a batch one message at a time -- so a batch whose
+    ///     handlers collectively take longer than the timeout has its later messages redelivered and
+    ///     executed a second time while the first execution is still running. Extension calls are only
+    ///     made when a batch is still in flight at half the visibility timeout, so fast handlers pay
+    ///     nothing. Has no effect on Buffered or Durable listeners, which delete the message before the
+    ///     handler runs. See GH-4019.
+    /// </summary>
+    /// <param name="maximum">
+    ///     Longest any single message is kept invisible from its receipt before Wolverine stops
+    ///     extending it. Defaults to, and cannot exceed, the SQS limit of 12 hours
+    /// </param>
+    public AmazonSqsListenerConfiguration ExtendVisibilityWhileHandling(TimeSpan? maximum = null)
+    {
+        add(e =>
+        {
+            e.ExtendVisibilityWhileHandling = true;
+            if (maximum.HasValue)
+            {
+                e.MaximumVisibilityExtension = maximum.Value;
+            }
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Split a message whose body would exceed SQS's hard 256KB limit into several SQS messages, and
+    ///     reassemble it on the receiving side. A listener reassembles fragments whether or not this is
+    ///     set -- the framing is self-describing -- so this only really matters on the sending side and
+    ///     for the reassembly timeout.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///     <b>Wolverine to Wolverine only</b>, and reassembly happens <b>in memory on one listener</b>, so
+    ///     every fragment of a message has to reach the same node. SQS is a competing-consumer queue, so
+    ///     use this only on a FIFO queue, with a <c>GlobalPartitioning</c> listener, or with a single
+    ///     listening node. Prefer a claim check (<c>WolverineFx.AmazonS3</c>) otherwise -- it
+    ///     is the AWS-sanctioned answer and has none of these constraints.
+    ///     </para>
+    ///     <para>
+    ///     See <a href="https://wolverinefx.net/guide/messaging/transports/sqs/large-messages.html">Large
+    ///     messages in SQS</a>.
+    ///     </para>
+    /// </remarks>
+    /// <param name="reassemblyTimeout">
+    ///     How long this listener holds an incomplete set of fragments before abandoning it. Defaults to 5
+    ///     minutes. Abandoned fragments were never deleted from SQS, so they become visible again.
+    /// </param>
+    public AmazonSqsListenerConfiguration FragmentOversizedMessages(TimeSpan? reassemblyTimeout = null)
+    {
+        add(e =>
+        {
+            e.FragmentOversizedMessages = true;
+            if (reassemblyTimeout.HasValue)
+            {
+                e.FragmentReassemblyTimeout = reassemblyTimeout.Value;
+            }
+        });
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Configure how the queue should be created within SQS
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration ConfigureQueueCreation(Action<CreateQueueRequest> configure)
+    {
+        add(e => configure(e.Configuration));
+        return this;
+    }
+
+    /// <summary>
+    /// Configure this listener to receive raw JSON of an expected message type from
+    /// an external system
+    /// </summary>
+    /// <param name="messageType"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration ReceiveRawJsonMessage(
+        Type messageType,
+        Action<JsonSerializerOptions>? configure = null)
+    {
+        add(e =>
+        {
+            JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
+
+            configure?.Invoke(serializerOptions);
+
+            e.Mapper = new RawJsonSqsEnvelopeMapper(messageType, serializerOptions);
+        });
+
+        return this;
+    }
+    
+    /// <summary>
+    ///     Configure this listener to receive a message from an SNS topic subscription
+    /// </summary>
+    /// <param name="internalMessageMapper">The mapper for message forwarded from the SNS topic</param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration ReceiveSnsTopicMessage(ISqsEnvelopeMapper? internalMessageMapper = null)
+    {
+        add(e =>
+        {
+            internalMessageMapper ??= new DefaultSqsEnvelopeMapper();
+            e.Mapper = new SnsTopicEnvelopeMapper(internalMessageMapper);
+        });
+
+        return this;
+    } 
+
+    /// <summary>
+    /// Utilize custom envelope mapping for SQS interoperability with external non-Wolverine systems
+    /// </summary>
+    /// <param name="mapper"></param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration InteropWith(ISqsEnvelopeMapper mapper)
+    {
+        add(e => e.Mapper = mapper);
+        return this;
+    }
+
+    /// <summary>
+    /// Use an NServiceBus compatible enveloper mapper to interact with NServiceBus systems on the other end
+    /// </summary>
+    /// <returns></returns>
+    /// <param name="replyQueueName">The name of an SQS queue that should be used for replies back from NServiceBus</param>
+    public AmazonSqsListenerConfiguration UseNServiceBusInterop(string? replyQueueName = null)
+    {
+        add(e =>
+        {
+            e.DefaultSerializer = new NewtonsoftSerializer(new JsonSerializerSettings());
+            e.Mapper = new NServiceBusEnvelopeMapper(replyQueueName!, e);
+        });
+
+        return this;
+    }
+
+    public AmazonSqsListenerConfiguration UseMassTransitInterop(Action<IMassTransitInterop>? configure = null)
+    {
+        add(e => e.Mapper = new MassTransitMapper((Endpoint as IMassTransitInteropEndpoint)!, configure));
+        return this;
+    }
+    
+    /// <summary>
+    /// Interop with upstream systems by reading messages with the CloudEvents specification
+    /// </summary>
+    /// <param name="jsonSerializerOptions"></param>
+    /// <returns></returns>
+    public AmazonSqsListenerConfiguration InteropWithCloudEvents(JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        jsonSerializerOptions ??= new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+        add(e =>
+        {
+            e.MapperFactory = (queue, r) =>
+            {
+                var mapper = e.BuildCloudEventsMapper(r, jsonSerializerOptions);
+                e.DefaultSerializer = mapper;
+                return new CloudEventsSqsMapper(mapper);
+            };
+        });
+
+        return this;
+    }
+}
+
+internal class NServiceBusEnvelopeMapper : ISqsEnvelopeMapper
+{
+    private readonly string _replyName;
+    private readonly Endpoint _endpoint;
+
+    private NewtonsoftSerializer _serializer = new NewtonsoftSerializer(new JsonSerializerSettings());
+
+    public NServiceBusEnvelopeMapper(string replyName, Endpoint endpoint)
+    {
+        _replyName = replyName;
+        _endpoint = endpoint;
+    }
+
+    public IEnumerable<KeyValuePair<string, MessageAttributeValue>> ToAttributes(Envelope envelope)
+    {
+        yield return new ("NServiceBus.ConversationId",
+            new MessageAttributeValue{StringValue = envelope.ConversationId.ToString()});
+
+        yield return new("NServiceBus.TimeSent", new MessageAttributeValue{StringValue = envelope.SentAt.ToUniversalTime().ToString("O")});
+
+        yield return new("NServiceBus.CorrelationId", new MessageAttributeValue{StringValue = envelope.CorrelationId});
+
+        if (_replyName.IsNotEmpty())
+        {
+            yield return new("NServiceBus.ReplyToAddress", new MessageAttributeValue { StringValue = _replyName });
+        }
+    }
+
+    public void ReadEnvelopeData(Envelope envelope, string messageBody, IDictionary<string, MessageAttributeValue> attributes)
+    {
+        envelope.Serializer = _endpoint.DefaultSerializer;
+
+        var sqs = _serializer.ReadFromData<SqsEnvelope>(
+                Encoding.UTF8.GetBytes(messageBody));
+
+        envelope.Data = Convert.FromBase64String(sqs.Body);
+        
+
+        if (sqs.Headers.TryGetValue("NServiceBus.MessageId", out var raw))
+        {
+            if (Guid.TryParse(raw, out var guid))
+            {
+                envelope.Id = guid;
+            }
+        }
+
+        if (sqs.Headers.TryGetValue("NServiceBus.ConversationId", out var conversationId))
+        {
+            if (Guid.TryParse(conversationId, out var guid))
+            {
+                envelope.ConversationId = guid;
+            }
+        }
+
+        if (sqs.Headers.TryGetValue("NServiceBus.CorrelationId", out var correlationId))
+        {
+            envelope.CorrelationId = correlationId;
+        }
+
+        if (sqs.Headers.TryGetValue("NServiceBus.ReplyToAddress", out var replyQueue))
+        {
+            envelope.ReplyUri = new Uri($"sqs://{replyQueue}");
+        }
+
+        if (sqs.Headers.TryGetValue("NServiceBus.ContentType", out var contentType))
+        {
+            envelope.ContentType = contentType;
+        }
+
+        if (sqs.Headers.TryGetValue("NServiceBus.TimeSent", out var rawTime))
+        {
+            if (DateTimeOffset.TryParse(rawTime, new DateTimeFormatInfo{FullDateTimePattern = "yyyy-MM-dd HH:mm:ss:ffffff Z"}, DateTimeStyles.AssumeUniversal, out var result))
+            {
+                envelope.SentAt = result;
+            }
+        }
+
+        if (sqs.Headers.TryGetValue(NServiceBusInterop.EnclosedMessageTypesHeader, out var enclosed)
+            && NServiceBusInterop.ResolveMessageType(enclosed) is string messageType)
+        {
+            envelope.MessageType = messageType;
+        }
+    }
+    
+    public string BuildMessageBody(Envelope envelope)
+    {
+        var data = Convert.ToBase64String(_serializer.WriteMessage(envelope.Message!));
+        var sqs = new SqsEnvelope(data, new())
+        {
+            Headers =
+            {
+                ["NServiceBus.MessageId"] = envelope.Id.ToString(),
+                ["NServiceBus.ConversationId"] = envelope.ConversationId.ToString(),
+                ["NServiceBus.CorrelationId"] = envelope.CorrelationId!,
+                ["NServiceBus.ReplyToAddress"] = _replyName,
+                ["NServiceBus.ContentType"] = "application/json",
+                ["NServiceBus.TimeSent"] = envelope.SentAt.ToString("yyyy-MM-dd HH:mm:ss:ffffff Z"),
+                ["NServiceBus.EnclosedMessageTypes"] = envelope.Message!.GetType().ToMessageTypeName()
+            }
+        };
+
+        return Encoding.UTF8.GetString(_serializer.WriteMessage(sqs));
+    }
+}
+
+internal record SqsEnvelope(string Body, Dictionary<string, string> Headers);
+
+// This was admittedly ripped off from NSB
+public static class DateTimeOffsetHelper
+{
+    /// <summary>
+    /// Converts the <see cref="DateTimeOffset" /> to a <see cref="string" /> suitable for transport over the wire.
+    /// </summary>
+    public static string ToWireFormattedString(DateTimeOffset dateTime)
+    {
+        return dateTime.ToUniversalTime().ToString(format, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Converts a wire formatted <see cref="string" /> from <see cref="ToWireFormattedString" /> to a UTC
+    /// <see cref="DateTimeOffset" />.
+    /// </summary>
+    public static DateTimeOffset ToDateTimeOffset(string wireFormattedString)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(wireFormattedString);
+
+        if (wireFormattedString.Length != format.Length)
+        {
+            throw new FormatException(errorMessage(wireFormattedString));
+        }
+
+        var year = 0;
+        var month = 0;
+        var day = 0;
+        var hour = 0;
+        var minute = 0;
+        var second = 0;
+        var microSecond = 0;
+
+        for (var i = 0; i < format.Length; i++)
+        {
+            var digit = wireFormattedString[i];
+
+            switch (format[i])
+            {
+                case 'y':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    year = (year * 10) + (digit - '0');
+                    break;
+
+                case 'M':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    month = (month * 10) + (digit - '0');
+                    break;
+
+                case 'd':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    day = (day * 10) + (digit - '0');
+                    break;
+
+                case 'H':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    hour = (hour * 10) + (digit - '0');
+                    break;
+
+                case 'm':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    minute = (minute * 10) + (digit - '0');
+                    break;
+
+                case 's':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    second = (second * 10) + (digit - '0');
+                    break;
+
+                case 'f':
+                    if (digit is < '0' or > '9')
+                    {
+                        throw new FormatException(errorMessage(wireFormattedString));
+                    }
+
+                    microSecond = (microSecond * 10) + (digit - '0');
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        var timestamp = new DateTimeOffset(year, month, day, hour, minute, second, TimeSpan.Zero);
+        timestamp = timestamp.AddMicroseconds(microSecond);
+        return timestamp;
+    }
+
+    const string format = "yyyy-MM-dd HH:mm:ss:ffffff Z";
+
+    // GH-4517: the bare "String was not recognized as a valid DateTime." told the user nothing about which
+    // value failed or what shape was expected. This is the NServiceBus interop wire format, carried on
+    // headers like "NServiceBus.TimeSent".
+    static string errorMessage(string wireFormattedString)
+    {
+        return
+            $"'{wireFormattedString}' is not a valid NServiceBus wire-formatted timestamp. The expected format is '{format}' (for example '{DateTimeOffset.UnixEpoch.ToString(format, CultureInfo.InvariantCulture)}'), which is what headers such as 'NServiceBus.TimeSent' carry.";
+    }
+}

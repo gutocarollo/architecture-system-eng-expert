@@ -1,0 +1,15 @@
+services:
+  trainer-http:
+    image: "europe-west1-docker.pkg.dev/${PROJECT_ID}/docker/trainer"
+
+  trainer-grpc:
+    image: "europe-west1-docker.pkg.dev/${PROJECT_ID}/docker/trainer"
+
+  trainings-http:
+    image: "europe-west1-docker.pkg.dev/${PROJECT_ID}/docker/trainings"
+
+  users-http:
+    image: "europe-west1-docker.pkg.dev/${PROJECT_ID}/docker/users"
+
+  users-grpc:
+    image: "europe-west1-docker.pkg.dev/${PROJECT_ID}/docker/users"

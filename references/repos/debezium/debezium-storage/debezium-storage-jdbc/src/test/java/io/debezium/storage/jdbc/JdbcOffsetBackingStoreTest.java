@@ -1,0 +1,126 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.storage.jdbc;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.debezium.config.Configuration;
+import io.debezium.doc.FixFor;
+import io.debezium.spi.storage.OffsetStore;
+import io.debezium.storage.jdbc.offset.JdbcOffsetBackingStore;
+
+/**
+ * @author Ismail simsek
+ */
+public class JdbcOffsetBackingStoreTest {
+
+    private final Map<ByteBuffer, ByteBuffer> firstSet = new HashMap<>();
+    private final Map<ByteBuffer, ByteBuffer> secondSet = new HashMap<>();
+
+    JdbcOffsetBackingStore store;
+    Map<String, String> props;
+    Configuration config;
+    File dbFile;
+
+    @BeforeEach
+    public void setup() throws IOException {
+        dbFile = File.createTempFile("test-", "db");
+        store = new JdbcOffsetBackingStore();
+        props = new HashMap<>();
+        props.put("offset.storage.jdbc.url", "jdbc:sqlite:" + dbFile.getAbsolutePath());
+        props.put("offset.storage.jdbc.user", "user");
+        props.put("offset.storage.jdbc.password", "pass");
+        props.put("offset.storage.jdbc.offset.table.name", "offsets_jdbc");
+        props.put("offset.storage.jdbc.offset.table.ddl", "CREATE TABLE %s (id VARCHAR(36) NOT NULL, " +
+                "offset_key VARCHAR(1255), offset_val VARCHAR(1255)," +
+                "record_insert_ts TIMESTAMP NOT NULL," +
+                "record_insert_seq INTEGER NOT NULL," +
+                "PRIMARY KEY (id)" +
+                ")");
+        props.put("offset.storage.jdbc.offset.table.select", "SELECT id, offset_key, offset_val FROM offsets_jdbc " +
+                "ORDER BY record_insert_ts, record_insert_seq");
+        config = Configuration.from(props);
+        store.configure(config);
+        store.start();
+
+        firstSet.put(store.toByteBuffer("key"), store.toByteBuffer("value"));
+        firstSet.put(null, null);
+        secondSet.put(store.toByteBuffer("key1secondSet"), store.toByteBuffer("value1secondSet"));
+        secondSet.put(store.toByteBuffer("key2secondSet"), store.toByteBuffer("value2secondSet"));
+    }
+
+    @AfterEach
+    public void teardown() {
+        dbFile.delete();
+    }
+
+    @Test
+    public void testInitializeWithCredentials() {
+        // multiple initialization should not fail
+        // first one should create the table and following ones should use the created table
+        store.start();
+        store.start();
+        store.start();
+    }
+
+    @Test
+    @FixFor("debezium/dbz#1957")
+    public void testInitializeWithoutCredentials() {
+        store.stop();
+        props.remove("offset.storage.jdbc.user");
+        props.remove("offset.storage.jdbc.password");
+        config = Configuration.from(props);
+        store = new JdbcOffsetBackingStore();
+        store.configure(config);
+        store.start();
+    }
+
+    @Test
+    public void testGetSet() throws Exception {
+        OffsetStore.Callback<Void> cb = (error, result) -> {
+        };
+        store.set(firstSet, cb).get();
+
+        Map<ByteBuffer, ByteBuffer> values = store.get(Arrays.asList(store.toByteBuffer("key"), store.toByteBuffer("bad"))).get();
+        assertEquals(store.toByteBuffer("value"), values.get(store.toByteBuffer("key")));
+        Assertions.assertNull(values.get(store.toByteBuffer("bad")));
+    }
+
+    @Test
+    public void testSaveRestore() throws Exception {
+        OffsetStore.Callback<Void> cb = (error, result) -> {
+        };
+
+        store.set(firstSet, cb).get();
+        store.set(secondSet, cb).get();
+        store.stop();
+
+        // Restore into a new store and make sure its correctly reload
+        JdbcOffsetBackingStore restore = new JdbcOffsetBackingStore();
+        restore.configure(config);
+        restore.start();
+        Map<ByteBuffer, ByteBuffer> values = restore.get(Collections.singletonList(store.toByteBuffer("key"))).get();
+        Map<ByteBuffer, ByteBuffer> values2 = restore.get(Collections.singletonList(store.toByteBuffer("key1secondSet"))).get();
+        Map<ByteBuffer, ByteBuffer> values3 = restore.get(Collections.singletonList(store.toByteBuffer("key2secondSet"))).get();
+        assertEquals(store.toByteBuffer("value"), values.get(store.toByteBuffer("key")));
+        assertEquals(store.toByteBuffer("value1secondSet"), values2.get(store.toByteBuffer("key1secondSet")));
+        assertEquals(store.toByteBuffer("value2secondSet"), values3.get(store.toByteBuffer("key2secondSet")));
+    }
+
+}

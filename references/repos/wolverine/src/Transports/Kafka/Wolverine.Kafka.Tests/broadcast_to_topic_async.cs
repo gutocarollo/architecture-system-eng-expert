@@ -1,0 +1,89 @@
+using System.Diagnostics;
+using JasperFx.Core;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using Shouldly;
+using Wolverine.Tracking;
+using Xunit;
+namespace Wolverine.Kafka.Tests;
+
+public class broadcast_to_topic_async : IAsyncLifetime
+{
+    private readonly ITestOutputHelper _output;
+    private IHost _sender = null!;
+    private IHost _receiver = null!;
+
+    public broadcast_to_topic_async(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
+    public async ValueTask InitializeAsync()
+    {
+
+        _sender = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.Policies.DisableConventionalLocalRouting();
+
+                opts.Services.AddResourceSetupOnStartup();
+            }).StartAsync();
+
+        _receiver = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.ListenToKafkaTopic("incoming.one");
+
+                // Include test assembly for handler discovery
+                opts.Discovery.IncludeAssembly(GetType().Assembly);
+
+                opts.Services.AddResourceSetupOnStartup();
+            }).StartAsync();
+
+    }
+
+    [Fact]
+    public async Task broadcast()
+    {
+        var session = await _sender.TrackActivity()
+            .AlsoTrack(_receiver)
+            .Timeout(60.Seconds())
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .ExecuteAndWaitAsync(m => m.BroadcastToTopicAsync("incoming.one", new ColorMessage("blue")));
+
+        var received = session.Received.SingleMessage<ColorMessage>();
+        received.Color.ShouldBe("blue");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _sender.StopAsync();
+        _sender.Dispose();
+        await _receiver.StopAsync();
+        _receiver.Dispose();
+    }
+}
+
+public class ColorMessage
+{
+    public ColorMessage()
+    {
+    }
+
+    public ColorMessage(string color)
+    {
+        Color = color;
+    }
+
+    public string Color { get; set; } = null!;
+}
+
+public static class ColorMessageHandler
+{
+    public static void Handle(ColorMessage message)
+    {
+        Debug.WriteLine("Got " + message.Color);
+    }
+}

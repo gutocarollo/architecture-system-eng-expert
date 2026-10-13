@@ -1,0 +1,58 @@
+plugins {
+    id "io.spring.dependency-management" version "1.1.7"
+}
+
+
+
+dependencyManagement {
+    imports {
+        mavenBom "io.micronaut:micronaut-bom:$micronautVersion"
+    }
+}
+
+
+dependencies {
+    testImplementation project(":eventuate-tram-sagas-micronaut-common")
+
+    api "io.eventuate.common:eventuate-common-micronaut-data-jdbc:$eventuateCommonVersion"
+
+    testImplementation project(":eventuate-tram-sagas-orchestration-simple-dsl")
+    testImplementation project(":eventuate-tram-sagas-micronaut-participant")
+    testImplementation project(":eventuate-tram-sagas-micronaut-orchestration")
+
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-events:$eventuateTramVersion"
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-producer-jdbc:$eventuateTramVersion"
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-consumer-jdbc:$eventuateTramVersion"
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-messaging:$eventuateTramVersion"
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-consumer-kafka:$eventuateTramVersion"
+    testImplementation "io.eventuate.tram.core:eventuate-tram-micronaut-events:$eventuateTramVersion"
+
+    api "com.mysql:mysql-connector-j:$mysqlConnectorVersion"
+    api ("org.postgresql:postgresql:$postgresqlVersion") {
+        exclude group: "org.slf4j", module: "slf4j-simple"
+    }
+
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor "io.micronaut:micronaut-validation"
+    annotationProcessor "io.micronaut.configuration:micronaut-openapi"
+    api "io.micronaut:micronaut-inject"
+    api "io.micronaut:micronaut-validation"
+    api "io.micronaut:micronaut-runtime"
+
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testAnnotationProcessor "io.micronaut:micronaut-validation"
+    testAnnotationProcessor "io.micronaut.configuration:micronaut-openapi"
+    testImplementation "io.micronaut:micronaut-inject"
+    testImplementation "io.micronaut:micronaut-validation"
+    testImplementation "io.micronaut:micronaut-runtime"
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "io.micronaut.test:micronaut-test-junit5"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+    testRuntimeOnly 'io.micronaut.sql:micronaut-jdbc-hikari'
+}
+
+// use JUnit 5 platform
+test {
+    useJUnitPlatform()
+}

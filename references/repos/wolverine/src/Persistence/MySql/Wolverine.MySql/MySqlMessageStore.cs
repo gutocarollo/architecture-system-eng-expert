@@ -1,0 +1,771 @@
+using Wolverine.Persistence.Sagas;
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.Logging;
+using MySqlConnector;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.MySql;
+using Wolverine.Logging;
+using Wolverine.MySql.Internals;
+using Wolverine.MySql.Schema;
+using Wolverine.MySql.Util;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Sagas;
+using Wolverine.RDBMS.Transport;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.Transports;
+using DbCommandBuilder = Weasel.Core.DbCommandBuilder;
+using Table = Weasel.MySql.Tables.Table;
+
+namespace Wolverine.MySql;
+
+internal class MySqlMessageStore : MessageDatabase<MySqlConnection>, ISagaStorageCodeSource
+{
+    /// <summary>
+    ///     GH-4805. Lets generated saga code construct <c>DatabaseSagaSchema<TSaga, TId></c> itself, which is the only way the
+    ///     saga path runs in a native image — <c>SagaSchemaFor</c> is an abstract generic method, and ILC
+    ///     cannot dispatch one.
+    /// </summary>
+    /// <remarks>
+    ///     <c>MakeGenericType</c> is safe here and nowhere near the runtime path: called once per saga
+    ///     chain while the chain model is built, under the JIT, and the <see cref="Type" /> it returns is
+    ///     only rendered as source text. <b>Note the argument order</b> — this store's schema is
+    ///     <c>DatabaseSagaSchema<TSaga, TId></c>, and the five relational stores do not agree on it, which is exactly why each
+    ///     answers this for itself rather than a shared helper guessing.
+    /// </remarks>
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "GH-4805. The closed type is RENDERED AS SOURCE TEXT by EnrollAndFetchSagaStorageFrame and never instantiated from this Type. Called at codegen time under the JIT, so it does not execute in a native image at all -- the generated code that replaces it is what runs there.")]
+    public SagaSchemaCodegen? SagaSchemaCodegenFor(Type sagaType, Type idType)
+    {
+        return new SagaSchemaCodegen(typeof(DatabaseSagaSchema<,>).MakeGenericType(sagaType, idType), typeof(RelationalSagaStorage));
+    }
+
+    /// <summary>
+    /// GH-4375. MySQL's placeholder count is a uint16 on the wire, so 65,535. A multi-row insert of
+    /// 65,536 parameters was accepted against the docker-compose MySQL, which means the practical limit
+    /// there is packet size rather than placeholder count -- this stays at the protocol number.
+    /// </summary>
+    public override int MaximumParameterCount => 65_535;
+
+    private readonly string _findAtLargeEnvelopesSql;
+
+    private ImHashMap<Type, IDatabaseSagaSchema> _sagaStorage = ImHashMap<Type, IDatabaseSagaSchema>.Empty;
+
+    public MySqlMessageStore(DatabaseSettings databaseSettings, DurabilitySettings settings,
+        MySqlDataSource dataSource,
+        ILogger<MySqlMessageStore> logger) : this(databaseSettings, settings, dataSource, logger,
+        Array.Empty<SagaTableDefinition>())
+    {
+        var descriptor = Describe();
+        Id = new DatabaseId(descriptor.ServerName, descriptor.DatabaseName);
+    }
+
+    // typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(...) at L59
+    // closes the saga schema generic over (sagaType, idType) at startup. Same
+    // chunk D / I / J / K / AE / AF / AG CloseAndBuildAs pattern: AOT-clean apps
+    // preserve saga state types via TrimmerRootDescriptor. Cross-link to #2769.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    public MySqlMessageStore(DatabaseSettings databaseSettings, DurabilitySettings settings,
+        MySqlDataSource dataSource,
+        ILogger<MySqlMessageStore> logger, IEnumerable<SagaTableDefinition> sagaTypes) : base(databaseSettings,
+        dataSource,
+        settings, logger, new MySqlMigrator(), MySqlProvider.Instance)
+    {
+        _findAtLargeEnvelopesSql =
+            $"SELECT {DatabaseConstants.IncomingFields} FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE owner_id = {TransportConstants.AnyNode} AND status = '{EnvelopeStatus.Incoming}' AND {DatabaseConstants.ReceivedAt} = @address LIMIT @limit";
+
+        MySqlDataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+
+        AdvisoryLock = new MySqlAdvisoryLock(dataSource, logger, Identifier);
+
+        foreach (var sagaTableDefinition in sagaTypes)
+        {
+            var storage = typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(sagaTableDefinition,
+                _settings, sagaTableDefinition.SagaType, sagaTableDefinition.IdMember.GetMemberType()!);
+            _sagaStorage = _sagaStorage.AddOrUpdate(sagaTableDefinition.SagaType, storage);
+        }
+    }
+
+    public MySqlDataSource MySqlDataSource { get; }
+
+    protected override INodeAgentPersistence? buildNodeStorage(DatabaseSettings databaseSettings,
+        DbDataSource dataSource)
+    {
+        return new MySqlNodePersistence(databaseSettings, this, (MySqlDataSource)dataSource);
+    }
+
+    protected override bool isExceptionFromDuplicateEnvelope(Exception ex)
+    {
+        if (ex is MySqlException mySqlException)
+        {
+            if (mySqlException.Number == 1062) return true;
+            return mySqlException.Message.Contains("Duplicate entry");
+        }
+
+        return false;
+    }
+
+    protected override void writePagingAfter(DbCommandBuilder builder, int offset, int limit)
+    {
+        if (limit > 0)
+        {
+            builder.Append(" LIMIT ");
+            builder.AppendParameter(limit);
+        }
+
+        if (offset > 0)
+        {
+            builder.Append(" OFFSET ");
+            builder.AppendParameter(offset);
+        }
+    }
+
+    /// <summary>GH-4742. A bounded reap: response bodies make one unbounded delete a long lock.</summary>
+    public override string? BatchedDeleteExpiredDeduplicatedResponsesSql(int batchSize)
+    {
+        return
+            $"delete from {SchemaName}.{DatabaseConstants.DeduplicatedResponsesTableName} " +
+            $"where {DatabaseConstants.Expires} <= @now limit {batchSize};";
+    }
+
+    public override ITable AddExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = new Table(definition.TableName);
+        table.AddColumn<Guid>(definition.IdColumnName).AsPrimaryKey();
+        table.AddColumn(definition.JsonBodyColumnName, "LONGBLOB").NotNull();
+        if (definition.TimestampColumnName.IsNotEmpty())
+        {
+            table.AddColumn<DateTimeOffset>(definition.TimestampColumnName)
+                .DefaultValueByExpression("(UTC_TIMESTAMP(6))");
+        }
+
+        if (definition.MessageTypeColumnName.IsNotEmpty())
+        {
+            table.AddColumn<string>(definition.MessageTypeColumnName);
+        }
+
+        return table;
+    }
+
+    public override async Task MigrateExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = (Table)AddExternalMessageTable(definition);
+        await using var conn = CreateConnection();
+        await conn.OpenAsync();
+
+        var migration = await SchemaMigration.DetermineAsync(conn, CancellationToken.None, table);
+        if (migration.Difference != SchemaPatchDifference.None)
+        {
+            await new MySqlMigrator().ApplyAllAsync(conn, migration, AutoCreate.CreateOrUpdate);
+        }
+
+        await conn.CloseAsync();
+    }
+
+    protected override Task deleteManyAsync(DbTransaction tx, Guid[] ids, DbObjectName tableName,
+        string idColumnName, CancellationToken token)
+    {
+        if (ids.Length == 0) return Task.CompletedTask;
+
+        var cmd = (MySqlCommand)tx.Connection!.CreateCommand();
+        cmd.Transaction = (MySqlTransaction)tx;
+
+        var placeholders = MySqlCommandExtensions.WithIdList(cmd, "id", ids);
+        cmd.CommandText = $"DELETE FROM {tableName.QualifiedName} WHERE {idColumnName} IN ({placeholders})";
+
+        return cmd.ExecuteNonQueryAsync(token);
+    }
+
+    protected override async Task<bool> TryAttainLockAsync(int lockId, MySqlConnection connection,
+        CancellationToken token)
+    {
+        var lockName = $"wolverine_{lockId}";
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT GET_LOCK(@lockName, 0)";
+        cmd.Parameters.AddWithValue("@lockName", lockName);
+
+        var result = await cmd.ExecuteScalarAsync(token).ConfigureAwait(false);
+
+        if (result is int intResult && intResult == 1) return true;
+        if (result is long longResult && longResult == 1) return true;
+
+        return false;
+    }
+
+    protected override async Task ReleaseLockAsync(int lockId, MySqlConnection connection, CancellationToken token)
+    {
+        var lockName = $"wolverine_{lockId}";
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT RELEASE_LOCK(@lockName)";
+        cmd.Parameters.AddWithValue("@lockName", lockName);
+        await cmd.ExecuteScalarAsync(token).ConfigureAwait(false);
+    }
+
+    protected override DbCommand buildFetchSql(MySqlConnection conn, DbObjectName tableName, string[] columnNames,
+        int maxRecords)
+    {
+        var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT {columnNames.Join(", ")} FROM {tableName.QualifiedName} LIMIT @limit";
+        cmd.Parameters.AddWithValue("@limit", maxRecords);
+        return cmd;
+    }
+
+    public override async Task<PersistedCounts> FetchCountsAsync()
+    {
+        var counts = new PersistedCounts();
+
+        await using (var reader = await CreateCommand(
+            $"SELECT status, COUNT(*) FROM {SchemaName}.{DatabaseConstants.IncomingTable} GROUP BY status")
+            .ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                var status = Enum.Parse<EnvelopeStatus>(await reader.GetFieldValueAsync<string>(0));
+                var count = await reader.GetFieldValueAsync<long>(1);
+
+                if (status == EnvelopeStatus.Incoming)
+                {
+                    counts.Incoming = (int)count;
+                }
+                else if (status == EnvelopeStatus.Handled)
+                {
+                    counts.Handled = (int)count;
+                }
+                else if (status == EnvelopeStatus.Scheduled)
+                {
+                    counts.Scheduled = (int)count;
+                }
+            }
+
+            await reader.CloseAsync();
+        }
+
+        var longCount =
+            await CreateCommand($"SELECT COUNT(*) FROM {SchemaName}.{DatabaseConstants.OutgoingTable}")
+                .ExecuteScalarAsync();
+
+        counts.Outgoing = Convert.ToInt32(longCount);
+
+        var deadLetterCount =
+            await CreateCommand($"SELECT COUNT(*) FROM {SchemaName}.{DatabaseConstants.DeadLetterTable}")
+                .ExecuteScalarAsync();
+
+        counts.DeadLetter = Convert.ToInt32(deadLetterCount);
+
+        // GH-4499 follow-up: the head of the outbox, so a stuck outbox can be told from a busy one
+        await fetchOldestOutgoingAsync(counts);
+
+        return counts;
+    }
+
+    public override async Task DiscardAndReassignOutgoingAsync(Envelope[] discards, Envelope[] reassigned, int nodeId)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(_cancellation);
+
+        try
+        {
+            if (discards.Length > 0)
+            {
+                await using var deleteCmd = conn.CreateCommand();
+                var deletePlaceholders = MySqlCommandExtensions.WithEnvelopeIds(deleteCmd, "id", discards);
+                deleteCmd.CommandText =
+                    $"DELETE FROM {SchemaName}.{DatabaseConstants.OutgoingTable} WHERE id IN ({deletePlaceholders})";
+                await deleteCmd.ExecuteNonQueryAsync(_cancellation);
+            }
+
+            if (reassigned.Length > 0)
+            {
+                await using var reassignCmd = conn.CreateCommand();
+                var reassignPlaceholders = MySqlCommandExtensions.WithEnvelopeIds(reassignCmd, "rid", reassigned);
+                reassignCmd.CommandText =
+                    $"UPDATE {SchemaName}.{DatabaseConstants.OutgoingTable} SET owner_id = @node WHERE id IN ({reassignPlaceholders})";
+                reassignCmd.Parameters.AddWithValue("@node", nodeId);
+                await reassignCmd.ExecuteNonQueryAsync(_cancellation);
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public override async Task DeleteOutgoingAsync(Envelope[] envelopes)
+    {
+        if (HasDisposed) return;
+        if (envelopes.Length == 0) return;
+
+        await using var conn = await MySqlDataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand();
+        var placeholders = MySqlCommandExtensions.WithEnvelopeIds(cmd, "id", envelopes);
+        cmd.CommandText = $"DELETE FROM {SchemaName}.{DatabaseConstants.OutgoingTable} WHERE id IN ({placeholders})";
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    protected override string determineOutgoingEnvelopeSql(DurabilitySettings settings)
+    {
+        return
+            $"SELECT {DatabaseConstants.OutgoingFields} FROM {SchemaName}.{DatabaseConstants.OutgoingTable} WHERE owner_id = {TransportConstants.AnyNode} AND destination = @destination LIMIT {settings.RecoveryBatchSize}";
+    }
+
+    public override async Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress,
+        int limit)
+    {
+        await using var conn = await MySqlDataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = _findAtLargeEnvelopesSql;
+        cmd.Parameters.AddWithValue("@address", listenerAddress.ToString());
+        cmd.Parameters.AddWithValue("@limit", limit);
+        var result = await cmd.FetchListAsync(r => DatabasePersistence.ReadIncomingAsync(r));
+        await conn.CloseAsync();
+        return result;
+    }
+
+    public override DbCommandBuilder ToCommandBuilder()
+    {
+        return new DbCommandBuilder(new MySqlCommand());
+    }
+
+    public override async Task<bool> ExistsAsync(Envelope envelope, CancellationToken cancellation)
+    {
+        if (HasDisposed) return false;
+
+        await using var conn = await MySqlDataSource.OpenConnectionAsync(cancellation);
+        await using var cmd = conn.CreateCommand();
+
+        if (Durability.MessageIdentity == MessageIdentity.IdOnly)
+        {
+            cmd.CommandText =
+                $"SELECT COUNT(id) FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE id = @id";
+            cmd.Parameters.AddWithValue("@id", envelope.Id);
+        }
+        else
+        {
+            cmd.CommandText =
+                $"SELECT COUNT(id) FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE id = @id AND {DatabaseConstants.ReceivedAt} = @destination";
+            cmd.Parameters.AddWithValue("@id", envelope.Id);
+            cmd.Parameters.AddWithValue("@destination", envelope.Destination!.ToString());
+        }
+
+        var count = await cmd.ExecuteScalarAsync(cancellation);
+        await conn.CloseAsync();
+
+        return Convert.ToInt64(count) > 0;
+    }
+
+    public override void WriteLoadScheduledEnvelopeSql(DbCommandBuilder builder, DateTimeOffset utcNow)
+    {
+        builder.Append(
+            $"SELECT {DatabaseConstants.IncomingFields} FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE status = '{EnvelopeStatus.Scheduled}' AND execution_time <= ");
+
+        builder.AppendParameter(utcNow);
+        builder.Append($" ORDER BY execution_time LIMIT {Durability.RecoveryBatchSize}");
+    }
+
+    /// <summary>
+    /// GH-4216. Builds the promotion statement for the batch the poller just selected. Two things it must
+    /// not do, both of which the previous <c>WHERE id IN (...)</c> did:
+    ///
+    /// <list type="bullet">
+    /// <item>Under <see cref="MessageIdentity.IdAndDestination"/> the identity is <c>(id, received_at)</c>, so
+    /// matching on the id alone also rewrites a row for a different message that merely shares the id at
+    /// another destination -- reassigning an <c>owner_id</c> the poller never selected. The pairs have to be
+    /// matched together: an <c>id IN (...) AND received_at IN (...)</c> pair of lists would match the cross
+    /// product, which is the same bug wearing a longer statement.</item>
+    /// <item>Without a status predicate it also rewrites rows that are already Incoming or Handled, and
+    /// promotes a scheduled sibling that is not due yet -- a message scheduled an hour out executes now. The
+    /// load side already selects only Scheduled rows, so constraining the update to match costs nothing.</item>
+    /// </list>
+    ///
+    /// Mirrors <c>PostgresqlMessageStore._reassignIncomingSql</c>, which does the same job through
+    /// <c>unnest(@ids, @uris)</c>. See GH-4209 for the incident that first exposed the shape.
+    /// </summary>
+    private string writePromotionSql(DbCommand command, IReadOnlyList<Envelope> envelopes)
+    {
+        var matchesById = Durability.MessageIdentity == MessageIdentity.IdOnly;
+        var clauses = new List<string>(envelopes.Count);
+
+        for (var i = 0; i < envelopes.Count; i++)
+        {
+            var idParameter = command.CreateParameter();
+            idParameter.ParameterName = $"@id_{i}";
+            idParameter.Value = envelopes[i].Id;
+            command.Parameters.Add(idParameter);
+
+            if (matchesById)
+            {
+                clauses.Add($"id = @id_{i}");
+                continue;
+            }
+
+            var uriParameter = command.CreateParameter();
+            uriParameter.ParameterName = $"@uri_{i}";
+            uriParameter.Value = envelopes[i].Destination!.ToString();
+            command.Parameters.Add(uriParameter);
+
+            clauses.Add($"(id = @id_{i} AND {DatabaseConstants.ReceivedAt} = @uri_{i})");
+        }
+
+        return $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET owner_id = @owner, status = '{EnvelopeStatus.Incoming}' " +
+               $"WHERE status = '{EnvelopeStatus.Scheduled}' AND ({string.Join(" OR ", clauses)})";
+    }
+
+    public override async Task PollForScheduledMessagesAsync(IWolverineRuntime runtime, ILogger logger,
+        DurabilitySettings durabilitySettings, CancellationToken cancellationToken)
+    {
+        IReadOnlyList<Envelope> envelopes;
+
+        if (HasDisposed) return;
+
+        await using var conn = await MySqlDataSource.OpenConnectionAsync(cancellationToken);
+        try
+        {
+            var tx = await conn.BeginTransactionAsync(cancellationToken);
+
+            var lockName = $"wolverine_{Settings.ScheduledJobLockId}";
+            await using var lockCmd = conn.CreateCommand();
+            lockCmd.Transaction = tx;
+            lockCmd.CommandText = "SELECT GET_LOCK(@lockName, 0)";
+            lockCmd.Parameters.AddWithValue("@lockName", lockName);
+            var lockResult = await lockCmd.ExecuteScalarAsync(cancellationToken);
+
+            var gotLock = (lockResult is int intResult && intResult == 1) ||
+                          (lockResult is long longResult && longResult == 1);
+
+            if (gotLock)
+            {
+                var builder = new DbCommandBuilder(new MySqlCommand());
+                WriteLoadScheduledEnvelopeSql(builder, DateTimeOffset.UtcNow);
+                await using var cmd = (MySqlCommand)builder.Compile();
+                cmd.Connection = conn;
+                cmd.Transaction = tx;
+
+                envelopes = await cmd.FetchListAsync(reader =>
+                    DatabasePersistence.ReadIncomingAsync(reader, cancellationToken), cancellation: cancellationToken);
+
+                if (!envelopes.Any())
+                {
+                    await using var releaseLockCmd = conn.CreateCommand();
+                    releaseLockCmd.Transaction = tx;
+                    releaseLockCmd.CommandText = "SELECT RELEASE_LOCK(@lockName)";
+                    releaseLockCmd.Parameters.AddWithValue("@lockName", lockName);
+                    await releaseLockCmd.ExecuteScalarAsync(cancellationToken);
+
+                    await tx.RollbackAsync(cancellationToken);
+                    return;
+                }
+
+                await using var reassignCmd = conn.CreateCommand();
+                reassignCmd.Transaction = tx;
+                reassignCmd.CommandText = writePromotionSql(reassignCmd, envelopes);
+                reassignCmd.Parameters.AddWithValue("@owner", durabilitySettings.AssignedNodeNumber);
+                await reassignCmd.ExecuteNonQueryAsync(_cancellation);
+
+                await using var releaseLockCmd2 = conn.CreateCommand();
+                releaseLockCmd2.Transaction = tx;
+                releaseLockCmd2.CommandText = "SELECT RELEASE_LOCK(@lockName)";
+                releaseLockCmd2.Parameters.AddWithValue("@lockName", lockName);
+                await releaseLockCmd2.ExecuteScalarAsync(cancellationToken);
+
+                await tx.CommitAsync(cancellationToken);
+
+                // Mirror onto the in-memory envelopes what the UPDATE above just did to their rows:
+                // owning store (GH-2576) and promoted status (GH-4673).
+                DatabasePersistence.MarkPromotedFromScheduled(envelopes, this,
+                    durabilitySettings.AssignedNodeNumber);
+
+                await runtime.EnqueueDirectlyAsync(envelopes);
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public override async Task PublishMessageToExternalTableAsync(ExternalMessageTable table, string? messageTypeName,
+        byte[] json,
+        CancellationToken token)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(token);
+
+        await using var cmd = conn.CreateCommand();
+        if (table.MessageTypeColumnName.IsEmpty())
+        {
+            cmd.CommandText =
+                $"INSERT INTO {table.TableName.QualifiedName} ({table.IdColumnName}, {table.JsonBodyColumnName}) VALUES (@id, @json)";
+            cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
+            cmd.Parameters.AddWithValue("@json", json);
+        }
+        else
+        {
+            cmd.CommandText =
+                $"INSERT INTO {table.TableName.QualifiedName} ({table.IdColumnName}, {table.JsonBodyColumnName}, {table.MessageTypeColumnName}) VALUES (@id, @json, @message)";
+            cmd.Parameters.AddWithValue("@id", Guid.NewGuid());
+            cmd.Parameters.AddWithValue("@json", json);
+            cmd.Parameters.AddWithValue("@message", messageTypeName!);
+        }
+
+        await cmd.ExecuteNonQueryAsync(token);
+
+        await conn.CloseAsync();
+    }
+
+    public override DatabaseDescriptor Describe()
+    {
+        var builder = new MySqlConnectionStringBuilder(DataSource?.ConnectionString ?? Settings.ConnectionString ?? "");
+        var descriptor = new DatabaseDescriptor
+        {
+            Engine = "MySQL",
+            ServerName = builder.Server ?? string.Empty,
+            DatabaseName = builder.Database ?? string.Empty,
+            Subject = GetType().FullNameInCode(),
+            SubjectUri = SubjectUri,
+            Identifier = Identifier
+        };
+
+        descriptor.TenantIds.AddRange(TenantIds);
+
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Server));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Port));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Database));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.UserID));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Pooling));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.MinimumPoolSize));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.MaximumPoolSize));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.ConnectionTimeout));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.DefaultCommandTimeout));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.SslMode));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.CharacterSet));
+
+        descriptor.Properties.RemoveAll(x => x.Name.ContainsIgnoreCase("password"));
+        descriptor.Properties.RemoveAll(x => x.Name.ContainsIgnoreCase("certificate"));
+
+        return descriptor;
+    }
+
+    public override IEnumerable<ISchemaObject> AllObjects()
+    {
+        yield return new OutgoingEnvelopeTable(Durability, SchemaName);
+        yield return new IncomingEnvelopeTable(Durability, SchemaName);
+        yield return new DeadLettersTable(Durability, SchemaName);
+
+        // GH-4180. Every store role, not just Main -- see the PostgreSQL twin.
+        // GH-4757: exactly one of the two, never both. The hash mode's key is a binary column, which
+        // cannot be reached from the original table by any migration Weasel can express.
+        if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByString)
+        {
+            yield return new DeduplicationTable(SchemaName);
+        }
+        else if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByHash)
+        {
+            yield return new HashedDeduplicationTable(SchemaName);
+        }
+
+        // GH-4742. Every store role, behind its own opt-in.
+        if (Durability.EnableDeduplicatedResponses)
+        {
+            yield return new DeduplicatedResponsesTable(SchemaName);
+        }
+
+        // Recurring-message tracking — Main store only, behind the opt-in. See the PostgreSQL twin.
+        if (Durability.EnableRecurringMessages && Role == MessageStoreRole.Main)
+        {
+            yield return new RecurringMessagesTable(SchemaName);
+        }
+
+        if (Role == MessageStoreRole.Main)
+        {
+            var nodeTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeTableName));
+            nodeTable.AddColumn<Guid>("id").AsPrimaryKey();
+            // MySQL requires AUTO_INCREMENT to be part of a key - add unique index.
+            // AUTO_INCREMENT belongs in AutoIncrement(), not in the type: the catalog reports
+            // the type as plain INT, so folding it into the type string made this column
+            // report drift on every schema check (GH-3983).
+            nodeTable.AddColumn<int>("node_number").NotNull()
+                .AutoIncrement()
+                .AddIndex(idx => idx.IsUnique = true);
+            // GH-4246: every string column in this node-table family used to take Weasel's default
+            // string mapping, which on MySQL is VARCHAR(255) -- the narrowest of any provider, and
+            // narrower than what the SQL Server and Oracle stores have always declared for the same
+            // columns. Declaring the widths explicitly puts MySQL on the same footing instead of leaving
+            // it a provider-specific ceiling nobody sees until an insert fails. Widths stay at or under
+            // 500 for anything in a key: InnoDB caps an index key at 3072 bytes, which is 768 characters
+            // of utf8mb4.
+            nodeTable.AddColumn("description", "varchar(500)").NotNull();
+            nodeTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("started").DefaultValueByExpression("(UTC_TIMESTAMP(6))").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("health_check").NotNull().DefaultValueByExpression("(UTC_TIMESTAMP(6))");
+            nodeTable.AddColumn<string>("version");
+            nodeTable.AddColumn("capabilities", "TEXT").AllowNulls();
+
+            // GH-4593, mirroring the PostgreSQL gate from GH-3959: provisioned only behind the opt-in so
+            // an upgrade migrates nothing, and MySqlNodePersistence gates every statement naming it on the
+            // same flag. Plain DOUBLE with no modifiers in the type string, per GH-3983.
+            if (Durability.CapacityAwareAssignment)
+            {
+                nodeTable.AddColumn(DatabaseConstants.LoadFactor, "DOUBLE").AllowNulls();
+            }
+
+            yield return nodeTable;
+
+            var assignmentTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeAssignmentsTableName));
+            assignmentTable.AddColumn("id", $"varchar({AgentUri.MaximumLength})").AsPrimaryKey();
+            assignmentTable.AddColumn<Guid>("node_id")
+                .ForeignKeyTo(nodeTable.Identifier, "id", onDelete: Weasel.Core.CascadeAction.Cascade);
+            assignmentTable.AddColumn<DateTimeOffset>("started").DefaultValueByExpression("(UTC_TIMESTAMP(6))").NotNull();
+
+            yield return assignmentTable;
+
+            if (_settings.CommandQueuesEnabled)
+            {
+                var queueTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.ControlQueueTableName));
+                queueTable.AddColumn<Guid>("id").AsPrimaryKey();
+                queueTable.AddColumn(DatabaseConstants.MessageType, "varchar(500)").NotNull();
+                queueTable.AddColumn<Guid>("node_id").NotNull();
+                queueTable.AddColumn(DatabaseConstants.Body, "LONGBLOB").NotNull();
+                queueTable.AddColumn<DateTimeOffset>("posted").NotNull().DefaultValueByExpression("(UTC_TIMESTAMP(6))");
+                queueTable.AddColumn<DateTimeOffset>("expires");
+
+                yield return queueTable;
+            }
+
+            if (_settings.AddTenantLookupTable)
+            {
+                var tenantTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.TenantsTableName));
+                tenantTable.AddColumn<string>(StorageConstants.TenantIdColumn).AsPrimaryKey();
+                tenantTable.AddColumn(StorageConstants.ConnectionStringColumn, "varchar(500)").NotNull();
+                tenantTable.AddColumn<bool>(DatabaseConstants.DisabledColumn).DefaultValueByExpression("false").NotNull();
+                yield return tenantTable;
+            }
+
+            var eventTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeRecordTableName));
+            eventTable.AddColumn<int>("id").AsPrimaryKey().AutoIncrement();
+            eventTable.AddColumn<int>("node_number").NotNull();
+            eventTable.AddColumn("event_name", "varchar(500)").NotNull();
+            eventTable.AddColumn<DateTimeOffset>("timestamp").DefaultValueByExpression("(UTC_TIMESTAMP(6))").NotNull();
+            eventTable.AddColumn("description", $"varchar({NodeRecord.DescriptionLength})").AllowNulls();
+            yield return eventTable;
+
+            var restrictionTable =
+                new Table(new DbObjectName(SchemaName, DatabaseConstants.AgentRestrictionsTableName));
+            restrictionTable.AddColumn<Guid>("id").AsPrimaryKey();
+            restrictionTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").NotNull();
+            restrictionTable.AddColumn("type", $"varchar({AgentUri.MaximumLength})").NotNull();
+            restrictionTable.AddColumn<int>("node").NotNull().DefaultValue(0);
+            yield return restrictionTable;
+
+            // Dynamic listener registry (GH-2685). Provisioned only when the opt-in
+            // flag is set so existing apps see no migration churn.
+            if (Durability.EnableDynamicListeners)
+            {
+                var listenerTable =
+                    new Table(new DbObjectName(SchemaName, DatabaseConstants.ListenersTableName));
+                listenerTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").AsPrimaryKey();
+                yield return listenerTable;
+            }
+        }
+
+        foreach (var table in _otherTables)
+        {
+            yield return table;
+        }
+
+        foreach (var entry in _sagaStorage.Enumerate())
+        {
+            yield return entry.Value.Table;
+        }
+    }
+
+    private readonly List<Table> _otherTables = new();
+
+    public void AddTable(Table table)
+    {
+        _otherTables.Add(table);
+    }
+
+    public override DatabaseSagaSchema<T, TId> SagaSchemaFor<T, TId>()
+    {
+        if (_sagaStorage.TryFind(typeof(T), out var raw))
+        {
+            if (raw is DatabaseSagaSchema<T, TId> sagaStorage)
+            {
+                return sagaStorage;
+            }
+        }
+
+        var definition = new SagaTableDefinition(typeof(T), null);
+        var storage = new DatabaseSagaSchema<T, TId>(definition, _settings);
+        _sagaStorage = _sagaStorage.AddOrUpdate(typeof(T), storage);
+
+        return storage;
+    }
+
+    protected override void writeMessageIdArrayQueryList(DbCommandBuilder builder, Guid[] messageIds)
+    {
+        if (messageIds.Length == 0)
+        {
+            builder.Append($" AND {DatabaseConstants.Id} IN (NULL)");
+            return;
+        }
+
+        builder.Append($" AND {DatabaseConstants.Id} IN (");
+        for (var i = 0; i < messageIds.Length; i++)
+        {
+            if (i > 0) builder.Append(", ");
+            builder.AppendParameter(messageIds[i]);
+        }
+
+        builder.Append(')');
+    }
+
+    public override async Task DeleteAllHandledAsync()
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(CancellationToken.None);
+
+        var deleted = 1;
+
+        var sql = $@"
+DELETE FROM {_settings.SchemaName}.{DatabaseConstants.IncomingTable}
+WHERE id IN (
+    SELECT id FROM (
+        SELECT id
+        FROM {_settings.SchemaName}.{DatabaseConstants.IncomingTable}
+        WHERE status = '{EnvelopeStatus.Handled}'
+        ORDER BY id
+        LIMIT 10000
+        FOR UPDATE SKIP LOCKED
+    ) AS subquery
+)";
+
+        try
+        {
+            while (deleted > 0)
+            {
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandText = sql;
+                deleted = await cmd.ExecuteNonQueryAsync();
+                await Task.Delay(10.Milliseconds());
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+}

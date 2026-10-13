@@ -1,0 +1,531 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DaemonTests.MultiTenancy;
+using JasperFx.Core;
+using JasperFx.Events;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events.Aggregation;
+using Marten.Internal.Sessions;
+using Marten.Metadata;
+using Marten.Services;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace DaemonTests.Aggregations;
+
+public class side_effects_in_aggregations: OneOffConfigurationsContext
+{
+    private readonly ITestOutputHelper _output;
+
+    public side_effects_in_aggregations(ITestOutputHelper output)
+    {
+        _output = output;
+    }
+
+    [Fact]
+    public async Task add_events_single_stream_guid_identifier()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<Projection1>(ProjectionLifecycle.Async);
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamId = Guid.NewGuid();
+        theSession.Events.StartStream<SideEffects1>(streamId, new MTAEvent(),
+            new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version1 = await theSession.LoadAsync<SideEffects1>(streamId, TestContext.Current.CancellationToken);
+        version1.A.ShouldBe(3);
+        version1.B.ShouldBe(0);
+
+        theSession.Events.Append(streamId, new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+
+        // Prove the BEevent side effect happened as expected
+        var state = await theSession.Events.FetchStreamStateAsync(streamId, TestContext.Current.CancellationToken);
+        var tries = 0;
+        while (state.Version != 6 && tries < 10)
+        {
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+            state = await theSession.Events.FetchStreamStateAsync(streamId, TestContext.Current.CancellationToken);
+            tries++;
+        }
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version2 = await theSession.LoadAsync<SideEffects1>(streamId, TestContext.Current.CancellationToken);
+        version2.A.ShouldBe(5);
+
+        // This proves that the aggregate was updated the new new event
+        version2.B.ShouldBe(1);
+
+        // 5 events explicitly added, 1 from side effect
+        version2.Version.ShouldBe(6);
+
+
+        state.Version.ShouldBe(6);
+    }
+
+    [Fact]
+    public async Task calls_side_effects_when_there_is_a_delete_event()
+    {
+        var outbox = new RecordingMessageOutbox();
+
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<Projection1>(ProjectionLifecycle.Async);
+            opts.Events.MessageOutbox = outbox;
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamId = Guid.NewGuid();
+        theSession.Events.StartStream<SideEffects1>(streamId, new MTAEvent(),
+            new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        theSession.Events.Append(streamId, new MTEEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        // Should be deleted by now
+        var version1 = await theSession.LoadAsync<SideEffects1>(streamId, TestContext.Current.CancellationToken);
+        version1.ShouldBeNull();
+
+        outbox
+            .Batches
+            .SelectMany(x => x.Messages)
+            .Select(x => x.message)
+            .OfType<WasDeleted>().Single().Id.ShouldBe(streamId);
+
+    }
+
+    [Fact]
+    public async Task add_events_single_stream_guid_identifier_when_starting_a_stream()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<Projection1>(ProjectionLifecycle.Async);
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamId = Guid.NewGuid();
+        theSession.Events.StartStream<SideEffects1>(streamId, new MTAEvent(),
+            new MTAEvent(), new MTAEvent(), new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Prove the BEevent side effect happened as expected
+        var state = await theSession.Events.FetchStreamStateAsync(streamId, TestContext.Current.CancellationToken);
+        var tries = 0;
+        while (state.Version != 6 && tries < 10)
+        {
+            await Task.Delay(500.Milliseconds(), TestContext.Current.CancellationToken);
+            state = await theSession.Events.FetchStreamStateAsync(streamId, TestContext.Current.CancellationToken);
+            tries++;
+        }
+
+        state.Version.ShouldBe(6);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version2 = await theSession.LoadAsync<SideEffects1>(streamId, TestContext.Current.CancellationToken);
+        version2.A.ShouldBe(5);
+
+        // This proves that the aggregate was updated the new new event
+        version2.B.ShouldBe(1);
+
+        // 5 events explicitly added, 1 from side effect
+        version2.Version.ShouldBe(6);
+        state.Version.ShouldBe(6);
+    }
+
+    [Fact]
+    public async Task add_events_single_stream_string_identifier_when_starting_a_stream()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<Projection2>(ProjectionLifecycle.Async);
+            opts.Events.StreamIdentity = StreamIdentity.AsString;
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamKey = Guid.NewGuid().ToString();
+        theSession.Events.StartStream<SideEffects2>(streamKey, new MTAEvent(),
+            new MTAEvent(), new MTAEvent(), new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Prove the BEevent side effect happened as expected
+        var state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+        var tries = 0;
+        while (state.Version != 6 && tries < 10)
+        {
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+            state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+            tries++;
+        }
+
+        state.Version.ShouldBe(6);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version2 = await theSession.LoadAsync<SideEffects2>(streamKey, TestContext.Current.CancellationToken);
+        version2.A.ShouldBe(5);
+
+        // This proves that the aggregate was updated the new new event
+        version2.B.ShouldBe(1);
+
+        // 5 events explicitly added, 1 from side effect
+        version2.Version.ShouldBe(6);
+        state.Version.ShouldBe(6);
+    }
+
+    [Fact]
+    public async Task add_events_single_stream_string_identifier()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Events.StreamIdentity = StreamIdentity.AsString;
+            opts.Projections.Add<Projection2>(ProjectionLifecycle.Async);
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamKey = Guid.NewGuid().ToString();
+        theSession.Events.StartStream<SideEffects2>(streamKey, new MTAEvent(),
+            new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version1 = await theSession.LoadAsync<SideEffects2>(streamKey, TestContext.Current.CancellationToken);
+        version1.A.ShouldBe(3);
+        version1.B.ShouldBe(0);
+
+        theSession.Events.Append(streamKey, new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+
+        // Prove the BEevent side effect happened as expected
+        var state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+        var tries = 0;
+        while (state.Version != 6 && tries < 10)
+        {
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+            state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+            tries++;
+        }
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version2 = await theSession.LoadAsync<SideEffects2>(streamKey, TestContext.Current.CancellationToken);
+        version2.A.ShouldBe(5);
+
+        // This proves that the aggregate was updated the new new event
+        version2.B.ShouldBe(1);
+
+        // 5 events explicitly added, 1 from side effect
+        version2.Version.ShouldBe(6);
+
+        state.Version.ShouldBe(6);
+    }
+
+    [Fact]
+    public async Task side_effects_do_not_happen_in_rebuilds()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Events.StreamIdentity = StreamIdentity.AsString;
+            opts.Projections.Add<Projection2>(ProjectionLifecycle.Async);
+
+            opts.Events.AppendMode = EventAppendMode.Quick;
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var streamKey = Guid.NewGuid().ToString();
+        theSession.Events.StartStream<SideEffects2>(streamKey, new MTAEvent(),
+            new MTAEvent(), new MTAEvent(), new MTAEvent(), new MTAEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Prove the BEevent side effect happened as expected
+        var state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+        var tries = 0;
+        while (state.Version != 6 && tries < 10)
+        {
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+            state = await theSession.Events.FetchStreamStateAsync(streamKey, TestContext.Current.CancellationToken);
+            tries++;
+        }
+
+        await daemon.WaitForNonStaleData(30.Seconds());
+
+        var version1 = await theSession.LoadAsync<SideEffects2>(streamKey, TestContext.Current.CancellationToken);
+        version1.A.ShouldBe(5);
+        version1.B.ShouldBe(1);
+
+        await daemon.StopAllAsync();
+
+        await daemon.RebuildProjectionAsync<Projection2>(5.Seconds(), CancellationToken.None);
+
+        // No changes!
+        var version2 = await theSession.LoadAsync<SideEffects2>(streamKey, TestContext.Current.CancellationToken);
+        version2.A.ShouldBe(5);
+        version2.B.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task publishing_messages_in_continuous_mode()
+    {
+        var outbox = new RecordingMessageOutbox();
+
+        StoreOptions(opts =>
+        {
+            opts.Projections.Add<Projection3>(ProjectionLifecycle.Async);
+            opts.Events.MessageOutbox = outbox;
+        });
+
+        await theStore.Advanced.Clean.DeleteAllDocumentsAsync(TestContext.Current.CancellationToken);
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync(TestContext.Current.CancellationToken);
+
+        var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var stream1 = Guid.NewGuid();
+        var stream2 = Guid.NewGuid();
+        var stream3 = Guid.NewGuid();
+
+        theSession.Events.StartStream<SideEffects1>(stream1, new MTAEvent(), new MTAEvent());
+        theSession.Events.StartStream<SideEffects1>(stream2, new MTAEvent(), new MTAEvent());
+        theSession.Events.StartStream<SideEffects1>(stream3, new MTAEvent(), new MTAEvent(), new MTBEvent());
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(120.Seconds());
+
+        var expected = outbox.Batches.SelectMany(x => x.Messages).Select(x => x.message).OfType<GotB>().Single();
+        expected.streamId.ShouldBe(stream3);
+
+        foreach (var batch in outbox.Batches)
+        {
+            batch.BeforeCommitWasCalled.ShouldBeTrue();
+            batch.AfterCommitWasCalled.ShouldBeTrue();
+        }
+    }
+}
+
+public partial class Projection1: SingleStreamProjection<SideEffects1, Guid>
+{
+    public Projection1()
+    {
+        DeleteEvent<MTEEvent>();
+    }
+
+    public void Apply(SideEffects1 aggregate, MTAEvent _)
+    {
+        aggregate.A++;
+    }
+
+    public void Apply(SideEffects1 aggregate, MTBEvent _)
+    {
+        aggregate.B++;
+    }
+
+    public override ValueTask RaiseSideEffects(IDocumentOperations operations, IEventSlice<SideEffects1> slice)
+    {
+        if (slice.Snapshot?.A % 5 == 0)
+        {
+            slice.AppendEvent(new MTBEvent());
+        }
+
+        if (slice.Events().OfType<IEvent<MTEEvent>>().Any())
+        {
+            slice.PublishMessage(new WasDeleted(slice.Events().First().StreamId));
+        }
+
+        return new ValueTask();
+
+    }
+}
+
+public class SideEffects1: IRevisioned
+{
+    public Guid Id { get; set; }
+    public int A { get; set; }
+    public int B { get; set; }
+    public int C { get; set; }
+    public int D { get; set; }
+    public int Version { get; set; }
+}
+
+public record WasDeleted(Guid Id);
+
+public partial class Projection2: SingleStreamProjection<SideEffects2, string>
+{
+    public void Apply(SideEffects2 aggregate, MTAEvent _)
+    {
+        aggregate.A++;
+    }
+
+    public void Apply(SideEffects2 aggregate, MTBEvent _)
+    {
+        aggregate.B++;
+    }
+
+    public override ValueTask RaiseSideEffects(IDocumentOperations operations, IEventSlice<SideEffects2> slice)
+    {
+        if (slice.Snapshot.A >= 5 && slice.Snapshot.B == 0)
+        {
+            slice.AppendEvent(new MTBEvent());
+        }
+
+        return new ValueTask();
+    }
+}
+
+public partial class Projection3: SingleStreamProjection<SideEffects1, Guid>
+{
+    public void Apply(SideEffects1 aggregate, MTAEvent _)
+    {
+        aggregate.A++;
+    }
+
+    public void Apply(SideEffects1 aggregate, MTBEvent _)
+    {
+
+    }
+
+    public override ValueTask RaiseSideEffects(IDocumentOperations operations, IEventSlice<SideEffects1> slice)
+    {
+        if (slice.Snapshot != null && slice.Events().OfType<IEvent<MTBEvent>>().Any())
+        {
+            slice.PublishMessage(new GotB(slice.Snapshot.Id));
+        }
+
+        return new ValueTask();
+    }
+}
+
+public record GotB(Guid streamId);
+
+public class SideEffects2: IRevisioned
+{
+    public string Id { get; set; }
+    public int A { get; set; }
+    public int B { get; set; }
+    public int C { get; set; }
+    public int D { get; set; }
+    public int Version { get; set; }
+}
+
+public class RecordingMessageOutbox: IMessageOutbox
+{
+    private readonly List<RecordingMessageBatch> _batches = new();
+
+    // The daemon raises side effects for the slices in a batch concurrently, so both of the
+    // collections in this harness have to be synchronized -- an unguarded List.Add silently drops
+    // batches and messages, which is what made blue_green_side_effect_gate look flaky (#5065).
+    // The sibling copy in Composites/composite_rebuild_suppresses_side_effects.cs already locks.
+    public IReadOnlyList<RecordingMessageBatch> Batches
+    {
+        get
+        {
+            lock (_batches)
+            {
+                return _batches.ToList();
+            }
+        }
+    }
+
+    public ValueTask<IMessageBatch> CreateBatch(DocumentSessionBase session)
+    {
+        var batch = new RecordingMessageBatch();
+        lock (_batches)
+        {
+            _batches.Add(batch);
+        }
+
+        return new ValueTask<IMessageBatch>(batch);
+    }
+}
+
+public record TenantMessage(string tenantId, object message);
+
+public class RecordingMessageBatch: IMessageBatch
+{
+    private readonly List<TenantMessage> _messages = new();
+
+    public IReadOnlyList<TenantMessage> Messages
+    {
+        get
+        {
+            lock (_messages)
+            {
+                return _messages.ToList();
+            }
+        }
+    }
+
+    public Task AfterCommitAsync(IDocumentSession session, IChangeSet commit, CancellationToken token)
+    {
+        AfterCommitWasCalled = true;
+        return Task.CompletedTask;
+    }
+
+    public bool AfterCommitWasCalled { get; set; }
+
+    public Task BeforeCommitAsync(IDocumentSession session, IChangeSet commit, CancellationToken token)
+    {
+        BeforeCommitWasCalled = true;
+        return Task.CompletedTask;
+    }
+
+    public bool BeforeCommitWasCalled { get; set; }
+    public ValueTask PublishAsync<T>(T message, string tenantId)
+    {
+        lock (_messages)
+        {
+            _messages.Add(new TenantMessage(tenantId, message));
+        }
+
+        return new ValueTask();
+    }
+}

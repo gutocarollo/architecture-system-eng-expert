@@ -1,0 +1,1326 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Marten.Exceptions;
+using Marten.Internal;
+using Marten.Linq.Members;
+using Marten.Linq.Members.ValueCollections;
+using Marten.Linq.Parsing;
+using Marten.Schema.Identity;
+using Marten.Schema.Identity.Sequences;
+using Marten.Schema.Indexing.FullText;
+using Marten.Schema.Indexing.Unique;
+using Marten.Storage;
+using Marten.Storage.Metadata;
+using Marten.Util;
+using NpgsqlTypes;
+using Weasel.Core;
+using Weasel.Postgresql;
+using Weasel.Postgresql.Tables;
+using Weasel.Postgresql.Tables.Indexes;
+using Weasel.Postgresql.Tables.Partitioning;
+
+namespace Marten.Schema;
+
+public enum PrimaryKeyTenancyOrdering
+{
+    /// <summary>
+    /// This is the normal ordering with tenant id, then id for the primary
+    /// key ordering. This is appropriate for most conjoined tenancy modeling
+    /// </summary>
+    TenantId_Then_Id,
+
+    /// <summary>
+    /// V6 compatible mode. The PK is ordered by id, tenant_id. May be more efficient for querying
+    /// when using partitioning by tenant id
+    /// </summary>
+    Id_Then_TenantId
+}
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070",
+    Justification = "Class-level: reflects PublicMethods/PublicProperties on a Type whose runtime instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2090",
+    Justification = "Class-level: generic class type-argument flow on the aggregator / storage instantiation. Types preserved at the projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public interface IDocumentType
+{
+    IDocumentType Root { get; }
+
+    Type DocumentType { get; }
+
+    Type IdType { get; }
+    DbObjectName TableName { get; }
+
+    DocumentMetadataCollection Metadata { get; }
+    bool UseOptimisticConcurrency { get; }
+    IList<IndexDefinition> Indexes { get; }
+    IList<ForeignKey> ForeignKeys { get; }
+    SubClasses SubClasses { get; }
+    string DatabaseSchemaName { get; set; }
+    EnumStorage EnumStorage { get; }
+    Casing Casing { get; }
+    string Alias { get; set; }
+    IIdGeneration IdStrategy { get; }
+    MemberInfo IdMember { get; }
+    bool StructuralTyped { get; }
+    string DdlTemplate { get; }
+    IReadOnlyHiloSettings HiloSettings { get; }
+    TenancyStyle TenancyStyle { get; }
+    IReadOnlyList<DuplicatedField> DuplicatedFields { get; }
+    bool IsHierarchy();
+    IEnumerable<DocumentIndex> IndexesFor(string column);
+    string AliasFor(Type subclassType);
+    Type TypeFor(string alias);
+}
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070",
+    Justification = "Class-level: reflects PublicMethods/PublicProperties on a Type whose runtime instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public partial class DocumentMapping: IDocumentMapping, IDocumentType
+{
+    internal static bool IsValidIdentityType([NotNullWhen(true)]Type? identityType)
+    {
+        if (identityType == null)
+            return false;
+
+        if (identityType.IsGenericType && identityType.IsNullable())
+        {
+            identityType = identityType.GetGenericArguments()[0];
+        }
+
+        return identityType.IsOneOf(ValidIdTypes) ||
+               ValueTypeIdGeneration.IsCandidate(identityType, out var generation) ||
+               FSharpDiscriminatedUnionIdGeneration.IsCandidate(identityType,
+                   out var fSharpDiscriminatedUnionIdGeneration);
+    }
+
+    /// <summary>
+    ///     Accepts exactly what <see cref="IsValidIdentityType" /> accepts, but registers nothing and
+    ///     constructs nothing.
+    /// </summary>
+    /// <remarks>
+    ///     Identity resolution has to test every property and field to find the one id, and
+    ///     <see cref="IsValidIdentityType" /> is not free to ask: its strong-typed-id arm registers the
+    ///     probed type on the global <see cref="PostgresqlProvider" /> singleton and closes an open
+    ///     generic to build a select clause. Asking it about every member therefore remapped ordinary
+    ///     single-value structs process-wide -- an <c>Optional&lt;string&gt;</c> property turning the
+    ///     type into <c>varchar</c> for everything -- and brought Native AOT startup down on the generic
+    ///     construction. So the traversal asks this, and the effectful question is put only to the member
+    ///     actually chosen, by the <see cref="IdMember" /> setter. See #5562.
+    /// </remarks>
+    internal static bool IsPlausibleIdentityType([NotNullWhen(true)]Type? identityType)
+    {
+        if (identityType == null)
+            return false;
+
+        if (identityType.IsGenericType && identityType.IsNullable())
+        {
+            identityType = identityType.GetGenericArguments()[0];
+        }
+
+        return identityType.IsOneOf(ValidIdTypes) ||
+               ValueTypeIdGeneration.IsCandidateShape(identityType) ||
+               FSharpDiscriminatedUnionIdGeneration.IsCandidateShape(identityType);
+    }
+
+    [GeneratedRegex("<|>")]
+    private static partial Regex AliasSanitizer();
+
+    internal static readonly Type[] ValidIdTypes = [typeof(int), typeof(Guid), typeof(long), typeof(string)];
+    private readonly List<DuplicatedField> _duplicates = [];
+    private readonly Lazy<DocumentSchema> _schema;
+
+    private string _alias;
+    private string _databaseSchemaName;
+
+    private HiloSettings _hiloSettings;
+    private MemberInfo _idMember;
+
+    public DocumentMapping(Type documentType, StoreOptions storeOptions)
+    {
+        if (documentType.IsSimple())
+        {
+            throw new ArgumentOutOfRangeException(nameof(documentType),
+                "This type cannot be used as a Marten document");
+        }
+
+        StoreOptions = storeOptions ?? throw new ArgumentNullException(nameof(storeOptions));
+
+        DocumentType = documentType ?? throw new ArgumentNullException(nameof(documentType));
+        Alias = defaultDocumentAliasName(documentType);
+
+        QueryMembers = new DocumentQueryableMemberCollection(this, StoreOptions);
+        IdMember = FindIdMember(documentType);
+
+        Metadata = new DocumentMetadataCollection(this);
+
+        SubClasses = new SubClasses(this, storeOptions);
+
+        StoreOptions.applyPolicies(this);
+
+        applyAnyMartenAttributes(documentType);
+
+        StoreOptions.applyPostPolicies(this);
+
+        _schema = new Lazy<DocumentSchema>(() => new DocumentSchema(this));
+
+        if (DisablePartitioningIfAny)
+        {
+            Partitioning = null;
+        }
+    }
+
+    public PrimaryKeyTenancyOrdering PrimaryKeyTenancyOrdering { get; set; } =
+        PrimaryKeyTenancyOrdering.TenantId_Then_Id;
+
+    public bool StartIndexesByTenantId { get; set; }
+
+    public bool DisablePartitioningIfAny { get; set; } = false;
+
+    public IPartitionStrategy? Partitioning { get; set; }
+
+    /// <summary>
+    ///     Table level storage parameters written as <c>WITH (name = value, ...)</c> on the document table,
+    ///     keyed by the PostgreSQL parameter name, e.g. <c>fillfactor</c>. Only the parameters declared here are
+    ///     managed: a parameter that exists in the database but is not declared is left alone.
+    /// </summary>
+    public OrderedDictionary StorageParameters { get; } = new();
+
+    [IgnoreDescription]
+    public DocumentCodeGen? CodeGen { get; private set; }
+
+    internal DocumentQueryableMemberCollection QueryMembers { get; }
+
+    public IList<string> IgnoredIndexes { get; } = new List<string>();
+
+    internal StoreOptions StoreOptions { get; }
+
+    internal DocumentSchema Schema => _schema.Value;
+
+    /// <summary>
+    /// This is a workaround for the quick append + inline projection
+    /// issue
+    /// </summary>
+    public bool UseVersionFromMatchingStream { get; set; }
+
+    public HiloSettings HiloSettings
+    {
+        get => _hiloSettings;
+        set
+        {
+            if (IdStrategy is HiloIdGeneration)
+            {
+                IdStrategy = new HiloIdGeneration(DocumentType, value);
+                _hiloSettings = value;
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    $"DocumentMapping for {DocumentType.FullName} is using {IdStrategy.GetType().FullName} as its Id strategy so cannot override Hilo sequence configuration");
+            }
+        }
+    }
+
+    // TODO: This should be smarter, maybe nullable option for Schema or some other base type
+    internal bool SkipSchemaGeneration { get; set; }
+
+    /// <summary>
+    /// Per-mapping override for Row Level Security.
+    /// Null inherits the store-level <see cref="StoreOptions.RlsTenantSessionSetting"/>;
+    /// true forces RLS on for this mapping; false forces it off.
+    /// </summary>
+    internal bool? RlsOverride { get; set; }
+
+    /// <summary>
+    /// Optional per-mapping GUC setting name. Only relevant when RLS is enabled for the
+    /// mapping (either via <see cref="RlsOverride"/> == true or inherited from the store).
+    /// When null, the store-level setting is used.
+    /// </summary>
+    internal string? RlsSettingOverride { get; set; }
+
+    /// <summary>
+    /// Resolves the effective RLS configuration for this mapping: whether a policy
+    /// should be applied and which GUC setting name it should reference.
+    /// Only returns an enabled result for <see cref="TenancyStyle.Conjoined"/> mappings.
+    /// </summary>
+    internal (bool Enabled, string? SettingName) ResolveRowLevelSecurity()
+    {
+        if (TenancyStyle != TenancyStyle.Conjoined)
+        {
+            return (false, null);
+        }
+
+        var storeSetting = StoreOptions.RlsTenantSessionSetting;
+
+        if (RlsOverride == false)
+        {
+            return (false, null);
+        }
+
+        if (RlsOverride == true)
+        {
+            return (true, RlsSettingOverride ?? storeSetting ?? "app.tenant_id");
+        }
+
+        return storeSetting != null ? (true, storeSetting) : (false, null);
+    }
+
+    public MemberInfo IdMember
+    {
+        get => _idMember;
+        set
+        {
+            if (value != null && !IsValidIdentityType(value.GetMemberType()))
+            {
+                throw new InvalidDocumentException(
+                    $"Id members must be an int, long, Guid, string or a valid strong typed id, but found {value.GetMemberType().FullNameInCode()}");
+            }
+
+            _idMember = value;
+
+            if (_idMember != null)
+            {
+                IdStrategy = StoreOptions.DetermineIdStrategy(DocumentType, IdMember);
+                CodeGen = new DocumentCodeGen(this);
+            }
+
+
+        }
+    }
+
+    public Type IdType => IdMember?.GetMemberType();
+
+    IDocumentMapping IDocumentMapping.Root => this;
+
+    public Type DocumentType { get; }
+
+    public virtual DbObjectName TableName =>
+        new PostgresqlObjectName(DatabaseSchemaName, $"{SchemaConstants.TablePrefix}{_alias}");
+
+    public DocumentMetadataCollection Metadata { get; }
+
+    public bool UseOptimisticConcurrency { get; set; }
+
+    public bool UseNumericRevisions { get; set; }
+
+    /// <summary>
+    ///     Set only by an explicit <c>Schema.For&lt;T&gt;().UseOptimisticConcurrency(true)</c> fluent call,
+    ///     as opposed to the same flag being inferred by a policy, an interface, or a [Version] member.
+    ///     That call clears the competing numeric-revision metadata so the two orders of the fluent
+    ///     pair behave the same (#5159), which means <see cref="CompileAndValidate" /> can no longer
+    ///     see the conflict in the metadata itself and needs this to report the cases where the
+    ///     override genuinely cannot work.
+    /// </summary>
+    internal bool OptimisticConcurrencyRequestedExplicitly { get; set; }
+
+    public IList<IndexDefinition> Indexes { get; } = new List<IndexDefinition>();
+
+    public IList<ForeignKey> ForeignKeys { get; } = new List<ForeignKey>();
+
+    [IgnoreDescription]
+    public SubClasses SubClasses { get; }
+
+    public string SubClassTypes => SubClasses.Any() ? SubClasses.Select(x => x.DocumentType.FullNameInCode()).Join(", ") : "None";
+
+    public string DatabaseSchemaName
+    {
+        get => _databaseSchemaName ?? StoreOptions.DatabaseSchemaName;
+        set => _databaseSchemaName = value.ToLowerInvariant();
+    }
+
+    public EnumStorage EnumStorage => StoreOptions.EnumStorage;
+
+    public Casing Casing => StoreOptions.Serializer().Casing;
+
+    public string Alias
+    {
+        get => _alias;
+        set
+        {
+            if (value.IsEmpty())
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            _alias = value.ToLower();
+        }
+    }
+
+    public PropertySearching PropertySearching { get; set; } = PropertySearching.JSON_Locator_Only;
+    public DeleteStyle DeleteStyle { get; set; } = DeleteStyle.Remove;
+
+    public IIdGeneration IdStrategy { get; set; }
+
+    public bool StructuralTyped { get; set; }
+
+    public string DdlTemplate { get; set; }
+
+    IReadOnlyHiloSettings IDocumentType.HiloSettings { get; }
+
+    private TenancyStyle _tenancyStyle = TenancyStyle.Single;
+
+    public TenancyStyle TenancyStyle
+    {
+        get => _tenancyStyle;
+        set
+        {
+            _tenancyStyle = value;
+            if (QueryMembers != null)
+            {
+                QueryMembers.TenancyStyle = value;
+            }
+        }
+    }
+
+    IDocumentType IDocumentType.Root => this;
+
+    public IReadOnlyList<DuplicatedField> DuplicatedFields => _duplicates;
+
+    /// <summary>
+    /// Setting this to true just means that Weasel should assume that *something* else is
+    /// managing the partitions and that Weasel should not try to manage them at all
+    /// </summary>
+    public bool IgnorePartitions { get; set; }
+
+    public bool IsHierarchy()
+    {
+        return SubClasses.Any() || DocumentType.GetTypeInfo().IsAbstract || DocumentType.GetTypeInfo().IsInterface;
+    }
+
+    public IEnumerable<DocumentIndex> IndexesFor(string column)
+    {
+        return Indexes.OfType<DocumentIndex>().Where(x => x.Columns.Contains(column));
+    }
+
+    public string AliasFor(Type subclassType)
+    {
+        if (subclassType == DocumentType)
+        {
+            return SchemaConstants.BaseAlias;
+        }
+
+        var type = SubClasses.FirstOrDefault(x => x.DocumentType == subclassType);
+        if (type == null)
+        {
+            throw new ArgumentOutOfRangeException(
+                $"Unknown subclass type '{subclassType.FullName}' for Document Hierarchy {DocumentType.FullName}");
+        }
+
+        return type.Alias;
+    }
+
+    // This method is used in generated code, so please don't delete this!!!!
+    public Type TypeFor(string alias)
+    {
+        if (alias == SchemaConstants.BaseAlias)
+        {
+            return DocumentType;
+        }
+
+        var subClassMapping = SubClasses.FirstOrDefault(x => x.Alias.EqualsIgnoreCase(alias));
+        if (subClassMapping == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(alias),
+                $"No subclass in the hierarchy '{DocumentType.FullName}' matches the alias '{alias}'");
+        }
+
+        return subClassMapping.DocumentType;
+    }
+
+    /// <summary>
+    ///     This directs the schema migration functionality to ignore the presence of this named index
+    ///     on the document storage table
+    /// </summary>
+    /// <param name="indexName"></param>
+    public void IgnoreIndex(string indexName)
+    {
+        IgnoredIndexes.Add(indexName);
+    }
+
+    private void applyAnyMartenAttributes(Type documentType)
+    {
+        documentType.ForAttribute<MartenAttribute>(att => att.Modify(this));
+
+        documentType.GetProperties()
+            .Where(x => !x.HasAttribute<DuplicateFieldAttribute>() &&
+                        PostgresqlProvider.Instance.HasTypeMapping(x.PropertyType))
+            .Each(prop => { prop.ForAttribute<MartenAttribute>(att => att.Modify(this, prop)); });
+
+        documentType.GetFields()
+            .Where(x => !x.HasAttribute<DuplicateFieldAttribute>() &&
+                        PostgresqlProvider.Instance.HasTypeMapping(x.FieldType))
+            .Each(fieldInfo => { fieldInfo.ForAttribute<MartenAttribute>(att => att.Modify(this, fieldInfo)); });
+
+        // DuplicateFieldAttribute does not require TypeMappings check
+        documentType.GetProperties()
+            .Where(x => x.HasAttribute<DuplicateFieldAttribute>())
+            .Each(prop => { prop.ForAttribute<DuplicateFieldAttribute>(att => att.Modify(this, prop)); });
+
+        documentType.GetFields()
+            .Where(x => x.HasAttribute<DuplicateFieldAttribute>())
+            .Each(fieldInfo =>
+            {
+                fieldInfo.ForAttribute<DuplicateFieldAttribute>(att => att.Modify(this, fieldInfo));
+            });
+    }
+
+    /// <summary>
+    ///     Access to all other document types that are linked to by foreign keys
+    ///     from this document type
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<Type> ReferencedTypes()
+    {
+        return ForeignKeys.OfType<DocumentForeignKey>().Select(x => x.ReferenceDocumentType)
+            .Where(x => x != DocumentType);
+    }
+
+    public static DocumentMapping<T> For<T>(string databaseSchemaName = SchemaConstants.DefaultSchema)
+    {
+        var storeOptions = new StoreOptions { DatabaseSchemaName = databaseSchemaName };
+
+        var documentMapping = new DocumentMapping<T>(storeOptions);
+        documentMapping.CompileAndValidate();
+        return documentMapping;
+    }
+
+    public static MemberInfo FindIdMember(Type documentType)
+    {
+        // #4525: the attribute-then-convention traversal (IdentityAttribute on a
+        // property, then a field, then a case-insensitive "id" property/field) is
+        // lifted verbatim to JasperFx.DocumentIdentity. Marten keeps its own
+        // predicate (which also recognizes strong-typed ids and F# DUs) so
+        // resolution behavior is unchanged.
+        //
+        // #5562: that predicate is the SHAPE-only one. The traversal applies the filter to
+        // EVERY property and field before it picks by [Identity] or by name, and the effectful
+        // IsValidIdentityType registers each type it is asked about on the global
+        // PostgresqlProvider. Asking it about every member remapped ordinary single-value
+        // structs process-wide and crashed Native AOT startup on the generic construction.
+        // The chosen member still goes through IsValidIdentityType -- the IdMember setter does
+        // that -- so the registration a real strong-typed id needs still happens.
+        return JasperFx.DocumentIdentity.FindIdMember(documentType, IsPlausibleIdentityType);
+    }
+
+    public DocumentIndex AddGinIndexToData()
+    {
+        var index = AddIndex("data");
+        index.ToGinWithJsonbPathOps();
+
+        PropertySearching = PropertySearching.ContainmentOperator;
+
+        return index;
+    }
+
+    /// <summary>
+    ///     Adds a GIN index over one member of the JSONB data, e.g.
+    ///     (data -> 'Children') jsonb_path_ops. Child collection containment filters
+    ///     compare against exactly this expression, which a whole-document GIN index
+    ///     cannot serve
+    /// </summary>
+    public DocumentIndex AddGinIndexToDataMember(MemberInfo[] members)
+    {
+        // resolve through the queryable member tree so the index expression uses the
+        // same serialized property names the generated SQL will use
+        IQueryableMember member = QueryMembers.FindMember(members[0]);
+        for (var i = 1; i < members.Length; i++)
+        {
+            if (member is not IHasChildrenMembers parent)
+            {
+                throw new ArgumentOutOfRangeException(nameof(members),
+                    $"Marten cannot build a GIN index through member '{member.MemberName}' of type {member.MemberType.FullNameInCode()}");
+            }
+
+            member = parent.FindMember(members[i]);
+        }
+
+        var segments = member.Ancestors
+            .Select(x => x.MemberName)
+            .Where(x => x.IsNotEmpty())
+            .Append(member.MemberName)
+            .ToArray();
+
+        var path = segments.Select(x => $" -> '{x}'").Join("");
+
+        var index = new DocumentIndex(this, "data")
+        {
+            Method = IndexMethod.gin, Mask = $"(?{path}) jsonb_path_ops"
+        };
+        index.Name = $"{TableName.Name}_idx_{segments.Join("_").ToLowerInvariant()}_gin";
+
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    public DocumentIndex AddLastModifiedIndex(Action<DocumentIndex>? configure = null)
+    {
+        var index = new DocumentIndex(this, SchemaConstants.LastModifiedColumn);
+        configure?.Invoke(index);
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    /// <summary>
+    ///     Creates an index on the tenantId column.
+    /// </summary>
+    /// <remarks>
+    ///     Only applicable when using multi-tenancy for this table
+    /// </remarks>
+    public DocumentIndex? AddTenantIdIndex(Action<DocumentIndex>? configure = null)
+    {
+        if (TenancyStyle == TenancyStyle.Conjoined)
+        {
+            var index = new DocumentIndex(this, TenantIdColumn.Name);
+            configure?.Invoke(index);
+            Indexes.Add(index);
+
+            return index;
+        }
+
+        return null;
+    }
+
+    public DocumentIndex AddCreatedAtIndex(Action<DocumentIndex>? configure = null)
+    {
+        var index = new DocumentIndex(this, SchemaConstants.CreatedAtColumn);
+        configure?.Invoke(index);
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    public DocumentIndex AddDeletedAtIndex(Action<DocumentIndex>? configure = null)
+    {
+        if (DeleteStyle != DeleteStyle.SoftDelete)
+        {
+            throw new InvalidOperationException(
+                $"DocumentMapping for {DocumentType.FullName} is not configured to use Soft Delete");
+        }
+
+        var index = new DocumentIndex(this, SchemaConstants.DeletedAtColumn)
+        {
+            Predicate = SchemaConstants.DeletedColumn
+        };
+
+        configure?.Invoke(index);
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    public DocumentIndex AddIndex(params string[] columns)
+    {
+        var existing = Indexes.OfType<DocumentIndex>().FirstOrDefault(x => x.Columns.SequenceEqual(columns));
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var index = new DocumentIndex(this, columns);
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    public IndexDefinition AddUniqueIndex(MemberInfo[][] members,
+        UniqueIndexType indexType = UniqueIndexType.Computed, string? indexName = null,
+        IndexMethod indexMethod = IndexMethod.btree, TenancyScope tenancyScope = TenancyScope.Global)
+    {
+        if (indexType == UniqueIndexType.DuplicatedField)
+        {
+            var fields = members.Select(memberPath => DuplicateField(memberPath)).ToList();
+
+            var index = AddIndex(fields.Select(m => m.ColumnName).ToArray());
+            index.Name = indexName;
+            index.Method = indexMethod;
+            index.IsUnique = true;
+            index.TenancyScope = tenancyScope;
+
+            return index;
+        }
+        else
+        {
+            var index = new ComputedIndex(
+                this,
+                members)
+            { Method = indexMethod, Name = indexName, IsUnique = true, TenancyScope = tenancyScope };
+
+            var existing = Indexes.OfType<ComputedIndex>().FirstOrDefault(x => x.Name == index.Name);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            Indexes.Add(index);
+
+            return index;
+        }
+    }
+
+    /// <summary>
+    ///     Adds a full text index
+    /// </summary>
+    /// <param name="regConfig">The dictionary to used by the 'to_tsvector' function, defaults to 'english'.</param>
+    /// <param name="configure">Optional action to further configure the full text index</param>
+    /// <remarks>
+    ///     See: https://www.postgresql.org/docs/10/static/textsearch-controls.html#TEXTSEARCH-PARSING-DOCUMENTS
+    /// </remarks>
+    public FullTextIndexDefinition AddFullTextIndex(
+        string regConfig = FullTextIndexDefinition.DefaultRegConfig,
+        Action<FullTextIndexDefinition>? configure = null
+    )
+    {
+        var index = FullTextIndexDefinitionFactory.From(this, regConfig);
+        configure?.Invoke(index);
+
+        return AddFullTextIndexIfDoesNotExist(index);
+    }
+
+    /// <summary>
+    ///     Adds a full text index
+    /// </summary>
+    /// <param name="members">Document fields that should be use by full text index</param>
+    /// <param name="regConfig">The dictionary to used by the 'to_tsvector' function, defaults to 'english'.</param>
+    /// <remarks>
+    ///     See: https://www.postgresql.org/docs/10/static/textsearch-controls.html#TEXTSEARCH-PARSING-DOCUMENTS
+    /// </remarks>
+    public FullTextIndexDefinition AddFullTextIndex(
+        MemberInfo[][] members,
+        string regConfig = FullTextIndexDefinition.DefaultRegConfig,
+        string? indexName = null
+    )
+    {
+        var index = FullTextIndexDefinitionFactory.From(this, members, regConfig);
+        if (indexName != null)
+            index.Name = indexName;
+
+        return AddFullTextIndexIfDoesNotExist(index);
+    }
+
+    /// <summary>
+    ///     Adds a full text index whose members carry PostgreSQL <c>setweight</c> labels, so that a match
+    ///     in one field can outrank a match in another.
+    /// </summary>
+    /// <remarks>
+    ///     #5298. Distinct from <see cref="AddFullTextIndex(string, Action{FullTextIndexDefinition})" />
+    ///     because the DDL is a different shape, not a configured variant of the same one: weighting
+    ///     concatenates the VECTORS rather than the text, so the expression is a <c>tsvector</c> at the top
+    ///     level and goes to Weasel's <c>ForTsVector</c> factory instead of to <c>DocumentConfig</c>
+    ///     (weasel#541).
+    /// </remarks>
+    public FullTextIndexDefinition AddWeightedFullTextIndex<T>(
+        Action<WeightedFullTextIndexExpression<T>> configure,
+        string regConfig = FullTextIndexDefinition.DefaultRegConfig,
+        string? indexName = null)
+    {
+        var expression = new WeightedFullTextIndexExpression<T>();
+        configure(expression);
+
+        if (expression.IsEmpty)
+        {
+            throw new ArgumentOutOfRangeException(nameof(configure),
+                "A weighted full text index needs at least two members. Call Weighted() to add them.");
+        }
+
+        // One member, or the same label on every member, ranks nothing -- setweight only ever
+        // expresses a RELATIVE ordering. Refused at configuration time rather than emitting DDL that
+        // looks weighted and is not, because the failure otherwise shows up as a ranked screen that
+        // silently returns arbitrary order.
+        if (expression.IsUniform)
+        {
+            throw new ArgumentOutOfRangeException(nameof(configure),
+                "A weighted full text index needs at least two DIFFERENT weights -- weighting expresses a relative ranking, so one weight, or the same weight on every member, ranks nothing. Use FullTextIndex() for an unweighted index.");
+        }
+
+        var index = FullTextIndexDefinition.ForTsVector(
+            PostgresqlObjectName.From(TableName),
+            expression.BuildTsVectorExpression(this, regConfig),
+            indexName,
+            SchemaConstants.MartenPrefix);
+
+        // RegConfig takes no part in the DDL for a pre-built vector -- it is already inside the
+        // expression -- but the query side resolves an index by it, so it still has to be set.
+        index.RegConfig = regConfig;
+
+        return AddFullTextIndexIfDoesNotExist(index);
+    }
+
+    private FullTextIndexDefinition AddFullTextIndexIfDoesNotExist(FullTextIndexDefinition index)
+    {
+        var existing = Indexes.OfType<FullTextIndexDefinition>().FirstOrDefault(x => x.Name == index.Name);
+        if (existing != null)
+        {
+            // #5315: the dedupe is here so that configuring the same index twice is idempotent, which is
+            // ordinary in composed configuration. But a name collision does not prove the two are the
+            // same index -- FullTextIndexDefinition derives its name from the TABLE (and the regConfig
+            // when non-default), not from its members, so two calls naming different members collide by
+            // construction:
+            //
+            //   .FullTextIndex(x => x.Title)
+            //   .FullTextIndex(x => x.Body)     // same derived name, silently discarded
+            //
+            // That returned the first index and threw the second away with no warning, so the second was
+            // never created and never searched. A document matching only on it simply never came back.
+            // Idempotence is worth keeping; silently dropping a DIFFERENT configuration is not.
+            if (existing.IndexedTsVector != index.IndexedTsVector)
+            {
+                throw new AmbiguousFullTextIndexException(
+                    $"Document type {DocumentType.FullNameInCode()} already has a full text index named '{index.Name}' over a different expression, and full text index names are derived from the table rather than from the members being indexed -- so two indexes over different members collide by construction. "
+                    + "Give at least one of them an explicit index name, or combine the members into a single FullTextIndex() call.");
+            }
+
+            return existing;
+        }
+
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    /// <summary>
+    ///     Adds a full text index
+    /// </summary>
+    /// <param name="regConfig">The dictionary to used by the 'to_tsvector' function, defaults to 'english'.</param>
+    /// <param name="configure">Optional action to further configure the ngram index</param>
+    public NgramIndex AddNgramIndex(Action<NgramIndex>? configure = null)
+    {
+        var index = new NgramIndex(this);
+        configure?.Invoke(index);
+
+        return AddNgramIndexIfDoesNotExist(index);
+    }
+
+    /// <summary>
+    ///     Adds a full text index
+    /// </summary>
+    /// <param name="members">Document fields that should be use by ngram index</param>
+    public NgramIndex AddNgramIndex(MemberInfo[] members, string? indexName = null)
+    {
+        var index = new NgramIndex(this, members) { Name = indexName };
+
+        return AddNgramIndexIfDoesNotExist(index);
+    }
+
+    private NgramIndex AddNgramIndexIfDoesNotExist(NgramIndex index)
+    {
+        var existing = Indexes.OfType<NgramIndex>().FirstOrDefault(x => x.Name == index.Name);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        Indexes.Add(index);
+
+        return index;
+    }
+
+    public DocumentForeignKey AddForeignKey(string memberName, Type referenceType)
+    {
+        var member = DocumentType.GetProperty(memberName) ?? (MemberInfo)DocumentType.GetField(memberName)!;
+
+        return AddForeignKey(new MemberInfo[] { member }, referenceType);
+    }
+
+    public DocumentForeignKey AddForeignKey(MemberInfo[] members, Type referenceType)
+    {
+        var referenceMapping =
+            referenceType != DocumentType ? StoreOptions.Storage.MappingFor(referenceType) : this;
+
+        DocumentForeignKey foreignKey;
+        if (members.Contains(IdMember))
+        {
+            foreignKey = new DocumentForeignKey("id", this, referenceMapping);
+        }
+        else
+        {
+            var duplicateField = DuplicateField(members);
+            foreignKey = new DocumentForeignKey(duplicateField.ColumnName, this, referenceMapping);
+        }
+        ForeignKeys.Add(foreignKey);
+
+        return foreignKey;
+    }
+
+    private static string defaultDocumentAliasName(Type documentType)
+    {
+        var nameToAlias = documentType.Name;
+        if (documentType.GetTypeInfo().IsGenericType)
+        {
+            nameToAlias = AliasSanitizer().Replace(documentType.GetPrettyName(), string.Empty).Replace(",", "_");
+        }
+
+        var parts = new List<string> { nameToAlias.ToLower() };
+        if (documentType.IsNested)
+        {
+            parts.Insert(0, documentType.DeclaringType!.Name.ToLower());
+        }
+
+        return string.Join("_", parts);
+    }
+
+    public DuplicatedField DuplicateField(string memberName, string? pgType = null, bool notNull = false)
+    {
+        var existing = QueryMembers.MemberFor(memberName);
+        if (existing is DuplicatedField f)
+            return f;
+
+        var member = (QueryableMember)existing;
+
+        var enumStorage = StoreOptions.Advanced.DuplicatedFieldEnumStorage;
+        var dateTimeStorage = StoreOptions.Advanced.DuplicatedFieldUseTimestampWithoutTimeZoneForDateTime;
+
+        DuplicatedField duplicatedField;
+
+        if (member is ValueCollectionMember collectionMember)
+        {
+            duplicatedField = new DuplicatedArrayField(enumStorage, collectionMember, dateTimeStorage, notNull);
+        }
+        else if (member.IsGenericInterfaceImplementation(typeof(IValueTypeMember<,>)))
+        {
+            var valueTypeInfo = StoreOptions.ValueTypes.FirstOrDefault(x => x.OuterType == member.MemberType)!;
+            duplicatedField = new DuplicatedValueTypeField(enumStorage, member, valueTypeInfo, notNull);
+        }
+        else
+        {
+            duplicatedField = new DuplicatedField(enumStorage, member, dateTimeStorage, notNull);
+        }
+
+        if (pgType.IsNotEmpty())
+        {
+            duplicatedField.PgType = pgType;
+        }
+
+        QueryMembers.ReplaceMember(member.Member, duplicatedField);
+
+        _duplicates.Add(duplicatedField);
+
+        return duplicatedField;
+    }
+
+    public DuplicatedField DuplicateField(MemberInfo[] members, string? pgType = null, string? columnName = null,
+        bool notNull = false, bool partOfPrimaryKey = false)
+    {
+        // A primary-key column must be NOT NULL.
+        notNull = notNull || partOfPrimaryKey;
+
+        var member = QueryMembers.FindMember(members[0]);
+        IHasChildrenMembers parent = QueryMembers;
+        for (var i = 1; i < members.Length; i++)
+        {
+            parent = member.As<IHasChildrenMembers>();
+            member = parent.FindMember(members[i]);
+        }
+
+        if (member is DuplicatedField d)
+        {
+            if (pgType != null)
+                d.PgType = pgType;
+            if (columnName != null)
+                d.ColumnName = columnName;
+            d.NotNull = notNull;
+            if (partOfPrimaryKey)
+                d.PartOfPrimaryKey = true;
+            return d;
+        }
+
+        if (member is not QueryableMember)
+        {
+            throw new ArgumentOutOfRangeException(nameof(members),
+                $"{members.Select(x => x.Name).Join(".")} of type {member.MemberType.FullNameInCode()} cannot be used as a Duplicated Field by Marten");
+        }
+
+        var enumStorage = StoreOptions.Advanced.DuplicatedFieldEnumStorage;
+        var dateTimeStorage = StoreOptions.Advanced.DuplicatedFieldUseTimestampWithoutTimeZoneForDateTime;
+
+        DuplicatedField duplicatedField;
+
+        if (member is ValueCollectionMember collectionMember)
+        {
+            duplicatedField = new DuplicatedArrayField(enumStorage, collectionMember, dateTimeStorage, notNull);
+        }
+        else if (member.IsGenericInterfaceImplementation(typeof(IValueTypeMember<,>)))
+        {
+            var valueTypeInfo = StoreOptions.ValueTypes.FirstOrDefault(x => x.OuterType == member.MemberType)!;
+            duplicatedField = new DuplicatedValueTypeField(enumStorage, (QueryableMember)member, valueTypeInfo, notNull);
+        }
+        else
+        {
+            duplicatedField = new DuplicatedField(enumStorage, (QueryableMember)member, dateTimeStorage, notNull);
+        }
+
+        parent.ReplaceMember(members.Last(), duplicatedField);
+
+        if (pgType.IsNotEmpty())
+        {
+            duplicatedField.PgType = pgType;
+        }
+
+        if (columnName.IsNotEmpty())
+        {
+            duplicatedField.ColumnName = columnName;
+        }
+
+        duplicatedField.PartOfPrimaryKey = partOfPrimaryKey;
+
+        _duplicates.Add(duplicatedField);
+
+        return duplicatedField;
+    }
+
+    internal void CompileAndValidate()
+    {
+        if (IdMember == null)
+        {
+            throw new InvalidDocumentException(
+                $"Could not determine an 'id/Id' field or property for requested document type {DocumentType.FullName}");
+        }
+
+        if (Metadata.TenantId.Member != null && TenancyStyle != TenancyStyle.Conjoined)
+        {
+            throw new InvalidDocumentException(
+                $"Tenancy style must be set to {nameof(TenancyStyle.Conjoined)} to map tenant id metadata for {DocumentType.FullName}.");
+        }
+
+        if (Metadata.DocumentType.Member != null && !IsHierarchy())
+        {
+            throw new InvalidDocumentException(
+                $"{DocumentType.FullName} must be part of a document hierarchy to map document type metadata.");
+        }
+
+        if ((Metadata.IsSoftDeleted.Member != null || Metadata.SoftDeletedAt.Member != null) &&
+            DeleteStyle != DeleteStyle.SoftDelete)
+        {
+            throw new InvalidDocumentException(
+                $"{DocumentType.FullName} must be configured for soft deletion to map soft deleted metadata.");
+        }
+
+        if (UseNumericRevisions && UseOptimisticConcurrency)
+        {
+            throw new InvalidDocumentException(
+                $"{DocumentType.FullNameInCode()} cannot be configured with UseNumericRevision and UseOptimisticConcurrency. Choose one or the other");
+        }
+
+        // #5159: an explicit UseOptimisticConcurrency(true) now clears the numeric-revision
+        // metadata so the fluent pair is order-independent (last call wins), which is what the
+        // API reads like it should do. That override is right for a plain document, where the
+        // revision was only ever Marten's inference. It is wrong in two cases, and those are
+        // worth distinct, actionable errors rather than one "both flags are set" message:
+        //
+        //   1. a projection-target document, where numeric revisions are load-bearing for the
+        //      projection machinery itself (#2978), and
+        //   2. a revision bound to a real member on the user's own type -- IRevisioned,
+        //      ILongVersioned, or a long [Version] member -- where honoring the override would
+        //      leave that property permanently unmapped and silently never populated.
+        //
+        // In both, the user's configuration cannot work as written, so say which one it is.
+        if (OptimisticConcurrencyRequestedExplicitly)
+        {
+            if (StoreOptions.Projections != null &&
+                StoreOptions.Projections.TryFindAggregate(DocumentType, out _))
+            {
+                throw new InvalidDocumentException(
+                    $"{DocumentType.FullNameInCode()} is the target document of a projection, and projection targets always use numeric revisions -- the projection machinery writes the aggregate version into that column. It cannot also be configured with UseOptimisticConcurrency(true). Remove that call for this document type.");
+            }
+
+            if (Metadata.Revision.Member != null)
+            {
+                throw new InvalidDocumentException(
+                    $"{DocumentType.FullNameInCode()} declares numeric revisions through its own type -- the member '{Metadata.Revision.Member.Name}' (from IRevisioned, ILongVersioned, or a long [Version] member) -- so UseOptimisticConcurrency(true) cannot be honored: the Guid version and the numeric revision map to the same mt_version column, and taking the Guid flavor would leave '{Metadata.Revision.Member.Name}' unmapped and never populated. Either drop the UseOptimisticConcurrency(true) call, or stop declaring the revision member on the document type.");
+            }
+        }
+
+        // Backstop. The metadata Enabled bits are what actually emit columns, and the Guid
+        // version and numeric revision flavors compete for the same physical mt_version column,
+        // so both enabled means a duplicate column: a raw duplicate-key ArgumentException from
+        // projection storage, or invalid DDL at migration time. The fluent path above can no
+        // longer reach this state, but a hand-rolled IDocumentPolicy or direct mapping mutation
+        // still can.
+        if (Metadata.Version.Enabled && Metadata.Revision.Enabled)
+        {
+            throw new InvalidDocumentException(
+                $"{DocumentType.FullNameInCode()} has both the Guid version metadata (Metadata.Version, from UseOptimisticConcurrency) and the numeric revision metadata (Metadata.Revision, from UseNumericRevisions) enabled, but they map to the same mt_version column. Choose one or the other. Note that projection-target documents always use numeric revisions and cannot opt into UseOptimisticConcurrency.");
+        }
+
+        IQueryableMember idField;
+        if (IdStrategy is ValueTypeIdGeneration st)
+        {
+            // #5589: registry first, reflective fallback.
+            idField = ValueTypeIdRegistry.TryIdMember(st.OuterType, st.SimpleType, IdMember, st)
+                      ?? typeof(StrongTypedIdMember<,>).CloseAndBuildAs<IQueryableMember>(IdMember, st,
+                          st.OuterType, st.SimpleType);
+        }
+        else if (IdStrategy is FSharpDiscriminatedUnionIdGeneration fst)
+        {
+            idField = ValueTypeIdRegistry.TryIdMember(fst.OuterType, fst.SimpleType, IdMember, fst)
+                      ?? typeof(StrongTypedIdMember<,>).CloseAndBuildAs<IQueryableMember>(IdMember, fst,
+                          fst.OuterType, fst.SimpleType);
+        }
+        else
+        {
+            idField = new IdMember(IdMember);
+        }
+        QueryMembers.ReplaceMember(IdMember, idField);
+    }
+
+    public override string ToString()
+    {
+        return $"Storage for {DocumentType}, Table: {TableName}";
+    }
+
+    internal Type InnerIdType()
+    {
+        if (IdStrategy is ValueTypeIdGeneration sti)
+            return sti.SimpleType;
+
+        var memberType = _idMember.GetMemberType();
+        return memberType.IsNullable() ? memberType.GetGenericArguments()[0] : memberType;
+    }
+
+    internal void PartitionByDeleted()
+    {
+        Partitioning = new ListPartitioning { Columns = [SchemaConstants.DeletedColumn] }
+            .AddPartition("deleted", true);
+    }
+}
+
+[UnconditionalSuppressMessage("Trimming", "IL2090",
+    Justification = "Class-level: generic class type-argument flow on the aggregator / storage instantiation. Types preserved at the projection-registration boundary.")]
+public class DocumentMapping<T>: DocumentMapping
+{
+    public DocumentMapping(StoreOptions storeOptions) : base(typeof(T), storeOptions)
+    {
+        var configure = typeof(T).GetMethod("ConfigureMarten", BindingFlags.Static | BindingFlags.Public);
+        configure?.Invoke(null, [this]);
+    }
+
+    /// <summary>
+    ///     Marks a property or field on this document type as a searchable field that is also duplicated in the
+    ///     database document table
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="pgType">Optional, overrides the Postgresql column type for the duplicated field</param>
+    /// <param name="configure">
+    ///     Optional, allows you to customize the Postgresql database index configured for the duplicated
+    ///     field
+    /// </param>
+    /// <returns></returns>
+    public void Duplicate(Expression<Func<T, object?>> expression, string? pgType = null, NpgsqlDbType? dbType = null,
+        Action<DocumentIndex>? configure = null, bool notNull = false, bool partOfPrimaryKey = false)
+        => Duplicate<T>(expression, pgType, dbType, configure, notNull, partOfPrimaryKey);
+
+    /// <summary>
+    /// Duplicates a member from a subclass of <typeparamref name="T"/> into a
+    /// dedicated table column, and optionally creates an index on that column.
+    /// </summary>
+    /// <typeparam name="TSub">
+    /// The subclass of <typeparamref name="T"/> that defines the selected member.
+    /// </typeparam>
+    /// <param name="expression">
+    /// Member selector on <typeparamref name="TSub"/>, for example <c>x => x.Code</c>.
+    /// </param>
+    /// <param name="pgType">
+    /// Optional PostgreSQL column type override, for example <c>"timestamp without time zone"</c>.
+    /// </param>
+    /// <param name="dbType">
+    /// Optional Npgsql database type override used for parameters.
+    /// </param>
+    /// <param name="configure">
+    /// Optional callback to configure the index created for the duplicated column.
+    /// </param>
+    /// <param name="notNull">
+    /// When true, the duplicated column is created with <c>NOT NULL</c>.
+    /// </param>
+    public void Duplicate<TSub>(Expression<Func<TSub, object?>> expression, string? pgType = null, NpgsqlDbType? dbType = null,
+        Action<DocumentIndex>? configure = null, bool notNull = false, bool partOfPrimaryKey = false) where TSub : T
+    {
+        var visitor = new FindMembers();
+        visitor.Visit(expression);
+
+        var duplicateField = DuplicateField(visitor.Members.ToArray(), pgType, notNull: notNull, partOfPrimaryKey: partOfPrimaryKey);
+
+        if (dbType.HasValue)
+        {
+            duplicateField.DbType = dbType.Value;
+        }
+
+        // A primary-key column is already indexed by the PK constraint, so skip the extra index.
+        if (!partOfPrimaryKey)
+        {
+            var indexDefinition = AddIndex(duplicateField.ColumnName);
+            configure?.Invoke(indexDefinition);
+        }
+    }
+
+    /// <summary>
+    ///     Adds a computed index
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <param name="configure"></param>
+    public void Index(Expression<Func<T, object?>> expression, Action<ComputedIndex>? configure = null)
+    {
+        if (expression.Body is NewExpression newExpression)
+        {
+            var members = newExpression.Arguments
+                .Select(FindMembers.Determine).ToArray();
+
+            var index = new ComputedIndex(this, members);
+            configure?.Invoke(index);
+            Indexes.Add(index);
+            return;
+        }
+
+
+        Index([expression], configure);
+    }
+
+    /// <summary>
+    ///     Adds a computed index
+    /// </summary>
+    /// <param name="expressions"></param>
+    /// <param name="configure"></param>
+    public void Index(IReadOnlyCollection<Expression<Func<T, object?>>> expressions,
+        Action<ComputedIndex>? configure = null)
+    {
+        var members = expressions
+            .Select(FindMembers.Determine).ToArray();
+
+        var index = new ComputedIndex(this, members);
+        configure?.Invoke(index);
+        Indexes.Add(index);
+    }
+
+    public void UniqueIndex(UniqueIndexType indexType, string? indexName,
+        params Expression<Func<T, object?>>[] expressions)
+    {
+        UniqueIndex(indexType, indexName, TenancyScope.Global, expressions);
+    }
+
+    public void UniqueIndex(UniqueIndexType indexType, string? indexName,
+        TenancyScope tenancyScope = TenancyScope.Global, params Expression<Func<T, object?>>[] expressions)
+    {
+        var members = expressions
+            .Select(e =>
+            {
+                var visitor = new Marten.Linq.Parsing.MemberFinder();
+                visitor.Visit(e);
+                return visitor.Members.ToArray();
+            })
+            .ToArray();
+
+        if (members.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"Unique index on {typeof(T)} requires at least one property/field");
+        }
+
+        AddUniqueIndex(
+            members,
+            indexType,
+            indexName,
+            IndexMethod.btree,
+            tenancyScope);
+    }
+
+    /// <summary>
+    ///     Adds a full text index
+    /// </summary>
+    /// <param name="regConfig">The dictionary to used by the 'to_tsvector' function, defaults to 'english'.</param>
+    /// <param name="expressions">Document fields that should be use by full text index</param>
+    /// <remarks>
+    ///     See: https://www.postgresql.org/docs/10/static/textsearch-controls.html#TEXTSEARCH-PARSING-DOCUMENTS
+    /// </remarks>
+    public FullTextIndexDefinition FullTextIndex(string regConfig, params Expression<Func<T, object?>>[] expressions)
+    {
+        return AddFullTextIndex(
+            expressions
+                .Select(FindMembers.Determine)
+                .ToArray(),
+            regConfig);
+    }
+
+    /// <summary>
+    ///     Adds an ngram index.
+    /// </summary>
+    /// <param name="expression">Document field that should be use by ngram index</param>
+    public NgramIndex NgramIndex(Expression<Func<T, object?>> expression)
+    {
+        var visitor = new FindMembers();
+        visitor.Visit(expression);
+
+        return AddNgramIndex(visitor.Members.ToArray());
+    }
+
+    /// <summary>
+    ///     Adds a full text index with default region config set to 'english'
+    /// </summary>
+    /// <param name="expressions">Document fields that should be use by full text index</param>
+    public NgramIndex NgramIndex(Action<NgramIndex> configure, Expression<Func<T, object?>> expression)
+    {
+        var index = NgramIndex(expression);
+        configure(index);
+        return index;
+    }
+}
+
+public class DocumentCodeGen
+{
+    public DocumentCodeGen(DocumentMapping mapping)
+    {
+        AccessId = mapping.IdMember.GetRawMemberType()!.IsNullable()
+            ? $"{mapping.IdMember.Name}.Value"
+            : mapping.IdMember.Name;
+
+        ParameterValue = mapping.IdMember.Name;
+        if (mapping.IdStrategy is ValueTypeIdGeneration st)
+        {
+            ParameterValue = st.ParameterValue(mapping);
+        }
+
+        if (mapping.IdStrategy is FSharpDiscriminatedUnionIdGeneration fst)
+        {
+            ParameterValue = fst.ParameterValue(mapping);
+        }
+    }
+
+    public string AccessId { get; }
+    public string ParameterValue { get; }
+}
+
+internal static class ForeignKeyExtensions
+{
+    public static void TryMoveTenantIdFirst(this ForeignKey foreignKey, DocumentMapping mapping)
+    {
+        // Guard clause, do nothing if this document is not tenanted or foreign key doesn't contain tenant id
+        if (mapping.TenancyStyle == TenancyStyle.Single || !foreignKey.ColumnNames.Contains(StorageConstants.TenantIdColumn))
+            return;
+
+        foreignKey.ColumnNames = new string[] { TenantIdColumn.Name }
+            .Concat(foreignKey.ColumnNames.Where(x => x != TenantIdColumn.Name)).ToArray();
+
+        foreignKey.LinkedNames = new string[] { TenantIdColumn.Name }
+            .Concat(foreignKey.LinkedNames.Where(x => x != TenantIdColumn.Name)).ToArray();
+
+        foreignKey.Name = $"{mapping.TableName.Name}_{foreignKey.ColumnNames.Join("_")}_fkey";
+    }
+}

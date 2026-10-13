@@ -1,0 +1,679 @@
+# Marten.AspNetCore
+
+::: tip
+For a little more context, see the blog post [Efficient Web Services with Marten V4](https://jeremydmiller.com/2021/09/28/efficient-web-services-with-marten-v4/).
+:::
+
+Marten has a small addon that adds helpers for ASP.Net Core development, expressly
+the ability to very efficiently _stream_ the raw JSON of persisted documents straight to an HTTP response
+without every having to waste time with deserialization/serialization or even reading the data into a JSON
+string in memory.
+
+First, to get started, Marten provides **Marten.AspNetCore** plugin.
+
+Install it through the [Nuget package](https://www.nuget.org/packages/Marten.AspNetCore/).
+
+```powershell
+PM> Install-Package Marten.AspNetCore
+```
+
+## Single Document
+
+If you need to write a single Marten document to the HTTP response by its id, the most
+efficient way is this syntax shown in a small sample MVC Core controller method:
+
+<!-- snippet: sample_write_single_document_by_id_to_httpresponse -->
+<a id='snippet-sample_write_single_document_by_id_to_httpresponse'></a>
+```cs
+[HttpGet("/issue/{issueId}")]
+public Task Get(Guid issueId, [FromServices] IQuerySession session, [FromQuery] string? sc = null)
+{
+    // This "streams" the raw JSON to the HttpResponse
+    // w/o ever having to read the full JSON string or
+    // deserialize/serialize within the HTTP request
+    return sc is null
+        ? session.Json
+            .WriteById<Issue>(issueId, HttpContext)
+        : session.Json
+            .WriteById<Issue>(issueId, HttpContext, onFoundStatus: int.Parse(sc));
+
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L37-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_write_single_document_by_id_to_httpresponse' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+That syntax will write the HTTP `content-type` and `content-length` response headers
+as you'd expect, and copy the raw JSON for the document to the `HttpResponse.Body` stream
+if the document is found. The status code will be 200 if the document is found, and 404 if
+it is not.
+
+Likewise, if you need to write a single document from a Linq query, you have this syntax:
+
+<!-- snippet: sample_use_linq_to_write_single_document_to_httpcontext -->
+<a id='snippet-sample_use_linq_to_write_single_document_to_httpcontext'></a>
+```cs
+[HttpGet("/issue2/{issueId}")]
+public Task Get2(Guid issueId, [FromServices] IQuerySession session, [FromQuery] string? sc = null)
+{
+    return sc is null
+        ? session.Query<Issue>().Where(x => x.Id == issueId)
+            .WriteSingle(HttpContext)
+        : session.Query<Issue>().Where(x => x.Id == issueId)
+            .WriteSingle(HttpContext, onFoundStatus: int.Parse(sc));
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L55-L67' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_use_linq_to_write_single_document_to_httpcontext' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Multiple Documents
+
+The `WriteArray()` extension method will allow you to write an array of documents in
+a Linq query to the outgoing HTTP response like this:
+
+<!-- snippet: sample_writing_multiple_documents_to_httpcontext -->
+<a id='snippet-sample_writing_multiple_documents_to_httpcontext'></a>
+```cs
+[HttpGet("/issue/open")]
+public Task OpenIssues([FromServices] IQuerySession session, [FromQuery] string? sc = null)
+{
+    // This "streams" the raw JSON to the HttpResponse
+    // w/o ever having to read the full JSON string or
+    // deserialize/serialize within the HTTP request
+    return sc is null
+        ? session.Query<Issue>().Where(x => x.Open)
+            .WriteArray(HttpContext)
+        : session.Query<Issue>().Where(x => x.Open)
+            .WriteArray(HttpContext, onFoundStatus: int.Parse(sc));
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L82-L97' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_writing_multiple_documents_to_httpcontext' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Compiled Query Support
+
+The absolute fastest way to invoke querying in Marten is by using [compiled queries](/documents/querying/compiled-queries)
+that allow you to use Linq queries without the runtime overhead of continuously parsing Linq expressions every time.
+
+Back to the sample endpoint above where we write an array of all the open issues. We can express the same query in a simple compiled query like this:
+
+<!-- snippet: sample_openissues -->
+<a id='snippet-sample_openissues'></a>
+```cs
+public class OpenIssues: ICompiledListQuery<Issue>
+{
+    public Expression<Func<IMartenQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
+    {
+        return q => q.Where(x => x.Open);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L112-L122' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_openissues' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And use that in an MVC Controller method like this:
+
+<!-- snippet: sample_using_compiled_query_with_json_streaming -->
+<a id='snippet-sample_using_compiled_query_with_json_streaming'></a>
+```cs
+[HttpGet("/issue2/open")]
+public Task OpenIssues2([FromServices] IQuerySession session, [FromQuery] string? sc = null)
+{
+    return sc is null
+        ? session.WriteArray(new OpenIssues(), HttpContext)
+        : session.WriteArray(new OpenIssues(), HttpContext, onFoundStatus: int.Parse(sc));
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L99-L109' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_compiled_query_with_json_streaming' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Likewise, you _could_ use a compiled query to write a single document. As a contrived
+sample, here's an example compiled query that reads a single `Issue` document by its
+id:
+
+<!-- snippet: sample_issuebyid -->
+<a id='snippet-sample_issuebyid'></a>
+```cs
+public class IssueById: ICompiledQuery<Issue, Issue>
+{
+    public Expression<Func<IMartenQueryable<Issue>, Issue>> QueryIs()
+    {
+        return q => q.FirstOrDefault(x => x.Id == Id);
+    }
+
+    public Guid Id { get; set; }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L124-L136' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_issuebyid' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And the usage of that to write JSON directly to the `HttpContext` in a controller method:
+
+<!-- snippet: sample_write_single_document_to_httpcontext_with_compiled_query -->
+<a id='snippet-sample_write_single_document_to_httpcontext_with_compiled_query'></a>
+```cs
+[HttpGet("/issue3/{issueId}")]
+public Task Get3(Guid issueId, [FromServices] IQuerySession session, [FromQuery] string? sc = null)
+{
+    return sc is null
+        ? session.WriteOne(new IssueById { Id = issueId }, HttpContext)
+        : session.WriteOne(new IssueById { Id = issueId }, HttpContext, onFoundStatus: int.Parse(sc));
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/IssueController.cs#L69-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_write_single_document_to_httpcontext_with_compiled_query' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Writing Event Sourcing Aggregates
+
+If you are using Marten's [event sourcing](/events/) and [single stream projections](/events/projections/single-stream-projections),
+the `WriteLatest<T>()` extension method on `IEventStoreOperations` lets you stream the
+projected aggregate's JSON directly to an HTTP response. This is the event sourcing equivalent
+of `WriteById<T>()` for documents.
+
+The key advantage is performance: for `Inline` projections, the aggregate already exists as raw JSONB
+in PostgreSQL and is streamed directly to the HTTP response with **zero deserialization or serialization**.
+For `Async` projections that are caught up, the same optimization applies. Only when the async daemon
+is behind does Marten fall back to rebuilding the aggregate in memory.
+
+Internally this delegates to `StreamLatestJson<T>()`, which streams raw JSONB bytes from PostgreSQL without deserializing to a .NET object. See [Reading Aggregates](/events/projections/read-aggregates#fetchlatest)
+for details on how each projection lifecycle is handled.
+
+Usage with a `Guid`-identified stream:
+
+<!-- snippet: sample_write_latest_aggregate_to_httpresponse -->
+<a id='snippet-sample_write_latest_aggregate_to_httpresponse'></a>
+```cs
+[HttpGet("/order/{orderId:guid}")]
+public Task GetOrder(Guid orderId, [FromServices] IDocumentSession session)
+{
+    // Streams the raw JSON of the projected aggregate to the HTTP response
+    // without deserialization/serialization when the projection is stored inline
+    return session.Events.WriteLatest<Order>(orderId, HttpContext);
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/WriteLatestController.cs#L50-L60' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_write_latest_aggregate_to_httpresponse' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Usage with a `string`-identified stream:
+
+<!-- snippet: sample_write_latest_aggregate_by_string_to_httpresponse -->
+<a id='snippet-sample_write_latest_aggregate_by_string_to_httpresponse'></a>
+```cs
+[HttpGet("/named-order/{orderId}")]
+public Task GetNamedOrder(string orderId, [FromServices] IDocumentSession session)
+{
+    return session.Events.WriteLatest<NamedOrder>(orderId, HttpContext);
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/Controllers/WriteLatestController.cs#L62-L70' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_write_latest_aggregate_by_string_to_httpresponse' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Like `WriteById<T>()`, `WriteLatest<T>()` returns a 200 status with the JSON body if the aggregate
+is found, or a 404 with no body if not found. You can customize the content type and success status code:
+
+```csharp
+// Use a custom status code and content type
+await session.Events.WriteLatest<Order>(orderId, HttpContext,
+    contentType: "application/json; charset=utf-8",
+    onFoundStatus: 201);
+```
+
+::: warning
+`WriteLatest<T>()` requires `IDocumentSession` (not `IQuerySession`) because
+`FetchLatest<T>()` is only available on `IDocumentSession`.
+:::
+
+There is also a lower-level `StreamLatestJson<T>()` method on `IEventStoreOperations` that
+writes the raw JSON to any `Stream`, which you can use to build your own response handling:
+
+```csharp
+var stream = new MemoryStream();
+bool found = await session.Events.StreamLatestJson<Order>(orderId, stream);
+```
+
+## Typed Streaming Result Types <Badge type="tip" text="8.x" />
+
+For Minimal API endpoints (and for frameworks like [Wolverine.Http](https://wolverinefx.net/guide/http/)
+that dispatch any `IResult` return value), `Marten.AspNetCore` ships seven typed
+result wrappers that carry the streaming behavior above as endpoint return values
+while also contributing correct OpenAPI metadata:
+
+| Type                     | Source                                          | Response shape                 | 404 on miss?           |
+| ------------------------ | ----------------------------------------------- | ------------------------------ | ---------------------- |
+| `StreamOne<T>`           | `IQueryable<T>` — regular Marten document query | Single `T`                     | yes                    |
+| `StreamMany<T>`          | `IQueryable<T>` — regular Marten document query | JSON array `T[]`               | no (empty array = 200) |
+| `StreamAggregate<T>`     | `IDocumentSession` + stream id — event-sourced  | Single `T`                     | yes                    |
+| `StreamPaged<T>`         | `IQueryable<T>` — regular Marten document query | Paged JSON envelope            | no (empty page = 200)  |
+| `StreamPagedByCursor<T>` | `IQueryable<T>` (with `OrderBy`/`ThenBy`)       | { "items": T[], "nextCursor" } | no (empty array = 200) |
+| `StreamEventState`       | `IQuerySession` + stream id — event stream      | Single `StreamStateResponse`   | yes                    |
+| `StreamEvents`           | `IQuerySession` + stream id — event stream      | JSON array `EventResponse[]`   | yes (configurable)     |
+
+Each type implements both `IResult` (so ASP.NET Minimal API dispatches it via
+`ExecuteAsync`) and `IEndpointMetadataProvider` (so Swashbuckle, NSwag, and the
+built-in OpenAPI generator see the right response shape), while delegating the
+actual body write to `WriteSingle`/`WriteArray`/`WriteLatest`/`WriteStreamState`/`WriteEvents`.
+Returning one from an endpoint is a concise, typed alternative to writing the HTTP
+handshake manually.
+
+### `StreamOne<T>` — single document with 404 on miss
+
+```csharp
+app.MapGet("/issues/{id:guid}",
+    (Guid id, IQuerySession session) =>
+        new StreamOne<Issue>(session.Query<Issue>().Where(x => x.Id == id)));
+```
+
+Returns `200 application/json` with the document JSON on a hit, `404` on a miss.
+`Content-Length` and `Content-Type` are set automatically, matching the
+behavior of `WriteSingle<T>`.
+
+### `StreamMany<T>` — JSON array
+
+```csharp
+app.MapGet("/issues/open",
+    (IQuerySession session) =>
+        new StreamMany<Issue>(session.Query<Issue>().Where(x => x.Open)));
+```
+
+Returns `200 application/json` with a JSON array body. An empty result set
+yields `[]`, not a 404 — matching the behavior of `WriteArray<T>`.
+
+### `StreamPaged<T>` — paged JSON envelope (single round trip) <Badge type="tip" text="9.18" />
+
+```csharp
+app.MapGet("/issues/paged/{pageNumber:int}/{pageSize:int}",
+    (int pageNumber, int pageSize, IQuerySession session) =>
+        new StreamPaged<Issue>(session.Query<Issue>().OrderBy(x => x.Description), pageNumber, pageSize));
+```
+
+Returns `200 application/json` with a single JSON envelope combining paging
+metadata and the matching documents for that page:
+
+```json
+{"pageNumber":3,"pageSize":25,"totalItemCount":1207,"pageCount":49,"hasNextPage":true,"hasPreviousPage":true,"items":[...]}
+```
+
+`pageNumber` is 1-based. `totalItemCount` and `pageCount` are computed from a
+`count(*) OVER()` window function added to the _same_ SQL query that fetches
+the page, so the whole response -- count and documents both -- comes from a
+single database round trip. Documents inside `items` are streamed as raw,
+already-persisted JSON, without a deserialize/serialize step. An empty page
+still returns `200` with `totalItemCount: 0`, `pageCount: 0`, and an empty
+`items` array -- never a `404`.
+
+Internally, `StreamPaged<T>` delegates to the `IQueryable<T>.StreamPagedJsonArray()`
+extension method described in the [Paging](/documents/querying/linq/paging) docs,
+which can also be used directly (e.g. from an MVC controller action) instead of
+through the `IResult` wrapper.
+
+### `StreamAggregate<T>` — event-sourced aggregate (latest)
+
+```csharp
+app.MapGet("/orders/{id:guid}",
+    (Guid id, IDocumentSession session) =>
+        new StreamAggregate<Order>(session, id));
+```
+
+Returns `200 application/json` with the JSON of the latest projected aggregate
+state, or `404` if no stream exists. A constructor overload accepts `string`
+ids for stores configured with string-keyed streams.
+
+### `StreamEventState` — event stream metadata <Badge type="tip" text="9.20" />
+
+Writes the high level metadata of a single event stream — Marten's `StreamState` — as JSON,
+or `404` when the stream does not exist:
+
+<!-- snippet: sample_minimal_api_stream_event_state -->
+<a id='snippet-sample_minimal_api_stream_event_state'></a>
+```cs
+app.MapGet("/minimal/order/{id:guid}/state",
+    (Guid id, IQuerySession session)
+        => new StreamEventState(session, id));
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/StreamingMinimalEndpoints.cs#L183-L189' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_minimal_api_stream_event_state' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+A constructor overload accepts a `string` stream key for stores configured with string-keyed
+streams.
+
+The response body is a **`StreamStateResponse`**, not `StreamState` itself. `StreamState.AggregateType`
+is a `System.Type`, and System.Text.Json refuses to serialize those outright
+(`Serialization and deserialization of 'System.Type' instances is not supported`), so the
+aggregate type is projected down to its simple name in `AggregateTypeName`:
+
+```json
+{
+  "id": "0198e1b4-5b1c-7a1e-9a3f-2f2f5b6c7d8e",
+  "key": null,
+  "version": 2,
+  "aggregateTypeName": "Order",
+  "lastTimestamp": "2026-07-26T09:41:02.113Z",
+  "created": "2026-07-26T09:41:02.098Z",
+  "isArchived": false
+}
+```
+
+### `StreamEvents` — raw events of a stream <Badge type="tip" text="9.20" />
+
+Writes the raw events of a single event stream as a JSON array:
+
+<!-- snippet: sample_minimal_api_stream_events -->
+<a id='snippet-sample_minimal_api_stream_events'></a>
+```cs
+app.MapGet("/minimal/order/{id:guid}/events",
+    (Guid id, IQuerySession session)
+        => new StreamEvents(session, id));
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/StreamingMinimalEndpoints.cs#L197-L203' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_minimal_api_stream_events' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+`StreamEvents` carries the same optional `version`, `timestamp`, and `fromVersion` filters as
+`FetchStreamAsync()`, and there is a `string` stream key overload as well.
+
+Elements are **`EventResponse`**, not `IEvent` itself — `IEvent.EventType` is a `System.Type` and
+hits the same System.Text.Json wall as above. Use `eventTypeName`, Marten's stable event type
+alias, to discriminate event types on the client. The assembly qualified .NET type name
+(`DotNetTypeName`) is deliberately left off the wire:
+
+```json
+[
+  {
+    "id": "0198e1b4-5b1c-7a1e-9a3f-2f2f5b6c7d8e",
+    "version": 1,
+    "sequence": 41,
+    "streamId": "0198e1b4-5b1c-7a1e-9a3f-2f2f5b6c7d8e",
+    "streamKey": null,
+    "eventTypeName": "order_placed",
+    "timestamp": "2026-07-26T09:41:02.098Z",
+    "tenantId": "*DEFAULT*",
+    "isArchived": false,
+    "causationId": null,
+    "correlationId": null,
+    "headers": null,
+    "data": { "description": "Widget", "amount": 99.95 }
+  }
+]
+```
+
+#### Empty streams: 404 or an empty array?
+
+`FetchStream` yields an empty list both for a stream that does not exist _and_ for a filter that
+excludes every event, and the two cannot be told apart. `StreamEvents` therefore exposes an
+`OnEmptyStatus` that defaults to `404`, matching the other single-resource results. Set it to
+`200` when running off the end of a stream is expected rather than exceptional — paging forward
+with `fromVersion`, for example:
+
+<!-- snippet: sample_minimal_api_stream_events_from_version -->
+<a id='snippet-sample_minimal_api_stream_events_from_version'></a>
+```cs
+// Paging forward through a stream: running off the end is expected, not a 404
+app.MapGet("/minimal/order/{id:guid}/events/from/{fromVersion:long}",
+    (Guid id, long fromVersion, IQuerySession session)
+        => new StreamEvents(session, id, fromVersion: fromVersion)
+        {
+            OnEmptyStatus = StatusCodes.Status200OK
+        });
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/IssueService/StreamingMinimalEndpoints.cs#L209-L219' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_minimal_api_stream_events_from_version' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+#### Sharing a query plan with a batched query
+
+Both results are backed by the [`FetchStreamStatePlan` / `FetchStreamPlan` query plans](/events/querying#stream-query-plans),
+and both accept a pre-built plan. That lets a handler build the plan once and either batch it with
+other queries into a single round trip or hand it straight back as an HTTP result:
+
+```csharp
+var plan = new FetchStreamPlan(orderId, version: 5);
+
+// ...batch it alongside other queries
+var fetcher = batch.QueryByPlan(plan);
+
+// ...or return it from an endpoint
+return new StreamEvents(session, plan);
+```
+
+### Choosing between the result types
+
+- **`StreamOne<T>`** is for regular Marten documents — plain objects persisted
+  via `session.Store()` and queried with `session.Query<T>()`. The query hits
+  the document table directly.
+- **`StreamAggregate<T>`** is for event-sourced aggregates. Marten rebuilds the
+  latest aggregate state by folding events from the event store (or reads a
+  projected snapshot if one is configured). Use this when `T` is an
+  event-sourced aggregate, not a stored document.
+- **`StreamEventState`** returns a stream's _metadata_ — version, timestamps,
+  archived flag — rather than any projected state. Reach for it when a client
+  needs to know where a stream is up to, not what it currently looks like.
+- **`StreamEvents`** returns the stream's _raw events_. Use it for audit trails,
+  event-log style UIs, and debugging endpoints, rather than as the read model for
+  ordinary consumers — those are better served by `StreamAggregate<T>`.
+
+### ETag / Conditional Requests <Badge type="tip" text="9.18" />
+
+::: tip
+`StreamOne<T>` and `StreamAggregate<T>` support HTTP conditional requests.
+`StreamMany<T>` does not — a collection-wide ETag is harder to derive cheaply
+and is out of scope for the initial implementation.
+:::
+
+Both `StreamOne<T>` and `StreamAggregate<T>` set an `ETag` response header
+by default and honor an incoming `If-None-Match` request header, responding
+`304 Not Modified` with an empty body when the client's cached version is
+still current:
+
+- For `StreamOne<T>`, the ETag is derived from the document's `mt_version`
+  (the same optimistic-concurrency version Marten tracks for every stored
+  document), formatted as a quoted GUID, e.g. `"3f2504e0-4f89-11d3-9a0c-0305e82c3301"`.
+  The `mt_version` value is read **inline with the document in the same single
+  database round trip** (piggy-backed onto the streaming query), so enabling the
+  ETag adds no extra query. The version is read off the row _before_ the document
+  payload, so a `304` skips buffering a body it would only discard — but the row
+  itself still comes back from Postgres, so a `304` on `StreamOne<T>` saves the
+  response and the copy, not the read.
+- For documents using [numeric revisioning](/documents/concurrency) instead of the
+  Guid version — `IRevisioned`/`ILongVersioned` types, and every aggregate-projection
+  target (snapshots, single- and multi-stream projections), since Marten forces
+  numeric revisions on those — the `StreamOne<T>` ETag is the numeric `mt_version`,
+  formatted as a quoted integer, e.g. `"3"`. Documents written by an
+  `EventProjection` are **not** aggregate-projection targets, so Marten does not
+  force numeric revisions on them; they keep the plain-document default and emit a
+  quoted GUID ETag that changes on every projection write. That is a usable cache
+  validator, but it is not a stream version and does not line up with what
+  `StreamAggregate<T>` serves. For a `SingleStreamProjection`
+  target the revision is the source stream's version, so serving the read model
+  through `StreamOne<T>` produces the same ETag that `StreamAggregate<T>` would
+  serve for the stream itself; for an Inline-lifecycle projection, clients can
+  switch between the two read styles without invalidating their caches (an
+  Async-lifecycle document can lag the stream head, so the two styles may briefly
+  disagree). Multi-stream and `ILongVersioned` targets emit their own monotonic
+  per-document revision, which is a valid ETag but not a stream version. Note that
+  revision-derived ETags are deterministic: a projection-logic change plus rebuild
+  that does not advance the stream does not invalidate previously cached responses
+  (bumping `ProjectionVersion` does not reset the revision either), matching the
+  `StreamAggregate<T>` semantics. The compiled-query overload
+  (`StreamOne<TDoc, TOut>`) does not participate in ETag/`304` handling. Document
+  types with neither version flavor enabled (no `mt_version` column) simply emit
+  no ETag.
+- For `StreamAggregate<T>`, the ETag is derived from the event stream's
+  version (a `long`), formatted as a quoted integer, e.g. `"42"`. The version
+  is looked up before the aggregate is folded, so a cache hit (`304`) skips
+  that work entirely.
+
+```csharp
+app.MapGet("/issues/{id:guid}",
+    (Guid id, IQuerySession session) =>
+        new StreamOne<Issue>(session.Query<Issue>().Where(x => x.Id == id)));
+
+app.MapGet("/orders/{id:guid}",
+    (Guid id, IDocumentSession session) =>
+        new StreamAggregate<Order>(session, id));
+```
+
+A poller can send the previously-received `ETag` value back as `If-None-Match`:
+
+```http
+GET /issues/f47ac10b-58cc-4372-a567-0e02b2c3d479 HTTP/1.1
+If-None-Match: "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+```
+
+```http
+HTTP/1.1 304 Not Modified
+ETag: "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+```
+
+Set `EmitETag = false` to opt out and restore the pre-ETag behavior (no
+`ETag` header, no conditional-request handling):
+
+```csharp
+app.MapGet("/issues/{id:guid}",
+    (Guid id, IQuerySession session) =>
+        new StreamOne<Issue>(session.Query<Issue>().Where(x => x.Id == id))
+        {
+            EmitETag = false
+        });
+```
+
+### Customizing status code and content type
+
+All three types expose init-only properties:
+
+```csharp
+app.MapPost("/issues",
+    (CreateIssue cmd, IQuerySession session) =>
+        new StreamOne<Issue>(session.Query<Issue>().Where(x => x.Id == cmd.IssueId))
+        {
+            OnFoundStatus = StatusCodes.Status201Created,
+            ContentType = "application/vnd.myapi.issue+json"
+        });
+```
+
+### Compiled query overloads
+
+`StreamOne` and `StreamMany` also accept Marten compiled queries. These overloads
+take an extra generic argument for the query result type and the `IQuerySession`
+alongside the compiled query:
+
+```csharp
+public class IssueById : ICompiledQuery<Issue, Issue>
+{
+    public Guid Id { get; set; }
+    public Expression<Func<IMartenQueryable<Issue>, Issue>> QueryIs()
+        => q => q.FirstOrDefault(x => x.Id == Id);
+}
+
+public class OpenIssues : ICompiledListQuery<Issue>
+{
+    public Expression<Func<IMartenQueryable<Issue>, IEnumerable<Issue>>> QueryIs()
+        => q => q.Where(x => x.Open);
+}
+
+app.MapGet("/issues/{id:guid}",
+    (Guid id, IQuerySession session) =>
+        new StreamOne<Issue, Issue>(session, new IssueById { Id = id }));
+
+app.MapGet("/issues/open",
+    (IQuerySession session) =>
+        new StreamMany<Issue, IEnumerable<Issue>>(session, new OpenIssues()));
+```
+
+These use `WriteOne` / `WriteArray` for compiled queries under the hood. OpenAPI
+metadata advertises `200: TOut` (and `404` for `StreamOne`), where `TOut` is the
+compiled query's declared return type. Prefer compiled queries when the endpoint
+is on a hot path — Marten caches the compiled SQL and bypasses LINQ parsing on
+subsequent calls.
+
+## `StreamPagedByCursor<T>` — keyset-paginated streaming <Badge type="tip" text="9.18" />
+
+`StreamMany<T>` and `WriteArray()` stream an entire result set. For very large or
+open-ended result sets — infinite scroll UIs, data exports, catch-up feeds — you
+usually want to hand the client back a _page_ at a time instead, together with a
+token to fetch the next page. `StreamPagedByCursor<T>` is an `IResult` that does
+exactly that using **keyset (a.k.a. seek) pagination** rather than `Skip`/`Take`
+offsets. See [Keyset (Cursor) Pagination](/documents/querying/linq/paging#keyset-cursor-pagination)
+for a deeper explanation of how keyset pagination works and how it compares to
+offset-based paging.
+
+```csharp
+app.MapGet("/issues",
+    (IQuerySession session, string? cursor, int pageSize) =>
+        new StreamPagedByCursor<Issue>(
+            session.Query<Issue>().OrderBy(x => x.Description).ThenBy(x => x.Id),
+            cursor,
+            pageSize));
+```
+
+Call it the same way on every request; only the `cursor` query string value
+changes between calls:
+
+- **First request** — omit `cursor` (or pass `null`/empty). Marten runs
+  `ORDER BY ... LIMIT @pageSize` and returns the first page.
+- **Every later request** — pass the `nextCursor` value returned by the
+  previous call. Marten decodes it, translates it into a `WHERE` seek predicate
+  matching your `OrderBy`/`ThenBy` chain, and returns the next page at the same
+  cost regardless of how many pages have already been read.
+- **End of the result set** — when a page comes back with fewer than
+  `pageSize` rows, there is no `nextCursor`; stop paging.
+
+The response body is a small JSON envelope:
+
+```json
+{
+  "items": [{ "id": "...", "description": "..." }, { "id": "...", "description": "..." }],
+  "nextCursor": "v1:W3siRGVzY3JpcHRpb24iOiJEZXNjcmlwdGlvbiIsIklkIjoiLi4uIn1d"
+}
+```
+
+The same value is also written to a `Marten-Continuation` response header, so
+callers that would rather keep the body a plain array can read the cursor from
+there instead of parsing the envelope.
+
+### The `OrderBy`/`ThenBy` requirement
+
+The queryable passed to `StreamPagedByCursor<T>` **must** have at least one
+`OrderBy`/`OrderByDescending` clause, and the **last** ordering in the chain
+must be on a member that is guaranteed unique across the result set — normally
+the document's `Id`. This guarantees the cursor is deterministic: without a
+unique tie-breaker, rows that share the same leading sort key(s) could be
+skipped or repeated across pages.
+
+```csharp
+// Good: Description is not unique on its own, so Id is added as a tie-breaker
+session.Query<Issue>().OrderBy(x => x.Description).ThenBy(x => x.Id)
+
+// Throws InvalidOperationException: no OrderBy clause at all
+session.Query<Issue>()
+
+// Throws InvalidOperationException: terminal clause (Description) isn't unique
+session.Query<Issue>().OrderBy(x => x.Description)
+```
+
+Mixed ascending/descending orderings are supported — each `ThenBy`/`ThenByDescending`
+clause keeps its own direction when Marten builds the seek predicate:
+
+```csharp
+session.Query<Issue>()
+    .OrderByDescending(x => x.Description)
+    .ThenBy(x => x.Id)
+```
+
+### Constructor and options
+
+```csharp
+public StreamPagedByCursor(IQueryable<T> queryable, string? cursor, int pageSize)
+```
+
+Like the other typed result wrappers, it exposes init-only properties for
+customizing the response:
+
+```csharp
+app.MapGet("/issues",
+    (IQuerySession session, string? cursor, int pageSize) =>
+        new StreamPagedByCursor<Issue>(
+            session.Query<Issue>().OrderBy(x => x.Description).ThenBy(x => x.Id),
+            cursor,
+            pageSize)
+        {
+            OnFoundStatus = StatusCodes.Status200OK,
+            ContentType = "application/vnd.myapi.issue-page+json"
+        });
+```

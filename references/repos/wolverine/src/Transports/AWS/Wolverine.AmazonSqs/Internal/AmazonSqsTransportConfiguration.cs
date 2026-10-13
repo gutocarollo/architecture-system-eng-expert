@@ -1,0 +1,406 @@
+using Amazon.Runtime;
+using Amazon.SQS;
+using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.AmazonSqs.Internal;
+
+public class AmazonSqsTransportConfiguration : BrokerExpression<AmazonSqsTransport, AmazonSqsQueue, AmazonSqsQueue,
+    AmazonSqsListenerConfiguration, AmazonSqsSubscriberConfiguration, AmazonSqsTransportConfiguration>
+{
+    public AmazonSqsTransportConfiguration(AmazonSqsTransport transport, WolverineOptions options) : base(transport,
+        options)
+    {
+    }
+
+    protected override AmazonSqsListenerConfiguration createListenerExpression(AmazonSqsQueue listenerEndpoint)
+    {
+        return new AmazonSqsListenerConfiguration(listenerEndpoint);
+    }
+
+    protected override AmazonSqsSubscriberConfiguration createSubscriberExpression(AmazonSqsQueue subscriberEndpoint)
+    {
+        return new AmazonSqsSubscriberConfiguration(subscriberEndpoint);
+    }
+
+    /// <summary>
+    ///     Add credentials for the connection to AWS SQS
+    /// </summary>
+    /// <param name="credentials"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration Credentials(AWSCredentials credentials)
+    {
+        Transport.CredentialSource = _ => credentials;
+        return this;
+    }
+
+    /// <summary>
+    ///     Add a credential source for the connection to AWS SQS
+    /// </summary>
+    /// <param name="credentialSource"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration Credentials(Func<IWolverineRuntime, AWSCredentials> credentialSource)
+    {
+        Transport.CredentialSource = credentialSource;
+        return this;
+    }
+
+    /// <summary>
+    ///     Direct this application to use a LocalStack connection when
+    ///     the system is detected to be running with EnvironmentName == "Development"
+    /// </summary>
+    /// <param name="port">Port to connect to LocalStack. Default is 4566</param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration UseLocalStackIfDevelopment(int port = 4566)
+    {
+        Transport.LocalStackPort = port;
+        Transport.UseLocalStackInDevelopment = true;
+        return this;
+    }
+
+    /// <summary>
+    ///     Apply a conventional routing topology based on message types
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration UseConventionalRouting(
+        Action<AmazonSqsMessageRoutingConvention>? configure = null)
+    {
+        var routing = new AmazonSqsMessageRoutingConvention
+        {
+            BoundTransport = Transport
+        };
+        configure?.Invoke(routing);
+
+        Options.RouteWith(routing);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Apply a conventional routing topology with the specified naming source.
+    ///     Using <see cref="NamingSource.FromHandlerType"/> is appropriate for modular monolith
+    ///     scenarios where you have more than one handler for a given message type.
+    /// </summary>
+    /// <param name="namingSource"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration UseConventionalRouting(NamingSource namingSource,
+        Action<AmazonSqsMessageRoutingConvention>? configure = null)
+    {
+        var routing = new AmazonSqsMessageRoutingConvention
+        {
+            BoundTransport = Transport
+        };
+        routing.UseNaming(namingSource);
+        configure?.Invoke(routing);
+
+        Options.RouteWith(routing);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Globally disable all native dead letter queueing with AWS SQS queues within this entire
+    /// application
+    /// </summary>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration DisableAllNativeDeadLetterQueues()
+    {
+        Transport.DisableDeadLetterQueues = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Set a transport-wide default name for the dead-letter queue used by every SQS listener
+    /// that hasn't been individually configured with
+    /// <c>AmazonSqsListenerConfiguration.ConfigureDeadLetterQueue(...)</c> or
+    /// <c>DisableDeadLetterQueueing()</c>. Useful with multi-environment AWS accounts where
+    /// the default <c>"wolverine-dead-letter-queue"</c> name would collide across environments,
+    /// or with conventional routing / auto-provisioning where touching every listener
+    /// individually is impractical.
+    ///
+    /// Resolution order (per listener):
+    /// <list type="number">
+    ///   <item>Per-listener <c>ConfigureDeadLetterQueue("name")</c> wins.</item>
+    ///   <item>Per-listener <c>DisableDeadLetterQueueing()</c> wins.</item>
+    ///   <item>Otherwise, this transport-wide default is used.</item>
+    /// </list>
+    ///
+    /// <c>DisableAllNativeDeadLetterQueues()</c> disables the entire SQS DLQ surface regardless
+    /// of what's configured here. The supplied name is sanitized via
+    /// <see cref="AmazonSqsTransport.SanitizeSqsName"/> so periods and other illegal SQS
+    /// characters are normalised consistently with per-listener configuration.
+    /// </summary>
+    /// <param name="deadLetterQueueName">
+    /// Default DLQ name to apply across the transport. Must be non-null and non-empty;
+    /// pass to <c>DisableAllNativeDeadLetterQueues()</c> instead if you want to turn the
+    /// surface off entirely.
+    /// </param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration DefaultDeadLetterQueueName(string deadLetterQueueName)
+    {
+        if (string.IsNullOrWhiteSpace(deadLetterQueueName))
+        {
+            throw new ArgumentException(
+                "Dead-letter queue name must be a non-empty value. " +
+                $"Call {nameof(DisableAllNativeDeadLetterQueues)}() to disable the SQS DLQ surface globally.",
+                nameof(deadLetterQueueName));
+        }
+
+        Transport.DefaultDeadLetterQueueName =
+            AmazonSqsTransport.SanitizeSqsName(deadLetterQueueName);
+        return this;
+    }
+
+    /// <summary>
+    /// Enable a background listener that drains the native Amazon SQS dead letter queue(s) and
+    /// recovers the messages into Wolverine's durable dead letter storage (the
+    /// <c>wolverine_dead_letters</c> table), making natively dead-lettered messages queryable and
+    /// replayable through <c>IDeadLetters</c> and tools like CritterWatch. This is the SQS analogue
+    /// of RabbitMQ's <c>EnableDeadLetterQueueRecovery()</c>.
+    ///
+    /// With no arguments, every distinct dead letter queue used by a listening SQS queue is drained.
+    /// Requires Wolverine's durable message storage (a database) to be configured.
+    /// </summary>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration EnableDeadLetterQueueRecovery()
+    {
+        ensureRecoveryServicesRegistered();
+        return this;
+    }
+
+    /// <summary>
+    /// Enable a background listener that drains the named Amazon SQS dead letter queue(s) and
+    /// recovers the messages into Wolverine's durable dead letter storage. Use this overload when
+    /// the dead letter queues you want to recover from are not directly attached to a Wolverine
+    /// listener (for example, queues fed by an SQS native redrive policy you manage yourself).
+    /// </summary>
+    /// <param name="deadLetterQueueNames">The names of the SQS dead letter queues to drain.</param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration EnableDeadLetterQueueRecovery(params string[] deadLetterQueueNames)
+    {
+        var settings = ensureRecoveryServicesRegistered();
+        foreach (var name in deadLetterQueueNames)
+        {
+            var sanitized = AmazonSqsTransport.SanitizeSqsName(name);
+            if (!settings.QueueNames.Contains(sanitized))
+            {
+                settings.QueueNames.Add(sanitized);
+            }
+        }
+
+        return this;
+    }
+
+    private AmazonSqsDeadLetterQueueRecoverySettings ensureRecoveryServicesRegistered()
+    {
+        var existing = Options.Services
+            .Where(s => s.ServiceType == typeof(AmazonSqsDeadLetterQueueRecoverySettings))
+            .Select(s => s.ImplementationInstance)
+            .OfType<AmazonSqsDeadLetterQueueRecoverySettings>()
+            .FirstOrDefault();
+
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var settings = new AmazonSqsDeadLetterQueueRecoverySettings();
+        Options.Services.AddSingleton(settings);
+        Options.Services.AddSingleton(Transport);
+        Options.Services.AddHostedService<SqsDeadLetterQueueListener>();
+        return settings;
+    }
+
+    /// <summary>
+    /// Enable Wolverine system queues for request/reply support.
+    /// Creates a per-node response queue that is automatically cleaned up.
+    /// </summary>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration EnableSystemQueues()
+    {
+        Transport.SystemQueuesEnabled = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Control whether Wolverine creates system queues for responses and retries.
+    /// Should be set to false if the application lacks permissions to create queues.
+    /// </summary>
+    /// <param name="enabled"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration SystemQueuesAreEnabled(bool enabled)
+    {
+        Transport.SystemQueuesEnabled = enabled;
+        return this;
+    }
+
+    /// <summary>
+    /// Enable Wolverine control queues for inter-node communication
+    /// (leader election, node coordination).
+    /// </summary>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration EnableWolverineControlQueues()
+    {
+        buildControlQueue();
+
+        return this;
+    }
+
+    /// <summary>
+    /// GH-4282. Prepend a prefix to the names of the queues Wolverine creates for its own use -- the
+    /// response queue, the node control queue, and the default dead letter queue -- so several unrelated
+    /// applications can share one AWS account and region without colliding. Without a prefix (the default)
+    /// those names are exactly what they have always been.
+    ///
+    /// <para>Only queues Wolverine names for itself are affected. A dead letter queue you name yourself,
+    /// through either <c>ConfigureDeadLetterQueue("x")</c> on an endpoint or
+    /// <see cref="DefaultDeadLetterQueueName" /> on the transport, is taken as fully qualified and is never
+    /// prefixed.</para>
+    ///
+    /// <para>This is a separate concept from <c>PrefixIdentifiers()</c>, which renames the *application*
+    /// queues and deliberately does not reach Wolverine's system queues. Use that when every application
+    /// queue should be renamed too, and this when cooperating applications must keep sharing the same
+    /// application queue names while still each owning their own control, response and dead letter
+    /// queues.</para>
+    ///
+    /// <para>Order does not matter with respect to <see cref="EnableWolverineControlQueues" />: calling
+    /// this afterwards rebuilds the control queue under the prefixed name.</para>
+    /// </summary>
+    /// <param name="prefix">The prefix. Sanitized to legal SQS name characters.</param>
+    public AmazonSqsTransportConfiguration SystemQueuePrefix(string prefix)
+    {
+        if (string.IsNullOrWhiteSpace(prefix))
+        {
+            throw new ArgumentException("The system queue prefix must be a non-empty value", nameof(prefix));
+        }
+
+        var sanitized = AmazonSqsTransport.SanitizeSqsName(prefix.Trim()).Trim('-', '_').ToLowerInvariant();
+        if (sanitized.IsEmpty())
+        {
+            throw new ArgumentException(
+                $"'{prefix}' does not leave any usable Amazon SQS queue name characters to use as a system queue prefix",
+                nameof(prefix));
+        }
+
+        Transport.SystemQueuePrefix = sanitized;
+
+        // The control queue is built eagerly (see below), so if it already exists under the unprefixed
+        // name, rebuild it here under the new one.
+        if (Transport.ControlQueue != null)
+        {
+            buildControlQueue();
+        }
+
+        return this;
+    }
+
+    // Built here and now rather than in tryBuildSystemEndpoints, because Options.Transports
+    // .NodeControlEndpoint is read by the message stores and the node agent before the transports ever
+    // initialize.
+    private void buildControlQueue()
+    {
+        Transport.SystemQueuesEnabled = true;
+
+        // Lowercase to match URI normalization (see tryBuildSystemEndpoints comment). In Solo mode the
+        // assigned node number is always 1 (#3188), so key the per-node control queue on the unique
+        // node id to keep multiple Solo hosts on one broker from colliding. See #3189.
+        var controlNode = Options.Durability.Mode == DurabilityMode.Solo
+            ? Options.UniqueNodeId.ToString("N")
+            : Options.Durability.AssignedNodeNumber.ToString();
+        var queueName = AmazonSqsTransport.SanitizeSqsName(
+            Transport.PrefixSystemQueueName("wolverine.control." + controlNode))
+            .ToLowerInvariant();
+
+        // SystemQueuePrefix() can be called after EnableWolverineControlQueues(), in which case the control
+        // queue already exists under the unprefixed name. Take it back out so the transport does not go on
+        // to provision and listen to a queue nothing points at any more.
+        if (Transport.ControlQueue != null && Transport.ControlQueue.QueueName != queueName)
+        {
+            Transport.Queues.Remove(Transport.ControlQueue.QueueName);
+            Transport.SystemQueues.Remove(Transport.ControlQueue);
+        }
+
+        var queue = Transport.Queues[queueName];
+        queue.Mode = EndpointMode.BufferedInMemory;
+        queue.IsListener = true;
+        queue.EndpointName = "Control";
+        queue.IsUsedForReplies = true;
+        queue.Role = EndpointRole.System;
+        queue.DeadLetterQueueName = null;
+        queue.Configuration.Attributes ??= new Dictionary<string, string>();
+        queue.Configuration.Attributes["MessageRetentionPeriod"] = "300";
+
+        Options.Transports.NodeControlEndpoint = queue;
+        Transport.ControlQueue = queue;
+
+        Transport.SystemQueues.Add(queue);
+    }
+
+    /// <summary>
+    /// Override the sending behavior for unknown or missing tenant ids when using broker-per-tenant Amazon SQS
+    /// multi-tenancy (GH-3304). See <see cref="TenantedIdBehavior"/>. Default is
+    /// <see cref="Wolverine.Transports.Sending.TenantedIdBehavior.FallbackToDefault"/> unless changed.
+    /// </summary>
+    /// <param name="behavior"></param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration TenantIdBehavior(TenantedIdBehavior behavior)
+    {
+        Transport.TenantedIdBehavior = behavior;
+        return this;
+    }
+
+    /// <summary>
+    /// Register a tenant that is served by its own dedicated Amazon SQS connection (typically a distinct region or
+    /// <c>ServiceURL</c>) while sharing the queue topology declared on this transport. The tenant inherits the
+    /// parent's AWS credentials and provisioning / dead-letter behavior; use <paramref name="configure"/> to point
+    /// the tenant at its own region or endpoint. Outbound messages carrying a matching
+    /// <see cref="Envelope.TenantId"/> are routed to this tenant's connection; inbound messages consumed from it are
+    /// stamped with the tenant id.
+    /// </summary>
+    /// <param name="tenantId"></param>
+    /// <param name="configure">Configuration applied to the tenant's own <see cref="AmazonSQSConfig"/>.</param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration AddTenant(string tenantId, Action<AmazonSQSConfig> configure)
+    {
+        if (tenantId.IsEmpty()) throw new ArgumentOutOfRangeException(nameof(tenantId), "Empty or null tenantId");
+        ArgumentNullException.ThrowIfNull(configure);
+
+        // Deferred: applied in AmazonSqsTenant.Compile() after the parent connection is seeded onto the tenant, so
+        // the tenant only overrides the axes it sets and inherits the rest.
+        Transport.Tenants[tenantId].Configure = configure;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Register a tenant that is served by its own dedicated Amazon SQS account, identified by its own
+    /// <paramref name="credentials"/>, while sharing the queue topology declared on this transport. Use the optional
+    /// <paramref name="configure"/> to also point the tenant at its own region or <c>ServiceURL</c>; if omitted the
+    /// tenant inherits the parent's region/endpoint. Outbound messages carrying a matching
+    /// <see cref="Envelope.TenantId"/> are routed to this tenant's account; inbound messages consumed from it are
+    /// stamped with the tenant id.
+    /// </summary>
+    /// <param name="tenantId"></param>
+    /// <param name="credentials">The AWS credentials for the tenant's dedicated account.</param>
+    /// <param name="configure">Optional configuration applied to the tenant's own <see cref="AmazonSQSConfig"/>.</param>
+    /// <returns></returns>
+    public AmazonSqsTransportConfiguration AddTenant(string tenantId, AWSCredentials credentials,
+        Action<AmazonSQSConfig>? configure = null)
+    {
+        if (tenantId.IsEmpty()) throw new ArgumentOutOfRangeException(nameof(tenantId), "Empty or null tenantId");
+        ArgumentNullException.ThrowIfNull(credentials);
+
+        var tenant = Transport.Tenants[tenantId];
+        tenant.Transport.CredentialSource = _ => credentials;
+        // Deferred: applied in AmazonSqsTenant.Compile() after the parent connection is seeded onto the tenant.
+        tenant.Configure = configure;
+
+        return this;
+    }
+}

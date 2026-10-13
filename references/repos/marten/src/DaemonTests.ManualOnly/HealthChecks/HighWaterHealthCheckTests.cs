@@ -1,0 +1,631 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using DaemonTests.TestingSupport;
+using JasperFx.Core;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Marten.Events.Aggregation;
+using Marten.Events.Daemon;
+using Marten.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Npgsql;
+using NSubstitute;
+using Shouldly;
+using Xunit;
+using static Marten.Events.Daemon.HighWaterHealthCheckExtensions;
+
+namespace DaemonTests.ManualOnly.HealthChecks;
+
+public record HwFakeEvent();
+
+public class HwFakeStream { public Guid Id { get; set; } }
+
+public partial class HwFakeProjection: SingleStreamProjection<HwFakeStream, Guid>
+{
+    public void Apply(HwFakeEvent @event, HwFakeStream projection) { }
+}
+
+public class HighWaterHealthCheckTests: DaemonContext
+{
+    private FakeHealthCheckBuilderStub _builder = new();
+    private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
+    private readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
+    private readonly HighWaterStateTracker _tracker = new();
+
+    public HighWaterHealthCheckTests(ITestOutputHelper output): base(output)
+    {
+        _output = output;
+        _timeProvider.GetUtcNow().Returns(_now);
+    }
+
+    private HighWaterHealthCheck buildCheck(TimeSpan? staleThreshold = null, long minimumGap = 1,
+        bool autoRestart = false, IProjectionCoordinator? coordinator = null,
+        Func<IMartenDatabase, bool>? databaseFilter = null, bool includeExternallyManaged = false,
+        Func<IServiceProvider, IMartenDatabase, bool>? scopedDatabaseFilter = null,
+        Action<ServiceCollection>? configure = null)
+    {
+        var services = new ServiceCollection();
+        if (coordinator != null)
+        {
+            services.AddSingleton(coordinator);
+        }
+
+        configure?.Invoke(services);
+
+        return new(theStore,
+            new HighWaterHealthCheckSettings(staleThreshold ?? 30.Seconds(), minimumGap, autoRestart, databaseFilter,
+                includeExternallyManaged, scopedDatabaseFilter), _timeProvider,
+            _tracker, services.BuildServiceProvider());
+    }
+
+    private async Task appendEventsAsync(int count)
+    {
+        await using var session = theStore.LightweightSession();
+        var stream = Guid.NewGuid();
+        for (var i = 0; i < count; i++)
+        {
+            session.Events.Append(stream, new HwFakeEvent());
+        }
+
+        await session.SaveChangesAsync();
+    }
+
+    private Task seedHighWaterMarkAsync(long sequence) => seedProgressionRowAsync("HighWaterMark", sequence);
+
+    // Seeds an arbitrary progression row (store-global "HighWaterMark" or a per-tenant
+    // "HighWaterMark:<tenant>" row). marten#5174: last_updated is the per-cycle liveness signal for
+    // per-tenant rows -- mt_mark_event_progression stamps it on EVERY vectorized poll, mark advance or
+    // not -- so it is settable here to simulate a poll loop that has stopped cycling.
+    private async Task seedProgressionRowAsync(string name, long sequence, DateTimeOffset? lastUpdated = null)
+    {
+        var stamp = lastUpdated is { } at ? $"'{at:O}'::timestamptz" : "now()";
+        var sql =
+            $"insert into {theStore.Events.DatabaseSchemaName}.mt_event_progression (name, last_seq_id, last_updated) " +
+            $"values ('{name}', {sequence}, {stamp}) " +
+            "on conflict (name) do update set last_seq_id = excluded.last_seq_id, last_updated = excluded.last_updated";
+        await theSession.ExecuteAsync(new NpgsqlCommand(sql));
+    }
+
+    // ---- registration --------------------------------------------------------------------
+
+    [Fact]
+    public void registers_settings_timeprovider_tracker_and_check()
+    {
+        _builder = new();
+        _builder.AddMartenHighWaterHealthCheck(30.Seconds());
+
+        _builder.Services.ShouldContain(x => x.ServiceType == typeof(HighWaterHealthCheckSettings));
+        _builder.Services.ShouldContain(x => x.ServiceType == typeof(TimeProvider));
+        _builder.Services.ShouldContain(x => x.ServiceType == typeof(HighWaterStateTracker));
+
+        var services = _builder.Services.BuildServiceProvider();
+        services.GetServices<HealthCheckRegistration>()
+            .ShouldContain(reg => reg.Name == nameof(HighWaterHealthCheck));
+    }
+
+    // ---- gating --------------------------------------------------------------------------
+
+    [Fact]
+    public async Task healthy_when_no_async_projections_even_if_mark_is_stuck()
+    {
+        // no async projection registered -> the high-water agent runs nowhere, so a stuck mark is legitimate
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var result = await buildCheck().CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task healthy_when_daemon_mode_is_disabled_even_if_mark_is_stuck()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Disabled;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var result = await buildCheck().CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    // ---- signal --------------------------------------------------------------------------
+
+    [Fact]
+    public async Task healthy_when_mark_is_caught_up()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        var highest = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedHighWaterMarkAsync(highest.EventSequenceNumber);
+
+        var result = await buildCheck().CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task healthy_within_grace_window_when_mark_first_seen_behind()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        // first observation of the gap only starts the clock; not yet stale
+        var result = await buildCheck().CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task unhealthy_when_mark_stuck_behind_past_threshold()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds());
+
+        // first check records the stalled mark at _now
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        // advance the clock past the threshold with the mark still stuck
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+
+        var result = await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    [Fact]
+    public async Task healthy_when_mark_advances_before_threshold()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds());
+
+        // first check: gap observed, clock starts
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        // the mark advances (agent alive) and time moves forward past the threshold
+        await seedHighWaterMarkAsync(10);
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+
+        // the advance resets the clock, so it must not be reported stale
+        var result = await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    // ---- per-tenant poll-cycle signal (marten#4986, revised by marten#5174) ---------------
+
+    // marten#5174: the ExtendedProgression `heartbeat` column is never written for high-water rows
+    // (ExtendedProgressionWriter.OnNext drops HighWaterMark states outright), so the check no longer
+    // reads it. For per-tenant rows the real per-cycle signal is last_updated, which
+    // mt_mark_event_progression stamps on every vectorized poll whether or not the mark advances.
+
+    [Fact]
+    public async Task healthy_when_the_per_tenant_poll_is_fresh_even_though_the_mark_is_behind()
+    {
+        // A fresh poll cycle means the agent is alive, so a per-tenant mark sitting behind the latest
+        // event is NOT unhealthy.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedProgressionRowAsync("HighWaterMark:acme", 1, _now.AddSeconds(-5));
+
+        var result = await buildCheck(30.Seconds()).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task unhealthy_when_the_per_tenant_poll_is_stale_even_though_the_mark_is_caught_up()
+    {
+        // A stale poll cycle means the loop stopped cycling. This trips even when the mark is fully
+        // caught up — the case the store-global gap heuristic is blind to.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        var stats = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedProgressionRowAsync("HighWaterMark:acme", stats.EventSequenceNumber, _now.AddSeconds(-90));
+
+        var result = await buildCheck(30.Seconds()).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    [Fact]
+    public async Task the_extended_progression_heartbeat_column_is_never_consulted()
+    {
+        // The pin for marten#5174. With ExtendedProgression on and a heartbeat that is *fresh*, a
+        // store-global mark stuck behind the latest event must still be caught by the gap heuristic --
+        // proving the check no longer defers to a column the daemon does not write. (Before this change
+        // the fresh heartbeat short-circuited the whole assessment.)
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+            x.Events.EnableExtendedProgressionTracking = true;
+        });
+        await appendEventsAsync(20);
+        await seedProgressionRowAsync("HighWaterMark", 1);
+        await theSession.ExecuteAsync(new NpgsqlCommand(
+            $"update {theStore.Events.DatabaseSchemaName}.mt_event_progression set heartbeat = '{_now:O}'::timestamptz where name = 'HighWaterMark'"));
+
+        var check = buildCheck(30.Seconds());
+
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Healthy);
+
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    // ---- autoRestart remediation (marten#4986) -------------------------------------------
+
+    [Fact]
+    public async Task autorestart_triggers_a_restart_once_and_still_reports_unhealthy()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        var stats = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedProgressionRowAsync("HighWaterMark:acme", stats.EventSequenceNumber, _now.AddSeconds(-90));
+
+        var daemon = Substitute.For<IProjectionDaemon>();
+        var coordinator = new FakeCoordinator(daemon);
+
+        var check = buildCheck(30.Seconds(), autoRestart: true, coordinator: coordinator);
+
+        // First stale cycle: restart the loop, still report Unhealthy so an alert fires.
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Unhealthy);
+        await daemon.Received(1).RestartHighWaterAgentAsync(Arg.Any<CancellationToken>());
+
+        // Second cycle inside the same staleness window: still Unhealthy, but NOT restarted again (capped).
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Unhealthy);
+        await daemon.Received(1).RestartHighWaterAgentAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task without_autorestart_no_restart_is_attempted()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        var stats = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedProgressionRowAsync("HighWaterMark:acme", stats.EventSequenceNumber, _now.AddSeconds(-90));
+
+        var daemon = Substitute.For<IProjectionDaemon>();
+        var coordinator = new FakeCoordinator(daemon);
+
+        var result = await buildCheck(30.Seconds(), coordinator: coordinator).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+        await daemon.DidNotReceive().RestartHighWaterAgentAsync(Arg.Any<CancellationToken>());
+    }
+
+    // ---- database scoping (marten#4991) --------------------------------------------------
+
+    [Fact]
+    public async Task database_filter_excluding_the_database_reports_healthy_despite_stuck_mark()
+    {
+        // marten#4991: a predicate that excludes this node's non-owned databases must stop the check
+        // from probing (and asserting on) them at all — even a hard-stuck mark stays Healthy.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds(), databaseFilter: _ => false);
+
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        // still Healthy well past the staleness threshold, because the database is never probed
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task database_filter_including_the_database_still_detects_stuck_mark()
+    {
+        // The complementary case: a predicate that includes the database behaves exactly like no filter.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds(), databaseFilter: _ => true);
+
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    // ---- provider-aware database scoping (marten#5061) -----------------------------------
+
+    // Stands in for the runtime-owned ownership state that the plain databaseFilter closure cannot
+    // reach: on the reporter's system this is IWolverineRuntime.Agents.AllLocallyOwnedDatabaseIds(),
+    // which changes as Wolverine rebalances agents over the node's lifetime.
+    private sealed class FakeOwnershipRegistry
+    {
+        public bool OwnsEverything { get; set; }
+    }
+
+    [Fact]
+    public async Task scoped_database_filter_excluding_the_database_reports_healthy_despite_stuck_mark()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds(),
+            scopedDatabaseFilter: (services, _) =>
+                services.GetRequiredService<FakeOwnershipRegistry>().OwnsEverything,
+            configure: services => services.AddSingleton(new FakeOwnershipRegistry { OwnsEverything = false }));
+
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Healthy);
+
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task scoped_database_filter_is_re_evaluated_on_every_probe()
+    {
+        // The whole point of marten#5061: ownership is runtime state. A node that does not own the
+        // database at probe 1 but does at probe 2 must start asserting on it without re-registration.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var ownership = new FakeOwnershipRegistry { OwnsEverything = false };
+        var check = buildCheck(30.Seconds(),
+            scopedDatabaseFilter: (services, _) =>
+                services.GetRequiredService<FakeOwnershipRegistry>().OwnsEverything,
+            configure: services => services.AddSingleton(ownership));
+
+        // Not owned yet, and well past the staleness threshold: not our problem.
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Healthy);
+
+        // The agent gets assigned here. First probe under ownership establishes the stuck-mark
+        // reading; the gap heuristic then needs a full staleness window at the same mark.
+        ownership.OwnsEverything = true;
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Healthy);
+
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(120));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status
+            .ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    [Fact]
+    public void scoped_overload_registers_the_settings_through_a_factory_carrying_the_filter()
+    {
+        _builder = new();
+        _builder.AddMartenHighWaterHealthCheck(
+            (_, database) => database.Identifier == "owned",
+            staleThreshold: 30.Seconds(),
+            includeExternallyManaged: true);
+
+        var services = _builder.Services.BuildServiceProvider();
+        var settings = services.GetRequiredService<HighWaterHealthCheckSettings>();
+
+        settings.DatabaseFilter.ShouldBeNull();
+        settings.ScopedDatabaseFilter.ShouldNotBeNull();
+        settings.IncludeExternallyManaged.ShouldBeTrue();
+
+        // The registration must be a factory, not a pre-built instance — that is what makes
+        // overriding the settings a supported extension point (marten#5061 suggestion 3).
+        _builder.Services.ShouldContain(x =>
+            x.ServiceType == typeof(HighWaterHealthCheckSettings) && x.ImplementationFactory != null);
+
+        services.GetServices<HealthCheckRegistration>()
+            .ShouldContain(reg => reg.Name == nameof(HighWaterHealthCheck));
+    }
+
+    // ---- ExternallyManaged gate (marten#4991) --------------------------------------------
+
+    [Fact]
+    public async Task healthy_under_externally_managed_by_default_even_if_per_tenant_poll_stale()
+    {
+        // Default: ExternallyManaged (e.g. Wolverine-managed distribution) hosts no local daemon, so the
+        // check stays a no-op and a stalled poll is not asserted.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.ExternallyManaged;
+        });
+        await appendEventsAsync(20);
+        var stats = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedProgressionRowAsync("HighWaterMark:acme", stats.EventSequenceNumber, _now.AddSeconds(-90));
+
+        var result = await buildCheck(30.Seconds()).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task unhealthy_under_externally_managed_when_opted_in_and_per_tenant_poll_stale()
+    {
+        // Opted in: assert under ExternallyManaged too — via the per-tenant poll-cycle signal.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.ExternallyManaged;
+        });
+        await appendEventsAsync(20);
+        var stats = await theStore.Advanced.FetchEventStoreStatistics(token: TestContext.Current.CancellationToken);
+        await seedProgressionRowAsync("HighWaterMark:acme", stats.EventSequenceNumber, _now.AddSeconds(-90));
+
+        var result = await buildCheck(30.Seconds(), includeExternallyManaged: true)
+            .CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    [Fact]
+    public async Task externally_managed_opted_in_does_not_use_the_store_global_gap_heuristic()
+    {
+        // Opted in, store-global row only. The gap heuristic must be suppressed under ExternallyManaged
+        // because an external owner can legitimately pause the mark; it stays Healthy.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.ExternallyManaged;
+        });
+        await appendEventsAsync(20);
+        await seedHighWaterMarkAsync(1);
+
+        var check = buildCheck(30.Seconds(), includeExternallyManaged: true);
+
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    // ---- per-tenant high water (marten#4991) ---------------------------------------------
+
+    [Fact]
+    public async Task detects_a_stale_per_tenant_high_water_row()
+    {
+        // UseTenantPartitionedEvents persists HighWaterMark:<tenant> rows rather than a single
+        // store-global HighWaterMark. The original check matched only "HighWaterMark" and was blind to
+        // a stalled per-tenant agent; now a per-tenant row whose poll has stopped cycling is detected --
+        // with no dependency on ExtendedProgression (marten#5174).
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedProgressionRowAsync("HighWaterMark:acme", 5, _now.AddSeconds(-90));
+
+        var result = await buildCheck(30.Seconds()).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Unhealthy);
+    }
+
+    [Fact]
+    public async Task healthy_when_the_per_tenant_high_water_row_was_just_polled()
+    {
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+        await seedProgressionRowAsync("HighWaterMark:acme", 5, _now.AddSeconds(-5));
+
+        var result = await buildCheck(30.Seconds()).CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken);
+
+        result.Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    [Fact]
+    public async Task a_per_tenant_row_is_never_gap_assessed()
+    {
+        // There is no per-tenant highest-sequence to compute a meaningful gap against
+        // (FetchHighestEventSequenceNumber is store-global), so the gap heuristic must never run for a
+        // per-tenant row -- otherwise a tenant with no new events false-positives. Its poll cycle is
+        // fresh, so it stays Healthy no matter how far behind the store-global sequence it sits.
+        StoreOptions(x =>
+        {
+            x.Projections.Add(new HwFakeProjection(), ProjectionLifecycle.Async);
+            x.Projections.AsyncMode = DaemonMode.Solo;
+        });
+        await appendEventsAsync(20);
+
+        var check = buildCheck(30.Seconds());
+
+        await seedProgressionRowAsync("HighWaterMark:acme", 1, _now);
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+
+        // The poll keeps cycling at the same mark; still healthy a full window later.
+        _timeProvider.GetUtcNow().Returns(_now.AddSeconds(60));
+        await seedProgressionRowAsync("HighWaterMark:acme", 1, _now.AddSeconds(60));
+        (await check.CheckHealthAsync(new HealthCheckContext(), TestContext.Current.CancellationToken)).Status.ShouldBe(HealthStatus.Healthy);
+    }
+
+    // Minimal IProjectionCoordinator that hands back a single daemon — avoids mocking a ValueTask-returning
+    // member (CA2012) while letting the daemon itself stay an NSubstitute for Received(...) assertions.
+    private sealed class FakeCoordinator: IProjectionCoordinator
+    {
+        private readonly IProjectionDaemon _daemon;
+
+        public FakeCoordinator(IProjectionDaemon daemon) => _daemon = daemon;
+
+        public IProjectionDaemon DaemonForMainDatabase() => _daemon;
+
+        public ValueTask<IProjectionDaemon> DaemonForDatabase(string databaseIdentifier) => new(_daemon);
+
+        public ValueTask<IReadOnlyList<IProjectionDaemon>> AllDaemonsAsync() =>
+            new(new[] { _daemon });
+
+        public Task PauseAsync() => Task.CompletedTask;
+
+        public Task ResumeAsync() => Task.CompletedTask;
+
+        public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+}

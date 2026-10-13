@@ -1,0 +1,168 @@
+using System.Text;
+using System.Text.Json;
+using Confluent.Kafka;
+using IntegrationTests;
+using JasperFx.Core;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using Shouldly;
+using Wolverine.Kafka.Internals;
+using Wolverine.Postgresql;
+using Wolverine.Tracking;
+
+namespace Wolverine.Kafka.Tests;
+
+public class publish_and_receive_raw_json : IAsyncLifetime
+{
+    private IHost _sender = null!;
+    private IHost _receiver = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        #region sample_raw_json_sending_and_receiving_with_kafka
+        _receiver = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                //opts.EnableAutomaticFailureAcks = false;
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.ListenToKafkaTopic("json")
+
+                    // You do have to tell Wolverine what the message type
+                    // is that you'll receive here so that it can deserialize the
+                    // incoming data
+                    .ReceiveRawJson<ColorMessage>();
+
+                // Include test assembly for handler discovery
+                opts.Discovery.IncludeAssembly(GetType().Assembly);
+
+                opts.Services.AddResourceSetupOnStartup();
+
+                opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString, "kafka");
+
+                opts.Services.AddResourceSetupOnStartup();
+
+                opts.Policies.UseDurableInboxOnAllListeners();
+            }).StartAsync();
+
+        _sender = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.Policies.DisableConventionalLocalRouting();
+
+                opts.Services.AddResourceSetupOnStartup();
+
+                opts.PublishAllMessages().ToKafkaTopic("json")
+                    
+                    // Just publish the outgoing information as pure JSON
+                    // and no other Wolverine metadata
+                    .PublishRawJson(new JsonSerializerOptions());
+            }).StartAsync();
+
+        #endregion
+    }
+
+    [Fact]
+    public async Task can_receive_pure_json_if_the_default_messsage_type_exists()
+    {
+        var session = await _sender.TrackActivity()
+            .AlsoTrack(_receiver)
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .PublishMessageAndWaitAsync(new ColorMessage("yellow"));
+
+        session.Received.SingleMessage<ColorMessage>()
+            .Color.ShouldBe("yellow");
+    }
+
+    [Fact]
+    public async Task stamps_envelope_sent_at_from_the_kafka_record_timestamp()
+    {
+        // Envelope.SentAt defaults to UtcNow at construction, so a "recent" assertion would
+        // pass without this mapper. Produce with an explicit CreateTime an hour ago so we
+        // can distinguish broker-record time from the constructor default.
+        var transport = _receiver.GetRuntime().Options.Transports.GetOrCreate<KafkaTransport>();
+        var sentAt = DateTimeOffset.UtcNow.Subtract(1.Hours()).ToUnixTimeMilliseconds();
+        var expectedSentAt = DateTimeOffset.FromUnixTimeMilliseconds(sentAt);
+
+        var session = await _receiver.TrackActivity()
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .ExecuteAndWaitAsync((Func<IMessageContext, Task>)(async _ =>
+            {
+                using var producer = new ProducerBuilder<string, byte[]>(transport.ProducerConfig).Build();
+                await producer.ProduceAsync("json", new Message<string, byte[]>
+                {
+                    Value = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ColorMessage("yellow"))),
+                    Timestamp = new Timestamp(sentAt, TimestampType.CreateTime)
+                });
+                producer.Flush();
+            }));
+
+        var received = session.Received.SingleEnvelope<ColorMessage>();
+        received.SentAt.ShouldBe(expectedSentAt);
+    }
+
+    [Fact]
+    public async Task copies_kafka_headers_onto_the_received_envelope()
+    {
+        // PublishRawJson only writes the body, so an external producer is used here to
+        // put a custom header on the Kafka record. The JsonOnlyMapper should copy that
+        // header onto the received Envelope without clobbering anything Wolverine set.
+        // Use a non-reserved key — reserved Wolverine keys (tenant-id, saga-id, id, ...)
+        // are deliberately skipped so an untrusted producer cannot hijack typed props.
+        var transport = _receiver.GetRuntime().Options.Transports.GetOrCreate<KafkaTransport>();
+
+        var session = await _receiver.TrackActivity()
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .ExecuteAndWaitAsync((Func<IMessageContext, Task>)(async _ =>
+            {
+                using var producer = new ProducerBuilder<string, byte[]>(transport.ProducerConfig).Build();
+                await producer.ProduceAsync("json", new Message<string, byte[]>
+                {
+                    Value = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ColorMessage("green"))),
+                    Headers = new Headers
+                    {
+                        { "color-source", "acme"u8.ToArray() },
+                        { "tenant-id", "hijacked"u8.ToArray() },
+                        { "saga-id", "hijacked"u8.ToArray() },
+                        { "id", Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()) }
+                    }
+                });
+                producer.Flush();
+            }));
+
+        var received = session.Received.SingleEnvelope<ColorMessage>();
+        received.Headers["color-source"].ShouldBe("acme");
+        received.Headers.ContainsKey("tenant-id").ShouldBeFalse();
+        received.Headers.ContainsKey("saga-id").ShouldBeFalse();
+        received.Headers.ContainsKey("id").ShouldBeFalse();
+        received.TenantId.ShouldBeNull();
+        received.SagaId.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task do_not_go_into_infinite_loop_with_garbage_data()
+    {
+        var transport = _sender.GetRuntime().Options.Transports.GetOrCreate<KafkaTransport>();
+        var producerBuilder = new ProducerBuilder<string, string>(transport.ProducerConfig);
+        using var producer = producerBuilder.Build();
+
+        await producer.ProduceAsync("json", new Message<string, string>
+        {
+            Value = "{garbage}"
+        }, TestContext.Current.CancellationToken);
+        producer.Flush(TestContext.Current.CancellationToken);
+
+        // Wait long enough to detect any infinite retry loop, but not so long
+        // it needlessly inflates CI run time. 30 seconds is sufficient — a tight
+        // retry loop would exhaust resources well before then.
+        await Task.Delay(30.Seconds(), TestContext.Current.CancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _sender.StopAsync();
+        _sender.Dispose();
+        await _receiver.StopAsync();
+        _receiver.Dispose();
+    }
+}

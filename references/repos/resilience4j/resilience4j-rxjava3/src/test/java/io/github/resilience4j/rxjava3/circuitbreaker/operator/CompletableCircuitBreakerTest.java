@@ -1,0 +1,72 @@
+package io.github.resilience4j.rxjava3.circuitbreaker.operator;
+
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.test.HelloWorldService;
+import io.reactivex.rxjava3.core.Completable;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.*;
+
+/**
+ * Unit test for {@link CompletableCircuitBreaker}.
+ */
+class CompletableCircuitBreakerTest {
+
+    private final CircuitBreaker circuitBreaker = mock(CircuitBreaker.class, RETURNS_DEEP_STUBS);
+
+    @Test
+    void shouldSubscribeToCompletable() {
+        given(circuitBreaker.tryAcquirePermission()).willReturn(true);
+        given(circuitBreaker.getCurrentTimestamp()).willReturn(System.nanoTime());
+        given(circuitBreaker.getTimestampUnit()).willReturn(TimeUnit.NANOSECONDS);
+
+        Completable.complete()
+            .compose(CircuitBreakerOperator.of(circuitBreaker))
+            .test()
+            .assertComplete();
+
+        then(circuitBreaker).should().onSuccess(anyLong(), any(TimeUnit.class));
+        then(circuitBreaker).should(never())
+            .onError(anyLong(), any(TimeUnit.class), any(Throwable.class));
+    }
+
+    @Test
+    void shouldPropagateAndMarkError() {
+        given(circuitBreaker.tryAcquirePermission()).willReturn(true);
+        given(circuitBreaker.getCurrentTimestamp()).willReturn(System.nanoTime());
+        given(circuitBreaker.getTimestampUnit()).willReturn(TimeUnit.NANOSECONDS);
+
+        Completable.error(new IOException("BAM!"))
+            .compose(CircuitBreakerOperator.of(circuitBreaker))
+            .test()
+            .assertError(IOException.class)
+            .assertNotComplete();
+
+        then(circuitBreaker).should()
+            .onError(anyLong(), any(TimeUnit.class), any(IOException.class));
+        then(circuitBreaker).should(never()).onSuccess(anyLong(), any(TimeUnit.class));
+    }
+
+    @Test
+    void shouldEmitErrorWithCallNotPermittedException() {
+        given(circuitBreaker.tryAcquirePermission()).willReturn(false);
+
+        Completable.complete()
+            .compose(CircuitBreakerOperator.of(circuitBreaker))
+            .test()
+            .assertError(CallNotPermittedException.class)
+            .assertNotComplete();
+
+        then(circuitBreaker).should(never()).onSuccess(anyLong(), any(TimeUnit.class));
+        then(circuitBreaker).should(never())
+            .onError(anyLong(), any(TimeUnit.class), any(Throwable.class));
+    }
+}

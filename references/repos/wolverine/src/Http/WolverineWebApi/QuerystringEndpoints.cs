@@ -1,0 +1,236 @@
+using JasperFx.Core;
+using Marten;
+using Microsoft.AspNetCore.Mvc;
+using Spectre.Console;
+using Wolverine.Http;
+
+namespace WolverineWebApi;
+
+public static class QuerystringEndpoints
+{
+
+    [WolverineGet("/querystring/enum")]
+    public static string UsingEnumQuerystring(Direction direction)
+    {
+        return direction.ToString();
+    }
+
+    [WolverineGet("/querystring/explicit")]
+    public static string UsingEnumQuerystring([FromQuery(Name = "name")] string value)
+    {
+        return value ?? "";
+    }
+
+    [WolverineGet("/querystring/enum/nullable")]
+    public static string UsingNullableEnumQuerystring(Direction? direction)
+    {
+        return direction?.ToString() ?? "none";
+    }
+
+    [WolverineGet("/querystring/stringarray")]
+    public static string StringArray(string[]? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.Join(",");
+    }
+
+    [WolverineGet("/querystring/intarray")]
+    public static string IntArray(int[]? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.OrderBy(x => x).Select(x => x.ToString()).Join(",");
+    }
+
+    [WolverineGet("/querystring/enumarray")]
+    public static string EnumArray(Direction[]? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.Select(x => x.ToString()).Join(",");
+    }
+
+    // GH-3602: an explicit [FromQuery] on an array/collection of a simple element must bind from repeated
+    // query values exactly like the attribute-less StringArray/IntArray above, not get misrouted into the
+    // complex-type member-flattening path (which threw at discovery because arrays have no ctor).
+    [WolverineGet("/querystring/stringarray2")]
+    public static string StringArray2([FromQuery] string[]? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.Join(",");
+    }
+
+    [WolverineGet("/querystring/intarray2")]
+    public static string IntArray2([FromQuery] int[]? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.OrderBy(x => x).Select(x => x.ToString()).Join(",");
+    }
+
+    [WolverineGet("/querystring/intlist2")]
+    public static string IntList2([FromQuery] List<int>? values)
+    {
+        if (values == null || values.IsEmpty()) return "none";
+
+        return values.OrderBy(x => x).Select(x => x.ToString()).Join(",");
+    }
+
+    [WolverineGet("/querystring/datetime")]
+    public static string DateTime(DateTime value)
+    {
+        return value.ToString("O");
+    }
+    
+    [WolverineGet("/querystring/datetime2")]
+    public static string DateTime2([FromQuery] DateTime value)
+    {
+        return value.ToString("O");
+    }
+
+    // GH-3586 follow-up: a scalar [FromQuery] decimal is a single query value like [FromQuery] DateTime
+    // above. It used to throw at discovery ("System.Decimal has multiple constructors") because decimal was
+    // routed into the complex-type flattening path; guarded now in IsComplexQueryStringType.
+    [WolverineGet("/querystring/decimal2")]
+    public static string Decimal2([FromQuery] decimal value)
+    {
+        return value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    [WolverineGet("/querystring/decimal2/nullable")]
+    public static string Decimal2Nullable([FromQuery] decimal? value)
+    {
+        return value.HasValue ? value.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "Value is missing";
+    }
+
+    // GH-3586 follow-up: enum values arrive on the wire as their string name (?value=North). A scalar
+    // [FromQuery] enum must parse that name, case-insensitively, through the explicit-attribute path.
+    [WolverineGet("/querystring/enum2")]
+    public static string Enum2([FromQuery] Direction value)
+    {
+        return value.ToString();
+    }
+
+    [WolverineGet("/querystring/enum2/nullable")]
+    public static string Enum2Nullable([FromQuery] Direction? value)
+    {
+        return value.HasValue ? value.Value.ToString() : "Value is missing";
+    }
+
+    [WolverineGet("/querystring/datetime/nullable")]
+    public static string DateTimeNullable(DateTime? value)
+    {
+        return value.HasValue ? value.Value.ToString("O") : "Value is missing";
+    }
+
+    [WolverineGet("/querystring/dateonly")]
+    public static string DateOnly(DateOnly value)
+    {
+        return value.ToString("O");
+    }
+
+    [WolverineGet("/querystring/dateonly/nullable")]
+    public static string DateOnlyNullable(DateOnly? value)
+    {
+        return value.HasValue ? value.Value.ToString("O") : "Value is missing";
+    }
+}
+
+public static class DottedFromQueryEndpoints
+{
+    [WolverineGet("/querystring/dotted")]
+    public static string HandleDottedQueryNames(
+        [FromQuery(Name = "hub.mode")] string hubMode,
+        [FromQuery(Name = "hub.challenge")] string hubChallenge,
+        [FromQuery(Name = "hub.verify_token")] string hubVerifyToken)
+    {
+        return $"{hubMode}|{hubChallenge}|{hubVerifyToken}";
+    }
+
+    [WolverineGet("/querystring/dotted-int")]
+    public static string HandleDottedIntQueryName(
+        [FromQuery(Name = "page.number")] int pageNumber)
+    {
+        return $"page {pageNumber}";
+    }
+}
+
+public static class FromQueryEndpoints
+{
+    [WolverineGet("/api/fromquery1")]
+    public static Query1 Get([FromQuery] Query1 query) => query;
+
+    [WolverineGet("/api/fromquery2")]
+    public static Query2 Get([FromQuery] Query2 query) => query;
+
+    [WolverineGet("/api/fromquery3")]
+    public static Query3 Get([FromQuery] Query3 query) => query;
+
+    [WolverineGet("/api/fromquery4")]
+    public static Query4 Get([FromQuery] Query4 query) => query;
+
+    [WolverineGet("/api/bigquery")]
+    public static BigQuery Get([FromQuery] BigQuery query) => query;
+
+    [WolverineGet("/api/fromquery/aliased-array")]
+    public static AliasedArrayQuery GetAliasedArray([FromQuery] AliasedArrayQuery query) => query;
+
+    [WolverineGet("/api/fromquery/aliased-int-array")]
+    public static AliasedIntArrayQuery GetAliasedIntArray([FromQuery] AliasedIntArrayQuery query) => query;
+
+    [WolverineGet("/api/asparameters/aliased-array")]
+    public static AliasedArrayQuery GetAliasedArrayAsParams([AsParameters] AliasedArrayQuery query) => query;
+
+    [WolverineGet("/api/asparameters/aliased-int-array")]
+    public static AliasedIntArrayQuery GetAliasedIntArrayAsParams([AsParameters] AliasedIntArrayQuery query) => query;
+}
+
+
+public record Query1(string Name);
+public record Query2(int Number);
+public record Query3(Guid Id);
+
+public record Query4(string Name, int Number, Direction Direction);
+
+public record AliasedArrayQuery([FromQuery(Name = "v")] string[] Values);
+
+public record AliasedIntArrayQuery([FromQuery(Name = "n")] int[] Numbers);
+
+
+public class BigQuery
+{
+    public string Name { get; set; } = null!;
+    public int Number { get; set; }
+    public Direction Direction { get; set; }
+    public string[] Values { get; set; } = null!;
+    public int[] Numbers { get; set; } = null!;
+
+    public bool Flag { get; set; }
+
+    public int? NullableNumber { get; set; }
+    public Direction? NullableDirection { get; set; }
+    public bool? NullableFlag { get; set; }
+
+    [FromQuery(Name = "aliased")]
+    [FromForm(Name = "aliased")]
+    public string? ValueWithAlias { get; set; }
+
+    public List<string> ListValues { get; set; } = new();
+    public List<Direction> EnumListValues { get; set; } = new();
+
+    public List<int> IntList { get; set; } = null!;
+
+    [FromQuery(Name = "v")]
+    [FromForm(Name = "v")]
+    public string[] AliasedValues { get; set; } = null!;
+
+    [FromQuery(Name = "n")]
+    [FromForm(Name = "n")]
+    public int[] AliasedNumbers { get; set; } = null!;
+
+    [FromQuery(Name = "d")]
+    [FromForm(Name = "d")]
+    public List<Direction> AliasedEnumList { get; set; } = new();
+}

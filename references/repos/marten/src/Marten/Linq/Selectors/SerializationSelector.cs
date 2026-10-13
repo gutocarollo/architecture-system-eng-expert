@@ -1,0 +1,26 @@
+#nullable enable
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Marten.Linq.Selectors;
+
+internal class SerializationSelector<T>: ISelector<T>
+{
+    private readonly IStorageSerializer _serializer;
+
+    public SerializationSelector(IStorageSerializer serializer)
+    {
+        _serializer = serializer;
+    }
+
+    public T Resolve(DbDataReader reader)
+    {
+        return _serializer.FromJson<T>(reader, 0);
+    }
+
+    public async Task<T> ResolveAsync(DbDataReader reader, CancellationToken token)
+    {
+        return await _serializer.FromJsonAsync<T>(reader, 0, token).ConfigureAwait(false);
+    }
+}

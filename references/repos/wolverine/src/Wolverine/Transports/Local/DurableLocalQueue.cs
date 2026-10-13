@@ -1,0 +1,371 @@
+using JasperFx.Blocks;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.Transports.Local;
+
+internal class DurableLocalQueue : ISendingAgent, IListenerCircuit, ILocalQueue
+{
+    private readonly IMessageInbox _inbox;
+    private readonly ILogger _logger;
+    private readonly IMessageTracker _messageLogger;
+    private readonly WolverineRuntime _runtime;
+    private readonly IMessageSerializer _serializer;
+    private readonly DurabilitySettings _settings;
+
+    // GH-4319. The local durable queue was the last per-message inbox INSERT that never batched: every
+    // publish opened its own pooled connection for one row. Null when StoreIncomingBatchSize is 1.
+    private readonly EnvelopeStoreCoalescer? _storeCoalescer;
+    private DurableReceiver? _receiver;
+    private Restarter? _restarter;
+
+    public DurableLocalQueue(Endpoint endpoint, WolverineRuntime runtime)
+    {
+        Uri = endpoint.Uri;
+        _settings = runtime.DurabilitySettings;
+
+        // When ancillary stores exist, wrap the inbox so that envelopes whose
+        // Store property has already been stamped (by ApplyAncillaryStoreFrame
+        // during handler execution) are persisted in the correct database.
+        // Without this, all local-queue messages land in the main store's inbox
+        // regardless of the handler's ancillary store association.
+        _inbox = runtime.Stores != null && runtime.Stores.HasAnyAncillaryStores()
+            ? new DelegatingMessageInbox(runtime.Storage.Inbox, runtime.Stores)
+            : runtime.Storage.Inbox;
+
+        _messageLogger = runtime.MessageTrackingFor(endpoint);
+        _serializer = endpoint.DefaultSerializer ??
+                      throw new ArgumentOutOfRangeException(nameof(endpoint),
+                          "No default serializer for this Endpoint");
+        Destination = endpoint.Uri;
+
+        _runtime = runtime;
+
+        Endpoint = endpoint;
+        ReplyUri = TransportConstants.RepliesUri;
+
+        _logger = runtime.LoggerFactory.CreateLogger<DurableLocalQueue>();
+
+        if (endpoint.CircuitBreakerOptions != null)
+        {
+            CircuitBreaker = new CircuitBreaker(endpoint.CircuitBreakerOptions, this, runtime.Observer);
+            Pipeline = new HandlerPipeline(runtime, new CircuitBreakerTrackedExecutorFactory(CircuitBreaker, runtime),
+                endpoint)
+            {
+                TelemetryEnabled = endpoint.TelemetryEnabled
+            };
+        }
+        else
+        {
+            Pipeline = new HandlerPipeline(runtime, runtime, endpoint);
+        }
+
+        _receiver = new DurableReceiver(endpoint, runtime, Pipeline);
+
+        if (_settings.StoreIncomingBatchSize > 1)
+        {
+            _storeCoalescer = new EnvelopeStoreCoalescer(
+                envelopes => _inbox.StoreIncomingAsync(envelopes),
+                envelope => _inbox.StoreIncomingAsync(envelope),
+                _settings.StoreIncomingBatchSize, Uri, _logger);
+        }
+    }
+
+    public CircuitBreaker? CircuitBreaker { get; }
+
+    /// <summary>
+    /// Immediately latch the receiver to stop processing new messages.
+    /// </summary>
+    public void LatchReceiver()
+    {
+        Latched = true;
+        _receiver?.Latch();
+    }
+
+    int IListenerCircuit.QueueCount => _receiver?.QueueCount ?? 0;
+
+    async Task IListenerCircuit.EnqueueDirectlyAsync(IEnumerable<Envelope> envelopes)
+    {
+        if (_receiver == null)
+        {
+            return;
+        }
+
+        foreach (var envelope in envelopes) await _receiver.EnqueueAsync(envelope);
+    }
+
+    public async ValueTask PauseAsync(TimeSpan pauseTime)
+    {
+        Latched = true;
+        // GH-3832 — remember that this latch is a timed pause so Status reports Paused rather than
+        // the TooBusy that a back-pressure latch reports. This one is released by the Restarter
+        // installed at the end of this method; TooBusy is released by the queue draining.
+        _paused = true;
+
+        if (_receiver != null)
+        {
+            try
+            {
+                _receiver.Latch();
+                await _receiver.DrainAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error trying to drain in flight messages for {Uri}", Destination);
+            }
+        }
+
+        _receiver = null;
+
+        CircuitBreaker?.Reset();
+
+        _runtime.Tracker.Publish(
+            new ListenerState(Endpoint.Uri, Endpoint.EndpointName, ListeningStatus.Paused));
+
+        _logger.LogInformation("Pausing message listening at {Uri}", Endpoint.Uri);
+
+        _restarter = new Restarter(this, pauseTime);
+    }
+
+    public async ValueTask PauseWithDrainAsync(TimeSpan pauseTime)
+    {
+        // DurableLocalQueue.PauseAsync already fully drains. The behavioral split
+        // between PauseAsync and PauseWithDrainAsync is important for BufferedReceiver
+        // (which skips the drain in PauseAsync to avoid deadlocking when called from
+        // within the handler pipeline). For the durable local queue, both are identical.
+        await PauseAsync(pauseTime);
+    }
+
+    private Uri? _partitionSlotUri;
+
+    /// <summary>
+    /// When this queue is a global partition's companion local queue, the slot's external address. The slot's
+    /// <c>ListeningAgent</c> stamps it when it installs the bridge, and every receiver this queue builds --
+    /// the one from the constructor and every rebuild in <see cref="StartAsync"/> after a slot handoff -- carries
+    /// it as <see cref="DurableReceiver.AlsoReleaseIncomingAt"/>, so losing the slot releases the rows that
+    /// arrived through the shard queue table and not only the ones that took the local shortcut.
+    /// </summary>
+    internal Uri? PartitionSlotUri
+    {
+        get => _partitionSlotUri;
+        set
+        {
+            _partitionSlotUri = value;
+            if (_receiver != null)
+            {
+                _receiver.AlsoReleaseIncomingAt = value;
+            }
+        }
+    }
+
+    public ValueTask StartAsync()
+    {
+        _receiver = new DurableReceiver(Endpoint, _runtime, Pipeline)
+        {
+            AlsoReleaseIncomingAt = _partitionSlotUri
+        };
+        Latched = false;
+        _paused = false;
+        _runtime.Tracker.Publish(new ListenerState(_receiver.Uri, Endpoint.EndpointName,
+            ListeningStatus.Accepting));
+        _restarter?.Dispose();
+        _restarter = null;
+        return ValueTask.CompletedTask;
+    }
+
+    private bool _paused;
+
+    // GH-3832 — a timed pause must not read as the back-pressure TooBusy latch;
+    // LatchReceiver() (agent-restriction latch) deliberately keeps the TooBusy mapping for now.
+    ListeningStatus IListenerCircuit.Status => _paused
+        ? ListeningStatus.Paused
+        : Latched ? ListeningStatus.TooBusy : ListeningStatus.Accepting;
+
+    public Uri Uri { get; }
+
+    public IHandlerPipeline Pipeline { get; }
+
+    public void Dispose()
+    {
+        _receiver?.SafeDispose();
+        CircuitBreaker?.SafeDisposeSynchronously();
+        _receiver?.SafeDispose();
+    }
+
+    ValueTask IReceiver.ReceivedAsync(IListener listener, Envelope[] messages)
+    {
+        return _receiver!.ReceivedAsync(listener, messages);
+    }
+
+    ValueTask IReceiver.ReceivedAsync(IListener listener, Envelope envelope)
+    {
+        return _receiver!.ReceivedAsync(listener, envelope);
+    }
+
+    async ValueTask IReceiver.DrainAsync()
+    {
+        var receiver = _receiver;
+
+        receiver?.Latch();
+
+        // GH-4662 removed the store-and-enqueue RetryBlock -- the write is awaited by its caller now --
+        // so the coalescer is the only thing left here that can hold a started flush.
+        if (_storeCoalescer != null)
+        {
+            await _storeCoalescer.DrainAsync();
+        }
+
+        if (receiver != null)
+            await receiver.DrainAsync();
+    }
+
+    void ILocalReceiver.Enqueue(Envelope envelope)
+    {
+        _receiver?.Enqueue(envelope);
+    }
+
+    ValueTask ILocalReceiver.EnqueueAsync(Envelope envelope)
+    {
+        return _receiver!.EnqueueAsync(envelope);
+    }
+
+    int IHasQueueDepth.QueueCount => _receiver?.QueueCount ?? 0;
+
+    public Uri Destination { get; }
+
+    public Endpoint Endpoint { get; }
+
+    public Uri? ReplyUri { get; set; }
+
+    public bool Latched { get; private set; }
+
+    public bool IsDurable => true;
+
+    public async ValueTask EnqueueOutgoingAsync(Envelope envelope)
+    {
+        // The envelope would be persisted regardless
+        if (Latched)
+        {
+            return;
+        }
+
+        _messageLogger.Sent(envelope);
+
+        await _receiver!.EnqueueAsync(envelope);
+    }
+
+    public ValueTask StoreAndForwardAsync(Envelope envelope)
+    {
+        // Try this first, let everything fail if it fails, don't want to log
+        writeMessageData(envelope);
+
+        _messageLogger.Sent(envelope);
+
+        envelope.PrepareForIncomingPersistence(DateTimeOffset.UtcNow, _settings);
+
+        if (Latched)
+        {
+            envelope.OwnerId = TransportConstants.AnyNode;
+        }
+
+        // GH-4662: awaited rather than posted to a RetryBlock, so a store that stays down fails the
+        // publish instead of discarding the envelope behind the caller's back.
+        return new ValueTask(storeAndEnqueueAsync(envelope));
+    }
+
+    public bool SupportsNativeScheduledSend => true;
+
+    public DateTimeOffset LastMessageSentAt => DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// If the handler for this message type targets an ancillary store on a
+    /// different database, set envelope.Store so that the DelegatingMessageInbox
+    /// persists it in the correct store for transactional atomicity. The
+    /// receiving handler's store association wins over the publishing context's
+    /// store: a message published from a main-store handler can be persisted
+    /// transactionally by an ancillary-store handler. Without overriding here,
+    /// a publisher-stamped envelope.Store (the main store) would carry through
+    /// the inbox and cause FlushOutgoingMessagesOnCommit to point at the
+    /// publisher's inbox table while the receiving Marten/Polecat session was
+    /// connected to the ancillary database. See GH-2669.
+    /// </summary>
+    private void assignAncillaryStoreIfNeeded(Envelope envelope)
+    {
+        if (_runtime.Stores == null) return;
+
+        // Uri, not just the message type: a sticky handler makes the owning store endpoint specific,
+        // and a local queue only ever feeds the handler chain for its own endpoint (GH-3886).
+        var store = _runtime.Stores.TryFindAncillaryStoreForMessageType(Uri, envelope.MessageType);
+        if (store != null)
+        {
+            envelope.Store = store;
+        }
+    }
+
+    private async Task storeAndEnqueueAsync(Envelope envelope)
+    {
+        var isLatched = Latched;
+
+        try
+        {
+            // Use AnyNode when latched so the durability agent can recover the message.
+            envelope.OwnerId = isLatched
+                ? TransportConstants.AnyNode
+                : _settings.AssignedNodeNumber;
+
+            // The ancillary store has to be stamped BEFORE the envelope joins a batch: both
+            // DelegatingMessageInbox and MultiTenantedMessageStore group the batched overload by
+            // Store/TenantId, and they can only group on what is already on the envelope.
+            assignAncillaryStoreIfNeeded(envelope);
+
+            // GH-4662: retried inline, and on exhaustion the exception reaches whoever called
+            // PublishAsync/ScheduleAsync. Before this it was swallowed by a RetryBlock that had
+            // already handed the caller a completed task, so a store outage lost the message with
+            // nothing but an Information line to show for it.
+            await DurableWriteRetry.ExecuteAsync(
+                () => _storeCoalescer != null
+                    ? _storeCoalescer.StoreAsync(envelope)
+                    : _inbox.StoreIncomingAsync(envelope),
+                envelope, _logger, _runtime.Cancellation);
+
+            envelope.WasPersistedInInbox = true;
+        }
+        catch (DuplicateIncomingEnvelopeException e)
+        {
+            _logger.LogError(e, "Duplicate incoming envelope detected");
+            return;
+        }
+
+        if (isLatched)
+        {
+            return;
+        }
+
+        if (envelope.Status == EnvelopeStatus.Incoming)
+        {
+            await _receiver!.EnqueueAsync(envelope);
+        }
+    }
+
+    private void writeMessageData(Envelope envelope)
+    {
+        if (envelope.Message is null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(envelope), "Envelope.Message is null");
+        }
+
+        if (envelope.Data == null || envelope.Data.Length == 0)
+        {
+            _serializer.Write(envelope);
+            envelope.ContentType = _serializer.ContentType;
+        }
+    }
+}

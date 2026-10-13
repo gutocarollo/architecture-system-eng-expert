@@ -1,0 +1,1048 @@
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Partitioning;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.Transports.Local;
+using Wolverine.Util;
+
+namespace Wolverine.Transports;
+
+public interface IListenerCircuit
+{
+    ListeningStatus Status { get; }
+    Endpoint Endpoint { get; }
+    int QueueCount { get; }
+    ValueTask PauseAsync(TimeSpan pauseTime);
+    
+    /// <summary>
+    /// Pause the listener and fully drain any buffered messages before returning.
+    /// Unlike PauseAsync (which may skip the drain to avoid deadlocks when called from
+    /// within the handler pipeline), this method guarantees all queued messages are
+    /// processed before returning. Safe to call from background threads.
+    /// </summary>
+    ValueTask PauseWithDrainAsync(TimeSpan pauseTime);
+    
+    ValueTask StartAsync();
+
+    /// <summary>
+    /// Force the listener to stop and rebuild its underlying transport listener even if it currently reports
+    /// <see cref="ListeningStatus.Accepting"/>. This is the remediation primitive for recovering a "stuck"
+    /// listener — e.g. a dead transport channel that the framework could not self-heal but that still reports
+    /// Accepting — without bouncing the process. When <paramref name="force"/> is <c>false</c> this behaves like
+    /// <see cref="StartAsync"/> (a no-op when already Accepting). The default implementation is the gentle
+    /// <see cref="StartAsync"/>; circuits backed by a real transport listener override it to tear down and rebuild.
+    /// </summary>
+    ValueTask RestartAsync(bool force = true) => StartAsync();
+
+    Task EnqueueDirectlyAsync(IEnumerable<Envelope> envelopes);
+}
+
+public interface IListeningAgent : IListenerCircuit
+{
+    Uri Uri { get; }
+
+    /// <summary>
+    /// Approximate timestamp of the last time queue activity was observed on this listener. Usually QueueCount
+    /// change detection rather than individual message receipt -- but GH-4186 made the receivers that run
+    /// without a BackPressureAgent (Inline, NativeAck) stamp their own receipts, because for those the change
+    /// detection has no writer at all and the value would otherwise never move off construction time.
+    /// </summary>
+    DateTimeOffset LastQueueActivityAt { get; }
+
+    ValueTask StopAndDrainAsync();
+
+    ValueTask MarkAsTooBusyAndStopReceivingAsync();
+
+    ValueTask LatchPermanently();
+
+    /// <summary>
+    /// GH-4199. Per-lane depth when this listener's receiver is group-partitioned, otherwise null. The
+    /// aggregate <see cref="IListenerCircuit.QueueCount"/> cannot distinguish an evenly loaded partitioned
+    /// listener from one where a single dominant group id has everything serialized behind it.
+    /// </summary>
+    PartitionedLaneDepth? LaneDepth => null;
+
+    /// <summary>
+    /// CritterWatch#942 — true when this listener's receiver execution block has faulted terminally
+    /// (jasperfx#506). A faulted receiver can never make progress: its QueueCount freezes and every
+    /// post from the receive loop throws, so the listener looks alive while dropping everything it
+    /// receives. BackPressureAgent forces a full rebuild when it sees this; health checks should
+    /// treat it as unhealthy. Default false for implementations that don't track it.
+    /// </summary>
+    bool ReceiverHasFaulted => false;
+}
+
+public class ListeningAgent : IAsyncDisposable, IDisposable, IListeningAgent
+{
+    private readonly BackPressureAgent? _backPressureAgent;
+    private readonly CircuitBreaker? _circuitBreaker;
+    private readonly ILogger _logger;
+    private readonly HandlerPipeline _pipeline;
+    private readonly WolverineRuntime _runtime;
+    private IReceiver? _receiver;
+    private IDisposable? _restarter;
+    private ListenerInboxRecoveryLoop? _inboxRecovery;
+
+    // GH-4776. The companion local queue's recovery, owned by this listener because the slot's ownership is what
+    // decides who may execute from that queue. Starts and dies with the slot, exactly like _inboxRecovery does.
+    private ListenerInboxRecoveryLoop? _companionInboxRecovery;
+    private int _lastObservedQueueCount;
+    private DateTimeOffset _lastQueueCountChangeAt = DateTimeOffset.UtcNow;
+    private bool _disposed;
+
+    public ListeningAgent(Endpoint endpoint, WolverineRuntime runtime)
+    {
+        Endpoint = endpoint;
+        _runtime = runtime;
+        Uri = endpoint.Uri;
+        _logger = runtime.LoggerFactory.CreateLogger<ListeningAgent>();
+
+        if (endpoint.CircuitBreakerOptions != null)
+        {
+            _circuitBreaker = new CircuitBreaker(endpoint.CircuitBreakerOptions, this, runtime.Observer);
+            _pipeline = new HandlerPipeline(runtime,
+                new CircuitBreakerTrackedExecutorFactory(_circuitBreaker,
+                    new CircuitBreakerTrackedExecutorFactory(_circuitBreaker, runtime)), endpoint)
+            {
+                TelemetryEnabled = endpoint.TelemetryEnabled
+            };
+        }
+        else
+        {
+            _pipeline = new HandlerPipeline(runtime, runtime, endpoint)
+            {
+                TelemetryEnabled = endpoint.TelemetryEnabled
+            };
+        }
+
+        if (endpoint.ShouldEnforceBackPressure())
+        {
+            _backPressureAgent = new BackPressureAgent(this, endpoint, runtime.Observer, _logger,
+                runtime.BackPressureSweeper);
+            _backPressureAgent.Start();
+        }
+    }
+
+    public IListener? Listener { get; private set; }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        _restarter?.SafeDispose();
+        _backPressureAgent?.SafeDispose();
+        stopInboxRecovery();
+
+        if (Listener != null)
+        {
+            await Listener.DisposeAsync();
+        }
+
+        _receiver?.Dispose();
+
+        if (_circuitBreaker != null)
+        {
+            await _circuitBreaker.DisposeAsync();
+        }
+        
+        Listener = null;
+        _receiver = null;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+        _disposed = true;
+
+        _receiver?.Dispose();
+        _circuitBreaker?.SafeDisposeSynchronously();
+        _backPressureAgent?.SafeDispose();
+        stopInboxRecovery();
+        _semaphore.Dispose();
+    }
+
+    // CritterWatch#942 — the receive block's own depth PLUS the members this listener has fed into
+    // message-batching pipelines that haven't reached a batch terminal yet. Without the second term,
+    // BatchMessagesOf drains the (bounded, watched) receive block into an unbounded local execution
+    // queue and back-pressure never fires while memory grows without bound.
+    /// <summary>
+    /// CritterWatch#942 — see <see cref="IListeningAgent.ReceiverHasFaulted"/>. True when the
+    /// current receiver's execution block has faulted terminally (jasperfx#506).
+    /// </summary>
+    // GH-4191: Unwrap() first. Neither pass-through wrapper implements IFaultTrackingReceiver, so reading the raw
+    // field made a terminally faulted receiver behind one report healthy forever -- and this flag is the only
+    // thing BackPressureAgent has to notice it by. ReceiverWithRules is installed for any incoming envelope rule,
+    // which includes a bare endpoint-level MessageType or TenantId, so "behind a wrapper" is the common case.
+    public bool ReceiverHasFaulted => _receiver?.Unwrap() is IFaultTrackingReceiver { HasFaulted: true };
+
+    // GH-4186: IHasQueueDepth, not ILocalQueue. InlineReceiver and NativeAckReceiver both maintain a depth over
+    // the same kind of block a BufferedReceiver does, but neither is a local queue -- deliberately, because a
+    // delivery in those modes settles against the listener that brought it. Reading through ILocalQueue meant
+    // both contributed a constant 0, so a saturated NativeAck listener was indistinguishable from an idle one.
+    public int QueueCount => (_receiver is IHasQueueDepth q ? q.QueueCount : 0)
+                             + _runtime.BatchingPendingCounts.PendingFor(Endpoint.Uri);
+
+    /// <summary>
+    /// GH-4199. Per-lane depth when this listener's receiver is group-partitioned, otherwise null. Read off
+    /// the OUTER receiver deliberately: both wrappers delegate it, and the outer one is what
+    /// <see cref="QueueCount"/> reads too, so the sum and its breakdown can never come from different layers.
+    /// </summary>
+    public PartitionedLaneDepth? LaneDepth => (_receiver as IHasQueueDepth)?.LaneDepth;
+
+    /// <summary>
+    /// Approximate timestamp of the last time a message was received on this listener. Receivers that stamp
+    /// their own receipts (<c>InlineReceiver</c>, <c>NativeAckReceiver</c>) report it directly; everything else
+    /// falls back to observing QueueCount changes, which is driven by BackPressureAgent polling or explicit
+    /// calls to <see cref="UpdateQueueCountObservation"/>.
+    /// </summary>
+    public DateTimeOffset LastQueueActivityAt
+    {
+        get
+        {
+            // GH-4186. The change-detection heuristic has exactly one writer, and that writer is
+            // BackPressureAgent -- which deliberately does not run for Inline or NativeAck endpoints. For those
+            // two the fallback below would return the construction timestamp forever, so prefer whatever the
+            // receiver stamped on receipt when it is the more recent of the two.
+            if (_receiver is IHasQueueDepth { LastReceivedAt: { } received } && received > _lastQueueCountChangeAt)
+            {
+                return received;
+            }
+
+            return _lastQueueCountChangeAt;
+        }
+    }
+
+    /// <summary>
+    /// Call periodically to update the heuristic for last message received.
+    /// If QueueCount has changed since the last observation, the timestamp is updated.
+    /// </summary>
+    internal void UpdateQueueCountObservation()
+    {
+        var current = QueueCount;
+        if (current != _lastObservedQueueCount)
+        {
+            _lastQueueCountChangeAt = DateTimeOffset.UtcNow;
+            _lastObservedQueueCount = current;
+        }
+    }
+
+    public async Task EnqueueDirectlyAsync(IEnumerable<Envelope> envelopes)
+    {
+        // GH-4188. Branch on the receiver that actually executes messages, not on whatever wrapper happens to be
+        // in front of it. Endpoint.MaybeWrapReceiver wraps in ReceiverWithRules for any incoming envelope rule --
+        // and ReceiverWithRules is unconditionally an ILocalQueue, so a wrapped NativeAck or Inline receiver used
+        // to match the ILocalQueue branch below and throw from inside ReceiverWithRules.EnqueueAsync, exactly
+        // re-creating the GH-4011 failure. A GlobalPartitionedInterceptor is not an ILocalQueue at all, so
+        // anything behind it fell all the way through to the throw.
+        //
+        // Dispatch still goes through the OUTER receiver everywhere it can, so the wrappers keep doing their jobs
+        // (applying the incoming rules, re-routing globally partitioned messages). Only the ILocalQueue branch
+        // enqueues into the unwrapped receiver -- which is what ReceiverWithRules.EnqueueAsync delegates to anyway.
+        // Null until StartAsync has built one; that falls through to the same throw it always did.
+        var actual = _receiver?.Unwrap();
+
+        if (actual is BufferedReceiver)
+        {
+            // Agent is latched if listener is null
+            await _receiver!.ReceivedAsync(new RetryOnInlineChannelCallback(Listener!, _runtime), envelopes.ToArray());
+        }
+        else if (actual is ILocalQueue queue)
+        {
+            var uniqueNodeId = _runtime.DurabilitySettings.AssignedNodeNumber;
+            foreach (var envelope in envelopes)
+            {
+                envelope.OwnerId = uniqueNodeId;
+                await queue.EnqueueAsync(envelope);
+            }
+        }
+        else if (actual is InlineReceiver)
+        {
+            // Agent is latched if listener is null
+            await _receiver!.ReceivedAsync(new RetryOnInlineChannelCallback(Listener!, _runtime), envelopes.ToArray());
+        }
+        else if (actual is NativeAckReceiver)
+        {
+            // GH-4011. Same shape as the InlineReceiver case above, and for the same reason: a receiver whose
+            // settlement rides the listener rather than a local queue. These envelopes come from the message
+            // store (DLQ replay per GH-1942, scheduled-message firing), not from a broker delivery, so there is
+            // no delivery tag to ack -- RetryOnInlineChannelCallback marks the inbox row handled and only then
+            // forwards to the real listener. Without this branch a NativeAck endpoint in an application that
+            // also has persistence configured -- durable outbox for sending, native acks on one flooding
+            // listener, a perfectly legitimate combination -- threw on any DLQ replay targeting it.
+            // Agent is latched if listener is null
+            await _receiver!.ReceivedAsync(new RetryOnInlineChannelCallback(Listener!, _runtime), envelopes.ToArray());
+        }
+        else if (actual is GlobalPartitionedReceiverBridge)
+        {
+            // Forward to the companion local queue for sequential processing
+            foreach (var envelope in envelopes)
+            {
+                // GH-4288. Everything routed through here (inbox recovery, DLQ replay, scheduled
+                // firing) came out of the message store, so the inbox row already exists. Without
+                // this the companion local queue's DurableReceiver re-stored each envelope and the
+                // resulting DuplicateIncomingEnvelopeException kept recovered messages stuck forever.
+                envelope.WasPersistedInInbox = true;
+                await _receiver!.ReceivedAsync(Listener!, envelope);
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException("There is no active, local queue for this listening endpoint at " +
+                                                Endpoint.Uri);
+        }
+    }
+
+    public Endpoint Endpoint { get; }
+
+    public Uri Uri { get; }
+
+    public ListeningStatus Status { get; private set; } = ListeningStatus.Stopped;
+
+    /// <summary>
+    /// Immediately latch the receiver to stop processing new messages from its internal queue.
+    /// Does not stop the listener or drain — just prevents the receiver from executing any more messages.
+    /// </summary>
+    public void LatchReceiver()
+    {
+        // GH-3709. Deliberately a single ILatchedReceiver test rather than an if/else chain naming each
+        // receiver type. As a chain this silently missed NativeAckReceiver when GH-3708 added it, and an
+        // unlatched receiver's DrainAsync returns immediately instead of waiting for in-flight handlers --
+        // so a stop-and-drain closed the transport channel underneath running work, the unsettled deliveries
+        // were requeued, and on an exclusive listener handoff the new owner re-ran them concurrently with
+        // the old owner. That is exactly the intra-group concurrency the partitioned modes forbid.
+        // GH-4188: Unwrap() rather than a single ReceiverWithRules cast -- the wrappers nest, and a receiver
+        // behind a GlobalPartitionedInterceptor was silently never latched at all.
+        var actual = _receiver?.Unwrap();
+        if (actual is ILatchedReceiver latched)
+        {
+            latched.Latch();
+        }
+    }
+
+    public async ValueTask StopAndDrainAsync()
+    {
+        await StopAndDrainCoreAsync(latchBeforeDrain: true, drainCompanionQueue: true);
+    }
+
+    /// <summary>
+    /// Shared implementation for stop-and-drain. When <paramref name="latchBeforeDrain"/> is
+    /// <c>true</c> (normal shutdown), the receiver is latched before <see cref="IReceiver.DrainAsync"/>
+    /// so that the drain knows it is safe to wait for any in-flight messages to complete.
+    /// When <c>false</c> (pause triggered from within the handler pipeline, e.g. rate limiting),
+    /// the receiver is <em>not</em> pre-latched, so <see cref="IReceiver.DrainAsync"/> sees
+    /// <c>_latched == false</c> and returns immediately — avoiding a deadlock caused by the
+    /// current message's execute frame being on the call stack.
+    /// </summary>
+    /// <param name="drainCompanionQueue">
+    /// GH-4777. True only when this is a real stop -- an exclusive-listener agent handing its slot to
+    /// another node, <see cref="LatchPermanently"/>, or process shutdown. A rate-limit or circuit-breaker
+    /// pause passes false: this node still owns the slot, nothing else will touch those group ids while it
+    /// is paused, so there is no concurrency to prevent and no reason to dump the companion queue's backlog
+    /// back into the inbox.
+    /// </param>
+    private async ValueTask StopAndDrainCoreAsync(bool latchBeforeDrain, bool drainCompanionQueue = false)
+    {
+        // GH-3590. Always tear the loop down first -- StartAsync() rebuilds it when this listener becomes
+        // the active one again.
+        stopInboxRecovery();
+
+        if (Status is ListeningStatus.Stopped or ListeningStatus.GloballyLatched or ListeningStatus.Paused)
+        {
+            return;
+        }
+
+        var listener = Listener;
+        var receiver = _receiver;
+
+        // GH-4866. A listener paused by back pressure has no IListener -- MarkAsTooBusyAndStopReceivingAsync
+        // stopped and disposed it -- but it still has the receiver, deliberately, because the backlog that
+        // receiver holds is what has to drain before the listener may resume. This used to return right here
+        // on `listener == null`, which made a stop in the TooBusy state a no-op: no latch, no receiver drain,
+        // no companion-queue drain (GH-4777), and Status left at TooBusy. The exclusive-listener agent still
+        // reported a clean stop, so the leader started the slot on another node while this one kept
+        // executing its backlog beside it; and with Status still TooBusy, the next back pressure sweep that
+        // found the queue under BufferingLimits.Restart called StartAsync() and put this node back on a slot
+        // it no longer owned. A missing listener means there is nothing to stop, not nothing to do.
+        if (listener == null && receiver == null)
+        {
+            Status = ListeningStatus.Stopped;
+            _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+            return;
+        }
+
+        try
+        {
+            using var activity = WolverineTracing.ActivitySource.StartActivity(WolverineTracing.StoppingListener);
+            activity?.SetTag(WolverineTracing.EndpointAddress, Uri);
+
+            if (listener != null)
+            {
+                await listener.StopAsync();
+            }
+
+            // When called during normal shutdown, latch BEFORE drain so DrainAsync knows
+            // it can safely wait for in-flight messages to complete.
+            // When called from within the handler pipeline (e.g. PauseListenerContinuation),
+            // do NOT latch here: DrainAsync will see _latched==false and return immediately,
+            // preventing a deadlock with the current message's execute frame.
+            if (latchBeforeDrain)
+            {
+                LatchReceiver();
+            }
+
+            Listener = null;
+            _receiver = null;
+
+            if (receiver != null)
+            {
+                await receiver.DrainAsync();
+            }
+
+            // GH-4777. Has to come after the listener is stopped, so nothing new arrives from the broker
+            // while the companion queue is finishing, and before Status flips to Stopped, so the agent's
+            // StopAsync does not return until the backlog is settled. ReassignAgent will not start this
+            // slot on the gaining node until that return is confirmed, which is what makes the handoff
+            // free of overlap rather than merely shorter.
+            if (drainCompanionQueue)
+            {
+                await drainCompanionQueueAsync();
+            }
+
+            if (listener != null)
+            {
+                try
+                {
+                    await listener.DisposeAsync();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Listener may already be disposed during rapid pause/stop cycles.
+                }
+            }
+
+            receiver?.Dispose();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unable to stop and drain the listener for {Uri}", Uri);
+        }
+
+        Status = ListeningStatus.Stopped;
+        _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+
+        _logger.LogInformation("Stopped message listener at {Uri}", Uri);
+    }
+
+    public async ValueTask LatchPermanently()
+    {
+        await StopAndDrainAsync();
+
+        Status = ListeningStatus.GloballyLatched;
+        _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+
+        _logger.LogInformation("Listener at {Uri} has been permanently latched", Uri);
+        await _runtime.Observer.ListenerLatched(Endpoint);
+    }
+
+    public async ValueTask RestartAsync(bool force = true)
+    {
+        if (force)
+        {
+            // Tear the listener down even when Status still reports Accepting — the underlying transport channel
+            // may be dead while the orchestration status is stale (the #3171-class state, or anything the framework
+            // can't self-heal). StopAndDrainAsync sets Status to Stopped, so the StartAsync() below is no longer a
+            // no-op and fully rebuilds the listener.
+            await StopAndDrainAsync();
+        }
+
+        await StartAsync();
+    }
+
+    public async ValueTask StartAsync()
+    {
+        if (Status == ListeningStatus.Accepting)
+        {
+            return;
+        }
+
+        if (_runtime.DurabilitySettings.Mode == DurabilityMode.Balanced
+            && _runtime.Restrictions.FindPausedAgentUris().Any(u => u == Uri))
+        {
+            Status = ListeningStatus.GloballyLatched;
+            _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+            _logger.LogInformation(
+                "Listener at {Uri} is not being started because of an existing agent restriction", Uri);
+            return;
+        }
+
+        // CritterWatch#942 — never re-attach a listener to a terminally faulted receiver. A faulted
+        // block (jasperfx#506) rejects every post and its QueueCount freezes, so reusing it turns a
+        // restart into a zombie: the receive loop polls, fails to enqueue, and (for brokers that
+        // settle at receipt) drops messages, forever. Rebuild instead.
+        //
+        // GH-4191: detect through Unwrap(), for the same reason ReceiverHasFaulted does. Unlike that flag this
+        // half is mode-independent -- it is reached on any restart, not only via BackPressureAgent -- so before
+        // this a wrapped faulted receiver was re-attached to a fresh listener on every restart.
+        if (_receiver?.Unwrap() is IFaultTrackingReceiver { HasFaulted: true } faulted)
+        {
+            _logger.LogWarning(
+                "The receiver for {Uri} had terminally faulted and is being rebuilt before the listener restarts",
+                Uri);
+
+            // Deliberately disposing the UNWRAPPED receiver rather than the outer one. The wrappers hold nothing
+            // of their own -- they forward Dispose() to Inner -- but they are IDisposable only, so disposing the
+            // outer would silently take the sync branch below and skip DurableReceiver.DisposeAsync entirely.
+            // Nulling the field drops the wrappers, and the rebuild below re-applies both of them.
+            _receiver = null;
+            try
+            {
+                if (faulted is IAsyncDisposable disposable)
+                {
+                    await disposable.DisposeAsync();
+                }
+                else
+                {
+                    ((IDisposable)faulted).Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(e, "Error disposing the faulted receiver for {Uri}", Uri);
+            }
+        }
+
+        _receiver ??= Endpoint.MaybeWrapReceiver(await buildReceiverAsync());
+
+        // If this endpoint is part of a global partitioned topology, swap receiver to bridge to local queue
+        if (Endpoint.GlobalPartitionLocalQueueUri != null)
+        {
+            var localQueue = _runtime.Endpoints.AgentForLocalQueue(Endpoint.GlobalPartitionLocalQueueUri) as ILocalQueue;
+            if (localQueue != null)
+            {
+                // The companion queue executes rows parked at TWO addresses: its own, for messages that took
+                // GlobalPartitionedRoute's local shortcut, and this slot's, for messages a durable database-backed
+                // slot popped out of its shard queue table (GH-4288 stamps those at the slot's address). The
+                // companion queue's drain on a handoff (GH-4777) can only release addresses it knows about, so
+                // tell it the slot's -- before the restart below, so a rebuilt receiver carries it too.
+                if (localQueue is DurableLocalQueue durableCompanion)
+                {
+                    durableCompanion.PartitionSlotUri = Endpoint.Uri;
+                }
+
+                // GH-4777. A previous loss of this slot drained the companion queue's receiver, and
+                // DurableReceiver has no unlatch -- so without rebuilding it here, re-acquiring the slot would
+                // hand the bridge a dead queue that silently executes nothing. Conditional on the status so a
+                // first start keeps the receiver its constructor already built, and so this does not publish a
+                // spurious Accepting ListenerState on every restart.
+                if (localQueue is IListenerCircuit { Status: not ListeningStatus.Accepting } companionCircuit)
+                {
+                    await companionCircuit.StartAsync();
+                }
+
+                // GH-4288. A durable database-backed queue (sharded SQL Server / PostgreSQL slots) moves
+                // each envelope into the inbox as part of the dequeue itself, so the bridge has to mark
+                // the envelopes as already persisted or the companion local queue's DurableReceiver
+                // stores them a second time -- a DuplicateIncomingEnvelopeException per message and
+                // every one of them permanently parked in the inbox instead of executed.
+                var alreadyPersisted = Endpoint is IDatabaseBackedEndpoint && Endpoint.Mode == EndpointMode.Durable;
+                _receiver = new GlobalPartitionedReceiverBridge(localQueue, alreadyPersisted);
+            }
+        }
+        // If there are global partitioned topologies and this is NOT a paired endpoint, intercept matching messages
+        // GH-4191: the `is not GlobalPartitionedInterceptor` guard. Unlike the `??=` above, this wrap used to be
+        // unconditional -- and StartAsync is also the back pressure RESUME path. MarkAsTooBusyAndStopReceivingAsync
+        // deliberately keeps _receiver alive (the queue it holds is exactly what has to drain before the listener
+        // resumes) and only drops the Listener, so every latch/resume cycle added another interceptor layer, with
+        // nothing ever removing one. Each layer only delegates, so it was never wrong -- just an unbounded chain
+        // whose per-message cost grew with the number of cycles the endpoint had been through.
+        else if (_runtime.Options.MessagePartitioning.GlobalPartitionedTopologies.Count > 0
+                 && !Endpoint.UsedInShardedTopology
+                 && Endpoint.Uri.Scheme != "local"
+                 && _receiver is not GlobalPartitionedInterceptor)
+        {
+            _receiver = new GlobalPartitionedInterceptor(_receiver, _runtime);
+        }
+
+        if (Endpoint.ListenerCount > 1)
+        {
+            var listeners = new List<IListener>(Endpoint.ListenerCount);
+            for (var i = 0; i < Endpoint.ListenerCount; i++)
+            {
+                var listener = await Endpoint.BuildListenerAsync(_runtime, _receiver);
+                listeners.Add(listener);
+            }
+
+            Listener = new ParallelListener(Uri, listeners);
+        }
+        else
+        {
+            Listener = await Endpoint.BuildListenerAsync(_runtime, _receiver);
+        }
+
+        assertLeaseRenewalContract(Listener);
+
+        Status = ListeningStatus.Accepting;
+        _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+
+        _logger.LogInformation("Started message listening at {Uri}", Uri);
+
+        startInboxRecoveryIfNecessary();
+    }
+
+    /// <summary>
+    /// GH-4048. A NativeAck endpoint on a transport that puts a clock on an unsettled delivery MUST build a
+    /// lease-renewing listener. Without one, the delivery expires while the envelope is still sitting in an
+    /// execution lane and the broker redelivers it -- so the endpoint is a silent duplicate generator by
+    /// construction, not merely at risk under load. Failing at startup is the same treatment GH-3712 gave
+    /// silently-ignored listener settings.
+    /// </summary>
+    private void assertLeaseRenewalContract(IListener? listener)
+    {
+        if (Endpoint.Mode != EndpointMode.NativeAck) return;
+        if (!Endpoint.holdsExpiringLease) return;
+        if (listener == null) return;
+
+        foreach (var inner in flatten(listener))
+        {
+            if (inner is ISupportLeaseRenewal) continue;
+
+            throw new InvalidOperationException(
+                $"The listener for endpoint {Uri} ({inner.GetType().FullName}) is using EndpointMode.NativeAck on a transport whose unsettled deliveries expire, but it does not implement {nameof(ISupportLeaseRenewal)}. " +
+                "Under NativeAck a delivery stays unsettled for lane queue time plus handler time, so the broker's lease has to be renewed for the whole time the envelope is queued. " +
+                $"Implement {nameof(ISupportLeaseRenewal)} on the listener, or override Endpoint.holdsExpiringLease to false if this transport really does not expire an unsettled delivery.");
+        }
+    }
+
+    private static IEnumerable<IListener> flatten(IListener listener)
+    {
+        switch (listener)
+        {
+            case ParallelListener parallel:
+                foreach (var inner in parallel.InnerListeners)
+                foreach (var leaf in flatten(inner))
+                {
+                    yield return leaf;
+                }
+
+                break;
+
+            case CompoundListener compound:
+                foreach (var inner in compound.Inner)
+                foreach (var leaf in flatten(inner))
+                {
+                    yield return leaf;
+                }
+
+                break;
+
+            default:
+                yield return listener;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// GH-3590: a durable listener that is only ever active on a single node (Exclusive or PinnedToLeader) can
+    /// not rely on the per-database durability agent to recover its dormant inbox messages, because that agent
+    /// is assigned per database and routinely lands on a different node. Such a listener owns its own inbox
+    /// recovery for as long as it is the active listener.
+    ///
+    /// <para>GH-4776 adds a second, independent loop: a global partition slot also owns recovery for its
+    /// companion local queue. The two are deliberately separate loops rather than one sweeping both addresses,
+    /// because <see cref="ListenerInboxRecovery.DeterminePageSize"/> sizes each page against the status and
+    /// queue depth of the specific circuit it is feeding.</para>
+    /// </summary>
+    private void startInboxRecoveryIfNecessary()
+    {
+        if (!_runtime.Options.Durability.DurabilityAgentEnabled) return;
+        if (_runtime.Storage is NullMessageStore) return;
+
+        if (Endpoint is { Mode: EndpointMode.Durable, IsSingleNodeListener: true })
+        {
+            _inboxRecovery?.SafeDispose();
+            _inboxRecovery = new ListenerInboxRecoveryLoop(_runtime, this, _logger);
+        }
+
+        startCompanionQueueInboxRecoveryIfNecessary();
+    }
+
+    /// <summary>
+    /// GH-4776. A global partition's companion local queue cannot rely on the per-database durability agent
+    /// either, and for a sharper reason than GH-3590: the agent would succeed. That <c>local://</c> address is
+    /// live on every node -- <c>LocalQueue.IsSingleNodeListener</c> is deliberately false (GH-3856) and
+    /// <c>FindListenerCircuit</c> builds a circuit for any local scheme -- so a replayed dead letter or a
+    /// released backlog parked at that address was recovered straight into the agent node's own companion queue
+    /// and executed there, beside the slot's real owner and under the same group id.
+    ///
+    /// <para>So the companion queue's recovery is pinned to the SLOT, whose exclusive listener this agent is.
+    /// It starts when the slot is acquired and <see cref="stopInboxRecovery"/> kills it when the slot moves on,
+    /// which is exactly the lifetime during which this node is the one allowed to execute those messages.
+    /// Nothing recovers the rows while no node owns the slot, and that is the same bargain every exclusive
+    /// listener already makes: they wait at <c>owner_id = 0</c> rather than running in the wrong place.</para>
+    /// </summary>
+    private void startCompanionQueueInboxRecoveryIfNecessary()
+    {
+        // Null on a native-ack topology, which has no companion queue at all, and on every endpoint outside a
+        // global partitioned topology.
+        if (Endpoint.GlobalPartitionLocalQueueUri == null) return;
+
+        // A buffered companion queue writes no inbox rows, so there is nothing for a sweep to find.
+        if (_runtime.Endpoints.AgentForLocalQueue(Endpoint.GlobalPartitionLocalQueueUri) is not IListenerCircuit
+            { Endpoint.Mode: EndpointMode.Durable } companion) return;
+
+        _companionInboxRecovery?.SafeDispose();
+        _companionInboxRecovery = new ListenerInboxRecoveryLoop(_runtime, companion, _logger);
+    }
+
+    private void stopInboxRecovery()
+    {
+        _inboxRecovery?.SafeDispose();
+        _inboxRecovery = null;
+
+        _companionInboxRecovery?.SafeDispose();
+        _companionInboxRecovery = null;
+    }
+
+    /// <summary>
+    /// GH-4777. Losing a global partition slot has to stop this node executing from the slot's companion local
+    /// queue, and until now it did not. <see cref="StopAndDrainCoreAsync"/>'s two protective steps are
+    /// <see cref="LatchReceiver"/> and <c>receiver.DrainAsync()</c>, and for a slot both are no-ops: the
+    /// receiver is a <see cref="GlobalPartitionedReceiverBridge"/>, which is not an <c>IReceiverWrapper</c> (so
+    /// <c>Unwrap()</c> stops there and the latch finds no <c>ILatchedReceiver</c>) and whose <c>DrainAsync</c>
+    /// returns immediately. So the previous owner kept working through the backlog it already had while the
+    /// gaining node started on new messages of the same group ids -- the exact intra-group concurrency that
+    /// <see cref="LatchReceiver"/>'s own GH-3709 comment describes as already fixed for every other receiver.
+    ///
+    /// <para>The companion queue has a perfectly good latch-and-drain of its own; the handoff simply never
+    /// reached it. <c>DurableReceiver.DrainAsync</c> waits for in-flight handlers and then releases whatever is
+    /// still queued back to <c>AnyNode</c>, which is precisely "finish or release before the new owner starts".
+    /// The released rows reach the new owner through the companion inbox recovery loop that GH-4776 pinned to
+    /// the slot (<see cref="startCompanionQueueInboxRecoveryIfNecessary"/>) -- without that, releasing here
+    /// would strand them.</para>
+    ///
+    /// <para>Reversible on purpose. <c>DurableReceiver</c> has <c>Latch()</c> and no unlatch, so a drained
+    /// queue stays dead; <see cref="StartAsync"/> calls <c>StartAsync()</c> on the companion circuit when it
+    /// re-installs the bridge, which builds a fresh receiver. Between the two, <c>Latched</c> makes
+    /// <c>DurableLocalQueue</c> persist anything sent to it at <c>AnyNode</c> rather than execute it, so a
+    /// stray send during the gap is recovered rather than lost.</para>
+    /// </summary>
+    private async Task drainCompanionQueueAsync()
+    {
+        // Null outside a global partitioned topology, and on a native-ack topology, which has no companion
+        // queue to drain.
+        if (Endpoint.GlobalPartitionLocalQueueUri == null) return;
+
+        // Deliberately only the durable queue. A buffered companion queue holds nothing durably, so draining it
+        // would discard its backlog rather than hand it over -- see the note on this in the GH-4777 tests.
+        if (_runtime.Endpoints.AgentForLocalQueue(Endpoint.GlobalPartitionLocalQueueUri) is not DurableLocalQueue
+            companion) return;
+
+        try
+        {
+            _logger.LogInformation(
+                "Draining the global partition companion queue {Companion} because this node is giving up slot {Slot}",
+                companion.Uri, Uri);
+
+            // Latch FIRST: DurableReceiver.DrainAsync only waits for in-flight handlers when it was already
+            // latched (it reads _latched before setting it), so without this the drain would release the queued
+            // remainder but still let the message currently executing overlap the new owner.
+            companion.LatchReceiver();
+
+            await ((IReceiver)companion).DrainAsync();
+        }
+        catch (Exception e)
+        {
+            // Not rethrown. A failed drain must not fail the agent's StopAsync -- an unconfirmed stop means
+            // ReassignAgent never hands the slot on and it stops being served at all, which is worse than the
+            // overlap this method exists to prevent.
+            _logger.LogError(e,
+                "Error draining the global partition companion queue {Companion} while giving up slot {Slot}",
+                companion.Uri, Uri);
+        }
+    }
+
+    public async ValueTask PauseAsync(TimeSpan pauseTime)
+    {
+        // Do NOT pre-latch the receiver here. PauseAsync may be called from within the
+        // handler pipeline (e.g. via RateLimitContinuation → PauseListenerContinuation).
+        // Pre-latching causes DrainAsync to wait for the ActionBlock to drain, which
+        // deadlocks because the current message's execute frame is still on the call stack.
+        await PauseCoreAsync(pauseTime, latchBeforeDrain: false);
+    }
+
+    public async ValueTask PauseWithDrainAsync(TimeSpan pauseTime)
+    {
+        // Safe to fully drain here: this method is called from background threads
+        // (circuit breaker), never from within the handler pipeline call stack.
+        await PauseCoreAsync(pauseTime, latchBeforeDrain: true);
+    }
+
+    private async ValueTask PauseCoreAsync(TimeSpan pauseTime, bool latchBeforeDrain)
+    {
+        try
+        {
+            await StopAndDrainCoreAsync(latchBeforeDrain);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unable to drain outstanding messages in the listener for {Uri}", Uri);
+        }
+
+        _circuitBreaker?.Reset();
+
+        // GH-3832 — a deliberate pause is not the same state as merely stopped, and not the same
+        // as a back-pressure TooBusy latch. Both recover on their own, but on different triggers:
+        // this one on the Restarter installed below, TooBusy only once the queue drains. Keeping
+        // them distinct is what lets BackPressureAgent leave a paused listener alone.
+        Status = ListeningStatus.Paused;
+
+        _logger.LogInformation("Pausing message listening at {Uri}", Uri);
+        _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, ListeningStatus.Paused));
+        _restarter = new Restarter(this, pauseTime);
+    }
+
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+
+    public async ValueTask PauseForInboxRecoveryAsync()
+    {
+        if (Status != ListeningStatus.Accepting || Listener == null) return;
+
+        await _semaphore.WaitAsync();
+        if (Status != ListeningStatus.Accepting || Listener == null)
+        {
+            _semaphore.Release();
+            return;
+        }
+
+        try
+        {
+            await StopAndDrainAsync();
+            _circuitBreaker?.Reset();
+            _logger.LogWarning("Paused listener at {Uri} — inbox database unavailable", Uri);
+            _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, ListeningStatus.Stopped));
+
+            _restarter?.SafeDispose();
+            _restarter = new InboxHealthRestarter(this, _runtime, _logger);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public async ValueTask MarkAsTooBusyAndStopReceivingAsync()
+    {
+        if (Status != ListeningStatus.Accepting || Listener == null)
+        {
+            return;
+        }
+
+        await _semaphore.WaitAsync();
+        if (Status != ListeningStatus.Accepting || Listener == null)
+        {
+            _semaphore.Release();
+            return;
+        }
+
+        try
+        {
+            using var activity = WolverineTracing.ActivitySource.StartActivity(WolverineTracing.PausingListener);
+            activity?.SetTag(WolverineTracing.EndpointAddress, Listener.Address);
+            activity?.SetTag(WolverineTracing.StopReason, WolverineTracing.TooBusy);
+
+            try
+            {
+                await Listener.StopAsync();
+                await Listener.DisposeAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Unable to cleanly stop the listener for {Uri}", Uri);
+            }
+        
+            Listener = null;
+
+            Status = ListeningStatus.TooBusy;
+            _runtime.Tracker.Publish(new ListenerState(Uri, Endpoint.EndpointName, Status));
+
+            _logger.LogInformation("Marked listener at {Uri} as too busy and stopped receiving. The current local message count is {LocalCount}, and the BufferingLimits are set to {BufferingLimits}. You may want to increase the buffering limits", Uri, QueueCount, Endpoint.BufferingLimits);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private async ValueTask<IReceiver> buildReceiverAsync()
+    {
+        switch (Endpoint.Mode)
+        {
+            case EndpointMode.Durable:
+                var receiver = new DurableReceiver(Endpoint, _runtime, _pipeline);
+                await receiver.ClearInFlightIncomingAsync();
+                return receiver;
+
+            case EndpointMode.Inline:
+                return new InlineReceiver(Endpoint, _runtime, _pipeline);
+
+            case EndpointMode.BufferedInMemory:
+                return new BufferedReceiver(Endpoint, _runtime, _pipeline);
+
+            case EndpointMode.NativeAck:
+                return new NativeAckReceiver(Endpoint, _runtime, _pipeline);
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(Endpoint.Mode), Endpoint.Mode,
+                    $"Unknown {nameof(EndpointMode)} for the listening endpoint at {Endpoint.Uri}");
+        }
+    }
+}
+
+internal class Restarter : IDisposable
+{
+    private readonly CancellationTokenSource _cancellation;
+    private readonly Task<Task> _task;
+
+    public Restarter(IListenerCircuit parent, TimeSpan timeSpan)
+    {
+        _cancellation = new CancellationTokenSource();
+        _task = Task.Delay(timeSpan, _cancellation.Token)
+            .ContinueWith(async _ =>
+            {
+                if (_cancellation.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await parent.StartAsync();
+            }, TaskScheduler.Default);
+    }
+
+    public void Dispose()
+    {
+        _cancellation.Cancel();
+        _cancellation.Dispose();
+        _task.SafeDispose();
+    }
+}
+
+internal class InboxHealthRestarter : IDisposable
+{
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly Task _task;
+
+    public InboxHealthRestarter(IListenerCircuit parent, IWolverineRuntime runtime, ILogger logger)
+    {
+        // GH-4650. Detached, so the probe's store calls and the listener it restarts do not land under
+        // whatever activity the retry-block worker that paused the listener happened to carry.
+        _task = DetachedTask.Run(() => ProbeLoopAsync(parent, runtime, logger, _cancellation.Token));
+    }
+
+    private static async Task ProbeLoopAsync(
+        IListenerCircuit parent, IWolverineRuntime runtime, ILogger logger, CancellationToken ct)
+    {
+        var delay = TimeSpan.FromSeconds(2);
+        var maxDelay = TimeSpan.FromSeconds(30);
+
+        // GH-4658. Probe the MAIN store only. Since GH-4435 a listener pauses for inbox recovery only when
+        // the failure reached the main store -- a tenant database refusing a write defers those envelopes
+        // and leaves the listener running -- so the main store is the only thing whose health this probe is
+        // deciding. MultiTenantedMessageStore.ReleaseIncomingAsync fans out over Main AND every active
+        // tenant database and throws if ANY of them refuses, so probing the composite store held a listener
+        // paused for the whole of an unrelated tenant's outage, long after the main store had come back.
+        var inbox = (runtime.Storage is MultiTenantedMessageStore multiTenanted
+            ? multiTenanted.Main
+            : runtime.Storage).Inbox;
+
+        while (!ct.IsCancellationRequested)
+        {
+            try { await Task.Delay(delay, ct); }
+            catch (OperationCanceledException) { return; }
+
+            try
+            {
+                // Lightweight probe — releases 0 rows but exercises DB connection.
+                //
+                // GH-4739. THIS CALL MUST REMAIN A GENUINE DATABASE ROUND-TRIP. Owner 0 can never own a
+                // row (0 IS the unowned marker), and since GH-4739 the release statement also carries
+                // `owner_id <> 0`, so the predicate is now contradictory and SQL Server folds it to a
+                // trivial plan: an empty seek of the owner index, no update locks over the table, and still
+                // a real connection + execute that still throws when the store is unreachable. Measured at
+                // 2 logical reads against 223 for a 20k-row inbox. That is strictly better than what this
+                // used to be -- a full inbox scan taking U-locks against a database already struggling.
+                //
+                // Do NOT "optimize" this by short-circuiting ReleaseIncomingAsync on ownerId == 0. The probe
+                // would then always succeed and restart listeners over a dead database. Negative control:
+                // src/Testing/CoreTests/Transports/inbox_health_probe_4658.cs.
+                await inbox.ReleaseIncomingAsync(0, new Uri("wolverine://inbox-health-probe"));
+
+                logger.LogInformation("Inbox available again for {Uri}. Restarting listener.", parent.Endpoint.Uri);
+                await parent.StartAsync();
+                return;
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning(e, "Inbox still unavailable for {Uri}. Retrying in {Delay}.", parent.Endpoint.Uri, delay);
+                delay = TimeSpan.FromMilliseconds(Math.Min(delay.TotalMilliseconds * 1.5, maxDelay.TotalMilliseconds));
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        _cancellation.Cancel();
+        _cancellation.Dispose();
+        _task.SafeDispose();
+    }
+}
+
+internal class RetryOnInlineChannelCallback : IListener
+{
+    private readonly IListener _inner;
+    private readonly IWolverineRuntime _runtime;
+
+    public RetryOnInlineChannelCallback(IListener inner, IWolverineRuntime runtime)
+    {
+        _inner = inner;
+        _runtime = runtime;
+    }
+
+    public IHandlerPipeline? Pipeline => _inner.Pipeline;
+    public async ValueTask CompleteAsync(Envelope envelope)
+    {
+        try
+        {
+            await _runtime.Storage.Inbox.MarkIncomingEnvelopeAsHandledAsync(envelope);
+        }
+        catch (Exception e)
+        {
+            _runtime.Logger.LogError(e, "Error trying to mark a message as handled in the transactional inbox");
+        }
+
+        await _inner.CompleteAsync(envelope);
+    }
+
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        return _inner.DeferAsync(envelope);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return new ValueTask();
+    }
+
+    public Uri Address => _inner.Address;
+    public ValueTask StopAsync()
+    {
+        return new ValueTask();
+    }
+}

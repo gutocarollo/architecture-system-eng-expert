@@ -1,0 +1,204 @@
+﻿using Wolverine.Runtime.Serialization;
+using Wolverine.Runtime.Serialization.Encryption;
+using Wolverine.Transports;
+
+namespace Wolverine.Configuration;
+
+public interface IEndpointConfiguration<T>
+{
+    /// <summary>
+    ///     Give this subscriber endpoint a diagnostic name. This will be used
+    ///     by Open Telemetry diagnostics if set
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    T Named(string name);
+
+    /// <summary>
+    ///     Name the external system on the other end of this endpoint — "Stripe", "Legacy ERP" — when it
+    ///     listens to, or publishes to, something outside this application (GH-3989). Descriptive only:
+    ///     it flows out through the endpoint's capabilities descriptor and onto the Event Model as an
+    ///     external-system element on the translation slice this endpoint triggers or feeds.
+    /// </summary>
+    /// <param name="name">Display name of the external system.</param>
+    T ExternalSystem(string name);
+
+    /// <summary>
+    ///     Override the default serializer for this endpoint
+    /// </summary>
+    /// <param name="serializer"></param>
+    /// <returns></returns>
+    T DefaultSerializer(IMessageSerializer serializer);
+
+    /// <summary>
+    /// For endpoints that send or receive messages in batches, this governs the maximum
+    /// number of messages that will be received or sent in one batch. Defaults to 100.
+    /// </summary>
+    T MessageBatchSize(int batchSize);
+
+    /// <summary>
+    /// Toggle whether or not Open Telemetry auditing is enabled or disabled for sending, receiving, or executing messages received
+    /// at this endpoint
+    /// </summary>
+    /// <param name="isEnabled"></param>
+    /// <returns></returns>
+    T TelemetryEnabled(bool isEnabled);
+
+    /// <summary>
+    /// Enable wire tap auditing on this endpoint using the default <see cref="IWireTap"/>
+    /// registered in the IoC container. The wire tap will record message success and failure
+    /// for auditing, compliance, or monitoring purposes.
+    /// </summary>
+    /// <returns></returns>
+    T UseWireTap();
+
+    /// <summary>
+    /// Enable wire tap auditing on this endpoint using a keyed <see cref="IWireTap"/>
+    /// service from the IoC container. Use this to vary wire tap implementations
+    /// across different endpoints.
+    /// </summary>
+    /// <param name="serviceKey">The keyed service identifier used to resolve the IWireTap</param>
+    /// <returns></returns>
+    T UseWireTap(string serviceKey);
+}
+
+public interface IListenerConfiguration<T> : IEndpointConfiguration<T>
+{
+    /// <summary>
+    /// If supported, this will make Wolverine listen to this endpoint on
+    /// only one active node and with an inline listener or a sequential, buffered listener
+    /// for endpoints that do not support inline listeners
+    /// </summary>
+    /// <param name="endpointName">Wolverine requires a unique endpoint name for this usage. Most endpoints will supply one automatically, usually based on a queue or topic name, but some endpoint types may require an explicit name</param>
+    /// <returns></returns>
+    T ListenWithStrictOrdering(string? endpointName = null);
+
+    /// <summary>
+    /// Creates a policy of partitioning the processing of incoming messages by the
+    /// specified number of slots. Use this to group messages to prevent concurrent
+    /// processing of messages with the same GroupId while allowing parallel work across
+    /// GroupIds. The number of "slots" reflects the maximum number of parallel messages
+    /// that can be handled concurrently
+    /// </summary>
+    /// <param name="numberOfSlots"></param>
+    /// <returns></returns>
+    T PartitionProcessingByGroupId(PartitionSlots numberOfSlots);
+
+    /// <summary>
+    ///     Specify the maximum number of threads that this worker queue
+    ///     can use at one time
+    /// </summary>
+    /// <param name="maximumParallelHandlers"></param>
+    /// <returns></returns>
+    T MaximumParallelMessages(int maximumParallelHandlers);
+
+    /// <summary>
+    ///     Forces this worker queue to use no more than one thread
+    /// </summary>
+    /// <returns></returns>
+    T Sequential();
+
+    /// <summary>
+    ///     Force any messages enqueued to this worker queue to be durable
+    /// </summary>
+    /// <returns></returns>
+    T UseDurableInbox();
+
+    /// <summary>
+    ///     Force any messages enqueued to this worker queue to be durable
+    /// </summary>
+    /// <returns></returns>
+    /// <summary>
+    /// Hold each broker delivery unacknowledged while it flows through an in-memory, optionally
+    /// group-partitioned execution block, and settle it natively when the handler finishes. See GH-3708.
+    /// </summary>
+    T ProcessInParallelWithNativeAcks();
+
+    /// <summary>
+    /// GH-3710. Opt in to a bounded, in-memory guard that drops -- and immediately settles -- a redelivery
+    /// of a message id this process has already handled on this endpoint within the window. The non-durable
+    /// analogue of the durable inbox's duplicate detection, for <c>ProcessInParallelWithNativeAcks()</c>,
+    /// <c>BufferedInMemory()</c>, and <c>ProcessInline()</c> endpoints.
+    ///
+    /// <para>
+    /// Best-effort by construction: the guard lives in memory in ONE process, so a restart forgets
+    /// everything it knew and a second node never knew it. Read the "In-Memory Idempotency Guard" section of
+    /// the listener docs before relying on it, and keep the durable inbox if you need hard deduplication.
+    /// </para>
+    /// </summary>
+    /// <param name="window">How long a handled message id is remembered. Defaults to 5 minutes.</param>
+    /// <param name="maxTracked">Ceiling on remembered ids, after which the oldest generation is evicted early. Defaults to 100,000.</param>
+    T WithInMemoryIdempotency(TimeSpan? window = null, int? maxTracked = null);
+
+    T UseDurableInbox(BufferingLimits limits);
+
+    /// <summary>
+    ///     Incoming messages are immediately moved into an in-memory queue
+    ///     for parallel processing
+    /// </summary>
+    /// <returns></returns>
+    T BufferedInMemory();
+
+    /// <summary>
+    ///     Incoming messages are immediately moved into an in-memory queue
+    ///     for parallel processing
+    /// </summary>
+    /// <returns></returns>
+    T BufferedInMemory(BufferingLimits limits);
+
+
+    /// <summary>
+    ///     Incoming messages are executed inline
+    /// </summary>
+    /// <returns></returns>
+    T ProcessInline();
+
+    /// <summary>
+    ///     Mark this listener as the preferred endpoint for replies from other systems
+    /// </summary>
+    /// <returns></returns>
+    T UseForReplies();
+
+    /// <summary>
+    /// When using inline processing, allow already-ingested messages to continue processing
+    /// while the receiver is draining. Messages will only be deferred after the drain has
+    /// fully completed rather than as soon as it begins.
+    /// </summary>
+    /// <returns></returns>
+    T ProcessInlineWhileDraining();
+
+    /// <summary>
+    /// Direct Wolverine to use the specified handler type for its messages on
+    /// only this listening endpoint. This is helpful to create "sticky" handlers for the
+    /// same message type on multiple queues
+    /// </summary>
+    /// <param name="handlerType"></param>
+    /// <returns></returns>
+    T AddStickyHandler(Type handlerType);
+
+    /// <summary>
+    /// "Pin" this endpoint so that it is only active on the leader node
+    /// </summary>
+    /// <returns></returns>
+    public T ListenOnlyAtLeader();
+
+    /// <summary>
+    /// Mark this listener as accepting only AES-256-GCM encrypted envelopes.
+    /// Inbound envelopes whose content-type is not the encrypted variant are
+    /// routed to the dead-letter queue with <see cref="EncryptionPolicyViolationException"/>
+    /// before any serializer runs.
+    /// </summary>
+    /// <remarks>
+    /// Scope is the inbound listener only. Outgoing republishes — including
+    /// auto-published <see cref="Fault{T}"/> events that originate from a
+    /// failure on this listener — route via the global routing graph and are
+    /// not constrained by this marker. To require encryption on outbound
+    /// fault events, configure outbound encryption via
+    /// <see cref="MessageTypePolicies{T}.Encrypt"/> or per-endpoint
+    /// <c>.Encrypted()</c>; both pair automatically with the corresponding
+    /// <see cref="Fault{T}"/> envelopes.
+    /// </remarks>
+    public T RequireEncryption();
+}
+
+public interface IListenerConfiguration : IListenerConfiguration<IListenerConfiguration>;

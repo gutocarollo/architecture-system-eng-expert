@@ -1,0 +1,75 @@
+﻿using System.Text.Json;
+using FluentAssertions;
+using V1 = ECommerce.V1;
+
+namespace EventsVersioning.Tests.Downcasters;
+
+public class ChangedStructure
+{
+    public record Client(
+        Guid Id,
+        string Name = "Unknown"
+    );
+
+    public record ShoppingCartOpened(
+        Guid ShoppingCartId,
+        Client Client
+    );
+
+public static V1.ShoppingCartOpened Downcast(
+    ShoppingCartOpened newEvent
+)
+{
+    return new V1.ShoppingCartOpened(
+        newEvent.ShoppingCartId,
+        newEvent.Client.Id
+    );
+}
+
+public static V1.ShoppingCartOpened Downcast(
+    string newEventJson
+)
+{
+    var newEvent = JsonDocument.Parse(newEventJson).RootElement;
+
+    return new V1.ShoppingCartOpened(
+        newEvent.GetProperty("ShoppingCartId").GetGuid(),
+        newEvent.GetProperty("Client").GetProperty("Id").GetGuid()
+    );
+}
+
+    [Fact]
+    public void UpcastObjects_Should_BeForwardCompatible()
+    {
+        // Given
+        var newEvent = new ShoppingCartOpened(
+            Guid.CreateVersion7(),
+            new Client( Guid.CreateVersion7(), "Oskar the Grouch")
+        );
+
+        // When
+        var @event = Downcast(newEvent);
+
+        @event.Should().NotBeNull();
+        @event.ShoppingCartId.Should().Be(newEvent.ShoppingCartId);
+        @event.ClientId.Should().Be(newEvent.Client.Id);
+    }
+
+    [Fact]
+    public void UpcastJson_Should_BeForwardCompatible()
+    {
+        // Given
+        var newEvent = new ShoppingCartOpened(
+            Guid.CreateVersion7(),
+            new Client( Guid.CreateVersion7(), "Oskar the Grouch")
+        );
+        // When
+        var @event = Downcast(
+            JsonSerializer.Serialize(newEvent)
+        );
+
+        @event.Should().NotBeNull();
+        @event.ShoppingCartId.Should().Be(newEvent.ShoppingCartId);
+        @event.ClientId.Should().Be(newEvent.Client.Id);
+    }
+}

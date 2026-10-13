@@ -1,0 +1,6 @@
+dependencies {
+    api(project(":resilience4j-core"))
+
+    testImplementation(testFixtures(project(":resilience4j-core")))
+}
+ext.moduleName = "io.github.resilience4j.timelimiter"

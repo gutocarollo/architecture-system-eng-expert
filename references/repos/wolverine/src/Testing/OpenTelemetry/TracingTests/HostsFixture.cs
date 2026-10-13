@@ -1,0 +1,77 @@
+using Alba;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OtelMessages;
+using Subscriber1;
+using Wolverine;
+using Wolverine.RabbitMQ;
+using Wolverine.Transports.Tcp;
+
+namespace TracingTests;
+
+public class HostsFixture : IAsyncLifetime
+{
+    public IHost FirstSubscriber { get; private set; } = null!;
+    public IHost SecondSubscriber { get; private set; } = null!;
+    public IAlbaHost WebApi { get; private set; } = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        WebApi = await AlbaHost.For<Program>(x => { });
+
+        FirstSubscriber = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.ServiceName = "Subscriber1";
+                opts.ApplicationAssembly = GetType().Assembly;
+
+                opts.Discovery.DisableConventionalDiscovery().IncludeType<Subscriber1Handlers>();
+
+                opts.ListenAtPort(MessagingConstants.Subscriber1Port);
+
+                opts.UseRabbitMq().AutoProvision();
+
+                opts.ListenToRabbitQueue(MessagingConstants.Subscriber1Queue);
+
+                // Publish to the other subscriber
+                opts.PublishMessage<RabbitMessage2>().ToRabbitQueue(MessagingConstants.Subscriber2Queue);
+
+
+                opts.Services.AddOpenTelemetry()
+                    .ConfigureResource(resource => resource.AddService("Subscriber1"))
+                    .WithTracing(tracing => tracing.AddSource("Wolverine"));
+            }).StartAsync();
+
+        SecondSubscriber = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.ServiceName = "Subscriber2";
+                opts.ApplicationAssembly = GetType().Assembly;
+
+                opts.Discovery
+                    .DisableConventionalDiscovery()
+                    .IncludeType<Subscriber2Handlers>();
+
+                opts.UseRabbitMq().AutoProvision();
+
+                opts.ListenToRabbitQueue(MessagingConstants.Subscriber2Queue);
+
+                // Publish to the same subscriber
+                opts.PublishMessage<RabbitMessage3>().ToRabbitQueue(MessagingConstants.Subscriber2Queue);
+
+                opts.Services.AddOpenTelemetry()
+                    .ConfigureResource(resource => resource.AddService("Subscriber2"))
+                    .WithTracing(tracing => tracing.AddSource("Wolverine"));
+            }).StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await WebApi.DisposeAsync();
+        await FirstSubscriber.StopAsync();
+        FirstSubscriber.Dispose();
+        await SecondSubscriber.StopAsync();
+        SecondSubscriber.Dispose();
+    }
+}

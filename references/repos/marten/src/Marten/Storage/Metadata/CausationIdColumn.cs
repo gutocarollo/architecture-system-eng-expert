@@ -1,0 +1,83 @@
+using System;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Events;
+using Marten.Events;
+using Marten.Events.Schema;
+using Marten.Internal;
+using Marten.Internal.CodeGeneration;
+using Marten.Internal.Sessions;
+using Marten.Schema;
+using Marten.Schema.Arguments;
+using NpgsqlTypes;
+using Weasel.Postgresql;
+
+namespace Marten.Storage.Metadata;
+
+internal class CausationIdColumn: MetadataColumn<string>, ISelectableColumn, IEventTableColumn
+{
+    public static readonly string ColumnName = "causation_id";
+
+    private static readonly Lazy<Action<DbDataReader, int, IEvent>> ReadSync =
+        new(() => EventColumnReaders.BuildSync(x => x.CausationId));
+
+    private static readonly Lazy<Func<DbDataReader, int, IEvent, CancellationToken, Task>> ReadAsyncDelegate =
+        new(() => EventColumnReaders.BuildAsync(x => x.CausationId));
+
+    public CausationIdColumn(): base(ColumnName, x => x.CausationId)
+    {
+        Enabled = false;
+        ShouldUpdatePartials = true;
+    }
+
+    public bool ShouldSelect(DocumentMapping mapping, StorageStyle storageStyle)
+    {
+        return mapping.Metadata.CausationId.EnabledWithMember();
+    }
+
+    internal override UpsertArgument ToArgument()
+    {
+        return new CausationIdArgument();
+    }
+
+    public override void WriteMetadataInUpdateStatement(ICommandBuilder builder, DocumentSessionBase session)
+    {
+        builder.Append(ColumnName);
+        builder.Append(" = ");
+        builder.AppendParameter(session.CausationId);
+    }
+
+    public string ValueSql(EventGraph graph, AppendMode mode)
+    {
+        return "?";
+    }
+
+    void IEventTableColumn.ReadValueSync(DbDataReader reader, int index, IEvent @event)
+    {
+        if (reader.IsDBNull(index)) return;
+        ReadSync.Value(reader, index, @event);
+    }
+
+    async Task IEventTableColumn.ReadValueAsync(DbDataReader reader, int index, IEvent @event, CancellationToken cancellation)
+    {
+        if (await reader.IsDBNullAsync(index, cancellation).ConfigureAwait(false)) return;
+        await ReadAsyncDelegate.Value(reader, index, @event, cancellation).ConfigureAwait(false);
+    }
+}
+
+internal class CausationIdArgument: UpsertArgument
+{
+    public CausationIdArgument()
+    {
+        Arg = "causationId";
+        Column = CausationIdColumn.ColumnName;
+        PostgresType = "varchar";
+        DbType = NpgsqlDbType.Varchar;
+    }
+
+    public string ValueSql(EventGraph graph, AppendMode mode)
+    {
+        return "?";
+    }
+}

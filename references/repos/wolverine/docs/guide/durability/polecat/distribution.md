@@ -1,0 +1,90 @@
+# Projection/Subscription Distribution
+
+When Wolverine is combined with Polecat and you're using
+asynchronous projections or any event subscriptions with Polecat, you can achieve potentially greater
+scalability for your system by letting Wolverine distribute the load evenly across a running cluster:
+
+```cs
+opts.Services.AddPolecat(m =>
+    {
+        m.Connection(connectionString);
+
+        m.Projections.Add<TripProjection>(ProjectionLifecycle.Async);
+        m.Projections.Add<DayProjection>(ProjectionLifecycle.Async);
+        m.Projections.Add<DistanceProjection>(ProjectionLifecycle.Async);
+    })
+    .IntegrateWithWolverine(m =>
+    {
+        // This makes Wolverine distribute the registered projections
+        // and event subscriptions evenly across a running application
+        // cluster
+        m.UseWolverineManagedEventSubscriptionDistribution = true;
+    });
+```
+
+::: tip
+This option replaces the Polecat `AddAsyncDaemon(HotCold)` option and should not be used in combination
+with Polecat's own load distribution.
+:::
+
+With this option, Wolverine is going to ensure that every single known asynchronous event projection and every event
+subscription is running on exactly one running node within your application cluster. Moreover, Wolverine will purposely stop and
+restart projections or subscriptions to spread the running load across your entire cluster of running nodes.
+
+In the case of using multi-tenancy through separate databases per tenant with Polecat, this Wolverine "agent distribution"
+will assign the work by tenant databases, meaning that all the running projections and subscriptions for a single tenant
+database will always be running on a single application node. This was done with the theory that this affinity would hopefully
+reduce the number of used database connections over all.
+
+If a node is taken offline, Wolverine will detect that the node is no longer accessible and try to start the missing
+projection/subscription agents on another active node.
+
+_If you run your application on only a single server, Wolverine will of course run all projections and subscriptions
+on just that one server._
+
+Some other facts about this integration:
+
+* Wolverine's agent distribution works with per-tenant database multi-tenancy
+* Wolverine does automatic health checking at the running node level
+* Wolverine can detect when new nodes come online and redistribute work
+* Wolverine is able to support blue/green deployment
+* This capability depends on Wolverine's built-in leadership election
+
+## Uri Structure
+
+The `Uri` structure for event subscriptions or projections is:
+
+```
+event-subscriptions://[event store type]/[event store name]/[database server].[database name]/[relative path of the shard]
+```
+
+For an example from the tests: `event-subscriptions://sqlserver/main/localhost.mydb/day/all` where:
+
+* "sqlserver" is the event store *type*. Polecat reports its `IEventStore.Identity.Type` as its underlying
+  storage engine — `"SqlServer"`, lowercased by the URI — rather than "polecat", so this is where the
+  authority differs from the Marten page's `marten` example
+* "main" refers to this projection being in the primary Polecat store added from `AddPolecat()`. Otherwise
+  this value would be the type name of an ancillary store type in all lower case
+* "localhost" is the database server and "mydb" is the name of the database
+* "day/all" refers to a projection with the `ShardName` of "Day:All"
+
+## Requirements
+
+This functionality requires Wolverine to both track running nodes and to send messages between running nodes within your
+clustered Wolverine service. Wolverine will utilize a "database control queue" for this internal messaging if you are using the `AddPolecat().IntegrateWithWolverine()` integration.
+
+Other requirements:
+
+* `WolverineOptions.Durability.Mode` must be `Balanced` **to spread the work across multiple nodes**, since that is
+  what enables leader election and the control queue. In `Solo` mode every projection and subscription agent still
+  runs — just all of them on the single node. `Serverless` and `MediatorOnly` start no agents at all.
+* In `Balanced` mode you cannot disable external transports with `StubAllExternalTransports()`, because the nodes
+  need the control queue to communicate
+
+## When a Projection Fails <Badge type="tip" text="6.x" />
+
+The failure handling for a paused projection or subscription shard — the classified `ShardFailure` on
+`IEventSubscriptionAgent`, the `IWolverineObserver.AgentPaused` hook, the `NodeRecordType.AgentPaused`
+record, and the rule that only a self-healing failure is auto-restarted — is shared by both event store
+integrations. See [When a Projection Fails](/guide/durability/marten/distribution#when-a-projection-fails)
+on the Marten page for the details; everything there applies identically to Polecat.

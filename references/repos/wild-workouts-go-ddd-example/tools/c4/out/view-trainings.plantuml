@@ -1,0 +1,127 @@
+This diagram has been generated with go-structurizr 
+[https://github.com/krzysztofreczek/go-structurizr]
+
+@startuml
+
+title Service components
+
+skinparam {
+  shadowing false
+  arrowFontSize 10
+  defaultTextAlignment center
+  wrapWidth 200
+  maxMessageSize 100
+}
+hide stereotype
+top to bottom direction
+
+scale 4096 width
+
+skinparam rectangle<<_GROUP>> {
+  FontColor #ffffff
+  BorderColor #ffffff
+}
+
+skinparam rectangle<<ADAPTER>> {
+  BackgroundColor #2d69b7
+  FontColor #ffffff
+  BorderColor #000000
+}
+
+skinparam rectangle<<DOMAIN>> {
+  BackgroundColor #ffffff
+  FontColor #000000
+  BorderColor #000000
+}
+
+skinparam database<<DB>> {
+  BackgroundColor #c8c8c8
+  FontColor #000000
+  BorderColor #000000
+}
+
+skinparam rectangle<<ROOT>> {
+  BackgroundColor #ffffff
+  FontColor #000000
+  BorderColor #000000
+}
+
+skinparam rectangle<<APP>> {
+  BackgroundColor #1a4577
+  FontColor #ffffff
+  BorderColor #000000
+}
+
+rectangle 0ROOT <<_GROUP>> {
+	rectangle "==app.Commands\n<size:10>[component]</size>\n\napplication context" <<ROOT>> as 2042358025
+}
+rectangle 0ROOT <<_GROUP>> {
+	rectangle "==app.Application\n<size:10>[component]</size>\n\napplication context" <<ROOT>> as 1595196051
+}
+rectangle 0ROOT <<_GROUP>> {
+	rectangle "==app.Queries\n<size:10>[component]</size>\n\napplication context" <<ROOT>> as 2827497597
+}
+rectangle 28274975971APP <<_GROUP>> {
+	rectangle "==query.allTrainingsHandler\n<size:10>[component]</size>\n\napplication query" <<APP>> as 3842680776
+}
+2827497597 .[#000000].> 3842680776 : ""
+rectangle 28274975971APP <<_GROUP>> {
+	rectangle "==query.trainingsForUserHandler\n<size:10>[component]</size>\n\napplication query" <<APP>> as 677601637
+}
+2827497597 .[#000000].> 677601637 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.approveTrainingRescheduleHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 809422308
+}
+2042358025 .[#000000].> 809422308 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.cancelTrainingHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 1081289115
+}
+2042358025 .[#000000].> 1081289115 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.rejectTrainingRescheduleHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 3515646600
+}
+2042358025 .[#000000].> 3515646600 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.rescheduleTrainingHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 3269324937
+}
+2042358025 .[#000000].> 3269324937 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.requestTrainingRescheduleHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 555257820
+}
+2042358025 .[#000000].> 555257820 : ""
+rectangle 20423580251APP <<_GROUP>> {
+	rectangle "==command.scheduleTrainingHandler\n<size:10>[component]</size>\n\napplication command" <<APP>> as 1216381826
+}
+2042358025 .[#000000].> 1216381826 : ""
+1595196051 .[#000000].> 2042358025 : ""
+1595196051 .[#000000].> 2827497597 : ""
+rectangle 10812891152ADAPTER <<_GROUP>> {
+	rectangle "==adapters.UsersGrpc\n<size:10>[component]</size>\n\nadapter component" <<ADAPTER>> as 881049450
+}
+1081289115 .[#000000].> 881049450 : ""
+rectangle 10812891152ADAPTER <<_GROUP>> {
+	rectangle "==adapters.TrainerGrpc\n<size:10>[component]</size>\n\nadapter component" <<ADAPTER>> as 2401551451
+}
+1081289115 .[#000000].> 2401551451 : ""
+rectangle 10812891152ADAPTER <<_GROUP>> {
+	rectangle "==adapters.TrainingsFirestoreRepository\n<size:10>[component]</size>\n\nadapter component" <<ADAPTER>> as 1383687574
+}
+1081289115 .[#000000].> 1383687574 : ""
+3515646600 .[#000000].> 1383687574 : ""
+1216381826 .[#000000].> 1383687574 : ""
+1216381826 .[#000000].> 881049450 : ""
+1216381826 .[#000000].> 2401551451 : ""
+555257820 .[#000000].> 1383687574 : ""
+809422308 .[#000000].> 1383687574 : ""
+809422308 .[#000000].> 881049450 : ""
+809422308 .[#000000].> 2401551451 : ""
+3269324937 .[#000000].> 1383687574 : ""
+3269324937 .[#000000].> 881049450 : ""
+3269324937 .[#000000].> 2401551451 : ""
+3842680776 .[#000000].> 1383687574 : ""
+677601637 .[#000000].> 1383687574 : ""
+rectangle 13836875743DB <<_GROUP>> {
+	database "==Firestore\n<size:10>[component]</size>\n\nfirestore client" <<DB>> as 650530190
+}
+1383687574 .[#000000].> 650530190 : ""
+@enduml

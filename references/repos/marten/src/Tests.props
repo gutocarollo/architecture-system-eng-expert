@@ -1,0 +1,82 @@
+<Project>
+
+    <!-- Shared settings for xunit v3 test projects. Imported explicitly by each test
+         project rather than applied from Directory.Build.props, because the repo's
+         non-test projects (samples, CLI runners, benchmarks) must NOT pick these up. -->
+
+    <PropertyGroup>
+        <!-- xunit v3 test projects are stand-alone executables; xunit.v3 supplies the
+             generated entry point, so no Program/Main is declared in the test projects. -->
+        <OutputType>Exe</OutputType>
+
+        <!-- xUnit1051: "pass TestContext.Current.CancellationToken to methods accepting a
+             CancellationToken". New in the v3 analyzers.
+
+             Suppressed by default, and DELIBERATELY LEFT THAT WAY for the remaining suites.
+             This is a settled decision, not unfinished work — please don't sweep the rest.
+
+             The rule is on in the 13 projects that already carry it (DaemonTests plus the 12
+             swept in #5084), where a hung test now gets cancelled and reported instead of
+             running until CI's own job timeout. Those projects set
+             <ThreadTestCancellationToken>true</ThreadTestCancellationToken> BEFORE importing
+             this file, which keeps the warning enforced so unthreaded calls can't creep back.
+
+             The other suites stay suppressed because of the doc samples. Of the 7,930 flagged
+             sites across the solution, 400 sit inside `#region sample_*` blocks that
+             mdsnippets pulls into the VitePress docs, spread over ~82 files in
+             EventSourcingTests, DocumentDbTests, LinqTests, ValueTypeTests, CoreTests and
+             PatchingTests. Threading a test-only cancellation token there would publish
+             `await session.SaveChangesAsync(TestContext.Current.CancellationToken)` to users
+             as if it were guidance, and enforcing the rule around those blocks means
+             bracketing every one with a pragma pair placed outside the region markers
+             (a pragma inside a region is rendered into the docs). Clean sample code is worth
+             more than analyzer coverage in suites where the payoff is small.
+
+             See #5067 for the full per-project table. -->
+        <NoWarn Condition="'$(ThreadTestCancellationToken)' != 'true'">$(NoWarn);xUnit1051</NoWarn>
+
+        <!-- xunit.v3 supplies the entry point. Microsoft.NET.Test.Sdk will also emit a
+             Microsoft Testing Platform entry point for anything flagged IsTestProject,
+             which collides with it (CS0017). We run under VSTest, so suppress that one. -->
+        <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+
+        <!-- Same collision from the other direction: Microsoft.NET.Test.Sdk emits its own
+             VSTest Program.cs for test projects. xunit.v3 already provides Main. -->
+        <GenerateProgramFile>false</GenerateProgramFile>
+
+        <!-- Every test project doubles as a Microsoft.Testing.Platform host, so Bobcat's
+             supervisor (see build/SupervisedTests.cs) can drive the built executable as a
+             worker process over the MTP wire protocol. That is what buys per-test retries in
+             a FRESH process and honest flaky reporting — see #5096.
+
+             This changes only which runner the executable hosts; the entry point is still
+             xunit.v3's (GenerateTestingPlatformEntryPoint stays false above, or the two
+             collide with CS0017). `dotnet test`, its filter argument, TRX and coverlet all
+             keep working.
+             Set here rather than per-job so a build can never silently produce an
+             executable the supervisor cannot drive. -->
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    </PropertyGroup>
+
+    <!-- jasperfx#756 (marten#5343). JasperFx.Events 2.64.0 added canonical versions of the six
+         event exception types that were previously declared once per store, so any file importing
+         both JasperFx.Events and Marten.Exceptions now sees an ambiguous simple name (CS0104).
+         Six suites hit it: EventSourcingTests, TenantPartitionedEventsTests, MultiTenancyTests,
+         DaemonTests, DocumentDbTests and CoreTests.
+
+         These aliases are the test-side half of the same API-preserving choice made in
+         src/Marten/GlobalUsings.cs: Marten's own exception types stay the ones Marten's tests
+         assert on, because that is what Marten's callers catch, and the lift commit is explicit
+         that "stores will subclass or type-forward in a later node". When that node lands and
+         Marten's copies become subclasses or type-forwards of the shared ones, both alias blocks
+         go away together. A test that specifically wants the shared type fully-qualifies it. -->
+    <ItemGroup>
+        <Using Include="Marten.Exceptions.UnknownEventTypeException" Alias="UnknownEventTypeException" />
+        <Using Include="Marten.Exceptions.NonExistentStreamException" Alias="NonExistentStreamException" />
+        <Using Include="Marten.Exceptions.ExistingStreamIdCollisionException" Alias="ExistingStreamIdCollisionException" />
+        <Using Include="Marten.Exceptions.EventDeserializationFailureException" Alias="EventDeserializationFailureException" />
+        <Using Include="Marten.Exceptions.StreamLockedException" Alias="StreamLockedException" />
+        <Using Include="Marten.Exceptions.DefaultTenantUsageDisabledException" Alias="DefaultTenantUsageDisabledException" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,182 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Events;
+using JasperFx.Events.Aggregation;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Marten.Events.Projections;
+using Marten.Metadata;
+using Marten.Storage;
+using Microsoft.EntityFrameworkCore;
+
+namespace Marten.EntityFrameworkCore;
+
+/// <summary>
+/// Base class for multi-stream aggregate projections that persist the aggregate
+/// through an EF Core DbContext instead of Marten's document storage.
+/// The DbContext is also available in <see cref="ApplyEvent"/> for data lookups.
+/// </summary>
+/// <typeparam name="TDoc">The aggregate document type persisted by EF Core</typeparam>
+/// <typeparam name="TId">The aggregate identity type</typeparam>
+/// <typeparam name="TDbContext">The EF Core DbContext type to use</typeparam>
+/// <remarks>
+/// AOT: TDoc carries the DAM flag set required by the wrapped
+/// <see cref="EfCoreProjectionStorage{TDoc, TId, TDbContext}"/> — propagating
+/// the EF Core <c>FindEntityType</c> / <c>Find&lt;TEntity&gt;</c> trim contract
+/// up to consumers.
+/// </remarks>
+public abstract class EfCoreMultiStreamProjection<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.NonPublicProperties
+        | DynamicallyAccessedMemberTypes.Interfaces)]
+    TDoc, TId,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    TDbContext>
+    : MultiStreamProjection<TDoc, TId>, IValidatedProjection<StoreOptions>
+    where TDoc : class where TId : notnull where TDbContext : DbContext
+{
+    private string? _schemaName;
+
+    /// <summary>
+    /// Optional configuration for the DbContextOptionsBuilder.
+    /// Override to customize EF Core options. The Npgsql provider is already
+    /// configured before this is called.
+    /// </summary>
+    public virtual void ConfigureDbContext(DbContextOptionsBuilder<TDbContext> builder)
+    {
+    }
+
+    /// <summary>
+    /// Registers this projection's aggregate type for EF Core-based storage
+    /// with Marten's custom projection storage providers.
+    /// </summary>
+    internal void RegisterEfCoreStorage(StoreOptions options)
+    {
+        _schemaName = options.DatabaseSchemaName;
+        var schemaName = _schemaName;
+
+        // #5329: point rebuild teardown at the table EF Core actually writes. The inherited
+        // DeleteViewTypeOnTeardown<TDoc>() cleanup names Marten's mt_doc_<tdoc> table, which is
+        // never created for an EF-backed projection; Marten's teardown skips it once the line
+        // below registers this type as having custom storage.
+        var efTable = EfCoreProjectionExtensions
+            .ResolveEntityTableIdentifier<TDoc, TDbContext>(schemaName, ConfigureDbContext);
+        if (efTable != null)
+        {
+            Options.DeleteDataInTableOnTeardown(efTable);
+        }
+
+        options.CustomProjectionStorageProviders[typeof(TDoc)] = (session, tenantId) =>
+        {
+            var (dbContext, initialConnection) = session.Database.Create<TDbContext>(ConfigureDbContext, schemaName);
+
+            if (session is ITransactionParticipantRegistrar registrar)
+            {
+                registrar.AddTransactionParticipant(
+                    new DbContextTransactionParticipant<TDbContext>(dbContext, initialConnection, schemaName));
+            }
+
+            return new EfCoreProjectionStorage<TDoc, TId, TDbContext>(dbContext, tenantId);
+        };
+    }
+
+    [JasperFxIgnore]
+    public override async ValueTask<(TDoc?, ActionType)> DetermineActionAsync(
+        IQuerySession session,
+        TDoc? snapshot,
+        TId identity,
+        IIdentitySetter<TDoc, TId> identitySetter,
+        IReadOnlyList<IEvent> events,
+        CancellationToken cancellation)
+    {
+        // The projection's own storage already owns a DbContext for this tenant and batch, and the
+        // participant registered alongside it owns its disposal.
+        if (identitySetter is EfCoreProjectionStorage<TDoc, TId, TDbContext> efStorage)
+        {
+            return await ApplyEventsAsync(snapshot, identity, events, session, efStorage.DbContext,
+                cancellation).ConfigureAwait(false);
+        }
+
+        // Fallback: no EF-backed storage arrived, so build a DbContext just for this call.
+        var (dbContext, initialConnection) =
+            session.Database.Create<TDbContext>(ConfigureDbContext, _schemaName);
+
+        if (session is ITransactionParticipantRegistrar registrar)
+        {
+            registrar.AddTransactionParticipant(
+                new DbContextTransactionParticipant<TDbContext>(dbContext, initialConnection, _schemaName));
+
+            return await ApplyEventsAsync(snapshot, identity, events, session, dbContext, cancellation)
+                .ConfigureAwait(false);
+        }
+
+        // #5457: see the matching comment in EfCoreSingleStreamProjection -- a session that is not
+        // an ITransactionParticipantRegistrar leaves nobody to release the eagerly-opened
+        // connection, so this branch owns what it created.
+        try
+        {
+            return await ApplyEventsAsync(snapshot, identity, events, session, dbContext, cancellation)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            await dbContext.DisposeAsync().ConfigureAwait(false);
+            await initialConnection.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Override to apply events with access to both the aggregate and
+    /// an EF Core DbContext. The default implementation calls
+    /// <see cref="ApplyEvent"/> for each event.
+    /// </summary>
+    [JasperFxIgnore]
+    protected virtual ValueTask<(TDoc?, ActionType)> ApplyEventsAsync(
+        TDoc? snapshot, TId identity, IReadOnlyList<IEvent> events,
+        IQuerySession session, TDbContext dbContext, CancellationToken token)
+    {
+        foreach (var @event in events)
+        {
+            snapshot = ApplyEvent(snapshot, identity, @event, dbContext);
+        }
+
+        return new ValueTask<(TDoc?, ActionType)>(
+            (snapshot, snapshot == null ? ActionType.Delete : ActionType.Store));
+    }
+
+    /// <summary>
+    /// Override to apply a single event. Use <paramref name="dbContext"/> for EF Core data lookups.
+    /// The aggregate is persisted through EF Core's DbContext, not Marten.
+    /// </summary>
+    [JasperFxIgnore]
+    public virtual TDoc? ApplyEvent(TDoc? snapshot, TId identity, IEvent @event,
+        TDbContext dbContext)
+    {
+        return snapshot;
+    }
+
+    /// <summary>
+    /// Validates configuration specific to EF Core projections. Overrides the base
+    /// <see cref="MultiStreamProjection{TDoc,TId}"/> validation which assumes Marten document storage.
+    /// </summary>
+    IEnumerable<string> IValidatedProjection<StoreOptions>.ValidateConfiguration(StoreOptions options)
+    {
+        if (options.Events.TenancyStyle == TenancyStyle.Conjoined
+            && !typeof(TDoc).CanBeCastTo<ITenanted>())
+        {
+            yield return
+                $"The EF Core projection aggregate type {typeof(TDoc).FullNameInCode()} must implement " +
+                $"{nameof(ITenanted)} because the event store uses conjoined multi-tenancy. " +
+                $"Add a TenantId property via the {nameof(ITenanted)} interface so tenant_id is written to the EF Core table.";
+        }
+    }
+}

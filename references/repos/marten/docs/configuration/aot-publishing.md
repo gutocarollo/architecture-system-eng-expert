@@ -1,0 +1,395 @@
+# Publishing Marten with Native AOT
+
+This guide walks through publishing a Marten-backed .NET application with **Native AOT** (`dotnet publish /p:PublishAot=true`). Native AOT ahead-of-time-compiles the app to a self-contained native binary with no JIT and aggressive trimming, which means:
+
+- **Startup is near-instant** — no JIT warmup, no Roslyn loading.
+- **Publish size is small** — typically 15-40 MB self-contained, comparable to a Go binary.
+- **No runtime code generation** — anything that needs `Reflection.Emit`, `Type.MakeGenericType`, or `Activator.CreateInstance(Type)` on a type the trimmer didn't statically see will warn at publish time and may fail at runtime.
+
+Marten 9.0 is the first release where AOT publishing is a supported posture. The headline change: **Marten 9 retired its Roslyn-driven runtime code-generation pipeline entirely** (PR [#4461](https://github.com/JasperFx/marten/pull/4461) — "Removing All Runtime Compilation From Marten"). The document-storage, event-storage, compiled-query, and secondary-store paths now ship as hand-written closed-shape code or as compile-time source-generated output. There is no `dotnet run -- codegen write` step for Marten anymore.
+
+AOT publishing is the right choice for serverless / Lambda / fast-restart workloads. It is **not** required for every Marten app — JIT publishes still work fine, and the dev-loop trade-offs (longer publish times, stricter analyzer policy) mean AOT only pays off when cold-start latency or binary size matters.
+
+::: tip Prerequisites
+
+- .NET 9 or .NET 10 SDK
+- Marten 9.0.0-alpha or later
+- JasperFx 2.0 / JasperFx.Events 2.0 / Weasel 9.0 alphas pulled in transitively when you bump `Marten`
+- The System.Text.Json-based serializer (`UseSystemTextJsonForSerialization`) — Newtonsoft.Json is not AOT-compatible (see [The Newtonsoft.Json escape hatch](#the-newtonsoftjson-escape-hatch))
+- `Marten.SourceGenerator` if you use compiled queries — see the [Marten.SourceGenerator README](https://github.com/JasperFx/marten/blob/master/src/Marten.SourceGenerator/README.md)
+
+:::
+
+## How Marten 9 differs from the broader Critter Stack AOT story
+
+The [JasperFx AOT publishing guide](https://github.com/JasperFx/jasperfx/blob/main/docs/codegen/aot.md) describes a **two-phase model** where dev-time `dotnet run -- codegen write` produces pre-built `Internal/Generated/*.cs` files that the publish-time AOT compile then consumes. **That two-phase model does not apply to Marten 9.**
+
+```mermaid
+graph LR
+    subgraph Marten9["Marten 9: one phase"]
+        A[edit code] --> B["dotnet publish<br/>/p:PublishAot=true"]
+        B --> C[native binary]
+    end
+    subgraph JasperFx["JasperFx (other tools): two phases"]
+        D[edit code] --> E["dotnet run<br/>-- codegen write"]
+        E --> F[Internal/Generated/*.cs<br/>committed to source control]
+        F --> G["dotnet publish<br/>/p:PublishAot=true"]
+        G --> H[native binary]
+    end
+```
+
+Marten's storage / projection / compiled-query surfaces all build their dispatchers **at compile time** (via `Marten.SourceGenerator` and `JasperFx.Events.SourceGenerator`) or are **hand-written closed-shape code** that ships in `Marten.dll` directly. The runtime never invokes Roslyn. As a result:
+
+- **No `dotnet run -- codegen write` step.** If you have an `Internal/Generated/` folder committed from a pre-9.0 Marten app, delete it and remove it from `.gitignore`. Nothing reads or writes those files.
+- **No `services.AddRuntimeCompilation()` call.** PR [#4461](https://github.com/JasperFx/marten/pull/4461) ripped out the runtime-codegen seam entirely. Don't add it back.
+- **`StoreOptions.GeneratedCodeMode`, `AllowRuntimeCodeGeneration`, `SourceCodeWritingEnabled`, `GeneratedCodeOutputPath`** have been deleted entirely — references to them will fail to compile against Marten 9.0. Remove any leftover assignments from your bootstrapping. `StoreOptions.ApplicationAssembly` survives because `AutoRegister` and `TryUseSourceGeneratedDiscovery` still use it as a scan hint.
+
+If you have a Wolverine app sitting next to your Marten app in the same composition root, the Wolverine side **does** still use the JasperFx two-phase model — Wolverine retains runtime codegen as an opt-in seam ([per the 2026 plan](https://github.com/JasperFx/jasperfx/issues/217)). The JasperFx guide is the authoritative reference for the Wolverine half of that story.
+
+## Project setup walkthrough
+
+### 1. Configure your csproj
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <IsAotCompatible>true</IsAotCompatible>
+        <PublishAot>true</PublishAot>
+
+        <!-- Recommended: fail the publish build on any new IL warning -->
+        <WarningsAsErrors>IL2026;IL2046;IL2055;IL2065;IL2067;IL2070;IL2072;IL2075;IL2090;IL2091;IL2111;IL3050;IL3051</WarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Marten" />
+
+        <!-- Optional but recommended: compile-time source generator for ICompiledQuery<TDoc, TOut> types -->
+        <PackageReference Include="Marten.SourceGenerator" PrivateAssets="all" />
+    </ItemGroup>
+
+</Project>
+```
+
+Key points:
+
+- **`IsAotCompatible=true`** turns on the IL2026 / IL2070 / IL2075 / IL3050 analyzers so any new reflective surface in *your* code surfaces at compile time.
+- **`PublishAot=true`** triggers Native AOT at publish.
+- **`WarningsAsErrors=IL...`** is the policy enforcer — without it the analyzer warnings are easy to lose in build noise. The list above mirrors what the [Marten.AotSmoke consumer in CI](https://github.com/JasperFx/marten/tree/master/src/Marten.AotSmoke) uses.
+- **No `JasperFx.RuntimeCompiler` reference, no `Microsoft.CodeAnalysis.*` references** are needed. Marten 9 doesn't pull them in.
+
+### 2. Configure `AddMarten` for the AOT-clean serializer
+
+```csharp
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(builder.Configuration.GetConnectionString("Marten")!);
+
+    // System.Text.Json is the AOT-compatible serializer. The default options
+    // are fine for most apps; pass an explicit JsonSerializerContext via the
+    // configure callback if you need source-generated STJ as well.
+    opts.UseSystemTextJsonForSerialization();
+
+    // Register your document types, events, and projections as usual.
+    opts.Schema.For<Invoice>();
+    opts.Events.AddEventType<InvoiceCreated>();
+    opts.Projections.Add<InvoiceSummaryProjection>(ProjectionLifecycle.Inline);
+
+    // Say the aggregate's identity type out loud. The single-parameter overloads read it off the
+    // document mapping and close SingleStreamProjection<,> with it at runtime, which a native
+    // binary has no code for.
+    opts.Projections.LiveStreamAggregation<Order, Guid>();
+    opts.Projections.Snapshot<Shipment, string>(SnapshotLifecycle.Inline);
+});
+
+using var host = builder.Build();
+await host.RunAsync();
+```
+
+### 3. Add the `[JasperFxAssembly]` marker (if you use compiled queries)
+
+If your assembly declares any `ICompiledQuery<TDoc, TOut>` types, add the assembly-level marker that opts `Marten.SourceGenerator` into emitting handler code for them:
+
+```csharp
+// AssemblyInfo.cs (or any file in the assembly)
+[assembly: JasperFx.JasperFxAssembly]
+```
+
+With the `Marten.SourceGenerator` package reference and `[JasperFxAssembly]` both present, every compiled query in the assembly gets a generator-emitted handler that registers itself with Marten's runtime registry via a `[ModuleInitializer]` at module load. No reflection, no FastExpressionCompiler, no Roslyn — just direct property/field reads compiled into your assembly.
+
+See the [Marten.SourceGenerator README](https://github.com/JasperFx/marten/blob/master/src/Marten.SourceGenerator/README.md) for the full opt-in story and the three shapes the generator skips (where the runtime falls back to a `FastExpressionCompiler`-built descriptor — still no Roslyn, but the warning surface is wider).
+
+### 4. Publish
+
+```bash
+dotnet publish -c Release /p:PublishAot=true -r linux-x64 -o ./publish
+```
+
+A successful publish produces a single self-contained binary (plus a few native dependency `.so` / `.dll` files) under `./publish`. The Roslyn graph is absent; the binary loads pre-generated source-generator output baked into the assembly directly.
+
+## What works, what doesn't
+
+As of Marten 9.0.0-alpha:
+
+### Works (AOT-clean)
+
+- **`UseSystemTextJsonForSerialization`** with the default `JsonSerializerOptions` or a user-supplied one. For best AOT results, supply a source-generated `JsonSerializerContext` — and prefer `SystemTextJsonSerializer.UseTypeInfoResolver(MyContext.Default)` over assigning `JsonSerializerOptions.TypeInfoResolver` yourself. The former *combines* your context with a reflection-based resolver behind it; the latter replaces the reflection resolver outright, and then any type your context cannot name — an anonymous projection in particular — has no metadata at all. See [an anonymous projection cannot be materialized](#a-projection-into-an-anonymous-type-cannot-be-materialized).
+- **Document storage** — `Schema.For<TDoc>()` and the entire CRUD / LINQ surface for closed-shape document types with a **Guid / string / int / long** identity, including the containment and JSONPath filters a child-collection query compiles to (#5377).
+- **`Select()` projections** — into a named DTO (`Select(x => new Summary { ... })`), into a collection member (`Select(x => x.Lines)`), the element type of a `SelectMany(x => x.Lines)`, and a scalar member of any framework type, nullable included (`string`, `decimal?`, `Guid`, `DateTime`/`DateOnly`/`TimeOnly`, the integral and floating-point types). Every one of these closed its select clause over `selectExpression.Type` with `Activator.CreateInstance` until #5624, so they all failed natively — a *named* DTO projection just as hard as an anonymous one, and before the serializer was reached. A list of *nullable* scalars needed one more pair of instantiations (`NullableSelector<T>` feeding `ListQueryHandler<T?>`) and was fixed in #5635.
+- **A scalar projection of your own enum or struct** — `Select(x => x.Status)`, `MaxAsync(x => x.Status)` — **once you register the type**, one line per value type:
+
+  ```cs
+  opts.RegisterScalarType<Status>();
+  ```
+
+  Marten's scalar select clause is declared `where T : struct`, and the registration point #5624 added — `MartenLinqQueryable<T>`, which every projected type passes through — constrains its own `T` only to `notnull`, so Marten cannot close that clause for a type it doesn't know. It roots the scalar types it renders itself, which is why `decimal` and `DateOnly` need nothing. Without the call, under AOT:
+
+  ```text
+  MissingMethodException: No parameterless constructor defined for type
+  'Marten.Linq.SqlGeneration.NewScalarSelectClause`1[YourEnum]'
+  ```
+
+  Under a JIT the call does nothing and costs nothing. Projecting the same enum as a *member* of a named type (`Select(x => new StatusView { Status = x.Status })`) never needed it, and neither does filtering on it. See [#5635](https://github.com/JasperFx/marten/issues/5635).
+- **Strong-typed identities** (Vogen, StronglyTypedId, a plain `readonly record struct`) — **once you register them**, which is one extra line per document type:
+
+  ```cs
+  opts.Schema.For<Declaratie>();
+  opts.RegisterValueTypeId<Declaratie, DeclaratieId, Guid>();
+  ```
+
+  Marten's identity path closes a chain of generics over your id type, and a Native AOT image has no instantiation for any of them unless something rooted it at compile time. Naming all three types is what roots them — the same reason `Projections.LiveStreamAggregation<TDoc, TId>()` exists alongside the overload that infers the identity. The document type is part of the signature because the closed-shape storage subtree is closed over the document as well as the id, so an id-only registration would get through bootstrap and then fail on the first session that touched the document.
+
+  Under a JIT the call does nothing and costs nothing — unregistered types still take the reflective path. Without it, under AOT, one strong-typed id anywhere in the store fails the application while the **first** document's mapping is built:
+
+  ```text
+  System.MissingMethodException: No parameterless constructor defined for type
+  'Marten.Schema.Identity.ValueTypeIdSelectClause`2[YourId,System.Guid]'
+  ```
+
+  See [#5589](https://github.com/JasperFx/marten/issues/5589); the plan is for `Marten.SourceGenerator` to emit these registrations so the call becomes unnecessary.
+- **LINQ comparisons on `decimal`** (and any other type whose `>` / `<` is a user-defined operator) — **once you root the operator**, which is one declaration somewhere reachable in your app:
+
+  ```cs
+  internal static class DecimalOperatorRoots
+  {
+      [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(decimal))]
+      internal static void Root() { }
+  }
+
+  // the attribute only applies when the annotated method is itself reachable
+  DecimalOperatorRoots.Root();
+  ```
+
+  This one is **not Marten's code**, which is worth knowing before you go looking in the wrong place. Writing `.Where(x => x.Amount > 10)` against an `IQueryable<T>` makes the compiler emit code in *your* assembly that builds the expression tree at runtime, and `Expression.GreaterThan` on two decimals cannot use an IL comparison — `decimal` has no primitive `>` — so it looks up `System.Decimal.op_GreaterThan` by reflection. The trimmer has no reason to keep an operator nothing statically calls, and the factory then reports it as *"The binary operator GreaterThan is not defined for the types 'System.Decimal' and 'System.Decimal'"*. Equality is fine; it is the ordering comparisons that need the operator. See [#5597](https://github.com/JasperFx/marten/issues/5597), and note `Marten.AotRuntimeSmoke` covers this so the behaviour stays pinned if the runtime changes it.
+
+- **Event storage** — `StartStream`, `Append`, `FetchStream`, `FetchStreamStateAsync`, `AggregateStreamAsync`, `QueryAllRawEvents`, the async daemon. Reading an event needed a JIT until [#5373](https://github.com/JasperFx/marten/issues/5373): the events table closed its per-column reader over the column's member type at runtime.
+- **Projections** — registered either as a projection type (`Projections.Add<T>(...)`) or, for a self-aggregating type, through the identity-typed `LiveStreamAggregation<TDoc, TId>()` / `Snapshot<TDoc, TId>(...)` overloads: `SingleStreamProjection<TDoc, TId>`, `MultiStreamProjection<TDoc, TId>`, `EventProjection`, `CustomProjection`, and `EventApplier` — the JasperFx.Events source generator emits `[GeneratedEvolver]` dispatchers at compile time for each registration. Marten calls `Options.Projections.DiscoverGeneratedEvolvers(...)` at startup (`src/Marten/DocumentStore.cs:84`) to pick them up.
+- **Compiled queries** registered through `Marten.SourceGenerator` in an assembly marked `[JasperFxAssembly]`.
+- **Secondary stores** registered via `services.AddMartenStore<TInterface>()` — Marten 9 builds the implementation type via `System.Reflection.Emit` (PR [#4459](https://github.com/JasperFx/marten/pull/4459)). The trimmer warning at the emit site carries a `[RequiresDynamicCode]` annotation; published apps that use this surface can either suppress or rely on the runtime fall-through to keep working.
+- **`Marten.AspNetCore`** streaming endpoints (`WriteArray`, `StreamMany`, `WriteSingle`, etc.) — clean.
+- **`Marten.NodaTime`** type handlers — clean.
+- **`Marten.EntityFrameworkCore`** projection storage — clean once your `TDoc` / `TDbContext` consumer types satisfy the wrapper's `[DynamicallyAccessedMembers]` annotations (closing the generic parameters with concrete entity types and DbContext subclasses satisfies this implicitly).
+
+### Annotated (warns at AOT publish without suppression)
+
+- **`StoreOptions.MemberFactory`** — uses FastExpressionCompiler internally for property accessor delegates. Reached at registration time, not per-call. AOT consumers either accept the warning at the registration call site or wrap it with `[UnconditionalSuppressMessage]`.
+- **`FSharpTypeHelper`** — same pattern; FEC for F# discriminated-union member access. Only reached if you actually register F# types.
+- **LINQ queries with complex transforms** — the per-call LINQ-to-SQL translation uses runtime expression handling that the trim analyzer flags. For hot-path queries, route through `Marten.SourceGenerator`-emitted compiled queries to escape the warning.
+- **The closed-shape `IIdentification` / `IDocumentBinder` construction sites** — every `Identification` / `Binder` / `BulkLoader` in `Marten.Internal.ClosedShape.*` reaches `LambdaBuilder.Getter` / `Setter` from FEC at registration time. Marten's class-level `[UnconditionalSuppressMessage]` justifications hide these at build time, but `dotnet publish /p:PublishAot=true` walks the full reachable graph and surfaces them. Tracked on the Marten 9 master plan (#4349) — the path forward is a per-document-type source-generator extension; until that lands, AOT-publishing apps will see ~15 `IL2026` / `IL3050` warnings cascading from these sites.
+
+### Doesn't work in AOT
+
+- **F# single-case discriminated-union ids.** The C# strong-typed id wrappers are covered by `RegisterValueTypeId<TDoc, TWrapper, TInner>()` above, but an F# DU id is a reference type and routes through a different select clause (`FSharpDiscriminatedUnionIdSelectClause`), which that registration cannot name. Still fine under a JIT. Tracked with the rest of [#5589](https://github.com/JasperFx/marten/issues/5589).
+- **`.IsOneOf(...)` over a strong-typed id** reaches `ConvertFromWrapperArray` through a reflective method lookup that the trimmer can drop. Equality and ordering on a strong-typed id are fine.
+- **`Marten.Newtonsoft`** — Newtonsoft.Json is fundamentally AOT-hostile. The package's csproj deliberately leaves `IsAotCompatible` off (see PR [#4468](https://github.com/JasperFx/marten/pull/4468)). Use `UseSystemTextJsonForSerialization` instead.
+- **`services.AddRuntimeCompilation()`** — the seam doesn't exist in Marten 9. If you have it in your composition root from a pre-9 app, delete the call.
+- **Pre-built `Internal/Generated/`** — irrelevant to Marten 9. Delete the folder.
+
+## The Newtonsoft.Json escape hatch
+
+If your existing app uses `Marten.Newtonsoft`, the AOT migration is:
+
+```csharp
+// Before
+services.AddMarten(opts =>
+{
+    opts.Connection(connectionString);
+    opts.UseNewtonsoftForSerialization();  // ← not AOT-compatible
+});
+
+// After
+services.AddMarten(opts =>
+{
+    opts.Connection(connectionString);
+    opts.UseSystemTextJsonForSerialization();  // ← AOT-compatible
+});
+```
+
+Things to watch when switching:
+
+- **JSON property casing** — STJ defaults to `camelCase` for properties; Newtonsoft typically defaults to PascalCase. Override with `JsonSerializerOptions { PropertyNamingPolicy = null }` if your existing on-disk JSON uses PascalCase keys.
+- **Enum handling** — `EnumStorage.AsString` works in both; STJ uses the `JsonStringEnumConverter` under the hood.
+- **Polymorphic types** — STJ requires `[JsonDerivedType]` annotations or a source-gen `JsonSerializerContext` for type hierarchies. Newtonsoft's `TypeNameHandling` doesn't have a direct equivalent in STJ.
+- **`DateTime` formatting** — STJ uses round-trip ISO-8601 by default; if your stored JSON was emitted by Newtonsoft with non-default settings, double-check the read path.
+
+You can mix the two at the document level — register one document type with one serializer and another with a different one — but the AOT publish requires the STJ path to be the active one for the document types reached by your AOT-published code paths.
+
+## Verifying your app is AOT-clean
+
+After a publish, scan the build output for `IL2026` / `IL2070` / `IL2075` / `IL3050`:
+
+```bash
+dotnet publish -c Release /p:PublishAot=true -r linux-x64 -o ./publish 2>&1 | grep -E "warning IL|error IL"
+```
+
+Every warning carries the source location of the offending call. The fix path depends on the source:
+
+| Source | Action |
+| --- | --- |
+| Marten core surface (e.g., `Marten.Internal.ClosedShape.*`) | Track in #4349; suppress at the consumer call site if you must publish today, with a justification comment pointing at the master plan. |
+| Your own code reaching `Type.GetType(string)` / `MakeGenericType` / `Activator.CreateInstance(Type)` | Refactor to source-generated code, or add `[DynamicallyAccessedMembers]` to the relevant `Type` parameter. |
+| A third-party reflection-based library | Same approach as above — annotate the wrapper, or migrate to a source-generated alternative. |
+
+For a baseline confidence check, Marten ships [`src/Marten.AotSmoke/`](https://github.com/JasperFx/marten/tree/master/src/Marten.AotSmoke) — a tiny app that consumes the AOT-clean cross-section of Marten's surface with all the IL warning codes promoted to errors. Mirror its csproj setup in your own app, scoped to the Marten surface you actually use.
+
+::: warning A clean publish is necessary, not sufficient
+Analyzer cleanliness and runtime correctness are different properties. A `MakeGenericType` call that the analyzer has been told to trust still needs the closed instantiation to exist in the native image, and if it does not you get a clean publish followed by `MissingMethodException` on the first call — which is exactly how [#5328](https://github.com/JasperFx/marten/issues/5328) reached a release.
+
+Marten now also ships [`src/Marten.AotRuntimeSmoke/`](https://github.com/JasperFx/marten/tree/master/src/Marten.AotRuntimeSmoke), which publishes natively and *runs* every document read path against a real PostgreSQL in CI. Doing the same for your own app — publish AOT, then exercise your real queries against a real database once in your pipeline — is worth more than any amount of analyzer output.
+:::
+
+## Troubleshooting
+
+### "No source-generated dispatcher found for aggregate `X`"
+
+JasperFx.Events.SourceGenerator only picks up projection types that the consuming assembly references at compile time and that follow the discovered method-signature conventions (`Apply` / `Create` / `Evolve` shapes documented on each projection base type's xmldoc). If a projection is missing from `DiscoveredEvolvers`:
+
+- Confirm the assembly with `services.AddMarten(opts => opts.Projections.Add<MyProjection>(...))` references `JasperFx.Events.SourceGenerator` either directly or transitively through `Marten`. Marten core already wires it; you should not need a separate reference unless you're cross-assembly.
+- Confirm the projection extends `SingleStreamProjection<,>`, `MultiStreamProjection<,>`, or `EventProjection` (not a custom base type the generator doesn't know about).
+- Re-run a clean build (`dotnet build -c Release --no-incremental`); source generators run at compile time and the output is in `obj/`, so a stale build can mask new registrations.
+
+### `IL3050` warning on a custom projection base type
+
+The source generator skips base types it doesn't recognize. If you wrote a custom projection base, either:
+
+- Inherit from `SingleStreamProjection<,>` / `MultiStreamProjection<,>` / `EventProjection` instead and let the source generator emit the dispatch, or
+- Implement `IProjection.ApplyAsync` directly with no reflection (the type-switch fallback) — slower but AOT-clean by construction.
+
+### LINQ query throwing in AOT mode
+
+`LoadAsync`, LINQ, raw SQL and compiled queries all run from a native binary as of the fix for [#5328](https://github.com/JasperFx/marten/issues/5328). Before that release, the first *read* of any kind threw even though the publish was clean:
+
+```text
+MissingMethodException: No parameterless constructor defined for type
+'Marten.Internal.Sessions.QuerySession+StorageFinder`1[MyDocument]'
+```
+
+```text
+PlatformNotSupportedException: Dynamic code generation is not supported on this platform.
+   at FastExpressionCompiler.ExpressionCompiler.CompileFast[R](...)
+   at Marten.Linq.Parsing.LinqInternalExtensions.ReduceToConstant(Expression)
+```
+
+If you see either of those, you are on an older Marten — upgrade rather than working around it.
+
+Two shapes still need runtime code generation and therefore still need a JIT:
+
+- **A compiled query with an `enum`-typed parameter.** Marten closes `PropertyQueryMember<T>` over each supported parameter type ahead of time, but it cannot do that for an enum declared in your assembly. Store the value as its underlying type on the query object if you need this under AOT.
+- **A `where` clause whose value comes from a method call** — `x => x.Name == BuildName()`. Constants, captured locals, instance and static members, member chains and array literals are all evaluated reflectively; anything else falls back to expression compilation. Hoist the call into a local before the query.
+
+Compiled queries remain worth using under AOT for their own reasons — reference `Marten.SourceGenerator`, add `[assembly: JasperFx.JasperFxAssembly]`, and call `session.QueryAsync(compiledQueryInstance)` to dispatch through a source-generated handler instead of parsing the expression tree on every call. See [`Marten.SourceGenerator/README.md`](https://github.com/JasperFx/marten/blob/master/src/Marten.SourceGenerator/README.md) for the full surface. They are no longer a *workaround* for LINQ, though.
+
+### A child-collection filter throws `JsonTypeInfo metadata for type 'System.Object[]'`
+
+```text
+NotSupportedException: JsonTypeInfo metadata for type 'System.Object[]' was not provided by
+TypeInfoResolver of type 'MyApp.MyJsonContext'.
+```
+
+Fixed by [#5377](https://github.com/JasperFx/marten/pull/5377) — upgrade rather than working around it.
+A filter over a child collection (`x => x.Debtors.Any(d => d.Number == number)`) becomes a jsonb
+containment query, and Marten used to serialize that payload — its own dictionary of member names to the
+values you compared against — through *your* serializer. A source-generated resolver carries your
+documents, not that, so the query threw before it was ever sent. Marten now writes the payload itself.
+
+The split is by ownership: Marten writes the shapes that are its own (the payload dictionary, and the
+array a child-collection filter wraps it in) plus the scalar leaves, and hands everything that came out
+of your document — a typed nested dictionary, an enum, a record, a value object — back to your
+serializer, which has those types because they are part of a document.
+
+One consequence worth knowing, because it is the price of not needing your resolver for Marten's own
+shapes: the scalars written here do **not** go through your `JsonSerializerOptions`. A
+`NumberHandling` setting, or a custom converter for one of the scalar types (`decimal`,
+`DateTimeOffset`, `Guid`, …), will not affect how a *filter value* of that type is rendered, even
+though it affects how the document was stored. If you rely on one of those, compare through a member
+whose type Marten hands to the serializer rather than one it renders itself. A custom
+`JavaScriptEncoder` is not a concern: Postgres parses the payload into jsonb, where an escaped and an
+unescaped character are the same character.
+
+### A projection into an anonymous type cannot be materialized
+
+```text
+MartenNotSupportedException: Cannot materialize the LINQ projection into the anonymous type
+'<>f__AnonymousType0`2[System.String,System.Int32]' because MyApp.MyJsonContext has no
+JsonTypeInfo for it, and an anonymous type cannot be named by a [JsonSerializable] attribute.
+```
+
+A `Select(x => new { ... })` projection is rendered as a `jsonb_build_object(...)` and then
+deserialized **into the anonymous type**. `[JsonSerializable(typeof(...))]` needs a nameable type, so
+there is no way to put `<>f__AnonymousType0<string, int>` into a `JsonSerializerContext` — the
+remedy System.Text.Json's own `NotSupportedException` advises is impossible to follow, which is why
+Marten replaces it with the message above. It is **not** an AOT-specific failure: a JIT process whose
+options carry a context-only resolver fails exactly the same way.
+
+Two remedies, and which one you want depends on how much reflection you are willing to keep:
+
+```cs
+// 1. Keep a reflection-based resolver behind your context. Anonymous projections work, natively
+//    too -- the fallback resolves the anonymous type from metadata ILC kept because your own
+//    assembly is a TrimmerRootAssembly (step 1 of the recipe above).
+var serializer = new SystemTextJsonSerializer();
+serializer.UseTypeInfoResolver(MyJsonContext.Default);
+opts.Serializer(serializer);
+
+// 2. Or forgo reflection entirely -- and project into a named type your context does cover.
+opts.UseSystemTextJsonForSerialization(new JsonSerializerOptions { TypeInfoResolver = MyJsonContext.Default });
+// then, instead of Select(x => new { x.Name, x.Count }):
+.Select(x => new Summary { Name = x.Name, Count = x.Count })   // [JsonSerializable(typeof(Summary))]
+```
+
+The same applies to a `GroupBy(...).Select(g => new { g.Key, Count = g.Count() })`, which is the
+shape most grouping examples are written in.
+
+### Secondary store throws `MissingMethodException` at boot
+
+`AddMartenStore<TInterface>` uses `System.Reflection.Emit` to materialize the implementation type at runtime (Marten 9 ripped out the Roslyn-emit subclass path in PR [#4459](https://github.com/JasperFx/marten/pull/4459)). Native AOT supports `Reflection.Emit` only on full-AOT runtimes that include the JIT; some trimming configurations strip it. If a secondary store throws `MissingMethodException` at boot, check:
+
+- Your published binary still contains `System.Reflection.Emit` (verify with `dotnet publish` output — it shouldn't be trimmed away).
+- Your `TInterface` is exactly `: IDocumentStore` (no extra abstract members).
+
+### `dotnet publish` is slow
+
+Native AOT publish takes meaningfully longer than a JIT-mode publish (typically 30-90 seconds vs. a few seconds). Budget for it in your build pipeline; this is not a Marten-specific concern.
+
+## Performance
+
+Marten 9's source-generator-driven compiled-query path is meaningfully faster than the pre-9 runtime-codegen path on cold start. Per the [Marten.SourceGenerator README](https://github.com/JasperFx/marten/blob/master/src/Marten.SourceGenerator/README.md#status) measurements (taken before AOT publish):
+
+- **Cold call** (first invocation, includes Marten pipeline setup): **codegen 75ms vs source-gen 3ms — ~25× faster**.
+- **Steady-state per call** (200 calls amortized): **codegen 710μs vs source-gen 490μs — ~31% faster**.
+
+Native AOT publish layers an additional speedup on top by eliminating JIT warmup entirely. End-to-end cold-start benchmarks for Marten 9 under AOT are tracked on the [Critter Stack scalability project](https://github.com/JasperFx/CritterStackScalability) and will be cited here once published.
+
+## References
+
+- [Master plan: Marten 9.0](https://github.com/JasperFx/marten/issues/4349)
+- [AOT compliance pillar (JasperFx)](https://github.com/JasperFx/jasperfx/issues/213)
+- [JasperFx AOT publishing guide](https://github.com/JasperFx/jasperfx/blob/main/docs/codegen/aot.md) — the broader Critter Stack story (Wolverine + the two-phase model)
+- [Marten.SourceGenerator README](https://github.com/JasperFx/marten/blob/master/src/Marten.SourceGenerator/README.md) — the compiled-query AOT story
+- [Migration Guide: Runtime code generation removed](/migration-guide#runtime-code-generation-removed) — the 8.x → 9.0 migration for the codegen pipeline
+- [.NET trim warning reference](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-warnings/) — Microsoft's catalog of IL warning codes
+- [.NET Native AOT documentation](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) — official Microsoft guide

@@ -1,0 +1,491 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core.Reflection;
+using Marten;
+using JasperFx.Events;
+using Marten.Events;
+using Marten.Storage.Metadata;
+using Weasel.Core;
+using Wolverine.Configuration;
+using Wolverine.Marten.Codegen;
+using Wolverine.Marten.Requirements;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Codegen;
+using Wolverine.Persistence.Sagas;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Handlers;
+using IRevisioned = JasperFx.IRevisioned;
+
+namespace Wolverine.Marten.Persistence.Sagas;
+
+internal partial class MartenPersistenceFrameProvider : IPersistenceFrameProvider
+{
+    // Marten can persist any document, so CanPersist claims every type. Yield to selective
+    // providers (EF Core) for the entity types they actually map, regardless of the order the
+    // integrations were registered in
+    public bool IsCatchAll => true;
+
+    public bool CanPersist(Type entityType, IServiceContainer container, out Type persistenceService)
+    {
+        persistenceService = typeof(IDocumentSession);
+        return true;
+    }
+
+    public Type DetermineSagaIdType(Type sagaType, IServiceContainer container)
+    {
+        return idTypeFrom(sagaType, container.GetInstance<IDocumentStore>());
+    }
+
+    /// <summary>
+    /// GH-4441. Marten's identity answer is a fact about the STORE, not about the type: a store can name a
+    /// different member as the identity, so the default store and an ancillary one genuinely disagree.
+    /// </summary>
+    /// <remarks>
+    /// Silent rather than loud, which is why this went unnoticed: <c>FindOrResolveDocumentType</c> resolves a
+    /// conventional mapping for a type the store has never been told about instead of failing, so the default
+    /// store confidently answers <c>Guid</c> for an aggregate that is keyed by a string on the store the
+    /// handler actually commits through. The caller then searches the message for an identity member of the
+    /// wrong type and reports that it cannot find one -- naming the member, not the store.
+    /// </remarks>
+    public Type DetermineSagaIdType(Type sagaType, IChain chain, IServiceContainer container)
+    {
+        return idTypeFrom(sagaType, resolveStore(chain, container));
+    }
+
+    private static Type idTypeFrom(Type sagaType, IDocumentStore store)
+    {
+        return store.Options.FindOrResolveDocumentType(sagaType).IdType;
+    }
+
+    /// <summary>
+    /// The store this chain writes to, on the same terms as the natural-key resolution in
+    /// <c>MartenEventSourcingFrameProvider</c> (GH-4439): a store type this integration does not own, or one
+    /// that is not registered in this container, falls through to the default store — which is exactly the
+    /// behaviour that existed before the chain was available here.
+    /// </summary>
+    private static IDocumentStore resolveStore(IChain chain, IServiceContainer container)
+    {
+        if (chain.DetermineAncillaryStoreType() is { } storeType && storeType.CanBeCastTo<IDocumentStore>()
+                                                                 && container.Services.GetService(storeType) is
+                                                                     IDocumentStore ancillary)
+        {
+            return ancillary;
+        }
+
+        return container.GetInstance<IDocumentStore>();
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    ///     GH-4505. Marten can honour this whenever its store is single-database: Wolverine's message store
+    ///     is then built from <c>store.Storage.Database.DataSource</c> — literally Marten's own
+    ///     <c>NpgsqlDataSource</c>, in the same database and, by default, the same schema
+    ///     (<c>WolverineOptionsMartenExtensions.BuildSinglePostgresqlMessageStore</c>). Queuing the claim
+    ///     onto the session is then the same move Wolverine already makes for its inbox rows.
+    ///     <para>
+    ///     Database-per-tenant falls through to the claim-and-release path deliberately: that composition
+    ///     builds the main message store from <c>MainDatabaseConnectionString</c> / <c>MasterDataSource</c>,
+    ///     which is a different database from the tenant one the session commits to, so a queued claim would
+    ///     be riding the wrong transaction.
+    ///     </para>
+    /// </remarks>
+    public bool TryBuildTransactionalDeduplication(IChain chain, Variable deduplicationId,
+        DeduplicationRequirement requirement, IServiceContainer container,
+        [NotNullWhen(true)] out TransactionalDeduplication? deduplication)
+    {
+        deduplication = null;
+
+        // Not CanApply -- that answers "could this provider own the chain's transaction?", and a chain that
+        // merely takes an IDocumentSession satisfies it without ever committing one. Riding a transaction
+        // that is never committed writes no claim at all, so the endpoint silently loses deduplication
+        // entirely: every replay runs. Ask for the commit frame itself, which is the thing the claim has to
+        // ride. A chain without one genuinely has nothing to ride and belongs on the claim-and-release path.
+        if (!chain.Middleware.OfType<CreateDocumentSessionFrame>().Any()) return false;
+        if (!chain.Postprocessors.OfType<DocumentSessionSaveChanges>().Any()) return false;
+
+        if (resolveStore(chain, container).As<DocumentStore>().Tenancy.Cardinality !=
+            JasperFx.Descriptors.DatabaseCardinality.Single)
+        {
+            return false;
+        }
+
+        var marker = chain.DetermineAncillaryStoreType();
+        var check = new MartenDeduplicationClaimExistsFrame(deduplicationId, marker, requirement.Required);
+
+        deduplication = new TransactionalDeduplication
+        {
+            Check = check,
+            IsDuplicate = check.Variable,
+            Claim = new QueueMartenDeduplicationClaimFrame(deduplicationId, check.Variable, marker,
+                requirement.Window),
+            CommitRaceWrapper = new RefuseDuplicateClaimAtCommitFrame(
+                MartenDeduplicationFailures.Classifier,
+                lost => chain.BuildDeduplicationStopCondition(lost, DeduplicationOutcome.Duplicate, requirement))
+        };
+
+        return true;
+    }
+
+    public void ApplyTransactionSupport(IChain chain, IServiceContainer container)
+    {
+        if (!chain.Middleware.OfType<CreateDocumentSessionFrame>().Any())
+        {
+            chain.Middleware.Add(new CreateDocumentSessionFrame(chain));
+        }
+
+        if (chain is not SagaChain)
+        {
+            if (!chain.Postprocessors.OfType<DocumentSessionSaveChanges>().Any())
+            {
+                chain.Postprocessors.Add(new DocumentSessionSaveChanges());
+            }
+
+            if (!chain.Postprocessors.OfType<FlushOutgoingMessages>().Any())
+            {
+                chain.Postprocessors.Add(new FlushOutgoingMessages());
+            }
+        }
+
+        // Codegen-time opt-in: when WolverineOptions.Tracking.OutboxDiagnosticsEnabled
+        // is set, bracket the Marten SaveChangesAsync postprocessor with
+        // marten.savechanges.start / marten.savechanges.finished ActivityEvents so
+        // operators can profile slow transactional commits via OTel without paying
+        // the cost when the flag is off (the ActivityEvent calls aren't generated
+        // at all in that case - same no-runtime-if/then design as GH-2694).
+        var options = container.GetInstance<WolverineOptions>();
+        if (options?.Tracking.OutboxDiagnosticsEnabled == true)
+        {
+            foreach (var saveChanges in chain.Postprocessors.OfType<DocumentSessionSaveChanges>())
+            {
+                saveChanges.ActivityEventBeforeCall = MartenTracing.MartenSaveChangesStarted;
+                saveChanges.ActivityEventAfterCall = MartenTracing.MartenSaveChangesFinished;
+            }
+        }
+    }
+    
+    public void ApplyTransactionSupport(IChain chain, IServiceContainer container, Type entityType)
+    {
+        ApplyTransactionSupport(chain, container);
+    }
+
+    /// <summary>
+    /// GH-4631. Marten is designated by one of its own store or session interfaces, which is also what an
+    /// ancillary store marker type (<c>AddMartenStore&lt;IMyStore&gt;()</c>) derives from.
+    /// </summary>
+    public bool OwnsStorageType(Type storageType, IServiceContainer container)
+    {
+        return storageType.CanBeCastTo<IDocumentStore>() || storageType.CanBeCastTo<IQuerySession>();
+    }
+
+    public bool CanApply(IChain chain, IServiceContainer container)
+    {
+        if (chain is SagaChain)
+        {
+            return true;
+        }
+
+        if (chain.ReturnVariablesOfType<IMartenOp>().Any()) return true;
+
+        // GH-2941: detect parameter attributes whose Modify() injects a non-MethodCall frame that
+        // depends on IDocumentSession. Chain.serviceDependencies() only walks
+        // Middleware.OfType<MethodCall>() so those dependencies are invisible, AND
+        // WolverineParameterAttribute.Modify() runs lazily inside HandlerChain.applyCustomizations
+        // - long AFTER AutoApplyTransactions has evaluated CanApply. Without this detection,
+        // AutoApplyTransactions skips the chain entirely, no SaveChangesAsync postprocessor is
+        // attached, and a scheduled cascade (e.g. DeliveryMessage<T>.DelayedFor(...)) is queued
+        // onto the session via StoreIncoming(...) but never flushed -> the scheduled envelope
+        // never lands in wolverine_incoming_envelopes and is lost.
+        //
+        // [WriteAggregate] and [BoundaryModel] don't need this branch - their Modify() paths
+        // explicitly call ApplyTransactionSupport themselves. The at-risk attributes are
+        // [ReadAggregate] (injects FetchLatestAggregateFrame) and DocumentExists/DoesNotExist
+        // (ModifyChainAttributes that inject DocumentExistenceCheckFrame).
+        if (ChainHasMartenSessionAttributes(chain)) return true;
+
+        var serviceDependencies = chain
+            .ServiceDependencies(container, new[] { typeof(IDocumentSession), typeof(IQuerySession), typeof(IDocumentOperations), typeof(global::JasperFx.Events.IEventOperations), typeof(global::JasperFx.Events.IEventStoreOperations), typeof(global::Marten.Events.IEventStoreOperations), typeof(global::JasperFx.Events.Documents.IDocumentSessionOperations), typeof(global::JasperFx.Events.Documents.IDocumentWriteOperations), typeof(global::JasperFx.Events.Documents.IDocumentReadOperations) }).ToArray();
+                // A handler that takes the event operations straight as a parameter -- the shared
+        // JasperFx.Events.IEventOperations / IEventStoreOperations, or Marten's own IEventStoreOperations -- is
+        // unambiguously using this store, but none of those types appeared here, so
+        // AutoApplyTransactions skipped the chain and nothing was ever committed. Appending
+        // through the parameter queued into the session's unit of work and then silently
+        // vanished, with no exception.
+        //
+        // GH-3956: the same hole existed on the DOCUMENT side. JasperFx.Events.Documents lifts the
+        // store-agnostic document contracts, and Marten's IDocumentSession implements all three, so a
+        // handler could already declare one and have it bind -- it just never got a commit.
+        // IDocumentReadOperations is deliberately probed but NOT matched here, exactly as IQuerySession
+        // has always been: a read-only parameter is not evidence that the chain writes anything.
+        if (serviceDependencies.Any(x => x == typeof(IDocumentSession) || x == typeof(IDocumentOperations)
+                                            || x.Closes(typeof(IEventStream<>))
+                                            || x == typeof(global::JasperFx.Events.IEventOperations)
+                                            || x == typeof(global::JasperFx.Events.IEventStoreOperations)
+                                            || x == typeof(global::Marten.Events.IEventStoreOperations)
+                                            || x == typeof(global::JasperFx.Events.Documents.IDocumentSessionOperations)
+                                            || x == typeof(global::JasperFx.Events.Documents.IDocumentWriteOperations)))
+        {
+            return true;
+        }
+
+        // GH-4907: the IQuerySession permutation of GH-2941. A read-only parameter is served by casting the
+        // outbox-enrolled IDocumentSession, so a chain that reads AND sends messages queues its envelopes on a
+        // session nothing commits: a scheduled message is never handled, and a durable local one only ever
+        // runs from memory. Reading alone still does not claim the chain; reading plus sending does.
+        return serviceDependencies.Any(x => x == typeof(IQuerySession)
+                                            || x == typeof(global::JasperFx.Events.Documents.IDocumentReadOperations))
+               && chainCanSendMessages(chain, container);
+    }
+
+    private static bool chainCanSendMessages(IChain chain, IServiceContainer container)
+    {
+        if (chain.ServiceDependencies(container, new[] { typeof(IMessageBus), typeof(IMessageContext) })
+            .Any(x => x == typeof(IMessageBus) || x == typeof(IMessageContext)))
+        {
+            return true;
+        }
+
+        if (chain.ReturnVariablesOfType<OutgoingMessages>().Any()) return true;
+
+        // A message handler cascades whatever its handler methods return. An HTTP endpoint writes its first
+        // return value as the response, so only the ones after it cascade.
+        var firstCascadingReturn = chain is HandlerChain ? 0 : 1;
+        return chain.HandlerCalls().Any(call => call.Creates.Skip(firstCascadingReturn).Any());
+    }
+
+    private static bool ChainHasMartenSessionAttributes(IChain chain)
+    {
+        foreach (var call in chain.HandlerCalls())
+        {
+            foreach (var parameter in call.Method.GetParameters())
+            {
+                if (parameter.GetCustomAttributes().Any(a => a is ReadAggregateAttribute)) return true;
+            }
+        }
+
+        // [DocumentExists<T>] / [DocumentDoesNotExist<T>] are ModifyChainAttribute-based and can
+        // sit on either the handler method or the message type. Walk both.
+        foreach (var call in chain.HandlerCalls())
+        {
+            if (call.Method.GetCustomAttributes().Any(IsDocumentExistsAttribute)) return true;
+            if (call.HandlerType.GetCustomAttributes(true).OfType<Attribute>().Any(IsDocumentExistsAttribute)) return true;
+        }
+
+        var messageType = chain.InputType();
+        if (messageType != null && messageType.GetCustomAttributes(true).OfType<Attribute>().Any(IsDocumentExistsAttribute))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsDocumentExistsAttribute(Attribute attribute)
+    {
+        var type = attribute.GetType();
+        if (!type.IsGenericType) return false;
+        var def = type.GetGenericTypeDefinition();
+        return def == typeof(DocumentExistsAttribute<>) || def == typeof(DocumentDoesNotExistAttribute<>);
+    }
+
+    public bool TryBuildQueryableFrame(Type elementType, IServiceContainer container,
+        [NotNullWhen(true)] out Frame? frame,
+        [NotNullWhen(true)] out Variable? result)
+    {
+        var queryable = new QueryableFrame(elementType);
+        frame = queryable;
+        result = queryable.Result;
+        return true;
+    }
+
+    public Frame DetermineLoadFrame(IServiceContainer container, Type sagaType, Variable sagaId)
+    {
+        return new LoadDocumentFrame(sagaType, sagaId);
+    }
+
+    public Frame DetermineInsertFrame(Variable saga, IServiceContainer container)
+    {
+        return new DocumentSessionOperationFrame(saga, nameof(IDocumentSession.Insert));
+    }
+
+    public Frame CommitUnitOfWorkFrame(Variable saga, IServiceContainer container)
+    {
+        return new DocumentSessionSaveChanges();
+    }
+
+    public Frame DetermineUpdateFrame(Variable saga, IServiceContainer container)
+    {
+        if (saga.VariableType.CanBeCastTo<IRevisioned>())
+        {
+            return new UpdateSagaRevisionFrame(saga);
+        }
+        
+        return new DocumentSessionOperationFrame(saga, nameof(IDocumentSession.Update));
+    }
+
+    public Frame DetermineDeleteFrame(Variable sagaId, Variable saga, IServiceContainer container)
+    {
+        return new DocumentSessionOperationFrame(saga, nameof(IDocumentSession.Delete));
+    }
+
+    public Frame DetermineStoreFrame(Variable saga, IServiceContainer container)
+    {
+        return new DocumentSessionOperationFrame(saga, nameof(IDocumentSession.Store));
+    }
+
+    public Frame DetermineDeleteFrame(Variable variable, IServiceContainer container)
+    {
+        return new DocumentSessionOperationFrame(variable, nameof(IDocumentSession.Delete));
+    }
+
+    public Frame DetermineStorageActionFrame(Type entityType, Variable action, IServiceContainer container)
+    {
+        var method = typeof(MartenStorageActionApplier).GetMethod("ApplyAction")!
+            .MakeGenericMethod(entityType);
+
+        var call = new MethodCall(typeof(MartenStorageActionApplier), method);
+        call.Arguments[1] = action;
+
+        return call;
+    }
+
+    public Frame[] DetermineFrameToNullOutMaybeSoftDeleted(Variable entity)
+    {
+        return [new SetVariableToNullIfSoftDeletedFrame(entity)];
+    }
+
+    public bool TryBuildAllFrame(Type entityType, IServiceContainer container,
+        [NotNullWhen(true)] out Frame? frame,
+        [NotNullWhen(true)] out Variable? result)
+    {
+        var all = new AllFrame(entityType);
+        frame = all;
+        result = all.Result;
+        return true;
+    }
+
+    public bool TryBuildFirstOrDefaultFrame(Type entityType, IServiceContainer container,
+        [NotNullWhen(true)] out Frame? frame,
+        [NotNullWhen(true)] out Variable? result)
+    {
+        var first = new FirstOrDefaultFrame(entityType);
+        frame = first;
+        result = first.Result;
+        return true;
+    }
+
+    public bool TryBuildFetchSpecificationFrame(
+        Variable specVariable,
+        IServiceContainer container,
+        [NotNullWhen(true)] out Frame? frame,
+        [NotNullWhen(true)] out Variable? result)
+    {
+        if (specVariable is null)
+        {
+            frame = null;
+            result = null;
+            return false;
+        }
+
+        var specType = specVariable.VariableType;
+
+        // Marten spec shapes: ICompiledQuery<,>, IBatchQueryPlan<>, IQueryPlan<>
+        var compiled = specType.FindInterfaceThatCloses(typeof(global::Marten.Linq.ICompiledQuery<,>));
+        var batchPlan = specType.FindInterfaceThatCloses(typeof(global::Marten.IBatchQueryPlan<>));
+        var queryPlan = specType.FindInterfaceThatCloses(typeof(global::Marten.IQueryPlan<>));
+
+        // Namespace guard - only Marten's own interfaces match (user types in other
+        // namespaces that happen to be named the same won't match).
+        var isMartenCompiled = compiled is not null
+                               && compiled.Namespace == typeof(global::Marten.Linq.ICompiledQuery<,>).Namespace;
+        var isMartenBatchPlan = batchPlan is not null
+                                && batchPlan.Namespace == typeof(global::Marten.IBatchQueryPlan<>).Namespace;
+        var isMartenPlan = queryPlan is not null
+                           && queryPlan.Namespace == typeof(global::Marten.IQueryPlan<>).Namespace;
+
+        if (!isMartenCompiled && !isMartenBatchPlan && !isMartenPlan)
+        {
+            frame = null;
+            result = null;
+            return false;
+        }
+
+        var fetch = new FetchSpecificationFrame(specVariable);
+        frame = fetch;
+        result = fetch.Result;
+        return true;
+    }
+}
+
+internal class SetVariableToNullIfSoftDeletedFrame : AsyncFrame
+{
+    private Variable _entity;
+    private Variable _documentSession = null!;
+    private Variable _entityMetadata = null!;
+
+    public SetVariableToNullIfSoftDeletedFrame(Variable entity)
+    {
+        _entity = entity;
+        uses.Add(entity);
+    }
+
+    public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
+    {
+        writer.WriteComment("If the document is soft deleted, set the variable to null");
+
+        writer.Write($"var {_entityMetadata.Usage} = {_entity.Usage} != null");
+        writer.Write($"    ? await {_documentSession.Usage}.{nameof(IDocumentSession.MetadataForAsync)}({_entity.Usage}).ConfigureAwait(false)");
+        writer.Write($"    : null;");
+            
+        writer.Write($"BLOCK:if ({_entityMetadata.Usage}?.{nameof(DocumentMetadata.Deleted)} == true)");
+        writer.Write($"{_entity.Usage} = null;");
+        writer.FinishBlock();
+            
+        Next?.GenerateCode(method, writer);
+    }
+
+    public override IEnumerable<Variable> FindVariables(IMethodVariables chain)
+    {
+        _documentSession = chain.FindVariable(typeof(IDocumentSession));
+        yield return _documentSession;
+
+        _entityMetadata = new Variable(typeof(DocumentMetadata), _entity.Usage + "Metadata", this);
+        yield return _entityMetadata;
+    }
+}
+
+public static class MartenStorageActionApplier
+{
+    public static void ApplyAction<T>(IDocumentSession session, IStorageAction<T> action) where T : notnull
+    {
+        if (action.Entity == null) return;
+        
+        switch (action.Action)
+        {
+            case StorageAction.Delete:
+                session.Delete(action.Entity!);
+                break;
+            case StorageAction.Insert:
+                session.Insert(action.Entity);
+                break;
+            case StorageAction.Store:
+                session.Store(action.Entity);
+                break;
+            case StorageAction.Update:
+                session.Update(action.Entity);
+                break;
+                
+        }
+    }
+}
+
+internal class DocumentSessionSaveChanges : MethodCall
+{
+    public DocumentSessionSaveChanges() : base(typeof(IDocumentSession), ReflectionHelper.GetMethod<IDocumentSession>(x => x.SaveChangesAsync(default))!)
+    {
+        CommentText = "Save all pending changes to this Marten session";
+    }
+}

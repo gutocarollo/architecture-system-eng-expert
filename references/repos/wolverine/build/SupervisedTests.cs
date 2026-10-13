@@ -1,0 +1,495 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Bobcat.Resilience;
+using Bobcat.Supervisor;
+using Nuke.Common;
+using Nuke.Common.IO;
+using Serilog;
+
+// The supervised test runner: every CI target runs its test projects through Bobcat's Supervisor
+// (https://github.com/JasperFx/bobcat) instead of `dotnet test`. What that buys over the old
+// TRX-parse-and-retry harness:
+//
+//   - Worker processes. The suite executable (an xUnit v3 Microsoft.Testing.Platform host — see
+//     UseMicrosoftTestingPlatformRunner in Directory.Build.props) is driven over the MTP wire
+//     protocol, so a target can split a suite across `workers` processes. Partitioning is by test
+//     CLASS, never by test — splitting a class across processes breaks every isolation contract
+//     xUnit writes against static state, measured as 1-4 non-deterministic failures on
+//     PersistenceTests when it was tried per-test.
+//   - Per-lane environments. With `postgresDatabasePerLane`, each worker process is pointed at its
+//     own database via ConnectionStrings__postgres (see src/Servers.cs), because schema names are
+//     hard-coded throughout the suites — isolation must be the database, not the connection alone.
+//   - Honest retries. A first failure is retried once in a FRESH process (parity with the old
+//     harness's fresh `dotnet test` invocation), but a pass-on-retry is never folded into a clean
+//     pass: it is reported as the flakiness ledger, and a crashed worker is Indeterminate — with
+//     the worker's exit code and stderr — never a silent pass or an ordinary "failed".
+//
+// Reliability is the acceptance criterion, not speed: pass counts are reported beside every run,
+// and `--disable-test-retry` turns retries off entirely for measuring, since a retry budget masks
+// exactly the instability parallelism is suspected of introducing.
+partial class Build
+{
+    /// <summary>
+    /// Overrides every target's worker count from the command line (e.g. <c>--test-workers 4</c>).
+    /// For measuring; the committed per-target counts are the tuned values.
+    /// </summary>
+    [Parameter] readonly int? TestWorkers;
+
+    /// <summary>
+    /// Turns off the retry-once policy (<c>--disable-test-retry</c>). Measure with retries off
+    /// first: 144/144 green at every fleet size is a much stronger claim without a retry budget.
+    /// </summary>
+    [Parameter] readonly bool DisableTestRetry;
+
+    /// <summary>
+    /// Retries a whole project run may spend before every remaining failure is reported as failed
+    /// WITHOUT being retried at all. Read the retry ledger (see RetryLedger.cs) against this number:
+    /// a run at the cap is not "N flaky tests", it is N flaky tests plus an unknown tail.
+    /// </summary>
+    const int MaxRetriesPerRun = 25;
+
+    /// <summary>
+    /// The standing exclusion every CI target applies: tests tagged [Trait("Category", "Flaky")]
+    /// do not run. Same semantics as the old vstest `Category!=Flaky` filter.
+    /// </summary>
+    static bool NotFlaky(WorkerTest test)
+        => !(test.Traits.TryGetValue("Category", out var category) && category.Contains("Flaky"));
+
+    /// <summary>
+    /// Runs one test project through the supervisor. See <see cref="RunTestProjects"/>.
+    /// </summary>
+    void RunTestProject(string projectPath, string frameworkOverride = null,
+        Func<WorkerTest, bool> testFilter = null, int workers = 1, bool postgresDatabasePerLane = false,
+        bool sqlServerDatabasePerLane = false)
+    {
+        RunTestProjects([projectPath], frameworkOverride, testFilter, workers, postgresDatabasePerLane,
+            sqlServerDatabasePerLane);
+    }
+
+    /// <summary>
+    /// Runs test projects through Bobcat's supervisor, sequentially per project.
+    /// </summary>
+    /// <param name="testFilter">
+    /// Optional shard filter ANDed onto the standing <see cref="NotFlaky"/> exclusion. Used by the
+    /// sharded CI targets (see #3350) to split one heavy project across parallel CI jobs. A shard
+    /// filter that matches nothing fails the run — a rename that empties a shard must not read as
+    /// a green job.
+    /// </param>
+    /// <param name="workers">
+    /// Worker processes for the suite. 1 (sequential) unless the suite has been profiled: the
+    /// largest test class is a hard floor on wall clock, so compute
+    /// <c>sum(durations)/largest class</c> before raising this — if the ceiling is 3x, eight
+    /// workers buy nothing but containers.
+    /// </param>
+    /// <param name="postgresDatabasePerLane">
+    /// Provisions one Postgres database per worker (wolverine_w0..N-1 on the docker-compose
+    /// server) and points each lane at its own via ConnectionStrings__postgres. Required before raising
+    /// <paramref name="workers"/> on any Postgres-backed suite.
+    /// </param>
+    /// <param name="sqlServerDatabasePerLane">
+    /// Same isolation story for SQL Server: one database per worker (wolverine_w0..N-1 on the
+    /// docker-compose server, port 1434), each lane pointed at its own via ConnectionStrings__sqlserver.
+    /// One server, many databases — a fleet of SQL Server CONTAINERS is far past what a 4-vCPU/16GB
+    /// hosted runner can carry (see the worker-clamp note in runSupervised).
+    /// </param>
+    void RunTestProjects(string[] projectPaths, string frameworkOverride = null,
+        Func<WorkerTest, bool> testFilter = null, int workers = 1, bool postgresDatabasePerLane = false,
+        bool sqlServerDatabasePerLane = false)
+    {
+        var failedProjects = new List<string>();
+        foreach (var projectPath in projectPaths)
+        {
+            foreach (var framework in frameworksBuiltFor(projectPath, frameworkOverride))
+            {
+                if (!runSupervised(projectPath, framework, testFilter, TestWorkers ?? workers,
+                        postgresDatabasePerLane, sqlServerDatabasePerLane))
+                    failedProjects.Add($"{projectPath} ({framework})");
+            }
+        }
+
+        if (failedProjects.Count > 0)
+            throw new InvalidOperationException($"Tests failed: {string.Join(", ", failedProjects)}");
+    }
+
+    bool runSupervised(string projectPath, string framework, Func<WorkerTest, bool> shardFilter,
+        int workers, bool postgresDatabasePerLane, bool sqlServerDatabasePerLane = false)
+    {
+        // The committed per-target count is tuned on a developer machine; the machine actually
+        // running decides what it can carry. A GitHub-hosted runner has 4 vCPUs and 16GB, and 4
+        // concurrent Marten test hosts beside Postgres got the runner itself killed with a
+        // shutdown signal — an oversubscribed fleet does not fail politely. An explicit
+        // --test-workers bypasses the clamp: measuring past the ceiling is a valid thing to ask.
+        var ceiling = Math.Max(1, Environment.ProcessorCount / 2);
+        if (TestWorkers is null && workers > ceiling)
+        {
+            Log.Information("Clamping {Asked} workers to {Ceiling} for this machine's {Cores} core(s)",
+                workers, ceiling, Environment.ProcessorCount);
+            workers = ceiling;
+        }
+
+        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+        var executable = testHostFor(projectPath, framework);
+
+        Log.Information("=== {Project} ({Framework}): supervised run, {Workers} worker(s){Retry} ===",
+            projectName, framework, workers, DisableTestRetry ? ", retries OFF" : "");
+
+        var factory = new MtpWorkerFactory(executable)
+        {
+            ConnectionStrings = laneConnectionStrings(workers, postgresDatabasePerLane, sqlServerDatabasePerLane),
+            // A wedged worker's state stops existing the moment it is killed (GH-4100): this
+            // hook gets the live pid first, and the dumpasync capture is the diagnosis. Only
+            // ever invoked for a live process that refused to exit — a healthy worker never
+            // pays for it. The budget covers dotnet-dump collect + analyze.
+            OnBeforeKill = captureBeforeKill,
+            BeforeKillTimeout = TimeSpan.FromMinutes(10)
+        };
+
+        var supervisor = new Supervisor(factory)
+        {
+            MaxParallelWorkers = workers,
+            TestFilter = shardFilter is null ? NotFlaky : t => NotFlaky(t) && shardFilter(t),
+            RetryBudget = DisableTestRetry
+                ? RetryBudget.None
+                : new RetryBudget { MaxAttemptsPerTest = 3, MaxRetriesPerRun = MaxRetriesPerRun },
+            // The policy below only ever asks for fresh-process retries, so idle lanes are
+            // released before they run: without this, workers+1 test hosts sit resident at once,
+            // which OOM-killed 16GB GitHub runners twice — both times during a retry.
+            ReleaseIdleLanes = true,
+            Log = message => Log.Information("  {Message}", message),
+
+            // The observability the retired shell watchdog (build/ci-memory-sampler.sh,
+            // GH-4083/GH-4089) approximated from outside the process, now the supervisor's own
+            // facts (Bobcat 0.8.0, JasperFx/bobcat#145-#150). All report-only — none of these
+            // ever fails or kills anything:
+            // - a TEST in flight past five minutes is named immediately. Five minutes is the
+            //   watchdog's own calibration ("a healthy suite is never idle for five minutes"),
+            //   and per-test in-flight time replaces both its idle heuristic and the per-target
+            //   deadline table that heavy suites kept having to opt out of.
+            // - a one-line progress heartbeat every 30s, so a wedged run's log shows where it
+            //   stopped and how far it got — the summary a capped job never reaches.
+            // - worker RSS sampled on the watchdog's own 15s cadence, attributed per test
+            //   (GH-4089: a GREEN CIMarten grew its host 375MB -> 9334MB and nothing could say
+            //   which tests grew it).
+            StallThreshold = TimeSpan.FromMinutes(5),
+            HeartbeatInterval = TimeSpan.FromSeconds(30),
+            ResourceSampleInterval = TimeSpan.FromSeconds(15),
+
+            // The previous main run's per-test durations, when a CI step (or a developer) has
+            // fetched them into previous-durations/ — longest-processing-time lane balancing
+            // instead of count balancing. Null degrades to exactly today's behavior. See
+            // build/TestDurations.cs for the whole loop.
+            KnownTestDurations = knownDurationsFor(projectName, framework)
+        };
+
+        if (!DisableTestRetry) supervisor.AddFailurePolicy(new RetryFailuresInFreshProcess());
+
+        // Only under Actions: locally the run finishes and prints its summary, and `dotnet run --
+        // --output Detailed` is the per-test view. In CI the summary is exactly what a wedged job
+        // never reaches. Same GITHUB_ACTIONS check the ledger uses.
+        if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            supervisor.AddObserver(new NarrateTestsAsTheyStart());
+
+        // GH-4098: a job cancelled at the cap used to report nothing at all. The registration
+        // snapshots the run, writes the partial ledger and names the stalled tests inside the
+        // runner's grace window — see build/StallCapture.cs.
+        using var cancellation = registerCancellationCapture(supervisor, projectName, framework);
+
+        var results = supervisor.Run().GetAwaiter().GetResult();
+
+        return report(projectName, framework, results, shardFilter is not null);
+    }
+
+    /// <summary>
+    /// Parity with the old flaky-retry harness, which gave a failed test up to THREE attempts:
+    /// the suite pass, then RunTestWithRetry's two single-test `dotnet test` invocations — each
+    /// a fresh, quiet process. Fresh-process isolation matters: a warm-process retry was tried
+    /// here and produced retries that could never succeed, because a failed first attempt leaves
+    /// node registrations and half-built state behind in the process (MySqlTests'
+    /// end_to_end_from_scratch cannot run "from scratch" in a process where scratch no longer
+    /// exists). ReleaseIdleLanes above keeps the memory profile bounded instead. A pass on any
+    /// retry is reported as flaky, never as clean.
+    /// </summary>
+    class RetryFailuresInFreshProcess : IFailurePolicy
+    {
+        public Disposition Decide(AttemptContext attempt)
+        {
+            if (attempt.Succeeded || !attempt.RetriesAvailable) return null;
+
+            return Disposition.RetryInFreshProcess(
+                "a failure is retried in a fresh process, within the budget, to separate flaky from broken");
+        }
+    }
+
+    /// <summary>
+    /// Prints one line per test as the worker picks it up, so a run that never finishes still says
+    /// what it was doing when it stopped.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The supervisor reports per-test results when a batch FINISHES. A batch that wedges never
+    /// finishes, so it reports nothing at all: on JasperFx/wolverine#4083 a CIMarten job's last
+    /// line was "275 test(s): 275 batched, 0 isolated", printed 18m33s before the 20 minute cap
+    /// cancelled the job, and the log could not name the test that hung. Since Bobcat 0.8.0 the
+    /// supervisor's own stall reporting and heartbeat carry the run-level view (STALLED lines and
+    /// the progress line arrive through Log above); this narration stays as the per-test bookmark
+    /// that says exactly what each lane picked up, in order.
+    /// </para>
+    /// <para>
+    /// In-progress updates only. The terminal update carries the same verdict the end-of-run
+    /// summary already prints, and doubling every line would bury the one that matters — the LAST
+    /// one. Bobcat fires these from the worker client's I/O thread, so lines from different lanes
+    /// interleave; the lane number is on each one for that reason.
+    /// </para>
+    /// </remarks>
+    class NarrateTestsAsTheyStart : ISupervisorObserver
+    {
+        public void TestUpdated(WorkerLaunchContext worker, WorkerTestUpdate update)
+        {
+            if (update.InProgress) Log.Information("  [lane {Lane}] -> {Test}", worker.Lane, update.DisplayName);
+        }
+    }
+
+    bool report(string projectName, string framework, SupervisorResults results, bool hadShardFilter)
+    {
+        recordLedger(projectName, framework, results);
+
+        if (results.AbortReason is not null)
+        {
+            Log.Error("=== {Project}: run ABORTED — {Reason} ===", projectName, results.AbortReason);
+            return false;
+        }
+
+        if (results.Tests.Count == 0)
+        {
+            // MTP silently ignoring a bad filter and running everything is the trap this guards
+            // against, inverted: a filter matching nothing is indistinguishable from a shard
+            // whose namespaces were renamed away. That must not read as a green job.
+            if (hadShardFilter)
+            {
+                Log.Error("=== {Project}: the shard filter matched NO tests — renamed namespaces? ===", projectName);
+                return false;
+            }
+
+            Log.Warning("=== {Project}: no tests ran (all excluded or none discovered) ===", projectName);
+            return true;
+        }
+
+        Log.Information("=== {Project}: {Summary} ===", projectName, results.Summarize());
+
+        foreach (var flaky in results.PassedOnRetry)
+            Log.Warning("  [FLAKY] {Test} — passed on attempt {Attempts}", flaky.DisplayName, flaky.AttemptCount);
+
+        foreach (var fault in results.WorkerFaults)
+            Log.Error("  [WORKER FAULT] {Fault}", fault);
+
+        // Report-only, like everything else the stall threshold does: a test that exceeded five
+        // minutes and then passed is still worth a line — a green run is exactly where a
+        // creeping slowdown would otherwise go unnoticed.
+        foreach (var stalled in results.StalledTests)
+            Log.Warning("  [STALLED] {Test} — {Seconds}s in flight on lane {Lane}",
+                stalled.DisplayName, (int)stalled.InFlight.TotalSeconds, stalled.Worker.Lane);
+
+        // GH-4109. Report the top THREE, and do not call them retainers.
+        //
+        // This is a start-to-verdict RSS delta, which is heap EXPANSION, not live bytes: the GC does
+        // not hand memory back to the OS promptly, so whichever test happens to be running when the
+        // heap grows is charged for all of it. Naming a single winner "top retainer" reads as an
+        // accusation against that test, and the very first measurement this ever produced sent us
+        // after CoreTests.Acceptance.wolverine_as_command_bus.use_iasync_enumerable_as_return_value
+        // at +685 MB -- a test that sends three empty records and awaits two 50ms delays.
+        //
+        // Five consecutive runs of the same unchanged suite named five DIFFERENT tests (+535 MB to
+        // +1084 MB) while peak RSS stayed flat at 4956-5468 MB. The leader is noise; the peak is the
+        // signal. Three entries make that visible in the log itself -- a test that really does retain
+        // will hold its place across runs, and a run whose three entries are all strangers is telling
+        // you the ranking means nothing this time.
+        var memory = RunResources.For(results);
+        if (memory.IsMeasured)
+        {
+            var growth = memory.TopRetainers(3)
+                .Select(x => $"{RunResources.Delta(x.RetainedBytes!.Value)} {x.DisplayName}")
+                .ToArray();
+
+            Log.Information("  peak worker RSS {Peak}; largest RSS growth during: {Growth}",
+                RunResources.Humanize(memory.PeakBytes!.Value),
+                growth.Length > 0 ? string.Join(", ", growth) : "(none attributed)");
+        }
+
+        foreach (var test in results.Indeterminate)
+            Log.Error("  [INDETERMINATE] {Test} — {Error}", test.DisplayName, test.Final.Outcome.ErrorMessage);
+
+        foreach (var test in results.Failed)
+            Log.Error("  [FAILED] {Test} — {Error}", test.DisplayName, test.Final.Outcome.ErrorMessage);
+
+        return results.ExitCode == 0;
+    }
+
+    // ─── Test host resolution ──────────────────────────────────────────
+
+    /// <summary>
+    /// The frameworks a supervised run should cover: the override or --framework when given,
+    /// otherwise every target framework the project has actually been built for — matching the
+    /// old bare `dotnet test`, which ran all TFMs.
+    /// </summary>
+    /// <summary>
+    /// The framework to build and run <paramref name="projectPath"/> for: the override, else the pinned
+    /// <c>Framework</c> -- unless the project does not target it. The Alba-based test projects are
+    /// net10.0-only (Alba 9 has no net9.0 target), and every workflow passes <c>--framework net9.0</c>,
+    /// so such a project builds and runs at the highest framework it declares instead of failing
+    /// NETSDK1005.
+    /// </summary>
+    string frameworkFor(string projectPath, string frameworkOverride)
+    {
+        var chosen = frameworkOverride ?? Framework;
+        if (string.IsNullOrEmpty(chosen)) return chosen;
+
+        var declared = declaredFrameworks(projectPath);
+        if (declared.Count == 0 || declared.Contains(chosen)) return chosen;
+
+        var fallback = declared.OrderBy(x => x, StringComparer.Ordinal).Last();
+        Log.Information("{Project} does not target {Chosen}; using {Fallback}",
+            Path.GetFileNameWithoutExtension(projectPath), chosen, fallback);
+        return fallback;
+    }
+
+    static IReadOnlyList<string> declaredFrameworks(string projectPath)
+    {
+        if (!File.Exists(projectPath)) return [];
+
+        var match = System.Text.RegularExpressions.Regex.Match(File.ReadAllText(projectPath),
+            @"<TargetFrameworks?>([^<]+)</TargetFrameworks?>");
+
+        return match.Success
+            ? match.Groups[1].Value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            : [];
+    }
+
+    IReadOnlyList<string> frameworksBuiltFor(string projectPath, string frameworkOverride)
+    {
+        var chosen = frameworkFor(projectPath, frameworkOverride);
+        if (!string.IsNullOrEmpty(chosen)) return [chosen];
+
+        var binDir = (AbsolutePath)Path.GetDirectoryName(projectPath) / "bin" / Configuration;
+        if (!Directory.Exists(binDir))
+            throw new InvalidOperationException($"{binDir} does not exist — build {projectPath} first.");
+
+        var frameworks = Directory.GetDirectories(binDir)
+            .Select(Path.GetFileName)
+            .Where(tfm => File.Exists(testHostPathFor(projectPath, tfm)))
+            .OrderBy(tfm => tfm)
+            .ToList();
+
+        if (frameworks.Count == 0)
+            throw new InvalidOperationException(
+                $"No test host executable under {binDir}. Build the project first; the executable comes " +
+                "from UseMicrosoftTestingPlatformRunner in Directory.Build.props.");
+
+        return frameworks;
+    }
+
+    string testHostFor(string projectPath, string framework)
+    {
+        var executable = testHostPathFor(projectPath, framework);
+        if (!File.Exists(executable))
+            throw new InvalidOperationException(
+                $"{executable} does not exist — build {projectPath} for {framework} first. A build without " +
+                "UseMicrosoftTestingPlatformRunner yields a non-supervisable executable at the same path, so " +
+                "prefer fixing the build over deleting this check.");
+
+        return executable;
+    }
+
+    string testHostPathFor(string projectPath, string framework)
+    {
+        var projectName = Path.GetFileNameWithoutExtension(projectPath);
+        var host = (AbsolutePath)Path.GetDirectoryName(projectPath) / "bin" / Configuration / framework / projectName;
+        return OperatingSystem.IsWindows() ? host + ".exe" : host;
+    }
+
+    // ─── Per-lane environments ─────────────────────────────────────────
+
+    /// <summary>
+    /// Each lane's connection strings, handed to its worker process as
+    /// <c>ConnectionStrings__postgres</c> / <c>ConnectionStrings__sqlserver</c> (JasperFx/bobcat#414),
+    /// which src/Servers.cs reads ahead of WOLVERINE_POSTGRES / WOLVERINE_SQLSERVER. The same names
+    /// an Aspire AppHost would set, so a suite runs the same way under either. Null when no lane
+    /// needs its own database, so the factory takes its default path.
+    /// </summary>
+    /// <remarks>
+    /// One database per worker lane, wolverine_w0..N-1, provisioned on the docker-compose servers up
+    /// front. Schema names are hard-coded throughout the suites, so two processes sharing one
+    /// database collide however the tests are partitioned: isolation has to be the database.
+    /// Discovery and isolated/recycled workers all report lane 0, so the databases provisioned
+    /// equal the workers asked for, not the processes launched.
+    /// </remarks>
+    WorkerConnectionStrings laneConnectionStrings(int workers, bool postgres, bool sqlServer)
+    {
+        if (!postgres && !sqlServer) return null;
+
+        var connectionStrings = new WorkerConnectionStrings();
+
+        if (postgres)
+        {
+            ensurePostgresLaneDatabases(workers);
+            connectionStrings.Add("postgres", context => postgresLaneConnectionString(context.Lane));
+        }
+
+        if (sqlServer)
+        {
+            ensureSqlServerLaneDatabases(workers);
+            connectionStrings.Add("sqlserver", context => sqlServerLaneConnectionString(context.Lane));
+        }
+
+        return connectionStrings;
+    }
+
+    static string sqlServerLaneConnectionString(int lane)
+        => $"Server=localhost,1434;User Id=sa;Password=P@55w0rd;Timeout=5;MultipleActiveResultSets=True;Initial Catalog=wolverine_w{lane};Encrypt=False";
+
+    void ensureSqlServerLaneDatabases(int workers)
+    {
+        using var conn = new Microsoft.Data.SqlClient.SqlConnection(SqlServerConnectionString);
+        conn.Open();
+
+        for (var lane = 0; lane < workers; lane++)
+        {
+            var database = $"wolverine_w{lane}";
+
+            using var create = conn.CreateCommand();
+            // Identifier, not a value — cannot be parameterized. The name is generated above,
+            // never user input.
+            create.CommandText = $"if DB_ID('{database}') is null begin CREATE DATABASE {database} end";
+            create.ExecuteNonQuery();
+        }
+    }
+
+    static string postgresLaneConnectionString(int lane)
+        => $"Host=localhost;Port=5433;Database=wolverine_w{lane};Username=postgres;password=postgres";
+
+    void ensurePostgresLaneDatabases(int workers)
+    {
+        // The admin connection targets the default database; CREATE DATABASE cannot run inside
+        // a transaction or a pooled multiplexed connection, hence Pooling=false.
+        using var conn = new Npgsql.NpgsqlConnection(PostgresConnectionString + ";Pooling=false");
+        conn.Open();
+
+        for (var lane = 0; lane < workers; lane++)
+        {
+            var database = $"wolverine_w{lane}";
+
+            using var check = conn.CreateCommand();
+            check.CommandText = "select 1 from pg_database where datname = @name";
+            check.Parameters.AddWithValue("name", database);
+            if (check.ExecuteScalar() is not null) continue;
+
+            Log.Information("Provisioning per-lane database {Database}", database);
+            using var create = conn.CreateCommand();
+            // Identifier, not a value — cannot be parameterized. The name is generated above,
+            // never user input.
+            create.CommandText = $"CREATE DATABASE {database}";
+            create.ExecuteNonQuery();
+        }
+    }
+}

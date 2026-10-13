@@ -1,0 +1,428 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Wolverine.Http;
+using Wolverine.Http.CodeGen;
+using Wolverine.Runtime;
+
+internal class AsParamatersAttributeUsage : IParameterStrategy
+{
+    // parameter.ParameterType flows into AsParametersBindingFrame's
+    // [DAM(PublicConstructors|PublicProperties)]-annotated ctor parameter;
+    // ParameterInfo.ParameterType doesn't carry the DAM annotation. Suppress
+    // at the call site — the user's [AsParameters] type is statically rooted
+    // via endpoint discovery (which carries [RequiresUnreferencedCode]
+    // upstream after the chunk Q HandlerDiscovery work).
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+        Justification = "User [AsParameters] type statically rooted via endpoint discovery; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide.")]
+    public bool TryMatch(HttpChain chain, IServiceContainer container, ParameterInfo parameter, out Variable? variable)
+    {
+        variable = default;
+        if (!parameter.HasAttribute<AsParametersAttribute>())
+        {
+            return false;
+        }
+
+        // A chain gets exactly one binding frame per [AsParameters] type. A second consumer —
+        // typically a compound handler LoadAsync/Before method taking the same [AsParameters]
+        // parameter as the main endpoint method — must reuse the already-built variable, or the
+        // binding frame is emitted once per consuming method scope and the duplicated locals
+        // don't compile. See GH-3374.
+        if (chain.AsParametersVariable != null && chain.AsParametersVariable.VariableType == parameter.ParameterType)
+        {
+            variable = chain.AsParametersVariable;
+            return true;
+        }
+
+        if (IsClassOrNullableClassNotCollection(parameter.ParameterType))
+        {
+            chain.RequestType = parameter.ParameterType;
+            chain.AsParametersType = parameter.ParameterType;
+
+            // Decide form-vs-body-vs-neither HERE rather than inside the binding frame below. The frame is
+            // only built when the chain is compiled, and HttpChain.applyMetadata() — which turns IsFormData
+            // into Accepts metadata — can run BEFORE that, depending on the route warm-up mode. Waiting for
+            // the frame meant the metadata was stamped from the optimistic default. See GH-3630.
+            DescribeAsParametersBinding(parameter.ParameterType, out var hasForm, out var hasBody);
+            chain.IsFormData = hasForm;
+            chain.ReadsRequestBody = hasForm || hasBody;
+            if (hasForm) chain.BindsFormValues = true; // GH-4742
+
+            var bindingFrame = new AsParametersBindingFrame(parameter.ParameterType, chain, container);
+            chain.AsParametersVariable = bindingFrame.Variable;
+            variable = bindingFrame.Variable;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Does this <c>[AsParameters]</c> type read anything out of the request body? Mirrors the member walk
+    ///     <see cref="AsParametersBindingFrame" /> performs (single public constructor's parameters, then
+    ///     writable public properties), but only far enough to answer the two questions
+    ///     <see cref="HttpChain.applyMetadata" /> needs: is it a form, and is there a body at all.
+    ///
+    ///     <para>A type whose members are all <c>[FromQuery]</c> / <c>[FromRoute]</c> / <c>[FromHeader]</c>
+    ///     answers "no" to both — it reads no body, and an endpoint that advertises one it never reads gets
+    ///     dropped from route matching by ASP.NET Core's <c>AcceptsMatcherPolicy</c>. See GH-3630.</para>
+    /// </summary>
+    internal static void DescribeAsParametersBinding(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors |
+                                    DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type, out bool hasForm, out bool hasBody)
+    {
+        hasForm = false;
+        hasBody = false;
+
+        // A type with more than one public constructor is rejected by the binding frame below with a clear
+        // message; don't pre-empt that here, just describe what can be described.
+        var constructors = type.GetConstructors();
+        if (constructors.Length == 1)
+        {
+            foreach (var parameter in constructors[0].GetParameters())
+            {
+                if (parameter.HasAttribute<FromFormAttribute>())
+                {
+                    hasForm = true;
+                }
+                else if (parameter.HasAttribute<FromBodyAttribute>())
+                {
+                    hasBody = true;
+                }
+            }
+        }
+
+        foreach (var property in type.GetProperties().Where(x => x is { CanWrite: true, IsSpecialName: false }))
+        {
+            if (property.HasAttribute<FromFormAttribute>())
+            {
+                hasForm = true;
+            }
+            else if (property.HasAttribute<FromBodyAttribute>())
+            {
+                hasBody = true;
+            }
+        }
+    }
+
+    // TODO -- move this to an extension method in JasperFx. Could be useful in other places
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "type originates from [AsParameters] attribute usage on a Wolverine.Http endpoint parameter (already RUC-suppressed in TryMatch above). The IsEnumerable call inspects the type's generic-interface graph; the user's parameter type is statically rooted via endpoint discovery.")]
+    private bool IsClassOrNullableClassNotCollection(Type type)
+    {
+        return (
+            type.IsClass ||
+            (type.IsNullable() && type.GetInnerTypeFromNullable().IsClass)
+        ) && !type.IsEnumerable();
+    }
+}
+
+// TODO -- this should be in JasperFx longer term
+internal class AssignPropertyFrame : SyncFrame, IGeneratesCode
+{
+    private readonly Variable _target;
+    private readonly PropertyInfo _property;
+    private readonly Variable _value;
+
+    public AssignPropertyFrame(Variable target, PropertyInfo property, Variable value)
+    {
+        _target = target;
+        _property = property;
+        _value = value;
+        
+        uses.Add(target);
+        uses.Add(value);
+    }
+
+    public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
+    {
+        writer.Write($"{_target.Usage}.{_property.Name} = {_value.Usage};");
+        Next?.GenerateCode(method, writer);
+    }
+}
+
+internal class AsParametersBindingFrame : SyncFrame
+{
+    private readonly ConstructorInfo _constructor;
+    private readonly List<Frame> _props = [];
+    private readonly List<Frame> _parameterFrames = [];
+    private readonly List<Variable> _parameters = [];
+    private readonly List<Variable> _dependencies = [];
+    
+    private bool _hasForms = false;
+    private bool _hasJsonBody = false;
+    private int _jsonBodyCount = 0;
+
+    public AsParametersBindingFrame([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type queryType, HttpChain chain, IServiceContainer container)
+    {
+        Variable = new Variable(queryType, this);
+
+        var constructors = queryType.GetConstructors();
+        if (constructors.Length > 1)
+            throw new ArgumentOutOfRangeException(nameof(queryType),
+                $"Wolverine can only bind a query string to a type with only one public constructor. {queryType.FullNameInCode()} has multiple constructors");
+
+        _constructor = constructors.Single();
+        
+        foreach (var parameter in _constructor.GetParameters())
+        {
+            if (tryCreateFrame(parameter, chain, container, out var variable))
+            {
+                _parameters.Add(variable!);
+                if (variable!.Creator != null)
+                {
+                    _parameterFrames.Add(variable.Creator);
+                    absorbBindingFrame(variable);
+                }
+            }
+        }
+
+        foreach (var propertyInfo in queryType.GetProperties().Where(x => x is { CanWrite: true, IsSpecialName: false }))
+        {
+            if (tryCreateFrame(propertyInfo, chain, container, out var variable))
+            {
+                if (variable?.Creator is IReadHttpFrame frame)
+                {
+                    frame.AssignToProperty($"{Variable.Usage}.{propertyInfo.Name}");
+                    _props.Add(variable.Creator);
+                    absorbBindingFrame(variable);
+                }
+                else
+                {
+                    _props.Add(new AssignPropertyFrame(Variable, propertyInfo, variable!));
+                    _dependencies.Add(variable!);
+                }
+            }
+        }
+
+        if (_hasJsonBody && _hasForms)
+        {
+            throw new InvalidOperationException(
+                $"{queryType.FullNameInCode()} cannot be decorated with [AsParameters] because it uses both [FromForm] and [FromBody] binding. You can only use one or the other option");
+        }
+
+        // The request body is read once (chain.RequestBodyVariable is single-shot), so a second
+        // [FromBody] member would silently reuse the first member's deserialization variable and
+        // produce a wrong-typed assignment. Fail fast with a clear message, mirroring the
+        // FromForm+FromBody guard above. ASP.NET likewise rejects more than one body. See GH-3135.
+        if (_jsonBodyCount > 1)
+        {
+            throw new InvalidOperationException(
+                $"{queryType.FullNameInCode()} cannot be decorated with [AsParameters] because it has more than one [FromBody] member. Only a single request body is supported");
+        }
+
+        // TryMatch has to mark the chain as form data optimistically, before any member is known, so that
+        // form binding works at all. Correct it now that the members HAVE been walked: the two flags above
+        // are the real answer, and they are mutually exclusive (the guard above rejects both at once).
+        //
+        // A type bound purely from the query string, route, or headers reads no request body whatsoever.
+        // Leaving IsFormData true made applyMetadata() stamp Accepts("application/x-www-form-urlencoded",
+        // "multipart/form-data") onto it — and ASP.NET Core turns that into content-type edges in the route
+        // matcher, so a plain GET carrying no Content-Type stopped being a candidate for its own route and
+        // 404'd. See GH-3630.
+        chain.IsFormData = _hasForms;
+        chain.ReadsRequestBody = _hasForms || _hasJsonBody;
+        if (_hasForms) chain.BindsFormValues = true; // GH-4742
+    }
+    
+    /// <summary>
+    /// This frame generates any absorbed ReadHttpFrame (route/query string/form/header binding)
+    /// inline, so the variable it reads must be re-homed to this frame. Otherwise a second consumer
+    /// of the same variable — a compound handler LoadAsync/Before method binding the same route
+    /// value, for example — makes the arranger schedule the absorbed frame a second time as a
+    /// top-level frame, and the duplicated locals don't compile. See GH-3374.
+    /// </summary>
+    private void absorbBindingFrame(Variable variable)
+    {
+        if (variable is HttpElementVariable element && variable.Creator != null)
+        {
+            element.ReassignCreator(this);
+        }
+    }
+
+    private bool tryCreateFrame(ParameterInfo parameter, HttpChain chain, IServiceContainer container, out Variable? variable)
+    {
+        variable = default;
+
+        var memberType = parameter.ParameterType;
+        var memberName = parameter.Name;
+        
+        if (parameter.TryGetAttribute<FromFormAttribute>(out var fatt))
+        {
+            _hasForms = true;
+            var formName = fatt.Name ?? memberName;
+            variable = chain.TryFindOrCreateFormValue(memberType, memberName!, formName);
+            return true;
+        }
+
+        if (parameter.TryGetAttribute<FromQueryAttribute>(out var qatt))
+        {
+            var queryStringName = qatt.Name ?? memberName;
+            variable =
+                chain.TryFindOrCreateQuerystringValue(memberType, queryStringName!);
+
+            return true;
+        }
+
+        if (parameter.TryGetAttribute<FromRouteAttribute>(out var ratt))
+        {
+            var routeArgumentName = ratt.Name ?? memberName;
+            if (chain.FindRouteVariable(memberType, routeArgumentName!, out variable))
+            {
+                return true;
+            }
+
+            throw new InvalidOperationException(
+                $"Unable to find a route argument '{routeArgumentName}' specified on property {Variable.VariableType.FullNameInCode()}.{memberName}");
+        }
+
+        if (parameter.TryGetAttribute<FromHeaderAttribute>(out var hatt))
+        {
+            variable = chain.GetOrCreateHeaderVariable(hatt, parameter);
+            return true;
+        }
+
+        if (parameter.TryGetAttribute<FromBodyAttribute>(out var batt))
+        {
+            _hasJsonBody = true;
+            _jsonBodyCount++;
+            chain.RequestType = memberType;
+            // A nullable [FromBody] member is an optional body: an empty request body binds null at
+            // runtime (instead of 400) and renders requestBody.required = false. See GH-3135.
+            chain.RequestBodyIsOptional = IsNullableMember(parameter);
+            variable = chain.BuildJsonDeserializationVariable();
+
+            chain.IsFormData = false;
+            return true;
+        }
+
+        if (parameter.TryGetAttribute<FromServicesAttribute>(out var satt))
+        {
+            variable = container.GetInstance<IServiceVariableSource>().Create(memberType);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool tryCreateFrame(PropertyInfo propertyInfo, HttpChain chain, IServiceContainer container, out Variable? variable)
+    {
+        variable = default;
+
+        var memberType = propertyInfo.PropertyType;
+        var memberName = propertyInfo.Name;
+
+        if (propertyInfo.TryGetAttribute<FromFormAttribute>(out var fatt))
+        {
+            _hasForms = true;
+            var formName = fatt.Name ?? memberName;
+            variable = chain.TryFindOrCreateFormValue(memberType, memberName!, formName);
+            return true;
+        }
+
+        if (propertyInfo.TryGetAttribute<FromQueryAttribute>(out var qatt))
+        {
+            var queryStringName = qatt.Name ?? memberName;
+            variable =
+                chain.TryFindOrCreateQuerystringValue(memberType, queryStringName!);
+
+            return true;
+        }
+
+        if (propertyInfo.TryGetAttribute<FromRouteAttribute>(out var ratt))
+        {
+            var routeArgumentName = ratt.Name ?? memberName;
+            if (chain.FindRouteVariable(memberType, routeArgumentName!, out variable))
+            {
+                return true;
+            }
+
+            throw new InvalidOperationException(
+                $"Unable to find a route argument '{routeArgumentName}' specified on property {Variable.VariableType.FullNameInCode()}.{memberName}");
+        }
+
+        if (propertyInfo.TryGetAttribute<FromHeaderAttribute>(out var hatt))
+        {
+            variable = chain.GetOrCreateHeaderVariable(hatt, propertyInfo);
+            return true;
+        }
+
+        if (propertyInfo.TryGetAttribute<FromBodyAttribute>(out var batt))
+        {
+            _hasJsonBody = true;
+            _jsonBodyCount++;
+            chain.RequestType = memberType;
+            // A nullable [FromBody] member is an optional body: an empty request body binds null at
+            // runtime (instead of 400) and renders requestBody.required = false. See GH-3135.
+            chain.RequestBodyIsOptional = IsNullableMember(propertyInfo);
+            variable = chain.BuildJsonDeserializationVariable();
+
+            chain.IsFormData = false;
+            return true;
+        }
+
+        if (propertyInfo.TryGetAttribute<FromServicesAttribute>(out var satt))
+        {
+            variable = container.GetInstance<IServiceVariableSource>().Create(memberType);
+            return true;
+        }
+
+        return false;
+    }
+
+    public Variable Variable { get; }
+
+    public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
+    {
+        writer.WriteComment("Binding Form & Querystring values to the argument marked with [AsParameters]");
+
+        foreach (var frame in _parameterFrames)
+        {
+            frame.GenerateCode(method, writer);
+        }
+        
+        var arguments = _parameters.Select(x => x.Usage).Join(", ");
+
+        writer.Write($"var {Variable.Usage} = new {Variable.VariableType.FullNameInCode()}({arguments});");
+
+        foreach (var frame in _props) frame.GenerateCode(method, writer);
+
+        Next?.GenerateCode(method, writer);
+    }
+
+    public override IEnumerable<Variable> FindVariables(IMethodVariables chain)
+    {
+        foreach (var parameter in _dependencies) yield return parameter;
+    }
+
+    // A member is nullable when it's a Nullable<T> value type or a reference type whose nullable
+    // annotation context marks it nullable. A fresh NullabilityInfoContext per call keeps this
+    // thread-safe across concurrent chain compilation.
+    internal static bool IsNullableMember(ParameterInfo parameter)
+    {
+        if (parameter.ParameterType.IsValueType)
+        {
+            return parameter.ParameterType.IsNullable();
+        }
+
+        return new NullabilityInfoContext().Create(parameter).WriteState == NullabilityState.Nullable;
+    }
+
+    internal static bool IsNullableMember(PropertyInfo property)
+    {
+        if (property.PropertyType.IsValueType)
+        {
+            return property.PropertyType.IsNullable();
+        }
+
+        return new NullabilityInfoContext().Create(property).WriteState == NullabilityState.Nullable;
+    }
+}

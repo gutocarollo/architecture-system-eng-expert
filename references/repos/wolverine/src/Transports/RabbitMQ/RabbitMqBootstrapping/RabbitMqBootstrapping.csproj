@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\Wolverine.RabbitMQ\Wolverine.RabbitMQ.csproj"/>
+    </ItemGroup>
+
+</Project>

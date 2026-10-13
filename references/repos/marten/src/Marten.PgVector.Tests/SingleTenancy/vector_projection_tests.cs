@@ -1,0 +1,279 @@
+using JasperFx.Events.Projections;
+using Marten.PgVector;
+using Marten.PgVector.Projection;
+using Marten.PgVector.Tests.Helpers;
+using Marten.Testing.Harness;
+using Pgvector;
+using Shouldly;
+using Xunit;
+using System.Threading.Tasks;
+using JasperFx.Events.Vectors;
+using Neutral = JasperFx.Events.Vectors;
+
+namespace Marten.PgVector.Tests.SingleTenancy;
+
+#region sample_pgvector_vector_projection
+
+public record ProductCreated(Guid ProductId, string Name, string Description);
+public record ProductUpdated(Guid ProductId, string Description);
+public record ProductDeleted(Guid ProductId);
+
+public class ProductSearchProjection : VectorProjection
+{
+    public ProductSearchProjection(Neutral.IEmbeddingProvider provider)
+        : base("product_search_vectors", provider)
+    {
+    }
+
+    protected override void Configure(VectorProjectionMapping map)
+    {
+        map.Map<ProductCreated>(
+            e => $"{e.Name} {e.Description}",
+            e => e.ProductId);
+
+        map.Map<ProductUpdated>(
+            e => e.Description,
+            e => e.ProductId);
+
+        // The rows are keyed on the product, so the delete has to be too. Passing no selector here
+        // deletes by stream id, which is a row this projection never wrote.
+        map.Delete<ProductDeleted>(e => e.ProductId);
+    }
+}
+
+#endregion
+
+[Collection("Marten.PgVector")]
+public class vector_projection_tests : IAsyncLifetime
+{
+    private DocumentStore _store = null!;
+    private FakeEmbeddingProvider _embedder = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        _embedder = new FakeEmbeddingProvider(dimensions: 3);
+
+        var projection = new ProductSearchProjection(_embedder);
+
+        #region sample_pgvector_register_vector_projection
+        _store = DocumentStore.For(opts =>
+        {
+            opts.Connection(ConnectionSource.ConnectionString);
+            opts.DatabaseSchemaName = "pgvector_proj_tests";
+            opts.AutoCreateSchemaObjects = JasperFx.AutoCreate.All;
+
+            opts.UsePgVector();
+
+            // Register the projection as Inline for simpler testing
+            // (In production, use Async lifecycle with the daemon)
+            opts.Projections.Add(projection, ProjectionLifecycle.Inline);
+
+            // Register the projection's table as a schema object
+            opts.Storage.ExtendedSchemaObjects.Add(projection.BuildTable("pgvector_proj_tests"));
+
+            opts.Events.AddEventType<ProductCreated>();
+            opts.Events.AddEventType<ProductUpdated>();
+            opts.Events.AddEventType<ProductDeleted>();
+        });
+        #endregion
+
+        await _store.Advanced.Clean.CompletelyRemoveAllAsync();
+        await _store.Storage.ApplyAllConfiguredChangesToDatabaseAsync();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _store?.Dispose();
+        return default;
+    }
+
+    [Fact]
+    public async Task creates_embedding_on_event_append()
+    {
+        var productId = Guid.NewGuid();
+
+        await using var session = _store.LightweightSession();
+        session.Events.StartStream(productId,
+            new ProductCreated(productId, "Widget", "A fantastic widget for all purposes"));
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        #region sample_pgvector_vector_projection_search
+        // VectorProjectionSearchAsync<TId> takes the ReadOnlyMemory<float> the shared
+        // IEmbeddingProvider already hands back, so there is nothing to wrap
+        var queryEmbedding = await _embedder.GenerateEmbeddingAsync(
+            "Widget A fantastic widget for all purposes", TestContext.Current.CancellationToken);
+
+        var results = await session.VectorProjectionSearchAsync<Guid>(
+            "product_search_vectors",
+            queryEmbedding,
+            limit: 10,
+            distance: Neutral.DistanceFunction.L2);
+        #endregion
+
+        results.Count.ShouldBe(1);
+        results[0].Id.ShouldBe(productId);
+        results[0].ContentText.ShouldBe("Widget A fantastic widget for all purposes");
+    }
+
+    [Fact]
+    public async Task updates_embedding_when_content_changes()
+    {
+        var productId = Guid.NewGuid();
+
+        await using (var session = _store.LightweightSession())
+        {
+            session.Events.StartStream(productId,
+                new ProductCreated(productId, "Widget", "Original description"));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        // Update the product
+        await using (var session = _store.LightweightSession())
+        {
+            session.Events.Append(productId,
+                new ProductUpdated(productId, "Updated description"));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        // Search should find the updated content
+        await using var querySession = _store.QuerySession();
+        var results = await querySession.VectorProjectionSearchAsync(
+            "product_search_vectors",
+            _embedder.GenerateVector("Updated description"),
+            limit: 10,
+            distance: Neutral.DistanceFunction.L2);
+
+        results.Count.ShouldBe(1);
+        results[0].ContentText.ShouldBe("Updated description");
+    }
+
+    [Fact]
+    public async Task skips_re_embedding_when_content_unchanged()
+    {
+        var productId = Guid.NewGuid();
+        var callCount = 0;
+        var countingEmbedder = new CallCountingEmbeddingProvider(_embedder, () => callCount++);
+
+        var projection = new ProductSearchProjection(countingEmbedder);
+        var store = DocumentStore.For(opts =>
+        {
+            opts.Connection(ConnectionSource.ConnectionString);
+            opts.DatabaseSchemaName = "pgvector_hash_tests";
+            opts.AutoCreateSchemaObjects = JasperFx.AutoCreate.All;
+            opts.UsePgVector();
+            opts.Projections.Add(projection, ProjectionLifecycle.Inline);
+            opts.Storage.ExtendedSchemaObjects.Add(projection.BuildTable("pgvector_hash_tests"));
+            opts.Events.AddEventType<ProductCreated>();
+        });
+
+        await store.Advanced.Clean.CompletelyRemoveAllAsync(TestContext.Current.CancellationToken);
+        await store.Storage.ApplyAllConfiguredChangesToDatabaseAsync();
+
+        // First append — should call embedder
+        await using (var session = store.LightweightSession())
+        {
+            session.Events.StartStream(productId,
+                new ProductCreated(productId, "Widget", "Same content"));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var firstCallCount = callCount;
+        firstCallCount.ShouldBeGreaterThan(0);
+
+        // Append same content again — embedder should NOT be called
+        await using (var session = store.LightweightSession())
+        {
+            session.Events.Append(productId,
+                new ProductCreated(productId, "Widget", "Same content"));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        callCount.ShouldBe(firstCallCount); // No additional calls
+
+        store.Dispose();
+    }
+
+    [Fact]
+    public async Task deletes_embedding_on_delete_event()
+    {
+        var productId = Guid.NewGuid();
+
+        await using (var session = _store.LightweightSession())
+        {
+            session.Events.StartStream(productId,
+                new ProductCreated(productId, "Widget", "To be deleted"));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        // Delete
+        await using (var session = _store.LightweightSession())
+        {
+            session.Events.Append(productId,
+                new ProductDeleted(productId));
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        // Search should find nothing
+        await using var querySession = _store.QuerySession();
+        var results = await querySession.VectorProjectionSearchAsync(
+            "product_search_vectors",
+            _embedder.GenerateVector("anything"),
+            limit: 10,
+            distance: Neutral.DistanceFunction.L2);
+
+        results.Count.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task multiple_products_searchable_by_similarity()
+    {
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
+        var id3 = Guid.NewGuid();
+
+        await using var session = _store.LightweightSession();
+        session.Events.StartStream(id1,
+            new ProductCreated(id1, "Red Shoes", "Bright red running shoes"));
+        session.Events.StartStream(id2,
+            new ProductCreated(id2, "Blue Shoes", "Navy blue casual shoes"));
+        session.Events.StartStream(id3,
+            new ProductCreated(id3, "Garden Hose", "50ft expandable garden hose"));
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Search — should return all 3 ordered by distance
+        await using var querySession = _store.QuerySession();
+        var results = await querySession.VectorProjectionSearchAsync(
+            "product_search_vectors",
+            _embedder.GenerateVector("Red Shoes Bright red running shoes"),
+            limit: 10,
+            distance: Neutral.DistanceFunction.L2);
+
+        results.Count.ShouldBe(3);
+        // First result should be exact match
+        results[0].Id.ShouldBe(id1);
+        results[0].Distance.ShouldBe(0f); // Exact match = 0 distance
+    }
+}
+
+/// <summary>
+/// Wrapper that counts embedding API calls for testing content hash skipping.
+/// </summary>
+internal class CallCountingEmbeddingProvider : Neutral.IEmbeddingProvider
+{
+    private readonly Neutral.IEmbeddingProvider _inner;
+    private readonly Action _onCall;
+
+    public CallCountingEmbeddingProvider(Neutral.IEmbeddingProvider inner, Action onCall)
+    {
+        _inner = inner;
+        _onCall = onCall;
+    }
+
+    public int Dimensions => _inner.Dimensions;
+
+    public Task<ReadOnlyMemory<float>[]> GenerateEmbeddingsAsync(string[] texts, CancellationToken ct = default)
+    {
+        _onCall();
+        return _inner.GenerateEmbeddingsAsync(texts, ct);
+    }
+}

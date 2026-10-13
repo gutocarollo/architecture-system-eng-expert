@@ -1,0 +1,150 @@
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events.Daemon.Progress;
+using Marten.Storage;
+using Marten.Testing;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace DaemonTests.Internals;
+
+// #4962 / jasperfx#435 — targeted per-cell progression read. mt_event_progression.name holds a full
+// ShardName.Identity, so (projectionName, tenantId) can map to several rows; the resolution rules are:
+// candidates match parsed Name + TenantId (null tenant = bare store-global only), newest version wins.
+public class read_projection_progress : OneOffConfigurationsContext, IAsyncLifetime
+{
+    public override async ValueTask InitializeAsync()
+    {
+        await theStore.Advanced.Clean.DeleteAllEventDataAsync();
+        await theStore.EnsureStorageExistsAsync(typeof(IEvent));
+    }
+
+    public override ValueTask DisposeAsync()
+    {
+        Dispose();
+        return base.DisposeAsync();
+    }
+
+    private async Task seedProgression(params (ShardName name, long sequence)[] rows)
+    {
+        foreach (var (name, sequence) in rows)
+        {
+            theSession.QueueOperation(new InsertProjectionProgress(theStore.Events, new EventRange(name, sequence)));
+        }
+
+        await theSession.SaveChangesAsync();
+    }
+
+    private ValueTask<ProjectionProgressRow?> read(string projectionName, string? tenantId) =>
+        ((IEventDatabase)theStore.Tenancy.Default.Database)
+        .ReadProjectionProgressAsync(projectionName, tenantId, CancellationToken.None);
+
+    private ValueTask<ProjectionProgressRow?> read(ShardName name) =>
+        ((IEventDatabase)theStore.Tenancy.Default.Database)
+        .ReadProjectionProgressAsync(name, CancellationToken.None);
+
+    [Fact]
+    public async Task reads_the_store_global_row()
+    {
+        await seedProgression((ShardName.Compose("Orders"), 42));
+
+        var row = await read("Orders", null);
+
+        row.ShouldNotBeNull();
+        row.ProjectionName.ShouldBe("Orders");
+        row.TenantId.ShouldBeNull();
+        row.Sequence.ShouldBe(42);
+        // This store leaves EnableExtendedProgressionTracking off, so the columns don't exist and there
+        // is nothing to report. See Bug_5172 for the extended-tracking half.
+        row.AgentStatus.ShouldBeNull();
+        row.LastHeartbeat.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task returns_null_when_no_row_exists()
+    {
+        await seedProgression((ShardName.Compose("Orders"), 42));
+
+        (await read("Unobserved", null)).ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task newest_version_wins_across_a_blue_green_deploy()
+    {
+        await seedProgression(
+            (ShardName.Compose("Orders"), 10),                       // Orders:All        (V1)
+            (ShardName.Compose("Orders", version: 2), 25),           // Orders:V2:All
+            (ShardName.Compose("Orders", version: 3), 40));          // Orders:V3:All
+
+        var row = await read("Orders", null);
+
+        row.ShouldNotBeNull();
+        row.Sequence.ShouldBe(40);
+    }
+
+    [Fact]
+    public async Task null_tenant_matches_only_the_bare_store_global_row()
+    {
+        await seedProgression(
+            (ShardName.Compose("Orders"), 10),                       // Orders:All
+            (ShardName.Compose("Orders", tenantId: "tenant1"), 99)); // Orders:All:tenant1
+
+        (await read("Orders", null))!.Sequence.ShouldBe(10);
+        (await read("Orders", "tenant1"))!.Sequence.ShouldBe(99);
+    }
+
+    [Fact]
+    public async Task does_not_match_a_projection_whose_name_is_a_prefix()
+    {
+        await seedProgression(
+            (ShardName.Compose("Orders"), 10),
+            (ShardName.Compose("OrdersHistory"), 5));
+
+        (await read("Orders", null))!.Sequence.ShouldBe(10);
+        (await read("OrdersHistory", null))!.Sequence.ShouldBe(5);
+    }
+
+    // #4975 / jasperfx#529 — the exact ShardName overload does NO collapsing.
+    [Fact]
+    public async Task exact_shard_name_reads_the_specific_version_not_the_newest()
+    {
+        await seedProgression(
+            (ShardName.Compose("Orders", version: 2), 25),
+            (ShardName.Compose("Orders", version: 3), 40));
+
+        var v2 = await read(ShardName.Compose("Orders", version: 2));
+
+        v2.ShouldNotBeNull();
+        v2.Sequence.ShouldBe(25); // the exact V2 row, not the newest V3
+        v2.ProjectionName.ShouldBe("Orders");
+        v2.AgentStatus.ShouldBeNull();
+        v2.LastHeartbeat.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task exact_shard_name_returns_null_when_the_identity_does_not_exist()
+    {
+        await seedProgression((ShardName.Compose("Orders"), 10));
+
+        (await read(ShardName.Compose("Orders", version: 9))).ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task exact_shard_name_distinguishes_tenant_rows()
+    {
+        await seedProgression(
+            (ShardName.Compose("Orders"), 10),
+            (ShardName.Compose("Orders", tenantId: "tenant1"), 99));
+
+        (await read(ShardName.Compose("Orders")))!.Sequence.ShouldBe(10);
+
+        var tenantRow = await read(ShardName.Compose("Orders", tenantId: "tenant1"));
+        tenantRow!.Sequence.ShouldBe(99);
+        tenantRow.TenantId.ShouldBe("tenant1");
+    }
+}

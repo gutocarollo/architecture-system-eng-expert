@@ -1,0 +1,198 @@
+#nullable enable
+
+using System;
+using System.Data.Common;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Marten.Linq;
+using Marten.Linq.QueryHandlers;
+using Marten.Linq.Selectors;
+using Marten.Services;
+using Marten.Util;
+using Npgsql;
+
+namespace Marten.Internal.Sessions;
+
+public partial class QuerySession
+{
+    internal IConnectionLifetime _connection;
+
+    /// <summary>
+    ///     #5611. Whether this session is already inside a transaction that outlives the current call --
+    ///     one the caller opened with <see cref="SessionOptions.ForTransaction" />, an ambient
+    ///     <c>TransactionScope</c>, or an explicit <c>BeginTransaction</c>. A read that wants its own
+    ///     isolation level has to check this first: PostgreSQL will not let it change the isolation of a
+    ///     transaction already in progress, and the <c>end</c> that closes its bracket would commit that
+    ///     transaction out from under whoever owns it.
+    /// </summary>
+    internal bool HasSurvivingTransaction => _connection.HasSurvivingTransaction();
+
+    internal record CommandExecution(NpgsqlCommand Command, IConnectionLifetime Lifetime);
+
+    public Task<int> ExecuteAsync(NpgsqlCommand command, CancellationToken token = new())
+    {
+        RequestCount++;
+        return _resilience.ExecuteAsync(static (e, t) => new ValueTask<int>(e.Lifetime.ExecuteAsync(e.Command, t)), new CommandExecution(command, _connection), token).AsTask();
+    }
+
+    public Task<DbDataReader> ExecuteReaderAsync(NpgsqlCommand command, CancellationToken token = default)
+    {
+        RequestCount++;
+        return _resilience.ExecuteAsync(static (e, t) => new ValueTask<DbDataReader>(e.Lifetime.ExecuteReaderAsync(e.Command, t)), new CommandExecution(command, _connection), token).AsTask();
+    }
+
+    // #4810: IStorageSession db-neutral execution seam. The closed-shape read path builds an
+    // NpgsqlCommand (BuildLoadCommand / BuildLoadManyCommand) and hands it to the storage session
+    // as a DbCommand; Marten's session is Npgsql-backed, so it downcasts to the concrete path.
+    public Task<DbDataReader> ExecuteReaderAsync(DbCommand command, CancellationToken token = default)
+        => ExecuteReaderAsync((NpgsqlCommand)command, token);
+
+    internal record BatchExecution(NpgsqlBatch Batch, IConnectionLifetime Lifetime);
+
+    public DbDataReader ExecuteReader(NpgsqlBatch batch)
+    {
+        RequestCount++;
+        return _resilience.Execute(static e => e.Lifetime.ExecuteReader(e.Batch), new BatchExecution(batch, _connection));
+    }
+
+    public Task<DbDataReader> ExecuteReaderAsync(NpgsqlBatch batch, CancellationToken token = default)
+    {
+        RequestCount++;
+
+        // This is executing via Polly
+        return _resilience.ExecuteAsync(static (e, t)
+            => new ValueTask<DbDataReader>(e.Lifetime.ExecuteReaderAsync(e.Batch, t)),
+            new BatchExecution(batch, _connection), token).AsTask();
+    }
+
+    internal async Task<T?> LoadOneAsync<T>(DbCommand command, ISelector<T> selector, CancellationToken token)
+    {
+        await using var reader = await ExecuteReaderAsync(command, token).ConfigureAwait(false);
+        try
+        {
+            if (!await reader.ReadAsync(token).ConfigureAwait(false))
+            {
+                return default;
+            }
+
+            return await selector.ResolveAsync(reader, token).ConfigureAwait(false);
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    internal async Task<bool> StreamOne(DbCommand command, Stream stream, CancellationToken token)
+    {
+        await using var reader = await ExecuteReaderAsync(command, token).ConfigureAwait(false);
+        try
+        {
+            return await reader.StreamOne(stream, token).ConfigureAwait(false) == 1;
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    internal async Task<StreamOneReadResult> StreamOneWithVersion(DbCommand command, Stream stream,
+        bool numericRevision, Func<Guid?, long?, bool>? shouldWriteBody, CancellationToken token)
+    {
+        await using var reader = await ExecuteReaderAsync(command, token).ConfigureAwait(false);
+
+        try
+        {
+            return await reader.StreamOneWithVersion(stream, numericRevision, shouldWriteBody, token)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    internal async Task<int> StreamMany(DbCommand command, Stream stream, CancellationToken token)
+    {
+        await using var reader = await ExecuteReaderAsync(command, token).ConfigureAwait(false);
+
+        try
+        {
+            return await reader.StreamMany(stream, token).ConfigureAwait(false);
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    internal async Task<int> StreamPagedMany(DbCommand command, Stream stream, int pageNumber, int pageSize,
+        QueryStatistics statistics, CancellationToken token)
+    {
+        await using var reader = await ExecuteReaderAsync(command, token).ConfigureAwait(false);
+
+        try
+        {
+            return await reader.StreamPagedMany(stream, pageNumber, pageSize, statistics, token).ConfigureAwait(false);
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public async Task<T> ExecuteHandlerAsync<T>(IQueryHandler<T> handler, CancellationToken token)
+    {
+        var cmd = this.BuildCommand(handler);
+
+        await using var reader = await ExecuteReaderAsync(cmd, token).ConfigureAwait(false);
+        try
+        {
+            return await handler.HandleAsync(reader, this, token).ConfigureAwait(false);
+        }
+        finally
+        {
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public void BeginTransaction()
+    {
+        if (_connection is IAlwaysConnectedLifetime lifetime)
+        {
+            lifetime.BeginTransaction();
+
+        }
+        else if (_connection is ITransactionStarter starter)
+        {
+            var tx = starter.Start();
+            tx.BeginTransaction();
+            _connection = tx;
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"The current lifetime {_connection} is neither a {nameof(IAlwaysConnectedLifetime)} nor a {nameof(ITransactionStarter)}");
+        }
+    }
+
+    public async ValueTask BeginTransactionAsync(CancellationToken token)
+    {
+        if (_connection is IAlwaysConnectedLifetime lifetime)
+        {
+            await lifetime.BeginTransactionAsync(token).ConfigureAwait(false);
+        }
+        else if (_connection is ITransactionStarter starter)
+        {
+            var tx = await starter.StartAsync(token).ConfigureAwait(false);
+            await tx.BeginTransactionAsync(token).ConfigureAwait(false);
+            _connection = tx;
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"The current lifetime {_connection} is neither a {nameof(IAlwaysConnectedLifetime)} nor a {nameof(ITransactionStarter)}");
+        }
+    }
+}

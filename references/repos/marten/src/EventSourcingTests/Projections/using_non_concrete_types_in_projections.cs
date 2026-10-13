@@ -1,0 +1,93 @@
+using System;
+using System.Threading.Tasks;
+using EventSourcingTests.Aggregation;
+using JasperFx.Events.Aggregation;
+using Marten.Events.Aggregation;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace EventSourcingTests.Projections;
+
+public class using_non_concrete_types_in_projections : AggregationContext
+{
+    public using_non_concrete_types_in_projections(DefaultStoreFixture fixture) : base(fixture)
+    {
+        UsingDefinition<NonConcreteTabulatorProjection>();
+    }
+
+    [Fact]
+    public async Task live_aggregation()
+    {
+        var aggregate = await LiveAggregation(x =>
+        {
+            x.B();
+            x.C();
+            x.B();
+            x.C();
+            x.C();
+            x.A();
+            x.D();
+        });
+
+        aggregate.ACount.ShouldBe(1);
+        aggregate.BCount.ShouldBe(2);
+        aggregate.CCount.ShouldBe(3);
+        aggregate.DCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task inline_projection()
+    {
+        var stream1 = Guid.NewGuid();
+        await InlineProject(x =>
+        {
+            x.Streams[stream1].A();
+            x.Streams[stream1].B();
+            x.Streams[stream1].A();
+            x.Streams[stream1].D();
+            x.Streams[stream1].A();
+            x.Streams[stream1].B();
+            x.Streams[stream1].B();
+            x.Streams[stream1].C();
+            x.Streams[stream1].C();
+            x.Streams[stream1].E();
+            x.Streams[stream1].E();
+            x.Streams[stream1].E();
+            x.Streams[stream1].E();
+            x.Streams[stream1].A();
+        });
+
+        await using var query = theStore.QuerySession();
+
+        var aggregate = await query.LoadAsync<MyAggregate>(stream1);
+        aggregate.ShouldNotBeNull();
+
+        aggregate.ACount.ShouldBe(4);
+        aggregate.BCount.ShouldBe(3);
+        aggregate.CCount.ShouldBe(2);
+        aggregate.DCount.ShouldBe(1);
+        aggregate.ECount.ShouldBe(4);
+    }
+}
+
+// JasperFx.Events 2.0 (JasperFx/jasperfx#276 / #286) removed the
+// SingleStreamProjection<T>.ProjectEvent<TEvent>(handler) helpers, so the
+// non-concrete-type dispatch this test exercises is now expressed via the
+// method convention on a `partial` projection class. The source generator
+// emits a `[GeneratedEvolver]` dispatcher that routes any event implementing
+// ITabulator to the interface-typed Apply method.
+public partial class NonConcreteTabulatorProjection: SingleStreamProjection<MyAggregate, Guid>
+{
+    public MyAggregate Apply(ITabulator e, MyAggregate a)
+    {
+        e.Apply(a);
+        return a;
+    }
+
+    public MyAggregate Apply(EEvent _, MyAggregate a)
+    {
+        a.ECount++;
+        return a;
+    }
+}

@@ -1,0 +1,441 @@
+using System.Diagnostics;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using NSubstitute;
+using Wolverine.ComplianceTests;
+using Wolverine.ComplianceTests.Compliance;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Wolverine.Tracking;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+using Wolverine.Transports.Tcp;
+using Wolverine.Util;
+using Xunit;
+
+namespace CoreTests.Runtime;
+
+public class MessageContextTests
+{
+    private readonly MessageContext theContext;
+    private readonly Envelope theEnvelope;
+    private readonly MockWolverineRuntime theRuntime;
+
+    public MessageContextTests()
+    {
+        theRuntime = new MockWolverineRuntime();
+        theRuntime.Options.ServiceName = "MyService";
+
+        var original = ObjectMother.Envelope();
+        original.Id = Guid.NewGuid();
+        original.CorrelationId = Guid.NewGuid().ToString();
+        original.ConversationId = Guid.NewGuid();
+        original.TenantId = "some tenant";
+        original.SagaId = "some saga";
+
+        var context = new MessageContext(theRuntime);
+        context.ReadEnvelope(original, InvocationCallback.Instance);
+        theContext = context.As<MessageContext>();
+
+        theEnvelope = ObjectMother.Envelope();
+    }
+
+    [Fact]
+    public void default_multi_flush_mode_is_OnlyOnce()
+    {
+        theContext.MultiFlushMode.ShouldBe(MultiFlushMode.OnlyOnce);
+    }
+
+    [Fact]
+    public async Task try_to_call_flush_outgoing_twice_in_normal_mode()
+    {
+        theEnvelope.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(theEnvelope);
+        
+        // Point is that nothing happens, no exceptions
+        await theContext.FlushOutgoingMessagesAsync();
+
+        var envelope2 = ObjectMother.Envelope();
+        envelope2.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(envelope2);
+        await theContext.FlushOutgoingMessagesAsync();
+
+        await envelope2.Sender.DidNotReceive().StoreAndForwardAsync(envelope2);
+    }
+    
+    [Fact]
+    public async Task try_to_call_flush_outgoing_twice_in_allow_multiples_mode()
+    {
+        theContext.MultiFlushMode = MultiFlushMode.AllowMultiples;
+        
+        theEnvelope.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(theEnvelope);
+        
+        // Point is that nothing happens, no exceptions
+        await theContext.FlushOutgoingMessagesAsync();
+
+        var envelope2 = ObjectMother.Envelope();
+        envelope2.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(envelope2);
+        await theContext.FlushOutgoingMessagesAsync();
+
+        await envelope2.Sender.Received().StoreAndForwardAsync(envelope2);
+    }
+
+    [Fact]
+    public async Task throw_on_multiple_calls_to_flush_if_the_mode_is_assert_on_multiples()
+    {
+        theContext.MultiFlushMode = MultiFlushMode.AssertOnMultiples;
+        
+        
+        theEnvelope.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(theEnvelope);
+        await theContext.FlushOutgoingMessagesAsync();
+        
+        // Wacky, but this adds it to the MessageContext
+        var envelope2 = ObjectMother.Envelope();
+        envelope2.Sender = Substitute.For<ISendingAgent>();
+        
+        // Wacky, but this adds it to the MessageContext
+        await theContext.As<IEnvelopeTransaction>().PersistOutgoingAsync(envelope2);
+        await Should.ThrowAsync<InvalidOperationException>(async () =>
+        {
+            await theContext.FlushOutgoingMessagesAsync();
+        });
+
+        await envelope2.Sender.DidNotReceive().StoreAndForwardAsync(envelope2);
+    }
+    
+    [Fact]
+    public async Task reject_side_effect_as_cascading_message()
+    {
+        await Should.ThrowAsync<InvalidOperationException>(async () =>
+        {
+            await theContext.EnqueueCascadingAsync(Substitute.For<ISideEffect>());
+        });
+    }
+
+    [Fact]
+    public void track_envelope_correlation()
+    {
+        // Source is preserved when already set on the envelope (see
+        // track_envelope_correlation_does_not_override_existing_source);
+        // clear it here so the ServiceName fallback path is exercised.
+        theEnvelope.Source = null;
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.TenantId.ShouldBe(theContext.TenantId);
+
+        theEnvelope.SagaId.ShouldBe("some saga");
+        theEnvelope.ConversationId.ShouldBe(theContext.Envelope!.ConversationId);
+
+        theEnvelope.Source.ShouldBe("MyService");
+        theEnvelope.CorrelationId.ShouldBe(theContext.CorrelationId);
+
+        activity.Id.ShouldNotBeNull();
+        theEnvelope.ParentId.ShouldBe(activity.Id);
+    }
+
+    [Fact]
+    public void track_envelope_correlation_relays_user_name_when_enabled()
+    {
+        theRuntime.Options.EnableRelayOfUserName = true;
+        theContext.UserName = "testuser";
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.UserName.ShouldBe("testuser");
+    }
+
+    [Fact]
+    public void track_envelope_correlation_does_not_relay_user_name_when_disabled()
+    {
+        theRuntime.Options.EnableRelayOfUserName = false;
+        theContext.UserName = "testuser";
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.UserName.ShouldBeNull();
+    }
+
+    [Fact]
+    public void track_envelope_correlation_does_not_override_existing_user_name()
+    {
+        theRuntime.Options.EnableRelayOfUserName = true;
+        theContext.UserName = "contextuser";
+        theEnvelope.UserName = "envelopeuser";
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.UserName.ShouldBe("envelopeuser");
+    }
+
+    [Fact]
+    public void track_envelope_correlation_does_not_override_existing_source()
+    {
+        // A CustomizeOutgoingMessagesOfType<T> rule (or any per-message
+        // DeliveryOptions override) may have already set Source — for example
+        // when publishing CloudEvents and the producer needs a spec-valid
+        // per-message `source` URI. The framework must not clobber it.
+        theEnvelope.Source = "https://api.example.com/users/123";
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.Source.ShouldBe("https://api.example.com/users/123");
+    }
+
+    [Fact]
+    public void track_envelope_correlation_falls_back_to_service_name_when_source_is_empty()
+    {
+        theEnvelope.Source = null;
+
+        using var activity = new Activity("DoWork");
+        activity.Start();
+
+        theContext.TrackEnvelopeCorrelation(theEnvelope, activity);
+
+        theEnvelope.Source.ShouldBe("MyService");
+    }
+
+    [Fact]
+    public void reads_user_name_from_envelope()
+    {
+        var original = ObjectMother.Envelope();
+        original.UserName = "fromenvelope";
+
+        var context = new MessageContext(theRuntime);
+        context.ReadEnvelope(original, InvocationCallback.Instance);
+
+        context.UserName.ShouldBe("fromenvelope");
+    }
+
+    [Fact]
+    public void reads_tenant_id_from_envelope()
+    {
+        theContext.TenantId.ShouldBe("some tenant");
+    }
+
+    [Fact]
+    public async Task clear_all_cleans_out_outstanding_messages()
+    {
+        using var host = await WolverineHost.ForAsync(opts =>
+        {
+            opts.PublishAllMessages().ToPort(PortFinder.GetAvailablePort());
+        });
+
+        var context = new MessageContext(host.GetRuntime());
+
+        context.ReadEnvelope(theEnvelope, Substitute.For<IChannelCallback>());
+
+        var outbox = Substitute.For<IEnvelopeTransaction>();
+        await context.EnlistInOutboxAsync(outbox);
+
+        await context.PublishAsync(new Message1());
+        await context.ScheduleAsync(new Message2(), 1.Hours());
+
+        context.Outstanding.Any().ShouldBeTrue();
+
+        await context.ClearAllAsync();
+
+        context.Outstanding.Any().ShouldBeFalse();
+
+        await outbox.Received().RollbackAsync();
+
+        context.Transaction.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task reschedule_without_native_scheduling()
+    {
+        var callback = Substitute.For<IChannelCallback>();
+        var scheduledTime = DateTime.Today.AddHours(8);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        await theContext.ReScheduleAsync(scheduledTime);
+
+        theEnvelope.ScheduledTime.ShouldBe(scheduledTime);
+
+        await theContext.Storage.Inbox.Received().RescheduleExistingEnvelopeForRetryAsync(theEnvelope);
+    }
+
+    [Fact]
+    public async Task reschedule_with_native_scheduling()
+    {
+        var callback = Substitute.For<IChannelCallback, ISupportNativeScheduling>();
+        callback.As<ISupportNativeScheduling>().NativeSchedulingEnabled.Returns(true);
+        var scheduledTime = DateTime.Today.AddHours(8);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        await theContext.ReScheduleAsync(scheduledTime);
+
+        theEnvelope.ScheduledTime.ShouldBe(scheduledTime);
+
+        await theContext.Storage.Inbox.DidNotReceive().RescheduleExistingEnvelopeForRetryAsync(theEnvelope);
+        await callback.As<ISupportNativeScheduling>().Received()
+            .MoveToScheduledUntilAsync(theEnvelope, scheduledTime);
+    }
+
+    [Fact]
+    public async Task reschedule_falls_back_to_durable_inbox_when_native_scheduling_disabled()
+    {
+        // A listener that implements ISupportNativeScheduling but reports NativeSchedulingEnabled == false
+        // (e.g. Pulsar without a retry-letter topic) must NOT be treated as able to reschedule natively;
+        // the runtime should fall back to the durable inbox rather than silently no-op. GH-3491.
+        var callback = Substitute.For<IChannelCallback, ISupportNativeScheduling>();
+        callback.As<ISupportNativeScheduling>().NativeSchedulingEnabled.Returns(false);
+        var scheduledTime = DateTime.Today.AddHours(8);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        await theContext.ReScheduleAsync(scheduledTime);
+
+        theEnvelope.ScheduledTime.ShouldBe(scheduledTime);
+
+        await callback.As<ISupportNativeScheduling>().DidNotReceive()
+            .MoveToScheduledUntilAsync(Arg.Any<Envelope>(), Arg.Any<DateTimeOffset>());
+        await theContext.Storage.Inbox.Received().RescheduleExistingEnvelopeForRetryAsync(theEnvelope);
+    }
+
+    [Fact]
+    public async Task move_to_dead_letter_queue_without_native_dead_letter()
+    {
+        var callback = Substitute.For<IChannelCallback>();
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        var exception = new Exception();
+
+        await theContext.MoveToDeadLetterQueueAsync(exception);
+
+        await theRuntime.Storage.Inbox.Received()
+            .MoveToDeadLetterStorageAsync(theEnvelope, exception);
+    }
+
+    [Fact]
+    public async Task move_to_dead_letter_queue_with_native_dead_letter()
+    {
+        var callback = Substitute.For<IChannelCallback, ISupportDeadLetterQueue>();
+        callback.As<ISupportDeadLetterQueue>().NativeDeadLetterQueueEnabled.Returns(true);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        var exception = new Exception();
+
+        await theContext.MoveToDeadLetterQueueAsync(exception);
+
+        await callback.As<ISupportDeadLetterQueue>().Received()
+            .MoveToErrorsAsync(theEnvelope, exception);
+
+        await theRuntime.Storage.Inbox.DidNotReceive()
+            .MoveToDeadLetterStorageAsync(theEnvelope, exception);
+    }
+
+    /// <summary>
+    /// GH-4481. MoveToErrorQueue.ExecuteAsync calls CompleteAsync() unconditionally after
+    /// MoveToDeadLetterQueueAsync, and it has to: for a transport whose MoveToErrorsAsync only sends a COPY
+    /// (SQS, GCP Pub/Sub) that trailing call is the only thing that ever settles the original. A transport
+    /// whose native move ALREADY settled the delivery opts out of it by marking HasBeenAcked -- the flag
+    /// MessageContext.CompleteAsync short-circuits on. That is the per-transport signal the issue asks for,
+    /// and it already exists; Azure Service Bus was simply not setting it, so its trailing complete went to
+    /// the broker on a lock its own dead letter move had already consumed.
+    /// </summary>
+    [Fact]
+    public async Task a_native_dead_letter_move_that_settled_suppresses_the_trailing_complete()
+    {
+        var callback = Substitute.For<IChannelCallback, ISupportDeadLetterQueue>();
+        callback.As<ISupportDeadLetterQueue>().NativeDeadLetterQueueEnabled.Returns(true);
+
+        // What a settling transport does: RabbitMQ's two dead letter paths set this next to their own
+        // ack/nack, and as of GH-4481 so does AzureServiceBusEnvelope.DeadLetterAsync.
+        callback.As<ISupportDeadLetterQueue>()
+            .MoveToErrorsAsync(Arg.Any<Envelope>(), Arg.Any<Exception>())
+            .Returns(c =>
+            {
+                c.Arg<Envelope>().HasBeenAcked = true;
+                return Task.CompletedTask;
+            });
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        await theContext.MoveToDeadLetterQueueAsync(new Exception());
+        await theContext.CompleteAsync();
+
+        await callback.DidNotReceive().CompleteAsync(Arg.Any<Envelope>());
+    }
+
+    /// <summary>
+    /// GH-4481, the other half. The guard above must stay keyed off what the transport actually did, not off
+    /// "was this a native dead letter move" -- SQS and GCP Pub/Sub send a copy and leave the original
+    /// unsettled, so suppressing their trailing complete would turn every dead lettered message into a
+    /// duplicate once its visibility timeout lapsed.
+    /// </summary>
+    [Fact]
+    public async Task a_native_dead_letter_move_that_only_copied_still_gets_the_trailing_complete()
+    {
+        var callback = Substitute.For<IChannelCallback, ISupportDeadLetterQueue>();
+        callback.As<ISupportDeadLetterQueue>().NativeDeadLetterQueueEnabled.Returns(true);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        await theContext.MoveToDeadLetterQueueAsync(new Exception());
+        await theContext.CompleteAsync();
+
+        await callback.Received().CompleteAsync(theEnvelope);
+    }
+
+    [Fact]
+    public async Task move_to_dead_letter_queue_without_native_dead_letter_if_native_dlq_is_disabled()
+    {
+        var callback = Substitute.For<IChannelCallback, ISupportDeadLetterQueue>();
+        callback.As<ISupportDeadLetterQueue>().NativeDeadLetterQueueEnabled.Returns(false);
+
+        theContext.ReadEnvelope(theEnvelope, callback);
+
+        var exception = new Exception();
+
+        await theContext.MoveToDeadLetterQueueAsync(exception);
+
+        await theRuntime.Storage.Inbox.Received()
+            .MoveToDeadLetterStorageAsync(theEnvelope, exception);
+    }
+
+    [Fact]
+    public void correlation_id_should_be_same_as_original_envelope()
+    {
+        theContext.CorrelationId.ShouldBe(theContext.Envelope!.CorrelationId);
+    }
+
+    [Fact]
+    public void new_context_gets_a_non_empty_correlation_id()
+    {
+        theRuntime.NewContext().CorrelationId.ShouldNotBeNull();
+    }
+}

@@ -1,0 +1,108 @@
+import java.text.SimpleDateFormat
+
+Date buildTimeAndDate = new Date()
+ext {
+    buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
+    buildTime = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
+}
+
+def projectArtifactId = 'resilience4j'
+def url = "https://resilience4j.readme.io"
+apply plugin: 'biz.aQute.bnd.builder'
+
+normalization {
+    runtimeClasspath {
+        metaInf {
+            ignoreAttribute("Build-Time")
+            ignoreAttribute("Build-Date")
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Built-By': 'Robert Winkler',
+                'Created-By': System.properties['java.version'] + " (" + System.properties['java.vendor'] + " " + System.properties['java.vm.version'] + ")",
+                'Build-Date': project.buildDate,
+                'Build-Time': project.buildTime,
+                'Specification-Title': projectArtifactId,
+                'Specification-Version': project.version,
+                'Implementation-Title': projectArtifactId,
+                'Implementation-Version': project.version,
+        )
+    }
+    bundle {
+        bnd(
+                '-exportcontents': '!io.github.resilience4j.*.internal,*;-noimport:=true',
+                'Import-Package': '!javax.annotation,!javax.annotation.meta,*',
+                'Bundle-Description': 'A lightweight fault tolerance library',
+                'Bundle-DocURL': 'https://github.com/resilience4j/resilience4j',
+                'Bundle-Name': project.name,
+                'Bundle-SymbolicName': "${project.group}.${project.name}",
+                '-reproducible': "true",
+                '-noextraheaders': "true"
+        )
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+signing {
+    def gpgKey = System.getenv("GPG_KEY")
+    def gpgPassphrase = System.getenv("GPG_PASSPHRASE")
+    required = gpgKey != null
+    useInMemoryPgpKeys(gpgKey, gpgPassphrase)
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        resilience4j(MavenPublication) {
+            from components.java
+            pom.withXml {
+                def devs = ['RobWin': 'Robert Winkler',
+                            'storozhukBM': 'Bogdan Storozhuk',
+                            'Romeh': 'Mahmoud Romeh',
+                            'dlsrb6342': 'Ingyu Hwhang',
+                            'Hexmind': 'Tomasz Skowroński',
+                            'drmaas': 'Dan Maas']
+                def root = asNode()
+
+                root.appendNode('name', "${projectArtifactId}")
+                root.appendNode('packaging', 'jar')
+                root.appendNode('url', "${url}")
+                root.appendNode('description', project.description)
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'Apache-2.0')
+                license.appendNode('url', 'https://github.com/resilience4j/resilience4j/blob/master/LICENSE.txt')
+                license.appendNode('distribution', 'repo')
+
+                root.appendNode('scm').appendNode('url', 'https://github.com/resilience4j/resilience4j.git')
+
+                def developers = root.appendNode('developers')
+                devs.each {
+                    def d = developers.appendNode('developer')
+                    d.appendNode('id', it.key)
+                    d.appendNode('name', it.value)
+                }
+            }
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}

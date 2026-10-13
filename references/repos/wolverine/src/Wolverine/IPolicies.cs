@@ -1,0 +1,302 @@
+using System.Reflection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Persistence;
+using Wolverine.Runtime.Handlers;
+using Wolverine.Runtime.Routing;
+
+namespace Wolverine;
+
+public interface IPolicies : IEnumerable<IWolverinePolicy>, IWithFailurePolicies
+{
+    /// <summary>
+    ///     Add a new Wolverine policy
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    void Add<T>() where T : IWolverinePolicy, new();
+
+    /// <summary>
+    ///     Add a new endpoint policy
+    /// </summary>
+    /// <param name="policy"></param>
+    void Add(IWolverinePolicy policy);
+
+    /// <summary>
+    ///     Set all non local listening endpoints to be enrolled into durable inbox.
+    ///     <para>Endpoints with <see cref="EndpointRole.System" /> are skipped: they are infrastructure that
+    ///     Wolverine or one of its extensions configures for itself, are often high volume, and are
+    ///     deliberately cheap and droppable. See <see cref="AllListeners" />.</para>
+    /// </summary>
+    void UseDurableInboxOnAllListeners();
+
+    /// <summary>
+    ///     Set all local queues to be enrolled into durability.
+    ///     <para>Wolverine's own <see cref="EndpointRole.System" /> queues (the agent queue, for example) are
+    ///     skipped. See <see cref="AllLocalQueues" />.</para>
+    /// </summary>
+    void UseDurableLocalQueues();
+
+    /// <summary>
+    ///     Set all outgoing, external endpoints to be enrolled into durable outbox sending.
+    ///     <para>Endpoints with <see cref="EndpointRole.System" /> are skipped for the same reasons as
+    ///     <see cref="UseDurableInboxOnAllListeners" />. See <see cref="AllSenders" />.</para>
+    /// </summary>
+    void UseDurableOutboxOnAllSendingEndpoints();
+
+    /// <summary>
+    ///     Persist scheduled-for-later messages destined for non-durable local queues
+    ///     through <c>IMessageStore</c> rather than the in-process
+    ///     <c>IScheduledJobProcessor</c>, so they survive process restarts. The remaining
+    ///     scheduling paths already provide durability without this policy:
+    ///     <list type="bullet">
+    ///       <item>Native scheduling, persisted by the broker or the queue table: Azure
+    ///         Service Bus, Pulsar and NATS JetStream (both when native scheduled send is
+    ///         enabled), Redis streams, SQS standard queues for delays up to 15 minutes,
+    ///         and the database queue transports (PostgreSQL, SQL Server, MySQL, Oracle,
+    ///         SQLite).</item>
+    ///       <item>Senders with no native scheduling for the envelope (RabbitMQ, Kafka,
+    ///         Pub/Sub, SNS, MQTT, SignalR, and SQS on a FIFO queue or past the 15 minute
+    ///         cap): the routing layer (<c>MessageRoute.WriteEnvelope</c>) automatically
+    ///         swaps scheduled envelopes onto the <c>local://durable</c> system queue,
+    ///         which writes to the message store inbox.</item>
+    ///       <item>Local queues configured with <c>UseDurableInbox()</c>: already write
+    ///         to the message store via <c>DurableLocalQueue</c>.</item>
+    ///     </list>
+    ///     The unique gap this policy plugs is the default <c>BufferedInMemory</c> local
+    ///     queue case — without the policy those scheduled messages live only in memory.
+    ///     No-ops when no message store is configured (a startup warning is emitted in
+    ///     that case).
+    /// </summary>
+    void AlwaysMakeScheduledMessagesDurable();
+
+    /// <summary>
+    ///     Create a policy for all listening *non local* endpoints
+    /// </summary>
+    /// <param name="configure"></param>
+    void AllListeners(Action<ListenerConfiguration> configure);
+
+    /// <summary>
+    ///     Create a policy for all *non local* subscriber endpoints
+    /// </summary>
+    /// <param name="configure"></param>
+    void AllSenders(Action<ISubscriberConfiguration> configure);
+
+    /// <summary>
+    ///     Create a policy for all local queues
+    /// </summary>
+    /// <param name="configure"></param>
+    void AllLocalQueues(Action<IListenerConfiguration> configure);
+
+    /// <summary>
+    ///     Override the routing for locally handled messages
+    /// </summary>
+    /// <returns></returns>
+    ILocalMessageRoutingConvention ConfigureConventionalLocalRouting();
+
+    /// <summary>
+    ///     Opt out of Wolverine's default convention of routing messages to the local node's queues
+    ///     Use this to force messages without explicit routing rules to be sent to external transports
+    ///     even if the node has a message handler for the message type
+    /// </summary>
+    void DisableConventionalLocalRouting();
+
+
+    /// <summary>
+    ///     In place of using [Transactional] attributes, apply transactional middleware
+    ///     to every message handler that uses transactional services
+    /// </summary>
+    void AutoApplyTransactions();
+    
+    /// <summary>
+    ///     In place of using [Transactional] attributes, apply transactional middleware
+    ///     to every message handler that uses transactional services
+    /// </summary>
+    /// <param name="idempotency">Define a default IdempotencyStyle for message handlers executing in Buffered or Inline endpoints</param>
+    void AutoApplyTransactions(IdempotencyStyle idempotency);
+
+    /// <summary>
+    /// Apply eager message idempotency checks to any message handler chains that are not otherwise transactional.
+    /// Example is a handler that calls an external web service but does not make any changes to the current system's
+    /// databases or storage
+    /// </summary>
+    void AutoApplyIdempotencyOnNonTransactionalHandlers();
+
+    /// <summary>
+    ///     GH-4180. Require a <b>logical</b> deduplication id on every message handler chain matched by
+    ///     <paramref name="filter" />, as an alternative to decorating each one with
+    ///     <c>[Deduplicated]</c>.
+    ///
+    ///     <para>
+    ///     Requires <c>Durability.MessageDeduplicationMode</c>, which provisions the backing storage.
+    ///     Unlike the attribute, this reaches handlers you do not own — the usual case being a marker
+    ///     interface on every create-style command in an application.
+    ///     </para>
+    /// </summary>
+    /// <param name="filter">
+    ///     Which handler chains this applies to. Required rather than optional: applying logical
+    ///     deduplication to <i>every</i> handler would demand an id on traffic that has no business
+    ///     carrying one, and with <c>Required</c> defaulting to true that turns into a dead-lettered
+    ///     message per unkeyed send.
+    /// </param>
+    /// <param name="requirement">
+    ///     How the id is resolved. Defaults to <see cref="Envelope.DeduplicationId" />, required.
+    /// </param>
+    void RequireDeduplicationId(Func<HandlerChain, bool> filter, DeduplicationRequirement? requirement = null);
+
+    /// <summary>
+    ///     Add Wolverine middleware to message handlers
+    /// </summary>
+    /// <param name="filter">If specified, limits the applicability of the middleware to certain message types</param>
+    /// <typeparam name="T">The actual middleware type</typeparam>
+    void AddMiddleware<T>(Func<HandlerChain, bool>? filter = null);
+
+    /// <summary>
+    ///     Add Wolverine middleware to message handlers
+    /// </summary>
+    /// <param name="middlewareType">The actual middleware type</param>
+    /// <param name="filter">If specified, limits the applicability of the middleware to certain message types</param>
+    void AddMiddleware(Type middlewareType, Func<HandlerChain, bool>? filter = null);
+
+    /// <summary>
+    ///     For the purposes of interoperability with NServiceBus or MassTransit, register
+    ///     the assemblies for shared message types to make Wolverine try to forward the message
+    ///     names of its messages to the interfaces of NServiceBus or MassTransit message types
+    /// </summary>
+    /// <param name="assembly"></param>
+    void RegisterInteropMessageAssembly(Assembly assembly);
+
+    /// <summary>
+    ///     Route every message handler, HTTP endpoint and gRPC service in <paramref name="assembly" /> to
+    ///     the ancillary (secondary) store identified by <paramref name="storeType" />, instead of marking
+    ///     each type with <c>[Storage(typeof(IMyStore))]</c>. Intended for modular monoliths, where one
+    ///     module's assembly maps to one store.
+    /// </summary>
+    /// <remarks>
+    ///     An explicit <c>[Storage]</c>, <c>[MartenStore]</c>, <c>[PolecatStore]</c> or
+    ///     <c>[FisherStore]</c> on a type or method still wins, so a single handler can opt out of its
+    ///     module's default. Note this is also the only way to reach an ancillary store from a gRPC
+    ///     service: the gRPC chains never apply chain attributes, so <c>[Storage]</c> is silently
+    ///     ignored there.
+    /// </remarks>
+    /// <param name="storeType">The store marker type, e.g. <c>typeof(IPlayerStore)</c></param>
+    /// <param name="assembly">Every handler, endpoint and gRPC service in this assembly is routed</param>
+    void UseAncillaryStorageFromAssembly(Type storeType, Assembly assembly);
+
+    /// <summary>
+    ///     Route every message handler, HTTP endpoint and gRPC service in the assembly that contains
+    ///     <typeparamref name="T" /> to the ancillary (secondary) store identified by
+    ///     <paramref name="storeType" />. Sugar over
+    ///     <see cref="UseAncillaryStorageFromAssembly" /> for the common case of naming a module by one
+    ///     of its types.
+    /// </summary>
+    /// <param name="storeType">The store marker type, e.g. <c>typeof(IPlayerStore)</c></param>
+    /// <typeparam name="T">Any type in the module's assembly</typeparam>
+    void UseAncillaryStorageFromAssemblyContaining<T>(Type storeType);
+
+    /// <summary>
+    ///     Route every message handler, HTTP endpoint and gRPC service whose type is in
+    ///     <paramref name="namespace" />, or any namespace below it, to the ancillary (secondary) store
+    ///     identified by <paramref name="storeType" />. Use this instead of
+    ///     <see cref="UseAncillaryStorageFromAssembly" /> when several modules share one assembly.
+    /// </summary>
+    /// <remarks>
+    ///     Matching uses the namespace of the handler or endpoint type, not of the message. An explicit
+    ///     <c>[Storage]</c> attribute still wins, as does an earlier ancillary storage policy.
+    /// </remarks>
+    /// <param name="storeType">The store marker type, e.g. <c>typeof(IPlayerStore)</c></param>
+    /// <param name="namespace">Every handler, endpoint and gRPC service in this namespace is routed</param>
+    void UseAncillaryStorageFromNamespace(Type storeType, string @namespace);
+
+    /// <summary>
+    ///     Route every message handler, HTTP endpoint and gRPC service in the namespace of
+    ///     <typeparamref name="T" />, or any namespace below it, to the ancillary (secondary) store
+    ///     identified by <paramref name="storeType" />. Sugar over
+    ///     <see cref="UseAncillaryStorageFromNamespace" />.
+    /// </summary>
+    /// <param name="storeType">The store marker type, e.g. <c>typeof(IPlayerStore)</c></param>
+    /// <typeparam name="T">Any type in the module's root namespace</typeparam>
+    void UseAncillaryStorageFromNamespaceContaining<T>(Type storeType);
+
+    /// <summary>
+    ///     Write a log message with the given log level when message execution starts.
+    ///     This would also include any audited members of the message
+    /// </summary>
+    /// <param name="logLevel"></param>
+    void LogMessageStarting(LogLevel logLevel);
+
+    /// <summary>
+    ///     Specify policies for the handling of every message type that can
+    ///     be cast to T
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    MessageTypePolicies<T> ForMessagesOfType<T>();
+
+    /// <summary>
+    /// Override the log level for Wolverine's built in logging for messages
+    /// being completed successfully. This is Information by default
+    /// </summary>
+    /// <param name="logLevel"></param>
+    void MessageSuccessLogLevel(LogLevel logLevel);
+
+    /// <summary>
+    /// Override the log level for Wolverine to trace execution starting and
+    /// finishing of the actual message execution. The default is Debug.
+    /// </summary>
+    /// <param name="logLevel"></param>
+    void MessageExecutionLogLevel(LogLevel logLevel);
+
+    /// <summary>
+    /// Advanced usage to forward concrete message types to the actual
+    /// message type in Wolverine handlers. Mostly to map concrete types
+    /// to the message handler for a particular interface or abstract class
+    /// </summary>
+    /// <param name="rule"></param>
+    void ForwardHandledTypes(IHandledTypeRule rule);
+
+    /// <summary>
+    /// Advanced usage to map an open type of an interface for a message to the actual closed type
+    /// Pretty well built for Marten event publishing
+    /// </summary>
+    /// <param name="interfaceType"></param>
+    /// <param name="closedType"></param>
+    void MapGenericMessageType(Type interfaceType, Type closedType);
+
+    /// <summary>
+    /// Normally, Wolverine will not apply message routing conventions to message types
+    /// that the current application handles locally if the local routing conventions
+    /// apply subscriptions. Enabling this option will make Wolverine additively create
+    /// subscriptions for a message type both locally and for any external message broker
+    /// routing conventions that are applied to the system
+    /// </summary>
+    void ConventionalLocalRoutingIsAdditive();
+
+    /// <summary>
+    /// Should Wolverine try to publish internal events about agent assignment, node
+    /// history, and endpoint events to the message bus? The default is false;
+    /// </summary>
+    bool PublishAgentEvents { get; set; }
+
+    /// <summary>
+    /// Automatically propagate the originating message's GroupId to the PartitionKey of outgoing
+    /// envelopes. This is useful when using Kafka and you want cascaded messages to inherit
+    /// the partition key from the originating message's group/stream id without manually
+    /// specifying DeliveryOptions on every outgoing message.
+    /// </summary>
+    void PropagateGroupIdToPartitionKey();
+
+    /// <summary>
+    /// Automatically propagate the named headers from an incoming message to all outgoing
+    /// messages cascaded within the same handler context. Headers not present on the incoming
+    /// message are silently skipped.
+    /// </summary>
+    void PropagateIncomingHeadersToOutgoing(params string[] headerNames);
+
+    /// <summary>
+    /// Automatically propagate a single named header from an incoming message to all outgoing
+    /// messages cascaded within the same handler context. If the header is not present on the
+    /// incoming message it is silently skipped.
+    /// </summary>
+    void PropagateIncomingHeaderToOutgoing(string headerName);
+}

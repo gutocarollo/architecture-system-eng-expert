@@ -1,0 +1,802 @@
+using System.Text;
+using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using Shouldly;
+using Wolverine;
+using Wolverine.ComplianceTests.ErrorHandling;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Newtonsoft;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Tracking;
+using Wolverine.Transports;
+using Xunit;
+
+namespace Wolverine.ComplianceTests.Compliance;
+
+public abstract class TransportComplianceFixture : IDisposable, IAsyncDisposable
+{
+    public readonly TimeSpan DefaultTimeout = 5.Seconds();
+
+    protected TransportComplianceFixture(Uri destination, int defaultTimeInSeconds = 5)
+    {
+        OutboundAddress = destination;
+        DefaultTimeout = defaultTimeInSeconds.Seconds();
+    }
+
+    public IHost Sender { get; private set; } = null!;
+    public IHost Receiver { get; private set; } = null!;
+    public Uri OutboundAddress { get; protected set; }
+
+    public bool AllLocally { get; set; }
+
+    public bool MustReset { get; set; } = true;
+
+    public bool IsSenderOnlyTransport { get; set; }
+
+    /// <summary>
+    /// Durability mode applied to the sender and receiver hosts. Defaults to Solo,
+    /// which is correct for the vast majority of broker transports. Control-plane
+    /// transports that only register in a clustered mode (e.g. the RavenDB control
+    /// queue, which wires its NodeControlEndpoint only under Balanced) can override
+    /// this to DurabilityMode.Balanced.
+    /// </summary>
+    public DurabilityMode Mode { get; set; } = DurabilityMode.Solo;
+
+    /// <summary>
+    /// Tears down the sender and receiver hosts, then hands off to <see cref="AfterDisposeAsync"/>.
+    /// </summary>
+    /// <remarks>
+    /// Do NOT hide this with a <c>public new DisposeAsync()</c> in a derived fixture. It reads like an
+    /// override and is not one: <see cref="TransportCompliance{T}"/> disposes the fixture through a
+    /// <c>T</c>-typed reference, which binds statically to *this* method, so the hiding member is simply
+    /// never called. Thirty-four fixtures had one; seven of those carried real cleanup — a SQLite database,
+    /// shared-memory queues, and four local MQTT brokers — that had never once executed, and four more were
+    /// infinitely self-recursive dead code. Put transport-specific cleanup in <see cref="AfterDisposeAsync"/>,
+    /// which is virtual and actually runs. See #3763.
+    /// </remarks>
+    public async ValueTask DisposeAsync()
+    {
+        if (Sender == null)
+        {
+            return;
+        }
+
+        await Sender.StopAsync();
+        Sender.Dispose();
+
+        if (Receiver != null)
+        {
+            if (!ReferenceEquals(Sender, Receiver))
+            {
+                await Receiver.StopAsync();
+                Receiver.Dispose();
+            }
+        }
+
+        await AfterDisposeAsync();
+    }
+
+    /// <summary>
+    /// Template method for transport-specific cleanup after hosts are disposed.
+    /// Override this in transport compliance fixtures that need to clean up
+    /// broker resources (e.g., deleting queues from an emulator).
+    /// </summary>
+    protected virtual Task AfterDisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        Sender?.Dispose();
+        if (!ReferenceEquals(Sender, Receiver))
+        {
+            Receiver?.Dispose();
+        }
+    }
+
+    protected async Task TheOnlyAppIs(Action<WolverineOptions> configure)
+    {
+        AllLocally = true;
+
+        Sender = await Host.CreateDefaultBuilder()
+            .UseWolverine(options =>
+            {
+                configure(options);
+                options.Durability.Mode = Mode;
+                configureReceiver(options);
+                configureSender(options);
+            }).StartAsync();
+    }
+
+    protected async Task SenderIs(Action<WolverineOptions> configure)
+    {
+        Sender = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                configure(opts);
+                configureSender(opts);
+                opts.Durability.Mode = Mode;
+            }).StartAsync();
+
+    }
+
+    private void configureSender(WolverineOptions options)
+    {
+        options
+            .DisableConventionalDiscovery()
+            .IncludeType<PongHandler>();
+
+        options.AddSerializer(new GreenTextWriter());
+        options.ServiceName = "SenderService";
+        options.PublishAllMessages().To(OutboundAddress).TelemetryEnabled(false);
+
+        options.Services.AddSingleton<IMessageSerializer, GreenTextWriter>();
+        //options.Services.AddResourceSetupOnStartup(StartupAction.ResetState);
+
+        options.Durability.Mode = Mode;
+
+        options.UseNewtonsoftForSerialization();
+    }
+
+    public async Task ReceiverIs(Action<WolverineOptions> configure)
+    {
+        Receiver = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.Durability.Mode = Mode;
+                configure(opts);
+                configureReceiver(opts);
+            }).StartAsync();
+    }
+
+    private static void configureReceiver(WolverineOptions options)
+    {
+        options.Policies.Failures.MaximumAttempts = 3;
+        options
+            .DisableConventionalDiscovery()
+            .IncludeType<MessageConsumer>()
+            .IncludeType<ExecutedMessageGuy>()
+            .IncludeType<ColorHandler>()
+            .IncludeType<ErrorCausingMessageHandler>()
+            .IncludeType<BlueHandler>()
+            .IncludeType<PingHandler>();
+
+        options.UseNewtonsoftForSerialization();
+
+        options.AddSerializer(new BlueTextReader());
+
+        options.Policies.OnException<DivideByZeroException>()
+            .MoveToErrorQueue();
+
+        options.Policies.OnException<DataMisalignedException>()
+            .Requeue();
+
+        options.Policies.OnException<BadImageFormatException>()
+            .ScheduleRetry(3.Seconds());
+
+
+        options.Services.AddSingleton(new ColorHistory());
+
+        //options.Services.AddResourceSetupOnStartup(StartupAction.ResetState);
+    }
+
+    public virtual void BeforeEach()
+    {
+    }
+}
+
+public abstract class TransportCompliance<T> : IAsyncLifetime where T : TransportComplianceFixture, new()
+{
+    protected readonly ErrorCausingMessage theMessage = new();
+    private ITrackedSession _session = null!;
+    protected Uri theOutboundAddress = null!;
+    protected IHost theReceiver = null!;
+    protected IHost theSender = null!;
+    private readonly bool _ownFixture;
+
+    protected TransportCompliance()
+    {
+        Fixture = new T();
+        _ownFixture = true;
+    }
+
+    protected TransportCompliance(T fixture)
+    {
+        Fixture = fixture;
+        _ownFixture = false;
+    }
+
+    public T Fixture { get; }
+
+    public async ValueTask InitializeAsync()
+    {
+        if (_ownFixture && Fixture is IAsyncLifetime lifetime)
+        {
+            await lifetime.InitializeAsync();
+        }
+
+        theSender = Fixture.Sender;
+        theReceiver = Fixture.Receiver;
+        theOutboundAddress = Fixture.OutboundAddress;
+
+        if (Fixture.MustReset)
+        {
+            await Fixture.Sender.ResetResourceState();
+
+            if (Fixture.Receiver != null && !ReferenceEquals(Fixture.Sender, Fixture.Receiver))
+            {
+                await Fixture.Receiver.ResetResourceState();
+            }
+        }
+
+        Fixture.BeforeEach();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_ownFixture)
+            return;
+        if (Fixture is IAsyncDisposable)
+            await Fixture.DisposeAsync();
+        else
+            Fixture?.SafeDispose();
+    }
+
+    [Fact]
+    public void all_listeners_say_they_are_accepting_on_startup()
+    {
+        var runtime = (theReceiver ?? theSender).Get<IWolverineRuntime>();
+        foreach (var listener in runtime.Endpoints.ActiveListeners())
+            listener.Status.ShouldBe(ListeningStatus.Accepting);
+    }
+
+    [Fact]
+    public virtual async Task can_apply_requeue_mechanics()
+    {
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .Timeout(30.Seconds())
+            .ExecuteAndWaitAsync(c => c.EndpointFor(theOutboundAddress).SendAsync(new Message2()));
+
+        session.FindSingleTrackedMessageOfType<Message2>(MessageEventType.MessageSucceeded)
+            .ShouldNotBeNull();
+    }
+
+    [Fact]
+    public virtual async Task can_send_from_one_node_to_another_by_destination()
+    {
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .ExecuteAndWaitAsync(c => c.EndpointFor(theOutboundAddress).SendAsync(new Message1()));
+
+
+        session.FindSingleTrackedMessageOfType<Message1>(MessageEventType.MessageSucceeded)
+            .ShouldNotBeNull();
+    }
+
+    //[Fact]
+    public async Task can_stop_and_restart_listeners()
+    {
+        var receiving = theReceiver ?? theSender;
+        var runtime = receiving.Get<IWolverineRuntime>();
+
+        foreach (var listener in runtime.Endpoints.ActiveListeners()
+                     .Where(x => x.Endpoint.Role == EndpointRole.Application))
+        {
+            await listener.StopAndDrainAsync();
+
+            listener.Status.ShouldBe(ListeningStatus.Stopped);
+        }
+
+        foreach (var listener in runtime.Endpoints.ActiveListeners()
+                     .Where(x => x.Endpoint.Role == EndpointRole.Application))
+        {
+            await listener.StartAsync();
+
+            listener.Status.ShouldBe(ListeningStatus.Accepting);
+        }
+
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .ExecuteAndWaitAsync(c => c.EndpointFor(theOutboundAddress).SendAsync(new Message1()));
+
+
+        session.FindSingleTrackedMessageOfType<Message1>(MessageEventType.MessageSucceeded)
+            .ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task can_stop_receiving_when_too_busy_and_restart_listeners()
+    {
+        var receiving = theReceiver ?? theSender;
+        var runtime = receiving.Get<IWolverineRuntime>();
+
+        foreach (var listener in runtime.Endpoints.ActiveListeners()
+                     .Where(x => x.Endpoint.Role == EndpointRole.Application))
+        {
+            await listener.MarkAsTooBusyAndStopReceivingAsync();
+
+            listener.Status.ShouldBe(ListeningStatus.TooBusy);
+        }
+
+        foreach (var listener in runtime.Endpoints.ActiveListeners()
+                     .Where(x => x.Endpoint.Role == EndpointRole.Application))
+        {
+            await listener.StartAsync();
+
+            listener.Status.ShouldBe(ListeningStatus.Accepting);
+        }
+
+        // I FEEL DIRTY
+        await Task.Delay(5.Seconds());
+
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(30.Seconds())
+            .DoNotAssertOnExceptionsDetected()
+            .ExecuteAndWaitAsync(c => c.EndpointFor(theOutboundAddress).SendAsync(new Message1()));
+
+
+        session.FindSingleTrackedMessageOfType<Message1>(MessageEventType.MessageSucceeded)
+            .ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task can_send_from_one_node_to_another_by_publishing_rule()
+    {
+        var message1 = new Message1();
+
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .Timeout(30.Seconds())
+            .SendMessageAndWaitAsync(message1);
+
+
+        session.FindSingleTrackedMessageOfType<Message1>(MessageEventType.MessageSucceeded)
+            .Id.ShouldBe(message1.Id);
+    }
+
+    [Fact]
+    public async Task can_send_and_wait()
+    {
+        if (Fixture.IsSenderOnlyTransport)
+        {
+            return;
+        }
+        
+        var message1 = new Message1();
+
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(30.Seconds())
+            .InvokeMessageAndWaitAsync(message1);
+    }
+
+    [Fact]
+    public async Task can_request_reply()
+    {
+        if (Fixture.IsSenderOnlyTransport)
+        {
+            return;
+        }
+        
+        var request = new Request { Name = "Nick Bolton" };
+
+        var (session, response) = await theSender.TrackActivity()
+            .AlsoTrack(theReceiver)
+            .IncludeExternalTransports()
+            .Timeout(30.Seconds())
+            .InvokeAndWaitAsync<Response>(request, 30.Seconds());
+
+        response!.Name.ShouldBe(request.Name);
+    }
+
+    [Fact]
+    public async Task tags_the_envelope_with_the_source()
+    {
+        var session = await theSender.TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .ExecuteAndWaitAsync(c => c.EndpointFor(theOutboundAddress).SendAsync(new Message1()));
+
+
+        var record = session.FindEnvelopesWithMessageType<Message1>(MessageEventType.MessageSucceeded).Single();
+        record
+            .ShouldNotBeNull();
+
+        record!.Envelope!.Source.ShouldBe(theSender.Get<WolverineOptions>().ServiceName);
+    }
+
+    [Fact]
+    public async Task tracking_correlation_id_on_everything()
+    {
+        var id2 = string.Empty;
+        Func<IMessageContext, Task> action = async context =>
+        {
+            id2 = context.CorrelationId;
+
+            await context.SendAsync(new ExecutedMessage());
+            await context.PublishAsync(new ExecutedMessage());
+            //await context.ScheduleSend(new ExecutedMessage(), DateTimeOffset.Now.AddDays(5));
+        };
+
+        var session2 = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(1.Minutes())
+            .ExecuteAndWaitAsync(action);
+
+        var envelopes = session2
+            .AllRecordsInOrder(MessageEventType.Sent)
+            .Select(x => x.Envelope)
+            .ToArray();
+
+
+        foreach (var envelope in envelopes) envelope!.CorrelationId!.ShouldBe(id2);
+    }
+
+    [Fact]
+    public async Task schedule_send()
+    {
+        var session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(15.Seconds())
+            .WaitForMessageToBeReceivedAt<ColorChosen>(theReceiver ?? theSender)
+            .ExecuteAndWaitAsync(c => c.ScheduleAsync(new ColorChosen { Name = "Orange" }, 5.Seconds()));
+
+        var message = session.FindSingleTrackedMessageOfType<ColorChosen>(MessageEventType.MessageSucceeded);
+        message.Name.ShouldBe("Orange");
+    }
+
+    protected void throwOnAttempt<TException>(int attempt) where TException : Exception, new()
+    {
+        // GH-3800: records the type NAME, not an instance -- an Exception does not round-trip
+        // through System.Text.Json, and this battery runs under serializers that use it.
+        theMessage.ThrowOnAttempt<TException>(attempt);
+    }
+
+    protected async Task<EnvelopeRecord> afterProcessingIsComplete()
+    {
+        _session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .SendMessageAndWaitAsync(theMessage);
+
+        return endingRecordFor(_session)!;
+    }
+
+    /// <summary>
+    /// The last ending record for *the message this test sent*. Scoping by message type alone picks up
+    /// stragglers: broker queues are shared across the test methods in a compliance class, and a
+    /// redelivery still in flight when the previous test's session completed lands in this one's.
+    /// </summary>
+    private EnvelopeRecord? endingRecordFor(ITrackedSession session)
+    {
+        return session.AllRecordsInOrder()
+            .Where(x => x.Envelope?.Message is ErrorCausingMessage m && m.Id == theMessage.Id)
+            .LastOrDefault(x =>
+                x.MessageEventType == MessageEventType.MessageSucceeded ||
+                x.MessageEventType == MessageEventType.MovedToErrorQueue);
+    }
+
+    protected async Task shouldSucceedOnAttempt(int attempt)
+    {
+        var session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(15.Seconds())
+            .DoNotAssertOnExceptionsDetected()
+            .SendMessageAndWaitAsync(theMessage);
+
+        session.AssertCondition("Expected ending activity was not detected", () =>
+        {
+            var record = endingRecordFor(session);
+
+            if (record is null) return false;
+
+            if (record.MessageEventType == MessageEventType.MessageSucceeded && record.AttemptNumber == attempt)
+            {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    protected async Task shouldMoveToErrorQueueOnAttempt(int attempt)
+    {
+        var session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .DoNotAssertOnExceptionsDetected()
+            .Timeout(30.Seconds())
+            .SendMessageAndWaitAsync(theMessage);
+
+        var record = endingRecordFor(session);
+
+        if (record == null)
+        {
+            throw new Exception("No ending activity detected");
+        }
+
+        if (record.MessageEventType == MessageEventType.MovedToErrorQueue && record.AttemptNumber == attempt)
+        {
+            return;
+        }
+
+        var writer = new StringWriter();
+
+        await writer.WriteLineAsync($"Actual ending was '{record.MessageEventType}' on attempt {record.AttemptNumber}");
+        foreach (var envelopeRecord in session.AllRecordsInOrder())
+        {
+            await writer.WriteLineAsync(envelopeRecord.ToString());
+            if (envelopeRecord.Exception != null)
+            {
+                await writer.WriteLineAsync(envelopeRecord.Exception.Message);
+            }
+        }
+
+        throw new Exception(writer.ToString());
+    }
+
+    [Fact]
+    public virtual async Task will_move_to_dead_letter_queue_without_any_exception_match()
+    {
+        throwOnAttempt<InvalidOperationException>(1);
+        throwOnAttempt<InvalidOperationException>(2);
+        throwOnAttempt<InvalidOperationException>(3);
+
+        await shouldMoveToErrorQueueOnAttempt(3);
+    }
+
+    [Fact]
+    public virtual async Task will_move_to_dead_letter_queue_with_exception_match()
+    {
+        throwOnAttempt<DivideByZeroException>(1);
+        throwOnAttempt<DivideByZeroException>(2);
+        throwOnAttempt<DivideByZeroException>(3);
+
+        await shouldMoveToErrorQueueOnAttempt(1);
+    }
+
+    [Fact]
+    public virtual async Task will_requeue_and_increment_attempts()
+    {
+        throwOnAttempt<DataMisalignedException>(1);
+        throwOnAttempt<DataMisalignedException>(2);
+
+        await shouldSucceedOnAttempt(3);
+    }
+
+    [Fact]
+    public virtual async Task can_schedule_retry()
+    {
+        throwOnAttempt<BadImageFormatException>(1);
+
+        await shouldSucceedOnAttempt(2);
+    }
+
+    [Fact]
+    public async Task explicit_respond_to_sender()
+    {
+        if (Fixture.IsSenderOnlyTransport)
+        {
+            return;
+        }
+        
+        var ping = new PingMessage();
+
+        var session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(30.Seconds())
+            .SendMessageAndWaitAsync(ping);
+
+        session.FindSingleTrackedMessageOfType<PongMessage>(MessageEventType.MessageSucceeded)
+            .Id.ShouldBe(ping.Id);
+    }
+
+    [Fact]
+    public async Task requested_response()
+    {
+        if (Fixture.IsSenderOnlyTransport)
+        {
+            return;
+        }
+        
+        var ping = new ImplicitPing();
+
+        var session = await theSender
+            .TrackActivity(Fixture.DefaultTimeout)
+            .AlsoTrack(theReceiver)
+            .Timeout(30.Seconds())
+            .ExecuteAndWaitAsync(x => x.SendAsync(ping, DeliveryOptions.RequireResponse<ImplicitPong>()));
+
+        session.FindSingleTrackedMessageOfType<ImplicitPong>(MessageEventType.MessageSucceeded)
+            .Id.ShouldBe(ping.Id);
+    }
+
+    [Fact] // This test isn't always the most consistent test
+    public async Task send_green_as_text_and_receive_as_blue()
+    {
+        if (Fixture.AllLocally)
+        {
+            return; // this just doesn't apply when running all with local queues
+        }
+
+        var greenMessage = new GreenMessage { Name = "Magic Johnson" };
+
+        var session = await theSender
+            .TrackActivity()
+            .AlsoTrack(theReceiver)
+            .ExecuteAndWaitAsync(c => c.SendAsync(greenMessage, new DeliveryOptions { ContentType = "text/plain" }));
+
+        session.FindSingleTrackedMessageOfType<BlueMessage>()
+            .Name.ShouldBe("Magic Johnson");
+    }
+
+    [Fact]
+    public async Task send_green_that_gets_received_as_blue()
+    {
+        if (Fixture.AllLocally)
+        {
+            return; // this just doesn't apply when running all with local queues
+        }
+
+        var session = await theSender
+            .TrackActivity()
+            .AlsoTrack(theReceiver)
+            .ExecuteAndWaitAsync(c =>
+                c.SendAsync(new GreenMessage { Name = "Kareem Abdul-Jabbar" }));
+
+
+        session.FindSingleTrackedMessageOfType<BlueMessage>()
+            .Name.ShouldBe("Kareem Abdul-Jabbar");
+    }
+
+    [Fact]
+    public void can_collect_endpoint_health_snapshots_without_error()
+    {
+        var runtime = theSender.Get<IWolverineRuntime>();
+        var snapshots = runtime.Endpoints.CollectEndpointHealth();
+
+        // Should return at least one snapshot (sender has at least a sending endpoint)
+        snapshots.ShouldNotBeEmpty();
+
+        // Every snapshot should have a valid URI
+        foreach (var snapshot in snapshots)
+        {
+            snapshot.Uri.ShouldNotBeNull();
+            snapshot.EndpointName.ShouldNotBeNullOrEmpty();
+            snapshot.Direction.ShouldBeOneOf(EndpointDirection.Listening, EndpointDirection.Sending);
+        }
+    }
+
+    [Fact]
+    public void receiver_endpoint_health_includes_listeners()
+    {
+        var host = theReceiver ?? theSender;
+        var runtime = host.Get<IWolverineRuntime>();
+        var snapshots = runtime.Endpoints.CollectEndpointHealth();
+
+        var listeners = snapshots.Where(s => s.Direction == EndpointDirection.Listening).ToList();
+        listeners.ShouldNotBeEmpty("Should have at least one listening endpoint");
+
+        foreach (var listener in listeners)
+        {
+            // Status should be a valid ListeningStatus value
+            listener.Status.ShouldNotBeNullOrEmpty();
+            listener.LastQueueActivityAt.ShouldNotBeNull();
+        }
+    }
+
+    [Fact]
+    public void sender_endpoint_health_includes_senders()
+    {
+        var runtime = theSender.Get<IWolverineRuntime>();
+        var snapshots = runtime.Endpoints.CollectEndpointHealth();
+
+        var senders = snapshots.Where(s => s.Direction == EndpointDirection.Sending).ToList();
+        senders.ShouldNotBeEmpty("Should have at least one sending endpoint");
+
+        foreach (var sender in senders)
+        {
+            sender.SenderLatched.ShouldBeFalse("Senders should not be latched on healthy startup");
+        }
+    }
+
+    [Fact]
+    public async Task transport_health_check_does_not_throw()
+    {
+        var runtime = theSender.Get<IWolverineRuntime>();
+
+        foreach (var transport in runtime.Options.Transports)
+        {
+            var healthCheck = transport.BuildHealthCheck(runtime);
+            if (healthCheck == null) continue;
+
+            // Smoke test: calling the health check should not throw
+            var result = await healthCheck.CheckHealthAsync();
+            result.ShouldNotBeNull();
+            result.TransportName.ShouldNotBeNullOrEmpty();
+            result.Protocol.ShouldNotBeNullOrEmpty();
+            result.Status.ShouldBeOneOf(
+                TransportHealthStatus.Healthy,
+                TransportHealthStatus.Degraded,
+                TransportHealthStatus.Unhealthy);
+        }
+    }
+}
+
+#region sample_bluetextreader
+public class BlueTextReader : IMessageSerializer
+{
+    public string ContentType => "text/plain";
+
+    public byte[] Write(Envelope envelope)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object ReadFromData(Type messageType, Envelope envelope)
+    {
+        return ReadFromData(envelope.Data!);
+    }
+
+    public object ReadFromData(byte[] data)
+    {
+        var name = Encoding.UTF8.GetString(data);
+        return new BlueMessage { Name = name };
+    }
+
+    public byte[] WriteMessage(object message)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+#endregion
+
+#region sample_greentextwriter
+public class GreenTextWriter : IMessageSerializer
+{
+    public string ContentType => "text/plain";
+
+    public object ReadFromData(Type messageType, Envelope envelope)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object ReadFromData(byte[] data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] WriteMessage(object message)
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] Write(Envelope model)
+    {
+        if (model.Message is GreenMessage green)
+        {
+            return Encoding.UTF8.GetBytes(green.Name);
+        }
+
+        throw new NotSupportedException("This serializer only writes GreenMessage");
+    }
+}
+
+#endregion

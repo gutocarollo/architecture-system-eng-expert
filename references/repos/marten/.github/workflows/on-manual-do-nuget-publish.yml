@@ -1,0 +1,39 @@
+name: Marten NuGet Manual Publish
+
+on: [ workflow_dispatch ]
+
+env:
+  config: Release
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUKE_TELEMETRY_OPTOUT: true
+
+jobs:
+  publish_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Install .NET Aspire workload
+        run: |
+          dotnet workload update
+          dotnet workload install aspire
+
+      - name: Run Pack
+        run: ./build.sh pack
+        shell: bash
+
+      - name: Publish to NuGet
+        run: |
+          find . -name '*.nupkg' -exec dotnet nuget push "{}" -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate \;
+          # find . -name '*.snupkg' -exec dotnet nuget push "{}" -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} \;
+        shell: bash

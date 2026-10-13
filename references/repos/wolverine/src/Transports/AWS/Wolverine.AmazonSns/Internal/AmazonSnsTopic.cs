@@ -1,0 +1,442 @@
+﻿using Amazon.SimpleNotificationService;
+using Amazon.SimpleNotificationService.Model;
+using Amazon.SQS;
+using Amazon.SQS.Model;
+using JasperFx.Core;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+using Endpoint = Wolverine.Configuration.Endpoint;
+
+namespace Wolverine.AmazonSns.Internal;
+
+public class AmazonSnsTopic : Endpoint, IBrokerQueue
+{
+    private bool _initialized;
+
+    internal AmazonSnsTopic(string topicName, AmazonSnsTransport parent)
+        : base(new Uri($"{parent.Protocol}://{topicName}"), EndpointRole.Application)
+    {
+        Parent = parent;
+
+        TopicName = topicName;
+        EndpointName = topicName;
+        TopicArn = string.Empty;
+        BrokerRole = "topic";
+
+        Configuration = new CreateTopicRequest(TopicName);
+
+        MessageBatchSize = 10;
+    }
+
+    internal AmazonSnsTransport Parent { get; }
+
+    /// <summary>
+    ///     Pluggable strategy for interoperability with non-Wolverine systems. Customizes how the incoming SNS requests
+    ///     are read and how outgoing messages are written to SNS
+    /// </summary>
+    public ISnsEnvelopeMapper? Mapper { get; set; }
+
+
+    internal Func<AmazonSnsTopic, IWolverineRuntime, ISnsEnvelopeMapper>? MapperFactory = null;
+
+    // AmazonSnsTopic inherits raw Endpoint (not the typed Endpoint<,>), so the
+    // generic base override doesn't apply. Surface "user wired their own SNS
+    // mapper or factory" through the same protected hook so the
+    // EndpointDescriptor reports InteropMode = "Custom" for SNS too. See #2641.
+    protected internal override bool HasCustomEnvelopeMapper =>
+        Mapper is not null || MapperFactory is not null;
+    
+    internal ISnsEnvelopeMapper BuildMapper(IWolverineRuntime runtime)
+    {
+        if (Mapper != null)
+        {
+            return Mapper;
+        }
+
+        if (MapperFactory != null)
+        {
+            return MapperFactory(this, runtime);
+        }
+
+        return new DefaultSnsEnvelopeMapper();
+    }
+    
+    public string TopicName { get; }
+    public string TopicArn { get; set; }
+
+    // AWS requires FIFO topics to carry the ".fifo" suffix, so the name is the only thing
+    // we need to tell the two topic types apart. Mirrors AmazonSqsQueue.IsFifoQueue.
+    internal bool IsFifoTopic => TopicName.EndsWith(".fifo", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    ///     The <c>MessageDeduplicationId</c> to publish for this envelope, or null for none. A FIFO topic
+    ///     without <c>ContentBasedDeduplication</c> rejects any publish that carries no
+    ///     <c>MessageDeduplicationId</c> at all, and Wolverine's own circuit-resume ping never has one --
+    ///     so a latched sender could never probe its way back on such a topic. Fall back to the envelope
+    ///     id for pings, which is unique per probe and is exactly the semantic we want (two pings must
+    ///     never dedupe against each other, which content-based deduplication would happily do since every
+    ///     ping body is identical). See GH-3793.
+    /// </summary>
+    internal static string? DetermineDeduplicationId(Envelope envelope)
+    {
+        if (envelope.DeduplicationId.IsNotEmpty())
+        {
+            return envelope.DeduplicationId;
+        }
+
+        return envelope.IsPing() ? envelope.Id.ToString() : null;
+    }
+    
+    [ChildDescription]
+    public CreateTopicRequest Configuration { get; }
+    [DescribeAsStringArray]
+    public IList<AmazonSnsSubscription> TopicSubscriptions { get; set; } = new List<AmazonSnsSubscription>();
+    
+    public async ValueTask<bool> CheckAsync()
+    {
+        return await Parent.SnsClient!.FindTopicAsync(TopicName) is not null;
+    }
+
+    public async ValueTask TeardownAsync(ILogger logger)
+    {
+        var client = Parent.SnsClient!;
+
+        if (TopicArn.IsEmpty())
+        {
+            var topic = await client.FindTopicAsync(TopicName);
+            if (topic is null) return;
+            TopicArn = topic.TopicArn;
+        }
+
+        foreach (var subscription in TopicSubscriptions)
+        {
+            var unsubscribeRequest = new UnsubscribeRequest(subscription.SubscriptionArn);
+            await client.UnsubscribeAsync(unsubscribeRequest);
+        }
+        
+        await client.DeleteTopicAsync(TopicArn);
+    }
+
+    public ValueTask SetupAsync(ILogger logger)
+    {
+        return new ValueTask(setupAsync(Parent.SnsClient!));
+    }
+    
+    public ValueTask PurgeAsync(ILogger logger)
+    {
+        // TODO We can't really purge SNS topics, so probably do nothing here
+        return new ValueTask(Task.CompletedTask);
+    }
+    
+    public async ValueTask<Dictionary<string, string>> GetAttributesAsync()
+    {
+        var client = Parent.SnsClient!;
+
+        await loadTopicArnIfEmptyAsync(client);
+        
+        var atts = await client.GetTopicAttributesAsync(TopicArn);
+        atts.Attributes.Add("name", TopicName);
+        
+        // TODO return all attributes?
+        return atts.Attributes;
+    }
+    
+    internal async Task SendMessageAsync(Envelope envelope, ILogger logger)
+    {
+        if (!_initialized)
+        {
+            await InitializeAsync(logger);
+        }
+        
+        var body = Mapper!.BuildMessageBody(envelope);
+        var request = new PublishRequest(TopicArn, body);
+        if (envelope.GroupId.IsNotEmpty())
+        {
+            request.MessageGroupId = envelope.GroupId;
+        }
+
+        // SNS rejects MessageDeduplicationId outright on a standard topic ("the request includes
+        // MessageDeduplicationId parameter that is not valid for this topic type"), so this has to be
+        // gated the same way AmazonSqsQueue gates it. See GH-3793.
+        if (IsFifoTopic)
+        {
+            var deduplicationId = DetermineDeduplicationId(envelope);
+            if (deduplicationId.IsNotEmpty())
+            {
+                request.MessageDeduplicationId = deduplicationId;
+            }
+        }
+
+        foreach (var attribute in Mapper!.ToAttributes(envelope))
+        {
+            request.MessageAttributes ??= new();
+            request.MessageAttributes.Add(attribute.Key, attribute.Value);
+        }
+        
+        await Parent.SnsClient!.PublishAsync(request);
+    }
+    
+    public override ValueTask<IListener> BuildListenerAsync(IWolverineRuntime runtime, IReceiver receiver)
+    {
+        // TODO there is no "listening" to SNS topics, so not sure what to do this this one. Maybe Endpoint is the wrong class to use here?
+        throw new NotSupportedException(
+            $"The Amazon SNS topic '{TopicName}' ({Uri}) is a publish-only endpoint. SNS topics cannot be listened to directly. Subscribe an SQS queue to the topic and listen to that queue instead with ListenToSqsQueue().");
+    }
+
+    protected override ISender CreateSender(IWolverineRuntime runtime)
+    {
+        Mapper ??= BuildMapper(runtime);
+
+        // Broker-per-tenant (GH-3305): route by Envelope.TenantId to a per-tenant publisher bound to that tenant's
+        // own SNS account, falling back to the shared account for the default/untenanted path. SNS is publish-only,
+        // so there is no CompoundListener — only a TenantedSender.
+        //
+        // Both the tenant senders AND the default sender they fall back to must be fire-and-forget ISenders:
+        // TenantedSender intentionally does NOT implement ISenderRequiresCallback (GH-2361) and does not forward
+        // RegisterCallback to the senders beneath it. A BatchedSender (SnsSenderProtocol) registered under it would
+        // therefore never receive its ISenderCallback and would silently drop every message. InlineSnsSender sends
+        // directly and needs no callback — the same fire-and-forget model the SQS / RabbitMQ / NATS per-tenant
+        // senders use.
+        if (Parent.Tenants.Any() && TenancyBehavior == TenancyBehavior.TenantAware)
+        {
+            var tenantedSender = new TenantedSender(Uri, Parent.TenantedIdBehavior, new InlineSnsSender(runtime, this));
+            foreach (var tenant in Parent.Tenants)
+            {
+                var tenantTopic = BuildTenantSibling(tenant);
+                tenantedSender.RegisterSender(tenant.TenantId, new InlineSnsSender(runtime, tenantTopic));
+            }
+
+            return tenantedSender;
+        }
+
+        if (SendsInline)
+        {
+            return new InlineSnsSender(runtime, this);
+        }
+
+        var protocol = new SnsSenderProtocol(runtime, this,
+            Parent.SnsClient ?? throw new InvalidOperationException(AmazonSnsTransport.NotInitializedMessage(Uri)));
+        return new BatchedSender(this, protocol, runtime.Cancellation,
+            runtime.LoggerFactory.CreateLogger<SnsSenderProtocol>());
+    }
+
+    /// <summary>
+    /// Broker-per-tenant (GH-3305): materialize this topic's tenant-specific twin on the given tenant's child
+    /// transport — same topic name and configuration, but bound to the tenant's own SNS client and its own TopicArn
+    /// cache (which is why a fresh endpoint is required rather than reusing this one, and why the subscriptions are
+    /// deep-copied — SubscriptionArn is stamped per account). The tenant twin is cached on the tenant transport's
+    /// <see cref="AmazonSnsTransport.Topics"/> so repeated sender builds resolve the same instance.
+    /// </summary>
+    internal AmazonSnsTopic BuildTenantSibling(AmazonSnsTenant tenant)
+    {
+        var sibling = tenant.Transport.Topics[TopicName];
+
+        sibling.Mode = Mode;
+        sibling.EndpointName = EndpointName;
+        sibling.Role = Role;
+
+        // Share the interop mapper strategy so tenant traffic serializes identically to the shared account.
+        sibling.Mapper = Mapper;
+        sibling.MapperFactory = MapperFactory;
+
+        // Preserve topic-creation attributes (FIFO, etc.) for AutoProvision on the tenant account.
+        sibling.Configuration.Attributes = Configuration.Attributes is { Count: > 0 }
+            ? new Dictionary<string, string>(Configuration.Attributes)
+            : sibling.Configuration.Attributes;
+
+        // Deep-copy subscriptions so each tenant provisions its own SQS subscription (and stamps its own
+        // SubscriptionArn) against its own paired SQS client, rather than sharing the parent's list/ARNs.
+        sibling.TopicSubscriptions = TopicSubscriptions
+            .Select(x => new AmazonSnsSubscription(x.Endpoint, x.Type, new AmazonSnsSubscriptionAttributes
+            {
+                RawMessageDelivery = x.Attributes.RawMessageDelivery,
+                FilterPolicy = x.Attributes.FilterPolicy,
+                RedrivePolicy = x.Attributes.RedrivePolicy
+            }))
+            .ToList();
+
+        return sibling;
+    }
+
+    public override  async ValueTask InitializeAsync(ILogger logger)
+    {
+        if (_initialized)
+        {
+            return;
+        }
+        
+        try
+        {
+            var client = Parent.SnsClient;
+
+            if (client == null)
+            {
+                throw new InvalidOperationException(AmazonSnsTransport.NotInitializedMessage(Uri));
+            }
+
+            if (Parent.AutoProvision)
+            {
+                await setupAsync(client);
+                logger.LogInformation("Tried to create Amazon SNS topic {Name} if missing", TopicName);
+                
+                if (TopicSubscriptions.Any()) await createTopicSubscriptionsAsync(client);
+            }
+            
+            await loadTopicArnIfEmptyAsync(client);
+            await loadTopicSubscriptionsAsync(client);
+        }
+        catch (Exception e)
+        {
+            throw new WolverineSnsTransportException($"Error while trying to initialize Amazon SNS topic '{TopicName}'",
+                e);
+        }
+        
+        _initialized = true;
+    }
+    
+    private async Task setupAsync(IAmazonSimpleNotificationService client)
+    {
+        Configuration.Name = TopicName;
+
+        // GH-4518: this used to catch, Console.WriteLine(e), and rethrow. A framework writing a stack trace
+        // straight to stdout is exactly the noise that makes a configuration problem read as a Wolverine bug;
+        // the caller already wraps this in WolverineSnsTransportException naming the topic.
+        var response = await client.CreateTopicAsync(Configuration);
+
+        TopicArn = response.TopicArn;
+    }
+    
+    private async Task loadTopicArnIfEmptyAsync(IAmazonSimpleNotificationService client)
+    {
+        if (TopicArn.IsEmpty())
+        {
+            var response = await client.FindTopicAsync(TopicName);
+
+            if (response == null)
+            {
+                // GH-4518: this used to be a NullReferenceException, which reads as a Wolverine bug once it is
+                // wrapped by WolverineSnsTransportException and the user drills into the inner exception.
+                throw new InvalidOperationException(
+                    $"Could not find the Amazon SNS topic '{TopicName}'. Either enable AutoProvision() on the SNS transport so Wolverine creates the topic, or create it out of band before the application starts. If the topic does exist, check the region and credentials passed to UseAmazonSnsTransport() -- a topic in another account or region is invisible to this client.");
+            }
+            
+            TopicArn = response.TopicArn;
+        }
+    }
+
+    private async Task loadTopicSubscriptionsAsync(IAmazonSimpleNotificationService client)
+    {
+        // If you have more than 100 subscriptions on one topic this code breaks
+        var subscriptionResponse = await client.ListSubscriptionsByTopicAsync(TopicArn);
+        foreach (var subscription in (subscriptionResponse?.Subscriptions ?? []).Where(x =>
+                     TopicSubscriptions.FirstOrDefault(y => y.SubscriptionArn == x.SubscriptionArn) is null))
+        {
+            TopicSubscriptions.Add(new AmazonSnsSubscription(subscription));
+        }
+    }
+
+    private async Task createTopicSubscriptionsAsync(IAmazonSimpleNotificationService client)
+    {
+        var sqsClient = Parent.SqsClient!;
+
+        foreach (var subscription in TopicSubscriptions)
+        {
+            // Skip subscriptions that are already provisioned
+            if (subscription.SubscriptionArn.IsNotEmpty()) continue;
+
+            string endpoint;
+
+            switch (subscription.Type)
+            {
+                case AmazonSnsSubscriptionType.Sqs:
+                    GetQueueUrlResponse getQueueResponse;
+                    try
+                    {
+                        getQueueResponse = await sqsClient.GetQueueUrlAsync(subscription.Endpoint);
+                    }
+                    catch (Amazon.SQS.Model.QueueDoesNotExistException e)
+                    {
+                        // GH-4518: the SDK's "The specified queue does not exist." names neither the queue nor the
+                        // ordering requirement, and the WolverineSnsTransportException wrapper only names the topic.
+                        throw new InvalidOperationException(
+                            $"Cannot subscribe the Amazon SQS queue '{subscription.Endpoint}' to the SNS topic '{TopicName}' because that queue does not exist. The queue must be created before the SNS subscription is provisioned -- either register it on the SQS transport with AutoProvision() enabled, or create it out of band. Check too that the SQS client is pointed at the same account and region as the SNS client.",
+                            e);
+                    }
+
+                    endpoint = await getSqsSubscriptionEndpointAsync(sqsClient, getQueueResponse.QueueUrl);
+
+                    await setQueuePolicyForTopic(sqsClient, new (getQueueResponse.QueueUrl, endpoint,  TopicArn));
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        $"Wolverine does not support the Amazon SNS subscription type '{subscription.Type}' for topic '{TopicName}'. Only {nameof(AmazonSnsSubscriptionType.Sqs)} subscriptions can be provisioned by Wolverine today; create any other subscription type out of band.");
+            }
+
+            var subscribeRequest = new SubscribeRequest(TopicArn, subscription.Protocol, endpoint);
+            subscribeRequest.Attributes ??= new();
+            subscribeRequest.Attributes[nameof(AmazonSnsSubscriptionAttributes.RawMessageDelivery)] =
+                subscription.Attributes.RawMessageDelivery.ToString();
+
+            if (subscription.Attributes.FilterPolicy.IsNotEmpty())
+            {
+                subscribeRequest.Attributes[nameof(AmazonSnsSubscriptionAttributes.FilterPolicy)] =
+                    subscription.Attributes.FilterPolicy;
+            }
+
+            if (subscription.Attributes.RedrivePolicy.IsNotEmpty())
+            {
+                subscribeRequest.Attributes[nameof(AmazonSnsSubscriptionAttributes.RedrivePolicy)] =
+                    subscription.Attributes.RedrivePolicy;
+            }
+
+            try
+            {
+                var subscribeResponse = await client.SubscribeAsync(subscribeRequest);
+                subscription.SubscriptionArn = subscribeResponse.SubscriptionArn;
+            }
+            catch (InvalidParameterException)
+            {
+                // Subscription already exists with different attributes.
+                // Find the existing subscription and use its ARN.
+                var existingSubs = await client.ListSubscriptionsByTopicAsync(TopicArn);
+                var existing = existingSubs.Subscriptions?.FirstOrDefault(s => s.Endpoint == endpoint);
+                if (existing != null)
+                {
+                    subscription.SubscriptionArn = existing.SubscriptionArn;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+    }
+
+    private async Task<string> getSqsSubscriptionEndpointAsync(IAmazonSQS client, string queueUrl)
+    {
+        var queueAttributesRequest = new GetQueueAttributesRequest
+        {
+            QueueUrl = queueUrl,
+            AttributeNames = [QueueAttributeName.QueueArn]
+        };
+        
+        var getAttributesResponse = await client.GetQueueAttributesAsync(queueAttributesRequest);
+        return getAttributesResponse.QueueARN;
+    }
+
+    private async Task setQueuePolicyForTopic(IAmazonSQS client, SqsTopicDescription description)
+    {
+        var queuePolicy = Parent.QueuePolicyBuilder(description);
+
+        await client.SetQueueAttributesAsync(
+            new SetQueueAttributesRequest
+            {
+                QueueUrl = description.QueueUrl,
+                Attributes = new Dictionary<string, string> { {"Policy", queuePolicy } }
+            });
+    }
+}

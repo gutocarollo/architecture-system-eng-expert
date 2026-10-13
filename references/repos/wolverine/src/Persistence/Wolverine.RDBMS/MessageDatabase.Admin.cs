@@ -1,0 +1,461 @@
+using System.Data.Common;
+using System.Globalization;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Logging;
+using Weasel.Core;
+using Wolverine.Logging;
+using Wolverine.Persistence.Durability;
+
+namespace Wolverine.RDBMS;
+
+/// <summary>
+///     Base class for relational database backed message storage
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public abstract partial class MessageDatabase<T>
+{
+    public abstract Task<PersistedCounts> FetchCountsAsync();
+
+    /// <summary>
+    /// GH-4499 follow-up. Populate <see cref="PersistedCounts.OldestOutgoing" /> — the timestamp of the head
+    /// of the durable outbox — so the stuck-outbox health signal has a discriminator to work with. A no-op
+    /// leaving the value null when the column is not there.
+    /// </summary>
+    /// <remarks>
+    /// <para>The <c>timestamp</c> column on the outgoing table only exists when
+    /// <see cref="DurabilitySettings.OutboxStaleTime" /> is set — see each provider's
+    /// <c>OutgoingEnvelopeTable</c> — so this is gated on the same setting rather than probing the schema.
+    /// Leaving it null is the documented "NOT MEASURED" signal and stands the health check down, which is
+    /// the same rule <see cref="PersistedCounts.ScheduledDue" /> established.</para>
+    ///
+    /// <para>Shared here rather than repeated per provider: <c>min(timestamp)</c> needs no dialect-specific
+    /// syntax, and every provider that reaches this base class has the same column.</para>
+    /// </remarks>
+    protected async Task fetchOldestOutgoingAsync(PersistedCounts counts)
+    {
+        if (!Durability.OutboxStaleTime.HasValue) return;
+
+        await using var conn = await DataSource.OpenConnectionAsync();
+        try
+        {
+            var raw = await conn
+                .CreateCommand(
+                    $"select min({DatabaseConstants.Timestamp}) from {QuotedTableNameFor(DatabaseConstants.OutgoingTable)}")
+                .ExecuteScalarAsync();
+
+            // Every provider writes this column as a true UTC instant -- Postgres via `now()` into a
+            // timestamptz (GH-4663; it used to be `now() at time zone 'utc'`, which was not), SQLite via
+            // `datetime('now')` -- but they hand it back as three different CLR types, and two of the
+            // three carry no offset with them. A value with no offset has to be read as UTC explicitly: the
+            // framework default is to assume LOCAL, which silently shifts the head by the machine's offset
+            // and reported a timestamp five hours in the future on a UTC-5 box. That is the same trap as
+            // GH-3645's timestamp headers.
+            counts.OldestOutgoing = raw switch
+            {
+                // Postgres: the driver materialises timestamptz as a DateTimeOffset already
+                DateTimeOffset value => value.ToUniversalTime(),
+
+                // SQL Server and MySQL: a DateTime, whose Kind is Unspecified for these columns
+                DateTime value => new DateTimeOffset(
+                    value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Utc) : value,
+                    TimeSpan.Zero).ToUniversalTime(),
+
+                // SQLite: the column is TEXT, e.g. "2026-09-23 19:26:15"
+                string value when DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsed) => parsed,
+
+                // DBNull, or anything unrecognised: an empty outbox has no head, and NOT MEASURED is the
+                // safe reading for a value that cannot be interpreted
+                _ => null
+            };
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public virtual Task DeleteAllHandledAsync()
+    {
+        throw new NotSupportedException($"This function is not (yet) supported by {GetType().FullNameInCode()}");
+    }
+
+    public async Task ClearAllAsync()
+    {
+        await using var conn = await DataSource.OpenConnectionAsync(_cancellation);
+        try
+        {
+            await truncateEnvelopeDataAsync(conn);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task RebuildAsync()
+    {
+        await using var conn = await DataSource.OpenConnectionAsync(_cancellation);
+
+        try
+        {
+            await migrateAsync(conn);
+
+            await truncateEnvelopeDataAsync(conn);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public Task MigrateAsync()
+    {
+        return MigrateAsync(null);
+    }
+
+    public async Task MigrateAsync(AutoCreate? overrideAutoCreate)
+    {
+        var autoCreate = overrideAutoCreate ?? _settings.AutoCreate;
+
+        Func<Task> tryMigrate = async () =>
+        {
+            await using var conn = await DataSource.OpenConnectionAsync(_cancellation);
+            var typedConn = (T)conn;
+            var lockId = _settings.MigrationLockId;
+            var lockAcquired = false;
+
+            try
+            {
+                // Acquire a global advisory lock to serialize migrations across processes.
+                // Without this, concurrent CREATE SCHEMA IF NOT EXISTS statements can race
+                // and produce 23505 duplicate-key errors against pg_namespace_nspname_index
+                // (or equivalents on other engines). See GH-2518.
+                lockAcquired = await acquireMigrationLockAsync(lockId, typedConn, _cancellation);
+
+                await migrateAsync(conn, autoCreate);
+            }
+            finally
+            {
+                if (lockAcquired)
+                {
+                    try
+                    {
+                        await releaseMigrationLockAsync(lockId, typedConn, _cancellation);
+                    }
+                    catch
+                    {
+                        // Best-effort release. The session-scoped lock will be cleaned up
+                        // when the connection closes regardless.
+                    }
+                }
+
+                await conn.CloseAsync();
+            }
+        };
+
+        try
+        {
+            await tryMigrate();
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception)
+        {
+            await Task.Delay(new Random().Next(250, 1000).Milliseconds(), _cancellation);
+            await tryMigrate();
+        }
+    }
+
+    /// <summary>
+    /// Attempt to acquire the migration advisory lock with bounded retries.
+    /// Returns true if acquired (caller is responsible for the migration and release),
+    /// false if not acquired after the retry budget — in which case another process
+    /// is presumably finishing the migration; we proceed and let our own SchemaMigration
+    /// detect "no changes" as a no-op.
+    ///
+    /// Providers whose advisory-lock primitive depends on schema that is itself part
+    /// of the migration (e.g., SQLite's row-based lock on <c>wolverine_locks</c>)
+    /// should override this with a primitive that does not depend on the schema —
+    /// for example, SQLite's <c>BEGIN EXCLUSIVE</c>.
+    /// </summary>
+    protected virtual async Task<bool> acquireMigrationLockAsync(int lockId, T conn, CancellationToken token)
+    {
+        const int maxAttempts = 10;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            if (await TryAttainLockAsync(lockId, conn, token))
+            {
+                return true;
+            }
+
+            // Linear backoff: 100ms, 200ms, ..., 1000ms (~5.5s total worst case)
+            await Task.Delay(TimeSpan.FromMilliseconds(100 * (attempt + 1)), token);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Release the lock previously acquired by <see cref="acquireMigrationLockAsync"/>.
+    /// Default implementation delegates to the polling-lock release path; providers
+    /// that override <see cref="acquireMigrationLockAsync"/> with a different primitive
+    /// (e.g., a transaction) must override this too.
+    /// </summary>
+    protected virtual Task releaseMigrationLockAsync(int lockId, T conn, CancellationToken token)
+    {
+        return ReleaseLockAsync(lockId, conn, token);
+    }
+
+    public async Task<IReadOnlyList<Envelope>> AllIncomingAsync()
+    {
+        return await CreateCommand(
+                $"select {DatabaseConstants.IncomingFields} from {QuotedTableNameFor(DatabaseConstants.IncomingTable)}")
+            .FetchListAsync(r => DatabasePersistence.ReadIncomingAsync(r, _cancellation), _cancellation);
+    }
+
+    public Task<IReadOnlyList<Envelope>> AllOutgoingAsync()
+    {
+        return CreateCommand(
+                $"select {DatabaseConstants.OutgoingFields} from {QuotedTableNameFor(DatabaseConstants.OutgoingTable)}")
+            .FetchListAsync(r => DatabasePersistence.ReadOutgoingAsync(r, _cancellation), _cancellation);
+    }
+
+    public Task ReleaseAllOwnershipAsync()
+    {
+        return CreateCommand(
+                $"update {QuotedTableNameFor(DatabaseConstants.IncomingTable)} set owner_id = 0;update {QuotedTableNameFor(DatabaseConstants.OutgoingTable)} set owner_id = 0")
+            .ExecuteNonQueryAsync(_cancellation);
+    }
+
+    /// <summary>
+    /// GH-4739: `owner_id &lt;&gt; 0` is what lets SQL Server seek the FILTERED owner indexes on both tables
+    /// instead of scanning them -- a parameterized `owner_id = @id` alone cannot use a filtered index,
+    /// because the plan has to remain correct for @id = 0. This runs on every clean shutdown
+    /// (WolverineRuntime.HostService), so on a large inbox it is two full table scans in the shutdown path.
+    /// </summary>
+    public Task ReleaseAllOwnershipAsync(int ownerId)
+    {
+        return CreateCommand(
+                $"update {QuotedTableNameFor(DatabaseConstants.IncomingTable)} set owner_id = 0 where owner_id = @id and owner_id <> 0;update {QuotedTableNameFor(DatabaseConstants.OutgoingTable)} set owner_id = 0 where owner_id = @id and owner_id <> 0")
+            .With("id", ownerId)
+            .ExecuteNonQueryAsync(_cancellation);
+    }
+
+    public async Task CheckConnectivityAsync(CancellationToken token)
+    {
+        await using var conn = await DataSource.OpenConnectionAsync(token);
+        await conn.CloseAsync();
+    }
+
+    public async Task AssertStorageExistsAsync(CancellationToken token)
+    {
+        await using var conn = await DataSource.OpenConnectionAsync(token);
+        try
+        {
+            // A reachable database is not enough — the schema/tables can be missing (e.g. never
+            // provisioned, or dropped). Reuse the same Weasel diff the migration path uses so that
+            // 'resources check' reports an un-provisioned schema as unhealthy.
+            var migration = await SchemaMigration.DetermineAsync(conn, token, Objects);
+            if (migration.Difference != SchemaPatchDifference.None)
+            {
+                throw new InvalidOperationException(
+                    $"The Wolverine message storage for database '{Name}' is missing or out of date (schema difference: {migration.Difference}). Run 'resources setup' or enable auto-provisioning.");
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// GH-4166. The cheap startup counterpart to <see cref="AssertStorageExistsAsync"/>: one trivially
+    /// planned probe per core table rather than a full schema diff of every object. `select 1 ... where
+    /// 1 = 0` returns no rows and reads no data on every engine we support -- it fails only when the
+    /// table itself is not there, which is the condition worth catching when AutoCreate is None.
+    /// </summary>
+    public async Task AssertStorageProvisionedAsync(CancellationToken token)
+    {
+        // Envelope storage first, then the node tables, which only the Main store owns. Deliberately not
+        // the stored procedures or indexes -- their absence is drift for the migration path to report,
+        // not the "nothing was ever provisioned" case this exists to name.
+        var tables = new List<string>
+        {
+            DatabaseConstants.IncomingTable,
+            DatabaseConstants.OutgoingTable,
+            DatabaseConstants.DeadLetterTable
+        };
+
+        if (Role == MessageStoreRole.Main)
+        {
+            tables.Add(DatabaseConstants.NodeTableName);
+        }
+
+        await using var conn = await DataSource.OpenConnectionAsync(token);
+        try
+        {
+            foreach (var table in tables)
+            {
+                var name = QuotedTableNameFor(table);
+
+                try
+                {
+                    await using var command = conn.CreateCommand();
+                    command.CommandText = $"select 1 from {name} where 1 = 0";
+                    await command.ExecuteNonQueryAsync(token);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException(
+                        $"The Wolverine message storage for database '{Name}' is missing (could not read '{name}'). Run 'resources setup' / IHost.SetupResources(), or enable auto-provisioning with AutoBuildMessageStorageOnStartup.",
+                        e);
+                }
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    private Task migrateAsync(DbConnection conn)
+    {
+        return migrateAsync(conn, _settings.AutoCreate);
+    }
+
+    private async Task migrateAsync(DbConnection conn, AutoCreate autoCreate)
+    {
+        var migration = await SchemaMigration.DetermineAsync(conn, _cancellation, Objects);
+
+        if (migration.Difference != SchemaPatchDifference.None)
+        {
+            if (autoCreate == AutoCreate.None)
+            {
+                Logger.LogWarning(
+                    "Message storage in database {Database} is out of date ({Difference}) but AutoCreate is None — no migration applied. Run 'resources setup' to provision it",
+                    Name, migration.Difference);
+                return;
+            }
+
+            await Migrator.ApplyAllAsync(conn, migration, autoCreate, new MigrationLogger(Logger), ct: _cancellation);
+        }
+
+        if (autoCreate != AutoCreate.None)
+        {
+            await repairLegacyColumnDefaultsAsync(conn);
+        }
+    }
+
+    /// <summary>
+    /// Correct column DEFAULT expressions that a previous version of Wolverine declared wrongly.
+    ///
+    /// <para>
+    /// This exists because Weasel does not compare defaults unless a table opts into
+    /// <c>DetectColumnDrift</c>, which Wolverine never sets and which Weasel itself warns against for
+    /// datetime defaults (they canonicalize non-trivially, so a textual comparison produces perpetual
+    /// false-positive migrations). A column whose name and type still match is "the same" column, so a
+    /// corrected declaration reaches new databases only — every deployed one keeps the old default
+    /// forever. That is how GH-2634's Oracle fix silently never reached existing Oracle deployments.
+    /// </para>
+    ///
+    /// <para>
+    /// Runs inside the migration advisory lock, and deliberately runs even when the schema diff is empty,
+    /// because an already-provisioned database is exactly the case that needs repairing. Implementations
+    /// must be idempotent and must not take a lock when there is nothing to correct.
+    /// </para>
+    /// </summary>
+    protected virtual Task repairLegacyColumnDefaultsAsync(DbConnection conn)
+    {
+        return Task.CompletedTask;
+    }
+
+    private async Task truncateEnvelopeDataAsync(DbConnection conn)
+    {
+        try
+        {
+            var tx = await conn.BeginTransactionAsync(_cancellation);
+            await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.OutgoingTable)}")
+                .ExecuteNonQueryAsync(_cancellation);
+            await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.IncomingTable)}")
+                .ExecuteNonQueryAsync(_cancellation);
+            await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.DeadLetterTable)}")
+                .ExecuteNonQueryAsync(_cancellation);
+
+            // GH-4180. Outside the Main-only block below on purpose: the deduplication table is
+            // provisioned for every store role, and ClearAllAsync means "no residue from the previous
+            // test". A surviving claim would silently refuse the next test's first message as a
+            // duplicate -- a green suite over a system that did nothing.
+            // GH-4757: whichever of the two tables this mode provisioned, and only that one -- a
+            // delete against the other would fail because it does not exist.
+            if (Durability.MessageDeduplicationMode != MessageDeduplicationMode.None)
+            {
+                await tx.CreateCommand(
+                        $"delete from {QuotedTableNameFor(DeduplicationTableNameFor(Durability))}")
+                    .ExecuteNonQueryAsync(_cancellation);
+            }
+
+            // GH-4742. The same, for [DeduplicatedWithResponse]: a surviving claim would replay a previous test's response.
+            if (Durability.EnableDeduplicatedResponses)
+            {
+                await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.DeduplicatedResponsesTableName)}")
+                    .ExecuteNonQueryAsync(_cancellation);
+            }
+
+            if (_settings.Role == MessageStoreRole.Main)
+            {
+                // Recurring-message tracking rows are Main-only bookkeeping (the table only
+                // exists when the feature's opt-in flag is set). A surviving row would let a
+                // later test adopt a previous test's "pending occurrence" or inherit its pause.
+                if (Durability.EnableRecurringMessages)
+                {
+                    await tx.CreateCommand(
+                            $"delete from {QuotedTableNameFor(DatabaseConstants.RecurringMessagesTableName)}")
+                        .ExecuteNonQueryAsync(_cancellation);
+                }
+
+                await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.AgentRestrictionsTableName)}")
+                    .ExecuteNonQueryAsync(_cancellation);
+
+                await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.NodeRecordTableName)}")
+                    .ExecuteNonQueryAsync(_cancellation);
+
+                // Clear the dynamic-listener registry too, so test hosts that call
+                // ResetResourceState / ClearAllAsync get a truly clean slate. Only
+                // attempted when the registry is opted in, since otherwise the
+                // wolverine_listeners table doesn't exist.
+                if (Durability.EnableDynamicListeners)
+                {
+                    await tx.CreateCommand($"delete from {QuotedTableNameFor(DatabaseConstants.ListenersTableName)}")
+                        .ExecuteNonQueryAsync(_cancellation);
+                }
+            }
+
+            await tx.CommitAsync(_cancellation);
+
+            await afterTruncateEnvelopeDataAsync(conn);
+        }
+        catch (Exception e)
+        {
+            throw new InvalidOperationException(
+                "Failure trying to execute the statements to clear envelope storage", e);
+        }
+    }
+
+    /// <summary>
+    /// Hook called after envelope data has been truncated and the transaction committed.
+    /// Override to perform provider-specific cleanup such as updating table statistics.
+    /// </summary>
+    protected virtual Task afterTruncateEnvelopeDataAsync(DbConnection conn)
+    {
+        return Task.CompletedTask;
+    }
+}

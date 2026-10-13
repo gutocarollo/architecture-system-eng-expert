@@ -1,0 +1,215 @@
+using Azure.Messaging.ServiceBus;
+using JasperFx.Blocks;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.AzureServiceBus.Internal;
+
+public class InlineAzureServiceBusListener : IListener, ISupportDeadLetterQueue, ISupportNativeScheduling,
+    IReportConnectionState
+{
+    private readonly CancellationTokenSource _cancellation = new();
+
+    // GH-3237: derived only from ProcessErrorAsync (degrade-only). A successful delivery clears back to
+    // Unknown — never Connected, because the SDK cannot prove the AMQP link is up without traffic.
+    private volatile TransportConnectionState _connectionState = TransportConnectionState.Unknown;
+    private readonly RetryBlock<AzureServiceBusEnvelope> _complete;
+    private readonly RetryBlock<AzureServiceBusEnvelope> _deadLetter;
+    private readonly RetryBlock<AzureServiceBusEnvelope> _defer;
+    private readonly AzureServiceBusEndpoint _endpoint;
+    private readonly ILogger _logger;
+    private readonly IIncomingMapper<ServiceBusReceivedMessage> _mapper;
+    private readonly ServiceBusProcessor _processor;
+    private readonly IReceiver _receiver;
+    private readonly ISender _requeue;
+
+    public InlineAzureServiceBusListener(AzureServiceBusEndpoint endpoint,
+        ILogger logger,
+        ServiceBusProcessor processor, IReceiver receiver,
+        IIncomingMapper<ServiceBusReceivedMessage> mapper,
+        ISender requeue, int maximumAckAttempts)
+    {
+        _endpoint = endpoint;
+        _logger = logger;
+        _processor = processor;
+        _receiver = receiver;
+        _mapper = mapper;
+        _requeue = requeue;
+
+        // GH-4012 item 3: ack budget + terminal-failure classification, shared with the batched listener
+        _complete = AzureServiceBusSettlement.CompleteBlock(
+            (e, _) => AzureServiceBusSettlement.CompleteAsync(e, maximumAckAttempts, _logger, _cancellation.Token),
+            _logger, _cancellation.Token);
+
+        _defer = new RetryBlock<AzureServiceBusEnvelope>(async (envelope, _) =>
+        {
+            if (envelope is { IsCompleted: false } e)
+            {
+                await e.CompleteAsync(_cancellation.Token);
+            }
+
+            await _requeue.SendAsync(envelope);
+        }, logger, _cancellation.Token);
+
+        _deadLetter =
+            new RetryBlock<AzureServiceBusEnvelope>(
+                (e, c) => e.DeadLetterAsync(_cancellation.Token, e.Exception?.GetType().NameInCode(),
+                    e.Exception?.Message), logger,
+                _cancellation.Token);
+
+        _processor.ProcessMessageAsync += processMessageAsync;
+        _processor.ProcessErrorAsync += processErrorAsync;
+    }
+
+    public IHandlerPipeline? Pipeline => _receiver.Pipeline;
+
+    public TransportConnectionState ConnectionState => _connectionState;
+
+    public ValueTask CompleteAsync(Envelope envelope)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            var task = _complete.PostAsync(e);
+            return new ValueTask(task);
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            var task = _defer.PostAsync(e);
+            return new ValueTask(task);
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    public async Task<bool> TryRequeueAsync(Envelope envelope)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            await _defer.PostAsync(e);
+            return true;
+        }
+
+        return false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cancellation.CancelAsync();
+        _cancellation.Dispose();
+        _complete.SafeDispose();
+        _defer.SafeDispose();
+        _deadLetter.SafeDispose();
+        await _processor.DisposeAsync();
+    }
+
+    public Uri Address => _endpoint.Uri;
+
+    public async ValueTask StopAsync()
+    {
+        await _processor.StopProcessingAsync();
+    }
+
+    public async Task MoveToErrorsAsync(Envelope envelope, Exception exception)
+    {
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            DeadLetterQueueConstants.StampFailureMetadata(envelope, exception);
+            e.Exception = exception;
+            await _deadLetter.PostAsync(e);
+        }
+    }
+
+    public bool NativeDeadLetterQueueEnabled => true;
+
+    public async Task MoveToScheduledUntilAsync(Envelope envelope, DateTimeOffset time)
+    {
+        envelope.ScheduledTime = time;
+
+        // GH-4062: settle the original before sending the scheduled copy, exactly like _defer above.
+        // This only re-sent the copy, so the original delivery stayed locked until Azure Service Bus
+        // expired the lock and redelivered it -- every ScheduleRetry() produced a duplicate on top of
+        // the scheduled copy. Latent until GH-4018 turned AutoCompleteMessages off, which had been
+        // covering the unsettled original when the processor callback returned.
+        if (envelope is AzureServiceBusEnvelope e)
+        {
+            await _defer.PostAsync(e);
+            return;
+        }
+
+        await _requeue.SendAsync(envelope);
+    }
+
+    public Task StartAsync()
+    {
+        return _processor.StartProcessingAsync();
+    }
+
+    private Task processErrorAsync(ProcessErrorEventArgs arg)
+    {
+        var degraded = AzureServiceBusConnectionStateMapper.StateForError(arg.Exception);
+        if (degraded.HasValue)
+        {
+            _connectionState = degraded.Value;
+        }
+
+        _logger.LogError(arg.Exception, "Error trying to receive Azure Service Bus message at {Uri}", _endpoint.Uri);
+        return Task.CompletedTask;
+    }
+
+    private async Task processMessageAsync(ProcessMessageEventArgs arg)
+    {
+        if (_connectionState != TransportConnectionState.Unknown)
+        {
+            // Messages are flowing again, so any previously derived trouble state is stale
+            _connectionState = TransportConnectionState.Unknown;
+        }
+
+        try
+        {
+            var envelope = new AzureServiceBusEnvelope(arg);
+            _mapper.MapIncomingToEnvelope(envelope, arg.Message);
+
+            // If a ping, you're done, ack it and get out of there
+            if (envelope.IsPing())
+            {
+                await CompleteAsync(envelope);
+                return;
+            }
+
+            try
+            {
+                await _receiver.ReceivedAsync(this, envelope);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failure to receive an incoming message with {Id}, trying to 'Defer' the message",
+                    envelope.Id);
+
+                try
+                {
+                    await DeferAsync(envelope);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "Failure trying to Nack a previously failed message {Id}", envelope.Id);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            await _deadLetter.PostAsync(new AzureServiceBusEnvelope(arg) { Exception = e });
+            _logger.LogError(e, "Error while reading message {Id} from {Uri}", arg.Message.MessageId,
+                _endpoint.Uri);
+        }
+    }
+}

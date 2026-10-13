@@ -1,0 +1,8 @@
+
+dependencies {
+    api "io.eventuate.local.java:eventuate-client-java:$eventuateLocalVersion"
+    api "io.eventuate.tram.core:eventuate-tram-spring-commands:$eventuateTramVersion"
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

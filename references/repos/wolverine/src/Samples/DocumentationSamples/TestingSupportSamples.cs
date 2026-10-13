@@ -1,0 +1,355 @@
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Marten;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using NSubstitute;
+using Shouldly;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Runtime.Agents;
+using Wolverine.Tracking;
+using Xunit;
+
+namespace DocumentationSamples;
+
+public class TestingSupportSamples
+{
+    public static async Task stub_all_external_transports()
+    {
+        #region sample_conditionally_disable_transports
+        var builder = Host.CreateApplicationBuilder();
+        builder.UseWolverine(opts =>
+        {
+            // Other configuration...
+
+            // IF the environment is "Testing", turn off all external transports
+            if (builder.Environment.IsDevelopment())
+            {
+                opts.StubAllExternalTransports();
+            }
+        });
+
+        using var host = builder.Build();
+        await host.StartAsync();
+
+        #endregion
+    }
+}
+
+public static class AccountHandler
+{
+    #region sample_accounthandler_for_testing_examples
+    [Transactional]
+    public static IEnumerable<object> Handle(
+        DebitAccount command,
+        Account account,
+        IDocumentSession session)
+    {
+        account.Balance -= command.Amount;
+
+        // This just marks the account as changed, but
+        // doesn't actually commit changes to the database
+        // yet. That actually matters as I hopefully explain
+        session.Store(account);
+
+        // Conditionally trigger other, cascading messages
+        if (account.Balance > 0 && account.Balance < account.MinimumThreshold)
+        {
+            yield return new LowBalanceDetected(account.Id)
+                .WithDeliveryOptions(new DeliveryOptions { ScheduleDelay = 1.Hours() });
+        }
+        else if (account.Balance < 0)
+        {
+            yield return new AccountOverdrawn(account.Id);
+
+            // Give the customer 10 days to deal with the overdrawn account
+            yield return new EnforceAccountOverdrawnDeadline(account.Id);
+        }
+
+        yield return new AccountUpdated(account.Id, account.Balance);
+    }
+
+    #endregion
+}
+
+public class AccountHandlerTests
+{
+    #region sample_handle_a_debit_that_makes_the_account_have_a_low_balance
+    [Fact]
+    public void handle_a_debit_that_makes_the_account_have_a_low_balance()
+    {
+        var account = new Account
+        {
+            Balance = 1000,
+            MinimumThreshold = 200,
+            Id = 1111
+        };
+
+        // Let's otherwise ignore this for now, but this is using NSubstitute
+        var session = Substitute.For<IDocumentSession>();
+
+        var message = new DebitAccount(account.Id, 801);
+        var messages = AccountHandler.Handle(message, account, session).ToList();
+
+        // Now, verify that the only the expected messages are published:
+
+        // One message of type AccountUpdated
+        messages
+            .ShouldHaveMessageOfType<AccountUpdated>()
+            .AccountId.ShouldBe(account.Id);
+
+        // You can optionally assert against DeliveryOptions
+        messages
+            .ShouldHaveMessageOfType<LowBalanceDetected>(delivery =>
+            {
+                delivery!.ScheduleDelay!.Value.ShouldNotBe(TimeSpan.Zero);
+            })
+            .AccountId.ShouldBe(account.Id);
+
+        // Assert that there are no messages of type AccountOverdrawn
+        messages.ShouldHaveNoMessageOfType<AccountOverdrawn>();
+    }
+
+    #endregion
+
+
+    [Fact]
+
+    #region sample_using_tracked_session
+    public async Task using_tracked_sessions()
+    {
+        // The point here is just that you somehow have
+        // an IHost for your application
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine().StartAsync();
+
+        var debitAccount = new DebitAccount(111, 300);
+        var session = await host.InvokeMessageAndWaitAsync(debitAccount);
+
+        var overdrawn = session.Sent.SingleMessage<AccountOverdrawn>();
+        overdrawn.AccountId.ShouldBe(debitAccount.AccountId);
+    }
+
+    #endregion
+
+    #region sample_advanced_tracked_session_usage
+    private static async Task using_tracked_sessions_advanced(IHost otherWolverineSystem)
+    {
+        // The point here is just that you somehow have
+        // an IHost for your application
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine().StartAsync();
+
+        var debitAccount = new DebitAccount(111, 300);
+        var session = await host
+
+            // Start defining a tracked session
+            .TrackActivity()
+
+            // Override the timeout period for longer tests
+            .Timeout(1.Minutes())
+
+            // Be careful with this one! This makes Wolverine wait on some indication
+            // that messages sent externally are completed
+            .IncludeExternalTransports()
+
+            // Make the tracked session span across an IHost for another process
+            // May not be super useful to the average user, but it's been crucial
+            // to test Wolverine itself
+            .AlsoTrack(otherWolverineSystem)
+
+            // This is actually helpful if you are testing for error handling
+            // functionality in your system
+            .DoNotAssertOnExceptionsDetected()
+            
+            // Hey, just in case failure acks are getting into your testing session
+            // and you do not care for the tests, tell Wolverine to ignore them
+            .IgnoreFailureAcks()
+
+            // Again, this is testing against processes, with another IHost
+            .WaitForMessageToBeReceivedAt<LowBalanceDetected>(otherWolverineSystem)
+
+            // Continue tracking until at least this many messages of the
+            // type have finished execution. Use this when messages are
+            // published out-of-band from the tracked execution -- e.g. by a
+            // Marten async daemon subscription or projection side effect --
+            // where the tracked session could otherwise complete during a
+            // momentary lull before every expected message has been published.
+            // Multiple calls combine, requiring every count to be reached.
+            .WaitForExecutionOf<AccountUpdated>(1)
+
+            // Wolverine does this automatically, but it's sometimes
+            // helpful to tell Wolverine to not track certain message
+            // types during testing. Especially messages originating from
+            // some kind of polling operation
+            .IgnoreMessageType<IAgentCommand>()
+            
+            // Another option
+            .IgnoreMessagesMatchingType(type => type.CanBeCastTo<IAgentCommand>())
+
+            // And when the message TYPE cannot tell the traffic apart, filter
+            // on the envelope itself
+            .IgnoreEnvelopes(e => e.Destination == new Uri("rabbitmq://queue/audit-log"))
+
+            // There are many other options as well
+            .InvokeMessageAndWaitAsync(debitAccount);
+
+        var overdrawn = session.Sent.SingleMessage<AccountOverdrawn>();
+        overdrawn.AccountId.ShouldBe(debitAccount.AccountId);
+    }
+
+    #endregion
+
+    #region sample_ignore_envelopes_on_a_shared_host
+    private static async Task scoping_a_tracked_session_by_envelope(IHost host, Guid tenantId)
+    {
+        var debitAccount = new DebitAccount(111, 300);
+
+        var session = await host
+            .TrackActivity()
+
+            // This host also runs background subscriptions and other tests' work, so the same
+            // message types are legitimately in flight for more than one reason at once and
+            // IgnoreMessageType cannot separate them. The predicate sees the whole Envelope, so
+            // scope on whatever actually distinguishes this flow -- here, the tenant under test.
+            .IgnoreEnvelopes(e => e.TenantId != tenantId.ToString())
+
+            .InvokeMessageAndWaitAsync(debitAccount);
+
+        session.Sent.SingleMessage<AccountOverdrawn>()
+            .AccountId.ShouldBe(debitAccount.AccountId);
+    }
+    #endregion
+}
+
+// The attribute directs Wolverine to send this message with
+// a "deliver within 5 seconds, or discard" directive
+[DeliverWithin(5)]
+public record AccountUpdated(long AccountId, decimal Balance);
+
+public record LowBalanceDetected(long AccountId) : IAccountCommand;
+
+public record EnforceAccountOverdrawnDeadline(long AccountId) : TimeoutMessage(10.Days()), IAccountCommand;
+
+public class Account
+{
+    public long Id { get; set; }
+    public decimal Balance { get; set; }
+    public decimal MinimumThreshold { get; set; }
+}
+
+public interface IAccountCommand
+{
+    long AccountId { get; }
+}
+
+#region sample_send_message_on_file_change
+public record FileAdded(string FileName);
+
+public class FileAddedHandler
+{
+    public Task Handle(
+        FileAdded message
+    ) =>
+        Task.CompletedTask;
+}
+
+public class RandomFileChange
+{
+    private readonly IMessageBus _messageBus;
+
+    public RandomFileChange(
+        IMessageBus messageBus
+    ) => _messageBus = messageBus;
+
+    public async Task SimulateRandomFileChange()
+    {
+        // Delay task with a random number of milliseconds
+        // Here would be your FileSystemWatcher / IFileProvider
+        await Task.Delay(
+            TimeSpan.FromMilliseconds(
+                new Random().Next(100, 1000)
+            )
+        );
+        var randomFileName = Path.GetRandomFileName();
+        await _messageBus.SendAsync(new FileAdded(randomFileName));
+    }
+}
+
+public class When_message_is_sent : IAsyncLifetime
+{
+    private IHost _host = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        var hostBuilder = Host.CreateDefaultBuilder();
+        hostBuilder.ConfigureServices(
+            services => { services.AddSingleton<RandomFileChange>(); }
+        );
+        hostBuilder.UseWolverine();
+
+        _host = await hostBuilder.StartAsync();
+    }
+    
+    [Fact]
+    public async Task should_be_in_session_using_service_provider()
+    {
+        var randomFileChange = _host.Services.GetRequiredService<RandomFileChange>();
+
+        var session = await _host.Services
+            .TrackActivity()
+            .Timeout(2.Seconds())
+            .ExecuteAndWaitAsync(
+                (Func<IMessageContext, Task>)(
+                    async (
+                        _
+                    ) => await randomFileChange.SimulateRandomFileChange()
+                )
+            );
+
+        session
+            .Sent
+            .AllMessages()
+            .Count()
+            .ShouldBe(1);
+        
+        session
+            .Sent
+            .AllMessages()
+            .First()
+            .ShouldBeOfType<FileAdded>();
+    }
+
+    [Fact]
+    public async Task should_be_in_session()
+    {
+        var randomFileChange = _host.Services.GetRequiredService<RandomFileChange>();
+
+        var session = await _host
+            .TrackActivity()
+            .Timeout(2.Seconds())
+            .ExecuteAndWaitAsync(
+                (Func<IMessageContext, Task>)(
+                    async (
+                        _
+                    ) => await randomFileChange.SimulateRandomFileChange()
+                )
+            );
+
+        session
+            .Sent
+            .AllMessages()
+            .Count()
+            .ShouldBe(1);
+        
+        session
+            .Sent
+            .AllMessages()
+            .First()
+            .ShouldBeOfType<FileAdded>();
+    }
+
+    public async ValueTask DisposeAsync() => await _host.StopAsync();
+}
+#endregion

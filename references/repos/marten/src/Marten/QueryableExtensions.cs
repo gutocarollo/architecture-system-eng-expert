@@ -1,0 +1,950 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Numerics;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Core.Reflection;
+using Marten.Internal.Sessions;
+using Marten.Linq;
+using Marten.Schema.Indexing.FullText;
+using Weasel.Postgresql.Tables.Indexes;
+using Marten.Linq.Includes;
+using Marten.Services.BatchQuerying;
+using Npgsql;
+using System.Diagnostics.CodeAnalysis;
+using Marten.Util;
+
+namespace Marten;
+
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "Class-level: consumes RUC-annotated members (ISerializer, JasperFx.Events aggregator graph, CloseAndBuildAs / GenericFactoryCache fallbacks, FastExpressionCompiler). Document/event/projection types flow in from StoreOptions / Schema.For<T>() / projection registration and are preserved per the AOT publishing guide; AOT consumers supply a source-generator-backed serializer + pre-generated codegen artifacts.")]
+[UnconditionalSuppressMessage("Trimming", "IL2060",
+    Justification = "Class-level: Expression.Call(Type, string, ...) on framework Queryable / Enumerable intrinsics that the trimmer preserves.")]
+[UnconditionalSuppressMessage("Trimming", "IL2070",
+    Justification = "Class-level: reflects PublicMethods/PublicProperties on a Type whose runtime instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+[UnconditionalSuppressMessage("AOT", "IL3050",
+    Justification = "Class-level: uses Type.MakeGenericType / MethodInfo.MakeGenericMethod / Activator.CreateInstance / FastExpressionCompiler — runtime code generation. AOT consumers pre-generate codegen artifacts (codegen write) and supply source-generator-backed serializer impls per the AOT publishing guide.")]
+public static class QueryableExtensions
+{
+    /// <summary>
+    ///     Fetch the Postgresql QueryPlan for the Linq query
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="configureExplain"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<QueryPlan> ExplainAsync<T>(this IQueryable<T> queryable, CancellationToken token = default,
+        Action<IConfigureExplainExpressions>? configureExplain = null) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ExplainAsync(configureExplain: configureExplain, token: token);
+    }
+
+    #region ToList
+
+    /// <summary>
+    ///     Fetch results asynchronously to a read only list
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="token"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<IReadOnlyList<T>> ToListAsync<T>(this IQueryable<T> queryable,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToListAsync<T>(token);
+    }
+
+    #endregion ToList
+
+    /// <summary>
+    ///     Builds the database command that would be used to execute this Linq query
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="fetchType"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static NpgsqlCommand ToCommand<T>(this IQueryable<T> queryable, FetchType fetchType = FetchType.FetchMany) where T : notnull
+    {
+        if (queryable is MartenLinqQueryable<T> q1)
+        {
+            return q1.ToPreviewCommand(fetchType);
+        }
+
+        throw new InvalidOperationException($"{nameof(ToCommand)} is only valid on Marten IQueryable objects");
+    }
+
+    /// <summary>
+    ///     Fetch a related document of type TInclude when executing the Linq query and
+    ///     call the supplied callback for each result
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="idSource"></param>
+    /// <param name="callback"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable,
+        Expression<Func<T, object>> idSource,
+        Action<TInclude> callback) where TInclude : notnull where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(idSource, callback);
+    }
+
+    /// <summary>
+    ///     Fetch a related document of type TInclude when executing the Linq query and
+    ///     store these documents in the supplied List<TInclude>
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="idSource"></param>
+    /// <param name="list"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryable<T> Include<T, TInclude>(this IQueryable<T> queryable,
+        Expression<Func<T, object>> idSource,
+        IList<TInclude> list) where TInclude : notnull where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(idSource, list);
+    }
+
+    /// <summary>
+    ///     Fetch related documents when executing the Linq query and store the related documents
+    ///     into the supplied dictionary
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="idSource"></param>
+    /// <param name="dictionary"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryable<T> Include<T, TKey, TInclude>(this IQueryable<T> queryable,
+        Expression<Func<T, object>> idSource,
+        IDictionary<TKey, TInclude> dictionary) where TInclude : notnull where TKey : notnull where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>()
+            .Include(idSource, dictionary);
+    }
+
+    /// <summary>
+    ///     Also fetch related documents, and call the callback lambda for each
+    ///     related document. Follow this with <c>.On(idSource)</c> to specify how to
+    ///     map to this document.
+    /// </summary>
+    /// <param name="callback"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryableIncludeBuilder<T, TInclude> Include<T, TInclude>(
+        this IQueryable<T> queryable,
+        Action<TInclude> callback)
+        where TInclude : notnull where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(callback);
+    }
+
+    /// <summary>
+    ///     Also fetch related documents, and add the related documents to
+    ///     the supplied list. Follow this with <c>.On(idSource)</c> to specify how to
+    ///     map to this document.
+    /// </summary>
+    /// <param name="idSource"></param>
+    /// <param name="list"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryableIncludeBuilder<T, TInclude> Include<T, TInclude>(
+        this IQueryable<T> queryable,
+        IList<TInclude> list)
+        where TInclude : notnull where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(list);
+    }
+
+    /// <summary>
+    ///     Also fetch related documents, and add the related documents to
+    ///     the supplied dictionary organized by the property mapped to the related
+    ///     document. Follow this with <c>.On(idSource)</c> to specify how to map to
+    ///     this document.
+    /// </summary>
+    /// <param name="idSource"></param>
+    /// <param name="dictionary"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryableIncludeBuilder<T, TKey, TInclude> Include<T, TKey, TInclude>(
+        this IQueryable<T> queryable,
+        IDictionary<TKey, TInclude> dictionary)
+        where TInclude : notnull
+        where TKey : notnull
+        where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(dictionary);
+    }
+
+    /// <summary>
+    ///     Also fetch related documents, and add the related documents to
+    ///     the supplied dictionary of lists organized by the property mapped to the
+    ///     related document. Follow this with <c>.On(idSource)</c> to specify how
+    ///     to map to this document.
+    /// </summary>
+    /// <param name="idSource"></param>
+    /// <param name="dictionary"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryableIncludeBuilder<T, TKey, TInclude> Include<T, TKey, TInclude>(
+        this IQueryable<T> queryable,
+        IDictionary<TKey, IList<TInclude>> dictionary)
+        where TInclude : notnull
+        where TKey : notnull
+        where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(dictionary);
+    }
+
+    /// <summary>
+    ///     Also fetch related documents, and add the related documents to
+    ///     the supplied dictionary of lists organized by the property mapped to the
+    ///     related document. Follow this with <c>.On(idSource)</c> to specify how
+    ///     to map to this document.
+    /// </summary>
+    /// <param name="idSource"></param>
+    /// <param name="dictionary"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TInclude"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <returns></returns>
+    public static IMartenQueryableIncludeBuilder<T, TKey, TInclude> Include<T, TKey, TInclude>(
+        this IQueryable<T> queryable,
+        IDictionary<TKey, List<TInclude>> dictionary)
+        where TInclude : notnull
+        where TKey : notnull
+        where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().Include(dictionary);
+    }
+
+    /// <summary>
+    ///     Execute this query to an IAsyncEnumerable. This is valuable for reading
+    ///     and processing large result sets without having to keep the entire
+    ///     result set in memory
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public static IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IQueryable<T> queryable,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToAsyncEnumerable(token);
+    }
+
+
+    /// <summary>
+    ///     Write the raw persisted JSON for the Linq query directly to the destination stream
+    /// </summary>
+    /// <param name="destination"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public static Task<int> StreamJsonArray<T>(this IQueryable<T> queryable, Stream destination,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().StreamJsonArray(destination, token);
+    }
+
+    public static Task<string> ToJsonArray<T>(this IQueryable<T> queryable, CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToJsonArray(token);
+    }
+
+    /// <summary>
+    ///     Write a single "page" of results from the Linq query as a JSON envelope containing
+    ///     paging metadata (pageNumber, pageSize, totalItemCount, pageCount, hasNextPage,
+    ///     hasPreviousPage) and the raw persisted JSON for the matching documents ("items"),
+    ///     directly to the destination stream. This makes exactly one round trip to the
+    ///     database by using a <c>count(*) OVER()</c> window function to retrieve the total
+    ///     item count in the same query used to fetch the page of documents.
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="destination"></param>
+    /// <param name="pageNumber">1-based page number</param>
+    /// <param name="pageSize"></param>
+    /// <param name="token"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns>The total number of items across all pages</returns>
+    public static Task<int> StreamPagedJsonArray<T>(this IQueryable<T> queryable, Stream destination, int pageNumber,
+        int pageSize, CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().StreamPagedJsonArray(destination, pageNumber, pageSize, token);
+    }
+
+    public static Task StreamJsonFirst<T>(this IQueryable<T> queryable, Stream destination,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().StreamJsonFirst(destination, token);
+    }
+
+    public static async Task<bool> StreamJsonFirstOrDefault<T>(this IQueryable<T> queryable, Stream destination,
+        CancellationToken token = default) where T : notnull
+    {
+        return await queryable.As<MartenLinqQueryable<T>>().StreamJsonFirstOrDefault(destination, token)
+            .ConfigureAwait(false) > 0;
+    }
+
+    public static Task StreamJsonSingle<T>(this IQueryable<T> queryable, Stream destination,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().StreamJsonFirst(destination, token);
+    }
+
+    public static Task StreamJsonSingleOrDefault<T>(this IQueryable<T> queryable, Stream destination,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().StreamJsonSingleOrDefault(destination, token);
+    }
+
+    public static Task<string> ToJsonFirst<T>(this IQueryable<T> queryable, CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToJsonFirst(token);
+    }
+
+    public static Task<string?> ToJsonFirstOrDefault<T>(this IQueryable<T> queryable, CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToJsonFirstOrDefault(token);
+    }
+
+    public static Task<string> ToJsonSingle<T>(this IQueryable<T> queryable, CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToJsonSingle(token);
+    }
+
+    public static Task<string?> ToJsonSingleOrDefault<T>(this IQueryable<T> queryable,
+        CancellationToken token = default) where T : notnull
+    {
+        return queryable.As<MartenLinqQueryable<T>>().ToJsonSingleOrDefault(token);
+    }
+
+    #region Any
+
+    public static Task<bool> AnyAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().AnyAsync(token);
+    }
+
+    public static Task<bool> AnyAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).AnyAsync(token);
+    }
+
+    #endregion Any
+
+    #region Aggregate Functions
+
+    public static Task<TResult> SumAsync<TSource, TResult>(
+        this IQueryable<TSource> source, Expression<Func<TSource, TResult>> expression,
+        CancellationToken token = default) where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.Select(expression).As<MartenLinqQueryable<TResult>>().SumAsync<TResult>(token);
+    }
+
+    public static Task<TResult> MaxAsync<TSource, TResult>(
+        this IQueryable<TSource> source, Expression<Func<TSource, TResult>> expression,
+        CancellationToken token = default) where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.Select(expression).As<MartenLinqQueryable<TResult>>().MaxAsync<TResult>(token);
+    }
+
+    public static Task<TResult> MinAsync<TSource, TResult>(
+        this IQueryable<TSource> source, Expression<Func<TSource, TResult>> expression,
+        CancellationToken token = default) where TResult : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.Select(expression).As<MartenLinqQueryable<TResult>>().MinAsync<TResult>(token);
+    }
+
+    public static Task<double> AverageAsync<TSource, TMember>(
+        this IQueryable<TSource> source, Expression<Func<TSource, TMember>> expression,
+        CancellationToken token = default) where TMember : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.Select(expression).As<MartenLinqQueryable<TMember>>().AverageAsync(token);
+    }
+
+    #endregion Aggregate Functions
+
+    #region Count/LongCount/Sum
+
+    public static Task<int> CountAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().CountAsync(token);
+    }
+
+    public static Task<int> CountAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).CountAsync(token);
+    }
+
+    public static Task<long> LongCountAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().CountLongAsync(token);
+    }
+
+    public static Task<long> LongCountAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).LongCountAsync(token);
+    }
+
+    #endregion Count/LongCount/Sum
+
+    #region First/FirstOrDefault
+
+    public static Task<TSource> FirstAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().FirstAsync<TSource>(token);
+    }
+
+    public static Task<TSource> FirstAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).FirstAsync(token);
+    }
+
+    public static Task<TSource?> FirstOrDefaultAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().FirstOrDefaultAsync<TSource>(token);
+    }
+
+    public static Task<TSource?> FirstOrDefaultAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).FirstOrDefaultAsync(token);
+    }
+
+    #endregion First/FirstOrDefault
+
+    #region Single/SingleOrDefault
+
+    public static Task<TSource> SingleAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().SingleAsync<TSource>(token);
+    }
+
+    public static Task<TSource> SingleAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).SingleAsync(token);
+    }
+
+    public static Task<TSource?> SingleOrDefaultAsync<TSource>(
+        this IQueryable<TSource> source,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        return source.As<MartenLinqQueryable<TSource>>().SingleOrDefaultAsync<TSource>(token);
+    }
+
+    public static Task<TSource?> SingleOrDefaultAsync<TSource>(
+        this IQueryable<TSource> source,
+        Expression<Func<TSource, bool>> predicate,
+        CancellationToken token = default) where TSource : notnull
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        ArgumentNullException.ThrowIfNull(predicate);
+
+        return source.Where(predicate).SingleOrDefaultAsync(token);
+    }
+
+    #endregion Single/SingleOrDefault
+
+    #region OrderBy
+
+    /// <summary>
+    ///     Order by multiple properties in ascending order i.e. "prop1", "prop2"
+    ///     or order by multiple properties with their respective sort order i.e. "prop1", "prop2 ASC|asc", "prop3 DESC|desc"
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="properties"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> queryable, params string[] properties)
+    {
+        if (properties.Length == 0)
+        {
+            throw new ArgumentException($"{nameof(properties)} should at least have one property",
+                nameof(properties));
+        }
+
+        // handle the first order by property
+        var orderedQueryable = queryable.OrderBy(properties.First());
+
+        // handle the rest of the properties
+        return properties.Skip(1).Aggregate(orderedQueryable, (current, prop) => current.OrderBy(prop));
+    }
+
+    /// <summary>
+    ///     Order by multiple properties in ascending order i.e. "prop1", "prop2"
+    ///     or order by multiple properties with their respective sort order i.e. "prop1", "prop2 ASC|asc", "prop3 DESC|desc"
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="properties"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static IBatchedOrderedQueryable<T> OrderBy<T>(this IBatchedQueryable<T> queryable,
+        params string[] properties)
+    {
+        if (properties.Length == 0)
+        {
+            throw new ArgumentException($"{nameof(properties)} should at least have one property",
+                nameof(properties));
+        }
+
+        // handle the first order by property
+        var orderedQueryable = queryable.OrderBy(properties.First());
+
+        // handle the rest of the properties
+        return properties.Skip(1).Aggregate(orderedQueryable, (current, prop) => current.OrderBy(prop));
+    }
+
+    /// <summary>
+    ///     Order by a single property in ascending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> queryable, string property)
+    {
+        GetSortProperty(ref property, out var sortOrder);
+        return sortOrder == "desc"
+            ? ApplyOrder(queryable, property, "OrderByDescending")
+            : ApplyOrder(queryable, property, "OrderBy");
+    }
+
+    internal static void GetSortProperty(ref string property, out string sortOrder)
+    {
+        var propParts = property.Split(' ').Take(2).ToArray();
+
+        if (propParts.Length == 2)
+        {
+            property = propParts[0];
+            sortOrder = propParts[1].ToLower();
+        }
+        else
+        {
+            property = propParts[0];
+            sortOrder = "asc";
+        }
+    }
+
+    internal static readonly MethodInfo OrderByFieldNameAndComparerMethod = typeof(QueryableExtensions)
+        .GetMethods(BindingFlags.Public | BindingFlags.Static).Where(x => x.Name == nameof(OrderBy)).Single(x =>
+        {
+            var parameters = x.GetParameters();
+            return parameters.Length == 3 && parameters[1].ParameterType == typeof(string) &&
+                   parameters[2].ParameterType == typeof(StringComparer);
+        });
+
+
+    /// <summary>
+    /// Order by a single property name or [property name] [asc/desc] and a StringComparer value
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <param name="comparer"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> queryable, string property, StringComparer comparer)
+    {
+        var call = Expression.Call(null, OrderByFieldNameAndComparerMethod.MakeGenericMethod(typeof(T)), queryable.Expression,
+            Expression.Constant(property), Expression.Constant(comparer));
+
+        return (IOrderedQueryable<T>)queryable.Provider.CreateQuery<T>(call);
+    }
+
+    /// <summary>
+    ///     Order by a single property in ascending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IBatchedOrderedQueryable<T> OrderBy<T>(this IBatchedQueryable<T> queryable, string property)
+    {
+        GetSortProperty(ref property, out var sortOrder);
+        return sortOrder == "desc"
+            ? ApplyOrder(queryable, property, "OrderByDescending")
+            : ApplyOrder(queryable, property, "OrderBy");
+    }
+
+    /// <summary>
+    ///     Order by a single property in descending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> queryable, string property)
+    {
+        return ApplyOrder(queryable, property, "OrderByDescending");
+    }
+
+    /// <summary>
+    ///     Order by a single property in descending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IBatchedOrderedQueryable<T> OrderByDescending<T>(this IBatchedQueryable<T> queryable, string property)
+    {
+        return ApplyOrder(queryable, property, "OrderByDescending");
+    }
+
+    /// <summary>
+    ///     Chain another order by using a single property in ascending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> queryable, string property)
+    {
+        return ApplyOrder(queryable, property, "ThenBy");
+    }
+
+    /// <summary>
+    ///     Chain another order by using a single property in ascending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IBatchedOrderedQueryable<T> ThenBy<T>(this IBatchedOrderedQueryable<T> queryable, string property)
+    {
+        return ApplyOrder(queryable, property, "ThenBy");
+    }
+
+    /// <summary>
+    ///     Chain another order by using a single property in descending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> queryable, string property)
+    {
+        return ApplyOrder(queryable, property, "ThenByDescending");
+    }
+
+    /// <summary>
+    ///     Chain another order by using a single property in descending order
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="property"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IBatchedOrderedQueryable<T> ThenByDescending<T>(this IBatchedOrderedQueryable<T> queryable,
+        string property)
+    {
+        return ApplyOrder(queryable, property, "ThenByDescending");
+    }
+
+    private static IOrderedQueryable<T> ApplyOrder<T>(
+        IQueryable<T> queryable,
+        string property,
+        string methodName)
+    {
+        var lambda = CompileOrderBy<T>(property, out var targetType);
+        var result = typeof(Queryable).GetMethods().Single(
+                method => method.Name == methodName
+                          && method.IsGenericMethodDefinition
+                          && method.GetGenericArguments().Length == 2
+                          && method.GetParameters().Length == 2)
+            .MakeGenericMethod(typeof(T), targetType)
+            .Invoke(null, new object[] { queryable, lambda });
+        return (IOrderedQueryable<T>)result!;
+    }
+
+    private static IBatchedOrderedQueryable<T> ApplyOrder<T>(
+        IBatchedQueryable<T> queryable,
+        string property,
+        string methodName)
+    {
+        var lambda = CompileOrderBy<T>(property, out var targetType);
+        var result = queryable.GetType().GetMethods().Single(
+                method => method.Name == methodName
+                          && method.IsGenericMethodDefinition
+                          && method.GetGenericArguments().Length == 1
+                          && method.GetParameters().Length == 1)
+            .MakeGenericMethod(targetType)
+            .Invoke(queryable, new object[] { lambda });
+        return (IBatchedOrderedQueryable<T>)result!;
+    }
+
+    internal static LambdaExpression CompileOrderBy<T>(string property, out Type targetType)
+    {
+        var props = property.Split('.');
+        targetType = typeof(T);
+
+        var arg = Expression.Parameter(targetType, "x");
+        Expression expr = arg;
+        foreach (var prop in props)
+        {
+            var pi = targetType.GetProperty(prop);
+
+            if (pi == null)
+            {
+                throw new ArgumentException($"Order by property {prop} not found in type {typeof(T).FullName}",
+                    nameof(property));
+            }
+
+            expr = Expression.Property(expr, pi);
+            targetType = pi.PropertyType;
+        }
+
+        var delegateType = typeof(Func<,>).MakeGenericType(typeof(T), targetType);
+        return Expression.Lambda(delegateType, expr, arg);
+    }
+
+    #endregion
+
+    private static Lazy<MethodInfo> _orderBySqlMethod = new(() => typeof(QueryableExtensions).RequireMethod(nameof(OrderBySql),
+        BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic));
+
+    private static Lazy<MethodInfo> _thenBySqlMethod = new(() => typeof(QueryableExtensions).RequireMethod(nameof(ThenBySql),
+        BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic));
+
+    /// <summary>
+    /// Supply literal SQL fragments to be placed in the generated SQL for this LINQ query.
+    /// You can supply the "desc" suffix here
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IQueryable<T> OrderBySql<T>(this IQueryable<T> queryable, string sql)
+    {
+        return queryable.Provider.CreateQuery<T>(Expression.Call(null, _orderBySqlMethod.Value.MakeGenericMethod(typeof(T)), queryable.Expression,
+            Expression.Constant(sql)));
+    }
+
+    /// <summary>
+    /// Supply literal SQL fragments to be placed in the generated SQL for this LINQ query
+    /// You can supply the "desc" suffix here
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IQueryable<T> ThenBySql<T>(this IQueryable<T> queryable, string sql)
+    {
+        return queryable.Provider.CreateQuery<T>(Expression.Call(null, _thenBySqlMethod.Value.MakeGenericMethod(typeof(T)), queryable.Expression,
+            Expression.Constant(sql)));
+    }
+
+    private static Lazy<MethodInfo> _orderByNgramRankMethod = new(() => typeof(QueryableExtensions).RequireMethod(nameof(OrderByNgramRank),
+        BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic));
+
+    /// <summary>
+    /// Order query results by ngram search relevance using PostgreSQL's ts_rank function.
+    /// Use in combination with NgramSearch in the Where clause.
+    /// Results are ordered by highest relevance first (descending) by default.
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="memberExpression">The string property to rank on (same as the NgramSearch target)</param>
+    /// <param name="searchTerm">The search term to rank against</param>
+    /// <typeparam name="T"></typeparam>
+    public static IQueryable<T> OrderByNgramRank<T>(this IQueryable<T> queryable,
+        Expression<Func<T, string>> memberExpression, string searchTerm)
+    {
+        return queryable.Provider.CreateQuery<T>(
+            Expression.Call(null,
+                _orderByNgramRankMethod.Value.MakeGenericMethod(typeof(T)),
+                queryable.Expression,
+                memberExpression,
+                Expression.Constant(searchTerm)));
+    }
+
+    private static Lazy<MethodInfo> _orderByTextRankMethod = new(() => typeof(QueryableExtensions).RequireMethod(
+        nameof(OrderByTextRank), BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic));
+
+    private static Lazy<MethodInfo> _thenByTextRankMethod = new(() => typeof(QueryableExtensions).RequireMethod(
+        nameof(ThenByTextRank), BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic));
+
+    /// <summary>
+    ///     Order results by full text search relevance, using PostgreSQL's <c>ts_rank</c>. Highest
+    ///     relevance first.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Pair with a matching full text search in the <c>Where</c> clause. The rank resolves the same
+    ///         tsvector the filter does — including a weighted one from <c>WeightedFullTextIndex</c> — so
+    ///         the two cannot drift apart.
+    ///     </para>
+    ///     <code>
+    ///     session.Query&lt;Achievement&gt;()
+    ///         .Where(a =&gt; a.WebStyleSearch(term))
+    ///         .OrderByTextRank(term, TextSearchFunction.WebStyle)
+    ///     </code>
+    ///     <para>
+    ///         <paramref name="function" /> is explicit and has no default on purpose: ranking with a
+    ///         different tsquery function than the <c>Where</c> used is always a mistake, and a friendly
+    ///         default would be occasionally wrong and silently so.
+    ///     </para>
+    ///     <para>
+    ///         GIN cannot order, so this is a post-filter sort over the matched set. Ranking a broad query
+    ///         sorts a lot of rows.
+    ///     </para>
+    /// </remarks>
+    /// <param name="searchTerm">The term to rank against — normally the same one the Where clause used</param>
+    /// <param name="function">The tsquery function, which must match the one the Where clause used</param>
+    /// <param name="regConfig">The text search configuration, defaulting to 'english'</param>
+    public static IQueryable<T> OrderByTextRank<T>(this IQueryable<T> queryable, string searchTerm,
+        TextSearchFunction function, string regConfig = FullTextIndexDefinition.DefaultRegConfig)
+    {
+        return queryable.Provider.CreateQuery<T>(
+            Expression.Call(null,
+                _orderByTextRankMethod.Value.MakeGenericMethod(typeof(T)),
+                queryable.Expression,
+                Expression.Constant(searchTerm),
+                Expression.Constant(function),
+                Expression.Constant(regConfig)));
+    }
+
+    /// <summary>
+    ///     Add a <c>ts_rank</c> relevance ordering after an existing ordering. See
+    ///     <see cref="OrderByTextRank{T}" />.
+    /// </summary>
+    public static IQueryable<T> ThenByTextRank<T>(this IQueryable<T> queryable, string searchTerm,
+        TextSearchFunction function, string regConfig = FullTextIndexDefinition.DefaultRegConfig)
+    {
+        return queryable.Provider.CreateQuery<T>(
+            Expression.Call(null,
+                _thenByTextRankMethod.Value.MakeGenericMethod(typeof(T)),
+                queryable.Expression,
+                Expression.Constant(searchTerm),
+                Expression.Constant(function),
+                Expression.Constant(regConfig)));
+    }
+
+    /// <summary>
+    ///     Retrieve the total number of persisted rows in the database that match this
+    ///     query. Useful for server side paging.
+    /// </summary>
+    /// <param name="stats"></param>
+    /// <returns></returns>
+    public static IMartenQueryable<T> Stats<T>(this IQueryable<T> queryable, out QueryStatistics stats) where T : notnull
+    {
+        // TODO -- make this be an expression here!
+        var martenQueryable = queryable.As<MartenLinqQueryable<T>>();
+        martenQueryable.Statistics = new QueryStatistics();
+        stats = martenQueryable.Statistics;
+
+        return martenQueryable;
+    }
+
+    internal static readonly MethodInfo IncludePlanMethod =
+        typeof(QueryableExtensions).RequireMethod(nameof(IncludePlan), BindingFlags.Static | BindingFlags.NonPublic);
+
+    internal static IMartenQueryable<T> IncludePlan<T>(this IQueryable<T> queryable, IIncludePlan include)
+    {
+        var method = IncludePlanMethod.MakeGenericMethod(typeof(T));
+        var methodCallExpression = Expression.Call(null, method, queryable.Expression, Expression.Constant(include));
+
+        return (IMartenQueryable<T>)queryable.Provider.CreateQuery<T>(methodCallExpression);
+    }
+
+
+
+    /// <summary>
+    /// For usage in LINQ Select() transforms by Marten to use user-supplied SQL for
+    /// transformations
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="sql"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static T ExplicitSql<T>(this object target, string sql)
+    {
+        return default;
+    }
+}

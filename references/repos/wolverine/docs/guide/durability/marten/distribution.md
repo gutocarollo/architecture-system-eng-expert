@@ -1,0 +1,299 @@
+# Projection/Subscription Distribution <Badge type="tip" text="3.0" />
+
+When Wolverine is combined with Marten into the full "Critter Stack" combination, and you're using
+the asynchronous projection or any event subscriptions with Marten, you can achieve potentially greater
+scalability for your system by better distributing the background work of these asynchronous event workers
+by letting Wolverine distribute the load evenly across a running cluster as shown below:
+
+<!-- snippet: sample_opt_into_wolverine_managed_subscription_distribution -->
+<a id='snippet-sample_opt_into_wolverine_managed_subscription_distribution'></a>
+```cs
+opts.Services.AddMarten(m =>
+    {
+        m.DisableNpgsqlLogging = true;
+        m.Connection(Servers.PostgresConnectionString);
+        m.DatabaseSchemaName = "csp";
+
+        m.Projections.Add<TripProjection>(ProjectionLifecycle.Async);
+        m.Projections.Add<DayProjection>(ProjectionLifecycle.Async);
+        m.Projections.Add<DistanceProjection>(ProjectionLifecycle.Async);
+    })
+    .IntegrateWithWolverine(m =>
+    {
+        // This makes Wolverine distribute the registered projections
+        // and event subscriptions evenly across a running application
+        // cluster
+        m.UseWolverineManagedEventSubscriptionDistribution = true;
+    });
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Distribution/Support/SingleTenantContext.cs#L60-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_opt_into_wolverine_managed_subscription_distribution' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: warning
+This option **replaces** Marten's own daemon coordination — remove any `AddAsyncDaemon(DaemonMode.HotCold)`,
+`AddAsyncDaemon(DaemonMode.Solo)`, or `MartenDaemonModeIsSolo()` call. Wolverine sets Marten's async mode to
+`ExternallyManaged` itself, so no daemon registration is needed at all.
+
+Combining the two would leave competing coordinators running against the same daemon, so Wolverine **throws at
+startup** rather than let the projections silently stall. See [GH-3388](https://github.com/JasperFx/wolverine/issues/3388).
+:::
+
+With this option, Wolverine is going to ensure that every single known asynchronous [event projection](https://martendb.io/events/projections/) and every [event
+subscription](https://martendb.io/events/subscriptions.html) is running on exactly one running node within your application cluster. Moreover, Wolverine will purposely stop and
+restart projections or subscriptions to purposely spread the running load across your entire cluster of running nodes.
+
+In the case of using multi-tenancy through separate databases per tenant with Marten, this Wolverine "agent distribution"
+will assign the work by tenant databases, meaning that all the running projections and subscriptions for a single tenant
+database will always be running on a single application node. This was done with the theory that this affinity would hopefully
+reduce the number of used database connections over all.
+
+If a node is taken offline, Wolverine will detect that the node is no longer accessible and try to move start the missing
+projection/subscription agents on another active node. 
+
+_If you run your application on only a single server, Wolverine will of course run all projections and subscriptions
+on just that one server._
+
+Some other facts about this integration:
+
+* Wolverine's agent distribution does indeed work with per-tenant database multi-tenancy
+* Wolverine does automatic health checking at the running node level so that it can fail over assigned agents
+* Wolverine can detect when new nodes come online and redistribute work
+* Wolverine is able to support blue/green deployment and only run projections or subscriptions on active nodes
+  where a capability is present. This just means that you can add all new projections or subscriptions, or even just
+  new versions of a projection or subscription on some application nodes in order to do try ["blue/green deployment."](https://en.wikipedia.org/wiki/Blue%E2%80%93green_deployment)
+* This capability does depend on Wolverine's built-in [leadership election](https://en.wikipedia.org/wiki/Leader_election) -- which fortunately got a _lot_ better in Wolverine 3.0
+
+## Database-Affine Distribution for Multi-Database Stores <Badge type="tip" text="6.x" />
+
+By default Wolverine spreads subscription and projection agents *evenly* across the cluster (with blue/green
+capability matching). That is the right choice for a single-database event store.
+
+It is *not* the right choice for a store backed by many databases. The clearest case is a Marten store that combines
+[sharded multi-tenancy](https://martendb.io/configuration/multitenancy.html#sharded-multi-tenancy-with-database-pooling)
+with [per-tenant event partitioning](https://martendb.io/events/multitenancy.html#per-tenant-event-partitioning). There,
+many tenants are co-located in one shard database and each draws its own event sequence, so Wolverine fans agents out
+one-per-`(shard, tenant)` rather than one-per-database. With hundreds of tenants scattered across many shard databases,
+an even per-agent spread makes *every* node open a connection pool to *nearly every* shard database — so the pool count
+grows as `nodes × databases` and quickly exhausts a shared server's `max_connections`.
+
+So Wolverine keys the distribution off the store itself, with no configuration needed: when a store reports that it is
+backed by multiple databases (its `IEventStore.DatabaseCardinality` is static- or dynamic-multiple — sharded tenancy or
+database-per-tenant), that store's agents are assigned with **database affinity** — every agent for a given database is
+kept together on a single node, so a node only opens pools to the databases it actually owns and the pool count scales
+with the number of databases, not `nodes × databases`. The grouping key is the
+`[event store type]/[event store name]/[database]` prefix of the agent `Uri` (see below), so all of a database's
+agents share one group. Whole groups are still spread across the cluster largest-first, so total agent counts stay
+balanced. A single-database store in the same application keeps the default even distribution — each store is
+distributed in its own pass.
+
+## Uri Structure
+
+The `Uri` structure for event subscriptions or projections is:
+
+```
+event-subscriptions://[event store type]/[event store name]/[database server].[database name]/[relative path of the shard]
+```
+
+For an example from the tests: `event-subscriptions://marten/main/localhost.postgres/day/all` where:
+
+* "marten" means that its a [Marten](https://martendb.io) based event store (we are planning on at least a SQL Server backed event store some day besides Marten)
+* "main" refers to this projection being in the main `DocumentStore` Marten store that is added from `IServiceCollection.AddMarten()`. Otherwise this value would be the type name of an ancillary store
+  type in all lower case
+* "localhost" is the database server
+* "postgres" is the name of the database
+* "day/all" refers to a projection with the `ShardName` of "Day:All"
+
+## Requirements
+
+This functionality requires Wolverine to both track running nodes and to send messages between running nodes within your
+clustered Wolverine service. One way or another, Wolverine needs some kind of "control queue" mechanism for this internal
+messaging. Not to worry though, because Wolverine will utilize in a very basic "database control queue" specifically for
+this if you are using the `AddMarten().IntegrateWithWolverine()` integration or any database backed message persistence as a default
+if you are not using any kind of external messaging broker that supports Wolverine control queues. 
+
+At the point of this writing, the Rabbit MQ and Azure Service Bus transport options both create a "control queue" for each
+executing Wolverine node that Wolverine can use for this communication in a more efficient way than the database backed 
+control queue mechanism. 
+
+Other requirements:
+
+* `WolverineOptions.Durability.Mode` must be `Balanced` **to spread the work across multiple nodes**, since that is
+  what enables leader election and the control queue. In `Solo` mode every projection and subscription agent still
+  runs — just all of them on the single node, which is why `Solo` is a reasonable development-time setting (see
+  below). `Serverless` and `MediatorOnly` start no agents at all.
+* In `Balanced` mode you cannot disable external transports with `StubAllExternalTransports()`, because the nodes
+  need the control queue to communicate
+
+If you are seeing any issues with timeouts due to the Wolverine load distribution, you can try:
+
+1. Pre-generating any Marten types to speed up the "cold start" time
+2. Use the `WolverineOptions.Durability.Mode = Solo` setting at development time
+3. Try to use an external broker for faster communication between nodes
+
+## With Ancillary Marten Stores <Badge type="tip" text="5.0" />
+
+Wolverine can also distribute projections and subscriptions running in [ancillary stores](/guide/durability/marten/ancillary-stores) as well. In this case,
+you do have to enable the Wolverine managed distribution on the main Marten store registration, but that applies to
+all known ancillary stores. 
+
+<!-- snippet: sample_using_distributed_projections_with_ancillary_stores -->
+<a id='snippet-sample_using_distributed_projections_with_ancillary_stores'></a>
+```cs
+var host = await Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        opts.Durability.HealthCheckPollingTime = 1.Seconds();
+        opts.Durability.CheckAssignmentPeriod = 1.Seconds();
+
+        opts.UseMessagePackSerialization();
+
+        opts.UseSharedMemoryQueueing();
+
+        opts.Services.AddMarten(m =>
+            {
+                m.DisableNpgsqlLogging = true;
+                m.Connection(Servers.PostgresConnectionString);
+                m.DatabaseSchemaName = "csp2";
+
+                m.Projections.Add<TripProjection>(ProjectionLifecycle.Async);
+                m.Projections.Add<DayProjection>(ProjectionLifecycle.Async);
+                m.Projections.Add<DistanceProjection>(ProjectionLifecycle.Async);
+            })
+            .IntegrateWithWolverine(m =>
+            {
+                // This makes Wolverine distribute the registered projections
+                // and event subscriptions evenly across a running application
+                // cluster
+                m.UseWolverineManagedEventSubscriptionDistribution = true;
+            });
+
+        opts.Services.AddSingleton<ILoggerProvider>(new OutputLoggerProvider(output));
+
+        opts.Services.AddMartenStore<ITripStore>(m =>
+        {
+            m.DisableNpgsqlLogging = true;
+            m.Connection(Servers.PostgresConnectionString);
+            m.DatabaseSchemaName = "csp3";
+
+            m.Projections.Add<TripProjection>(ProjectionLifecycle.Async);
+            m.Projections.Add<DayProjection>(ProjectionLifecycle.Async);
+            m.Projections.Add<DistanceProjection>(ProjectionLifecycle.Async);
+        }).IntegrateWithWolverine();
+
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Distribution/with_ancillary_stores.cs#L59-L103' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_distributed_projections_with_ancillary_stores' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+## When a Projection Fails <Badge type="tip" text="6.x" />
+
+A projection or subscription shard that throws while applying an event is *paused* by the Marten/Polecat
+daemon rather than skipped, unless you have opted into skipping through `ErrorHandlingOptions`
+(`SkipApplyErrors` and friends). A paused shard makes no further progress, and Wolverine deliberately does
+not restart it — restarting would fail on the exact same event, so the shard would thrash instead of
+advance.
+
+Wolverine surfaces the paused shard so it does not simply go quiet:
+
+* The agent's health check reports the failure **category**, the sequence number and type of the event it
+  died on, and the root exception type — enough to act on without going to dig through logs.
+* `IWolverineObserver.AgentPaused(Uri agentUri, ShardFailure? failure)` fires once per transition into the
+  failed state (and again if the shard recovers and later fails anew). Implement it on a custom observer to
+  raise your own alert; [CritterWatch](https://critterwatch.io) uses this hook.
+* A `NodeRecordType.AgentPaused` record is written to the node-record log with the classified reason, so
+  the failure is readable after the fact and from another process.
+* `IEventSubscriptionAgent.Failure` exposes the same `ShardFailure` value directly. It is a plain,
+  serializable record — category, the failing event, the exception message and full detail — not an
+  `Exception`, so it survives being shipped to a monitoring UI.
+
+The category tells you what to do about it:
+
+| Category | What it means |
+|----------|---------------|
+| `ApplyEvent` | Your projection code threw on an event — the classic "poison pill". Needs a code fix, or `SkipApplyErrors`. |
+| `EventSerialization` | The store could not deserialize or upcast a stored event body. Needs a serializer or data fix. |
+| `UnknownEventType` | A stored event alias resolves to no known .NET type in *this* deployment — usually a missing registration or a rollback. |
+| `ProgressionOutOfOrder` | The shard's progression row moved underneath it, which almost always means two processes are running the same shard. |
+| `Other` | A database outage, a timeout, or a bug. No single event can be blamed. |
+
+Only `Other` is treated as potentially self-healing, so it is the only category Wolverine's stall detector
+will auto-restart. The rest are left alone until you resolve the underlying problem, at which point
+restarting or rewinding the agent picks it back up.
+
+## Waiting for the Node Set to Settle <Badge type="tip" text="6.x" />
+
+A rolling deploy brings pods up one at a time. The leader assigns agents against whatever nodes exist at
+that instant, so every pod that joins afterwards triggers another rebalance that moves agents again. On a
+large agent universe — database-per-tenant Marten with one subscription agent per tenant per projection —
+each of those waves is thousands of agent starts and stops, and the fleet is below full throughput until
+the last one lands.
+
+`AssignmentSettlePeriod` makes the leader wait for the node set to go quiet before it assigns:
+
+```csharp
+opts.Durability.AssignmentSettlePeriod = TimeSpan.FromSeconds(30);  // default: TimeSpan.Zero, off
+opts.Durability.MaxAssignmentSettleTime = TimeSpan.FromMinutes(1);  // default
+opts.Durability.AssignmentSettleNodeCount = 0;                      // default, off
+```
+
+Only nodes *joining* are waited out. A node that leaves has taken its agents with it, so that work is
+running nowhere — a departure is assigned immediately and cancels any wait in progress, which is what keeps
+a real node loss (or a leader takeover) as responsive as it was before. `MaxAssignmentSettleTime` bounds the
+wait from the first join, so a cluster that keeps gaining nodes — an autoscaler ramping up, or a node
+flapping — is still served.
+
+`AssignmentSettleNodeCount` ends the wait early: once that many nodes are live the leader assigns without
+waiting the period out. Use it on a cold start of a deployment whose replica count you know, where the timer
+is then only the fallback for a pod that never arrives. Leave it off for a rolling deploy — the outgoing
+pods are still live and counted, so the target is met on the first tick and nothing is ever waited out.
+
+The cost of a non-zero settle period is that a cold start runs no agents at all until it elapses, which is
+why the default is off. Size it against the rollout it is meant to absorb: tens of seconds for a deploy whose pods
+come up within a minute of each other.
+
+### The first node of a cold cluster <Badge type="tip" text="6.49" />
+
+Even with the settle period off, the very first node of a cold cluster holds its placement back for one
+evaluation. With nobody else in the node table yet, every distribution would hand that node the whole agent
+universe, and each node that registers afterwards would then be served out of the first node's own lane as a
+stop-then-start of everything it had already started. One tick is enough for pods that start together to
+register and take their share from the outset.
+
+```csharp
+opts.Durability.LeaderColdStartHoldEvaluations = 1;  // default; 0 turns it off
+```
+
+The hold only applies while the first node is alone and only when the wave it is holding is larger than
+`AgentStartBatchSize`, so a single node that genuinely runs a handful of agents is not made to wait for peers
+that are never coming. A rollout whose pods arrive over a longer period is what `AssignmentSettlePeriod` is for.
+
+## Keeping a Node Out of Leadership <Badge type="tip" text="6.49" />
+
+Any node can be elected leader and run the agent assignment, including a warm-up node of a blue/green
+rollout — whose own store enumerates the *new* version's agents, which makes it the least representative
+node in the cluster to evaluate from. A node can opt out:
+
+```csharp
+opts.Durability.LeadershipEligible = false;  // default: true
+```
+
+An ineligible node still heartbeats, ejects stale peers, reconciles and sweeps its own agents, and runs
+whatever assignments the leader gives it. It simply never contends for the leadership lock, and steps down
+if the setting changed underneath an existing lease. At least one node of the cluster must be eligible, or
+nothing is ever assigned.
+
+## Agent Start Retries <Badge type="tip" text="6.x" />
+
+An agent's very first assignment can race the subsystems it depends on coming up — an event-subscription
+shard evaluated before its store's high-water detection is running, for instance, which on a multi-store
+host could leave a different shard idle on every boot. Wolverine retries a failed agent start locally a
+couple of times before leaving it to the next assignment reevaluation:
+
+```csharp
+opts.Durability.AgentStartRetryAttempts = 2;                       // default
+opts.Durability.AgentStartRetryDelay = TimeSpan.FromMilliseconds(250);  // default, multiplied by attempt number
+```
+
+Set `AgentStartRetryAttempts` to `0` to disable the local retry entirely. A failure that outlives the
+retries is logged and picked up again on the next `CheckAssignmentPeriod` tick, exactly as before.

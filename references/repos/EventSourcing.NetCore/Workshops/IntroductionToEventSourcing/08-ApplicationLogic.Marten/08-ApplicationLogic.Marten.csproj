@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>ApplicationLogic.Marten</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="Marten.AspNetCore" />
+        <PackageReference Include="Marten" />
+    </ItemGroup>
+</Project>

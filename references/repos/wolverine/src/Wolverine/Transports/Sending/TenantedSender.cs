@@ -1,0 +1,193 @@
+using ImTools;
+using JasperFx.Core;
+
+namespace Wolverine.Transports.Sending;
+
+public enum TenantedIdBehavior
+{
+    /// <summary>
+    /// Wolverine will throw exceptions disallowing any messages sent with a null
+    /// or empty TenantId
+    /// </summary>
+    TenantIdRequired,
+    
+    /// <summary>
+    /// Wolverine will happily ignore messages sent to unknown tenants
+    /// </summary>
+    IgnoreUnknownTenants,
+    
+    /// <summary>
+    /// Messages to an unknown tenant id will use a supplied default
+    /// pathway
+    /// </summary>
+    FallbackToDefault
+}
+
+internal class InvalidTenantSender : ISender
+{
+    private readonly string _tenantId;
+    public Uri Destination { get; }
+
+    public InvalidTenantSender(Uri destination, string tenantId)
+    {
+        _tenantId = tenantId;
+        Destination = destination;
+    }
+
+    public bool SupportsNativeScheduledSend => false;
+    public Task<bool> PingAsync()
+    {
+        return Task.FromResult(true);
+    }
+
+    public ValueTask SendAsync(Envelope envelope)
+    {
+        throw new InvalidOperationException($"Unknown tenant id '{_tenantId}'");
+    }
+}
+
+/// <summary>
+/// Routes messages to tenant-specific senders based on envelope TenantId.
+///
+/// IMPORTANT: This class intentionally does NOT implement ISenderRequiresCallback.
+/// When it did, SendingAgent chose the sendWithCallbackHandlingAsync path which
+/// assumes the inner sender calls back on success. But transport senders like
+/// RabbitMqSender are simple fire-and-forget (not ISenderRequiresCallback), so
+/// MarkSuccessfulAsync was never called and outbox entries were never deleted.
+/// Without ISenderRequiresCallback, SendingAgent uses sendWithExplicitHandlingAsync
+/// which explicitly calls MarkSuccessfulAsync after a successful send.
+/// See https://github.com/JasperFx/wolverine/issues/2361
+/// </summary>
+public class TenantedSender : ISender, IDisposable, IAsyncDisposable, IConditionalNativeScheduling
+{
+    public TenantedIdBehavior TenantedIdBehavior { get; }
+    private readonly ISender _defaultSender = null!;
+    private ImHashMap<string, ISender> _senders = ImHashMap<string, ISender>.Empty;
+
+    public TenantedSender(Uri destination, TenantedIdBehavior tenantedIdBehavior, ISender? defaultSender)
+    {
+        Destination = destination;
+        TenantedIdBehavior = tenantedIdBehavior;
+        _defaultSender = defaultSender!;
+
+        if (tenantedIdBehavior == TenantedIdBehavior.FallbackToDefault && _defaultSender == null)
+        {
+            throw new ArgumentNullException(nameof(defaultSender),
+                "A default sender is required if using the FallbackToDefault behavior");
+        }
+    }
+
+    public void RegisterSender(string tenantId, ISender sender)
+    {
+        _senders = _senders.AddOrUpdate(tenantId, sender);
+    }
+
+    /// <summary>
+    /// The sender used for the untenanted pathway, and for unknown tenant ids when the
+    /// TenantedIdBehavior is FallbackToDefault
+    /// </summary>
+    public ISender DefaultSender => _defaultSender;
+
+    /// <summary>
+    /// All the registered tenant id / sender pairs. Diagnostic only.
+    /// </summary>
+    public IEnumerable<KeyValuePair<string, ISender>> TenantSenders()
+    {
+        return _senders.Enumerate().Select(x => new KeyValuePair<string, ISender>(x.Key, x.Value));
+    }
+
+    public bool SupportsNativeScheduledSend => _defaultSender.SupportsNativeScheduledSend;
+
+    bool IConditionalNativeScheduling.CanScheduleNatively(Envelope envelope, DateTimeOffset utcNow)
+    {
+        // Tenant senders are siblings of the default sender against the same queue/topic
+        // topology, so the default sender's answer holds for every tenant
+        return _defaultSender is not IConditionalNativeScheduling conditional ||
+               conditional.CanScheduleNatively(envelope, utcNow);
+    }
+    public Uri Destination { get; }
+    public async Task<bool> PingAsync()
+    {
+        var pinged = true;
+        pinged = pinged && await _defaultSender.PingAsync();
+        foreach (var entry in _senders.Enumerate())
+        {
+            pinged = pinged && await entry.Value.PingAsync();
+        }
+
+        return pinged;
+    }
+
+    public ValueTask SendAsync(Envelope envelope)
+    {
+        return senderForTenantId(envelope.TenantId!).SendAsync(envelope);
+    }
+
+    private ISender senderForTenantId(string tenantId)
+    {
+        if (tenantId.IsEmpty())
+        {
+            switch (TenantedIdBehavior)
+            {
+                case TenantedIdBehavior.TenantIdRequired:
+                    throw new ArgumentNullException(nameof(tenantId));
+                case TenantedIdBehavior.FallbackToDefault:
+                    return _defaultSender;
+            }
+        }
+
+        if (_senders.TryFind(tenantId, out var sender))
+        {
+            return sender;
+        }
+
+        switch (TenantedIdBehavior)
+        {
+            case TenantedIdBehavior.FallbackToDefault:
+                _senders = _senders.AddOrUpdate(tenantId, _defaultSender);
+                return _defaultSender;
+
+            case TenantedIdBehavior.IgnoreUnknownTenants:
+                return new NullSender(Destination);
+
+            case TenantedIdBehavior.TenantIdRequired:
+                var invalid = new InvalidTenantSender(Destination, tenantId);
+                _senders = _senders.AddOrUpdate(tenantId, invalid);
+                return invalid;
+        }
+
+        return _defaultSender;
+    }
+
+    public void Dispose()
+    {
+        if (_defaultSender is IDisposable defaultDisposable)
+        {
+            defaultDisposable.SafeDispose();
+        }
+
+        foreach (var entry in _senders.Enumerate())
+        {
+            if (entry.Value is IDisposable tenantDisposable)
+            {
+                tenantDisposable.SafeDispose();
+            }
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_defaultSender is IAsyncDisposable ad)
+        {
+            await ad.DisposeAsync();
+        }
+
+        foreach (var entry in _senders.Enumerate())
+        {
+            if (entry.Value is IAsyncDisposable ad2)
+            {
+                await ad2.DisposeAsync();
+            }
+        }
+    }
+}

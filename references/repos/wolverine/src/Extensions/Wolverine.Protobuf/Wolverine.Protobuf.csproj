@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>Protobuf serialization for Wolverine Applications</Description>
+		<PackageId>WolverineFx.Protobuf</PackageId>
+		<IsAotCompatible>true</IsAotCompatible>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Google.Protobuf" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Wolverine\Wolverine.csproj" />
+	</ItemGroup>
+
+</Project>

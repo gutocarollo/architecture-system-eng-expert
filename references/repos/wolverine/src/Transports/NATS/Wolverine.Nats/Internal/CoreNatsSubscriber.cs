@@ -1,0 +1,270 @@
+using Microsoft.Extensions.Logging;
+using NATS.Client.Core;
+using Wolverine.Runtime.RemoteInvocation;
+using Wolverine.Transports;
+using Wolverine.Util;
+
+namespace Wolverine.Nats.Internal;
+
+internal class CoreNatsSubscriber : INatsSubscriber
+{
+    private readonly NatsEndpoint _endpoint;
+    private readonly NatsConnection _connection;
+    private readonly ILogger<NatsEndpoint> _logger;
+    private readonly NatsEnvelopeMapper _mapper;
+    private readonly string _subscriptionPattern;
+    private readonly List<IAsyncDisposable> _subscriptions = new();
+    private readonly List<Task> _consumerTasks = new();
+
+    public CoreNatsSubscriber(
+        NatsEndpoint endpoint,
+        NatsConnection connection,
+        ILogger<NatsEndpoint> logger,
+        NatsEnvelopeMapper mapper,
+        string? subscriptionPattern = null
+    )
+    {
+        _endpoint = endpoint;
+        _connection = connection;
+        _logger = logger;
+        _mapper = mapper;
+        _subscriptionPattern = subscriptionPattern ?? endpoint.Subject;
+    }
+
+    public bool SupportsNativeDeadLetterQueue => false;
+
+    public TransportConnectionState ConnectionState => _connection.ConnectionState.ToTransportConnectionState();
+
+    public async Task StartAsync(
+        IListener listener,
+        IReceiver receiver,
+        CancellationToken cancellation
+    )
+    {
+        var patterns = new List<string>();
+
+        if (_subscriptionPattern != _endpoint.Subject && _subscriptionPattern.StartsWith("*."))
+        {
+            patterns.Add(_subscriptionPattern);
+            patterns.Add(_endpoint.Subject);
+
+            _logger.LogInformation(
+                "Multi-tenant subscription: listening to patterns '{WildcardPattern}' and '{BaseSubject}' for subject '{Subject}'",
+                _subscriptionPattern,
+                _endpoint.Subject,
+                _endpoint.Subject
+            );
+        }
+        else
+        {
+            patterns.Add(_subscriptionPattern);
+
+            _logger.LogInformation(
+                "Starting Core NATS listener for pattern {Pattern} (base subject: {Subject}) with queue group {QueueGroup}",
+                _subscriptionPattern,
+                _endpoint.Subject,
+                _endpoint.EffectiveQueueGroup ?? "(none)"
+            );
+        }
+
+        // The per-request reply subjects (see NatsTransport.WireReplySubjectFor), where NATS delivers its
+        // "no responders" answers
+        if (_endpoint.IsUsedForReplies)
+        {
+            patterns.Add($"{_endpoint.Subject}.>");
+        }
+
+        foreach (var pattern in patterns)
+        {
+            IAsyncDisposable subscription;
+
+            var queueGroup = _endpoint.EffectiveQueueGroup;
+            if (!string.IsNullOrEmpty(queueGroup))
+            {
+                subscription = await _connection.SubscribeCoreAsync<byte[]>(
+                    pattern,
+                    queueGroup,
+                    cancellationToken: cancellation
+                );
+            }
+            else
+            {
+                subscription = await _connection.SubscribeCoreAsync<byte[]>(
+                    pattern,
+                    cancellationToken: cancellation
+                );
+            }
+
+            _subscriptions.Add(subscription);
+
+            var consumerTask = Task.Run(
+                async () =>
+                {
+                    try
+                    {
+                        await foreach (
+                            var msg in ((INatsSub<byte[]>)subscription).Msgs.ReadAllAsync(cancellation)
+                        )
+                        {
+                            try
+                            {
+                                // NATS answers a request that reached no subscriber with an empty 503 status
+                                // message on the request's reply subject
+                                if (msg.HasNoResponders)
+                                {
+                                    if (_endpoint.IsUsedForReplies)
+                                    {
+                                        await failRequestWithoutRespondersAsync(listener, receiver, msg);
+                                    }
+
+                                    continue;
+                                }
+
+                                // Skip messages without data
+                                if (msg.Data == null || msg.Data.Length == 0)
+                                {
+                                    continue;
+                                }
+
+                                // A native scheduling control message published to a stream subject this
+                                // wildcard covers. The server stores the message it materializes at the due
+                                // time in the stream without publishing it to core subscriptions, so there is
+                                // nothing for a core listener to handle
+                                if (msg.Headers?.ContainsKey(JetStreamPublisher.NatsScheduleHeader) == true)
+                                {
+                                    _logger.LogDebug(
+                                        "Skipping the NATS schedule control message on subject {Subject}",
+                                        msg.Subject
+                                    );
+                                    continue;
+                                }
+
+                                // Skip messages without headers or without message-type header.
+                                // These are typically NATS protocol messages (JetStream acks, etc.)
+                                // that should not be processed by Wolverine.
+                                if (_endpoint.MessageType == null && (msg.Headers == null || !msg.Headers.ContainsKey("message-type")))
+                                {
+                                    _logger.LogDebug(
+                                        "Skipping NATS message without message-type header from subject {Subject}. DataLength={DataLength}, HasHeaders={HasHeaders}",
+                                        msg.Subject,
+                                        msg.Data.Length,
+                                        msg.Headers != null
+                                    );
+                                    continue;
+                                }
+
+                                var envelope = new NatsEnvelope(msg, null);
+                                _mapper.MapIncoming(envelope, msg);
+
+                                // A request's reply has to go to its exact wire reply subject, which is all a
+                                // responder limited to allow_responses may publish to
+                                _endpoint.RememberWireReplySubject(envelope, msg.ReplyTo);
+
+                                await receiver.ReceivedAsync(listener, envelope);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(
+                                    ex,
+                                    "Error processing NATS message from subject {Subject}",
+                                    msg.Subject
+                                );
+                            }
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _logger.LogDebug(
+                            "NATS listener for pattern {Pattern} was cancelled",
+                            pattern
+                        );
+                    }
+                },
+                cancellation
+            );
+
+            _consumerTasks.Add(consumerTask);
+        }
+    }
+
+    /// <summary>
+    /// A "no responders" answer on a per-request reply subject ends the waiting <c>InvokeAsync()</c> right away
+    /// with a <see cref="FailureAcknowledgement"/>, exactly as a failure reply from a responder would, instead of
+    /// leaving it to run into its timeout.
+    /// </summary>
+    private async Task failRequestWithoutRespondersAsync(IListener listener, IReceiver receiver, NatsMsg<byte[]> msg)
+    {
+        var prefix = _endpoint.Subject + ".";
+        if (!msg.Subject.StartsWith(prefix, StringComparison.Ordinal) ||
+            !Guid.TryParseExact(msg.Subject.AsSpan(prefix.Length), "N", out var requestId))
+        {
+            _logger.LogDebug("Ignoring a NATS 'no responders' status on {Subject}, which names no request", msg.Subject);
+            return;
+        }
+
+        _logger.LogDebug("NATS reported no responders for request {RequestId}, failing the waiting call", requestId);
+
+        var envelope = new NatsEnvelope(msg, null)
+        {
+            ConversationId = requestId,
+            IsResponse = true,
+            MessageType = typeof(FailureAcknowledgement).ToMessageTypeName(),
+            Message = new FailureAcknowledgement
+            {
+                RequestId = requestId,
+                Message =
+                    $"NATS reported no responders for request {requestId}: no subscriber is listening to the subject it was sent to"
+            }
+        };
+
+        await receiver.ReceivedAsync(listener, envelope);
+    }
+
+    public async Task RepublishAsync(NatsEnvelope envelope, CancellationToken cancellation)
+    {
+        // Increment attempts before republishing for requeue support
+        envelope.Attempts++;
+        
+        // Republish the message to the subject it arrived on for requeue support. The listener's own subject would
+        // drop a tenant prefix -- and with it the tenant, when the tenant-id header is not trusted -- and can be a
+        // wildcard nothing can be published to
+        var headers = new NatsHeaders();
+        _mapper.MapEnvelopeToOutgoing(envelope, headers);
+
+        await _connection.PublishAsync(
+            envelope.CoreMsg?.Subject ?? _endpoint.Subject,
+            envelope.Data,
+            headers,
+            cancellationToken: cancellation
+        );
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Dispose subscriptions first - this will cause ReadAllAsync to complete
+        foreach (var subscription in _subscriptions)
+        {
+            try
+            {
+                await subscription.DisposeAsync();
+            }
+            catch (Exception)
+            {
+                // Ignore disposal errors
+            }
+        }
+
+        // Wait for consumer tasks to complete - they should exit once subscriptions are disposed
+        if (_consumerTasks.Any())
+        {
+            try
+            {
+                await Task.WhenAll(_consumerTasks);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected during shutdown
+            }
+        }
+    }
+}

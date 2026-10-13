@@ -1,0 +1,594 @@
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Descriptors;
+using JasperFx.MultiTenancy;
+using Marten.Schema;
+using Npgsql;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.Core.MultiTenancy;
+using Weasel.Postgresql;
+using Table = Weasel.Postgresql.Tables.Table;
+
+namespace Marten.Storage;
+
+public class MasterTableTenancy: ITenancy, ITenancyWithMasterDatabase, IDynamicTenantSource<string>, IAsyncDisposable
+{
+    private readonly MasterTableTenancyOptions _configuration;
+    private readonly Lazy<NpgsqlDataSource> _dataSource;
+    private readonly StoreOptions _options;
+    private readonly string _schemaName;
+    private readonly Lazy<TenantLookupDatabase> _tenantDatabase;
+    private ImHashMap<string, MartenDatabase> _databases = ImHashMap<string, MartenDatabase>.Empty;
+
+    private bool _hasAppliedChanges;
+    private bool _hasAppliedDefaults;
+
+    public MasterTableTenancy(StoreOptions options, string connectionString, string schemaName): this(options,
+        new MasterTableTenancyOptions() { ConnectionString = connectionString, SchemaName = schemaName })
+    {
+    }
+
+    public MasterTableTenancy(StoreOptions options, MasterTableTenancyOptions tenancyOptions)
+    {
+        _options = options;
+
+        _configuration = tenancyOptions;
+
+        if (tenancyOptions.DataSource != null)
+        {
+            _dataSource = new Lazy<NpgsqlDataSource>(() => tenancyOptions.DataSource);
+        }
+        else if (tenancyOptions.ConnectionString.IsNotEmpty())
+        {
+            _dataSource = new Lazy<NpgsqlDataSource>(() =>
+                _options.NpgsqlDataSourceFactory.Create(tenancyOptions.ConnectionString));
+        }
+        else
+        {
+            // TODO -- remove this when we figure out how to use the DI data source
+            throw new ArgumentOutOfRangeException(nameof(tenancyOptions),
+                "Either an NpgsqlDataSource or ConnectionString is required at this point");
+        }
+
+        _schemaName = tenancyOptions.SchemaName;
+        Cleaner = new CompositeDocumentCleaner(this, _options);
+
+        _tenantDatabase = new Lazy<TenantLookupDatabase>(() =>
+            new TenantLookupDatabase(_options, _dataSource.Value, tenancyOptions.SchemaName));
+    }
+
+    public void Dispose()
+    {
+        foreach (var entry in _databases.Enumerate()) entry.Value.Dispose();
+
+        if (_dataSource.IsValueCreated)
+        {
+            _dataSource.Value.Dispose();
+        }
+    }
+
+    // #4874: async teardown mirror of Dispose() so DocumentStore.DisposeAsync() runs each tenant
+    // database's OwnsDataSource-aware async disposal rather than the blocking sync chain.
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var entry in _databases.Enumerate())
+        {
+            await entry.Value.DisposeAsync().ConfigureAwait(false);
+        }
+
+        if (_dataSource.IsValueCreated)
+        {
+            await _dataSource.Value.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
+    public async ValueTask<IReadOnlyList<IDatabase>> BuildDatabases()
+    {
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        await using var conn = _dataSource.Value.CreateConnection();
+        await conn.OpenAsync().ConfigureAwait(false);
+
+        try
+        {
+            if (!_hasAppliedDefaults)
+            {
+                await seedDatabasesAsync(conn).ConfigureAwait(false);
+            }
+
+            await using var reader = await ((DbCommand)conn
+                    .CreateCommand($"select tenant_id, connection_string from {_schemaName}.{TenantTable.TableName} where {TenantTable.DisabledColumn} = false"))
+                .ExecuteReaderAsync().ConfigureAwait(false);
+
+            while (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                var tenantId = await reader.GetFieldValueAsync<string>(0).ConfigureAwait(false);
+                tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+
+                // Be idempotent, don't duplicate
+                if (_databases.TryFind(tenantId, out var db))
+                {
+                    db.TenantIds.Fill(tenantId);
+                    continue;
+                }
+
+                var connectionString = await reader.GetFieldValueAsync<string>(1).ConfigureAwait(false);
+                connectionString = _configuration.CorrectConnectionString(connectionString);
+
+                var database = new MartenDatabase(_options, _options.NpgsqlDataSourceFactory.Create(connectionString),
+                    tenantId);
+
+                database.TenantIds.Fill(tenantId);
+
+                _databases = _databases.AddOrUpdate(tenantId, database);
+            }
+
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+
+        var list = _databases.Enumerate().Select(x => x.Value).OfType<IDatabase>().ToList();
+
+        list.Insert(0, _tenantDatabase.Value);
+        return list;
+    }
+
+    // #5479. Was "Default tenant does not supported". The sharded twin
+    // (ShardedTenancy.cs) already had the sentence this one should have had.
+    public Tenant Default => throw new NotSupportedException(
+        "The default tenant is not supported with master-table multi-tenancy. All operations require a tenant id.");
+    public IDocumentCleaner Cleaner { get; }
+
+    public Tenant GetTenant(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        if (_databases.TryFind(tenantId, out var database))
+        {
+            return new Tenant(tenantId, database);
+        }
+
+        // It's actually important to *not* do any synchronous IO in case
+        // someone is using multiplexing
+        database = tryFindTenantDatabase(tenantId).GetAwaiter().GetResult();
+        if (database == null)
+        {
+            throw new UnknownTenantIdException(tenantId);
+        }
+
+        _databases = _databases.AddOrUpdate(tenantId, database);
+
+        return new Tenant(tenantId, database);
+    }
+
+    public async ValueTask<Tenant> GetTenantAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        if (_databases.TryFind(tenantId, out var database))
+        {
+            return new Tenant(tenantId, database);
+        }
+
+        database = await tryFindTenantDatabase(tenantId).ConfigureAwait(false);
+        if (database == null)
+        {
+            throw new UnknownTenantIdException(tenantId);
+        }
+
+        _databases = _databases.AddOrUpdate(tenantId, database);
+
+        return new Tenant(tenantId, database);
+    }
+
+    public async ValueTask<IMartenDatabase> FindOrCreateDatabase(string tenantIdOrDatabaseIdentifier)
+    {
+        tenantIdOrDatabaseIdentifier = _options.TenantIdStyle.MaybeCorrectTenantId(tenantIdOrDatabaseIdentifier);
+        if (_databases.TryFind(tenantIdOrDatabaseIdentifier, out var database))
+        {
+            return database;
+        }
+
+        database = await tryFindTenantDatabase(tenantIdOrDatabaseIdentifier).ConfigureAwait(false);
+        if (database == null)
+        {
+            throw new UnknownTenantIdException(tenantIdOrDatabaseIdentifier);
+        }
+
+        return database;
+    }
+
+    /// <summary>
+    /// #5400 — the null-returning form of <see cref="FindOrCreateDatabase"/>. This tenancy never
+    /// provisioned on a lookup (<c>tryFindTenantDatabase</c> is a single select against the tenant table),
+    /// so this only swaps the miss from a throw to a null for callers that want to answer "no such tenant"
+    /// themselves.
+    /// </summary>
+    public async ValueTask<IMartenDatabase?> TryFindDatabase(string tenantIdOrDatabaseIdentifier)
+    {
+        tenantIdOrDatabaseIdentifier = _options.TenantIdStyle.MaybeCorrectTenantId(tenantIdOrDatabaseIdentifier);
+        if (_databases.TryFind(tenantIdOrDatabaseIdentifier, out var database))
+        {
+            return database;
+        }
+
+        return await tryFindTenantDatabase(tenantIdOrDatabaseIdentifier).ConfigureAwait(false);
+    }
+
+    public async ValueTask<IMartenDatabase> FindDatabase(DatabaseId id)
+    {
+        // Not worried about this being optimized at all
+        var database = _databases.Enumerate().Select(x => x.Value).FirstOrDefault(x => x.Id == id);
+        if (database != null) return database;
+
+        // Try to refresh once
+        await BuildDatabases().ConfigureAwait(false);
+
+        database = _databases.Enumerate().Select(x => x.Value).FirstOrDefault(x => x.Id == id);
+
+        if (database == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(id), $"Requested database {id.Identity} cannot be found");
+        }
+
+        return database;
+    }
+
+    public bool IsTenantStoredInCurrentDatabase(IMartenDatabase database, string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        return database.Identifier == tenantId;
+    }
+
+    public PostgresqlDatabase TenantDatabase => _tenantDatabase.Value;
+
+    public async Task DeleteDatabaseRecordAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        await _dataSource.Value
+            .CreateCommand($"delete from {_schemaName}.{TenantTable.TableName} where tenant_id = :id")
+            .With("id", tenantId)
+            .ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+    }
+
+    public async Task ClearAllDatabaseRecordsAsync()
+    {
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        await _dataSource.Value.CreateCommand($"delete from {_schemaName}.{TenantTable.TableName}")
+            .ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+    }
+
+    public async Task AddDatabaseRecordAsync(string tenantId, string connectionString)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        await _dataSource.Value
+            .CreateCommand(
+                $"insert into {_schemaName}.{TenantTable.TableName} (tenant_id, connection_string) values (:id, :connection) on conflict (tenant_id) do update set connection_string = :connection")
+            .With("id", tenantId)
+            .With("connection", connectionString)
+            .ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+    }
+
+    #region IDynamicTenantSource<string>
+
+    async ValueTask<string> ITenantedSource<string>.FindAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        var (connectionString, disabled) = await readTenantRow(tenantId).ConfigureAwait(false);
+
+        // #5479: a disabled tenant is a tenant this store knows about and is refusing on purpose.
+        if (disabled)
+        {
+            throw new DisabledTenantException(tenantId);
+        }
+
+        if (connectionString.IsEmpty())
+        {
+            throw new UnknownTenantIdException(tenantId);
+        }
+
+        return _configuration.CorrectConnectionString(connectionString);
+    }
+
+    Task ITenantedSource<string>.RefreshAsync()
+    {
+        // Reset the databases cache so next access re-reads from the master table
+        _databases = ImHashMap<string, MartenDatabase>.Empty;
+        return Task.CompletedTask;
+    }
+
+    IReadOnlyList<string> ITenantedSource<string>.AllActive()
+    {
+        return _databases.Enumerate().Select(x =>
+        {
+            // Return the connection strings for active databases
+            return x.Value.Identifier;
+        }).Distinct().ToList();
+    }
+
+    IReadOnlyList<Assignment<string>> ITenantedSource<string>.AllActiveByTenant()
+    {
+        return _databases.Enumerate().Select(pair => new Assignment<string>(pair.Key, pair.Key)).ToList();
+    }
+
+    public async Task AddTenantAsync(string tenantId, string connectionValue)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        await AddDatabaseRecordAsync(tenantId, connectionValue).ConfigureAwait(false);
+
+        // Eagerly create and cache the database
+        connectionValue = _configuration.CorrectConnectionString(connectionValue);
+        var database = new MartenDatabase(_options, _options.NpgsqlDataSourceFactory.Create(connectionValue), tenantId);
+        database.TenantIds.Fill(tenantId);
+        _databases = _databases.AddOrUpdate(tenantId, database);
+    }
+
+    public async Task DisableTenantAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        await _dataSource.Value
+            .CreateCommand($"update {_schemaName}.{TenantTable.TableName} set {TenantTable.DisabledColumn} = true where tenant_id = :id")
+            .With("id", tenantId)
+            .ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+
+        // Evict from cache and dispose
+        if (_databases.TryFind(tenantId, out var database))
+        {
+            _databases = _databases.Remove(tenantId);
+#pragma warning disable VSTHRD103
+            database.Dispose();
+#pragma warning restore VSTHRD103
+        }
+    }
+
+    public async Task RemoveTenantAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+
+        // Evict from cache and dispose before deleting the record
+        if (_databases.TryFind(tenantId, out var database))
+        {
+            _databases = _databases.Remove(tenantId);
+#pragma warning disable VSTHRD103
+            database.Dispose();
+#pragma warning restore VSTHRD103
+        }
+
+        await DeleteDatabaseRecordAsync(tenantId).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<string>> AllDisabledAsync()
+    {
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        var list = new List<string>();
+        await using var conn = _dataSource.Value.CreateConnection();
+        await conn.OpenAsync().ConfigureAwait(false);
+
+        try
+        {
+            await using var reader = await ((DbCommand)conn
+                    .CreateCommand($"select tenant_id from {_schemaName}.{TenantTable.TableName} where {TenantTable.DisabledColumn} = true"))
+                .ExecuteReaderAsync().ConfigureAwait(false);
+
+            while (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                list.Add(await reader.GetFieldValueAsync<string>(0).ConfigureAwait(false));
+            }
+
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+
+        return list;
+    }
+
+    public async Task EnableTenantAsync(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        await maybeApplyChanges(_tenantDatabase.Value).ConfigureAwait(false);
+
+        await _dataSource.Value
+            .CreateCommand($"update {_schemaName}.{TenantTable.TableName} set {TenantTable.DisabledColumn} = false where tenant_id = :id")
+            .With("id", tenantId)
+            .ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+
+        // The tenant will be lazily loaded into cache on next access
+    }
+
+    #endregion
+
+    private async Task maybeApplyChanges(TenantLookupDatabase tenantDatabase)
+    {
+        if (!_hasAppliedChanges && (_configuration.AutoCreate ?? _options.AutoCreateSchemaObjects) != AutoCreate.None)
+        {
+#pragma warning disable MA0032
+            await tenantDatabase
+                .ApplyAllConfiguredChangesToDatabaseAsync(_options.AutoCreateSchemaObjects).ConfigureAwait(false);
+#pragma warning restore MA0032
+            _hasAppliedChanges = true;
+        }
+    }
+
+    private async Task seedDatabasesAsync(NpgsqlConnection conn)
+    {
+        if (!_configuration.SeedDatabases.HasAny())
+        {
+            return;
+        }
+
+        var builder = new BatchBuilder();
+        foreach (var pair in _configuration.SeedDatabases.AllActiveByTenant())
+        {
+            builder.StartNewCommand();
+            var parameters = builder.AppendWithParameters(
+                $"insert into {_schemaName}.{TenantTable.TableName} (tenant_id, connection_string) values (?, ?) on conflict (tenant_id) do update set connection_string = ?");
+
+            parameters[0].Value = pair.TenantId;
+            parameters[1].Value = pair.Value;
+            parameters[2].Value = pair.Value;
+        }
+
+        var batch = builder.Compile();
+        batch.Connection = conn;
+        await batch.ExecuteNonQueryAsync(CancellationToken.None).ConfigureAwait(false);
+
+        _hasAppliedDefaults = true;
+    }
+
+    /// <summary>
+    ///     #5479. Returns null when the tenant has no row at all, and throws
+    ///     <see cref="DisabledTenantException" /> when it has one that is disabled. The two used to
+    ///     be indistinguishable here — the query filtered <c>disabled = false</c>, so a tenant that
+    ///     an operator had deliberately switched off came back as "no row" and every caller reported
+    ///     it as <see cref="UnknownTenantIdException" />: "Unknown tenant id 'acme'" about a tenant
+    ///     that is still there, with its data untouched.
+    /// </summary>
+    /// <remarks>
+    ///     Reading the <c>disabled</c> column instead of filtering on it costs nothing — it is the
+    ///     same single round trip, on the same primary key — and <see cref="DisabledTenantException" />
+    ///     derives from <see cref="UnknownTenantIdException" /> (jasperfx#882), so an existing
+    ///     <c>catch (UnknownTenantIdException)</c> keeps catching a disabled tenant.
+    /// </remarks>
+    private async Task<MartenDatabase?> tryFindTenantDatabase(string tenantId)
+    {
+        tenantId = _options.TenantIdStyle.MaybeCorrectTenantId(tenantId);
+        var (connectionString, disabled) = await readTenantRow(tenantId).ConfigureAwait(false);
+
+        if (disabled)
+        {
+            throw new DisabledTenantException(tenantId);
+        }
+
+        if (connectionString.IsEmpty())
+        {
+            return null;
+        }
+
+        connectionString = _configuration.CorrectConnectionString(connectionString);
+
+        if (connectionString.IsNotEmpty())
+        {
+            var db = new MartenDatabase(_options,
+                _options.NpgsqlDataSourceFactory.Create(connectionString), tenantId);
+            db.TenantIds.Fill(tenantId);
+
+            return db;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     One round trip for both facts the callers need: the connection string, and whether the
+    ///     row exists but is switched off. A missing row reads as <c>(null, false)</c>.
+    /// </summary>
+    private async Task<(string? ConnectionString, bool Disabled)> readTenantRow(string tenantId)
+    {
+        await using var reader = await _dataSource.Value
+            .CreateCommand(
+                $"select connection_string, {TenantTable.DisabledColumn} from {_schemaName}.{TenantTable.TableName} where tenant_id = :id")
+            .With("id", tenantId)
+            .ExecuteReaderAsync(CancellationToken.None).ConfigureAwait(false);
+
+        if (!await reader.ReadAsync(CancellationToken.None).ConfigureAwait(false))
+        {
+            return (null, false);
+        }
+
+        var connectionString = await reader.IsDBNullAsync(0, CancellationToken.None).ConfigureAwait(false)
+            ? null
+            : await reader.GetFieldValueAsync<string>(0, CancellationToken.None).ConfigureAwait(false);
+        var disabled = await reader.GetFieldValueAsync<bool>(1, CancellationToken.None).ConfigureAwait(false);
+
+        return (connectionString, disabled);
+    }
+
+    internal class TenantLookupDatabase: PostgresqlDatabase
+    {
+        private readonly TenantDatabaseStorage _feature;
+
+        public TenantLookupDatabase(StoreOptions options, NpgsqlDataSource dataSource, string schemaName): base(options,
+            options.AutoCreateSchemaObjects, options.Advanced.Migrator, "TenantDatabases", dataSource)
+        {
+            _feature = new TenantDatabaseStorage(schemaName, options);
+        }
+
+        public override IFeatureSchema[] BuildFeatureSchemas()
+        {
+            return [_feature];
+        }
+    }
+
+    internal class TenantDatabaseStorage: FeatureSchemaBase
+    {
+        private readonly StoreOptions _options;
+        private readonly string _schemaName;
+
+        public TenantDatabaseStorage(string schemaName, StoreOptions options): base("TenantDatabases",
+            options.Advanced.Migrator)
+        {
+            _schemaName = schemaName;
+        }
+
+        protected override IEnumerable<ISchemaObject> schemaObjects()
+        {
+            yield return new TenantTable(_schemaName);
+        }
+    }
+
+    internal class TenantTable: Table
+    {
+        public const string TableName = "mt_tenant_databases";
+
+        public TenantTable(DbObjectName name): base(name)
+        {
+        }
+
+        public TenantTable(string schemaName): base(new DbObjectName(schemaName, TableName))
+        {
+            AddColumn<string>(StorageConstants.TenantIdColumn).AsPrimaryKey();
+            AddColumn<string>(StorageConstants.ConnectionStringColumn).NotNull();
+            AddColumn<bool>(DisabledColumn).DefaultValueByExpression("false").NotNull();
+        }
+
+        public const string DisabledColumn = "disabled";
+    }
+
+    public async ValueTask<DatabaseUsage> DescribeDatabasesAsync(CancellationToken token)
+    {
+        // TODO -- watch out for duplicate databases!!!
+        await BuildDatabases().ConfigureAwait(false);
+        var list = _databases.Enumerate().Select(pair =>
+        {
+            var descriptor = pair.Value.Describe();
+            descriptor.TenantIds.Fill(pair.Key);
+            return descriptor;
+        }).ToList();
+
+        return new DatabaseUsage
+        {
+            Cardinality = DatabaseCardinality.DynamicMultiple,
+            Databases = list
+        };
+    }
+
+    public DatabaseCardinality Cardinality => DatabaseCardinality.DynamicMultiple;
+}

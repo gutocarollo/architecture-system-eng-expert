@@ -1,0 +1,62 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Marten.Services.Json;
+using Marten.Testing.Harness;
+using Shouldly;
+using Marten;
+namespace LinqTests.Bugs;
+
+public class Bug_1219_ordering_by_attributes : IntegrationContext
+{
+    public Bug_1219_ordering_by_attributes(DefaultStoreFixture fixture) : base(fixture)
+    {
+    }
+
+    // Both tests here store Cars and then assert on the ordering of *every* Car in the
+    // store, but IntegrationContext shares one store across the collection and never
+    // clears it between tests. Clear Cars per test so the assertions describe only the
+    // data this test wrote.
+    protected override IEnumerable<Type> ClearedBeforeEachTest => [typeof(Car)];
+
+    public class Car
+    {
+        public Guid Id { get; set; }
+        public Dictionary<string, string> Attributes = new Dictionary<string,string>();
+
+        public Dictionary<int, int> Numbers = new Dictionary<int, int>();
+    }
+
+    [SerializerTypeTargetedFact(RunFor = SerializerType.Newtonsoft)]
+    public async Task can_order_by_string_string_dictionaries()
+    {
+        var car1 = new Car {Attributes = {{"one", "5"},{"anumber", "5"},{"color", "red"}}};
+        var car2 = new Car {Attributes = {{"anumber", "3"}, {"color", "green"}}};
+        var car3 = new Car {Attributes = {{"anumber", "7"}, {"color", "blue"}}};
+        var car4 = new Car {Attributes = {{"anumber", "4"}, {"color", "purple"}}};
+
+        theSession.Store(car1, car2, car3, car4);
+        await theSession.SaveChangesAsync();
+
+        using var query = theStore.QuerySession();
+
+        var cars = (await query.Query<Car>().OrderBy(x => x.Attributes["color"]).ToListAsync());
+
+        cars[0].Id.ShouldBe(car3.Id);
+        cars[1].Id.ShouldBe(car2.Id);
+        cars[2].Id.ShouldBe(car4.Id);
+        cars[3].Id.ShouldBe(car1.Id);
+
+        var cars2 = (await query.Query<Car>().OrderBy(x => x.Attributes["anumber"]).ToListAsync());
+        cars2[0].Id.ShouldBe(car2.Id);
+    }
+
+    [Fact]
+    public async Task smoke_test_can_order_by_not_string_values_in_dictionary()
+    {
+        using var query = theStore.QuerySession();
+
+        await query.Query<Car>().OrderBy(x => x.Numbers[2]).ToListAsync();
+    }
+}

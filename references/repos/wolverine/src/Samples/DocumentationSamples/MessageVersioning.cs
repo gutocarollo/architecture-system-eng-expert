@@ -1,0 +1,168 @@
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Shouldly;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Newtonsoft;
+using Wolverine.Runtime.Serialization;
+using Xunit;
+
+namespace DocumentationSamples
+{
+    namespace FirstTry
+    {
+        #region sample_personborn1
+        public class PersonBorn
+        {
+            public string FirstName { get; set; } = null!;
+            public string LastName { get; set; } = null!;
+
+            // This is obviously a contrived example
+            // so just let this go for now;)
+            public int Day { get; set; }
+            public int Month { get; set; }
+            public int Year { get; set; }
+        }
+
+        #endregion
+
+
+        public class message_alias
+        {
+            #region sample_ootb_message_alias
+            [Fact]
+            public void message_alias_is_fullname_by_default()
+            {
+                new Envelope(new PersonBorn())
+                    .MessageType.ShouldBe(typeof(PersonBorn).FullName);
+            }
+
+            #endregion
+        }
+    }
+
+    namespace SecondTry
+    {
+        #region sample_override_message_alias
+        [MessageIdentity("person-born")]
+        public class PersonBorn
+        {
+            public string FirstName { get; set; } = null!;
+            public string LastName { get; set; } = null!;
+            public int Day { get; set; }
+            public int Month { get; set; }
+            public int Year { get; set; }
+        }
+
+        #endregion
+
+        public class message_alias
+        {
+            #region sample_explicit_message_alias
+            [Fact]
+            public void message_alias_is_fullname_by_default()
+            {
+                new Envelope(new PersonBorn())
+                    .MessageType.ShouldBe("person-born");
+            }
+
+            #endregion
+        }
+    }
+
+    namespace ThirdTry
+    {
+        #region sample_personborn_v2
+        [MessageIdentity("person-born", Version = 2)]
+        public class PersonBornV2
+        {
+            public string FirstName { get; set; } = null!;
+            public string LastName { get; set; } = null!;
+            public DateTime Birthday { get; set; }
+        }
+
+        #endregion
+
+        #region sample_iforwardsto_personbornv2
+        public class PersonBorn : IForwardsTo<PersonBornV2>
+        {
+            public string FirstName { get; set; } = null!;
+            public string LastName { get; set; } = null!;
+            public int Day { get; set; }
+            public int Month { get; set; }
+            public int Year { get; set; }
+
+            public PersonBornV2 Transform()
+            {
+                return new PersonBornV2
+                {
+                    FirstName = FirstName,
+                    LastName = LastName,
+                    Birthday = new DateTime(Year, Month, Day)
+                };
+            }
+        }
+
+        #endregion
+
+        #region sample_personcreatedhandler
+        public class PersonCreatedHandler
+        {
+            public static void Handle(PersonBorn person)
+            {
+                // do something w/ the message
+            }
+
+            public static void Handle(PersonBornV2 person)
+            {
+                // do something w/ the message
+            }
+        }
+
+        #endregion
+    }
+
+    public class MyCustomWriter : IMessageSerializer
+    {
+        public Type DotNetType { get; } = null!;
+        public string ContentType { get; } = null!;
+
+        public byte[] Write(Envelope model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object ReadFromData(Type messageType, Envelope envelope)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object ReadFromData(byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] WriteMessage(object message)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public static class MessageVersioning
+    {
+        public static async Task CustomizingJsonSerialization()
+        {
+            #region sample_customizingjsonserialization
+            using var host = await Host.CreateDefaultBuilder()
+                .UseWolverine(opts =>
+                {
+                    opts.UseNewtonsoftForSerialization(settings =>
+                    {
+                        settings.ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor;
+                    });
+                }).StartAsync();
+
+            #endregion
+        }
+    }
+}

@@ -1,0 +1,291 @@
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Weasel.Core;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
+using Wolverine.Runtime;
+
+namespace Wolverine.EntityFrameworkCore.Internals;
+
+// ReSharper disable once InconsistentNaming
+/// <summary>
+///     Envelope transaction for raw database access for DbContexts w/o the explicit wolverine mappings
+/// </summary>
+// AOT note (#2746): IDomainEventScraper reflection over runtime DbContext.
+// Same chunk Z / chunk P pattern.
+[UnconditionalSuppressMessage("Trimming", "IL2026",
+    Justification = "EFCore envelope transaction reflects over runtime DbContext for domain-event scraping; AOT consumers preserve DbContext / domain-event types via TrimmerRootDescriptor. See AOT guide.")]
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "EFCore envelope transaction reflects over runtime DbContext for domain-event scraping; AOT consumers preserve DbContext / domain-event types via TrimmerRootDescriptor. See AOT guide.")]
+public class EfCoreEnvelopeTransaction : IEnvelopeTransaction
+{
+    private readonly MessageContext _messaging;
+    private readonly IDomainEventScraper[] _scrapers;
+    private readonly IMessageDatabase _database = null!;
+
+    public EfCoreEnvelopeTransaction(DbContext dbContext, MessageContext messaging, IEnumerable<IDomainEventScraper> scrapers)
+    {
+        _messaging = messaging;
+        _scrapers = scrapers.ToArray();
+        if (!messaging.TryFindMessageDatabase(out _database!))
+        {
+            throw new InvalidOperationException(
+                "This Wolverine application is not using Database backed message persistence. Please configure the message persistence");
+        }
+
+        DbContext = dbContext;
+    }
+
+    // Keep this for backward compatibility w/ existing generated code
+    public EfCoreEnvelopeTransaction(DbContext dbContext, MessageContext messaging) : this(dbContext, messaging, [])
+    {
+
+    }
+
+    public DbContext DbContext { get; }
+
+    public async Task PersistOutgoingAsync(Envelope envelope)
+    {
+        if (DbContext.IsWolverineEnabled())
+        {
+            DbContext.Add(new OutgoingMessage(envelope));
+        }
+        else
+        {
+            if (DbContext.Database.CurrentTransaction == null)
+            {
+                await DbContext.Database.BeginTransactionAsync();
+            }
+            var conn = DbContext.Database.GetDbConnection();
+            var tx = DbContext.Database.CurrentTransaction!.GetDbTransaction();
+            var cmd = DatabasePersistence.BuildOutgoingStorageCommand(envelope, envelope.OwnerId, _database);
+            cmd.Transaction = tx;
+            cmd.Connection = conn;
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+
+    public async Task PersistOutgoingAsync(Envelope[] envelopes)
+    {
+        if (envelopes.Length == 0)
+        {
+            return;
+        }
+
+        if (DbContext.IsWolverineEnabled())
+        {
+            DbContext.AddRange(envelopes.Select(e => new OutgoingMessage(e)));
+        }
+        else
+        {
+            if (DbContext.Database.CurrentTransaction == null)
+            {
+                await DbContext.Database.BeginTransactionAsync();
+            }
+            var conn = DbContext.Database.GetDbConnection();
+            var tx = DbContext.Database.CurrentTransaction!.GetDbTransaction();
+            var cmd = DatabasePersistence.BuildOutgoingStorageCommand(envelopes, envelopes[0].OwnerId, _database);
+            cmd.Transaction = tx;
+            cmd.Connection = conn;
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+
+    public async Task PersistIncomingAsync(Envelope envelope)
+    {
+        if (DbContext.IsWolverineEnabled())
+        {
+            // For a Wolverine-mapped DbContext the envelope is just tracked and flushed by
+            // SaveChangesAsync, so don't force an explicit transaction here. We defer to whatever
+            // the ambient transaction mode established: in Eager middleware mode a transaction was
+            // already begun (EnrollDbContextInTransaction / StartDatabaseTransactionForDbContext) and
+            // the tracked entity enrolls into it at SaveChanges; in Lightweight/lazy mode there is no
+            // transaction and SaveChanges provides its own implicit one. This mirrors
+            // PersistOutgoingAsync and keeps ScheduleAsync from starting a transaction the caller
+            // never asked for (see #3121).
+            DbContext.Add(new IncomingMessage(envelope));
+        }
+        else
+        {
+            // The raw branch issues an ADO command that has to share the caller's transaction, so
+            // here we do need an explicit one when none is already in flight.
+            if (DbContext.Database.CurrentTransaction == null)
+            {
+                await DbContext.Database.BeginTransactionAsync();
+            }
+
+            var conn = DbContext.Database.GetDbConnection();
+            var tx = DbContext.Database.CurrentTransaction!.GetDbTransaction();
+            var builder = _database.ToCommandBuilder();
+            DatabasePersistence.BuildIncomingStorageCommand(_database, builder, envelope);
+
+
+            await using var command = builder.Compile();
+            command.Connection = conn;
+            command.Transaction = tx;
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    public ValueTask RollbackAsync()
+    {
+        if (DbContext.Database.CurrentTransaction != null)
+        {
+            return new ValueTask(DbContext.Database.CurrentTransaction.RollbackAsync());
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    public async Task<bool> TryMakeEagerIdempotencyCheckAsync(Envelope envelope, DurabilitySettings settings,
+        CancellationToken cancellation)
+    {
+        if (envelope.WasPersistedInInbox) return true;
+
+        // GH-4630: only the raw ADO branch of PersistIncomingAsync needs a transaction of its own -- a
+        // Wolverine-mapped DbContext just tracks an entity and the SaveChangesAsync below opens its own
+        // implicit transaction for it. Forcing an explicit one unconditionally made this check
+        // impossible in Lightweight mode, where nothing downstream would ever commit it and the whole
+        // point of the mode is to stay compatible with EnableRetryOnFailure. In Eager mode a
+        // transaction is always already open by the time this runs, so this is a no-op there.
+        if (DbContext.Database.CurrentTransaction == null && !DbContext.IsWolverineEnabled())
+        {
+            await DbContext.Database.BeginTransactionAsync(cancellation);
+        }
+
+        try
+        {
+            var copy = Envelope.ForPersistedHandled(envelope, DateTimeOffset.UtcNow, settings);
+            await PersistIncomingAsync(copy);
+            
+            // Gotta flush the call to the database!
+            if (DbContext.IsWolverineEnabled())
+            {
+                await DbContext.SaveChangesAsync(cancellation);
+            }
+            
+            envelope.WasPersistedInInbox = true;
+            envelope.Status = EnvelopeStatus.Handled;
+            return true;
+        }
+        catch (Exception )
+        {
+            if (DbContext.Database.CurrentTransaction != null)
+            {
+                await DbContext.Database.CurrentTransaction.RollbackAsync(cancellation);
+            }
+            
+            return false;
+        }
+    }
+
+    public ValueTask CommitAsync(CancellationToken cancellation) => CommitAsync(cancellation, true);
+
+    /// <summary>
+    ///     GH-4742. The commit, with the outbox flush that normally follows it made optional so a generated
+    ///     chain can place a frame strictly BETWEEN the two.
+    ///     <para>
+    ///     <c>[DeduplicatedWithResponse]</c> has to record the response after the business transaction has
+    ///     committed (so a failed commit cannot leave a stored "success" behind) and before the outbox
+    ///     flushes (so a flush that throws leaves the work recorded — the envelope rows are durable by then
+    ///     and the durability agent will send them — rather than releasing the claim and letting the client's
+    ///     retry re-run a handler whose work is already committed). While the commit and the flush were one
+    ///     method, and therefore one frame, there was no position in <c>Postprocessors</c> that could express
+    ///     that.
+    ///     </para>
+    ///     <para>
+    ///     Passing <c>true</c> is exactly the old behaviour, which is what the parameterless
+    ///     <see cref="CommitAsync(CancellationToken)" /> — the <see cref="IEnvelopeTransaction" /> member, and
+    ///     what any already-generated code calls — still does. The split chain passes <c>false</c> here and
+    ///     emits the flush as its own frame (<c>FlushOutboxAfterCommit</c>).
+    ///     </para>
+    /// </summary>
+    public async ValueTask CommitAsync(CancellationToken cancellation, bool flushOutgoingMessages)
+    {
+        // Scrape out domain events
+        foreach (var scraper in _scrapers)
+        {
+            await scraper.ScrapeEvents(DbContext, _messaging);
+        }
+        
+        if (_messaging.Envelope != null && _messaging.Envelope.Destination != null)
+        {
+            var conn = DbContext.Database.GetDbConnection();
+            var tx = DbContext.Database.CurrentTransaction?.GetDbTransaction();
+            
+            // Are we marking an existing envelope as persisted?
+            if (_messaging.Envelope.WasPersistedInInbox)
+            {
+                var keepUntil =
+                    DateTimeOffset.UtcNow.Add(_messaging.Runtime.Options.Durability.KeepAfterMessageHandling);
+
+                // Route through the store rather than binding the id here: the generic Weasel path binds
+                // a Guid as DbType.Guid, which ODP.NET rejects against Oracle's RAW(16) id columns
+                // (GH-3581). The store knows how to bind for its own provider.
+                await _database.MarkIncomingEnvelopeAsHandledInTransactionAsync(conn, tx, _messaging.Envelope,
+                    keepUntil, cancellation);
+            }
+            
+            // Or inserting a record just to tell the inbox about
+            // handled messages for the sake of idempotency
+            else
+            {
+                var envelope = Envelope.ForPersistedHandled(_messaging.Envelope, DateTimeOffset.UtcNow, _messaging.Runtime.Options.Durability);
+                await PersistIncomingAsync(envelope);
+            }
+            
+            _messaging.Envelope.Status = EnvelopeStatus.Handled;
+        }
+
+        // GH-3744/GH-4628: on a Wolverine-mapped DbContext both the scrape above (a durable route runs
+        // through PersistOutgoingAsync/PersistIncomingAsync, which only Add() an
+        // OutgoingMessage/IncomingMessage to the change tracker) and the handled-row branch just
+        // tracked entities -- and both ran AFTER the SaveChangesAsync that the EF Core transactional
+        // middleware emits. Committing straight from here therefore committed the aggregate and
+        // dropped every envelope those steps produced; the messages were still *sent* in memory, so
+        // tracked-session assertions passed while the durability row was silently missing. Flush the
+        // tracker so they land inside this transaction. This mirrors what
+        // CommitTenantedDbContextTransaction already does on the multi-tenanted path, and is a no-op
+        // when nothing was tracked. The raw (non Wolverine-mapped) branches above write through ADO
+        // commands on this same transaction, so they need no flush.
+        if (DbContext.IsWolverineEnabled())
+        {
+            await DbContext.SaveChangesAsync(cancellation);
+        }
+
+        if (DbContext.Database.CurrentTransaction != null)
+        {
+            await DbContext.Database.CurrentTransaction.CommitAsync(cancellation);
+        }
+
+        if (flushOutgoingMessages)
+        {
+            await _messaging.FlushOutgoingMessagesAsync();
+        }
+    }
+    
+    public static bool IsDisposed(DbContext context)
+    {
+        var result = true;
+
+        var typeDbContext = typeof(DbContext);
+        var typeInternalContext = typeDbContext.Assembly.GetType("System.Data.Entity.Internal.InternalContext");
+
+        var internalContextField = typeDbContext.GetField("_internalContext", BindingFlags.NonPublic | BindingFlags.Instance);
+        var isDisposedProperty = typeInternalContext!.GetProperty("IsDisposed");
+
+        var ic = internalContextField!.GetValue(context);
+
+        if (ic != null)
+        {
+            result = (bool)isDisposedProperty!.GetValue(ic)!;
+        }
+
+        return result;
+    }
+}

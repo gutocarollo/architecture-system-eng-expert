@@ -1,0 +1,6 @@
+Debezium Builder
+dependabotb
+Jenkins user
+Jiří Novotný
+Luis GarcÃÂ©s-Erice
+snyk-test

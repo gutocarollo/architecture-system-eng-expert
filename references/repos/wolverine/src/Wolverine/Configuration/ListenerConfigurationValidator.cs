@@ -1,0 +1,247 @@
+using Microsoft.Extensions.Logging;
+using Wolverine.Transports.Local;
+
+namespace Wolverine.Configuration;
+
+internal enum ListenerConfigurationSeverity
+{
+    /// <summary>
+    /// The setting is inert, but the endpoint still does something reasonable. Log and carry on.
+    /// </summary>
+    Warning,
+
+    /// <summary>
+    /// The setting asked for a processing guarantee the endpoint's mode cannot deliver. Refuse to start.
+    /// </summary>
+    Fatal
+}
+
+internal record ListenerConfigurationProblem(
+    Endpoint Endpoint,
+    ListenerConfigurationSeverity Severity,
+    string Message);
+
+/// <summary>
+/// GH-3712. Several listener configuration combinations used to be accepted in silence and then do
+/// nothing at runtime -- most damagingly <c>ProcessInline()</c> together with
+/// <c>PartitionProcessingByGroupId()</c>, which reads as "messages sharing a group id never run
+/// concurrently" and delivered no such thing. Everything Wolverine's Inline listening path ignores is
+/// enumerated here so a misconfiguration is either refused at bootstrap or said out loud in the log.
+/// </summary>
+internal static class ListenerConfigurationValidator
+{
+    /// <summary>
+    /// Validate every listening endpoint, logging the warnings and throwing on the first fatal problem.
+    /// Expects the endpoints to have already been compiled, so that endpoint policies and delayed
+    /// configuration have had their say about the final mode.
+    /// </summary>
+    /// <param name="requeuePoliciesConfigured">
+    /// GH-4060. True when the application configured any error handling that hands a failed message back to its
+    /// listener for redelivery. Failure policies live on the handler graph rather than on an endpoint, so the
+    /// endpoint-scoped checks below cannot work this out for themselves and it is computed once by the caller.
+    /// </param>
+    internal static void AssertValid(IEnumerable<Endpoint> endpoints, ILogger? logger,
+        bool requeuePoliciesConfigured = false)
+    {
+        var problems = endpoints.SelectMany(x => Validate(x, requeuePoliciesConfigured)).ToArray();
+
+        foreach (var problem in problems.Where(x => x.Severity == ListenerConfigurationSeverity.Warning))
+        {
+            logger?.LogWarning(problem.Message);
+        }
+
+        var fatal = problems.FirstOrDefault(x => x.Severity == ListenerConfigurationSeverity.Fatal);
+        if (fatal != null)
+        {
+            throw new InvalidListenerConfigurationException(fatal.Message);
+        }
+    }
+
+    internal static IEnumerable<ListenerConfigurationProblem> Validate(Endpoint endpoint,
+        bool requeuePoliciesConfigured = false)
+    {
+        if (!endpoint.IsListener && endpoint is not LocalQueue)
+        {
+            yield break;
+        }
+
+        // GH-4047. Transport-specific constraints first, and deliberately outside the Inline-only gate below: they
+        // are about combinations no core rule can see, and the Pulsar one they were added for is about NativeAck.
+        foreach (var message in endpoint.validateModeConfiguration())
+        {
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Fatal, message);
+        }
+
+        // GH-4060. Deliberately ahead of the Inline-only gate below: a listener with no cursor to redeliver from
+        // ignores requeue policies in EVERY mode, not just Inline.
+        if (requeuePoliciesConfigured && !endpoint.supportsRedelivery)
+        {
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                $"Ignored listener configuration for {describe(endpoint)}: this listener reads through an ephemeral, " +
+                "non-durable cursor -- Pulsar's TailFromLatest() is the one transport feature that does this today -- so it " +
+                "has nothing to redeliver a message from. Requeue(), RequeueIndefinitely(), PauseThenRequeue() and " +
+                "MaximumAttempts() all resolve to DeferAsync(), which is necessarily a no-op here: a message that fails its " +
+                "handler is dropped rather than retried, and no error is raised. Error handling that never leaves the " +
+                "process still works -- RetryTimes(), RetryWithCooldown() and ScheduleRetry() all run normally -- and a " +
+                "configured message store still captures the failure in the durable dead letter table. Use those instead, " +
+                "or drop TailFromLatest() for an ordinary subscription if these messages are ones you cannot afford to lose.");
+        }
+
+        // GH-3710. The in-memory guard applies to every non-durable listening mode, so this check sits
+        // ahead of the Inline-only block below.
+        if (endpoint.InMemoryIdempotency != null)
+        {
+            if (endpoint.Mode == EndpointMode.Durable)
+            {
+                yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                    $"Ignored listener configuration for {describe(endpoint)}: WithInMemoryIdempotency() was configured on a " +
+                    "durable endpoint, and Wolverine has not built the guard. The durable inbox already rejects a duplicate " +
+                    "message id on the primary key of the incoming table, across restarts and across every node -- which is " +
+                    "strictly stronger than an in-memory, per-process guard. Remove WithInMemoryIdempotency(), or remove " +
+                    "UseDurableInbox() if what you wanted was best-effort dedup without a database.");
+            }
+            else if (endpoint is LocalQueue)
+            {
+                yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                    $"Ignored listener configuration for {describe(endpoint)}: WithInMemoryIdempotency() was configured on a " +
+                    "local queue. The guard deduplicates redeliveries from a message broker, and nothing is ever redelivered " +
+                    "to a local queue -- its messages are enqueued from inside this same process.");
+            }
+        }
+
+        // GH-4410. Only DurableLocalQueue ever builds a CircuitBreaker from these options; a BufferedLocalQueue
+        // never counts a failure against them, and its IListenerCircuit pause/restart members are no-ops. The
+        // setting used to be accepted here and then do nothing at all, so the queue kept processing -- and
+        // failing -- every message while the application believed it would pause. An Inline local queue is
+        // already refused below, so only the buffered case needs saying here.
+        if (endpoint is LocalQueue && endpoint.CircuitBreakerOptions != null &&
+            endpoint.Mode == EndpointMode.BufferedInMemory)
+        {
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Fatal,
+                $"Invalid listener configuration for {describe(endpoint)}: CircuitBreaker() was configured on a buffered, " +
+                "non-durable local queue. A local queue's circuit breaker only exists when the queue is durable -- a buffered " +
+                "local queue never counts failures against it and cannot pause, so it would keep processing (and failing) every " +
+                "message rather than stopping. Add UseDurableInbox() to this queue, or opts.Policies.UseDurableLocalQueues() for " +
+                "all of them, or remove CircuitBreaker().");
+        }
+
+        // GH-4059. Mode is ONE property governing both directions, so on any transport where publishing and
+        // listening resolve to the same Endpoint object -- a RabbitMQ queue, a Redis stream, a Pulsar topic --
+        // whichever side's delayed configuration is applied last wins and the other side's request vanishes
+        // without a word. Two people hit this independently within an hour while building the Redis Streams
+        // and Pulsar transports (#4046, #4047).
+        //
+        // A warning rather than a refusal, deliberately. "Send inline, receive durably" is a coherent thing
+        // to want, and with a single Mode property Wolverine cannot express it -- so throwing would refuse a
+        // configuration that is meaningful rather than mistaken, with no remedy but to give one of them up.
+        // Separating the two into a distinct SendingMode is the real fix and needs its own migration story.
+        if (endpoint.ListenerRequestedMode is { } listenerMode
+            && endpoint.SubscriberRequestedMode is { } subscriberMode
+            && listenerMode != subscriberMode)
+        {
+            var loser = endpoint.Mode == listenerMode ? subscriberMode : listenerMode;
+            var losingSide = endpoint.Mode == listenerMode ? "publishing" : "listening";
+
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                $"Conflicting endpoint mode for {describe(endpoint)}: the listening side asked for " +
+                $"{listenerMode} and the publishing side asked for {subscriberMode}. This endpoint is both, and " +
+                $"EndpointMode is a single property covering both directions, so only one request can survive: " +
+                $"Wolverine is running it as {endpoint.Mode} and the {losingSide} side's {loser} was discarded. " +
+                "Which one wins depends on the order Wolverine applies the two configuration blocks, so this is " +
+                "not stable across changes elsewhere. Configure the mode on one side only, or split the " +
+                "publishing and listening sides onto separate endpoints if they genuinely need different modes.");
+        }
+
+        if (endpoint.Mode != EndpointMode.Inline)
+        {
+            yield break;
+        }
+
+        // NativeAck reaches none of the checks below and must not: partitioned processing plus real parallelism
+        // is the entire point of that mode. It is Inline -- and only Inline -- that has no execution block.
+        var name = describe(endpoint);
+
+        if (endpoint is LocalQueue)
+        {
+            // GH-4022. ListenerConfiguration.ProcessInline() refuses this eagerly, but only when it was handed the
+            // queue itself. LocalQueueFor<T>()/IConfigureLocalQueue resolve their queue lazily through
+            // LocalTransport.ConfigureQueueFor(), so the eager guard cannot see a LocalQueue there and the
+            // mode is not settled until Compile(). Catch that path here instead of at LocalQueue.BuildAgent(),
+            // which does not run until something first sends to the queue.
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Fatal,
+                $"Invalid listener configuration for {name}: ProcessInline() was configured on a local queue. Inline means " +
+                "\"execute the message on the transport's own listening callback instead of queueing it\", and a local queue has no " +
+                "transport listener -- the queue itself is Wolverine's local execution block, so there would be nothing left to run " +
+                "the message. Use BufferedInMemory() (the default for a local queue) or UseDurableInbox(), plus Sequential() if what " +
+                "you wanted was one message at a time.");
+
+            // Everything below is about settings an Inline endpoint merely ignores. This queue is not
+            // going to start at all, so there is no point piling warnings on top of the reason why.
+            yield break;
+        }
+
+        if (endpoint.GroupShardingSlotNumber.HasValue)
+        {
+            // GH-4059. Who actually asked for Inline decides what the remedy is. When a sending-side SendInline()
+            // overwrote the listener's own mode, telling the reader to "use ProcessInParallelWithNativeAcks()
+            // instead of ProcessInline()" sends them looking for a ProcessInline() call they never wrote -- and if
+            // their listener already said ProcessInParallelWithNativeAcks(), as the report in #4059 did, the advice
+            // is to make a change they have made already.
+            var imposedBySender = endpoint.SubscriberRequestedMode == EndpointMode.Inline
+                                  && endpoint.ListenerRequestedMode is { } requested
+                                  && requested != EndpointMode.Inline;
+
+            var remedy = imposedBySender
+                ? $"Nothing on the listening side asked for Inline: a SendInline() on the PUBLISHING side of this same " +
+                  $"endpoint overwrote the {endpoint.ListenerRequestedMode} the listener asked for, because EndpointMode is " +
+                  "a single property covering both directions. Remove SendInline() from the publishing rule for this " +
+                  "endpoint -- BufferedInMemory() or UseDurableOutbox() on the sending side leave the listener's mode " +
+                  "alone -- or split publishing and listening onto separate endpoints."
+                : "If you want partitioned processing AND native broker acks, use ProcessInParallelWithNativeAcks() " +
+                  "instead of ProcessInline() -- that mode exists for exactly this combination (GH-3708). Otherwise use " +
+                  "BufferedInMemory() or UseDurableInbox(), or remove PartitionProcessingByGroupId() from this endpoint.";
+
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Fatal,
+                $"Invalid listener configuration for {name}: PartitionProcessingByGroupId() was configured on an Inline endpoint. " +
+                "Partitioned processing is implemented by Wolverine's local execution block, and an Inline endpoint executes each message " +
+                "directly on the transport's listening callback without one -- so the group id ordering guarantee would silently not exist. " +
+                remedy);
+        }
+
+        if (endpoint.DiscardedMaxDegreeOfParallelism is { } discarded)
+        {
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                $"Ignored listener configuration for {name}: a maximum parallelism of {discarded} was configured on an Inline endpoint, " +
+                "and Wolverine has reset it to 1. MaximumParallelMessages(), Sequential(), ExclusiveNodeWithParallelism() and " +
+                "ExclusiveNodeWithSessionOrdering() all size Wolverine's local execution block, which an Inline endpoint does not have. " +
+                "How many messages an Inline listener handles at once is decided by the transport's own listener (for example RabbitMQ's " +
+                "ConsumerDispatchConcurrency). Use BufferedInMemory() or UseDurableInbox() if you want Wolverine to govern the parallelism.");
+        }
+
+        if (endpoint.BufferingLimitsAreExplicit)
+        {
+            yield return new ListenerConfigurationProblem(endpoint, ListenerConfigurationSeverity.Warning,
+                $"Ignored listener configuration for {name}: BufferingLimits were configured on an Inline endpoint. Back pressure is applied " +
+                "by counting messages queued in Wolverine's local execution block, so an Inline endpoint never starts a BackPressureAgent " +
+                "and these limits do nothing. Use BufferedInMemory(limits) or UseDurableInbox(limits) if you want back pressure.");
+        }
+    }
+
+    private static string describe(Endpoint endpoint)
+    {
+        return endpoint.EndpointName == endpoint.Uri.ToString()
+            ? $"endpoint '{endpoint.Uri}'"
+            : $"endpoint '{endpoint.EndpointName}' ({endpoint.Uri})";
+    }
+}
+
+/// <summary>
+/// GH-3712. Thrown at bootstrap when a listening endpoint's configuration asks for a processing
+/// guarantee that its <see cref="EndpointMode"/> cannot deliver.
+/// </summary>
+public class InvalidListenerConfigurationException : Exception
+{
+    public InvalidListenerConfigurationException(string message) : base(message)
+    {
+    }
+}

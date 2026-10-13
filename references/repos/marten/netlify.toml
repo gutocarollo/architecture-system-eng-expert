@@ -1,0 +1,14 @@
+[build]
+	publish = "docs/.vitepress/dist/"
+	
+[[redirects]]
+  from = "/v3/"
+  to = "/v3/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/discord"
+  to = "https://discord.gg/WMxrvegf8H"
+  status = 301
+  force = false

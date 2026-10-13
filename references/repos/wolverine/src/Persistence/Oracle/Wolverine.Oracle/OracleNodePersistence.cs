@@ -1,0 +1,535 @@
+using System.Data;
+using System.Data.Common;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
+using Weasel.Core;
+using Weasel.Oracle;
+using Wolverine.Oracle.Util;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Durability;
+using Wolverine.Runtime.Agents;
+using Wolverine.Transports;
+
+namespace Wolverine.Oracle;
+
+internal class OracleNodePersistence : DatabaseConstants, INodeAgentPersistence
+{
+    public static int LeaderLockId = 9999999;
+    private readonly DbObjectName _assignmentTable;
+    private readonly IMessageDatabase _database;
+    private readonly OracleDataSource _dataSource;
+    private readonly int _lockId;
+    private readonly DbObjectName _nodeTable;
+    private readonly DatabaseSettings _settings;
+    private readonly DbObjectName _restrictionTable;
+    private readonly DurabilitySettings _durability;
+
+    public OracleNodePersistence(DatabaseSettings settings, OracleMessageStore database, OracleDataSource dataSource)
+    {
+        _settings = settings;
+        _database = database;
+        _durability = database.Durability;
+        _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+        var schemaName = (settings.SchemaName ?? "WOLVERINE").ToUpperInvariant();
+        _nodeTable = new DbObjectName(schemaName, NodeTableName.ToUpperInvariant());
+        _restrictionTable = new DbObjectName(schemaName, AgentRestrictionsTableName.ToUpperInvariant());
+        _assignmentTable = new DbObjectName(schemaName, NodeAssignmentsTableName.ToUpperInvariant());
+
+        _lockId = schemaName.GetDeterministicHashCode();
+    }
+
+    // GH-4593: load_factor is only provisioned behind this flag (OracleMessageStore.AllObjects), so every
+    // statement naming it is gated on it too -- otherwise an un-migrated database (AutoCreate.None, or no
+    // DDL rights) fails node startup with ORA-00904. Read live rather than captured: this is constructed
+    // before the flag is reliably set.
+    private bool advertisesLoad => _durability.CapacityAwareAssignment;
+
+    private string nodeColumns => advertisesLoad ? $"{NodeColumns}, {LoadFactor}" : NodeColumns;
+
+    public bool AdvertisesNodeLoad => true;
+
+    public async Task ClearAllAsync(CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var cmd = conn.CreateCommand($"DELETE FROM {_nodeTable}");
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        await conn.CloseAsync();
+    }
+
+    public async Task<int> PersistAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        var capabilities = string.Join(",", node.Capabilities.Select(x => x.ToString()));
+
+        await using var insertCmd = conn.CreateCommand(
+            $"INSERT INTO {_nodeTable} (id, uri, capabilities, description, version) VALUES (:id, :uri, :capabilities, :description, :version)");
+        insertCmd.With("id", node.NodeId);
+        insertCmd.With("uri", (node.ControlUri ?? TransportConstants.LocalUri).ToString());
+        insertCmd.With("capabilities", capabilities);
+        insertCmd.With("description", node.Description);
+        insertCmd.With("version", node.Version.ToString());
+
+        await insertCmd.ExecuteNonQueryAsync(cancellationToken);
+
+        // Get the auto-generated node_number
+        await using var selectCmd = conn.CreateCommand($"SELECT node_number FROM {_nodeTable} WHERE id = :id");
+        selectCmd.With("id", node.NodeId);
+        var result = await selectCmd.ExecuteScalarAsync(cancellationToken);
+
+        await conn.CloseAsync();
+
+        return Convert.ToInt32(result);
+    }
+
+    public async Task DeleteAsync(Guid nodeId, int assignedNodeNumber)
+    {
+        if (_database.HasDisposed) return;
+
+        await using var conn = await _dataSource.OpenConnectionAsync();
+
+        await using var cmd1 = conn.CreateCommand($"DELETE FROM {_nodeTable} WHERE id = :id");
+        cmd1.With("id", nodeId);
+        await cmd1.ExecuteNonQueryAsync();
+
+        // GH-4739: `owner_id <> 0` for parity with the other providers. Oracle's owner index is unfiltered,
+        // so this is a no-op for the plan here, but the statements stay identical across providers.
+        await using var cmd2 = conn.CreateCommand(
+            $"UPDATE {_settings.SchemaName}.{IncomingTable} SET {OwnerId} = 0 WHERE {OwnerId} = :nodeNum AND {OwnerId} <> 0");
+        cmd2.With("nodeNum", assignedNodeNumber);
+        await cmd2.ExecuteNonQueryAsync();
+
+        await using var cmd3 = conn.CreateCommand(
+            $"UPDATE {_settings.SchemaName}.{OutgoingTable} SET {OwnerId} = 0 WHERE {OwnerId} = :nodeNum AND {OwnerId} <> 0");
+        cmd3.With("nodeNum", assignedNodeNumber);
+        await cmd3.ExecuteNonQueryAsync();
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<IReadOnlyList<WolverineNode>> LoadAllNodesAsync(CancellationToken cancellationToken)
+    {
+        var nodes = new List<WolverineNode>();
+
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        await using var nodeCmd = conn.CreateCommand($"SELECT {nodeColumns} FROM {_nodeTable}");
+        await using var nodeReader = await nodeCmd.ExecuteReaderAsync(cancellationToken);
+        while (await nodeReader.ReadAsync(cancellationToken))
+        {
+            var node = await readNodeAsync(nodeReader);
+            nodes.Add(node);
+        }
+        await nodeReader.CloseAsync();
+
+        var dict = nodes.ToDictionary(x => x.NodeId);
+
+        await using var assignCmd = conn.CreateCommand($"SELECT {Id}, {NodeId}, {Started} FROM {_assignmentTable}");
+        await using var assignReader = await assignCmd.ExecuteReaderAsync(cancellationToken);
+        while (await assignReader.ReadAsync(cancellationToken))
+        {
+            var agentId = new Uri(await assignReader.GetFieldValueAsync<string>(0, cancellationToken));
+            var nid = await OracleEnvelopeReader.ReadGuidAsync(assignReader, 1, cancellationToken);
+
+            if (dict.TryGetValue(nid, out var node))
+            {
+                node.ActiveAgents.Add(agentId);
+            }
+        }
+        await assignReader.CloseAsync();
+        await conn.CloseAsync();
+
+        return nodes;
+    }
+
+    public async Task PersistAgentRestrictionsAsync(IReadOnlyList<AgentRestriction> restrictions,
+        CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        foreach (var restriction in restrictions)
+        {
+            if (restriction.Type == AgentRestrictionType.None)
+            {
+                await using var cmd = conn.CreateCommand($"DELETE FROM {_restrictionTable} WHERE id = :id");
+                cmd.With("id", restriction.Id);
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+            }
+            else
+            {
+                await using var cmd = conn.CreateCommand(
+                    $"MERGE INTO {_restrictionTable} t USING DUAL ON (t.id = :id) " +
+                    "WHEN MATCHED THEN UPDATE SET t.node = :node " +
+                    "WHEN NOT MATCHED THEN INSERT (id, uri, type, node) VALUES (:id, :uri, :type, :node)");
+                cmd.With("id", restriction.Id);
+                cmd.With("uri", restriction.AgentUri.ToString());
+                cmd.With("type", restriction.Type.ToString());
+                cmd.With("node", restriction.NodeNumber);
+                await cmd.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+
+        await conn.CloseAsync();
+    }
+
+    public async Task<NodeAgentState> LoadNodeAgentStateAsync(CancellationToken cancellationToken)
+    {
+        var nodes = new List<WolverineNode>();
+        var restrictions = new List<AgentRestriction>();
+
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        await using var nodeCmd = conn.CreateCommand($"SELECT {nodeColumns} FROM {_nodeTable}");
+        await using var nodeReader = await nodeCmd.ExecuteReaderAsync(cancellationToken);
+        while (await nodeReader.ReadAsync(cancellationToken))
+        {
+            var node = await readNodeAsync(nodeReader);
+            nodes.Add(node);
+        }
+        await nodeReader.CloseAsync();
+
+        var dict = nodes.ToDictionary(x => x.NodeId);
+
+        await using var assignCmd = conn.CreateCommand($"SELECT {Id}, {NodeId}, {Started} FROM {_assignmentTable}");
+        await using var assignReader = await assignCmd.ExecuteReaderAsync(cancellationToken);
+        while (await assignReader.ReadAsync(cancellationToken))
+        {
+            var agentId = new Uri(await assignReader.GetFieldValueAsync<string>(0, cancellationToken));
+            var nid = await OracleEnvelopeReader.ReadGuidAsync(assignReader, 1, cancellationToken);
+
+            if (dict.TryGetValue(nid, out var node))
+            {
+                node.ActiveAgents.Add(agentId);
+            }
+        }
+        await assignReader.CloseAsync();
+
+        await using var restrictCmd = conn.CreateCommand($"SELECT id, uri, type, node FROM {_restrictionTable}");
+        await using var restrictReader = await restrictCmd.ExecuteReaderAsync(cancellationToken);
+        while (await restrictReader.ReadAsync(cancellationToken))
+        {
+            var id = await OracleEnvelopeReader.ReadGuidAsync(restrictReader, 0, cancellationToken);
+            var uriString = await restrictReader.GetFieldValueAsync<string>(1, cancellationToken);
+            var typeString = await restrictReader.GetFieldValueAsync<string>(2, cancellationToken);
+            var nodeNumber = Convert.ToInt32(restrictReader.GetValue(3));
+
+            restrictions.Add(new AgentRestriction(id, new Uri(uriString),
+                Enum.Parse<AgentRestrictionType>(typeString), nodeNumber));
+        }
+        await restrictReader.CloseAsync();
+        await conn.CloseAsync();
+
+        return new NodeAgentState(nodes, new AgentRestrictions(restrictions.ToArray()));
+    }
+
+    public async Task<WolverineNode?> LoadNodeAsync(Guid nodeId, CancellationToken cancellationToken)
+    {
+        if (_database.HasDisposed) return null;
+
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        WolverineNode? returnValue = null;
+
+        await using var nodeCmd = conn.CreateCommand($"SELECT {nodeColumns} FROM {_nodeTable} WHERE id = :id");
+        nodeCmd.With("id", nodeId);
+        await using var nodeReader = await nodeCmd.ExecuteReaderAsync(cancellationToken);
+        if (await nodeReader.ReadAsync(cancellationToken))
+        {
+            returnValue = await readNodeAsync(nodeReader);
+        }
+        await nodeReader.CloseAsync();
+
+        if (returnValue != null)
+        {
+            await using var assignCmd = conn.CreateCommand(
+                $"SELECT {Id}, {NodeId}, {Started} FROM {_assignmentTable} WHERE node_id = :id");
+            assignCmd.With("id", nodeId);
+            await using var assignReader = await assignCmd.ExecuteReaderAsync(cancellationToken);
+            while (await assignReader.ReadAsync(cancellationToken))
+            {
+                var agentId = new Uri(await assignReader.GetFieldValueAsync<string>(0, cancellationToken));
+                returnValue.ActiveAgents.Add(agentId);
+            }
+            await assignReader.CloseAsync();
+        }
+
+        await conn.CloseAsync();
+        return returnValue;
+    }
+
+    public async Task AssignAgentsAsync(Guid nodeId, IReadOnlyList<Uri> agents, CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        foreach (var agent in agents)
+        {
+            await using var cmd = conn.CreateCommand(
+                $"MERGE INTO {_assignmentTable} t USING DUAL ON (t.id = :id) " +
+                "WHEN MATCHED THEN UPDATE SET t.node_id = :node " +
+                "WHEN NOT MATCHED THEN INSERT (id, node_id) VALUES (:id, :node)");
+            cmd.With("id", agent.ToString());
+            cmd.With("node", nodeId);
+            await cmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+
+        await conn.CloseAsync();
+    }
+
+    public async Task RemoveAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var cmd = conn.CreateCommand($"DELETE FROM {_assignmentTable} WHERE id = :id AND node_id = :node");
+        cmd.With("id", agentUri.ToString());
+        cmd.With("node", nodeId);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        await conn.CloseAsync();
+    }
+
+    public async Task AddAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var cmd = conn.CreateCommand(
+            $"MERGE INTO {_assignmentTable} t USING DUAL ON (t.id = :id) " +
+            "WHEN MATCHED THEN UPDATE SET t.node_id = :node " +
+            "WHEN NOT MATCHED THEN INSERT (id, node_id) VALUES (:id, :node)");
+        cmd.With("id", agentUri.ToString());
+        cmd.With("node", nodeId);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+        await conn.CloseAsync();
+    }
+
+    public async Task<bool> TryClaimAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellationToken);
+
+        // GH-4407: insert only if nobody owns the agent yet, then report whether the row is ours
+        await using (var insert = conn.CreateCommand(
+                         $"MERGE INTO {_assignmentTable} t USING DUAL ON (t.id = :id) " +
+                         "WHEN NOT MATCHED THEN INSERT (id, node_id) VALUES (:id, :node)"))
+        {
+            insert.With("id", agentUri.ToString());
+            insert.With("node", nodeId);
+
+            try
+            {
+                await insert.ExecuteNonQueryAsync(cancellationToken);
+            }
+            catch (global::Oracle.ManagedDataAccess.Client.OracleException e) when (e.Number == 1)
+            {
+                // ORA-00001: a peer inserted between the MERGE's match and its insert, so it owns the row
+            }
+        }
+
+        await using var select = conn.CreateCommand(
+            $"SELECT COUNT(*) FROM {_assignmentTable} WHERE id = :id AND node_id = :node");
+        select.With("id", agentUri.ToString());
+        select.With("node", nodeId);
+        var owned = await select.ExecuteScalarAsync(cancellationToken);
+
+        await conn.CloseAsync();
+
+        return Convert.ToInt64(owned) > 0;
+    }
+
+    public async Task OverwriteHealthCheckTimeAsync(Guid nodeId, DateTimeOffset lastHeartbeatTime)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        await using var cmd = conn.CreateCommand($"UPDATE {_nodeTable} SET health_check = :now WHERE id = :id");
+        cmd.With("id", nodeId);
+        cmd.With("now", lastHeartbeatTime);
+        await cmd.ExecuteNonQueryAsync();
+        await conn.CloseAsync();
+    }
+
+    public async Task<bool> MarkHealthCheckAsync(WolverineNode node, CancellationToken token)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(token);
+        // GH-4593: the load advertisement rides the same single-statement heartbeat write, so the leader
+        // never places agents against a reading older than one HealthCheckPollingTime.
+        await using var cmd = conn.CreateCommand(advertisesLoad
+            ? $"UPDATE {_nodeTable} SET health_check = SYSTIMESTAMP AT TIME ZONE 'UTC', {LoadFactor} = :load WHERE id = :id"
+            : $"UPDATE {_nodeTable} SET health_check = SYSTIMESTAMP AT TIME ZONE 'UTC' WHERE id = :id");
+        cmd.With("id", node.NodeId);
+
+        if (advertisesLoad)
+        {
+            cmd.With("load", (object?)node.LoadFactor ?? DBNull.Value);
+        }
+
+        var count = await cmd.ExecuteNonQueryAsync(token);
+
+        await conn.CloseAsync();
+
+        // GH-3604 / D2: a miss means a peer deleted this still-live node's row; report it to the caller
+        // instead of blindly re-inserting a skeleton (fresh node_number, empty capabilities) here.
+        return count != 0;
+    }
+
+    public async Task ReregisterNodeAsync(WolverineNode node, CancellationToken token)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(token);
+
+        // node_number is GENERATED BY DEFAULT AS IDENTITY, so an explicit value is accepted. Delete any
+        // surviving row first (the FK cascades its assignment rows, which the caller restores) then insert
+        // with the preserved node number + capabilities so the resurrected row matches the in-memory identity.
+        var capabilities = string.Join(",", node.Capabilities.Select(x => x.ToString()));
+
+        await using var deleteCmd = conn.CreateCommand($"DELETE FROM {_nodeTable} WHERE id = :id");
+        deleteCmd.With("id", node.NodeId);
+        await deleteCmd.ExecuteNonQueryAsync(token);
+
+        // GH-4593: delete-then-insert rather than a MERGE, so the load column only joins the column and
+        // value lists.
+        var loadColumn = advertisesLoad ? $", {LoadFactor}" : string.Empty;
+        var loadValue = advertisesLoad ? ", :load" : string.Empty;
+
+        await using var insertCmd = conn.CreateCommand(
+            $"INSERT INTO {_nodeTable} (id, node_number, uri, capabilities, description, version, health_check{loadColumn}) VALUES (:id, :nodenum, :uri, :capabilities, :description, :version, SYSTIMESTAMP AT TIME ZONE 'UTC'{loadValue})");
+        insertCmd.With("id", node.NodeId);
+        insertCmd.With("nodenum", node.AssignedNodeNumber);
+        insertCmd.With("uri", (node.ControlUri ?? TransportConstants.LocalUri).ToString());
+        insertCmd.With("capabilities", capabilities);
+        insertCmd.With("description", node.Description);
+        insertCmd.With("version", node.Version.ToString());
+
+        if (advertisesLoad)
+        {
+            insertCmd.With("load", (object?)node.LoadFactor ?? DBNull.Value);
+        }
+
+        await insertCmd.ExecuteNonQueryAsync(token);
+
+        await conn.CloseAsync();
+    }
+
+    public async Task LogRecordsAsync(params NodeRecord[] records)
+    {
+        if (records.Length == 0) return;
+
+        // OracleMessageStore.EnqueueAsync is a no-op -- it has no DatabaseBatcher to hand the
+        // operation to -- so insert each record directly using the Oracle command extensions.
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        try
+        {
+            foreach (var record in records)
+            {
+                await using var cmd = conn.CreateCommand(
+                    $"INSERT INTO {_settings.SchemaName}.{NodeRecordTableName} " +
+                    "(node_number, event_name, description) " +
+                    "VALUES (:nodeNumber, :eventName, :description)");
+                cmd.With("nodeNumber", record.NodeNumber);
+                cmd.With("eventName", record.RecordType.ToString());
+                // GH-4246: same clamp the shared PersistNodeRecord operation applies -- Oracle writes
+                // node records through this hand-rolled path instead, so it needs it too.
+                cmd.With("description", NodeRecord.TruncateDescription(record.Description));
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task<IReadOnlyList<NodeRecord>> FetchRecentRecordsAsync(int count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Must be a positive number");
+
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        await using var cmd = conn.CreateCommand(
+            $"SELECT node_number, event_name, timestamp, description FROM {_settings.SchemaName}.{NodeRecordTableName} " +
+            $"ORDER BY id DESC FETCH FIRST :limit ROWS ONLY");
+        cmd.With("limit", count);
+
+        var list = new List<NodeRecord>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            list.Add(new NodeRecord
+            {
+                NodeNumber = Convert.ToInt32(reader.GetValue(0)),
+                RecordType = Enum.Parse<NodeRecordType>(await reader.GetFieldValueAsync<string>(1)),
+                Timestamp = await reader.GetFieldValueAsync<DateTimeOffset>(2),
+                Description = await reader.IsDBNullAsync(3) ? string.Empty : await reader.GetFieldValueAsync<string>(3)
+            });
+        }
+        await conn.CloseAsync();
+
+        return list;
+    }
+
+    // GH-3701: the row cap that bounds the node record table alongside the age sweep. Without this the
+    // store fell through to the interface's no-op default and only the age bound applied. Expressed as a
+    // floor id rather than a NOT IN over a FETCH FIRST subquery so the delete stays a primary-key range scan.
+    public async Task DeleteOldNodeRecordsAsync(int retainCount)
+    {
+        if (retainCount <= 0) return;
+
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        await using var cmd = conn.CreateCommand(
+            $"DELETE FROM {_settings.SchemaName}.{NodeRecordTableName} WHERE id < NVL((SELECT MIN(id) FROM (SELECT id FROM {_settings.SchemaName}.{NodeRecordTableName} ORDER BY id DESC FETCH FIRST :retain ROWS ONLY)), 0)");
+        cmd.With("retain", retainCount);
+
+        await cmd.ExecuteNonQueryAsync();
+        await conn.CloseAsync();
+    }
+
+    public bool HasLeadershipLock()
+    {
+        return _database.AdvisoryLock.HasLock(_lockId);
+    }
+
+    public Task<bool> TryAttainLeadershipLockAsync(CancellationToken token)
+    {
+        return _database.AdvisoryLock.TryAttainLockAsync(_lockId, token);
+    }
+
+    public Task ReleaseLeadershipLockAsync()
+    {
+        return _database.AdvisoryLock.ReleaseLockAsync(_lockId);
+    }
+
+    private async Task<WolverineNode> readNodeAsync(DbDataReader reader)
+    {
+        var node = new WolverineNode
+        {
+            NodeId = OracleEnvelopeReader.ReadGuid(reader, 0),
+            AssignedNodeNumber = Convert.ToInt32(reader.GetValue(1)),
+            Description = await reader.GetFieldValueAsync<string>(2),
+            ControlUri = (await reader.GetFieldValueAsync<string>(3)).ToUri(),
+            Started = await reader.GetFieldValueAsync<DateTimeOffset>(4),
+            LastHealthCheck = await reader.GetFieldValueAsync<DateTimeOffset>(5)
+        };
+
+        if (!await reader.IsDBNullAsync(6))
+        {
+            var rawVersion = await reader.GetFieldValueAsync<string>(6);
+            node.Version = System.Version.Parse(rawVersion);
+        }
+
+        if (!await reader.IsDBNullAsync(7))
+        {
+            var capabilitiesStr = await reader.GetFieldValueAsync<string>(7);
+            if (capabilitiesStr.IsNotEmpty())
+            {
+                var capabilities = capabilitiesStr.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                node.Capabilities.AddRange(capabilities.Select(x => new Uri(x.Trim())));
+            }
+        }
+
+        // GH-4593: resolved by name -- a select that stops appending the column should fail loudly here
+        // rather than read a wrong hard-coded ordinal. Convert rather than GetFieldValue<double>, in the
+        // house style for this store: ODP.NET hands numerics back as OracleDecimal.
+        if (advertisesLoad)
+        {
+            var loadFactor = reader.GetOrdinal(LoadFactor);
+            if (!await reader.IsDBNullAsync(loadFactor))
+            {
+                node.LoadFactor = Convert.ToDouble(reader.GetValue(loadFactor));
+            }
+        }
+
+        return node;
+    }
+}

@@ -1,0 +1,59 @@
+apply plugin: "groovy"
+
+dependencies {
+    annotationProcessor(platform(libs.micronaut.platform))
+    annotationProcessor(libs.micronaut.inject.java)
+
+    api(project(":resilience4j-annotations"))
+
+    implementation(platform(libs.micronaut.platform))
+    implementation(project(":resilience4j-framework-common"))
+    implementation(libs.micronaut.discovery.core)
+    implementation(libs.micronaut.retry)
+    implementation(libs.micronaut.router)
+    implementation(libs.micronaut.validation)
+
+    compileOnly(project(":resilience4j-bulkhead"))
+    compileOnly(project(":resilience4j-circuitbreaker"))
+    compileOnly(project(":resilience4j-consumer"))
+    compileOnly(project(":resilience4j-core"))
+    compileOnly(project(":resilience4j-ratelimiter"))
+    compileOnly(project(":resilience4j-reactor"))
+    compileOnly(project(":resilience4j-retry"))
+    compileOnly(project(":resilience4j-rxjava2"))
+    compileOnly(project(":resilience4j-rxjava3"))
+    compileOnly(project(":resilience4j-timelimiter"))
+    compileOnly(libs.micronaut.aop)
+    compileOnly(libs.micronaut.http)
+    compileOnly(libs.micronaut.http.server)
+    compileOnly(libs.reactor.core)
+    compileOnly(libs.rxjava2)
+    compileOnly(libs.rxjava3)
+
+    testAnnotationProcessor(platform(libs.micronaut.platform))
+    testAnnotationProcessor(project(":resilience4j-micronaut-annotation"))
+
+    testCompileOnly(project(":resilience4j-micronaut-annotation"))
+
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":resilience4j-bulkhead"))
+    testImplementation(project(":resilience4j-circuitbreaker"))
+    testImplementation(project(":resilience4j-consumer"))
+    testImplementation(project(":resilience4j-ratelimiter"))
+    testImplementation(project(":resilience4j-retry"))
+    testImplementation(project(":resilience4j-rxjava2"))
+    testImplementation(project(":resilience4j-timelimiter"))
+    testImplementation(libs.cglib.nodep)
+    testImplementation(libs.micronaut.aop)
+    testImplementation(libs.micronaut.http.client)
+    testImplementation(libs.micronaut.http.server.netty)
+    testImplementation(libs.micronaut.inject.groovy)
+    testImplementation(libs.micronaut.jackson.databind)
+    testImplementation(libs.micronaut.reactor)
+    testImplementation(libs.micronaut.rxjava2)
+    testImplementation(libs.micronaut.rxjava3)
+    testImplementation(libs.micronaut.test.spock)
+    testImplementation(libs.objenesis)
+}
+
+ext.moduleName = "io.github.resilience4j.micronaut"

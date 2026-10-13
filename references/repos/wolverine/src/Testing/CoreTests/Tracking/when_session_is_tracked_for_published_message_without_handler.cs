@@ -1,0 +1,115 @@
+using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Wolverine.Runtime;
+using Wolverine.Tracking;
+using Xunit;
+namespace CoreTests.Tracking;
+
+public record FileAdded(string FileName);
+
+public class RandomFileChangeForPublish
+{
+    private readonly IWolverineRuntime _runtime;
+
+    public RandomFileChangeForPublish(
+        IWolverineRuntime runtime
+    ) => _runtime = runtime;
+
+    public async Task SimulateRandomFileChange()
+    {
+        await Task.Delay(
+            TimeSpan.FromMilliseconds(
+                new Random().Next(100, 1000)
+            )
+        );
+        var randomFileName = Path.GetRandomFileName();
+        await new MessageBus(_runtime).PublishAsync(new FileAdded(randomFileName));
+    }
+}
+
+
+public class when_session_is_tracked_for_published_message_without_handler : IAsyncLifetime
+{
+    private readonly ITestOutputHelper _testOutputHelper;
+    private IHost _host = null!;
+
+    public when_session_is_tracked_for_published_message_without_handler(
+        ITestOutputHelper testOutputHelper
+    ) => _testOutputHelper = testOutputHelper;
+
+    public async ValueTask InitializeAsync()
+    {
+        var hostBuilder = Host.CreateDefaultBuilder();
+        hostBuilder.ConfigureServices(
+            services => { services.AddSingleton<RandomFileChangeForPublish>(); }
+        );
+        hostBuilder.UseWolverine();
+
+        _host = await hostBuilder.StartAsync();
+    }
+
+    [Fact]
+    public async Task should_be_included_in_sent_record_collection()
+    {
+        var randomEventEmitter = _host.Services.GetRequiredService<RandomFileChangeForPublish>();
+
+        var session = await _host
+            .TrackActivity()
+            .Timeout(2.Seconds())
+            .ExecuteAndWaitAsync(
+                (Func<IMessageContext, Task>)(
+                    async (
+                        _
+                    ) => await randomEventEmitter.SimulateRandomFileChange()
+                )
+            );
+
+
+        session.NoRoutes.AllMessages()
+            .Count()
+            .ShouldBe(1);
+
+        session.NoRoutes.AllMessages()
+            .First()
+            .ShouldBeOfType<FileAdded>();
+    }
+
+    [Fact]
+    public async Task should_apply_equally_when_tracked_across_multiple_hosts()
+    {
+        using var secondHost = await Host.CreateDefaultBuilder()
+            .UseWolverine().StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+        
+        var randomEventEmitter = _host.Services.GetRequiredService<RandomFileChangeForPublish>();
+
+        var session = await _host
+            .TrackActivity()
+            .IncludeExternalTransports()
+            .AlsoTrack(secondHost)
+            .Timeout(2.Seconds())
+            .ExecuteAndWaitAsync(
+                (Func<IMessageContext, Task>)(
+                    async (
+                        _
+                    ) => await randomEventEmitter.SimulateRandomFileChange()
+                )
+            );
+
+
+        session.NoRoutes.AllMessages()
+            .Count()
+            .ShouldBe(1);
+
+        session.NoRoutes.AllMessages()
+            .First()
+            .ShouldBeOfType<FileAdded>();
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+    }
+}

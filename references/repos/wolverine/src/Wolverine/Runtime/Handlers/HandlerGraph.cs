@@ -1,0 +1,787 @@
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using ImTools;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging.Debug;
+using Microsoft.Extensions.Options;
+using Wolverine.Attributes;
+using Wolverine.Configuration;
+using Wolverine.Persistence;
+using Wolverine.ErrorHandling;
+using Wolverine.Persistence.Sagas;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.RemoteInvocation;
+using Wolverine.Runtime.Scheduled;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+using Wolverine.Transports.Local;
+using Wolverine.Util;
+
+namespace Wolverine.Runtime.Handlers;
+
+public partial class HandlerGraph : ICodeFileCollectionWithServices, IWithFailurePolicies
+{
+    private readonly List<HandlerCall> _calls = new();
+    private readonly object _compilingLock = new();
+
+    private readonly IList<Action> _configurations = new List<Action>();
+
+    private readonly object _groupingLock = new();
+
+    internal readonly HandlerDiscovery Discovery = new();
+
+    private ImHashMap<Type, HandlerChain> _chains = ImHashMap<Type, HandlerChain>.Empty;
+
+    private ImHashMap<Type, IMessageHandler?> _handlers = ImHashMap<Type, IMessageHandler?>.Empty;
+
+    private bool _hasCompiled;
+
+    private bool _hasGrouped;
+
+    private object _messageTypesLock = new();
+
+    private ImHashMap<string, Type> _messageTypes = ImHashMap<string, Type>.Empty;
+
+    private ImmutableList<Type> _replyTypes = ImmutableList<Type>.Empty;
+
+    public HandlerGraph()
+    {
+        // All of this is to seed the handler and its associated retry policies
+        // for scheduling outgoing messages
+        AddMessageHandler(typeof(Envelope), new ScheduledSendEnvelopeHandler(this));
+
+        _messageTypes = _messageTypes.AddOrUpdate(TransportConstants.ScheduledEnvelope, typeof(Envelope));
+
+        RegisterMessageType(typeof(Acknowledgement));
+        RegisterMessageType(typeof(FailureAcknowledgement));
+    }
+
+    public Dictionary<Type, Type> MappedGenericMessageTypes { get; } = new();
+
+    internal IServiceContainer Container { get; set; } = null!;
+
+    public HandlerChain[] Chains => _chains.Enumerate().Select(x => x.Value).ToArray();
+
+    public IEnumerable<Assembly> ExtensionAssemblies => Discovery.Assemblies;
+    public List<Assembly> InteropAssemblies { get; } = new();
+
+    public FailureRuleCollection Failures { get; set; } = new();
+
+    public MultipleHandlerBehavior MultipleHandlerBehavior { get; set; } =
+        MultipleHandlerBehavior.ClassicCombineIntoOneLogicalHandler;
+
+    public void ConfigureHandlerForMessage<T>(Action<HandlerChain> configure)
+    {
+        ConfigureHandlerForMessage(typeof(T), configure);
+    }
+
+    public void ConfigureHandlerForMessage(Type messageType, Action<HandlerChain> configure)
+    {
+        _configurations.Add(() =>
+        {
+            var chain = ChainFor(messageType);
+            if (chain != null)
+            {
+                configure(chain);
+            }
+        });
+    }
+
+    internal void AddMessageHandler(Type messageType, IMessageHandler handler)
+    {
+        // Makes error handling and other configuration work cleanly
+        if (handler is MessageHandler h and not AgentCommandHandler)
+        {
+            var chain = new HandlerChain(messageType, this);
+            h.Chain = chain;
+        }
+        
+        _handlers = _handlers.AddOrUpdate(messageType, handler);
+        RegisterMessageType(messageType);
+    }
+
+    private void assertNotGrouped()
+    {
+        if (_hasGrouped)
+        {
+            // GH-4532: the cause is almost always configuration attempted after the host is up.
+            throw new InvalidOperationException(
+                "This HandlerGraph has already been grouped/compiled. Configure opts.Discovery inside UseWolverine(), not after the host has started.");
+        }
+    }
+
+    public void AddRange(IEnumerable<HandlerCall> calls)
+    {
+        assertNotGrouped();
+        _calls.AddRange(calls);
+    }
+
+    public IMessageHandler? HandlerFor<T>()
+    {
+        return HandlerFor(typeof(T));
+    }
+
+    public HandlerChain? ChainFor(Type messageType)
+    {
+        if (_chains.TryFind(messageType, out var chain)) return chain;
+
+        return null;
+    }
+
+    /// <summary>
+    ///     The chain that owns the handling of <paramref name="messageType" />: the discovered chain if there is
+    ///     one, otherwise the chain of a pre-canned <see cref="MessageHandler" /> registered with
+    ///     <see cref="WolverineOptions.AddMessageHandler(Type, IMessageHandler)" />. Returns null when neither
+    ///     exists.
+    /// </summary>
+    /// <remarks>
+    ///     <see cref="ChainFor(Type)" /> reads the discovered chains only. That is right for anything that needs
+    ///     generated code, and wrong for anything that only needs the chain's runtime settings -- batching, for
+    ///     one, which needs the batch type's chain for its failure rules and its envelope identity, and would
+    ///     otherwise refuse a batch handler that is perfectly able to run. Reads the pre-canned map directly
+    ///     rather than through <see cref="HandlerFor(Type)" />, so a miss is not memoized and an
+    ///     <see cref="IAgentCommand" /> type does not take the agent path.
+    /// </remarks>
+    internal HandlerChain? ChainOrRegisteredHandlerChainFor(Type messageType)
+    {
+        return ChainFor(messageType)
+               ?? (_handlers.TryFind(messageType, out var handler) && handler is MessageHandler { Chain: { } chain }
+                   ? chain
+                   : null);
+    }
+
+    public HandlerChain? ChainFor<T>()
+    {
+        return ChainFor(typeof(T));
+    }
+
+    public IMessageHandler? HandlerFor(Type messageType, Endpoint endpoint)
+    {
+        if (messageType.CanBeCastTo(typeof(IAgentCommand)))
+        {
+            if (_handlers.TryFind(typeof(IAgentCommand), out var handler))
+            {
+                _handlers = _handlers.AddOrUpdate(messageType, handler);
+                return handler;
+            }
+
+            throw new NotSupportedException();
+        }
+        
+        // This is cached in the HandlerPipeline for each endpoint, so 
+        // not terribly important to cache it here
+        var chain = ChainFor(messageType);
+
+        if (chain == null)
+        {
+            // There are a couple special types where this might be cached. Like for Acknowledgement
+            if (_handlers.TryFind(messageType, out var handler)) return handler;
+            
+            // This was to handle moving Event<T> to IEvent<T>
+            var candidates = _chains.Enumerate().Where(x => messageType.CanBeCastTo(x.Key)).ToArray();
+            if (candidates.Length == 1)
+            {
+                chain = candidates[0].Value;
+            }
+        }
+        
+        if (chain == null) return null;
+
+        // If there are no sticky handlers, just use the default handler
+        // for the message type
+        if (!chain.ByEndpoint.Any()) return HandlerFor(messageType);
+
+        // See if there is a sticky handler that is specific to this endpoint
+        var sticky = chain.ByEndpoint.FirstOrDefault(x => x.Endpoints.Contains(endpoint));
+        
+        // If none, use the default
+        if (sticky == null)
+        {
+            if (!chain.HasDefaultNonStickyHandlers())
+            {
+                // If all sticky handlers target local queues, create a fanout handler
+                // to relay the message from the external endpoint to each local queue
+                var allLocal = chain.ByEndpoint.All(
+                    c => c.Endpoints.All(e => e is LocalQueue));
+
+                if (allLocal)
+                {
+                    if (endpoint is not LocalQueue)
+                    {
+                        return getOrBuildFanoutHandler(messageType, chain);
+                    }
+
+                    // Also fanout when the incoming local queue is part of a sharded/global
+                    // partition topology rather than a sticky handler's own queue
+                    if (endpoint.UsedInShardedTopology)
+                    {
+                        return getOrBuildFanoutHandler(messageType, chain);
+                    }
+                }
+
+                throw new NoHandlerForEndpointException(messageType, endpoint.Uri);
+            }
+
+            return HandlerFor(messageType);
+        }
+
+        return resolveHandlerFromChain(messageType, sticky, false);
+    }
+
+    public IMessageHandler? HandlerFor(Type messageType)
+    {
+        if (_handlers.TryFind(messageType, out var handler))
+        {
+            return handler;
+        }
+
+        if (messageType.CanBeCastTo(typeof(IAgentCommand)))
+        {
+            if (_handlers.TryFind(typeof(IAgentCommand), out handler))
+            {
+                _handlers = _handlers.AddOrUpdate(messageType, handler);
+                return handler;
+            }
+
+            throw new NotSupportedException();
+        }
+        
+        if (_chains.TryFind(messageType, out var chain))
+        {
+            return resolveHandlerFromChain(messageType, chain, true);
+        }
+
+        // This was to handle moving Event<T> to IEvent<T>
+        var candidates = _chains.Enumerate().Where(x => messageType.CanBeCastTo(x.Key)).ToArray();
+        if (candidates.Length == 1)
+        {
+            chain = candidates[0].Value;
+            return resolveHandlerFromChain(messageType, chain, true);
+        }
+
+        // memoize the "miss"
+        _handlers = _handlers.AddOrUpdate(messageType, null);
+        return null;
+    }
+
+    private IMessageHandler? resolveHandlerFromChain(Type messageType, HandlerChain chain, bool shouldCacheGlobally)
+    {
+        IMessageHandler handler;
+        if (chain.Handler != null)
+        {
+            handler = chain.Handler;
+        }
+        else
+        {
+            // SagaChain.DetermineFrames clears Handlers during codegen, so the
+            // HasDefaultNonStickyHandlers check has to happen inside the lock
+            lock (_compilingLock)
+            {
+                if (chain.Handler != null)
+                {
+                    handler = chain.Handler;
+                }
+                else if (!chain.HasDefaultNonStickyHandlers())
+                {
+                    throw new NoHandlerForEndpointException(messageType);
+                }
+                else
+                {
+                    // TODO -- put this logic in JasperFx
+                    var logger = Container?.Services.GetService<ILoggerFactory>()?.CreateLogger<HandlerGraph>() ?? new Logger<HandlerGraph>(new LoggerFactory([new DebugLoggerProvider()]));
+
+                    logger.LogDebug("Starting to compile chain {MessageType}", chain.MessageType.NameInCode());
+
+                    chain.InitializeSynchronously(Rules, this, Container!.Services);
+                    handler = chain.CreateHandler(Container!);
+
+                    logger.LogDebug("Finished building the chain {MessageType}", chain.MessageType.NameInCode());
+                }
+            }
+        }
+
+        if (shouldCacheGlobally)
+        {
+            _handlers = _handlers.AddOrUpdate(messageType, handler);
+        }
+
+        return handler;
+    }
+
+    // Closes FanoutMessageHandler<> over the runtime-resolved messageType
+    // and Activator.CreateInstance's the result. Per-message-type lazy-init
+    // (cached in _handlers ImHashMap after first call). Same chunk J
+    // (RoutingFor) pattern: AOT-clean apps in TypeLoadMode.Static pre-
+    // populate _handlers at HandlerGraph.Compile time so the steady-state
+    // hot path is pure cache lookups. The pre-population work is tracked in
+    // #2769 (CloseAndBuildAs elimination).
+    private IMessageHandler getOrBuildFanoutHandler(Type messageType, HandlerChain chain)
+    {
+        if (_handlers.TryFind(messageType, out var cached) && cached != null)
+        {
+            return cached;
+        }
+
+        var localUris = chain.ByEndpoint
+            .SelectMany(c => c.Endpoints)
+            .OfType<LocalQueue>()
+            .Select(e => e.Uri)
+            .Distinct()
+            .ToArray();
+
+        var handler = BuildFanoutHandler(messageType, chain, localUris);
+
+        _handlers = _handlers.AddOrUpdate(messageType, handler);
+        return handler;
+    }
+
+    // Closes FanoutMessageHandler<> over the runtime-resolved messageType and
+    // Activator.CreateInstance's the result. Used both for sticky-handler fanout
+    // (getOrBuildFanoutHandler, cached in _handlers) and for relaying an externally-
+    // arriving element type to its direct + batch local queues (NOT cached — the
+    // _handlers[messageType] slot belongs to the direct handler). AOT-clean apps in
+    // TypeLoadMode.Static pre-populate handlers at Compile time. See #2769.
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "FanoutMessageHandler<> closed over runtime messageType; AOT consumers pre-populate handlers via TypeLoadMode.Static. See AOT guide / #2769.")]
+    internal IMessageHandler BuildFanoutHandler(Type messageType, HandlerChain chain, Uri[] localQueueUris)
+    {
+        var handlerType = typeof(FanoutMessageHandler<>).MakeGenericType(messageType);
+        return (IMessageHandler)Activator.CreateInstance(handlerType, localQueueUris, chain)!;
+    }
+
+    // Compile is the bootstrap-time handler-graph build. The remaining IL2026
+    // here comes from registerMessageTypes' MakeGenericType / GetInterfaces walks
+    // (pre-population work tracked in #2769) and from the opt-in
+    // Forwarders.FindForwards path that runs only when
+    // options.AutomaticForwarderDiscoveryEnabled is true (the 6.0 explicit
+    // RegisterMessageForwarder API replaced the unconditional scan — see #2757).
+    // Suppress at the Compile boundary: a single annotation here keeps
+    // WolverineRuntime.StartAsync (the public bootstrap entry point) free of
+    // the cascade.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Bootstrap-time handler-graph build; per-message-type cache population (#2769) plus opt-in Forwarders.FindForwards assembly scan (#2757). See AOT guide.")]
+    internal void Compile(WolverineOptions options, IServiceContainer container)
+    {
+        if (_hasCompiled)
+        {
+            return;
+        }
+
+        _hasCompiled = true;
+
+        var logger = (ILogger?)container.Services.GetService<ILogger<HandlerDiscovery>>() ?? NullLogger.Instance;
+
+        Rules = options.CodeGeneration;
+
+        compileWithRuntimeScanning(options, logger);
+
+        Group(options);
+
+        // GH-3974: the earliest point at which "will this message type be handled?" has a real answer.
+        // Discovery has resolved and the chains are grouped, so a consumer no longer has to hand-roll a
+        // mirror of Wolverine's own discovery convention to ask it.
+        options.ApplyHandlerDiscoveryCallbacks(Chains.Select(x => x.MessageType));
+
+        // This was to address the issue with policies not extending to sticky message
+        // handlers
+        IEnumerable<HandlerChain> explodeChains(HandlerChain chain)
+        {
+            yield return chain;
+
+            foreach (var stickyChain in chain.ByEndpoint)
+            {
+                yield return stickyChain;
+            }
+        }
+
+        var allChains = Chains.SelectMany(explodeChains).ToArray();
+        
+        // This lovely thing was brought to you by https://github.com/JasperFx/wolverine/issues/2004
+        var duplicateTypeNames = allChains
+            .Where(x => x.Handlers.Any()) // filter out the parent, placeholder HandlerChain for separated handlers
+            .GroupBy(x => x.TypeName)
+            .Where(x => x.Count() > 1)
+            .ToArray();
+
+        foreach (var @group in duplicateTypeNames)
+        {
+            foreach (var chain in @group)
+            {
+                // Both halves have to be sanitized into legal C# identifiers -- the message type may well be
+                // an array (batched messages are handled as T[]), which would otherwise emit brackets into
+                // the generated class name and blow up compilation. See GH-3399.
+                chain.TypeName =
+                    $"{HandlerChain.GeneratedTypeNameFor(chain.MessageType, "")}_{HandlerChain.GeneratedTypeNameFor(chain.HandlerCalls().First().HandlerType, "Handler")}";
+            }
+        }
+
+        foreach (var policy in handlerPolicies(options)) policy.Apply(allChains, Rules, container);
+
+        Container = container;
+
+        // 6.0 forwarder registration: drain the explicit
+        // WolverineOptions.RegisterMessageForwarder<TFrom, TTo>() registrations
+        // first (AOT-clean — no reflective assembly walk), then optionally
+        // run the legacy Forwarders.FindForwards(ApplicationAssembly) scan
+        // when the user opted in via UseAutomaticForwarderDiscovery(). The
+        // pre-6.0 unconditional scan is gone — see #2757 and
+        // docs/guide/migration.md.
+        var forwarders = new Forwarders();
+        foreach (var pair in options.ExplicitMessageForwarders)
+        {
+            forwarders.Relationships[pair.Key] = pair.Value;
+        }
+
+        if (options.AutomaticForwarderDiscoveryEnabled && options.ApplicationAssembly is not null)
+        {
+            forwarders.FindForwards(options.ApplicationAssembly);
+        }
+
+        AddForwarders(forwarders);
+
+        foreach (var configuration in _configurations) configuration();
+
+        registerMessageTypes();
+
+        tryApplyLocalQueueConfiguration(options);
+
+        options.MessagePartitioning.MaybeInferGrouping(this);
+
+        // Pre-populate the per-message-type cascading-async-enumerable cache on
+        // MessageContext so the reflective lazy-init in
+        // MessageContext.ResolveTypedAsyncEnumerableCascader never fires at
+        // steady state. AOT pillar follow-up #2769 (Option A).
+        var allMessageTypes = AllMessageTypes().ToArray();
+        MessageContext.PrepopulateCascadeCache(allMessageTypes);
+
+        // Same Option A pre-population for the IntrinsicSerializer<T> cache so
+        // ISerializable message types skip the first-occurrence CloseAndBuildAs.
+        Wolverine.Runtime.Serialization.IntrinsicSerializer.Instance.Prepopulate(allMessageTypes);
+    }
+
+    private void compileWithRuntimeScanning(WolverineOptions options, ILogger logger)
+    {
+        (Type, MethodInfo)[] methods;
+
+        // Cold-start fast path (Wolverine#1577 Tier 1): in TypeLoadMode.Static, or when the
+        // user opts in via UseStaticRegistries(), consume the pre-generated HandlerRegistry
+        // instead of scanning assemblies. Never applies during `codegen write` itself — that
+        // must run a fresh scan to regenerate the registry accurately.
+        if (shouldConsumeStaticRegistry(options) &&
+            Discovery.TryLoadStaticHandlerRegistry(options, out var registryTypes))
+        {
+            logger.LogInformation(
+                "Using pre-generated Wolverine HandlerRegistry ({Count} handler types); skipping assembly scan",
+                registryTypes.Count);
+            methods = Discovery.FindCallsFromTypes(registryTypes, options);
+        }
+        else
+        {
+            if (shouldConsumeStaticRegistry(options))
+            {
+                logger.LogWarning(
+                    "Static TypeLoadMode is active but no pre-generated HandlerRegistry was found — falling back to a runtime assembly scan. Run 'dotnet run -- codegen write' to eliminate handler discovery scanning.");
+            }
+
+            foreach (var assembly in Discovery.Assemblies)
+            {
+                logger.LogInformation("Searching assembly {Assembly} for Wolverine message handlers",
+                    assembly.GetName());
+            }
+
+            methods = Discovery.FindCalls(options);
+
+            warnAboutNearMissHandlerTypes(logger);
+        }
+
+        var calls = methods.Select(x => new HandlerCall(x.Item1, x.Item2));
+
+        if (methods.Length == 0)
+        {
+            logger.LogWarning(
+                "Wolverine found no handlers. If this is unexpected, check the assemblies that it's scanning. See https://wolverine.netlify.app/guide/handlers/discovery.html for more information");
+        }
+        else
+        {
+            AddRange(calls);
+        }
+    }
+
+    /// <summary>
+    /// GH-4702. Inside the scanning branch only, and after FindCalls has populated the conventional includes.
+    /// A plural-named class with handler-shaped methods is otherwise invisible: it never enters the handler
+    /// query, so nothing downstream can name it -- the one signal today is an Information-level "No routes
+    /// can be determined" long after startup, with no mention of the class.
+    /// </summary>
+    private void warnAboutNearMissHandlerTypes(ILogger logger)
+    {
+        foreach (var type in Discovery.FindNearMissHandlerTypes())
+        {
+            logger.LogWarning(
+                "Type {HandlerType} has handler-shaped methods but was not discovered: conventional discovery matches the '{HandlerSuffix}' / '{ConsumerSuffix}' suffix exactly. Rename it to {Suggestion}, mark it [WolverineHandler], or add it with opts.Discovery.IncludeType<{TypeName}>().",
+                type.FullNameInCode(), HandlerChain.HandlerSuffix, HandlerChain.ConsumerSuffix,
+                type.Name[..^1], type.Name);
+        }
+    }
+
+    private static bool shouldConsumeStaticRegistry(WolverineOptions options)
+    {
+        // Regenerating the registry during `codegen write` must always do a fresh scan,
+        // otherwise a stale registry would perpetuate itself and miss new handlers.
+        if (DynamicCodeBuilder.WithinCodegenCommand)
+        {
+            return false;
+        }
+
+        return options.CodeGeneration.TypeLoadMode == TypeLoadMode.Static || options.UseStaticHandlerRegistry;
+    }
+
+    private void tryApplyLocalQueueConfiguration(WolverineOptions options)
+    {
+        var local = options.Transports.GetOrCreate<LocalTransport>();
+        foreach (var chain in Chains)
+        {
+            local.ApplyConfiguration(chain);
+        }
+    }
+
+    // Walks chain.MessageType.GetInterfaces() to find interop interfaces,
+    // then closes generic-handler types over those interface message types
+    // via MakeGenericType. Bootstrap-time helper; AOT consumers preserve
+    // interop-interface types via opts.AddMessageInterfaceAssembly(...) +
+    // appropriate trim descriptors.
+    [UnconditionalSuppressMessage("Trimming", "IL2055",
+        Justification = "Closed generic message-handler type for interop interface; bootstrap-time only. See AOT guide.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2067",
+        Justification = "_messageTypes values originate from user-registered message types via RegisterMessageType / HandlerDiscovery. The TypeExtensions.Closes lambda inspects each type's generic-interface graph for MappedGenericMessageTypes keys; user message types are statically rooted via HandlerDiscovery and preserved.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "MessageType.GetInterfaces walk at bootstrap; user message types statically rooted via HandlerDiscovery. See AOT guide.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "MakeGenericType over runtime interface type; AOT consumers preserve interop-interface message types via opts.AddMessageInterfaceAssembly. See AOT guide.")]
+    private void registerMessageTypes()
+    {
+        lock (_messageTypesLock)
+        {
+            _messageTypes =
+                _messageTypes.AddOrUpdate(typeof(Acknowledgement).ToMessageTypeName(), typeof(Acknowledgement));
+
+            foreach (var chain in Chains)
+            {
+                _messageTypes = _messageTypes.AddOrUpdate(chain.MessageType.ToMessageTypeName(), chain.MessageType);
+
+                if (chain.MessageType.TryGetAttribute<InteropMessageAttribute>(out var att))
+                {
+                    _messageTypes = _messageTypes.AddOrUpdate(att.InteropType.ToMessageTypeName(), chain.MessageType);
+                }
+                else
+                {
+                    foreach (var @interface in chain.MessageType.GetInterfaces())
+                    {
+                        if (InteropAssemblies.Contains(@interface.Assembly))
+                        {
+                            _messageTypes =
+                                _messageTypes.AddOrUpdate(@interface.ToMessageTypeName(), chain.MessageType);
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (var pair in MappedGenericMessageTypes)
+        {
+            var matches = _messageTypes.Enumerate().Select(x => x.Value).Where(x => x.Closes(pair.Key));
+            foreach (var interfaceType in matches)
+            {
+                var closedType = pair.Value.MakeGenericType(interfaceType.GetGenericArguments());
+                RegisterMessageType(closedType);
+            }
+        }
+    }
+
+    /// <remarks>
+    ///     GH-3911: <see cref="EagerIdempotencyOnNonTransactionalChains" /> is deliberately pulled to the
+    ///     END, whatever order it was registered in. Its whole semantic is "for chains that nothing else
+    ///     made transactional", so it can only answer that question once every other policy has had its
+    ///     say. Left in registration order it produced generated code that varied by the order the user
+    ///     happened to call <c>AutoApplyIdempotencyOnNonTransactionalHandlers()</c> relative to a store's
+    ///     <c>IntegrateWithWolverine()</c> — which is why the store op policies could not set
+    ///     <c>IsTransactional</c> at all before this.
+    /// </remarks>
+    private IEnumerable<IHandlerPolicy> handlerPolicies(WolverineOptions options)
+    {
+        // GH-4180: DeduplicationHandlerPolicy is pulled to the end for exactly the same reason as the
+        // idempotency policy beside it -- the frames it weaves differ depending on IsTransactional, so
+        // it can only run once every store's policy has had its say.
+        var registered = options.RegisteredPolicies
+            .OrderBy(x => x is EagerIdempotencyOnNonTransactionalChains or DeduplicationHandlerPolicy ? 1 : 0)
+            .ToArray();
+
+        foreach (var policy in registered)
+        {
+            if (policy is IHandlerPolicy h)
+            {
+                yield return h;
+            }
+
+            if (policy is IChainPolicy c)
+            {
+                yield return new HandlerChainPolicy(c);
+            }
+        }
+    }
+
+    public bool TryFindMessageType(string messageTypeName, out Type messageType)
+    {
+        return _messageTypes.TryFind(messageTypeName, out messageType);
+    }
+
+    public void Group(WolverineOptions options)
+    {
+        lock (_groupingLock)
+        {
+            if (_hasGrouped)
+            {
+                return;
+            }
+
+            _calls
+                .GroupBy(x => x.MessageType)
+                .Select(x => buildHandlerChain(options, x))
+                .Each(chain => { _chains = _chains.AddOrUpdate(chain.MessageType, chain); });
+
+
+            _hasGrouped = true;
+        }
+    }
+
+    private bool isSagaMethod(HandlerCall call)
+    {
+        if (call.HandlerType.CanBeCastTo<Saga>())
+        {
+            if (call.Method.Name == SagaChain.NotFound) return true;
+            
+            // Legal for Start() methods to be be a static 
+            if (!call.Method.IsStatic) return true;
+
+            if (call.Method.Name.EqualsIgnoreCase("Start")) return true;
+            if (call.Method.Name.EqualsIgnoreCase("StartAsync")) return true;
+        }
+
+        return false;
+    }
+
+    private HandlerChain buildHandlerChain(WolverineOptions options, IGrouping<Type, HandlerCall> group)
+    {
+        // If the SagaChain handler method is a static, then it's valid to be a "Start" method
+        if (group.Any(isSagaMethod))
+        {
+            return new SagaChain(options, group, this);
+        }
+
+        return new HandlerChain(options, group, this);
+    }
+
+    // typeof(ForwardingHandler<,>).CloseAndBuildAs<MessageHandler>(this, source, destination)
+    // closes the forwarding-handler generic over (source, destination) message
+    // types. AddForwarders runs at bootstrap from HandlerGraph.Compile (or via
+    // the IForwardsTo<> assembly scan whose elimination is tracked in #2757).
+    // Same chunk D / I / J / K CloseAndBuildAs pattern.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "ForwardingHandler<,> closed over runtime (source, destination) message types at bootstrap; user types statically rooted. See AOT guide / #2757.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "ForwardingHandler<,> closed over runtime (source, destination) message types at bootstrap; user types statically rooted. See AOT guide / #2757.")]
+    internal void AddForwarders(Forwarders forwarders)
+    {
+        foreach (var pair in forwarders.Relationships)
+        {
+            var source = pair.Key;
+            var destination = pair.Value;
+
+            if (_chains.TryFind(destination, out _))
+            {
+                var handler =
+                    typeof(ForwardingHandler<,>).CloseAndBuildAs<MessageHandler>(this, source, destination);
+
+                _chains = _chains.AddOrUpdate(source, handler.Chain!);
+                _handlers = _handlers.AddOrUpdate(source, handler);
+            }
+        }
+    }
+
+    public bool CanHandle(Type messageType)
+    {
+        return _chains.TryFind(messageType, out _) || _handlers.Contains(messageType);
+    }
+
+    public void RegisterMessageType(Type messageType)
+    {
+        if (_replyTypes.Contains(messageType))
+        {
+            return;
+        }
+
+        lock (_messageTypesLock)
+        {
+            _messageTypes = _messageTypes.AddOrUpdate(messageType.ToMessageTypeName(), messageType);
+            _replyTypes = _replyTypes.Add(messageType);
+        }
+    }
+    
+    public void RegisterMessageType(Type messageType, string messageAlias)
+    {
+        lock (_messageTypesLock)
+        {
+            if (_messageTypes.TryFind(messageAlias, out var existing))
+            {
+                // GH-4532: the old message interpolated the type it found in the map, not the one being
+                // registered, so it named the wrong half of the collision -- and said nothing about
+                // [MessageIdentity], which is how you resolve one.
+                throw new InvalidOperationException(
+                    $"Message types {existing.FullNameInCode()} and {messageType.FullNameInCode()} both resolve to the message alias '{messageAlias}'. " +
+                    "Aliases must be unique because the alias is what Wolverine writes on the wire to identify the message type. " +
+                    $"Give one of them a distinct alias with [{nameof(MessageIdentityAttribute).Replace("Attribute", "")}(\"...\")], or rename the type.");
+            }
+
+            _messageTypes = _messageTypes.AddOrUpdate(messageAlias, messageType);
+            _replyTypes = _replyTypes.Add(messageType);
+        }
+    }
+
+    public IEnumerable<HandlerChain> AllChains()
+    {
+        foreach (var chain in Chains)
+        {
+            if (chain.Handlers.Any()) yield return chain;
+
+            foreach (var handlerChain in chain.ByEndpoint)
+            {
+                yield return handlerChain;
+            }
+        }
+    }
+
+    public IEnumerable<Type> AllMessageTypes()
+    {
+        foreach (var chain in Chains)
+        {
+            yield return chain.MessageType;
+
+            foreach (var publishedType in chain.PublishedTypes()) yield return publishedType;
+        }
+
+        foreach (var entry in _messageTypes.Enumerate())
+        {
+            yield return entry.Value;
+        }
+    }
+
+}

@@ -1,0 +1,295 @@
+using JasperFx.Core.Reflection;
+using Wolverine.Runtime;
+
+namespace Wolverine;
+
+public static class MessageBusExtensions
+{
+    /// <summary>
+    ///     Send a copy of this message to every node in the running Wolverine cluster, where each
+    ///     node, this one included, handles it once with its own handler for the message type.
+    ///     Peers receive it on their node control endpoint. This node handles it on a local queue,
+    ///     and never forwards it to any other endpoint the message type is routed to. Outside of
+    ///     <see cref="DurabilityMode.Balanced"/> mode there is no cluster, so only this node handles it.
+    ///     Delivery to other nodes is not durable, and a node with no handler for the message type
+    ///     discards it.
+    /// </summary>
+    /// <param name="bus"></param>
+    /// <param name="message"></param>
+    /// <param name="options"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <exception cref="NotSupportedException">The <see cref="IMessageBus"/> is not one of Wolverine's own implementations</exception>
+    public static ValueTask BroadcastToAllNodesAsync<T>(this IMessageBus bus, T message,
+        DeliveryOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(bus);
+        ArgumentNullException.ThrowIfNull(message);
+
+        if (bus is IBroadcastToAllNodes broadcaster)
+        {
+            return broadcaster.BroadcastToAllNodesAsync(message, options);
+        }
+
+        throw new NotSupportedException(
+            $"{nameof(BroadcastToAllNodesAsync)}() requires one of Wolverine's own message bus implementations, and {bus.GetType().FullNameInCode()} is not one. Use {nameof(TestMessageContext)} as the test double for unit tests.");
+    }
+
+    /// <summary>
+    ///     Publish a sequence of messages to all known subscribers in the order in which
+    ///     the messages are enumerated. Messages without known subscribers are ignored.
+    /// </summary>
+    /// <param name="bus"></param>
+    /// <param name="messages"></param>
+    /// <typeparam name="T"></typeparam>
+    public static async ValueTask PublishAllAsync<T>(this IMessageBus bus, IEnumerable<T> messages)
+    {
+        ArgumentNullException.ThrowIfNull(messages);
+
+        foreach (var message in messages)
+        {
+            await bus.PublishAsync(message).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    ///     Schedule the publishing or execution of a message until a later time
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="time"></param>
+    /// <param name="options"></param>
+    /// <typeparam name="T"></typeparam>
+    public static ValueTask ScheduleAsync<T>(this IMessageBus bus, T message, DateTimeOffset time,
+        DeliveryOptions? options = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        options ??= new DeliveryOptions();
+        options.ScheduledTime = time;
+
+        return bus.PublishAsync(message, options);
+    }
+
+    /// <summary>
+    ///     Schedule the publishing or execution of a message until a later time
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="delay"></param>
+    /// <param name="options"></param>
+    /// <typeparam name="T"></typeparam>
+    public static ValueTask ScheduleAsync<T>(this IMessageBus bus, T message, TimeSpan delay,
+        DeliveryOptions? options = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        options ??= new DeliveryOptions();
+        options.ScheduleDelay = delay;
+        return bus.PublishAsync(message, options);
+    }
+}
+
+public interface ICommandBus
+{
+    /// <summary>
+    ///     Execute the message handling for this message *right now* and wait for the completion.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <returns></returns>
+    Task InvokeAsync(object message, CancellationToken cancellation = default, TimeSpan? timeout = default);
+    
+    /// <summary>
+    ///     Execute the message handling for this message *right now* and wait for the completion.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="options">Use to pass in extra metadata like headers or group id or correlation information to the command execution</param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <returns></returns>
+    Task InvokeAsync(object message, DeliveryOptions options, CancellationToken cancellation = default, TimeSpan? timeout = default);
+
+    /// <summary>
+    ///     Execute the message handling for this message *right now* and wait for the completion and the designated response
+    ///     type T.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    Task<T> InvokeAsync<T>(object message, CancellationToken cancellation = default, TimeSpan? timeout = default);
+    
+    /// <summary>
+    ///     Execute the message handling for this message *right now* and wait for the completion and the designated response
+    ///     type T.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="options">Use to pass in extra metadata like headers or group id or correlation information to the command execution</param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    Task<T> InvokeAsync<T>(object message, DeliveryOptions options, CancellationToken cancellation = default, TimeSpan? timeout = default);
+
+    /// <summary>
+    ///     Execute the message handling right now and stream back a typed sequence of response objects.
+    ///     The handler must return <see cref="IAsyncEnumerable{TResponse}"/> of the response type.
+    ///     Only supported for locally-handled messages.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellation"></param>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    IAsyncEnumerable<TResponse> StreamAsync<TResponse>(object message, CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Execute the message handling right now and stream back a typed sequence of response objects.
+    ///     The handler must return <see cref="IAsyncEnumerable{TResponse}"/> of the response type.
+    ///     Only supported for locally-handled messages.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="options">Use to pass in extra metadata like headers or group id or correlation information to the command execution</param>
+    /// <param name="cancellation"></param>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    IAsyncEnumerable<TResponse> StreamAsync<TResponse>(object message, DeliveryOptions options, CancellationToken cancellation = default);
+
+    /// <summary>
+    ///     Execute the message handling for an inbound stream of messages right now and wait for the
+    ///     single response. The handler must accept <see cref="IAsyncEnumerable{TRequest}"/> as its
+    ///     message type, e.g. <c>Task&lt;TResponse&gt; Handle(IAsyncEnumerable&lt;TRequest&gt; messages, CancellationToken token)</c>.
+    ///     Only supported for locally-handled messages.
+    /// </summary>
+    /// <param name="messages"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <typeparam name="TRequest"></typeparam>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    Task<TResponse> StreamAsync<TRequest, TResponse>(IAsyncEnumerable<TRequest> messages,
+        CancellationToken cancellation = default, TimeSpan? timeout = default);
+
+    /// <summary>
+    ///     Execute the message handling for an inbound stream of messages right now and wait for the
+    ///     single response. The handler must accept <see cref="IAsyncEnumerable{TRequest}"/> as its
+    ///     message type, e.g. <c>Task&lt;TResponse&gt; Handle(IAsyncEnumerable&lt;TRequest&gt; messages, CancellationToken token)</c>.
+    ///     Only supported for locally-handled messages.
+    /// </summary>
+    /// <param name="messages"></param>
+    /// <param name="options">Use to pass in extra metadata like headers or group id or correlation information to the command execution</param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <typeparam name="TRequest"></typeparam>
+    /// <typeparam name="TResponse"></typeparam>
+    /// <returns></returns>
+    Task<TResponse> StreamAsync<TRequest, TResponse>(IAsyncEnumerable<TRequest> messages,
+        DeliveryOptions options, CancellationToken cancellation = default, TimeSpan? timeout = default);
+}
+
+/// <summary>
+///     Entry point for processing or publishing messages with Wolverine
+/// </summary>
+public interface IMessageBus : ICommandBus
+{
+    string? TenantId { get; set; }
+
+    ///<summary>
+    ///     Execute the message handling for this message *right now* against the specified tenant id and wait for the completion.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <returns></returns>
+    Task InvokeForTenantAsync(string tenantId, object message, CancellationToken cancellation = default, TimeSpan? timeout = default);
+
+
+    /// <summary>
+    ///     Execute the message handling for this message *right now* against the specified tenant id and wait for the completion and the designated response
+    ///     type T.
+    ///     If the message is handled locally, this delegates immediately
+    ///     If the message is handled remotely, the message is sent and the method waits for the response
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="timeout">Optional timeout</param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    Task<T> InvokeForTenantAsync<T>(string tenantId, object message, CancellationToken cancellation = default, TimeSpan? timeout = default);
+
+    /// <summary>
+    ///     Publish or process messages at a specific endpoint by
+    ///     endpoint name
+    /// </summary>
+    /// <param name="endpointName"></param>
+    /// <returns></returns>
+    IDestinationEndpoint EndpointFor(string endpointName);
+
+    /// <summary>
+    ///     Publish or process messages at a specific endpoint
+    ///     by the endpoint's Uri
+    /// </summary>
+    /// <param name="uri"></param>
+    /// <returns></returns>
+    IDestinationEndpoint EndpointFor(Uri uri);
+
+    /// <summary>
+    ///     Preview how Wolverine where and how this message would be sent. Use this as a debugging tool.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    IReadOnlyList<Envelope> PreviewSubscriptions(object message);
+    
+    /// <summary>
+    ///     Preview how Wolverine will send this message with the DeliveryOptions. Use this as a debugging tool.
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    IReadOnlyList<Envelope> PreviewSubscriptions(object message, DeliveryOptions options);
+
+    /// <summary>
+    ///     Publish a message to all known subscribers. Send the message expecting there to be at least one subscriber 
+    ///     to be executed later, but don't wait around
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="options"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    ValueTask SendAsync<T>(T message, DeliveryOptions? options = null);
+
+    /// <summary>
+    ///     Publish a message to all known subscribers. Ignores the message if there are no known subscribers
+    /// </summary>
+    /// <param name="message"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    ValueTask PublishAsync<T>(T message, DeliveryOptions? options = null);
+
+    /// <summary>
+    ///     Send a message to a specific topic name. This relies
+    ///     on having a backing transport endpoint that supports
+    ///     topic routing.
+    ///     At this point, this feature pretty well only matters with Rabbit MQ topic exchanges!
+    /// </summary>
+    /// <param name="topicName"></param>
+    /// <param name="message"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    ValueTask BroadcastToTopicAsync(string topicName, object message, DeliveryOptions? options = null);
+}

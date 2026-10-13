@@ -1,0 +1,912 @@
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+using System.Reflection;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.CodeGeneration.Services;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Wolverine.Attributes;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Middleware;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Codegen;
+using Wolverine.Persistence.Sagas;
+using Wolverine.Runtime.Partitioning;
+using Wolverine.Runtime.Routing;
+using Wolverine.Transports.Local;
+using Wolverine.Transports.Stub;
+
+namespace Wolverine.Runtime.Handlers;
+
+internal class ContextVariable : Variable
+{
+    public ContextVariable(Type variableType) : base(variableType, "context")
+    {
+    }
+
+    public override void OverrideName(string variableName)
+    {
+        // Do nothing here!
+    }
+}
+
+public class HandlerChain : Chain<HandlerChain, ModifyHandlerChainAttribute>, IWithFailurePolicies, ICodeFile
+{
+    public const string HandlerSuffix = "Handler";
+    public const string ConsumerSuffix = "Consumer";
+    public const string Handle = "Handle";
+    public const string Handles = "Handles";
+    public const string Consume = "Consume";
+    public const string Consumes = "Consumes";
+
+    protected readonly List<HandlerChain> _byEndpoint = [];
+
+    /// <summary>
+    /// Compose the name of a generated handler class for a type in a way that is guaranteed to be a legal
+    /// C# identifier. <see cref="TypeNameExtensions.ToSuffixedTypeName"/> only strips the generic arity
+    /// (the backtick suffix), so array types like <c>ItemDeleted[]</c> would otherwise leak the brackets
+    /// straight into the generated class name and fail compilation. See GH-3399.
+    /// </summary>
+    /// <remarks>
+    /// Uniqueness is unaffected: ToSuffixedTypeName appends a stable hash of the type's *full* name, and
+    /// T and T[] have different full names, so their generated names cannot collide after sanitizing.
+    /// </remarks>
+    internal static string GeneratedTypeNameFor(Type type, string suffix)
+    {
+        return type.ToSuffixedTypeName(suffix).Replace("[]", "Array").Sanitize();
+    }
+
+    private readonly List<Endpoint> _endpoints = [];
+
+    private readonly HandlerGraph _parent;
+
+    public readonly List<MethodCall> Handlers = new();
+    private GeneratedType? _generatedType;
+
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+    private Type? _handlerType;
+
+    private bool _hasConfiguredFrames;
+
+    public HandlerChain(Type messageType, HandlerGraph parent)
+    {
+        _parent = parent;
+        MessageType = messageType ?? throw new ArgumentNullException(nameof(messageType));
+
+        TypeName = GeneratedTypeNameFor(messageType, HandlerSuffix);
+
+        Description = "Message Handler for " + MessageType.FullNameInCode();
+
+        applyAuditAttributes(messageType);
+    }
+
+    protected HandlerChain(MethodCall call, HandlerGraph parent) : this(call.Method.MessageType()!, parent)
+    {
+        Handlers.Add(call);
+    }
+
+    internal HandlerChain(MethodCall call, HandlerGraph parent, Endpoint[] endpoints) : this(call, parent)
+    {
+        foreach (var endpoint in endpoints) RegisterEndpoint(endpoint);
+
+        TypeName = GeneratedTypeNameFor(call.HandlerType, HandlerSuffix);
+
+        Description = $"Message Handler for {MessageType.FullNameInCode()} using {call}";
+    }
+
+    public HandlerChain(WolverineOptions options, IGrouping<Type, HandlerCall> grouping, HandlerGraph parent) : this(
+        grouping.Key, parent)
+    {
+        // ReSharper disable once VirtualMemberCallInConstructor
+        validateAgainstInvalidSagaMethods(grouping);
+
+        Handlers.AddRange(grouping);
+
+        var i = 0;
+
+        foreach (var handler in Handlers)
+        {
+            foreach (var create in handler.Creates)
+            {
+                i = DisambiguateOutgoingVariableName(create, i);
+
+                // This was done to enable request/response through the HTTP transport
+                if (create.VariableType.IsConcrete())
+                {
+                    parent.RegisterMessageType(create.VariableType);
+                }
+            }
+        }
+
+        if (grouping.Count() > 1)
+        {
+            // ReSharper disable once VirtualMemberCallInConstructor
+            maybeAssignStickyHandlers(options, grouping);
+        }
+    }
+
+    protected virtual void maybeAssignStickyHandlers(WolverineOptions options, IGrouping<Type, HandlerCall> grouping)
+    {
+        foreach (var handlerCall in grouping)
+        {
+            tryAssignStickyEndpoints(handlerCall, options);
+        }
+    }
+
+    internal void ApplyIdempotencyCheck()
+    {
+        #pragma warning disable CS4014
+        Middleware.Insert(0, MethodCall.For<MessageContext>(x => x.AssertEagerIdempotencyAsync(CancellationToken.None)));
+
+        Postprocessors.Add(MethodCall.For<MessageContext>(x => x.PersistHandledAsync()));
+        #pragma warning restore CS4014
+    }
+
+    protected virtual void validateAgainstInvalidSagaMethods(IGrouping<Type, HandlerCall> grouping)
+    {
+        var illegalSagas = grouping.Where(x => x.HandlerType.CanBeCastTo<Saga>() && x.Method.IsStatic).ToArray();
+        if (illegalSagas.Any())
+        {
+            throw new InvalidSagaException(
+                $"Illegal static method {illegalSagas.Select(x => x.ToString()).Join(", ")}. Handler methods for existing saga data must be instance methods");
+        }
+    }
+
+    public IReadOnlyList<HandlerChain> ByEndpoint => _byEndpoint;
+
+    internal virtual bool HasDefaultNonStickyHandlers() => Handlers.Any();
+
+    /// <summary>
+    ///     In the case of "sticky" message handlers, this helps group the handler by an endpoint
+    /// </summary>
+    [IgnoreDescription]
+    public IReadOnlyList<Endpoint> Endpoints => _endpoints;
+
+    /// <summary>
+    ///     At what level should Wolverine log messages of this type about messages succeeding? The default
+    ///     is Debug (changed from Information in 6.21/GH-3490 — a per-message Information log is a real
+    ///     throughput tax on hot listeners; opt back in with Policies.MessageSuccessLogLevel(LogLevel.Information))
+    /// </summary>
+    public LogLevel SuccessLogLevel { get; set; } = LogLevel.Debug;
+
+    /// <summary>
+    ///     At what level should processing starting and finishing be logged for this message type?
+    ///     The default is Debug
+    /// </summary>
+    public LogLevel ProcessingLogLevel { get; set; } = LogLevel.Debug;
+
+    /// <summary>
+    ///     Is Open Telemetry logging enabled during message invocation (IMessageBus.InvokeAsync()) for
+    ///     this message type. Default is true
+    /// </summary>
+    public bool TelemetryEnabled { get; set; } = true;
+
+    public override MiddlewareScoping Scoping => MiddlewareScoping.MessageHandlers;
+
+    public override IdempotencyStyle Idempotency { get; set; } = IdempotencyStyle.None;
+
+    public override void ApplyParameterMatching(MethodCall call)
+    {
+        // Nothing
+    }
+
+    /// <summary>
+    ///     A textual description of this HandlerChain
+    /// </summary>
+    public override string Description { get; }
+
+    public Type MessageType { get; }
+
+    /// <summary>
+    ///     Wolverine's string identification for this message type
+    /// </summary>
+    public string TypeName { get; internal set; }
+
+    internal MessageHandler? Handler { get; private set; }
+
+    /// <summary>
+    ///     The message execution timeout in seconds for this specific message type. This uses a CancellationTokenSource
+    ///     behind the scenes, and the timeout enforcement is dependent on the usage within handlers
+    /// </summary>
+    public int? ExecutionTimeoutInSeconds { get; set; }
+
+    internal string? SourceCode => _generatedType?.SourceCode;
+
+    string ICodeFile.FileName => TypeName;
+
+    void ICodeFile.AssembleTypes(GeneratedAssembly assembly)
+    {
+        foreach (var handler in Handlers)
+        {
+            if (handler.Creates.Any(x => x.VariableType == typeof(Envelope)))
+            {
+                // GH-4532: people write this because they want to control delivery of a cascading
+                // message, which Wolverine supports three other ways. Naming them is the whole point --
+                // "you cannot do this" without "do this instead" leaves the reader stuck.
+                throw new InvalidHandlerException(
+                    $"Invalid Wolverine handler signature: {handler} returns or creates a {typeof(Envelope).FullNameInCode()}. " +
+                    "Handlers return the message itself; to control how a cascading message is delivered, return " +
+                    $"new DeliveryMessage<T>(message, new {nameof(DeliveryOptions)} {{ ... }}), implement {nameof(ISendMyself)} on the message, " +
+                    $"or return an {nameof(OutgoingMessages)} collection. To send with full control from inside the handler, " +
+                    $"take {nameof(IMessageBus)} as a parameter.");
+            }
+        }
+
+        _generatedType = assembly.AddType(TypeName, typeof(MessageHandler));
+
+        foreach (var handler in Handlers) assembly.ReferenceAssembly(handler.HandlerType.Assembly);
+
+        var handleMethod = _generatedType.MethodFor(nameof(MessageHandler.HandleAsync));
+
+        handleMethod.Sources.Add(new LoggerVariableSource(MessageType));
+        var envelopeVariable = new Variable(typeof(Envelope),
+            $"context.{nameof(IMessageContext.Envelope)}");
+
+        var messageVariable = new MessageVariable(envelopeVariable, InputType());
+
+        var frames = DetermineFrames(assembly.Rules, _parent.Container!, messageVariable);
+        var index = 0;
+        foreach (var variable in frames.SelectMany(x => x.Creates))
+        {
+            // Might wanna make this more generic later. Some kind of "reserved" variable names?
+            if (variable.Usage == "context")
+            {
+                variable.OverrideName("context" + ++index);
+            }
+        }
+
+        handleMethod.Frames.Insert(0, messageVariable.Creator!);
+        handleMethod.Frames.AddRange(frames);
+
+        if (frames.Any(x => x.IsAsync))
+        {
+            handleMethod.AsyncMode = AsyncMode.AsyncTask;
+        }
+
+        handleMethod.DerivedVariables.Add(new ContextVariable(typeof(IMessageContext)));
+        handleMethod.DerivedVariables.Add(new ContextVariable(typeof(IMessageBus)));
+
+
+        handleMethod.DerivedVariables.Add(envelopeVariable);
+    }
+
+    public override bool TryInferMessageIdentity(out PropertyInfo? property)
+    {
+        var atts = Handlers
+            .SelectMany(x => x.HandlerType.GetCustomAttributes().Concat(x.Method.GetCustomAttributes().Concat(x.Method.GetParameters().SelectMany(p => p.GetCustomAttributes()))))
+            .OfType<IMayInferMessageIdentity>().ToArray();
+
+        foreach (var att in atts)
+        {
+            if (att.TryInferMessageIdentity(this, out property)) return true;
+        }
+        
+        property = default;
+        return false;
+    }
+
+    Task<bool> ICodeFile.AttachTypes(GenerationRules rules, Assembly assembly, IServiceProvider? services,
+        string containingNamespace)
+    {
+        var found = this.As<ICodeFile>().AttachTypesSynchronously(rules, assembly, services, containingNamespace);
+        return Task.FromResult(found);
+    }
+
+    // AttachTypesSynchronously resolves the generated handler class by name in the *generated*
+    // handler assembly (or the pre-compiled one in TypeLoadMode.Static). Trim removal of the
+    // generated handler class would already break Wolverine at runtime; the lookup is finding a
+    // type that's known by construction.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Name lookup (Assembly.GetType, then an ExportedTypes walk) over the generated handler assembly to attach the generated handler type; the type is known by construction at codegen time. See AOT guide.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2074",
+        Justification = "_handlerType assignment from Assembly.GetType / ExportedTypes.FirstOrDefault — the generated handler type carries its codegen-emitted public constructor; trim preserves it because the type itself is rooted by the assembly load. See AOT guide.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2077",
+        Justification = "_handlerType is populated by a name lookup on the generated assembly; the resolved Type's constructors are emitted by the same codegen step that produced the type, so trimming preserves them in any practical setup.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "QuickBuild closes IFinder<TParameter> via MakeGenericType + Activator.CreateInstance; AOT consumers run pre-generated handlers via TypeLoadMode.Static so the reflective close never fires.")]
+    bool ICodeFile.AttachTypesSynchronously(GenerationRules rules, Assembly assembly, IServiceProvider? services,
+        string containingNamespace)
+    {
+        // GH-4625: resolve the generated handler by its full name (a targeted lookup, as HttpChain has done
+        // since GH-2908); fall back to the ExportedTypes walk only if it misses. The walk ran once per handler
+        // chain from AssertPreBuiltTypesExist, and under Native AOT every walk rebuilds runtime type
+        // information for each exported type, so it was most of WolverineRuntime.StartAsync.
+        _handlerType = assembly.GetType($"{containingNamespace}.{TypeName}")
+                       ?? assembly.ExportedTypes.FirstOrDefault(x => x.Name == TypeName);
+
+        if (_handlerType == null)
+        {
+            return false;
+        }
+
+        var container = services!.GetRequiredService<IServiceContainer>();
+        applyCustomizations(rules, container);
+
+        Handler = (MessageHandler)container.QuickBuild(_handlerType);
+        Handler.Chain = this;
+
+        Debug.WriteLine(_generatedType?.SourceCode);
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Configure the retry policies and error handling for this chain
+    /// </summary>
+    public FailureRuleCollection Failures { get; } = new();
+
+    protected void tryAssignStickyEndpoints(HandlerCall handlerCall, WolverineOptions options)
+    {
+        var endpoints = findStickyEndpoints(handlerCall, options).Distinct().ToArray();
+        if (endpoints.Any())
+        {
+            foreach (var stub in endpoints.OfType<StubEndpoint>())
+            {
+                stub.Subscriptions.Add(Subscription.ForType(MessageType));
+            }
+
+            var chain = new HandlerChain(handlerCall, options.HandlerGraph, endpoints);
+
+            Handlers.Remove(handlerCall);
+
+            _byEndpoint.Add(chain);
+        }
+    }
+
+    private IEnumerable<Endpoint> findStickyEndpoints(HandlerCall call, WolverineOptions options)
+    {
+        var foundSticky = false;
+        if (call.HandlerType.TryGetAttribute<StickyHandlerAttribute>(out var att))
+        {
+            foreach (var endpoint in options.FindOrCreateEndpointByName(att.EndpointName))
+            {
+                foundSticky = true;
+                yield return endpoint;
+            }
+        }
+
+        if (call.Method.TryGetAttribute(out att))
+        {
+            foreach (var endpoint in options.FindOrCreateEndpointByName(att.EndpointName))
+            {
+                foundSticky = true;
+                yield return endpoint;
+            }
+        }
+
+        foreach (var endpoint in options.FindEndpointsWithHandlerType(call.HandlerType))
+        {
+            foundSticky = true;
+            yield return endpoint;
+        }
+
+        // In this case, let's find the right queue
+        if (options.MultipleHandlerBehavior == MultipleHandlerBehavior.Separated && !foundSticky)
+        {
+            var endpoint = options.Transports.GetOrCreate<LocalTransport>()
+                .QueueFor(call.HandlerType.FullNameInCode().ToLowerInvariant());
+            yield return endpoint;
+        }
+    }
+
+    public void RegisterEndpoint(Endpoint endpoint)
+    {
+        _endpoints.Fill(endpoint);
+    }
+
+    public override bool HasAttribute<T>()
+    {
+        return Handlers.Any(x => x.Method.HasAttribute<T>() || x.HandlerType.HasAttribute<T>());
+    }
+
+    public override Type InputType()
+    {
+        return MessageType;
+    }
+
+    public override void UseForResponse(MethodCall methodCall)
+    {
+        var response = methodCall.ReturnVariable!;
+        response.OverrideName("response_of_" + response.Usage);
+
+        Postprocessors.Add(methodCall);
+
+        var cascading = new CaptureCascadingMessages(response);
+        Postprocessors.Add(cascading);
+    }
+
+    // GetProperties / GetFields walk on MessageType to find a member matching
+    // valueName + valueType. The member resolution happens at codegen time
+    // when binding handler parameters to message members. Same chunk Q / R / S
+    // pattern: message types are statically rooted via HandlerDiscovery.
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "MessageType member walk at codegen time; user message types are statically rooted via HandlerDiscovery. See AOT guide.")]
+    public override bool TryFindVariable(string valueName, ValueSource source, Type valueType, out Variable variable)
+    {
+        if (source == ValueSource.Claim)
+        {
+            throw new InvalidOperationException(
+                "ValueSource.Claim is only supported in HTTP endpoints, not message handlers. Use ValueSource.Header to read from Envelope headers instead.");
+        }
+
+        if (source == ValueSource.InputMember || source == ValueSource.Anything)
+        {
+            var member = (MemberInfo?)MessageType.GetProperties()
+                             .FirstOrDefault(x => x.Name.EqualsIgnoreCase(valueName) && x.PropertyType == valueType)
+                         ?? MessageType.GetFields()
+                             .FirstOrDefault(x => x.Name.EqualsIgnoreCase(valueName) && x.FieldType == valueType);
+
+            if (member != null)
+            {
+                variable = new MessageMemberVariable(member, MessageType);
+                return true;
+            }
+        }
+
+        if (source == ValueSource.Header)
+        {
+            var frame = new ReadEnvelopeHeaderFrame(valueType, valueName);
+            Middleware.Add(frame);
+            variable = frame.Variable;
+            return true;
+        }
+
+        if (source == ValueSource.Method)
+        {
+            return tryFindMethodVariable(valueName, valueType, out variable);
+        }
+
+        variable = default!;
+        return false;
+    }
+
+    // GetMethods walk on handler types to find a public-static method with the
+    // requested name + return type. Codegen-time helper; handler types
+    // statically rooted via HandlerDiscovery.
+    [UnconditionalSuppressMessage("Trimming", "IL2075",
+        Justification = "Handler-type method walk at codegen time; handler types are statically rooted via HandlerDiscovery. See AOT guide.")]
+    private bool tryFindMethodVariable(string methodName, Type returnType, out Variable variable)
+    {
+        var handlerTypes = Handlers.Select(h => h.HandlerType).Distinct();
+        foreach (var type in handlerTypes)
+        {
+            var method = type
+                .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                .FirstOrDefault(m => m.Name.EqualsIgnoreCase(methodName) && m.ReturnType == returnType);
+
+            if (method != null)
+            {
+                var call = new MethodCall(type, method);
+                Middleware.Add(call);
+                variable = call.ReturnVariable!;
+                return true;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Could not find a public static method '{methodName}' returning {returnType.FullNameInCode()} on handler types: {handlerTypes.Select(t => t.FullNameInCode()).Join(", ")}");
+    }
+
+    // GH-4752: constructed DIRECTLY rather than closed over the entity type through CloseAndBuildAs.
+    // The chain model is built at startup even under TypeLoadMode.Static, so the Activator call this
+    // replaces ran inside Native AOT applications against a closed generic frame ILC had never seen
+    // instantiated, and threw "EntityIsNotNullGuardFrame`1[TEntity] is missing native code or metadata".
+    public override Frame[] AddStopConditionIfNull(Variable variable)
+    {
+        var frame = new EntityIsNotNullGuardFrame(variable);
+
+        return [frame, new HandlerContinuationFrame(frame, NextContinuationVariableIndex())];
+    }
+
+    /// <inheritdoc />
+    /// <remarks>
+    ///     GH-4180. A message handler's natural logical id is <see cref="Envelope.DeduplicationId" />,
+    ///     which is not reachable through <see cref="TryFindVariable" />: <c>EnvelopeSerializer</c> lifts
+    ///     the <c>deduplication-id</c> wire header off into the first-class property rather than leaving
+    ///     it in <see cref="Envelope.Headers" />, so the inherited header lookup would find nothing. Any
+    ///     explicitly configured source falls through to the base implementation.
+    /// </remarks>
+    public override Variable ResolveDeduplicationId(DeduplicationRequirement requirement)
+    {
+        if (requirement.Source != ValueSource.Anything)
+        {
+            return base.ResolveDeduplicationId(requirement);
+        }
+
+        var frame = new DeduplicationIdFromEnvelopeFrame();
+        return frame.Variable;
+    }
+
+    /// <inheritdoc />
+    public override Frame[] BuildDeduplicationStopCondition(Variable condition, DeduplicationOutcome outcome,
+        DeduplicationRequirement requirement)
+    {
+        return outcome switch
+        {
+            DeduplicationOutcome.Duplicate => [new HandlerDeduplicationStopFrame(condition)],
+            DeduplicationOutcome.MissingId => [new MissingDeduplicationIdFrame(condition, Description)],
+            _ => throw new ArgumentOutOfRangeException(nameof(outcome))
+        };
+    }
+
+    // GH-4752: see the overload above - the frame is constructed directly rather than reflectively.
+    public override Frame[] AddStopConditionIfNull(Variable data, Variable? identity, IDataRequirement requirement)
+    {
+        switch (requirement.OnMissing)
+        {
+            case OnMissing.Simple404:
+            case OnMissing.ProblemDetailsWith400:
+            case OnMissing.ProblemDetailsWith404:
+            // The 204 is meaningless outside of HTTP, but the "log it and stop" behavior is identical
+            // to Simple404. Leaving it out of this group would drop it into the `default:` below and
+            // start throwing on message handlers that share an [Entity] configuration with an endpoint.
+            case OnMissing.EmptyContentWith204:
+                var frame = new EntityIsNotNullGuardFrame(data) { Requirement = requirement };
+
+                return [frame, new HandlerContinuationFrame(frame, NextContinuationVariableIndex())];
+                
+            default:
+                // AddStopConditionIfNull declares the identity nullable, so an entity addressed by
+                // something other than a single identity variable has none for the stock message to name.
+                var message = requirement.MissingMessage ?? (identity == null
+                    ? $"Required {data.VariableType.NameInCode()} was not found"
+                    : $"Unknown {data.VariableType.NameInCode()} with identity {{Id}}");
+                return [new ThrowRequiredDataMissingExceptionFrame(data, identity, message)];
+        }
+    }
+
+    public IEnumerable<Type> PublishedTypes()
+    {
+        var ignoredTypes = new[]
+        {
+            typeof(object),
+            typeof(object[]),
+            typeof(IEnumerable<object>),
+            typeof(IList<object>),
+            typeof(IReadOnlyList<object>)
+        };
+
+        foreach (var variable in Handlers.SelectMany(x => x.Creates))
+        {
+            if (ignoredTypes.Contains(variable.VariableType) ||
+                variable.VariableType.CanBeCastTo<IEnumerable<object>>())
+            {
+                continue;
+            }
+
+            // GH-4840. A return type that is never routed is not a published type: ISideEffect and the
+            // other INotToBeRouted return types are consumed by their policies inside the chain and never
+            // cascade. Listing them here put every side-effect interface through PrepopulateRoutingCache
+            // at startup, which closes EmptyMessageRouter<T> over it reflectively -- and the Fisher native
+            // lane crashed on exactly that the first time it returned a side-effect interface declared in
+            // the application, since nothing roots a router for a type that can never be routed.
+            if (variable.VariableType.CanBeCastTo<INotToBeRouted>())
+            {
+                continue;
+            }
+
+            yield return variable.VariableType;
+        }
+    }
+
+    public static HandlerChain For<T>(Expression<Action<T>> expression, HandlerGraph parent)
+    {
+        var method = ReflectionHelper.GetMethod(expression);
+        var call = new MethodCall(typeof(T), method!);
+
+        return new HandlerChain(call, parent);
+    }
+
+    // GetMethod on typeof(T) for the named handler method. T is the user-
+    // supplied handler type; adding [DAM(PublicMethods|NonPublicMethods)] on T
+    // documents the requirement explicitly. Test-helper API surface — caller
+    // sites pass concrete types so the cascade stops here.
+    public static HandlerChain For<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] T>(string methodName, HandlerGraph parent)
+        => For(typeof(T), methodName, parent);
+
+    /// <summary>
+    ///     The chain for <paramref name="methodName" /> on <paramref name="handlerType" />, which may be a
+    ///     <c>static</c> class — the shape the scaffold writes, and one a generic type argument cannot name.
+    /// </summary>
+    public static HandlerChain For(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type handlerType,
+        string methodName, HandlerGraph parent)
+    {
+        var method = handlerType.GetMethod(methodName,
+            BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+
+        if (method == null)
+        {
+            throw new ArgumentOutOfRangeException(nameof(methodName),
+                $"Cannot find method named '{methodName}' in type {handlerType.FullName}");
+        }
+
+        var call = new MethodCall(handlerType, method)
+        {
+            CommentText = "Core message handling method"
+        };
+
+        return new HandlerChain(call, parent);
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "QuickBuild closes [FromKeyedServices] parameters via CloseAndBuildAs (MakeGenericType on IFinder<T>). The _handlerType field is populated from the generated assembly's ExportedTypes; constructors are emitted by codegen and preserved. AOT consumers pre-generate handlers via TypeLoadMode.Static.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2077",
+        Justification = "_handlerType is populated from the generated handler assembly; constructors are emitted by codegen so they survive trimming in any practical setup.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "QuickBuild closes IFinder<TParameter> via MakeGenericType + Activator.CreateInstance for [FromKeyedServices] resolution; AOT consumers run pre-generated handlers via TypeLoadMode.Static so the reflective close never fires.")]
+    internal MessageHandler CreateHandler(IServiceContainer container)
+    {
+        if (_handlerType == null)
+        {
+            throw new InvalidOperationException("The handler type has not been built yet");
+        }
+
+        var handler = container.QuickBuild(_handlerType).As<MessageHandler>();
+        handler.Chain = this;
+        Handler = handler;
+
+        return handler;
+    }
+
+    /// <summary>
+    ///     Used internally to create the initial list of ordered Frames
+    ///     that will be used to generate the MessageHandler
+    /// </summary>
+    /// <param name="rules"></param>
+    /// <param name="container"></param>
+    /// <param name="messageVariable"></param>
+    /// <param name="messageVariable"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    internal virtual List<Frame> DetermineFrames(GenerationRules rules, IServiceContainer container,
+        MessageVariable messageVariable)
+    {
+        if (Handlers.Count == 0)
+        {
+            throw new InvalidOperationException("No method handlers configured for message type " +
+                                                MessageType.FullName);
+        }
+
+        Middleware.Insert(0, messageVariable.Creator!);
+
+        applyCustomizations(rules, container);
+        
+        // This has to be done *after* the customizations so the aggregate handler
+        // workflow can be applied
+        if (TryInferMessageIdentity(out var identity))
+        {
+            if (AuditedMembers.All(x => x.Member != identity))
+            {
+                Audit(identity!);
+            }    
+        }
+
+        if (AuditedMembers.Count != 0)
+        {
+            Middleware.Insert(0, new AuditToActivityFrame(this));
+        }
+
+        var handlerReturnValueFrames = determineHandlerReturnValueFrames().ToArray();
+
+        // Allow for immutable message types that get overwritten by middleware
+        foreach (var methodCall in Middleware.OfType<MethodCall>())
+            methodCall.TryReplaceVariableCreationWithAssignment(messageVariable);
+
+        // Opt-in stamping driven by WolverineOptions.Tracking.* — every diagnostic is
+        // baked into the generated handler at codegen time. When the corresponding
+        // flag is off the frame / event annotation simply isn't emitted, so the hot
+        // path has zero runtime conditionals for any of these features. This is the
+        // explicit no-runtime-if/then design discussed for GH-2694.
+        var options = container.GetInstance<WolverineOptions>();
+        IEnumerable<Frame> preamble = Array.Empty<Frame>();
+
+        if (options?.Tracking.HandlerExecutionDiagnosticsEnabled == true)
+        {
+            // wolverine.envelope.transport_lag_ms / receive_dwell_ms tags get stamped
+            // by an ApplyExecutionDiagnosticTagsFrame at the very front of the chain,
+            // before middleware. The frame emits a fully qualified static call to
+            // WolverineTracing.ApplyExecutionDiagnosticTags(Activity.Current, envelope)
+            // — Executor / HandlerPipeline / TracingExecutor never need to read the
+            // flag at runtime.
+            preamble = preamble.Append(new ApplyExecutionDiagnosticTagsFrame());
+
+            // Bracket every user handler MethodCall with wolverine.handler.started /
+            // wolverine.handler.finished. Middleware MethodCalls earlier in the frame
+            // sequence stay unmarked — the events wrap only the actual handler body.
+            foreach (var handlerCall in Handlers)
+            {
+                handlerCall.ActivityEventBeforeCall = WolverineTracing.HandlerStarted;
+                handlerCall.ActivityEventAfterCall = WolverineTracing.HandlerFinished;
+            }
+        }
+
+        if (options?.Tracking.OutboxDiagnosticsEnabled == true)
+        {
+            // Bracket FlushOutgoingMessages with wolverine.outbox.flushing /
+            // wolverine.outbox.published. Provider-agnostic — every persistence backend
+            // adds the same FlushOutgoingMessages postprocessor frame, so the events
+            // appear identically regardless of which transactional middleware is in play.
+            foreach (var flush in Postprocessors.OfType<FlushOutgoingMessages>())
+            {
+                flush.ActivityEventBeforeCall = WolverineTracing.OutboxFlushing;
+                flush.ActivityEventAfterCall = WolverineTracing.OutboxPublished;
+            }
+        }
+
+        // Cause-and-effect tracking lives between the handler return-value frames
+        // (which enqueue cascading messages onto the message context) and the
+        // postprocessor frames (which include FlushOutgoingMessages). Codegen-only
+        // gating: when the flag is off the frame isn't emitted into the chain and
+        // no runtime check is performed in the framework Executor / HandlerPipeline.
+        IEnumerable<Frame> causation = options?.Tracking.EnableMessageCausationTracking == true
+            ? new Frame[] { new RecordMessageCausationFrame() }
+            : Array.Empty<Frame>();
+
+        // GH-3001 scope priming used to be composed here, as a frame appended after the postprocessors.
+        // It now lives on the IServiceVariableSource (see HostBuilderExtensions) because a frame can
+        // only look for the scoped provider during the arranger's first resolution pass, and the scope
+        // for an opaque scoped/transient registration is not created until after it — so this never
+        // primed anything for the chains that had no explicit IServiceProvider. See GH-4171.
+
+        // The Enqueue cascading needs to happen before the post processors because of the
+        // transactional & outbox support.
+        return preamble
+            .Concat(Middleware)
+            .Concat(container.TryCreateConstructorFrames(Handlers))
+            .Concat(Handlers)
+            .Concat(handlerReturnValueFrames)
+            .Concat(causation)
+            .Concat(Postprocessors)
+            // GH-3975: after EVERY postprocessor, which is what makes "after the commit" structural rather
+            // than a position that policy ordering can silently move.
+            .Concat(PostCommitPostprocessors)
+            .ToList();
+    }
+
+
+    protected void applyCustomizations(GenerationRules rules, IServiceContainer container)
+    {
+        if (!_hasConfiguredFrames)
+        {
+            _hasConfiguredFrames = true;
+            
+            foreach (var attribute in MessageType
+                         .GetCustomAttributes(typeof(ModifyHandlerChainAttribute))
+                         .OfType<ModifyHandlerChainAttribute>()) attribute.Modify(this, rules);
+
+            foreach (var attribute in MessageType.GetCustomAttributes(typeof(ModifyChainAttribute))
+                         .OfType<ModifyChainAttribute>()) attribute.Modify(this, rules, container);
+
+            // THIS has to go before the baseline attributes and configure
+            foreach (var handlerCall in HandlerCalls())
+                WolverineParameterAttribute.TryApply(handlerCall, container, rules, this);
+
+            applyAttributesAndConfigureMethods(rules, container);
+
+
+        }
+
+        ApplyImpliedMiddlewareFromHandlers(rules);
+
+        // GH-4180. Weave logical deduplication HERE rather than from an IHandlerPolicy, because this is
+        // the first point at which both inputs are settled: [Deduplicated] is a ModifyChainAttribute and
+        // is only applied a few lines above -- well after HandlerGraph.Compile() ran the policies -- and
+        // IsTransactional is only final once [Transactional] and the stores' own policies have both had
+        // their say. Reading either one earlier produced a chain that silently wove nothing in.
+        // Idempotent, so a chain reached twice is woven once.
+        this.ApplyDeduplication(rules, container);
+
+        // Use Wolverine Parameter Attribute on any middleware
+        foreach (var methodCall in Middleware.OfType<MethodCall>().ToArray())
+            WolverineParameterAttribute.TryApply(methodCall, container, rules, this);
+    }
+
+    protected IEnumerable<Frame> determineHandlerReturnValueFrames()
+    {
+        return Handlers.SelectMany(x => x.Creates)
+            .Where(x => x is not MemberAccessVariable)
+            .Select(x => x.ReturnAction(this))
+            .SelectMany(x => x.Frames());
+    }
+
+    internal static int DisambiguateOutgoingVariableName(Variable create, int i)
+    {
+        create.OverrideName("outgoing" + ++i);
+
+        return i;
+    }
+
+    public override bool RequiresOutbox()
+    {
+        return true;
+    }
+
+    public override MethodCall[] HandlerCalls()
+    {
+        return Handlers.ToArray();
+    }
+
+    public override string ToString()
+    {
+        return
+            $"{MessageType.NameInCode()} handled by {Handlers.Select(x => $"{x.HandlerType.NameInCode()}.{x.Method.Name}()").Join(", ")}";
+    }
+
+    public override bool ShouldFlushOutgoingMessages()
+    {
+        return false;
+    }
+
+    internal TimeSpan DetermineMessageTimeout(WolverineOptions options)
+    {
+        if (ExecutionTimeoutInSeconds.HasValue)
+        {
+            return ExecutionTimeoutInSeconds.Value.Seconds();
+        }
+
+        return options.DefaultExecutionTimeout;
+    }
+}
+
+internal interface IEntityIsNotNullGuard
+{
+    IDataRequirement? Requirement { get; set; }
+}
+
+/// <remarks>
+/// GH-4752: the entity type is a constructor argument rather than a generic parameter. Closing this
+/// frame through <c>CloseAndBuildAs</c> put an <see cref="Activator" /> call on a startup path that runs
+/// even under <c>TypeLoadMode.Static</c>, which is how a Native AOT application died with
+/// "EntityIsNotNullGuardFrame`1[TEntity] is missing native code or metadata" - ILC has no reason to
+/// emit an instantiation nothing references statically. The static <see cref="EntityIsNotNullGuard{T}" />
+/// it targets IS referenced, by the generated code that calls <c>Assert</c>, so closing THAT over the
+/// entity type is safe where closing the frame was not.
+/// </remarks>
+internal class EntityIsNotNullGuardFrame : MethodCall, IEntityIsNotNullGuard
+{
+    // Resolved off the OPEN generic definition, which is statically referenced by the typeof() below and
+    // therefore keeps its reflection metadata. Looking Assert up on the CLOSED EntityIsNotNullGuard<T>
+    // instead returns null in a native image - ILC emits the instantiation's CODE, because the generated
+    // source calls it, but not reflection metadata for it - and MethodCall then NREs inside IsAsync.
+    private static readonly MethodInfo _assertMethod =
+        typeof(EntityIsNotNullGuard<>).GetMethod(nameof(EntityIsNotNullGuard<object>.Assert))!;
+
+    public EntityIsNotNullGuardFrame(Variable variable) : base(GuardTypeFor(variable.VariableType),
+        _assertMethod)
+    {
+        Arguments[0] = variable;
+        Arguments[2] = Constant.For(variable.Usage);
+    }
+
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "MakeGenericType closes EntityIsNotNullGuard<TEntity> at codegen time; the closed static class is rooted by the generated code that calls its Assert method.")]
+    private static Type GuardTypeFor(Type entityType) => typeof(EntityIsNotNullGuard<>).MakeGenericType(entityType);
+
+    public IDataRequirement? Requirement { get; set; }
+}
+
+public static class EntityIsNotNullGuard<T>
+{
+    public static HandlerContinuation Assert(T entity, ILogger logger, string entityVariableName, Envelope envelope)
+    {
+        if (entity == null)
+        {
+            logger.LogInformation(
+                "Not processing envelope {Id} because the required entity {EntityType} ('{VariableName}') cannot be found",
+                envelope.Id, typeof(T).FullNameInCode(), entityVariableName);
+            return HandlerContinuation.Stop;
+        }
+
+        return HandlerContinuation.Continue;
+    }
+}

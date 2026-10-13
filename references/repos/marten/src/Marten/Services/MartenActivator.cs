@@ -1,0 +1,160 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Marten.Schema;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Npgsql;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.Postgresql;
+
+namespace Marten.Services;
+
+internal class MartenActivator<T>: MartenActivator where T : IDocumentStore
+{
+    public MartenActivator(T store, ILogger<MartenActivator> logger): base(store, logger)
+    {
+    }
+}
+
+internal class MartenActivator: IHostedService, IGlobalLock<NpgsqlConnection>
+{
+    private readonly ILogger<MartenActivator> _logger;
+
+    public MartenActivator(IDocumentStore store, ILogger<MartenActivator> logger)
+    {
+        _logger = logger;
+        Store = store.As<DocumentStore>();
+    }
+
+    public DocumentStore Store { get; }
+
+    /// <summary>
+    ///     Poll for the apply-changes advisory lock until <see cref="StoreOptions.ApplyChangesLockTimeout" />
+    ///     expires.
+    /// </summary>
+    /// <remarks>
+    ///     #5529. Was a fixed 50 / 100 / 250ms ladder, so a store had ~400ms to win the lock. That covers the
+    ///     multi-replica rolling deploy the lock was built for — the loser waits out a peer's already-finished
+    ///     migration — but not more than one store sharing a database inside one host, where the loser has to
+    ///     wait out a migration that is still running.
+    ///     <para>
+    ///     Still <c>pg_try_advisory_lock</c> in a loop rather than the blocking <c>pg_advisory_lock</c>, on
+    ///     purpose: a blocking acquire ignores the cancellation token and cannot be bounded, so a peer that dies
+    ///     mid-migration would hang startup instead of failing it.
+    ///     </para>
+    /// </remarks>
+    public async Task<AttainLockResult> TryAttainLock(NpgsqlConnection conn, CancellationToken ct = default)
+    {
+        var deadline = DateTimeOffset.UtcNow + Store.Options.ApplyChangesLockTimeout;
+        var delay = 50;
+
+        while (true)
+        {
+            var result = await conn.TryGetGlobalLock(Store.Options.ApplyChangesLockId, cancellation: ct)
+                .ConfigureAwait(false);
+
+            // ShouldReconnect is the caller's business: Weasel opens a fresh connection and calls back in.
+            if (result.Succeeded || result.ShouldReconnect)
+                return result;
+
+            if (DateTimeOffset.UtcNow >= deadline)
+                return result;
+
+            await Task.Delay(delay, ct).ConfigureAwait(false);
+
+            // Backs off to a 250ms ceiling — the last rung of the original ladder. A migration holding the
+            // lock runs for seconds, so polling faster than that only adds round trips.
+            delay = Math.Min(delay * 2, 250);
+        }
+    }
+
+    public Task ReleaseLock(NpgsqlConnection conn, CancellationToken ct = default)
+    {
+        return conn.ReleaseGlobalLock(Store.Options.ApplyChangesLockId, cancellation: ct);
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        // GH-3521 (jasperfx#543): surface the application-assembly-reuse warning buffered from
+        // JasperFxOptions during StoreOptions.ReadJasperFxOptions. Only non-null in the multi-host
+        // test-harness divergence case, so this stays silent for a normal single-host application.
+        if (Store.Options.ApplicationAssemblyReuseWarning.IsNotEmpty())
+        {
+            _logger.LogWarning("{ApplicationAssemblyReuseWarning}", Store.Options.ApplicationAssemblyReuseWarning);
+        }
+
+        if (Store.Options.CreateDatabases != null)
+        {
+            var databaseGenerator = new DatabaseGenerator();
+            await databaseGenerator
+                .CreateDatabasesAsync(Store.Tenancy, Store.Options.CreateDatabases, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        var databases = await Store.Tenancy.BuildDatabases().ConfigureAwait(false);
+
+        if (Store.Options.ShouldApplyChangesOnStartup)
+        {
+            var failureMode = Store.Options.ResourceMigrationFailureMode;
+            foreach (PostgresqlDatabase database in databases)
+            {
+                // #4750: propagate the failure mode so Weasel's apply returns rather than throwing when it
+                // can't attain the global migration lock (e.g. a replica that loses the lock race during a
+                // multi-replica rolling deploy).
+                database.ResourceMigrationFailureMode = failureMode;
+
+                try
+                {
+                    await database
+                        .ApplyAllConfiguredChangesToDatabaseAsync(this, AutoCreate.CreateOrUpdate, ct: cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception e) when (failureMode == ResourceMigrationFailureMode.ContinueOnFailures)
+                {
+                    // Belt-and-suspenders for migration failures of any kind (not just the lock timeout):
+                    // log and keep starting up rather than crash-looping. FailFast (default) rethrows.
+                    _logger.LogError(e,
+                        "Failed to apply configured database changes to {Database} at startup. Continuing startup anyway because ResourceMigrationFailureMode is ContinueOnFailures.",
+                        database.Identifier);
+                }
+            }
+
+            // #5093: roll every configured rolling-window RANGE partition forward and retire the aged ones.
+            // The migration above already provisions the leading edge — with a partition manager attached the
+            // delta is additive — but migration never removes data, so the retention drop has to be driven
+            // separately. Gated on the same opt-in as the migration itself: applying changes on startup is
+            // how a host says "Marten owns this schema", and dropping partitions is emphatically a schema
+            // change. It runs BEFORE the assert below on purpose — once the clock crosses a period boundary
+            // the database is legitimately missing the new leading-edge partition, and asserting first would
+            // fail a deployment over a difference this pass is about to close.
+            await RollingPartitions
+                .ApplyAsync(databases.OfType<PostgresqlDatabase>(), _logger, rollForward: true, dropAged: true,
+                    cancellationToken).ConfigureAwait(false);
+        }
+
+        if (Store.Options.ShouldAssertDatabaseMatchesConfigurationOnStartup)
+        {
+            foreach (var database in databases)
+            {
+                await database.AssertDatabaseMatchesConfigurationAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        foreach (var initialData in Store.Options.InitialData)
+        {
+            _logger.LogInformation("Applying initial data {InitialData}", initialData);
+            await initialData.Populate(Store, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+}

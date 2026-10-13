@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Load-test rig for GH-3490 (Kafka performance deep dive). Deliberately NOT part of
+         either .slnx solution or CI; build and run standalone via rig.sh in this folder. -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Transports\Kafka\Wolverine.Kafka\Wolverine.Kafka.csproj" />
+        <ProjectReference Include="..\..\Transports\RabbitMQ\Wolverine.RabbitMQ\Wolverine.RabbitMQ.csproj" />
+        <ProjectReference Include="..\..\Transports\NATS\Wolverine.Nats\Wolverine.Nats.csproj" />
+        <ProjectReference Include="..\..\Transports\Pulsar\Wolverine.Pulsar\Wolverine.Pulsar.csproj" />
+        <ProjectReference Include="..\..\Transports\Redis\Wolverine.Redis\Wolverine.Redis.csproj" />
+        <ProjectReference Include="..\..\Transports\Azure\Wolverine.AzureServiceBus\Wolverine.AzureServiceBus.csproj" />
+        <ProjectReference Include="..\..\Persistence\Wolverine.Postgresql\Wolverine.Postgresql.csproj" />
+        <!-- GH-4369: the outbox-store lane A/Bs StoreOutgoingAsync per store -->
+        <ProjectReference Include="..\..\Persistence\Wolverine.SqlServer\Wolverine.SqlServer.csproj" />
+        <ProjectReference Include="..\..\Persistence\Oracle\Wolverine.Oracle\Wolverine.Oracle.csproj" />
+        <ProjectReference Include="..\..\Persistence\Wolverine.RavenDb\Wolverine.RavenDb.csproj" />
+        <ProjectReference Include="..\..\Wolverine.RuntimeCompilation\Wolverine.RuntimeCompilation.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\Servers.cs">
+            <Link>Servers.cs</Link>
+        </Compile>
+    </ItemGroup>
+
+</Project>

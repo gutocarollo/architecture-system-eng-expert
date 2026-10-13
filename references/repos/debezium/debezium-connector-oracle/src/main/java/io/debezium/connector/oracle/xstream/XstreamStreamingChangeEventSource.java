@@ -1,0 +1,339 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.connector.oracle.xstream;
+
+import java.sql.SQLException;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.debezium.DebeziumException;
+import io.debezium.connector.oracle.OracleConnection;
+import io.debezium.connector.oracle.OracleConnectorConfig;
+import io.debezium.connector.oracle.OracleDatabaseSchema;
+import io.debezium.connector.oracle.OracleDatabaseVersion;
+import io.debezium.connector.oracle.OracleOffsetContext;
+import io.debezium.connector.oracle.OraclePartition;
+import io.debezium.connector.oracle.Scn;
+import io.debezium.connector.oracle.SourceInfo;
+import io.debezium.connector.oracle.StreamingAdapter;
+import io.debezium.connector.oracle.StreamingAdapter.TableNameCaseSensitivity;
+import io.debezium.connector.oracle.jdbc.OracleConnectionFactory;
+import io.debezium.pipeline.ErrorHandler;
+import io.debezium.pipeline.EventDispatcher;
+import io.debezium.pipeline.monitor.OffsetActivityMonitor;
+import io.debezium.pipeline.monitor.OffsetActivityMonitorService;
+import io.debezium.pipeline.source.snapshot.incremental.SignalBasedIncrementalSnapshotContext;
+import io.debezium.pipeline.source.spi.StreamingChangeEventSource;
+import io.debezium.pipeline.txmetadata.TransactionContext;
+import io.debezium.relational.TableId;
+import io.debezium.util.Clock;
+import io.debezium.util.DelayStrategy;
+
+import oracle.sql.NUMBER;
+import oracle.streams.StreamsException;
+import oracle.streams.XStreamOut;
+import oracle.streams.XStreamUtility;
+
+/**
+ * A {@link StreamingChangeEventSource} based on Oracle's XStream API. The XStream event handler loop is executed in a
+ * separate executor.
+ *
+ * @author Gunnar Morling
+ */
+public class XstreamStreamingChangeEventSource implements StreamingChangeEventSource<OraclePartition, OracleOffsetContext> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XstreamStreamingChangeEventSource.class);
+
+    private static final int DEFAULT_MAX_ATTACH_RETRIES = 10;
+
+    private final OracleConnectorConfig connectorConfig;
+    private final OracleConnectionFactory connectionFactory;
+    private final EventDispatcher<OraclePartition, TableId> dispatcher;
+    private final ErrorHandler errorHandler;
+    private final Clock clock;
+    private final OracleDatabaseSchema schema;
+    private final XStreamStreamingChangeEventSourceMetrics streamingMetrics;
+    private final String xstreamOutboundServerName;
+    private volatile XStreamOut xsOut;
+    private final int posVersion;
+    /**
+     * A message box between thread that is informed about committed offsets and the XStream thread.
+     * When the last offset is committed its value is passed to the XStream thread and a watermark is
+     * set to signal which events were safely processed.
+     * This is important as setting watermark in a concurrent thread can lead to a deadlock due to an
+     * internal Oracle code locking.
+     */
+    private final AtomicReference<PositionAndScn> lcrMessage = new AtomicReference<>();
+    private final OffsetActivityMonitorService offsetActivityMonitorService;
+    private OracleOffsetContext effectiveOffset;
+    private OffsetActivityMonitor<OraclePartition, OracleOffsetContext> offsetActivityMonitor;
+
+    public XstreamStreamingChangeEventSource(OracleConnectorConfig connectorConfig, OracleConnectionFactory connectionFactory,
+                                             EventDispatcher<OraclePartition, TableId> dispatcher, ErrorHandler errorHandler,
+                                             Clock clock, OracleDatabaseSchema schema,
+                                             XStreamStreamingChangeEventSourceMetrics streamingMetrics) {
+        this.connectorConfig = connectorConfig;
+        this.connectionFactory = connectionFactory;
+        this.dispatcher = dispatcher;
+        this.errorHandler = errorHandler;
+        this.clock = clock;
+        this.schema = schema;
+        this.streamingMetrics = streamingMetrics;
+        this.xstreamOutboundServerName = connectorConfig.getXStreamOutboundServerName();
+        this.posVersion = resolvePosVersion(connectionFactory.streamingConnectionFactory().mainConnection());
+        this.offsetActivityMonitorService = OffsetActivityMonitorService.lookup(connectorConfig.getServiceRegistry());
+    }
+
+    @Override
+    public void init(OracleOffsetContext offsetContext) throws InterruptedException {
+        this.effectiveOffset = offsetContext == null ? emptyContext() : offsetContext;
+    }
+
+    private OracleOffsetContext emptyContext() {
+        return OracleOffsetContext.create().logicalName(connectorConfig)
+                .snapshotPendingTransactions(Collections.emptyMap())
+                .transactionContext(new TransactionContext())
+                .incrementalSnapshotContext(new SignalBasedIncrementalSnapshotContext<>()).build();
+    }
+
+    @Override
+    public void execute(ChangeEventSourceContext context, OraclePartition partition, OracleOffsetContext offsetContext)
+            throws InterruptedException {
+
+        this.effectiveOffset = offsetContext;
+
+        LcrEventHandler eventHandler = new LcrEventHandler(connectorConfig, errorHandler, dispatcher, clock, schema,
+                partition, offsetContext, isTableCaseInsensitive(), this, streamingMetrics);
+
+        try (OracleConnection xsConnection = connectAndAttachWithRetries(context, getStartPosition(offsetContext))) {
+            if (xsConnection == null) {
+                // The connector was stopped while attempting to attach to the outbound server.
+                LOGGER.info("Streaming stopped before the attach to outbound server {} completed.", xstreamOutboundServerName);
+                return;
+            }
+            try {
+                pinConnectionToPdb();
+                // 2. receive events while running
+                while (context.isRunning()) {
+                    LOGGER.trace("Receiving LCR");
+                    xsOut.receiveLCRCallback(eventHandler, XStreamOut.DEFAULT_MODE);
+                    dispatcher.dispatchHeartbeatEvent(partition, offsetContext);
+
+                    offsetActivityMonitorService.pulse(partition, offsetContext);
+
+                    if (context.isPaused()) {
+                        LOGGER.info("Streaming will now pause");
+                        context.streamingPaused();
+                        context.waitSnapshotCompletion();
+                        // The blocking snapshot shares the same main connection and its
+                        // close() resets the session back to CDB$ROOT; re-pin to the PDB
+                        // before processing any further LCRs.
+                        pinConnectionToPdb();
+                        LOGGER.info("Streaming resumed");
+                    }
+                }
+            }
+            finally {
+                // 3. disconnect
+                if (this.xsOut != null) {
+                    try {
+                        XStreamOut xsOut = this.xsOut;
+                        this.xsOut = null;
+                        xsOut.detach(XStreamOut.DEFAULT_MODE);
+                    }
+                    catch (StreamsException e) {
+                        LOGGER.error("Couldn't detach from XStream outbound server " + xstreamOutboundServerName, e);
+                    }
+                }
+            }
+        }
+        catch (Throwable e) {
+            errorHandler.setProducerThrowable(e);
+        }
+    }
+
+    @Override
+    public void commitOffset(Map<String, ?> partition, Map<String, ?> offset) {
+        if (xsOut != null) {
+            LOGGER.debug("Sending message to request recording of offsets to Oracle");
+            final LcrPosition lcrPosition = LcrPosition.valueOf((String) offset.get(SourceInfo.LCR_POSITION_KEY));
+            final Scn scn = OracleOffsetContext.getScnFromOffsetMapByKey(offset, SourceInfo.SCN_KEY);
+            // We can safely overwrite the message even if it was not processed. The watermarked will be set to the highest
+            // (last) delivered value in a single step instead of incrementally
+            sendPublishedPosition(lcrPosition, scn);
+        }
+    }
+
+    @Override
+    public OracleOffsetContext getOffsetContext() {
+        return effectiveOffset;
+    }
+
+    @Override
+    public Optional<OffsetActivityMonitor<OraclePartition, OracleOffsetContext>> getOffsetActivityMonitor() {
+        if (offsetActivityMonitor == null) {
+            offsetActivityMonitor = new XStreamOffsetActivityMonitor(
+                    connectorConfig.getOffsetActivityMonitorInterval(),
+                    streamingMetrics);
+        }
+        return Optional.of(offsetActivityMonitor);
+    }
+
+    /**
+     * Returns the shared out-of-bands JDBC connection used by the LCR handler for DDL fetches
+     * and LOB re-selection. It must always target the primary/source database: in downstream
+     * and standby capture modes the streaming factory's main connection points at the mining
+     * or standby instance, where the captured tables do not exist, whereas
+     * {@code snapshotConnectionFactory()} resolves to the primary in all factory
+     * implementations.
+     *
+     * <p>{@code JdbcConnection} re-establishes a closed connection lazily on first use and
+     * only re-runs its initial operations, which would leave the new session on
+     * {@code CDB$ROOT}. If the connection is found closed here, it is re-established and
+     * pinned to the PDB again before being handed out.
+     */
+    OracleConnection getOutOfBandsConnection() throws SQLException {
+        final OracleConnection connection = connectionFactory.snapshotConnectionFactory().mainConnection();
+        if (!connection.isConnected()) {
+            LOGGER.info("Out-of-bands connection is no longer connected, re-establishing it");
+            connection.connection();
+            pinConnectionToPdb();
+        }
+        return connection;
+    }
+
+    /**
+     * Pins the out-of-bands connection's session to the configured PDB when the connector is
+     * configured against a CDB+PDB topology. Must be called before the receive loop starts,
+     * again after a blocking snapshot completes because
+     * {@code OracleSnapshotChangeEventSource#close()} resets the session back to
+     * {@code CDB$ROOT}, and whenever the connection has been re-established.
+     */
+    private void pinConnectionToPdb() {
+        if (connectorConfig.isUsingPluggableDatabase()) {
+            LOGGER.debug("Pinning out-of-bands connection session to PDB '{}'", connectorConfig.getPdbName());
+            connectionFactory.snapshotConnectionFactory().mainConnection().setSessionToPdb(connectorConfig.getPdbName());
+        }
+    }
+
+    private boolean isTableCaseInsensitive() {
+        final StreamingAdapter<?> adapter = connectorConfig.getAdapter();
+        final OracleConnection connection = connectionFactory.streamingConnectionFactory().mainConnection();
+        return TableNameCaseSensitivity.INSENSITIVE.equals(adapter.getTableNameCaseSensitivity(connection));
+    }
+
+    private byte[] getStartPosition(OracleOffsetContext offsetContext) {
+        final String lcrPosition = offsetContext.getLcrPosition();
+        if (lcrPosition != null) {
+            return LcrPosition.valueOf(lcrPosition).getRawPosition();
+        }
+        return convertScnToPosition(offsetContext.getScn());
+    }
+
+    private OracleConnection connectAndAttachWithRetries(ChangeEventSourceContext context, byte[] startPosition) throws Exception {
+        OracleConnection connection = null;
+        final DelayStrategy retryStrategy = DelayStrategy.exponential(Duration.ofSeconds(1), Duration.ofMinutes(1));
+        for (int attempt = 1; attempt <= DEFAULT_MAX_ATTACH_RETRIES; attempt++) {
+            // The delay between attempts restores the thread's interrupt flag rather than propagating the
+            // interrupt, so both the running state and the interrupt flag must be checked here; otherwise
+            // the remaining attempts would be made back-to-back after a shutdown request.
+            if (!context.isRunning() || Thread.currentThread().isInterrupted()) {
+                LOGGER.info("Abandoning attach to outbound server {}, the connector is stopping.", xstreamOutboundServerName);
+                return null;
+            }
+
+            XStreamOut out = null;
+            try {
+                connection = connectionFactory.streamingConnectionFactory().newConnection();
+                connection.setAutoCommit(true);
+
+                out = XStreamOut.attach((oracle.jdbc.OracleConnection) connection.connection(), xstreamOutboundServerName,
+                        startPosition, 1, 1, XStreamOut.DEFAULT_MODE);
+
+                xsOut = out;
+                return connection;
+            }
+            catch (StreamsException e) {
+                if (!isAttachExceptionRetriable(e)) {
+                    LOGGER.warn("Failed to attach to outbound server with non-retriable error", e);
+                    throw e;
+                }
+                if (attempt == DEFAULT_MAX_ATTACH_RETRIES) {
+                    LOGGER.warn("Failed to attach to outbound server with max attempts", e);
+                    throw e;
+                }
+
+                LOGGER.warn("Failed to attach to outbound server - attempt {} / {}: {}", attempt, DEFAULT_MAX_ATTACH_RETRIES, e.getMessage());
+                retryStrategy.sleepWhen(true);
+            }
+            finally {
+                // If we failed to attach and connection isn't null, close and clear it
+                if (xsOut == null && connection != null) {
+                    connection.close();
+                    connection = null;
+                }
+            }
+        }
+        throw new DebeziumException("Failed to attach to the Oracle XStream outbound server");
+    }
+
+    private boolean isAttachExceptionRetriable(StreamsException e) {
+        return e.getErrorCode() == 26653
+                || e.getErrorCode() == 23656
+                || e.getErrorCode() == 26928
+                || e.getErrorCode() == 26812 // An active session currently attached to XStream server
+                || e.getErrorCode() == 26804 // Apply is disabled; attach restarts it once the previous instance is gone
+                || e.getErrorCode() == 26808 // Apply process died unexpectedly; typically mid-restart after a detach
+                || e.getMessage().contains("did not start properly and is currently in state")
+                || e.getMessage().contains("Timeout occurred while starting XStream process")
+                || e.getMessage().contains("Unable to communicate with XStream apply coordinator process");
+    }
+
+    private byte[] convertScnToPosition(Scn scn) {
+        try {
+            return XStreamUtility.convertSCNToPosition(new NUMBER(scn.toString(), 0), this.posVersion);
+        }
+        catch (SQLException | StreamsException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static class PositionAndScn {
+        public final LcrPosition position;
+        public final byte[] scn;
+
+        public PositionAndScn(LcrPosition position, byte[] scn) {
+            this.position = position;
+            this.scn = scn;
+        }
+    }
+
+    XStreamOut getXsOut() {
+        return xsOut;
+    }
+
+    private void sendPublishedPosition(final LcrPosition lcrPosition, final Scn scn) {
+        lcrMessage.set(new PositionAndScn(lcrPosition, (scn != null) ? convertScnToPosition(scn) : null));
+    }
+
+    PositionAndScn receivePublishedPosition() {
+        return lcrMessage.getAndSet(null);
+    }
+
+    private static int resolvePosVersion(OracleConnection connection) {
+        final OracleDatabaseVersion databaseVersion = connection.getOracleVersion();
+        if (databaseVersion.getMajor() == 11 || (databaseVersion.getMajor() == 12 && databaseVersion.getMinor() < 2)) {
+            return XStreamUtility.POS_VERSION_V1;
+        }
+        return XStreamUtility.POS_VERSION_V2;
+    }
+}

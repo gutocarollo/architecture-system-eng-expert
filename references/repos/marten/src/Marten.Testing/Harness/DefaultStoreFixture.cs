@@ -1,0 +1,55 @@
+using System;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Events;
+using Marten.Events;
+using Npgsql;
+using Weasel.Core;
+using Xunit;
+
+namespace Marten.Testing.Harness
+{
+    public class DefaultStoreFixture: IAsyncLifetime
+    {
+        public readonly Lazy<DocumentStore> StringStreamIdentifiers = new Lazy<DocumentStore>(() =>
+        {
+            var store = DocumentStore.For(opts =>
+            {
+                opts.Connection(ConnectionSource.ConnectionString);
+                opts.AutoCreateSchemaObjects = AutoCreate.All;
+                opts.DatabaseSchemaName = "string_events";
+                opts.Events.StreamIdentity = StreamIdentity.AsString;
+            });
+
+            using var conn = new NpgsqlConnection(ConnectionSource.ConnectionString);
+            conn.Open();
+            conn.CreateCommand("drop schema if exists string_events cascade").ExecuteNonQuery();
+
+            return store;
+        });
+
+        public ValueTask InitializeAsync()
+        {
+            Store = DocumentStore.For(opts =>
+            {
+                opts.Connection(ConnectionSource.ConnectionString);
+                opts.AutoCreateSchemaObjects = AutoCreate.All;
+            });
+
+            // Do this exactly once and no more.
+            return new ValueTask(Store.Advanced.Clean.CompletelyRemoveAllAsync());
+        }
+
+        public DocumentStore Store { get; private set; }
+
+        public ValueTask DisposeAsync()
+        {
+            Store.Dispose();
+            if (StringStreamIdentifiers.IsValueCreated)
+            {
+                StringStreamIdentifiers.Value.Dispose();
+            }
+            return default;
+        }
+    }
+}

@@ -1,0 +1,52 @@
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Marten.Schema.BulkLoading;
+using Marten.Storage;
+
+namespace Marten.Internal.CodeGeneration;
+
+public class SubClassBulkLoader<T, TRoot>: IBulkLoader<T> where T : TRoot
+{
+    private readonly IBulkLoader<TRoot> _inner;
+
+    public SubClassBulkLoader(IBulkLoader<TRoot> inner)
+    {
+        _inner = inner;
+    }
+
+    public Task LoadAsync(Tenant tenant, ISerializer serializer, DbConnection conn, IEnumerable<T> documents,
+        CancellationToken cancellation)
+    {
+        return _inner.LoadAsync(tenant, serializer, conn, documents.OfType<TRoot>(), cancellation);
+    }
+
+    public string CreateTempTableForCopying()
+    {
+        return _inner.CreateTempTableForCopying();
+    }
+
+    public Task LoadIntoTempTableAsync(Tenant tenant, ISerializer serializer, DbConnection conn,
+        IEnumerable<T> documents,
+        CancellationToken cancellation)
+    {
+        return _inner.LoadIntoTempTableAsync(tenant, serializer, conn, documents.OfType<TRoot>(), cancellation);
+    }
+
+    public string CopyNewDocumentsFromTempTable()
+    {
+        return _inner.CopyNewDocumentsFromTempTable();
+    }
+
+    public string OverwriteDuplicatesFromTempTable()
+    {
+        return _inner.OverwriteDuplicatesFromTempTable();
+    }
+
+    public string OverwriteDuplicatesFromTempTableWithVersionCheck()
+    {
+        return _inner.OverwriteDuplicatesFromTempTableWithVersionCheck();
+    }
+}

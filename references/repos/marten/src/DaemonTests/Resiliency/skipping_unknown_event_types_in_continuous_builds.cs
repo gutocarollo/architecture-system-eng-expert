@@ -1,0 +1,105 @@
+using System;
+using System.Threading.Tasks;
+using DaemonTests.MultiTenancy;
+using JasperFx.Core;
+using JasperFx.Events;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
+using Marten;
+using Marten.Events.Aggregation;
+using Marten.Events.Daemon.Coordination;
+using Marten.Events.Projections;
+using Marten.Testing.Harness;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Weasel.Postgresql;
+using Xunit;
+// 9.0: JFx.Events 2.0 introduced its own IProjectionCoordinator interface;
+// alias to the Marten-specific one this test fixture/sample actually uses.
+using IProjectionCoordinator = Marten.Events.Daemon.Coordination.IProjectionCoordinator;
+
+namespace DaemonTests.Resiliency;
+
+public class skipping_unknown_event_types_in_continuous_builds : HostedStoreContext
+{
+    private IHost _appender;
+    private IHost _processor;
+
+    public override async ValueTask InitializeAsync()
+    {
+        await SchemaUtils.DropSchema(ConnectionSource.ConnectionString, SchemaName);
+
+        _appender = await StartHostAsync(
+            opts => opts.Events.MapEventType<MTAEvent>("TripleAAA"),
+            configureMarten: marten => marten.ApplyAllDatabaseChangesOnStartup());
+    }
+
+    [Fact]
+    public async Task cleanly_skip_over_unknown_events()
+    {
+        var store = _appender.Services.GetRequiredService<IDocumentStore>();
+
+        var streamId = Guid.NewGuid();
+
+        using (var session = store.LightweightSession())
+        {
+            session.Events.StartStream<MyAggregate>(streamId, new MTAEvent(), new MTAEvent(), new MTBEvent(), new MTBEvent(),
+                new MTCEvent(), new MTDEvent());
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            // Rig up a bad, unknown event type
+            session.QueueSqlCommand(
+                $"update {SchemaName}.mt_events set mt_dotnet_type = 'wrong, wrong' where version = 1");
+            await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        _processor = await StartHostAsync(
+            opts => opts.Projections.Add(new WeirdCustomAggregation(), ProjectionLifecycle.Async),
+            DaemonMode.Solo);
+
+        var daemon = _processor.Services.GetRequiredService<IProjectionCoordinator>().DaemonForMainDatabase();
+        await daemon.WaitForShardToBeRunning("Weird:All", 10.Seconds());
+        await daemon.WaitForNonStaleData(5.Seconds());
+
+        await using (var session = _processor.DocumentStore().LightweightSession())
+        {
+            var aggregate = await session.LoadAsync<MyAggregate>(streamId, TestContext.Current.CancellationToken);
+            aggregate.ShouldNotBeNull();
+            aggregate.BCount.ShouldBe(2);
+            aggregate.CCount.ShouldBe(1);
+            aggregate.DCount.ShouldBe(1);
+        }
+    }
+}
+
+public partial class WeirdCustomAggregation: SingleStreamProjection<MyAggregate, Guid>
+{
+    public WeirdCustomAggregation()
+    {
+        Name = "Weird";
+    }
+
+    public override MyAggregate Evolve(MyAggregate snapshot, Guid id, IEvent e)
+    {
+        snapshot ??= new MyAggregate(){ Id = id };
+        switch (e.Data)
+        {
+            case MTAEvent:
+                snapshot.ACount++;
+                break;
+            case MTBEvent:
+                snapshot.BCount++;
+                break;
+            case MTCEvent:
+                snapshot.CCount++;
+                break;
+            case MTDEvent:
+                snapshot.DCount++;
+                break;
+        }
+
+        return snapshot;
+    }
+
+}

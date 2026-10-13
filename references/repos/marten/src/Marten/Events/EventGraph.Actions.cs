@@ -1,0 +1,145 @@
+﻿using System;
+using JasperFx.Events;
+using Marten.Internal.Sessions;
+
+namespace Marten.Events;
+
+public partial class EventGraph
+{
+    internal StreamAction Append(DocumentSessionBase session, Guid stream, params object[] events)
+    {
+        EnsureAsGuidStorage(session);
+
+        if (stream == Guid.Empty)
+        {
+            throw new ArgumentOutOfRangeException(nameof(stream), "Cannot use an empty Guid as the stream id");
+        }
+
+        // 9.0 (#4375): manual loop avoids the Select/iterator + per-call closure allocation
+        // (the previous lambda captured `stream` so the closure object was created per Append).
+        var wrapped = new IEvent[events.Length];
+        for (var i = 0; i < events.Length; i++)
+        {
+            var e = BuildEvent(events[i]);
+            e.StreamId = stream;
+            wrapped[i] = e;
+        }
+
+        if (session.WorkTracker.TryFindStream(stream, out var eventStream))
+        {
+            eventStream.AddEvents(wrapped);
+        }
+        else
+        {
+            eventStream = StreamAction.Append(stream, wrapped);
+            eventStream.TenantId = session.TenantId;
+
+            session.WorkTracker.Streams.Add(eventStream);
+        }
+
+        return eventStream;
+    }
+
+    internal StreamAction Append(DocumentSessionBase session, string stream, params object[] events)
+    {
+        EnsureAsStringStorage(session);
+
+        if (stream.IsEmpty())
+        {
+            throw new ArgumentOutOfRangeException(nameof(stream), "The stream key cannot be null or empty");
+        }
+
+        // 9.0 (#4375): see EventGraph.Append(Guid …) above — manual loop, no Select/closure.
+        var wrapped = new IEvent[events.Length];
+        for (var i = 0; i < events.Length; i++)
+        {
+            var e = BuildEvent(events[i]);
+            e.StreamKey = stream;
+            wrapped[i] = e;
+        }
+
+        if (session.WorkTracker.TryFindStream(stream, out var eventStream))
+        {
+            eventStream.AddEvents(wrapped);
+        }
+        else
+        {
+            eventStream = StreamAction.Append(stream, wrapped);
+            eventStream.TenantId = session.TenantId;
+            session.WorkTracker.Streams.Add(eventStream);
+        }
+
+        return eventStream;
+    }
+
+    internal StreamAction StartStream(DocumentSessionBase session, Type? aggregateType, Guid id, params object[] events)
+    {
+        EnsureAsGuidStorage(session);
+
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentOutOfRangeException(nameof(id), "Cannot use an empty Guid as the stream id");
+        }
+
+
+        var stream = StreamAction.Start(this, id, events);
+        stream.TenantId = session.TenantId;
+        stream.AggregateType = aggregateType;
+        session.WorkTracker.Streams.Add(stream);
+
+        return stream;
+    }
+
+    internal StreamAction StartEmptyStream(DocumentSessionBase session, Guid id, params object[] events)
+    {
+        EnsureAsGuidStorage(session);
+
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentOutOfRangeException(nameof(id), "Cannot use an empty Guid as the stream id");
+        }
+
+        var stream = new StreamAction(id, StreamActionType.Start) { TenantId = session.TenantId };
+
+        session.WorkTracker.Streams.Add(stream);
+
+        return stream;
+    }
+
+    internal StreamAction StartEmptyStream(DocumentSessionBase session, string key, params object[] events)
+    {
+        EnsureAsStringStorage(session);
+
+        if (key.IsEmpty())
+        {
+            throw new ArgumentOutOfRangeException(nameof(key), "Cannot use an empty or null string as the stream key");
+        }
+
+
+        var stream = new StreamAction(key, StreamActionType.Start) { TenantId = session.TenantId };
+
+        session.WorkTracker.Streams.Add(stream);
+
+        return stream;
+    }
+
+    internal StreamAction StartStream(DocumentSessionBase session, string streamKey, Type? aggregateType,
+        params object[] events)
+    {
+        EnsureAsStringStorage(session);
+
+        if (streamKey.IsEmpty())
+        {
+            throw new ArgumentOutOfRangeException(nameof(streamKey), "The stream key cannot be null or empty");
+        }
+
+
+        var stream = StreamAction.Start(this, streamKey, events);
+        stream.AggregateType = aggregateType;
+        stream.TenantId = session.TenantId;
+
+        session.WorkTracker.Streams.Add(stream);
+
+        return stream;
+    }
+}

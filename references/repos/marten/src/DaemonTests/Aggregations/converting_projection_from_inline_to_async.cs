@@ -1,0 +1,179 @@
+using System;
+using System.Threading.Tasks;
+using DaemonTests.MultiTenancy;
+using JasperFx.Core;
+using Marten.Events.Projections;
+using Marten.Metadata;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace DaemonTests.Aggregations;
+
+public class converting_projection_from_inline_to_async : OneOffConfigurationsContext
+{
+    [Fact]
+    public async Task start_as_inline_move_to_async_and_just_continue()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Snapshot<SimpleAggregate>(SnapshotLifecycle.Inline);
+        });
+
+        var id1 = theSession.Events.StartStream<SimpleAggregate>(new MTAEvent(), new MTBEvent()).Id;
+        var id2 = theSession.Events.StartStream<SimpleAggregate>(new MTBEvent(), new MTCEvent()).Id;
+        var id3 = theSession.Events.StartStream<SimpleAggregate>(new MTCEvent(), new MTDEvent()).Id;
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var store2 = SeparateStore(opts =>
+        {
+            #region sample_using_subscribe_as_inline_to_async
+
+            opts
+                .Projections
+                .Snapshot<SimpleAggregate>(SnapshotLifecycle.Async, o =>
+                {
+                    // This option tells Marten to start the async projection at the highest
+                    // event sequence assigned as the processing floor if there is no previous
+                    // async daemon progress for this projection
+                    o.SubscribeAsInlineToAsync();
+                });
+
+            #endregion
+        });
+
+        using var daemon = await store2.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        using var session = store2.LightweightSession();
+        session.Events.Append(id1, new MTEEvent(), new MTEEvent());
+        session.Events.Append(id2, new MTEEvent(), new MTEEvent());
+        session.Events.Append(id3, new MTEEvent(), new MTEEvent());
+        await session.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(10.Seconds());
+
+        var aggregate1 = await session.LoadAsync<SimpleAggregate>(id1, TestContext.Current.CancellationToken);
+        var aggregate2 = await session.LoadAsync<SimpleAggregate>(id2, TestContext.Current.CancellationToken);
+        var aggregate3 = await session.LoadAsync<SimpleAggregate>(id3, TestContext.Current.CancellationToken);
+
+        aggregate1.ShouldBe(new SimpleAggregate
+        {
+            Id = id1,
+            Version = 4,
+            ACount = 1,
+            BCount = 1,
+            ECount = 2
+        });
+
+        aggregate2.ShouldBe(new SimpleAggregate
+        {
+            Id = id2,
+            Version = 4,
+            BCount = 1,
+            CCount = 1,
+            ECount = 2
+        });
+
+    }
+
+    // Postgres reports last_value = 1 for a sequence nothing has drawn from, so an empty store must not start
+    // the projection at 1 while the high water mark is still 0.
+    [Fact]
+    public async Task start_against_an_empty_event_store()
+    {
+        StoreOptions(opts =>
+        {
+            opts.Projections.Snapshot<SimpleAggregate>(SnapshotLifecycle.Async, o => o.SubscribeAsInlineToAsync());
+        });
+
+        await theStore.Advanced.Clean.CompletelyRemoveAllAsync();
+        await theStore.Storage.ApplyAllConfiguredChangesToDatabaseAsync();
+
+        using var daemon = await theStore.BuildProjectionDaemonAsync();
+        await daemon.StartAllAsync();
+
+        var id = theSession.Events.StartStream<SimpleAggregate>(new MTAEvent(), new MTBEvent()).Id;
+        await theSession.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        await daemon.WaitForNonStaleData(10.Seconds());
+
+        var aggregate = await theSession.LoadAsync<SimpleAggregate>(id, TestContext.Current.CancellationToken);
+        aggregate.ShouldBe(new SimpleAggregate { Id = id, Version = 2, ACount = 1, BCount = 1 });
+    }
+}
+
+public class SimpleAggregate : IRevisioned
+{
+    // This will be the aggregate version
+    public int Version { get; set; }
+
+    public Guid Id { get; set; }
+
+    public int ACount { get; set; }
+    public int BCount { get; set; }
+    public int CCount { get; set; }
+    public int DCount { get; set; }
+    public int ECount { get; set; }
+
+    public void Apply(MTAEvent _)
+    {
+        ACount++;
+    }
+
+    public void Apply(MTBEvent _)
+    {
+        BCount++;
+    }
+
+    public void Apply(MTCEvent _)
+    {
+        CCount++;
+    }
+
+    public void Apply(MTDEvent _)
+    {
+        DCount++;
+    }
+
+    public void Apply(MTEEvent _)
+    {
+        ECount++;
+    }
+
+    public override string ToString()
+    {
+        return
+            $"{nameof(Version)}: {Version}, {nameof(Id)}: {Id}, {nameof(ACount)}: {ACount}, {nameof(BCount)}: {BCount}, {nameof(CCount)}: {CCount}, {nameof(DCount)}: {DCount}, {nameof(ECount)}: {ECount}";
+    }
+
+    protected bool Equals(SimpleAggregate other)
+    {
+        return Id.Equals(other.Id) && ACount == other.ACount && BCount == other.BCount && CCount == other.CCount && DCount == other.DCount && ECount == other.ECount;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        if (obj.GetType() != GetType())
+        {
+            return false;
+        }
+
+        return Equals((SimpleAggregate)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Id, ACount, BCount, CCount, DCount, ECount);
+    }
+}

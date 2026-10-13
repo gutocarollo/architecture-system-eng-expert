@@ -1,0 +1,123 @@
+using IntegrationTests;
+using JasperFx.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
+using JasperFx.Resources;
+using Shouldly;
+using Weasel.SqlServer;
+using Wolverine;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Sagas;
+using Wolverine.RDBMS.Transport;
+using Wolverine.Runtime;
+using Wolverine.SqlServer;
+using Wolverine.SqlServer.Persistence;
+using Wolverine.Tracking;
+
+namespace SqlServerTests;
+
+public class message_store_initialization_and_configuration : SqlServerContext, IAsyncLifetime
+{
+    private IHost _host = null!;
+
+    public new async ValueTask InitializeAsync()
+    {
+        await dropSchema();
+
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "registry");
+
+                opts.Services.AddResourceSetupOnStartup();
+            }).StartAsync();
+    }
+
+    private static async Task dropSchema()
+    {
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync();
+        await conn.DropSchemaAsync("registry");
+        await conn.CloseAsync();
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+    }
+    
+    [Fact]
+    public void main_store_role()
+    {
+        _host.GetRuntime().Storage.Role.ShouldBe(MessageStoreRole.Main);
+    }   
+
+    [Fact]
+    public async Task builds_the_node_and_control_queue_tables()
+    {
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync(TestContext.Current.CancellationToken);
+
+        var tables = await conn.ExistingTables("wolverine%", ct: TestContext.Current.CancellationToken);
+        await conn.CloseAsync();
+
+        tables.ShouldContain(x => x.Name == DatabaseConstants.NodeTableName);
+        tables.ShouldContain(x => x.Name == DatabaseConstants.NodeAssignmentsTableName);
+        tables.ShouldContain(x => x.Name == DatabaseConstants.ControlQueueTableName);
+    }
+
+    [Fact]
+    public void should_set_the_control_endpoint_and_add_transport()
+    {
+        var runtime = _host.Services.GetRequiredService<IWolverineRuntime>();
+
+        var expectedUri = $"dbcontrol://{runtime.Options.UniqueNodeId}".ToUri();
+        runtime.Options.Transports.NodeControlEndpoint!.Uri.ShouldBe(expectedUri);
+
+        runtime.Options.Transports.OfType<DatabaseControlTransport>().Single()
+            .Database.ShouldBeOfType<SqlServerMessageStore>()
+            .Settings.SchemaName.ShouldBe("registry");
+    }
+
+    [Fact]
+    public async Task stores_the_current_node_on_startup()
+    {
+        var runtime = _host.Services.GetRequiredService<IWolverineRuntime>();
+        var nodes = await runtime.Storage.Nodes.LoadAllNodesAsync(CancellationToken.None);
+
+        var current = nodes.Single();
+
+        current.NodeId.ShouldBe(runtime.Options.UniqueNodeId);
+        current.ControlUri.ShouldBe(runtime.Options.Transports.NodeControlEndpoint!.Uri);
+
+    }
+
+    [Fact]
+    public async Task deletes_the_node_on_shutdown()
+    {
+        await _host.StopAsync(TestContext.Current.CancellationToken);
+        _host.Dispose();
+        _host = null!;
+
+        var settings = new DatabaseSettings
+        {
+            ConnectionString = Servers.SqlServerConnectionString,
+            Role = MessageStoreRole.Tenant,
+            SchemaName = "registry"
+        };
+
+        var store = new SqlServerMessageStore(settings, new DurabilitySettings(),
+            NullLogger<SqlServerMessageStore>.Instance, Array.Empty<SagaTableDefinition>());
+
+        // Should delete itself at the end
+        var nodes = await store.Nodes.LoadAllNodesAsync(CancellationToken.None);
+        nodes.Any().ShouldBeFalse();
+    }
+}

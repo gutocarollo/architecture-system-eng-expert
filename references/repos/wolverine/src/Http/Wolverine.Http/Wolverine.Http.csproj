@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>High Performance ASP.Net Core HTTP endpoints using the Wolverine runtime</Description>
+        <PackageId>WolverineFx.Http</PackageId>
+        <!--
+          AOT-compatible (#2746). All ~128 IL warnings resolved through:
+          - Namespace-scoped UnconditionalSuppressMessage in GlobalSuppressions.cs
+            covering the codegen surface (Wolverine.Http and descendants)
+          - Per-ctor [DAM] annotations on AsParametersBindingFrame /
+            FormBindingFrame for parameter-type member access
+          - Per-method [UnconditionalSuppressMessage(IL2072)] at
+            AsParamatersAttributeUsage.TryMatch / FromFormAttributeUsage.TryMatch
+            where ParameterInfo.ParameterType flows into the [DAM]-annotated ctors
+        -->
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <ProjectReference Include="..\..\Wolverine\Wolverine.csproj"/>
+        <PackageReference Include="Asp.Versioning.Abstractions"/>
+        <!--
+          Emits the source-generated JasperFx DiscoveredCommands manifest for this
+          assembly so the 'openapi' command (and any future Wolverine.Http commands)
+          are discovered without a reflective assembly scan, keeping the AOT/trim
+          posture of WolverineFx.Http (IsAotCompatible) intact. Mirrors WolverineFx core.
+        -->
+        <PackageReference Include="JasperFx.SourceGenerator"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+        <!--
+          Newtonsoft.Json was removed from WolverineFx.Http in 6.0 (#2742).
+          The Newtonsoft surface (NewtonsoftHttpSerialization,
+          UseNewtonsoftJsonForSerialization, the codegen frames that target
+          NewtonsoftHttpSerialization) moved to the WolverineFx.Http.Newtonsoft
+          companion package. Core retains the JsonUsage.NewtonsoftJson enum
+          value and an internal INewtonsoftHttpCodeGen seam; selecting the
+          enum without the extension package installed throws a useful
+          codegen-time exception. See docs/guide/migration.md.
+        -->
+    </ItemGroup>
+
+    <ItemGroup>
+        <!--
+            The Wolverine.CritterWatch.Http companion package uses
+            WolverineHttpOptions.Endpoints to look up HttpChain instances by
+            stable chain id when CritterWatch requests a generated-source-code
+            preview (#84). Promoting the property to public would expose the
+            full HttpGraph to consumers; friend visibility keeps the surface
+            small while letting the integration package work without
+            reflection.
+        -->
+        <InternalsVisibleTo Include="Wolverine.CritterWatch.Http"/>
+    </ItemGroup>
+</Project>

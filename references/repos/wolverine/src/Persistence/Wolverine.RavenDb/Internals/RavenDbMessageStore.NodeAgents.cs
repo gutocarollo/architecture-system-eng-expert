@@ -1,0 +1,402 @@
+using JasperFx.Core;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Operations;
+using Raven.Client.Documents.Queries;
+using Raven.Client.Documents.Session;
+using Raven.Client.Exceptions;
+using Raven.Client.Exceptions.Documents.Session;
+using Wolverine.Runtime.Agents;
+
+namespace Wolverine.RavenDb.Internals;
+
+public partial class RavenDbMessageStore : INodeAgentPersistence
+{
+    private const int NodePersistenceMaxAttempts = 25;
+
+    // GH-4593: a document store has no schema to migrate and no column to gate, so the whole-document
+    // write paths carry LoadFactor unconditionally -- a property that is not there deserializes to null,
+    // which is exactly "this node is not advertising".
+    public bool AdvertisesNodeLoad => true;
+
+    public async Task ClearAllAsync(CancellationToken cancellationToken)
+    {
+        // Shouldn't really get called at runtime, so we're doing it crudely
+        var nodes = await LoadAllNodesAsync(cancellationToken);
+        using var session = _store.OpenAsyncSession();
+
+        foreach (var node in nodes)
+        {
+            // GH-3986: delete by document id rather than by entity. LoadAllNodesAsync opens and
+            // disposes its own session, so these WolverineNode instances are tracked by a session
+            // that is already gone, and RavenDB's Delete<T>(T entity) overload throws
+            // "... is not associated with the session, cannot delete unknown entity instance".
+            // Deleting by id matches what DeleteAsync(Guid, int) already does for a single node,
+            // and what the AgentAssignment deletes below have always done.
+            session.Delete(node.NodeId.ToString());
+            foreach (var agent in node.ActiveAgents)
+            {
+                session.Delete(AgentAssignment.ToId(agent));
+            }
+        }
+
+        await session.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<int> PersistAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        Exception? lastConflict = null;
+
+        for (var attempt = 1; attempt <= NodePersistenceMaxAttempts; attempt++)
+        {
+            try
+            {
+                using var session = _store.OpenAsyncSession(new SessionOptions
+                {
+                    TransactionMode = TransactionMode.ClusterWide
+                });
+                // RavenDB rejects cluster-wide transactions combined with optimistic concurrency.
+                // Disable it explicitly so a consumer-enabled convention doesn't break this session.
+                session.Advanced.UseOptimisticConcurrency = false;
+
+                var sequence = await session.LoadAsync<NodeSequence>(NodeSequence.SequenceId, cancellationToken);
+                sequence ??= new NodeSequence();
+
+                node.AssignedNodeNumber = ++sequence.Count;
+
+                await session.StoreAsync(sequence, cancellationToken);
+                await session.StoreAsync(node, cancellationToken);
+                await session.SaveChangesAsync(cancellationToken);
+
+                return node.AssignedNodeNumber;
+            }
+            catch (Exception e) when (isNodeSequenceConcurrencyConflict(e))
+            {
+                lastConflict = e;
+
+                if (attempt == NodePersistenceMaxAttempts)
+                {
+                    break;
+                }
+
+                // Linear backoff with jitter to avoid synchronized retries (thundering herd)
+                // when many nodes contend for the sequence at startup.
+                var jitter = Random.Shared.Next(0, 20);
+                await Task.Delay(TimeSpan.FromMilliseconds(20 * attempt + jitter), cancellationToken);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Unable to persist Wolverine node {node.NodeId} after {NodePersistenceMaxAttempts} attempts because RavenDB node sequence allocation kept conflicting.",
+            lastConflict);
+    }
+
+    private static bool isNodeSequenceConcurrencyConflict(Exception exception)
+    {
+        return exception is ClusterTransactionConcurrencyException or ConcurrencyException;
+    }
+
+    public async Task DeleteAsync(Guid nodeId, int assignedNodeNumber)
+    {
+        using var session = _store.OpenAsyncSession();
+        session.Delete(nodeId.ToString());
+
+        await session.SaveChangesAsync();
+
+        // Actually okay for these to be eventually consistent
+
+        var query = new IndexQuery
+        {
+            Query = $"from AgentAssignments a where a.NodeId = $node",
+            WaitForNonStaleResults = true,
+            WaitForNonStaleResultsTimeout = 5.Seconds(),
+            QueryParameters = new() { { "node", nodeId } }
+        };
+
+        var op = await _store.Operations.SendAsync(
+            new DeleteByQueryOperation(query));
+        await op.WaitForCompletionAsync();
+
+        await ReleaseAllOwnershipAsync(assignedNodeNumber);
+    }
+
+    public async Task<IReadOnlyList<WolverineNode>> LoadAllNodesAsync(CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+        var answer = await session
+            .Query<WolverineNode>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .ToListAsync(token: cancellationToken);
+
+        var assignments = await session
+            .Query<AgentAssignment>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .ToListAsync(token: cancellationToken);
+
+        foreach (var node in answer)
+        {
+            node.ActiveAgents.Clear();
+            node.ActiveAgents.AddRange(assignments.Where(x => x.NodeId == node.NodeId).Select(x => x.AgentUri));
+        }
+
+        return answer;
+    }
+
+    /// <summary>
+    /// RavenDB persistence model for agent restrictions, required since RavenDB is built around string identifiers.
+    /// </summary>
+    public record WolverineAgentRestriction(string Id, Uri AgentUri, AgentRestrictionType Type, int NodeNumber);
+
+    public async Task PersistAgentRestrictionsAsync(IReadOnlyList<AgentRestriction> restrictions,
+        CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession(new SessionOptions
+        {
+            TransactionMode = TransactionMode.ClusterWide
+        });
+        // Cluster-wide transactions can't run with optimistic concurrency. See PersistAsync.
+        session.Advanced.UseOptimisticConcurrency = false;
+
+        foreach (var restriction in restrictions)
+        {
+            if (restriction.Type == AgentRestrictionType.None)
+            {
+                session.Delete(restriction.Id.ToString());
+            }
+            else
+            {
+                var persistedRestriction = new WolverineAgentRestriction(
+                    Id: restriction.Id.ToString(),
+                    AgentUri: restriction.AgentUri,
+                    Type: restriction.Type,
+                    NodeNumber: restriction.NodeNumber);
+                await session.StoreAsync(persistedRestriction, changeVector: null, id: persistedRestriction.Id, cancellationToken);
+            }
+        }
+
+        await session.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<NodeAgentState> LoadNodeAgentStateAsync(CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+        var nodes = await session
+            .Query<WolverineNode>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .ToListAsync(token: cancellationToken);
+
+        var assignments = await session
+            .Query<AgentAssignment>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .ToListAsync(token: cancellationToken);
+
+        foreach (var node in nodes)
+        {
+            node.ActiveAgents.Clear();
+            node.ActiveAgents.AddRange(assignments.Where(x => x.NodeId == node.NodeId).Select(x => x.AgentUri));
+        }
+
+        var restrictions = await session
+            .Query<WolverineAgentRestriction>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .ToListAsync(token: cancellationToken);
+
+        var agentRestrictions = restrictions.Select(
+            x => new AgentRestriction(Guid.Parse(x.Id), x.AgentUri, x.Type, x.NodeNumber)
+        );
+
+        return new NodeAgentState(nodes, new AgentRestrictions([.. agentRestrictions]));
+    }
+
+    public async Task AssignAgentsAsync(Guid nodeId, IReadOnlyList<Uri> agents, CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+        // Agent assignments are idempotent: a re-assignment should overwrite the existing
+        // record. Load first so RavenDB uses the loaded change vector at save time and the
+        // write works whether or not the consumer has optimistic concurrency enabled.
+        foreach (var agent in agents)
+        {
+            var id = AgentAssignment.ToId(agent);
+            var existing = await session.LoadAsync<AgentAssignment>(id, cancellationToken);
+            if (existing == null)
+            {
+                await session.StoreAsync(new AgentAssignment(agent, nodeId), id, cancellationToken);
+            }
+            else
+            {
+                existing.NodeId = nodeId;
+            }
+        }
+
+        await session.SaveChangesAsync(token: cancellationToken);
+    }
+
+    public async Task RemoveAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        // GH-4407: only this node's own claim. Deleting by id alone let a node stopping a copy it did not own
+        // delete the owner's row, which the leader then read as an unassigned agent and placed again.
+        using var session = _store.OpenAsyncSession();
+        session.Advanced.UseOptimisticConcurrency = true;
+
+        var existing = await session.LoadAsync<AgentAssignment>(AgentAssignment.ToId(agentUri), cancellationToken);
+        if (existing == null || existing.NodeId != nodeId)
+        {
+            return;
+        }
+
+        session.Delete(existing);
+
+        try
+        {
+            await session.SaveChangesAsync(token: cancellationToken);
+        }
+        catch (ConcurrencyException)
+        {
+            // The row changed hands between the load and the delete, so it is no longer ours to remove
+        }
+    }
+
+    public async Task<bool> TryClaimAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        var id = AgentAssignment.ToId(agentUri);
+
+        using (var session = _store.OpenAsyncSession())
+        {
+            var existing = await session.LoadAsync<AgentAssignment>(id, cancellationToken);
+            if (existing != null)
+            {
+                return existing.NodeId == nodeId;
+            }
+
+            // GH-4407: an empty change vector means "only if the document does not exist yet", so a peer that
+            // claims the agent between the load and the save wins instead of being overwritten
+            await session.StoreAsync(new AgentAssignment(agentUri, nodeId), string.Empty, id, cancellationToken);
+
+            try
+            {
+                await session.SaveChangesAsync(token: cancellationToken);
+                return true;
+            }
+            catch (ConcurrencyException)
+            {
+                // Lost the race; fall through and report who did win
+            }
+        }
+
+        using var reread = _store.OpenAsyncSession();
+        var winner = await reread.LoadAsync<AgentAssignment>(id, cancellationToken);
+        return winner?.NodeId == nodeId;
+    }
+
+    public async Task AddAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+
+        // Agent assignments are idempotent: re-electing the same agent should overwrite the
+        // existing record. Load first so RavenDB uses the loaded change vector at save time
+        // instead of trying to write a brand-new document over an existing one.
+        var id = AgentAssignment.ToId(agentUri);
+        var existing = await session.LoadAsync<AgentAssignment>(id, cancellationToken);
+        if (existing == null)
+        {
+            await session.StoreAsync(new AgentAssignment(agentUri, nodeId), id, cancellationToken);
+        }
+        else
+        {
+            existing.NodeId = nodeId;
+        }
+
+        await session.SaveChangesAsync(token: cancellationToken);
+    }
+
+    public async Task<WolverineNode?> LoadNodeAsync(Guid nodeId, CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+        var node = await session.LoadAsync<WolverineNode>(nodeId.ToString(), token: cancellationToken);
+        var agents = await session.Query<AgentAssignment>().Customize(x => x.WaitForNonStaleResults()).Where(x => x.NodeId == nodeId).ToListAsync(token: cancellationToken);
+        node.ActiveAgents.Clear();
+        node.ActiveAgents.AddRange(agents.OrderBy(x => x.Id).Select(x => x.AgentUri));
+
+        return node;
+    }
+
+    public async Task<bool> MarkHealthCheckAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        using var session = _store.OpenAsyncSession();
+
+        // GH-3604 / D2: only patch an EXISTING node document. A miss means a peer deleted this still-live
+        // node's row; report it to the caller (which re-registers with real identity) instead of the old
+        // AddOrPatch, which blindly stored a skeleton node with no capabilities on a miss.
+        var existing = await session.LoadAsync<WolverineNode>(node.NodeId.ToString(), cancellationToken);
+        if (existing == null)
+        {
+            return false;
+        }
+
+        session.Advanced.Patch<WolverineNode, DateTimeOffset>(
+            node.NodeId.ToString(), x => x.LastHealthCheck, DateTimeOffset.UtcNow);
+
+        // GH-4593: LoadFactor rides every OTHER path for free, because those store the WolverineNode
+        // whole -- but this one deliberately patches single properties, so without a second patch the
+        // advertisement would be written once at registration and then never refreshed again. This is the
+        // once-per-heartbeat path, which is the only one that keeps the reading current.
+        if (_options.Durability.CapacityAwareAssignment)
+        {
+            session.Advanced.Patch<WolverineNode, double?>(
+                node.NodeId.ToString(), x => x.LoadFactor, node.LoadFactor);
+        }
+
+        await session.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task ReregisterNodeAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        // Store the node document with its preserved AssignedNodeNumber WITHOUT touching the NodeSequence
+        // (unlike PersistAsync, which allocates a fresh number). The caller restores the AgentAssignment
+        // documents separately.
+        using var session = _store.OpenAsyncSession();
+        session.Advanced.UseOptimisticConcurrency = false;
+        await session.StoreAsync(node, node.NodeId.ToString(), cancellationToken);
+        await session.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task OverwriteHealthCheckTimeAsync(Guid nodeId, DateTimeOffset lastHeartbeatTime)
+    {
+        using var session = _store.OpenAsyncSession();
+        session.Advanced.Patch<WolverineNode, DateTimeOffset>(nodeId.ToString(), x => x.LastHealthCheck, lastHeartbeatTime);
+        await session.SaveChangesAsync();
+    }
+
+    public async Task LogRecordsAsync(params NodeRecord[] records)
+    {
+        using var session = _store.OpenAsyncSession();
+        foreach (var record in records)
+        {
+            await session.StoreAsync(record);
+        }
+
+        await session.SaveChangesAsync();
+    }
+
+    public async Task<IReadOnlyList<NodeRecord>> FetchRecentRecordsAsync(int count)
+    {
+        using var session = _store.OpenAsyncSession();
+        var list = await session.Query<NodeRecord>()
+            .Customize(x => x.WaitForNonStaleResults())
+            .OrderByDescending(x => x.Timestamp)
+            .Take(count)
+            .ToListAsync();
+        list.Reverse();
+        return list;
+    }
+
+
+}
+
+public class NodeSequence
+{
+    public static readonly string SequenceId = "nodes/sequence";
+
+    public string Id { get; set; } = SequenceId;
+    public int Count { get; set; }
+}

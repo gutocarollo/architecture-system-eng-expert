@@ -1,0 +1,53 @@
+using Bogus;
+using Bogus.DataSets;
+using Helpdesk.Api.Incidents;
+using Helpdesk.Api.Incidents.GetIncidentDetails;
+using Xunit;
+using Ogooreck.API;
+using static Ogooreck.API.ApiSpecification;
+
+namespace Helpdesk.Api.Tests.Incidents;
+
+public class LogIncidentsTests(ApiSpecification<Program> api): IClassFixture<ApiSpecification<Program>>
+{
+    [Fact]
+    public Task LogIncident_ShouldSucceed() =>
+        api.Given()
+            .When(
+                POST,
+                URI($"api/customers/{CustomerId}/incidents/"),
+                BODY(new LogIncidentRequest(Contact, IncidentDescription))
+            )
+            .Then(CREATED_WITH_DEFAULT_HEADERS(locationHeaderPrefix: "/api/incidents/"))
+            .And()
+            .When(GET, URI(ctx => $"/api/incidents/{ctx.GetCreatedId()}"))
+            .Then(
+                OK,
+                RESPONSE_BODY(ctx =>
+                    new IncidentDetails(
+                        ctx.GetCreatedId<Guid>(),
+                        CustomerId,
+                        IncidentStatus.Pending,
+                        [],
+                        null,
+                        null,
+                        null,
+                        1
+                    )
+                )
+            );
+
+    private readonly Guid CustomerId = Guid.CreateVersion7();
+
+    private readonly Contact Contact = new Faker<Contact>().CustomInstantiator(
+        f => new Contact(
+            f.PickRandom<ContactChannel>(),
+            f.Name.FirstName(),
+            f.Name.LastName(),
+            f.Internet.Email(),
+            f.Phone.PhoneNumber()
+        )
+    ).Generate();
+
+    private readonly string IncidentDescription = new Lorem().Sentence();
+}

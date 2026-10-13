@@ -1,0 +1,14 @@
+
+dependencies {
+    api "io.eventuate.tram.core:eventuate-tram-reactive-commands:$eventuateTramVersion"
+
+    api project(":eventuate-tram-sagas-participant")
+    api project(":eventuate-tram-sagas-reactive-common")
+
+    api "io.projectreactor:reactor-core:$reactorVersion"
+
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

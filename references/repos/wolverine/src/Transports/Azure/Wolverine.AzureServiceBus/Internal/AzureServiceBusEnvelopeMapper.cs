@@ -1,0 +1,93 @@
+using System.Diagnostics.CodeAnalysis;
+using Azure.Messaging.ServiceBus;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+
+namespace Wolverine.AzureServiceBus.Internal;
+
+public class AzureServiceBusEnvelopeMapper : EnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage>, IAzureServiceBusEnvelopeMapper
+{
+    // Inherits EnvelopeMapper<,>'s reflection-based property mapping (chunk B
+    // #2753 annotated the base ctor as [RequiresDynamicCode] +
+    // [RequiresUnreferencedCode]). Same chunk X (RabbitMqEnvelopeMapper)
+    // pattern: leaf-suppress so the cascade doesn't propagate through
+    // Endpoint.buildMapper. AOT-clean apps either supply their own
+    // IAzureServiceBusEnvelopeMapper or preserve the closed
+    // EnvelopeMapper<ServiceBusReceivedMessage, ServiceBusMessage> via
+    // TrimmerRootDescriptor. See AOT guide.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Inherits EnvelopeMapper<,> reflective property mapping; AOT consumers supply their own mapper or preserve the closed type. See AOT guide.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "Inherits EnvelopeMapper<,> reflective property mapping; AOT consumers supply their own mapper or preserve the closed type. See AOT guide.")]
+    public AzureServiceBusEnvelopeMapper(Endpoint endpoint, IWolverineRuntime runtime) : base(endpoint)
+    {
+        MapProperty(x => x.ContentType!, (e, m) => e.ContentType = m.ContentType,
+            (e, m) => m.ContentType = e.ContentType);
+        // GH-4333: CopyBodyFrom on the way in so a large payload lands in a pooled buffer rather than on
+        // the LOH. The outgoing direction still needs a real array for BinaryData, and reading Data there
+        // materializes one exactly as before.
+        MapProperty(x => x.Data!, (e, m) => e.CopyBodyFrom(m.Body.ToMemory().Span),
+            (e, m) => m.Body = new BinaryData(e.Data!));
+        MapProperty(x => x.Id, (e, m) =>
+        {
+            if (Guid.TryParse(m.MessageId, out var id))
+            {
+                e.Id = id;
+            }
+        }, (e, m) => m.MessageId = e.Id.ToString());
+
+        MapProperty(x => x.CorrelationId!, (e, m) => e.CorrelationId = m.CorrelationId,
+            (e, m) => m.CorrelationId = e.CorrelationId);
+        MapProperty(x => x.MessageType!, (e, m) => e.MessageType = m.Subject, (e, m) => m.Subject = e.MessageType);
+        MapProperty(x => x.ScheduledTime!, (_, _) =>
+        {
+            // Nothing
+        }, (e, m) =>
+        {
+            if (e.ScheduledTime != null)
+            {
+                m.ScheduledEnqueueTime = e.ScheduledTime.Value.ToUniversalTime();
+            }
+        });
+
+        MapProperty(x => x.GroupId!, (e, m) => e.GroupId = m.SessionId!, (e, m) => m.SessionId = e.GroupId);
+
+    }
+
+    // GH-4328: writeIncomingHeaders copies every wire header into Envelope.Headers with the same
+    // keys and stringification the per-property reader would produce, so let the ~20 reserved
+    // property reads answer from the copied dictionary instead of re-probing (and re-stringifying
+    // from) the transport message on every one. Same opt-in RabbitMQ and Kafka took in GH-3490/92.
+    protected override bool preferCopiedIncomingHeaders => true;
+
+    protected override void writeOutgoingHeader(ServiceBusMessage outgoing, string key, string value)
+    {
+        outgoing.ApplicationProperties[key] = value;
+    }
+
+    protected override void writeIncomingHeaders(ServiceBusReceivedMessage incoming, Envelope envelope)
+    {
+        // GH-4012 item 4. Azure Service Bus counts deliveries itself and the count survives the envelope
+        // being reconstructed on every redelivery, which is what makes it the only thing able to bound a
+        // redeliver -> dedupe -> re-ack loop. First delivery is 1, so it is a delivery count rather than a
+        // redelivery count -- Envelope.BrokerDeliveryCount is documented in those terms.
+        envelope.BrokerDeliveryCount = incoming.DeliveryCount;
+
+        if (incoming.ApplicationProperties == null) return;
+
+        foreach (var pair in incoming.ApplicationProperties) envelope.Headers[pair.Key] = pair.Value?.ToString();
+    }
+
+    protected override bool tryReadIncomingHeader(ServiceBusReceivedMessage incoming, string key, out string? value)
+    {
+        if (incoming.ApplicationProperties.TryGetValue(key, out var header))
+        {
+            value = header.ToString();
+            return true;
+        }
+
+        value = default;
+        return false;
+    }
+}

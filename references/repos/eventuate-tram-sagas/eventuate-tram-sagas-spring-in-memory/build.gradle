@@ -1,0 +1,12 @@
+
+dependencies {
+    api project(":eventuate-tram-sagas-common-in-memory")
+    api "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
+
+    implementation  "io.eventuate.tram.core:eventuate-tram-spring-in-memory:$eventuateTramVersion"
+    implementation "com.h2database:h2:$h2Version"
+
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

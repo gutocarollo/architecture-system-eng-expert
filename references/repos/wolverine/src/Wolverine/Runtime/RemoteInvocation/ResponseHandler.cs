@@ -1,0 +1,97 @@
+using System.Collections.Concurrent;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.Util;
+
+namespace Wolverine.Runtime.RemoteInvocation;
+
+public interface IReplyTracker : IDisposable
+{
+#pragma warning disable VSTHRD200
+    Task<T> RegisterListener<T>(Envelope envelope, CancellationToken cancellationToken, TimeSpan timeout)
+#pragma warning restore VSTHRD200
+        ;
+
+    bool Complete(Envelope response);
+    int AssignedNodeNumber { get; set; }
+}
+
+internal class ReplyTracker : IReplyTracker
+{
+    public int AssignedNodeNumber { get; set; }
+    private readonly ConcurrentDictionary<Guid, IReplyListener> _listeners = new();
+    private readonly ILogger<ReplyTracker> _logger;
+    private readonly ResultTypeRegistry? _resultTypes;
+
+    public ReplyTracker(ILogger<ReplyTracker> logger, int assignedNodeNumber,
+        ResultTypeRegistry? resultTypes = null)
+    {
+        AssignedNodeNumber = assignedNodeNumber;
+        _logger = logger;
+        _resultTypes = resultTypes;
+    }
+
+#pragma warning disable VSTHRD200
+    public Task<T> RegisterListener<T>(Envelope envelope, CancellationToken cancellationToken, TimeSpan timeout)
+#pragma warning restore VSTHRD200
+    {
+        envelope.DeliverWithin = timeout; // Make the message expire so it doesn't cruft up the receivers
+        var listener = new ReplyListener<T>(envelope, this, timeout, cancellationToken, _resultTypes);
+
+        // GH-3781: an already-cancelled token completes the listener inside its constructor, before it was
+        // ever in this dictionary for Unregister to remove. Registering it anyway would leave an entry
+        // nothing will ever take out again.
+        if (listener.Task.IsCompleted)
+        {
+            listener.SafeDispose();
+            return listener.Task;
+        }
+
+        _listeners.AddOrUpdate(envelope.Id, listener, (_, _) => listener);
+
+        _logger.LogDebug("Registering a reply listener for message type {MessageType} and conversation id {ConversationId} on Node {NodeNumber}", typeof(T).ToMessageTypeName(), envelope.ConversationId, AssignedNodeNumber);
+
+        return listener.Task;
+    }
+
+    public void Dispose()
+    {
+        foreach (var listener in _listeners) listener.Value.SafeDispose();
+
+        _listeners.Clear();
+    }
+
+    public bool Complete(Envelope response)
+    {
+        try
+        {
+            if (_listeners.TryGetValue(response.ConversationId, out var listener))
+            {
+                listener.Complete(response);
+                _logger.LogDebug("Successfully completed a reply listener for conversation id {ReplyId} with message type {MessageTypeName} on Node {NodeNumber}", response.ConversationId, response.MessageType, AssignedNodeNumber);
+                return true;
+            }
+
+            _logger.LogDebug("No registered reply listener for conversation id {ReplyId} with message type {MessageType} on Node {NodeNumber} at endpoint {EndpointUri}. Falling through to normal handler execution", response.ConversationId, response.MessageType, AssignedNodeNumber, response.Destination);
+            return false;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while trying to complete a response for envelope conversation id {ReplyId}",
+                response.ConversationId);
+            return false;
+        }
+    }
+
+    public bool HasListener(Guid messageId)
+    {
+        return _listeners.ContainsKey(messageId);
+    }
+
+    internal void Unregister(IReplyListener replyListener)
+    {
+        _listeners.TryRemove(replyListener.RequestId, out var _);
+        replyListener.SafeDispose();
+    }
+}

@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit.v3"/>
+        <PackageReference Include="GitHubActionsTestLogger" PrivateAssets="All" />
+        <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All"/>
+        <PackageReference Include="coverlet.collector" PrivateAssets="All" />
+        <PackageReference Include="Testcontainers.Pulsar" />
+        <!-- Testcontainers depends on SSH.NET [2025.1.0, ), and every version through 2025.1.0
+             carries GHSA-q939-rpr3-3284 (high severity), which TreatWarningsAsErrors turns into a
+             hard build failure. Referencing the patched 2026.0.0 directly satisfies the open-ended
+             range and clears the advisory. Drop this once Testcontainers floors it itself. -->
+        <PackageReference Include="SSH.NET" />
+        <PackageReference Include="Apache.Avro" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Wolverine.Pulsar\Wolverine.Pulsar.csproj"/>
+        <ProjectReference Include="..\..\..\Testing\Wolverine.ComplianceTests\Wolverine.ComplianceTests.csproj" />
+        <!-- The global partitioning topology forces durable mode on every slot, so those tests need a real message store -->
+        <ProjectReference Include="..\..\..\Persistence\Wolverine.Postgresql\Wolverine.Postgresql.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="$(SolutionDir)xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+        <Compile Include="..\..\..\Servers.cs" Link="Servers.cs"/>
+    </ItemGroup>
+
+</Project>

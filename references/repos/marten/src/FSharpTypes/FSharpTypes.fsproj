@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <LangVersion>8.0</LangVersion>
+        <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Library.fs"/>
+    </ItemGroup>
+    
+
+    <ItemGroup>
+      <ProjectReference Include="..\LinqTestsTypes\LinqTestsTypes.csproj" />
+    </ItemGroup>
+    
+
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="8.0.100" />
+    </ItemGroup>
+
+</Project>

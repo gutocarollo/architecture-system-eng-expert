@@ -1,0 +1,55 @@
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+
+namespace Wolverine.Transports.Local;
+
+public class LocalQueueConfiguration : ListenerConfiguration<LocalQueueConfiguration, LocalQueue>
+{
+    public LocalQueueConfiguration(LocalQueue endpoint) : base(endpoint)
+    {
+        
+    }
+
+    internal LocalQueueConfiguration(Func<LocalQueue> source) : base(source)
+    {
+    }
+    
+
+    /// <summary>
+    ///     Limit all outgoing messages to a certain "deliver within" time span after which the messages
+    ///     will be discarded even if not successfully delivered or processed
+    /// </summary>
+    /// <param name="timeToLive"></param>
+    /// <returns></returns>
+    public LocalQueueConfiguration DeliverWithin(TimeSpan timeToLive)
+    {
+        add(e => e.OutgoingRules.Add(new DeliverWithinRule(timeToLive)));
+        return this;
+    }
+
+    /// <summary>
+    ///     Add circuit breaker exception handling to this local queue. The queue must also be durable
+    ///     (<c>UseDurableInbox()</c>, or <c>opts.Policies.UseDurableLocalQueues()</c>): a buffered local queue
+    ///     cannot pause, so as of 6.36 a circuit breaker on one stops the host from starting with an
+    ///     <see cref="InvalidListenerConfigurationException" /> rather than being silently ignored (GH-4410).
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public LocalQueueConfiguration CircuitBreaker(Action<CircuitBreakerOptions>? configure = null)
+    {
+        add(e =>
+        {
+            e.CircuitBreakerOptions = new CircuitBreakerOptions();
+            configure?.Invoke(e.CircuitBreakerOptions);
+        });
+
+        return this;
+    }
+
+    public LocalQueueConfiguration CustomizeOutgoing(Action<Envelope> customize)
+    {
+        add(e => e.OutgoingRules.Add(new LambdaEnvelopeRule(customize)));
+
+        return this;
+    }
+}

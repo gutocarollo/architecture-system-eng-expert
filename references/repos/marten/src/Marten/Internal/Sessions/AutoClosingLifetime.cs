@@ -1,0 +1,353 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.Core.Exceptions;
+using Marten.Exceptions;
+using Marten.Services;
+using Marten.Storage;
+using Npgsql;
+
+namespace Marten.Internal.Sessions;
+
+internal class AutoClosingLifetime: ConnectionLifetimeBase, IConnectionLifetime, ITransactionStarter
+{
+    private readonly SessionOptions _options;
+    private readonly IMartenDatabase _database;
+    private readonly ConnectionUsage _readerConnectionUsage;
+
+    public AutoClosingLifetime(SessionOptions options, StoreOptions storeOptions)
+    {
+        if (options.Tenant == null)
+            throw new ArgumentOutOfRangeException(nameof(options), "Tenant.Database cannot be null");
+
+        _options = options;
+        _database = options.Tenant!.Database;
+
+        // #5269: same resolution as every other lifetime -- this one builds its own rather than being handed
+        // one by SessionOptions, and it is the lifetime the default (non-sticky) write path uses.
+        CommandTimeout = _options.ResolveCommandTimeout(storeOptions);
+        _readerConnectionUsage =
+            options.Mode == CommandRunnerMode.ReadOnly
+            ? ConnectionUsage.Read
+            : ConnectionUsage.ReadWrite;
+    }
+
+    public int CommandTimeout { get; }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+
+    }
+
+    protected virtual void AfterOpened(NpgsqlConnection connection)
+    {
+    }
+
+    protected virtual Task AfterOpenedAsync(NpgsqlConnection connection, CancellationToken token)
+    {
+        return Task.CompletedTask;
+    }
+
+    public int Execute(NpgsqlCommand cmd)
+    {
+        Logger.OnBeforeExecute(cmd);
+        using var conn = _database.CreateConnection();
+        conn.Open();
+        AfterOpened(conn);
+        try
+        {
+            cmd.Connection = conn;
+            cmd.CommandTimeout = CommandTimeout;
+            var returnValue = cmd.ExecuteNonQuery();
+
+            Logger.LogSuccess(cmd);
+            return returnValue;
+        }
+        catch (Exception e)
+        {
+            handleCommandException(cmd, e);
+            throw;
+        }
+        finally
+        {
+            conn.Close();
+        }
+    }
+
+    public async Task<int> ExecuteAsync(NpgsqlCommand command,
+        CancellationToken token = new())
+    {
+        Logger.OnBeforeExecute(command);
+        await using var conn = _database.CreateConnection();
+        await conn.OpenAsync(token).ConfigureAwait(false);
+        await AfterOpenedAsync(conn, token).ConfigureAwait(false);
+
+        try
+        {
+            command.Connection = conn;
+            command.CommandTimeout = CommandTimeout;
+            var returnValue = await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+            Logger.LogSuccess(command);
+
+            return returnValue;
+        }
+        catch (Exception e)
+        {
+            handleCommandException(command, e);
+            throw;
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public DbDataReader ExecuteReader(NpgsqlCommand command)
+    {
+        Logger.OnBeforeExecute(command);
+
+        // Do NOT use a using block here because we're returning the reader
+        var conn = _database.CreateConnection(_readerConnectionUsage);
+        conn.Open();
+        AfterOpened(conn);
+
+        try
+        {
+            command.Connection = conn;
+            command.CommandTimeout = CommandTimeout;
+            var returnValue = command.ExecuteReader(CommandBehavior.CloseConnection);
+            Logger.LogSuccess(command);
+            return returnValue;
+        }
+        catch (Exception e)
+        {
+            conn.Close();
+            handleCommandException(command, e);
+            throw;
+        }
+    }
+
+    public async Task<DbDataReader> ExecuteReaderAsync(NpgsqlCommand command, CancellationToken token = default)
+    {
+        Logger.OnBeforeExecute(command);
+
+        // Do NOT use a using block here because we're returning the reader
+        var conn = _database.CreateConnection(_readerConnectionUsage);
+        await conn.OpenAsync(token).ConfigureAwait(false);
+        await AfterOpenedAsync(conn, token).ConfigureAwait(false);
+
+        try
+        {
+            command.Connection = conn;
+            command.CommandTimeout = CommandTimeout;
+            var returnValue = await command.ExecuteReaderAsync(CommandBehavior.CloseConnection, token).ConfigureAwait(false);
+            Logger.LogSuccess(command);
+            return returnValue;
+        }
+        catch (Exception e)
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+            handleCommandException(command, e);
+            throw;
+        }
+    }
+
+    public DbDataReader ExecuteReader(NpgsqlBatch batch)
+    {
+        Logger.OnBeforeExecute(batch);
+
+        // Do NOT use a using block here because we're returning the reader
+        var conn = _database.CreateConnection(_readerConnectionUsage);
+        conn.Open();
+        AfterOpened(conn);
+
+        try
+        {
+            batch.Connection = conn;
+            batch.Timeout = CommandTimeout;
+            var reader = batch.ExecuteReader(CommandBehavior.CloseConnection);
+            Logger.LogSuccess(batch);
+            return reader;
+        }
+        catch (Exception)
+        {
+            conn.Close();
+            throw;
+        }
+    }
+
+    public async Task<DbDataReader> ExecuteReaderAsync(NpgsqlBatch batch, CancellationToken token = default)
+    {
+        Logger.OnBeforeExecute(batch);
+
+        // Do NOT use a using block here because we're returning the reader
+        var conn = _database.CreateConnection(_readerConnectionUsage);
+        await conn.OpenAsync(token).ConfigureAwait(false);
+        await AfterOpenedAsync(conn, token).ConfigureAwait(false);
+
+        try
+        {
+            batch.Connection = conn;
+            batch.Timeout = CommandTimeout;
+            var reader = await batch.ExecuteReaderAsync(CommandBehavior.CloseConnection, token).ConfigureAwait(false);
+
+            Logger.LogSuccess(batch);
+
+            return reader;
+        }
+        catch (Exception)
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    public async Task ExecuteBatchPagesAsync(IReadOnlyList<OperationPage> pages, List<Exception> exceptions,
+        CancellationToken token, IReadOnlyList<ITransactionParticipant>? participants = null)
+    {
+        await using var conn = _database.CreateConnection();
+        await conn.OpenAsync(token).ConfigureAwait(false);
+        await AfterOpenedAsync(conn, token).ConfigureAwait(false);
+
+        try
+        {
+            var tx = await conn.BeginTransactionAsync(token).ConfigureAwait(false);
+
+            try
+            {
+                foreach (var page in pages)
+                {
+                    var batch = page.Compile();
+
+                    batch.Timeout = CommandTimeout;
+                    batch.Connection = conn;
+                    batch.Transaction = tx;
+
+                    Logger.OnBeforeExecute(batch);
+                    try
+                    {
+                        await using var reader = await batch.ExecuteReaderAsync(token).ConfigureAwait(false);
+                        await page.ApplyCallbacksAsync(reader, exceptions, token).ConfigureAwait(false);
+                        await reader.CloseAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogFailure(batch, e);
+
+                        // This lifetime executes the batch itself rather than going through
+                        // handleCommandException, so the batch has to be recorded here or the SQL is
+                        // gone by the time the outer catch builds a MartenCommandException.
+                        e.RecordNpgsqlBatch(batch);
+                        throw;
+                    }
+
+                    Logger.LogSuccess(batch);
+                }
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    await tx.RollbackAsync(token).ConfigureAwait(false);
+                }
+                catch (Exception rollbackEx)
+                {
+                    Logger.LogFailure(rollbackEx, "Error trying to rollback an exception");
+                    throw;
+                }
+
+                Logger.LogFailure(new NpgsqlCommand(), e);
+                pages.SelectMany(x => x.Operations).OfType<IExceptionTransform>()
+                    .Concat(MartenExceptionTransformer.Transforms).TransformAndThrow(e);
+            }
+
+            if (exceptions.Count == 1)
+            {
+                try
+                {
+                    await tx.RollbackAsync(token).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogFailure(e, "Failure trying to rollback an exception");
+                }
+
+                var ex = exceptions.Single();
+                ExceptionDispatchInfo.Throw(ex);
+            }
+
+            if (exceptions.Any())
+            {
+                try
+                {
+                    await tx.RollbackAsync(token).ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogFailure(e, "Failure trying to rollback an exception");
+                }
+
+                throw new AggregateException(exceptions);
+            }
+
+            if (participants is { Count: > 0 })
+            {
+                foreach (var participant in participants)
+                {
+                    await participant.BeforeCommitAsync(conn, tx, token).ConfigureAwait(false);
+                }
+            }
+
+            await tx.CommitAsync(token).ConfigureAwait(false);
+
+            // #5603: only now is the participants' work durable. A participant holding provisional
+            // state -- the EF Core change tracker -- accepts it here, never in BeforeCommitAsync,
+            // because that method runs inside the retried block and may have run more than once.
+
+            if (participants is { Count: > 0 })
+            {
+                foreach (var participant in participants)
+                {
+                    await participant.AfterCommitAsync(token).ConfigureAwait(false);
+                }
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public IAlwaysConnectedLifetime Start()
+    {
+        var transaction = CreateStickyConnection();
+        transaction.BeginTransaction();
+        return transaction;
+    }
+
+    public async Task<IAlwaysConnectedLifetime> StartAsync(CancellationToken token)
+    {
+        var transaction = CreateStickyConnection();
+        await transaction.BeginTransactionAsync(token).ConfigureAwait(false);
+        return transaction;
+    }
+
+    protected virtual TransactionalConnection CreateStickyConnection()
+    {
+        return _options.Mode == CommandRunnerMode.ReadOnly
+            ? new ReadOnlyTransactionalConnection(_options) { Logger = Logger, CommandTimeout = CommandTimeout }
+            : new TransactionalConnection(_options) { Logger = Logger, CommandTimeout = CommandTimeout };
+    }
+}

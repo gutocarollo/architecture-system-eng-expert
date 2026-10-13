@@ -1,0 +1,601 @@
+using System.Text.Json;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Interop;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Runtime.Serialization.Encryption;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.Transports;
+using Wolverine.Transports.Local;
+
+namespace Wolverine.Configuration;
+
+public class ListenerConfiguration : ListenerConfiguration<IListenerConfiguration, Endpoint>, IListenerConfiguration
+{
+    public ListenerConfiguration(Endpoint endpoint) : base(endpoint)
+    {
+    }
+}
+
+public class InteroperableListenerConfiguration<TSelf, TEndpoint, TMapper, TConcreteMapper> : ListenerConfiguration<TSelf, TEndpoint>
+    where TSelf : IListenerConfiguration<TSelf> 
+    where TEndpoint : Endpoint<TMapper, TConcreteMapper>
+    where TConcreteMapper : IEnvelopeMapper, TMapper
+{
+    public InteroperableListenerConfiguration(TEndpoint endpoint) : base(endpoint)
+    {
+    }
+
+    public InteroperableListenerConfiguration(Func<TEndpoint> source) : base(source)
+    {
+    }
+    
+    /// <summary>
+    /// Use a custom interoperability strategy to map Wolverine messages to an upstream
+    /// system's protocol
+    /// </summary>
+    /// <param name="mapper"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(TMapper mapper)
+    {
+        add(e => e.EnvelopeMapper = mapper);
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Customize the basic envelope mapping for interoperability. This mechanism
+    /// is suitable if you are mostly needing to modify how headers are communicated
+    /// from and to external systems through the underlying transport
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(Action<TEndpoint, TConcreteMapper> configure)
+    {
+        add(e => e.customizeMapping((m, _) => configure(e, m)));
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Create a completely customized mapper using the WolverineRuntime and the current
+    /// Endpoint. This is built lazily at system bootstrapping time
+    /// </summary>
+    /// <param name="factory"></param>
+    /// <returns></returns>
+    public TSelf UseInterop(Func<IWolverineRuntime, TEndpoint, TMapper> factory)
+    {
+        add(e => e.registerMapperFactory(r => factory(r, e)));
+        return this.As<TSelf>();
+    }
+    
+    /// <summary>
+    /// Interop with upstream systems by reading messages with the CloudEvents specification
+    /// </summary>
+    /// <param name="jsonSerializerOptions"></param>
+    /// <returns></returns>
+    public TSelf InteropWithCloudEvents(JsonSerializerOptions? jsonSerializerOptions = null)
+    {
+        jsonSerializerOptions ??= new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        add(e => e.customizeMapping((m, r) =>
+        {
+            e.DefaultSerializer = new CloudEventsMapper(r.Options.HandlerGraph, jsonSerializerOptions);
+        }));
+
+        return this.As<TSelf>();
+    }
+}
+
+public class ListenerConfiguration<TSelf, TEndpoint> : DelayedEndpointConfiguration<TEndpoint>,
+    IListenerConfiguration<TSelf>
+    where TSelf : IListenerConfiguration<TSelf> where TEndpoint : Endpoint
+{
+    public ListenerConfiguration(TEndpoint endpoint) : base(endpoint)
+    {
+        add(e => e.IsListener = true);
+    }
+
+    public ListenerConfiguration(Func<TEndpoint> source) : base(source)
+    {
+        add(e => e.IsListener = true);
+    }
+
+    /// <summary>
+    /// Creates a policy of sharding the processing of incoming messages by the
+    /// specified number of slots. Use this to group messages to prevent concurrent
+    /// processing of messages with the same GroupId while allowing parallel work across
+    /// GroupIds. The number of "slots" reflects the maximum number of parallel messages
+    /// that can be handled concurrently.
+    ///
+    /// Requires a BufferedInMemory, Durable, or NativeAck endpoint. Combining this with ProcessInline()
+    /// throws at bootstrap, because an Inline endpoint has no local execution block to shard
+    /// and the group id guarantee would silently not exist. See GH-3712. If you want partitioned
+    /// processing together with native broker acks, that is what
+    /// <see cref="ProcessInParallelWithNativeAcks"/> is for -- see GH-3708.
+    /// </summary>
+    /// <param name="numberOfSlots"></param>
+    /// <returns></returns>
+    public TSelf PartitionProcessingByGroupId(PartitionSlots numberOfSlots)
+    {
+        add(e => e.GroupShardingSlotNumber = numberOfSlots);
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// In the case of being part of tenancy aware group of message transports, this
+    /// setting makes this listening endpoint a "global" endpoint rather than a tenant id
+    /// aware endpoint that spans multiple message brokers.
+    /// </summary>
+    /// <returns></returns>
+    public TSelf GlobalListener()
+    {
+        add(e => e.TenancyBehavior = TenancyBehavior.Global);
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Mark this listener as accepting only AES-256-GCM encrypted envelopes.
+    /// Inbound envelopes whose content-type is not
+    /// <c>application/wolverine-encrypted+json</c> are routed to the
+    /// dead-letter queue with <see cref="EncryptionPolicyViolationException"/>
+    /// before any serializer runs. Requires the encrypting serializer to be
+    /// registered first via <see cref="WolverineOptions.UseEncryption"/> or
+    /// <see cref="WolverineOptions.RegisterEncryptionSerializer"/>; without it
+    /// the listener has no way to decrypt accepted envelopes and would
+    /// dead-letter every inbound message.
+    /// </summary>
+    /// <remarks>
+    /// Scope is the inbound listener only. Outgoing republishes — including
+    /// auto-published <see cref="Fault{T}"/> events that originate from a
+    /// failure on this listener — route via the global routing graph and are
+    /// not constrained by this marker. To require encryption on outbound
+    /// fault events, configure outbound encryption via
+    /// <see cref="MessageTypePolicies{T}.Encrypt"/> or per-endpoint
+    /// <c>.Encrypted()</c>; both pair automatically with the corresponding
+    /// <see cref="Fault{T}"/> envelopes.
+    /// </remarks>
+    public TSelf RequireEncryption()
+    {
+        add(endpoint =>
+        {
+            var runtime = endpoint.Runtime
+                ?? throw new InvalidOperationException(
+                    "Endpoint runtime is not set. .RequireEncryption() requires a fully-configured endpoint.");
+
+            if (runtime.Options.TryFindSerializer(EncryptionHeaders.EncryptedContentType) is null)
+            {
+                throw new InvalidOperationException(
+                    "No encrypting serializer is registered. Call " +
+                    "WolverineOptions.UseEncryption(provider) or " +
+                    "WolverineOptions.RegisterEncryptionSerializer(provider) " +
+                    "before configuring a listener with .RequireEncryption().");
+            }
+
+            runtime.Options.RequiredEncryptedListenerUris.Add(endpoint.Uri);
+        });
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Force this endpoint to use the AES-256-GCM encrypting serializer for
+    /// all outgoing messages. Requires the encrypting serializer to be
+    /// registered first via <see cref="WolverineOptions.UseEncryption"/> or
+    /// <see cref="WolverineOptions.RegisterEncryptionSerializer"/>; if it is
+    /// not registered, the host fails to start.
+    /// </summary>
+    public TSelf Encrypted()
+    {
+        add(endpoint =>
+        {
+            var runtime = endpoint.Runtime
+                ?? throw new InvalidOperationException(
+                    "Endpoint runtime is not set. .Encrypted() requires a fully-configured endpoint.");
+
+            var encrypting = runtime.Options.TryFindSerializer(EncryptionHeaders.EncryptedContentType)
+                ?? throw new InvalidOperationException(
+                    "No encrypting serializer is registered. Call " +
+                    "WolverineOptions.UseEncryption(provider) or " +
+                    "WolverineOptions.RegisterEncryptionSerializer(provider) " +
+                    "before configuring an endpoint with .Encrypted().");
+
+            endpoint.OutgoingRules.Add(new EncryptOutgoingEndpointRule(encrypting));
+        });
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// "Pin" this endpoint so that it is only active on the leader node
+    /// </summary>
+    /// <returns></returns>
+    public TSelf ListenOnlyAtLeader()
+    {
+        add(e =>
+        {
+            e.ListenerScope = ListenerScope.PinnedToLeader;
+            e.IsListener = true;
+        });
+
+        return this.As<TSelf>();
+    }
+
+    public TSelf ListenWithStrictOrdering(string? endpointName = null)
+    {
+        if (_endpoint is LocalQueue)
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(ListenWithStrictOrdering)} option for local queues. {nameof(Sequential)}() would work for strict ordering *within a single node*, but you will have to use an external message queue for strictly ordering globally across the entire application (assuming your application is clustered)");
+        
+        add(e =>
+        {
+            e.IsListener = true;
+            e.ListenerScope = ListenerScope.Exclusive;
+            e.MaxDegreeOfParallelism = 1;
+            e.ListenerCount = 1;
+
+            if (endpointName.IsNotEmpty())
+            {
+                e.EndpointName = endpointName;
+            }
+        });
+
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Configure this listener to run exclusively on a single node in the cluster,
+    /// but allow parallel message processing within that node. This is useful for
+    /// scenarios where you need single-node consistency but want to maintain throughput.
+    ///
+    /// The parallelism half of this has no effect on an Inline endpoint, which has no local
+    /// execution block to size -- Wolverine normalizes MaxDegreeOfParallelism to 1 and logs a
+    /// warning in that case. The exclusive-node half still applies. See GH-3712.
+    /// </summary>
+    /// <param name="maxParallelism">Maximum number of messages to process in parallel on the exclusive node. Default is 10.</param>
+    /// <param name="endpointName">Optional endpoint name for identification</param>
+    /// <returns>The configuration for method chaining</returns>
+    public TSelf ExclusiveNodeWithParallelism(int maxParallelism = 10, string? endpointName = null)
+    {
+        if (maxParallelism < 1)
+        {
+            throw new ArgumentException("Maximum parallelism must be at least 1", nameof(maxParallelism));
+        }
+
+        if (maxParallelism > 100)
+        {
+            // Warning for very high parallelism values that might indicate misunderstanding
+            // This is logged but doesn't prevent configuration
+            System.Diagnostics.Debug.WriteLine(
+                $"WARNING: Setting maxParallelism to {maxParallelism} is very high. " +
+                "This will consume significant memory and thread pool resources. " +
+                "Consider if this high level of parallelism is necessary for your use case.");
+        }
+
+        if (_endpoint is LocalQueue)
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(ExclusiveNodeWithParallelism)} option for local queues. Use an external message queue for exclusive node processing across a clustered application.");
+
+        add(e =>
+        {
+            e.IsListener = true;
+            e.ListenerScope = ListenerScope.Exclusive;
+            e.MaxDegreeOfParallelism = maxParallelism;
+            e.ListenerCount = 1; // Single listener instance for exclusive node
+
+            if (endpointName.IsNotEmpty())
+            {
+                e.EndpointName = endpointName;
+            }
+        });
+
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Configure this listener to run exclusively on a single node with parallel processing,
+    /// but maintain ordering within specific groups (sessions). This is particularly useful
+    /// for Azure Service Bus with sessions or similar scenarios.
+    /// </summary>
+    /// <param name="maxParallelSessions">Maximum number of sessions/groups to process in parallel. Default is 10.</param>
+    /// <param name="endpointName">Optional endpoint name for identification</param>
+    /// <returns>The configuration for method chaining</returns>
+    public TSelf ExclusiveNodeWithSessionOrdering(int maxParallelSessions = 10, string? endpointName = null)
+    {
+        if (maxParallelSessions < 1)
+        {
+            throw new ArgumentException("Maximum parallel sessions must be at least 1", nameof(maxParallelSessions));
+        }
+
+        if (maxParallelSessions > 100)
+        {
+            // Warning for very high session count that might indicate misunderstanding
+            // This is logged but doesn't prevent configuration
+            System.Diagnostics.Debug.WriteLine(
+                $"WARNING: Setting maxParallelSessions to {maxParallelSessions} is very high. " +
+                "This will consume significant memory and thread pool resources. " +
+                "Consider if this many concurrent sessions is necessary for your use case.");
+        }
+
+        if (_endpoint is LocalQueue)
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(ExclusiveNodeWithSessionOrdering)} option for local queues. Use an external message queue for exclusive node processing across a clustered application.");
+
+        add(e =>
+        {
+            e.IsListener = true;
+            e.ListenerScope = ListenerScope.Exclusive;
+            e.MaxDegreeOfParallelism = maxParallelSessions;
+            e.ListenerCount = maxParallelSessions; // Multiple listeners for different sessions
+
+            if (endpointName.IsNotEmpty())
+            {
+                e.EndpointName = endpointName;
+            }
+        });
+
+        return this.As<TSelf>();
+    }
+
+    public TSelf TelemetryEnabled(bool isEnabled)
+    {
+        add(e => e.TelemetryEnabled = isEnabled);
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// The maximum number of messages this endpoint will execute in parallel through Wolverine's
+    /// local execution block. Only applies to BufferedInMemory and Durable endpoints; an Inline
+    /// endpoint's concurrency belongs to the transport listener instead, and Wolverine logs a warning
+    /// if this is combined with ProcessInline(). See GH-3712.
+    /// </summary>
+    public TSelf MaximumParallelMessages(int maximumParallelHandlers)
+    {
+        add(e =>
+        {
+            e.MaxDegreeOfParallelism = maximumParallelHandlers;
+        });
+        
+        return this.As<TSelf>();
+    }
+
+    public TSelf UseDurableInbox(BufferingLimits limits)
+    {
+        add(e => e.BufferingLimits = limits);
+        return UseDurableInbox();
+    }
+
+    public TSelf BufferedInMemory(BufferingLimits limits)
+    {
+        add(e => e.BufferingLimits = limits);
+        return BufferedInMemory();
+    }
+
+    /// <summary>
+    /// Force this endpoint to execute one message at a time through Wolverine's local execution block.
+    /// Only applies to BufferedInMemory and Durable endpoints -- see MaximumParallelMessages() and GH-3712.
+    /// </summary>
+    public TSelf Sequential()
+    {
+        add(e =>
+        {
+            e.MaxDegreeOfParallelism = 1;
+        });
+
+        return this.As<TSelf>();
+    }
+    
+    public TSelf AddStickyHandler(Type handlerType)
+    {
+        // This needs to be done eagerly
+        _endpoint!.StickyHandlers.Add(handlerType);
+        return this.As<TSelf>();
+    }
+
+    public TSelf UseDurableInbox()
+    {
+        add(e => e.RequestListenerMode(EndpointMode.Durable));
+        return this.As<TSelf>();
+    }
+
+    public TSelf BufferedInMemory()
+    {
+        add(e => e.RequestListenerMode(EndpointMode.BufferedInMemory));
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// Process incoming messages inline with the transport's own listening callback, with no local
+    /// execution block and no inbox in between. Note that this makes MaximumParallelMessages(),
+    /// Sequential(), and PartitionProcessingByGroupId() inapplicable -- Wolverine normalizes
+    /// MaxDegreeOfParallelism to 1 at bootstrap for an Inline endpoint and rejects partitioned
+    /// processing outright. See GH-3712.
+    ///
+    /// Not valid on a local queue, which has no transport listener to be inline with -- that combination
+    /// throws here rather than at the first send. See GH-4022.
+    /// </summary>
+    /// <summary>
+    /// Process incoming messages through an in-memory execution block -- optionally group-partitioned via
+    /// <see cref="PartitionProcessingByGroupId"/> -- while holding the broker delivery unacknowledged, settling it
+    /// natively only when the handler pipeline reaches a terminal. Buffered's throughput and partitioning with
+    /// Inline's no-loss guarantee, and no database involvement. See GH-3708.
+    ///
+    /// <para>
+    /// Requires a transport whose deliveries are settled individually and can be settled out of order; a
+    /// transport that does not qualify throws at configuration time rather than silently degrading. RabbitMQ
+    /// queues qualify today.
+    /// </para>
+    ///
+    /// <para>
+    /// Back pressure is the broker's prefetch window rather than <see cref="BufferingLimits"/>, and the ordering
+    /// guarantee is that messages sharing a group id never run concurrently -- NOT that they run in original
+    /// delivery order, which no native-ack retry scheme can promise. Use the durable inbox if you need that.
+    /// </para>
+    /// </summary>
+    public TSelf ProcessInParallelWithNativeAcks()
+    {
+        if (_endpoint is LocalQueue)
+        {
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(ProcessInParallelWithNativeAcks)} option for local queues. Native acks "
+                + "settle a delivery back to a message broker, and a local queue has no broker to settle against.");
+        }
+
+        add(e => e.RequestListenerMode(EndpointMode.NativeAck));
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    /// GH-3710. Remember the message ids this process has already handled on this endpoint, and drop --
+    /// after settling -- any redelivery of one within the window. This is the non-durable analogue of the
+    /// durable inbox's duplicate detection: same outcome (ack the duplicate, never execute it), no database.
+    ///
+    /// <para>
+    /// Chiefly for <see cref="ProcessInParallelWithNativeAcks"/>, which is at-least-once by design and
+    /// deliberately produces a burst of redeliveries -- bounded by the broker's prefetch depth -- on every
+    /// rolling deploy. Also valid on <see cref="BufferedInMemory()"/> and <see cref="ProcessInline"/>.
+    /// Inert on <see cref="UseDurableInbox()"/>, whose inbox primary key already does this properly.
+    /// </para>
+    ///
+    /// <para>
+    /// The guard is per-process and in memory, and the docs say so out loud: a restart forgets every id it
+    /// ever saw, and a sibling node -- or the new owner after an exclusive-listener failover -- starts empty.
+    /// The promise is "at-least-once with best-effort dedup", not exactly-once. Where the broker has a real
+    /// dedup window (NATS JetStream's <c>Nats-Msg-Id</c>, SQS FIFO's <c>MessageDeduplicationId</c>, Pub/Sub's
+    /// <c>deduplication-id</c>), prefer that.
+    /// </para>
+    /// </summary>
+    /// <param name="window">How long a handled message id is remembered. Defaults to 5 minutes.</param>
+    /// <param name="maxTracked">Ceiling on remembered ids. Defaults to 100,000.</param>
+    public TSelf WithInMemoryIdempotency(TimeSpan? window = null, int? maxTracked = null)
+    {
+        if (_endpoint is LocalQueue)
+        {
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(WithInMemoryIdempotency)} option for local queues. The guard "
+                + "deduplicates redeliveries from a message broker, and a local queue has no broker to redeliver "
+                + "anything -- messages reach it from inside this same process.");
+        }
+
+        var settings = new InMemoryIdempotencySettings();
+        if (window.HasValue) settings.Window = window.Value;
+        if (maxTracked.HasValue) settings.MaxTracked = maxTracked.Value;
+
+        add(e => e.InMemoryIdempotency = settings);
+        return this.As<TSelf>();
+    }
+
+    public TSelf ProcessInline()
+    {
+        if (_endpoint is LocalQueue)
+            throw new NotSupportedException(
+                $"Wolverine cannot use the {nameof(ProcessInline)} option for local queues. Inline means \"execute the message on the transport's own listening callback instead of queueing it\", and a local queue has no transport listener -- the queue itself *is* Wolverine's local execution block, so there would be nothing left to run the message. Use {nameof(BufferedInMemory)}() (the default) or {nameof(UseDurableInbox)}() instead, plus {nameof(Sequential)}() if what you wanted was one message at a time.");
+
+        // GH-3712. The MaxDegreeOfParallelism = 1 clamp deliberately does NOT happen here. Clamping
+        // eagerly made the endpoint's final state depend on whether ProcessInline() was called before
+        // or after MaximumParallelMessages(); Endpoint.Compile() now normalizes it for every Inline
+        // endpoint once all of the configuration has been applied.
+        add(e => e.RequestListenerMode(EndpointMode.Inline));
+        return this.As<TSelf>();
+    }
+
+    public TSelf UseForReplies()
+    {
+        add(e => e.IsUsedForReplies = true);
+        return this.As<TSelf>();
+    }
+
+    public TSelf ProcessInlineWhileDraining()
+    {
+        add(e => e.ProcessInlineWhileDraining = true);
+        return this.As<TSelf>();
+    }
+
+    public TSelf Named(string name)
+    {
+        add(e => e.EndpointName = name);
+        return this.As<TSelf>();
+    }
+
+    public TSelf ExternalSystem(string name)
+    {
+        add(e => e.ExternalSystemName = name);
+        return this.As<TSelf>();
+    }
+
+    public TSelf DefaultSerializer(IMessageSerializer serializer)
+    {
+        add(e =>
+        {
+            e.RegisterSerializer(serializer);
+            e.DefaultSerializer = serializer;
+        });
+
+        return this.As<TSelf>();
+    }
+
+    public TSelf MessageBatchSize(int batchSize)
+    {
+        add(e =>
+        {
+            e.MessageBatchSize = batchSize;
+        });
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    ///     To optimize the message listener throughput,
+    ///     start up multiple listening endpoints. This is
+    ///     most necessary when using inline processing
+    /// </summary>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    public TSelf ListenerCount(int count)
+    {
+        if (count <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count), "Must be greater than zero");
+        }
+
+        add(e => e.ListenerCount = count);
+
+        return this.As<TSelf>();
+    }
+
+    /// <summary>
+    ///     Assume that any unidentified, incoming message types is the
+    ///     type "T". This is primarily for interoperability with non-Wolverine
+    ///     applications
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public TSelf DefaultIncomingMessage<T>()
+    {
+        return DefaultIncomingMessage(typeof(T));
+    }
+
+    /// <summary>
+    ///     Assume that any unidentified, incoming message types is the
+    ///     type "T". This is primarily for interoperability with non-Wolverine
+    ///     applications
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public TSelf DefaultIncomingMessage(Type messageType)
+    {
+        add(e => e.MessageType = messageType);
+        return this.As<TSelf>();
+    }
+
+    public TSelf UseWireTap()
+    {
+        add(e => e.UseWireTap = true);
+        return this.As<TSelf>();
+    }
+
+    public TSelf UseWireTap(string serviceKey)
+    {
+        add(e =>
+        {
+            e.UseWireTap = true;
+            e.WireTapServiceKey = serviceKey;
+        });
+        return this.As<TSelf>();
+    }
+}

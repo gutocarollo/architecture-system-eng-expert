@@ -1,0 +1,157 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Core.Reflection;
+using Marten.Internal.CodeGeneration;
+using Npgsql;
+using Weasel.Core;
+using Weasel.Postgresql;
+using Xunit;
+
+namespace Marten.Testing.Harness
+{
+    /// <summary>
+    /// Use this if the tests in a fixture are going to use
+    /// all custom StoreOptions configuration
+    /// </summary>
+    [Collection("OneOffs")]
+    public abstract class OneOffConfigurationsContext: IDisposable, IAsyncLifetime
+    {
+        protected string _schemaName;
+        private DocumentStore _store;
+        private IDocumentSession _session;
+        protected readonly IList<IDisposable> _disposables = new List<IDisposable>();
+
+        public string SchemaName => _schemaName;
+
+        protected OneOffConfigurationsContext()
+        {
+            _schemaName = GetType().Name.ToLower().Sanitize();
+        }
+
+        public IList<IDisposable> Disposables => _disposables;
+
+        /// <summary>
+        /// This will create an additional DocumentStore with the same schema name
+        /// The base context will track it and dispose it later
+        ///
+        /// This is meant for tests on schema detection and migrations
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        protected DocumentStore SeparateStore(Action<StoreOptions> configure = null)
+        {
+            var options = new StoreOptions { DatabaseSchemaName = SchemaName };
+
+            options.Connection(ConnectionSource.ConnectionString);
+            options.DisableNpgsqlLogging = true;
+
+            configure?.Invoke(options);
+
+            var store = new DocumentStore(options);
+
+            _disposables.Add(store);
+
+            return store;
+        }
+
+        protected DocumentStore StoreOptions(Action<StoreOptions> configure, bool cleanAll = true)
+        {
+            try
+            {
+                return storeOptions(configure, cleanAll);
+            }
+            catch (PostgresException e) when (e.SqlState == PostgresErrorCodes.DeadlockDetected)
+            {
+                System.Threading.Thread.Sleep(250);
+                return storeOptions(configure, cleanAll);
+            }
+        }
+
+        private DocumentStore storeOptions(Action<StoreOptions> configure, bool cleanAll)
+        {
+            // Reset any cached session from a previous store
+            _session = null;
+
+            var options = new StoreOptions();
+            options.Connection(ConnectionSource.ConnectionString);
+
+            // Can be overridden
+            options.AutoCreateSchemaObjects = AutoCreate.All;
+            options.NameDataLength = 100;
+            options.DatabaseSchemaName = _schemaName;
+
+            configure(options);
+
+            if (cleanAll)
+            {
+                using var conn = new NpgsqlConnection(ConnectionSource.ConnectionString);
+                conn.Open();
+                conn.CreateCommand($"drop schema if exists {_schemaName} cascade")
+                    .ExecuteNonQuery();
+            }
+
+            _store = new DocumentStore(options);
+
+            _disposables.Add(_store);
+
+            return _store;
+        }
+
+        protected DocumentStore theStore
+        {
+            get
+            {
+                if (_store == null)
+                {
+                    StoreOptions(_ => { });
+                }
+
+                return _store;
+            }
+            set
+            {
+                _store = value;
+            }
+        }
+
+        protected IDocumentSession theSession
+        {
+            get
+            {
+                if (_session != null)
+                    return _session;
+
+                _session = theStore.LightweightSession();
+                _disposables.Add(_session);
+
+                return _session;
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var disposable in _disposables)
+            {
+                disposable.Dispose();
+            }
+        }
+
+        /// <remarks>
+        /// This base implements IAsyncLifetime deliberately. Under xunit v2 a derived class
+        /// that added IAsyncLifetime still got this class's Dispose() called by the runner.
+        /// Under v3, IAsyncLifetime inherits IAsyncDisposable and the runner calls only the
+        /// async path — so a derived DisposeAsync that did not chain here would silently
+        /// skip disposing _disposables. Declaring the pair virtual on the base forces
+        /// derived overrides through base.DisposeAsync().
+        /// </remarks>
+        public virtual ValueTask InitializeAsync() => default;
+
+        public virtual ValueTask DisposeAsync()
+        {
+            Dispose();
+            return default;
+        }
+    }
+}

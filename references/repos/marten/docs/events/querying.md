@@ -1,0 +1,397 @@
+# Querying Event and Stream Data
+
+## Fetch Events for a Stream
+
+You can retrieve the events for a single stream at any time with the `IEventStore.FetchStream()` methods shown below:
+
+<!-- snippet: sample_using-fetch-stream -->
+<a id='snippet-sample_using-fetch-stream'></a>
+```cs
+public async Task load_event_stream(IDocumentSession session, Guid streamId)
+{
+    // Fetch *all* of the events for this stream
+    var events1 = await session.Events.FetchStreamAsync(streamId);
+
+    // Fetch the events for this stream up to and including version 5
+    var events2 = await session.Events.FetchStreamAsync(streamId, 5);
+
+    // Fetch the events for this stream at this time yesterday
+    var events3 = await session.Events
+        .FetchStreamAsync(streamId, timestamp: DateTime.UtcNow.AddDays(-1));
+}
+
+public async Task load_event_stream_async(IDocumentSession session, Guid streamId)
+{
+    // Fetch *all* of the events for this stream
+    var events1 = await session.Events.FetchStreamAsync(streamId);
+
+    // Fetch the events for this stream up to and including version 5
+    var events2 = await session.Events.FetchStreamAsync(streamId, 5);
+
+    // Fetch the events for this stream at this time yesterday
+    var events3 = await session.Events
+        .FetchStreamAsync(streamId, timestamp: DateTime.UtcNow.AddDays(-1));
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/event_store_quickstart.cs#L9-L37' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using-fetch-stream' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The data returned is a list of `IEvent` objects, where each is a (internal) strongly-typed `Event<T>` object shown below:
+
+```cs
+public interface IEvent
+{
+    /// <summary>
+    ///     Unique identifier for the event. Uses a sequential Guid
+    /// </summary>
+    Guid Id { get; set; }
+
+    /// <summary>
+    ///     The version of the stream this event reflects. The place in the stream.
+    /// </summary>
+    long Version { get; set; }
+
+    /// <summary>
+    ///     The sequential order of this event in the entire event store
+    /// </summary>
+    long Sequence { get; set; }
+
+    /// <summary>
+    ///     The actual event data body
+    /// </summary>
+    object Data { get; }
+
+    /// <summary>
+    ///     If using Guid's for the stream identity, this will
+    ///     refer to the Stream's Id, otherwise it will always be Guid.Empty
+    /// </summary>
+    Guid StreamId { get; set; }
+
+    /// <summary>
+    ///     If using strings as the stream identifier, this will refer
+    ///     to the containing Stream's Id
+    /// </summary>
+    string? StreamKey { get; set; }
+
+    /// <summary>
+    ///     The UTC time that this event was originally captured
+    /// </summary>
+    DateTimeOffset Timestamp { get; set; }
+
+    /// <summary>
+    ///     If using multi-tenancy by tenant id
+    /// </summary>
+    string TenantId { get; set; }
+
+    /// <summary>
+    ///     The .Net type of the event body
+    /// </summary>
+    Type EventType { get; }
+
+    /// <summary>
+    ///     Marten's type alias string for the Event type
+    /// </summary>
+    string EventTypeName { get; set; }
+
+    /// <summary>
+    ///     Marten's string representation of the event type
+    ///     in assembly qualified name
+    /// </summary>
+    string DotNetTypeName { get; set; }
+
+    /// <summary>
+    ///     Optional metadata describing the causation id
+    /// </summary>
+    string? CausationId { get; set; }
+
+    /// <summary>
+    ///     Optional metadata describing the correlation id
+    /// </summary>
+    string? CorrelationId { get; set; }
+
+    /// <summary>
+    ///     Optional user defined metadata values. This may be null.
+    /// </summary>
+    Dictionary<string, object>? Headers { get; set; }
+
+    /// <summary>
+    ///     Has this event been archived and no longer applicable
+    ///     to projected views
+    /// </summary>
+    bool IsArchived { get; set; }
+
+    /// <summary>
+    ///     Marten's name for the aggregate type that will be persisted
+    ///     to the streams table. This will only be available when running
+    ///     within the Async Daemon
+    /// </summary>
+    public string? AggregateTypeName { get; set; }
+
+    /// <summary>
+    ///     Set an optional user defined metadata value by key
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    void SetHeader(string key, object value);
+
+    /// <summary>
+    ///     Get an optional user defined metadata value by key
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    object? GetHeader(string key);
+
+    /// <summary>
+    ///     Optional user name captured for this event
+    /// </summary>
+    string? UserName { get; set; }
+
+    /// <summary>
+    ///     Has this event been marked as skipped and filtered out of
+    ///     projection and subscription processing
+    /// </summary>
+    bool IsSkipped { get; set; }
+
+    /// <summary>
+    ///     Strong-typed identifier values used for cross-stream querying
+    ///     and consistency (dynamic consistency boundaries). May be null.
+    /// </summary>
+    IReadOnlyList<EventTag>? Tags { get; }
+
+    /// <summary>
+    ///     Add a strong-typed tag value to this event
+    /// </summary>
+    void AddTag<TTag>(TTag tag) where TTag : notnull;
+
+    /// <summary>
+    ///     Add a tag value to this event
+    /// </summary>
+    void AddTag(EventTag tag);
+}
+```
+
+## Stream State
+
+If you just need to check on the state of an event stream - what version (effectively the number of events in the stream) it is and what, if any, aggregate type it represents - you can use the `IEventStore.FetchStreamState()/FetchStreamStateAsync()` methods or `IBatchQuery.Events.FetchStreamState()`, as shown below:
+
+<!-- snippet: sample_fetching_stream_state -->
+<a id='snippet-sample_fetching_stream_state'></a>
+```cs
+public class fetching_stream_state: IntegrationContext
+{
+    private Guid theStreamId;
+
+    public fetching_stream_state(DefaultStoreFixture fixture) : base(fixture)
+    {
+
+    }
+
+    protected override Task fixtureSetup()
+    {
+        var joined = new MembersJoined { Members = new[] { "Rand", "Matt", "Perrin", "Thom" } };
+        var departed = new MembersDeparted { Members = new[] { "Thom" } };
+
+        theStreamId = theSession.Events.StartStream<Quest>(joined, departed).Id;
+        return theSession.SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task can_fetch_the_stream_version_and_aggregate_type()
+    {
+        var state = await theSession.Events.FetchStreamStateAsync(theStreamId);
+
+        state.ShouldNotBeNull();
+        state.Id.ShouldBe(theStreamId);
+        state.Version.ShouldBe(2);
+        state.AggregateType.ShouldBe(typeof(Quest));
+        state.LastTimestamp.ShouldNotBe(DateTimeOffset.MinValue);
+        state.Created.ShouldNotBe(DateTimeOffset.MinValue);
+    }
+
+    [Fact]
+    public async Task can_fetch_the_stream_version_and_aggregate_type_async()
+    {
+        var state = await theSession.Events.FetchStreamStateAsync(theStreamId);
+
+        state.ShouldNotBeNull();
+        state.Id.ShouldBe(theStreamId);
+        state.Version.ShouldBe(2);
+        state.AggregateType.ShouldBe(typeof(Quest));
+        state.LastTimestamp.ShouldNotBe(DateTimeOffset.MinValue);
+        state.Created.ShouldNotBe(DateTimeOffset.MinValue);
+    }
+
+    [Fact]
+    public async Task can_fetch_the_stream_version_through_batch_query()
+    {
+        var batch = theSession.CreateBatchQuery();
+
+        var stateTask = batch.Events.FetchStreamState(theStreamId);
+
+        await batch.Execute();
+
+        var state = await stateTask;
+
+        state.Id.ShouldBe(theStreamId);
+        state.Version.ShouldBe(2);
+        state.AggregateType.ShouldBe(typeof(Quest));
+        state.LastTimestamp.ShouldNotBe(DateTimeOffset.MinValue);
+    }
+
+    [Fact]
+    public async Task can_fetch_the_stream_events_through_batch_query()
+    {
+        var batch = theSession.CreateBatchQuery();
+
+        var eventsTask = batch.Events.FetchStream(theStreamId);
+
+        await batch.Execute();
+
+        var events = await eventsTask;
+
+        events.Count.ShouldBe(2);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/fetching_stream_state.cs#L88-L165' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_fetching_stream_state' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Furthermore, `StreamState` contains metadata for when the stream was created, `StreamState.Created`, and when the stream was last updated, `StreamState.LastTimestamp`.
+
+## Stream Query Plans
+
+The stream fetches above are also available as reusable [query plans](/documents/querying/compiled-queries#query-plans-):
+`FetchStreamStatePlan` wraps `FetchStreamState()`/`FetchStreamStateAsync()` and `FetchStreamPlan` wraps `FetchStream()`/`FetchStreamAsync()`.
+Both plans accept either a `Guid` stream id or a `string` stream key, and `FetchStreamPlan` carries the optional
+`version`, `timestamp`, and `fromVersion` filters. Because the plans implement both `IQueryPlan<T>` and
+`IBatchQueryPlan<T>`, the same object works standalone with `IQuerySession.QueryByPlanAsync()` or combined with any
+other registered queries into a single database round trip within a batched query:
+
+<!-- snippet: sample_fetch_stream_plans_in_batch -->
+<a id='snippet-sample_fetch_stream_plans_in_batch'></a>
+```cs
+[Fact]
+public async Task use_both_plans_in_one_batch()
+{
+    var streamId = theSession.Events.StartStream<Quest>(new QuestStarted { Name = "Destroy the One Ring" },
+        new MembersJoined(1, "Hobbiton", "Frodo", "Sam")).Id;
+    await theSession.SaveChangesAsync();
+
+    // Start a batch query
+    var batch = theSession.CreateBatchQuery();
+
+    // Fetching the stream state and the raw events of the same stream
+    // in one database round trip
+    var stateFetcher = batch.QueryByPlan(new FetchStreamStatePlan(streamId));
+    var eventsFetcher = batch.QueryByPlan(new FetchStreamPlan(streamId));
+
+    // Execute the batch query
+    await batch.Execute();
+
+    var state = await stateFetcher;
+    var events = await eventsFetcher;
+
+    state.ShouldNotBeNull();
+    state.Version.ShouldBe(2);
+    events.Count.ShouldBe(2);
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/fetching_stream_query_plans.cs#L105-L133' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_fetch_stream_plans_in_batch' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: tip
+Both plans also back an ASP.NET Core endpoint return value —
+[`StreamEventState` and `StreamEvents`](/documents/aspnetcore#typed-streaming-result-types-) write the
+same data straight to an HTTP response, and accept a pre-built plan so a handler can share one plan
+between a batched query and its HTTP result.
+:::
+
+## Fetch a Single Event
+
+You can fetch the information for a single event by id, including its version number within the stream, by using `IEventStore.LoadAsync()` as shown below:
+
+<!-- snippet: sample_load-a-single-event -->
+<a id='snippet-sample_load-a-single-event'></a>
+```cs
+public async Task load_a_single_event_synchronously(IDocumentSession session, Guid eventId)
+{
+    // If you know what the event type is already
+    var event1 = await session.Events.LoadAsync<MembersJoined>(eventId);
+
+    // If you do not know what the event type is
+    var event2 = await session.Events.LoadAsync(eventId);
+}
+
+public async Task load_a_single_event_asynchronously(IDocumentSession session, Guid eventId)
+{
+    // If you know what the event type is already
+    var event1 = await session.Events.LoadAsync<MembersJoined>(eventId);
+
+    // If you do not know what the event type is
+    var event2 = await session.Events.LoadAsync(eventId);
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/Examples/event_store_quickstart.cs#L39-L59' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_load-a-single-event' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Querying Directly Against Event Data
+
+We urge caution about this functionality because it requires a search against the entire `mt_events` table. To issue Linq queries against any specific event type, use the method shown below:
+
+<!-- snippet: sample_query-against-event-data -->
+<a id='snippet-sample_query-against-event-data'></a>
+```cs
+[Fact]
+public async Task can_query_against_event_type()
+{
+    theSession.Events.StartStream<Quest>(joined1, departed1);
+    theSession.Events.StartStream<Quest>(joined2, departed2);
+
+    await theSession.SaveChangesAsync();
+
+    (await theSession.Events.QueryRawEventDataOnly<MembersJoined>().CountAsync()).ShouldBe(2);
+    (await theSession.Events.QueryRawEventDataOnly<MembersJoined>().ToListAsync()).SelectMany(x => x.Members).Distinct()
+        .OrderBy(x => x)
+        .ShouldHaveTheSameElementsAs("Egwene", "Matt", "Nynaeve", "Perrin", "Rand", "Thom");
+
+    (await theSession.Events.QueryRawEventDataOnly<MembersDeparted>()
+        .SingleAsync(x => x.Members.Contains("Matt"))).Id.ShouldBe(departed2.Id);
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/querying_event_data_with_linq.cs#L37-L55' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_query-against-event-data' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+You can use any Linq operator that Marten supports to query against event data. We think that this functionality is probably more useful for diagnostics or troubleshooting rather than something you would routinely use to support your application. We recommend that you favor event projection views over querying within the raw event table.
+
+You can issue queries with Marten's full Linq support against the raw event data with this method:
+
+<!-- snippet: sample_example_of_querying_for_event_data -->
+<a id='snippet-sample_example_of_querying_for_event_data'></a>
+```cs
+public async Task example_of_querying_for_event_data(IDocumentSession session, Guid stream)
+{
+    var events = await session.Events.QueryAllRawEvents()
+        .Where(x => x.StreamId == stream)
+        .OrderBy(x => x.Sequence)
+        .ToListAsync();
+}
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/querying_event_data_with_linq.cs#L162-L171' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_example_of_querying_for_event_data' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+This mechanism will allow you to query by any property of the `IEvent` interface shown above.
+
+## Filter by Event Types <Badge type="tip" text="7.28" />
+
+You can limit the types of events returned by the LINQ query through the `EventTypesAre()` extension method
+in a `Where()` clause as shown below:
+
+<!-- snippet: sample_using_event_types_are -->
+<a id='snippet-sample_using_event_types_are'></a>
+```cs
+var raw = await theSession.Events.QueryAllRawEvents()
+    .Where(x => x.EventTypesAre(typeof(CEvent), typeof(DEvent)))
+    .ToListAsync();
+```
+<sup><a href='https://github.com/JasperFx/marten/blob/master/src/EventSourcingTests/querying_event_data_with_linq.cs#L257-L263' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_event_types_are' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->

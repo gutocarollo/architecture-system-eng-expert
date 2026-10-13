@@ -1,0 +1,340 @@
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
+using Wolverine;
+using Wolverine.Configuration;
+using Wolverine.Redis.Internal;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Partitioning;
+
+namespace Wolverine.Redis;
+
+/// <summary>
+/// Determines the starting position for new Redis Stream consumer groups
+/// </summary>
+public enum StartFrom
+{
+    /// <summary>
+    /// Start consuming from the beginning of the stream (equivalent to "0-0")
+    /// Similar to Kafka's AutoOffsetReset.Earliest
+    /// </summary>
+    Beginning,
+    
+    /// <summary>
+    /// Start consuming only new messages added after group creation (equivalent to "$")
+    /// Similar to Kafka's AutoOffsetReset.Latest
+    /// </summary>
+    NewMessages
+}
+
+public static class WolverineOptionsExtensions
+{
+    /// <summary>
+    /// Adds Redis Streams transport to Wolverine with the specified connection string
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="connectionString">Redis connection string (StackExchange.Redis format)</param>
+    /// <returns>RedisTransport for fluent configuration</returns>
+    public static RedisTransportExpression UseRedisTransport(this WolverineOptions options, string connectionString)
+    {
+        var transport = new RedisTransport(connectionString);
+
+        options.Transports.Add(transport);
+
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Adds the Redis Streams transport to Wolverine using caller-supplied StackExchange.Redis
+    /// <see cref="ConfigurationOptions"/> instead of a connection string. Wolverine builds and owns the
+    /// underlying <c>ConnectionMultiplexer</c>. Use this to wire up StackExchange.Redis extensions — for
+    /// example <a href="https://github.com/Azure/Microsoft.Azure.StackExchangeRedis">Microsoft.Azure.StackExchangeRedis</a>
+    /// for Azure Managed Redis with Entra ID / Managed Identity token refresh. GH-3110.
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="configurationOptions">Pre-configured StackExchange.Redis connection options</param>
+    /// <returns>RedisTransport for fluent configuration</returns>
+    public static RedisTransportExpression UseRedisTransport(this WolverineOptions options, ConfigurationOptions configurationOptions)
+    {
+        var transport = new RedisTransport(configurationOptions);
+
+        options.Transports.Add(transport);
+
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Adds the Redis Streams transport to Wolverine using a caller-managed
+    /// <see cref="IConnectionMultiplexer"/>. Wolverine uses the supplied multiplexer as-is and does NOT
+    /// dispose it — the caller owns its lifetime and any custom authentication, reconnect policy, or token
+    /// refresh wired into it (e.g. via Microsoft.Azure.StackExchangeRedis). GH-3110.
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="connectionMultiplexer">A connected, caller-managed multiplexer</param>
+    /// <returns>RedisTransport for fluent configuration</returns>
+    public static RedisTransportExpression UseRedisTransport(this WolverineOptions options, IConnectionMultiplexer connectionMultiplexer)
+    {
+        var transport = new RedisTransport(connectionMultiplexer);
+
+        options.Transports.Add(transport);
+
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Adds the Redis Streams transport to Wolverine using an <see cref="IConnectionMultiplexer"/> resolved
+    /// from the application's IoC container at runtime. Use this to share one multiplexer (for example a
+    /// singleton registered with Microsoft.Azure.StackExchangeRedis token refresh) between Wolverine and the
+    /// rest of the application. The resolved multiplexer is assumed to be container-owned — Wolverine uses it
+    /// as-is and does NOT dispose it. GH-3110.
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="connectionFactory">Resolves the multiplexer from the built service provider</param>
+    /// <returns>RedisTransport for fluent configuration</returns>
+    public static RedisTransportExpression UseRedisTransport(this WolverineOptions options, Func<IServiceProvider, IConnectionMultiplexer> connectionFactory)
+    {
+        var transport = new RedisTransport(connectionFactory);
+
+        options.Transports.Add(transport);
+
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Locate the Redis transport for this application. Pass a <paramref name="name"/> to resolve an
+    /// additional, named Redis broker registered via <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>.
+    /// GH-3309.
+    /// </summary>
+    internal static RedisTransport RedisTransport(this WolverineOptions options, BrokerName? name = null)
+    {
+        if (name == null)
+        {
+            return options.Transports.GetOrCreate<RedisTransport>();
+        }
+
+        var existing = options.Transports.OfType<RedisTransport>().FirstOrDefault(x => x.Protocol == name.Name);
+        if (existing == null)
+        {
+            throw new InvalidOperationException(
+                $"No named Redis broker '{name.Name}' has been registered. Call AddNamedRedisBroker(new BrokerName(\"{name.Name}\"), connectionString) before publishing or listening on it.");
+        }
+
+        return existing;
+    }
+
+    /// <summary>
+    /// Register an additional, independent Redis broker addressed by a StackExchange.Redis connection string.
+    /// Only use this if your Wolverine application needs to talk to two or more Redis brokers. The
+    /// <paramref name="name"/> doubles as the URI scheme for the additional broker's endpoints, so pin
+    /// publishing / listening to it with <see cref="ToRedisStreamOnNamedBroker"/> /
+    /// <see cref="ListenToRedisStreamOnNamedBroker(WolverineOptions, BrokerName, string, string)"/>. GH-3309.
+    /// </summary>
+    public static RedisTransportExpression AddNamedRedisBroker(this WolverineOptions options, BrokerName name, string connectionString)
+    {
+        var transport = new RedisTransport(name.Name, connectionString);
+        options.Transports.Add(transport);
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Register an additional, independent Redis broker addressed by caller-supplied
+    /// <see cref="ConfigurationOptions"/>. See <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>. GH-3309.
+    /// </summary>
+    public static RedisTransportExpression AddNamedRedisBroker(this WolverineOptions options, BrokerName name, ConfigurationOptions configurationOptions)
+    {
+        var transport = new RedisTransport(name.Name, configurationOptions);
+        options.Transports.Add(transport);
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Register an additional, independent Redis broker addressed by a caller-managed
+    /// <see cref="IConnectionMultiplexer"/> (which Wolverine does NOT dispose).
+    /// See <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>. GH-3309.
+    /// </summary>
+    public static RedisTransportExpression AddNamedRedisBroker(this WolverineOptions options, BrokerName name, IConnectionMultiplexer connectionMultiplexer)
+    {
+        var transport = new RedisTransport(name.Name, connectionMultiplexer);
+        options.Transports.Add(transport);
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Register an additional, independent Redis broker addressed by an <see cref="IConnectionMultiplexer"/>
+    /// resolved from the IoC container at runtime (which Wolverine does NOT dispose).
+    /// See <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>. GH-3309.
+    /// </summary>
+    public static RedisTransportExpression AddNamedRedisBroker(this WolverineOptions options, BrokerName name, Func<IServiceProvider, IConnectionMultiplexer> connectionFactory)
+    {
+        var transport = new RedisTransport(name.Name, connectionFactory);
+        options.Transports.Add(transport);
+        return new RedisTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Publish messages to a Redis stream on an additional, named broker registered via
+    /// <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>. GH-3309.
+    /// </summary>
+    /// <param name="publishing">Publishing configuration</param>
+    /// <param name="name">Identity of the additional Redis broker</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <param name="databaseId">Redis database ID (default 0)</param>
+    public static RedisSubscriberConfiguration ToRedisStreamOnNamedBroker(this IPublishToExpression publishing, BrokerName name, string streamKey, int databaseId = 0)
+    {
+        var transport = publishing.As<PublishingExpression>().Parent.RedisTransport(name);
+
+        var endpoint = transport.StreamEndpoint(streamKey, databaseId);
+
+        publishing.To(endpoint.Uri);
+
+        return new RedisSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Listen to a Redis stream on an additional, named broker registered via
+    /// <see cref="AddNamedRedisBroker(WolverineOptions, BrokerName, string)"/>. GH-3309.
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="name">Identity of the additional Redis broker</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <param name="consumerGroup">Consumer group name</param>
+    /// <param name="databaseId">Redis database ID (default 0)</param>
+    public static RedisListenerConfiguration ListenToRedisStreamOnNamedBroker(this WolverineOptions options, BrokerName name, string streamKey, string consumerGroup, int databaseId = 0)
+    {
+        var transport = options.RedisTransport(name);
+
+        var endpoint = transport.StreamEndpoint(streamKey, databaseId, e =>
+        {
+            e.ConsumerGroup = consumerGroup;
+            e.IsListener = true;
+        });
+
+        return new RedisListenerConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to publish messages to the specified Redis stream (uses database 0)
+    /// </summary>
+    /// <param name="publishing">Publishing configuration</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <returns>Stream endpoint for further configuration</returns>
+    public static RedisSubscriberConfiguration ToRedisStream(this IPublishToExpression publishing, string streamKey)
+    {
+        return publishing.ToRedisStream(streamKey, 0);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to publish messages to the specified Redis stream with database ID
+    /// </summary>
+    /// <param name="publishing">Publishing configuration</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <param name="databaseId">Redis database ID</param>
+    /// <returns>Stream endpoint for further configuration</returns>
+    public static RedisSubscriberConfiguration ToRedisStream(this IPublishToExpression publishing, string streamKey, int databaseId)
+    {
+        // Use correct pattern from Kafka transport
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<RedisTransport>();
+        
+        var endpoint = transport.StreamEndpoint(streamKey, databaseId);
+        
+        // Register this as a publishing destination
+        publishing.To(endpoint.Uri);
+        
+        return new RedisSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to listen to messages from the specified Redis stream with a consumer group (uses database 0)
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <param name="consumerGroup">Consumer group name</param>
+    /// <returns>Stream endpoint for further configuration</returns>
+    public static RedisListenerConfiguration ListenToRedisStream(this WolverineOptions options, string streamKey, string consumerGroup)
+    {
+        return options.ListenToRedisStream(streamKey, consumerGroup, 0);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to listen to a Redis stream with starting position control
+    /// </summary>
+    public static RedisListenerConfiguration ListenToRedisStream(this WolverineOptions options, string streamKey, string consumerGroup, StartFrom startFrom)
+    {
+        var endpoint = options.ListenToRedisStream(streamKey, consumerGroup, 0);
+
+        if (startFrom == StartFrom.Beginning) return endpoint.StartFromBeginning();
+        return endpoint.StartFromNewMessages();
+    }
+
+    /// <summary>
+    /// Configure Wolverine to listen to messages from the specified Redis stream with a consumer group and database ID
+    /// </summary>
+    /// <param name="options">Wolverine configuration options</param>
+    /// <param name="streamKey">Redis stream key name</param>
+    /// <param name="consumerGroup">Consumer group name</param>
+    /// <param name="databaseId">Redis database ID</param>
+    /// <returns>Stream endpoint for further configuration</returns>
+    public static RedisListenerConfiguration ListenToRedisStream(this WolverineOptions options, string streamKey, string consumerGroup, int databaseId)
+    {
+        var transport = options.Transports.GetOrCreate<RedisTransport>();
+        if (transport == null)
+        {
+            throw new InvalidOperationException("Redis transport has not been configured. Call UseRedisTransport() first.");
+        }
+
+        var endpoint = transport.StreamEndpoint(streamKey, databaseId, e =>
+        {
+            e.ConsumerGroup = consumerGroup;
+            e.IsListener = true;
+        });
+
+        return new RedisListenerConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Create a sharded message topology with Redis streams named
+    /// baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="rules"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static MessagePartitioningRules PublishToShardedRedisStreams(this MessagePartitioningRules rules, string baseName, int numberOfEndpoints, Action<PartitionedMessageTopologyWithStreams> configure)
+    {
+        rules.AddPublishingTopology((opts, _) =>
+        {
+            var topology = new PartitionedMessageTopologyWithStreams(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            topology.ConfigureListening(x => {});
+            configure(topology);
+            topology.AssertValidity();
+
+            return topology;
+        });
+
+        return rules;
+    }
+
+    /// <summary>
+    /// Use sharded Redis streams for global partitioned message processing.
+    /// Streams will be named baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="topology"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static GlobalPartitionedMessageTopology UseShardedRedisStreams(
+        this GlobalPartitionedMessageTopology topology, string baseName, int numberOfEndpoints,
+        Action<PartitionedMessageTopologyWithStreams>? configure = null)
+    {
+        topology.SetExternalTopology(opts =>
+        {
+            var t = new PartitionedMessageTopologyWithStreams(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            configure?.Invoke(t);
+            return t;
+        }, baseName);
+        return topology;
+    }
+}

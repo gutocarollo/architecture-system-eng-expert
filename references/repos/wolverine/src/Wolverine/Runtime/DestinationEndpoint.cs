@@ -1,0 +1,164 @@
+using System.Diagnostics;
+using JasperFx.Core;
+using Wolverine.Configuration;
+using Wolverine.Runtime.RemoteInvocation;
+using Wolverine.Runtime.Scheduled;
+using Wolverine.Transports;
+using Wolverine.Transports.Sending;
+
+namespace Wolverine.Runtime;
+
+internal class DestinationEndpoint : IDestinationEndpoint
+{
+    private readonly Endpoint _endpoint;
+    private readonly MessageBus _parent;
+
+    public DestinationEndpoint(Endpoint endpoint, MessageBus parent)
+    {
+        _endpoint = endpoint;
+        _parent = parent;
+
+        // Hokey, but guarantees that the sending agent is active
+        if (endpoint.Agent == null)
+        {
+            parent.Runtime.Endpoints.GetOrBuildSendingAgent(endpoint.Uri);
+        }
+    }
+
+    public Uri Uri => _endpoint.Uri;
+    public string EndpointName => _endpoint.EndpointName;
+
+    public ValueTask SendAsync<T>(T message, DeliveryOptions? options = null)
+    {
+        if (message == null || message.GetType() == typeof(Uri))
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        var route = _endpoint.RouteFor(message.GetType(), _parent.Runtime);
+        var envelope = new Envelope(message, _endpoint.Agent!) { WireTap = _endpoint.WireTap };
+        if (options != null && options.ContentType.IsNotEmpty() && options.ContentType != envelope.ContentType)
+        {
+            envelope.Serializer = _parent.Runtime.Options.FindSerializer(options.ContentType);
+        }
+
+        for (var i = 0; i < route.Rules.Count; i++)
+        {
+            route.Rules[i].Modify(envelope);
+        }
+
+        // Delivery options win
+        options?.Override(envelope);
+
+        // adjust for local, scheduled send
+        var utcNow = DateTimeOffset.UtcNow;
+        if (envelope.IsScheduledForLater(utcNow) && !_endpoint.Agent!.SupportsNativeScheduledSendFor(envelope, utcNow))
+        {
+            var localDurableQueue =
+                _parent.Runtime.Endpoints.GetOrBuildSendingAgent(TransportConstants.DurableLocalUri);
+            envelope = envelope.ForScheduledSend(localDurableQueue);
+        }
+
+        _parent.TrackEnvelopeCorrelation(envelope, Activity.Current);
+
+        return _parent.PersistOrSendAsync(envelope);
+    }
+
+    public ValueTask SendRawMessageAsync(byte[] data, Type? messageType = null, Action<Envelope>? configure = null)
+    {
+        if (data == null)
+        {
+            throw new ArgumentNullException(nameof(data));
+        }
+
+        if (data.Length == 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(data), "Zero length data is not valid for this usage");
+        }
+
+        var envelope = new Envelope
+        {
+            Data = data,
+            Sender = _parent.Runtime.Endpoints.GetOrBuildSendingAgent(_endpoint.Uri),
+            WireTap = _endpoint.WireTap
+        };
+
+        if (messageType != null)
+        {
+            envelope.SetMessageType(messageType);
+            
+            var route = _endpoint.RouteFor(messageType, _parent.Runtime);
+            for (var i = 0; i < route.Rules.Count; i++)
+        {
+            route.Rules[i].Modify(envelope);
+        }
+        }
+        
+        configure?.Invoke(envelope);
+        
+        // adjust for local, scheduled send
+        var utcNow = DateTimeOffset.UtcNow;
+        if (envelope.IsScheduledForLater(utcNow) && !_endpoint.Agent!.SupportsNativeScheduledSendFor(envelope, utcNow))
+        {
+            var localDurableQueue =
+                _parent.Runtime.Endpoints.GetOrBuildSendingAgent(TransportConstants.DurableLocalUri);
+            envelope = envelope.ForScheduledSend(localDurableQueue);
+        }
+
+        _parent.TrackEnvelopeCorrelation(envelope, Activity.Current);
+
+        return _parent.PersistOrSendAsync(envelope);
+    }
+
+    public Task<Acknowledgement> InvokeAsync(object message, CancellationToken cancellation = default,
+        TimeSpan? timeout = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        var route = _endpoint.RouteFor(message.GetType(), _parent.Runtime);
+        return route.InvokeAsync<Acknowledgement>(message, _parent, cancellation, timeout);
+    }
+
+    public Task<Acknowledgement> InvokeAsync(object message, DeliveryOptions options, CancellationToken cancellation = default,
+        TimeSpan? timeout = null)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        var route = _endpoint.RouteFor(message.GetType(), _parent.Runtime);
+        return route.InvokeAsync<Acknowledgement>(message, _parent, cancellation, timeout, options);
+    }
+
+    public Task<T> InvokeAsync<T>(object message, CancellationToken cancellation = default, TimeSpan? timeout = null)
+        where T : class
+    {
+        _parent.Runtime.RegisterMessageType(typeof(T));
+
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        var route = _endpoint.RouteFor(message.GetType(), _parent.Runtime);
+        return route.InvokeAsync<T>(message, _parent, cancellation, timeout);
+    }
+
+    public Task<T> InvokeAsync<T>(object message, DeliveryOptions options, CancellationToken cancellation = default,
+        TimeSpan? timeout = null) where T : class
+    {
+        _parent.Runtime.RegisterMessageType(typeof(T));
+
+        if (message == null)
+        {
+            throw new ArgumentNullException(nameof(message));
+        }
+
+        var route = _endpoint.RouteFor(message.GetType(), _parent.Runtime);
+        return route.InvokeAsync<T>(message, _parent, cancellation, timeout, options);
+    }
+}

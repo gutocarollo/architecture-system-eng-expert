@@ -1,0 +1,427 @@
+﻿using System.Diagnostics;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Runtime.Handlers;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Runtime.Serialization.Encryption;
+using Wolverine.Transports;
+
+namespace Wolverine.Runtime;
+
+public class HandlerPipeline : IHandlerPipeline
+{
+    private readonly CancellationToken _cancellation;
+    private readonly ObjectPool<MessageContext> _contextPool;
+
+    private readonly LightweightCache<Type, IExecutor> _executors;
+    private readonly HandlerGraph _graph;
+
+    private readonly WolverineRuntime _runtime;
+    private readonly Endpoint _endpoint = null!;
+
+    internal HandlerPipeline(WolverineRuntime runtime, IExecutorFactory executorFactory)
+    {
+        _graph = runtime.Handlers;
+        _runtime = runtime;
+        ExecutorFactory = executorFactory;
+        _contextPool = runtime.ExecutionPool;
+        _cancellation = runtime.Cancellation;
+
+        Logger = runtime.MessageTracking;
+
+        _executors = new LightweightCache<Type, IExecutor>(executorFactory.BuildFor);
+    }
+
+    internal HandlerPipeline(WolverineRuntime runtime, IExecutorFactory executorFactory, Endpoint endpoint)
+    {
+        _graph = runtime.Handlers;
+        _runtime = runtime;
+        _endpoint = endpoint;
+        ExecutorFactory = executorFactory;
+        _contextPool = runtime.ExecutionPool;
+        _cancellation = runtime.Cancellation;
+
+        // CritterWatch GH-907: a system endpoint's received traffic never reaches the meters or the
+        // CritterWatch accumulator. Resolved once here, not per envelope.
+        Logger = runtime.MessageTrackingFor(endpoint);
+
+        _executors = new LightweightCache<Type, IExecutor>(type => executorFactory.BuildFor(type, endpoint));
+    }
+
+    internal IExecutorFactory ExecutorFactory { get; }
+
+    public IMessageTracker Logger { get; }
+    public bool TelemetryEnabled { get; set; } = true;
+
+    public Task InvokeAsync(Envelope envelope, IChannelCallback channel)
+    {
+        if (_cancellation.IsCancellationRequested)
+        {
+            return Task.CompletedTask;
+        }
+
+        // NOT a `using` declaration: this method is synchronous, so a `using` would dispose --
+        // and therefore Stop() -- the activity as soon as the async overload below hits its
+        // first suspension point, truncating the execution span to the synchronous prefix of
+        // message processing. The 3-arg overload's finally owns the Stop.
+        var activity = TelemetryEnabled ? WolverineTracing.StartExecuting(envelope) : null;
+
+        // No runtime check for HandlerExecutionDiagnosticsEnabled — diagnostic tag
+        // stamping is baked into the generated handler chain via
+        // ApplyExecutionDiagnosticTagsFrame when the flag is set at codegen time.
+        // See GH-2694.
+        return InvokeAsync(envelope, channel, activity);
+    }
+
+    public async Task InvokeAsync(Envelope envelope, IChannelCallback channel, Activity? activity)
+    {
+        try
+        {
+            // Inside the try so the early return still stops the activity in the finally;
+            // the 2-arg overload above relies on this method to stop what it started.
+            if (_cancellation.IsCancellationRequested)
+            {
+                return;
+            }
+
+            WolverineTracing.LinkToPreviousAttempt(activity, envelope);
+
+            var context = _contextPool.Get();
+            context.ReadEnvelope(envelope, channel);
+
+            try
+            {
+                var continuation = await executeAsync(context, envelope, activity).ConfigureAwait(false);
+                await continuation.ExecuteAsync(context, _runtime, DateTimeOffset.UtcNow, activity).ConfigureAwait(false);
+            }
+            catch (ObjectDisposedException)
+            {
+                // It's shutting down, get out of here
+            }
+            catch (Exception e)
+            {
+                // The pipeline's last line of defense. Containment lives in a guarded helper so a
+                // failure in the recovery path itself (e.g. an OutOfMemoryException re-thrown by the
+                // allocating CompleteAsync / logging calls) can never escape InvokeAsync, fault the
+                // receiver loop, and silently stop the listener. See GH-3111.
+                await RecoverFromFailedProcessingAsync(channel, envelope, e, Logger, _runtime.Logger, activity)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                _contextPool.Return(context);
+            }
+        }
+        finally
+        {
+            activity?.Stop();
+        }
+    }
+
+    /// <summary>
+    /// The pipeline's final, allocation-safe recovery step. Normal failures are acked out of the way
+    /// and logged exactly as before; the difference is that if that recovery work itself throws — which
+    /// happens when the original failure is resource exhaustion, because <see cref="IChannelCallback.CompleteAsync"/>
+    /// and structured logging both allocate at the memory ceiling — the failure is contained here instead of
+    /// escaping <c>InvokeAsync</c>. An exception escaping the pipeline faults the receiver loop, stops the
+    /// listener, and lets the host exit cleanly (exit code 0), which an orchestrator reads as success and
+    /// restarts straight back into the same un-acked poison message → permanent crash loop. A single
+    /// un-recoverable envelope must never take the whole host down. See GH-3111.
+    /// </summary>
+    internal static async ValueTask RecoverFromFailedProcessingAsync(
+        IChannelCallback channel,
+        Envelope envelope,
+        Exception exception,
+        IMessageTracker tracker,
+        ILogger logger,
+        Activity? activity)
+    {
+        try
+        {
+            // Gotta get the message out of here because it's something that
+            // could never be handled
+            await channel.CompleteAsync(envelope).ConfigureAwait(false);
+
+            tracker.LogException(exception, envelope.Id);
+
+            // GH-4125: record a terminal event for the envelope. This path acks the message away and
+            // will never touch it again, so from every tracker's point of view the message has failed --
+            // but until now the only thing emitted was the free-form LogException, which is not a
+            // message event. Two consequences: failure metrics under-counted every envelope that died
+            // here (a handler chain that fails to compile, a missing sticky handler), and a tracked
+            // session could never see the envelope reach a terminal state, so it stayed "incomplete"
+            // until the session timed out. Now that the timeout assertion is no longer suppressed by
+            // DoNotAssertOnExceptionsDetected(), that second one is the difference between a test that
+            // reports the real failure and one that reports a five second timeout.
+            tracker.MessageFailed(envelope, exception);
+
+            activity?.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
+        }
+        catch (Exception recoveryFailure)
+        {
+            // The recovery path itself failed — almost always because the original failure was an
+            // OutOfMemoryException and CompleteAsync / structured logging also allocate. Swallow it so
+            // it cannot escape InvokeAsync and stop the listener; the broker will redeliver the
+            // still-un-acked envelope, but the host stays up and keeps processing other messages.
+            TryLogContainedFailure(logger, envelope, exception, recoveryFailure, activity);
+        }
+    }
+
+    private static void TryLogContainedFailure(ILogger logger, Envelope envelope, Exception original,
+        Exception recoveryFailure, Activity? activity)
+    {
+        try
+        {
+            var fatal = original is OutOfMemoryException || recoveryFailure is OutOfMemoryException;
+
+            logger.LogError(recoveryFailure,
+                "Wolverine could not recover from a {Severity} failure while processing envelope {Id} " +
+                "(original failure: {Original}). The message was not acknowledged or dead-lettered and may be " +
+                "redelivered by the broker; the listener is being kept alive to avoid a poison-message crash loop. See GH-3111.",
+                fatal ? "fatal resource-exhaustion" : "cascading", envelope.Id, original.GetType().Name);
+
+            activity?.SetStatus(ActivityStatusCode.Error, original.GetType().Name);
+        }
+        catch
+        {
+            // Even minimal structured logging allocates and can itself fail at the memory ceiling.
+            // There is nothing more we can safely do here; never let the containment path throw.
+        }
+    }
+
+    public async ValueTask<IContinuation> TryDeserializeEnvelope(Envelope envelope)
+    {
+        if (envelope.Message != null) return NullContinuation.Instance;
+
+        // Opt-in via WolverineOptions.Tracking.DeserializationSpanEnabled.
+        // The span only starts when the flag is on AND we have a current Activity
+        // listener — ActivitySource.StartActivity returns null otherwise, which
+        // keeps the no-op cost trivial.
+        using var activity = _runtime.Options.Tracking.DeserializationSpanEnabled
+            ? WolverineTracing.ActivitySource.StartActivity(WolverineTracing.Deserialize, ActivityKind.Internal)
+            : null;
+
+        // Try to deserialize
+        try
+        {
+            if (RequiresEncryption(envelope)
+                && envelope.ContentType != EncryptionHeaders.EncryptedContentType)
+            {
+                return new MoveToErrorQueue(new EncryptionPolicyViolationException(envelope));
+            }
+
+            var serializer = envelope.Serializer ?? serializerFor(envelope);
+            serializer.UnwrapEnvelopeIfNecessary(envelope);
+
+            if (envelope.Data == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(envelope),
+                    "Envelope does not have a message or deserialized message data");
+            }
+
+            activity?.SetTag(WolverineTracing.PayloadSizeBytes, envelope.Data.Length);
+
+            if (envelope.Message != null)
+            {
+                return NullContinuation.Instance;
+            }
+
+            if (string.IsNullOrEmpty(envelope.MessageType))
+            {
+                throw new ArgumentOutOfRangeException(nameof(envelope),
+                    "The envelope has no Message or MessageType name");
+            }
+
+            if (_graph.TryFindMessageType(envelope.MessageType, out var messageType))
+            {
+                if (serializer is IAsyncMessageSerializer asyncMessageSerializer)
+                {
+                    envelope.Message = await asyncMessageSerializer.ReadFromDataAsync(messageType, envelope).ConfigureAwait(false);
+                }
+                else
+                {
+                    envelope.Message = serializer.ReadFromData(messageType, envelope);
+                }
+            }
+            else
+            {
+                return new NoHandlerContinuation(_runtime.MissingHandlers(), _runtime);
+            }
+
+            if (envelope.Message == null)
+            {
+                return new MoveToErrorQueue(new InvalidOperationException(
+                    "No message body could be de-serialized from the raw data in this envelope"));
+            }
+
+            return NullContinuation.Instance;
+        }
+        catch (Exception? e)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, e.GetType().Name);
+
+            // Record the caught exception as an OpenTelemetry "exception" event so
+            // OTLP exporters see exception.type / exception.message / exception.stacktrace
+            // for the malformed or incompatible payload, instead of only the generic
+            // "Serialization Failure" status the parent activity is later stamped with.
+            // AddException is a no-op when activity is null (span not started because
+            // DeserializationSpanEnabled is off), so the opt-in cost stays trivial.
+            activity?.AddException(e);
+
+            return new MoveToErrorQueue(e);
+        }
+        finally
+        {
+            recordReceivedOnce(envelope);
+        }
+    }
+
+    /// <summary>
+    /// GH-4135: report Received exactly once per receipt. Both the deserialization path and the
+    /// already-deserialized path report it, and partitioned processing goes through BOTH -- it
+    /// deserializes up front so it can read the group id, then hands the pipeline an envelope that
+    /// already carries a Message. Reporting twice double-counted the received metric, double-fed the
+    /// CritterWatch accumulator, logged each receipt twice, and left two Received records in a tracked
+    /// session, which is what made Received.SingleMessage&lt;T&gt;() fail on correct behaviour.
+    /// </summary>
+    private void recordReceivedOnce(Envelope envelope)
+    {
+        if (envelope.WasTrackedAsReceived)
+        {
+            return;
+        }
+
+        envelope.WasTrackedAsReceived = true;
+        Logger.Received(envelope);
+    }
+
+    // Resolve the serializer for an envelope whose runtime-only Serializer reference
+    // is no longer set. This happens on replay paths (scheduled retry, durable
+    // recovery) where the envelope is rehydrated from storage: ContentType and
+    // Destination survive, but Serializer does not. Resolve from the originating
+    // endpoint first so endpoint-scoped serializers are honored on replay exactly
+    // as they are at first receipt. This matters most for the MassTransit and
+    // NServiceBus interop serializers wired by UseMassTransitInterop() /
+    // UseNServiceBusInterop(): they register only on the listener endpoint, never in
+    // the global content-type registry. Without this, DetermineSerializer falls back
+    // to the default JSON serializer, which deserializes the un-unwrapped interop
+    // envelope root and yields an all-default message. Mirrors DeadLetterEnvelope.TryReadData.
+    private IMessageSerializer serializerFor(Envelope envelope)
+    {
+        if (envelope.ContentType.IsNotEmpty())
+        {
+            // _endpoint is set on per-listener pipelines and is the most reliable
+            // source; fall back to the persisted Destination for the global pipeline.
+            var endpoint = _endpoint ?? endpointFor(envelope.Destination);
+            var serializer = endpoint?.TryFindSerializer(envelope.ContentType);
+            if (serializer != null)
+            {
+                return serializer;
+            }
+        }
+
+        return _runtime.Options.DetermineSerializer(envelope);
+    }
+
+    private Endpoint? endpointFor(Uri? destination)
+    {
+        return destination == null ? null : _runtime.Endpoints.EndpointFor(destination);
+    }
+
+    private bool RequiresEncryption(Envelope envelope)
+    {
+        var options = _runtime.Options;
+
+        // GH-4322: for the overwhelmingly common no-encryption configuration, answer from two
+        // count reads instead of paying the message-type map probe below on every envelope. Read
+        // per call rather than cached at construction because policies may register encrypted
+        // types lazily after this pipeline is built.
+        if (options.RequiredEncryptedListenerUris.Count == 0 && options.RequiredEncryptedTypes.Count == 0)
+        {
+            return false;
+        }
+
+        // Use the listener's own URI, not envelope.Destination: the latter is sender-
+        // controlled and not populated on broker transports (Rabbit/Kafka/SB).
+        // For per-type enforcement, defer to IsEncryptionRequired so the check
+        // mirrors the polymorphic send-side rule (CanBeCastTo<T>) and a plaintext
+        // envelope for a concrete subtype of an interface/abstract marker is rejected.
+        return (_endpoint?.Uri is not null
+                    && options.RequiredEncryptedListenerUris.Contains(_endpoint.Uri))
+               || (!string.IsNullOrEmpty(envelope.MessageType)
+                    && _graph.TryFindMessageType(envelope.MessageType, out var type)
+                    && options.IsEncryptionRequired(type));
+    }
+
+    // GH-4322: ValueTask because the deserialization pre-checks complete synchronously for the
+    // common already-deserialized case and the success result is a singleton — Task<IContinuation>
+    // was one box per message.
+    private async ValueTask<IContinuation> executeAsync(MessageContext context, Envelope envelope, Activity? activity)
+    {
+        if (envelope.IsExpired())
+        {
+            return new DiscardEnvelope(new EnvelopeExpiredException(envelope));
+        }
+
+        if (envelope.Message == null)
+        {
+            var deserializationResult = await TryDeserializeEnvelope(envelope).ConfigureAwait(false);
+            if (deserializationResult is not NullContinuation)
+            {
+                activity?.SetStatus(ActivityStatusCode.Error, "Serialization Failure");
+                return deserializationResult;
+            }
+        }
+        else
+        {
+            recordReceivedOnce(envelope);
+        }
+
+        if (envelope.IsResponse)
+        {
+            // If a reply listener is registered (from InvokeAsync), complete it directly.
+            // If not (from PublishAsync + RequireResponse), fall through to normal handler execution
+            // so the response can be handled by a registered message handler.
+            if (_runtime.Replies.Complete(envelope))
+            {
+                return MessageSucceededContinuation.Instance;
+            }
+        }
+
+        IExecutor executor;
+        try
+        {
+            executor = _executors[envelope.Message!.GetType()];
+        }
+        catch (ObjectDisposedException)
+        {
+            // GH-4213: the container is already disposed, which means the node is shutting down rather than
+            // misconfigured -- building the executor resolves services, and IHost.Dispose() flags the
+            // IServiceProvider before it disposes WolverineRuntime and drains. Rethrowing hands this to
+            // InvokeAsync's ObjectDisposedException guard, which leaves the envelope unsettled so the broker
+            // or the inbox redelivers it to a live node. Dead-lettering it here instead would discard work
+            // whose handler never ran, on a shutdown that succeeds everywhere else.
+            throw;
+        }
+        catch (Exception e)
+        {
+            // GH-4151: building the executor happens *before* any HandlerChain instance exists, so there
+            // is no chain.Failures for a failure policy to hang off of -- not even a MoveToErrorQueue rule
+            // written specifically for this message type. Without this catch the exception escapes to
+            // InvokeAsync's last line of defense, which acks the envelope away: on a durable transport the
+            // row is marked Handled with attempts=0 and then swept by ordinary inbox cleanup, so a
+            // configuration error silently discards durable messages with no DLQ row and a healthy host.
+            // Every cause takes this same path -- a missing pre-built type in TypeLoadMode.Static, a chain
+            // that will not compile, a sticky-handler misconfiguration -- and none of them will ever
+            // succeed on a retry, so the dead letter queue is where the envelope belongs.
+            activity?.SetStatus(ActivityStatusCode.Error, e.GetType().Name);
+            return new MoveToErrorQueue(e);
+        }
+
+        return await executor.ExecuteAsync(context, _cancellation).ConfigureAwait(false);
+    }
+}

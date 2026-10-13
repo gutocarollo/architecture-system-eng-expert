@@ -1,0 +1,314 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Documents;
+using JasperFx.Events;
+using JasperFx.Events.ComplianceTests;
+using JasperFx.Events.Documents;
+using Marten.Schema;
+using Marten.Storage;
+
+namespace Marten.Testing.Harness;
+
+/// <summary>
+/// Marten's implementation of the cross-store <em>document</em> compliance seam (#5216,
+/// jasperfx#647).
+/// </summary>
+/// <remarks>
+/// <para>
+/// Three members wide, against the nine-plus of <see cref="MartenComplianceFixture" />, and unlike
+/// that one it is not generic over Marten's session pair. Both differences are the point rather
+/// than an inconsistency: the event surface is largely only reachable through a product's own
+/// session type, whereas everything the document suites do runs through
+/// <see cref="IDocumentSessionFactory" /> and the three session contracts — which Marten's
+/// <c>IDocumentStore</c>, <c>IQuerySession</c>, <c>IDocumentOperations</c> and <c>IDocumentSession</c>
+/// now implement directly.
+/// </para>
+/// <para>
+/// <see cref="Sessions" /> being typed as the bare <see cref="IDocumentSessionFactory" /> is what
+/// makes that claim load-bearing: if any of these suites ever needed to reach past the contract
+/// onto a Marten type, it would not compile.
+/// </para>
+/// </remarks>
+public class MartenDocumentComplianceFixture: DocumentStorageComplianceFixture
+{
+    private DocumentStore _store = null!;
+
+    public override IDocumentSessionFactory Sessions => _store;
+
+    /// <summary>
+    /// jasperfx#819 (#5393). Marten implements Guid optimistic concurrency through the IVersioned
+    /// marker and <c>Schema.For&lt;T&gt;().UseOptimisticConcurrency(true)</c>, so
+    /// GuidOptimisticConcurrencyCompliance runs rather than skips.
+    /// </summary>
+    /// <remarks>
+    /// Flipping this is only half of the opt-in: the fixture must also replay
+    /// <c>DocumentComplianceConfig.OptimisticConcurrencyTypes</c>, which BuildStoreAsync below does.
+    /// </remarks>
+    public override bool SupportsOptimisticConcurrency => true;
+
+    /// <summary>
+    /// #5517 / jasperfx#898. Marten's conjoined tenancy, opted into per document type with
+    /// <c>MultiTenanted()</c> — which BuildStoreAsync replays from
+    /// <c>DocumentComplianceConfig.ConjoinedDocuments</c>. Flipping this without that replay does not
+    /// make the suite skip; it makes its isolation facts fail, because a single-tenanted store folds
+    /// both tenants into one row.
+    /// </summary>
+    /// <summary>
+    /// #5517. Marten implements numeric revisions through <c>Schema.For&lt;T&gt;().UseNumericRevisions()</c>
+    /// and <c>Metadata.Revision</c>, so the per-tenant revision fact runs rather than skipping.
+    /// BuildStoreAsync replays <c>DocumentComplianceConfig.NumericRevisionTypes</c> to match.
+    /// </summary>
+    public override bool SupportsNumericRevisions => true;
+
+    public override bool SupportsConjoinedDocuments => true;
+
+    /// <summary>
+    /// #5543 / jasperfx#870. Marten's <c>DocumentStore</c> implements both halves of the diagnostics
+    /// contract, so <c>DocumentStoreDiagnosticsCompliance</c> runs rather than skipping.
+    /// </summary>
+    public override bool SupportsDocumentDiagnostics => true;
+
+    public override IDocumentStoreDiagnostics DocumentDiagnostics => _store;
+
+    public override bool SupportsDocumentDiagnosticWrites => true;
+
+    public override IDocumentStoreDiagnosticsWriter DocumentDiagnosticsWriter => _store;
+
+    /// <summary>
+    /// jasperfx#869. Marten applies <c>Where</c> / <c>OrderBy</c> through its own LINQ provider, so the
+    /// criteria facts run — and the "refused, not ignored" fact, which holds a store WITHOUT predicate
+    /// support to refusing, skips.
+    /// </summary>
+    public override bool SupportsDocumentDiagnosticCriteria => true;
+
+    /// <summary>
+    /// #5544 / jasperfx#928. This fixture builds a single-database conjoined store, which is the shape
+    /// Marten reads every tenant from: dropping the <c>tenant_id</c> predicate answers all of them in one
+    /// query, ordered by tenant then id so paging cannot repeat a row.
+    /// </summary>
+    /// <remarks>
+    /// A store spanning several databases is REFUSED rather than answered from the default one — see
+    /// <c>allTenantsDatabase</c>. That refusal is the contract, not a gap being hidden: returning the
+    /// default tenant's rows as though they were every tenant's is the one failure the flag exists to
+    /// prevent, and a console cannot tell it apart from a store with a single tenant.
+    /// </remarks>
+    public override bool SupportsDocumentDiagnosticAllTenants => true;
+
+    /// <summary>
+    /// #5543. Marten soft-deletes per document type through <c>Schema.For&lt;T&gt;().SoftDeleted()</c>, which
+    /// BuildStoreAsync replays from <c>DocumentComplianceConfig.SoftDeletedDocuments</c>. Flipping this
+    /// without that replay does not make the soft-delete facts skip — it hard-deletes the rows and every one
+    /// of them fails.
+    /// </summary>
+    public override bool SupportsSoftDeletedDocuments => true;
+
+    /// <summary>
+    /// #5543. Marten keeps a sub-class in its root's table with an <c>mt_doc_type</c> discriminator, opted
+    /// into with <c>Schema.For&lt;TRoot&gt;().AddSubClass&lt;TSub&gt;()</c> — replayed from
+    /// <c>DocumentComplianceConfig.SubClasses</c>. Same warning as above: without the replay each sub-class
+    /// gets its own table and "filter to the requested type" has nothing to exclude, so the facts fail
+    /// rather than skip.
+    /// </summary>
+    public override bool SupportsDocumentHierarchies => true;
+
+    /// <summary>
+    /// #5517. Separate gate from <see cref="SupportsConjoinedDocuments" /> on purpose — a store can
+    /// have conjoined storage and no cross-tenant escape — and Marten has both.
+    /// </summary>
+    public override bool SupportsCrossTenantQueries => true;
+
+    /// <summary>
+    /// Marten spells the cross-tenant escapes as element predicates INSIDE the <c>Where</c>, which the
+    /// LINQ parser recognizes from the extension method's declaring type. That is why these are seam
+    /// members rather than shared source: built anywhere else, the expression carries a
+    /// <c>MethodInfo</c> the parser does not match, and it would fail at translation rather than
+    /// compile time.
+    /// </summary>
+    public override async Task<IReadOnlyList<T>> QueryAllTenantsAsync<T>(
+        IDocumentReadOperations session, CancellationToken token)
+        => await ((IQuerySession)session).Query<T>().Where(x => x.AnyTenant()).ToListAsync(token);
+
+    /// <inheritdoc cref="QueryAllTenantsAsync{T}" />
+    public override async Task<IReadOnlyList<T>> QueryTenantsAsync<T>(
+        IDocumentReadOperations session, string[] tenantIds, CancellationToken token)
+        => await ((IQuerySession)session).Query<T>().Where(x => x.TenantIsOneOf(tenantIds)).ToListAsync(token);
+
+    protected override async Task BuildStoreAsync(DocumentComplianceConfig config)
+    {
+        var options = new StoreOptions();
+        options.Connection(ConnectionSource.ConnectionString);
+        options.AutoCreateSchemaObjects = AutoCreate.All;
+        options.DisableNpgsqlLogging = true;
+        options.NameDataLength = 100;
+        options.DatabaseSchemaName = (config.SchemaName ?? "doc_compliance").ToLowerInvariant();
+
+        // Marten creates document storage on demand, so DocumentTypes is not strictly required
+        // here. Registering it anyway means ApplyAllConfiguredChangesToDatabaseAsync below actually
+        // builds the tables up front, which keeps the first test of each suite off the lazy-DDL
+        // path and makes CleanDocumentDataAsync a plain delete rather than a no-op against nothing.
+        foreach (var documentType in config.DocumentTypes)
+        {
+            options.Storage.MappingFor(documentType);
+        }
+
+        // jasperfx#665/#666 (#5241). ValueTypes carries the strong-typed identifier wrappers the
+        // suite's documents are keyed by, which LoadAsync<T>(object) needs resolved — the one member
+        // of the document contract whose behavior depends on store configuration the contract itself
+        // does not carry.
+        //
+        // Replayed for the same reason as DocumentTypes above, and with the same status: not
+        // strictly required. Marten's identity convention already discovers a strong-typed id from
+        // the document's Id property, which is how every value type these suites currently declare
+        // reaches the store — the four suites pass with this loop deleted, so do not read it as
+        // load-bearing. It is here because the fixture's job is to replay the config it was handed
+        // rather than to rely on a convention reaching the same answer, and a value type that is
+        // NOT a document's Id (a query parameter, a nested identity) would not be discovered.
+        foreach (var valueType in config.ValueTypes)
+        {
+            options.RegisterValueType(valueType);
+        }
+
+        // jasperfx#819 (#5393). Load-bearing in the strongest sense, and NOT belt-and-braces like the
+        // two loops above: GuidOptimisticConcurrencyCompliance's document implements IVersioned *and*
+        // declares config.UseOptimisticConcurrency<T>(), because the stores disagree about whether the
+        // marker is itself the opt-in or merely supplies the member to guard on. A fixture that drops
+        // this does not make the suite skip -- on a store where the marker alone is not the opt-in,
+        // every guard fact fails instead.
+        //
+        // Set on the mapping rather than through Schema.For<T>() because the config hands over a Type
+        // and the fluent entry point is generic; Policies.ForAllDocuments(m => m.UseOptimisticConcurrency
+        // = true) is the same move one level up.
+        foreach (var type in config.OptimisticConcurrencyTypes)
+        {
+            options.Storage.MappingFor(type).UseOptimisticConcurrency = true;
+        }
+
+        // #5517. Replayed so DocumentConjoinedTenancyCompliance's per-tenant revision fact runs rather
+        // than skipping -- it declares UseNumericRevisions<ComplianceLedgerEntry>() and is gated on
+        // SupportsNumericRevisions below.
+        //
+        // Sets the same three fields the fluent UseNumericRevisions(true) sets, not just the flag: the
+        // revision metadata column has to be enabled or nothing reads the value back, and the competing
+        // Guid flavour has to be cleared because BOTH map to mt_version. That mutual exclusion is why
+        // this loop runs AFTER the OptimisticConcurrencyTypes loop above and not before -- a type in
+        // both lists is a contradiction, and last-writer-wins on the numeric side matches the fluent
+        // API's own precedence rather than leaving the mapping with both flags set.
+        foreach (var type in config.NumericRevisionTypes)
+        {
+            var mapping = options.Storage.MappingFor(type);
+            mapping.UseNumericRevisions = true;
+            mapping.UseOptimisticConcurrency = false;
+            mapping.Metadata.Revision.Enabled = true;
+            mapping.Metadata.Version.Enabled = false;
+        }
+
+        // #5517 / jasperfx#898. NOT optional, and not a skip if dropped: a single-tenanted store folds
+        // both tenants' writes into one row, so DocumentConjoinedTenancyCompliance's isolation facts
+        // FAIL rather than skip. MultiTenanted() is the conjoined opt-in per document type; the suite
+        // names the types and the fixture replays them, exactly as with OptimisticConcurrencyTypes.
+        foreach (var type in config.ConjoinedDocuments)
+        {
+            options.Storage.MappingFor(type).TenancyStyle = TenancyStyle.Conjoined;
+        }
+
+        // #5543 / jasperfx#870. What Schema.For<T>().SoftDeleted() sets, reached through the mapping because
+        // the config hands over a Type and the fluent entry point is generic. NOT optional: a dropped replay
+        // hard-deletes the rows, so "a soft-deleted row is excluded by default" passes vacuously while
+        // "it comes back flagged when asked for" fails -- the worst of both.
+        foreach (var type in config.SoftDeletedDocuments)
+        {
+            options.Storage.MappingFor(type).DeleteStyle = DeleteStyle.SoftDelete;
+        }
+
+        // #5543 / jasperfx#870. Schema.For<TRoot>().AddSubClass<TSub>() one level down. Registered on the
+        // ROOT's mapping, which is what puts the sub-class in the root's table with an mt_doc_type
+        // discriminator instead of a table of its own -- and a table of its own is exactly the shape that
+        // makes "naming a sub-class returns only that sub-class" trivially true and therefore no test at all.
+        foreach (var declaration in config.SubClasses)
+        {
+            options.Storage.MappingFor(declaration.Root).SubClasses.Add(declaration.SubClass);
+        }
+
+        // jasperfx#672 (#5249). The suite states the stream identity it needs and the fixture
+        // replays it, rather than the fixture inferring it. This is load-bearing in the same way
+        // ValueTypes above is not: DocumentSessionEventsCompliance and PendingStreamActionsCompliance
+        // both append by string stream *key*, and Marten's default StreamIdentity is Guid — so a
+        // fixture that drops this fails those suites on the append rather than on the thing they are
+        // there to pin.
+        //
+        // It was previously inferred from EventTypes being non-empty, which happened to reach the
+        // same answer only because every suite populating EventTypes wanted AsString. Nullable, so
+        // null still means "leave the store on its own default" and the four document-only suites
+        // sharing this schema are untouched.
+        if (config.StreamIdentity.HasValue)
+        {
+            options.Events.StreamIdentity = config.StreamIdentity.Value;
+        }
+
+        // Registering event types does not by itself provoke event storage, so unlike the identity
+        // switch above this needs no guard — for the document-only suites the list is empty.
+        foreach (var eventType in config.EventTypes)
+        {
+            options.Events.AddEventType(eventType);
+        }
+
+        // jasperfx#679 (#5258). The one config member that is an INSTANCE rather than a Type,
+        // because the suite has to hold the very listener it registered in order to read back what
+        // the store handed it. Replayed through StoreOptions.AddCommitListener, which wraps each one
+        // in Marten's internal DocumentCommitListenerAdapter and drops it on Options.Listeners.
+        //
+        // ⚠️ Load-bearing in the strongest sense of any line in this fixture: a fixture that drops
+        // it does not make DocumentCommitListenerCompliance skip -- every fact in it fails, because
+        // "the listener was never registered" and "the store never invokes listeners" are the same
+        // observable result.
+        foreach (var listener in config.CommitListeners)
+        {
+            options.AddCommitListener(listener);
+        }
+
+        // The seam for a consumer that needs a store this project cannot build. jasperfx#842's
+        // search suite is the first: it reaches IDocumentReadOperations.Search, which core Marten
+        // leaves as a hole (StoreOptions.SearchOperations) for Marten.PgVector's UsePgVector() to
+        // fill -- and Marten.Testing cannot reference Marten.PgVector, because that is the
+        // dependency arrow backwards.
+        //
+        // A hook rather than a second copy of this fixture, so the ten-odd replay loops above stay
+        // stated once. Empty by default, so every existing suite is untouched.
+        Configure(options, config);
+
+        _store = new DocumentStore(options);
+
+        await _store.Storage.ApplyAllConfiguredChangesToDatabaseAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Wiping a store is administration rather than part of the document contract, so this is
+    /// spelled on Marten's own Advanced surface — exactly the asymmetry the seam exists to absorb.
+    /// </summary>
+    public override Task CleanDocumentDataAsync() => _store.Advanced.Clean.DeleteAllDocumentsAsync();
+
+    public override async ValueTask DisposeAsync()
+    {
+        if (_store != null)
+        {
+            await _store.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Last word on the options before the store is built, for a fixture in another test project
+    /// that needs configuration this one cannot name.
+    /// </summary>
+    /// <remarks>
+    /// See the call site: the reason it exists is that vector search ships in an optional package.
+    /// A subclass overriding this gets every replay loop above for free and adds only what is its
+    /// own.
+    /// </remarks>
+    protected virtual void Configure(StoreOptions options, DocumentComplianceConfig config)
+    {
+    }
+
+}

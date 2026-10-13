@@ -1,0 +1,434 @@
+using JasperFx.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using JasperFx.Resources;
+using RabbitMQ.Client;
+using Microsoft.Extensions.Logging.Abstractions;
+using NSubstitute;
+using Shouldly;
+using Wolverine.RabbitMQ;
+using Wolverine.RabbitMQ.Internal;
+using Wolverine.Runtime;
+using Wolverine.Tracking;
+using Xunit;
+
+namespace Wolverine.RabbitMQ.Tests;
+
+public class native_dead_letter_queue_mechanics : IAsyncLifetime
+{
+    private readonly string QueueName = Guid.NewGuid().ToString();
+    private IHost _host = null!;
+    private RabbitMqTransport theTransport = null!;
+
+    public async ValueTask InitializeAsync() =>await  ValueTask.CompletedTask;
+    private async Task afterBootstrapping()
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq().AutoProvision().AutoPurgeOnStartup();
+
+                opts.PublishAllMessages()
+                    .ToRabbitQueue(QueueName);
+
+                opts.ListenToRabbitQueue(QueueName);
+
+                opts.LocalRoutingConventionDisabled = true;
+            }).StartAsync();
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // Try to eliminate queues to keep them from accumulating
+        if (_host != null)
+        {
+            await _host.TeardownResources();
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task should_have_the_dead_letter_objects_by_default()
+    {
+        await afterBootstrapping();
+
+        theTransport.Exchanges.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeTrue();
+        theTransport.Queues.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeTrue();
+
+        var exchange = theTransport.Queues[RabbitMqTransport.DeadLetterQueueName];
+        exchange.Bindings().Single().Queue.ShouldBeSameAs(theTransport.Queues[RabbitMqTransport.DeadLetterQueueName]);
+    }
+
+    /// <summary>
+    /// GH-4559. "on created queues" means the broker's copy. <c>RabbitMqQueue.Arguments</c> is the
+    /// dictionary Wolverine assembles to PASS to <c>QueueDeclareAsync</c>, so asserting it is true whether
+    /// or not the declaration ever reached Rabbit.
+    /// </summary>
+    [Fact]
+    public async Task sets_the_dead_letter_queue_exchange_on_created_queues()
+    {
+        await afterBootstrapping();
+
+        using var probe = await RabbitManagementProbe.RequireAsync(TestContext.Current.CancellationToken);
+
+        var arguments = await probe.GetQueueArgumentsAsync(QueueName, token: TestContext.Current.CancellationToken);
+
+        arguments.ShouldNotBeNull();
+        arguments[RabbitMqTransport.DeadLetterQueueHeader].ShouldBe(RabbitMqTransport.DeadLetterQueueName);
+    }
+
+    [Fact]
+    public async Task publish_side_queue_keeps_its_custom_dead_letter_exchange_during_auto_provision()
+    {
+        var queueName = QueueName + "-publish-override";
+        var defaultDeadLetterQueueName = "default-dlx";
+        var defaultDeadLetterExchangeName = "default-dlx-exchange";
+        var overrideDeadLetterExchangeName = "override-dlx-exchange";
+
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq()
+                    .AutoProvision()
+                    .AutoPurgeOnStartup()
+                    .CustomizeDeadLetterQueueing(new DeadLetterQueue(defaultDeadLetterQueueName)
+                    {
+                        ExchangeName = defaultDeadLetterExchangeName
+                    });
+
+                opts.PublishMessage<PublishOverrideMessage>()
+                    .ToRabbitQueue(queueName)
+                    .DeadLetterQueueing(new DeadLetterQueue(queueName + "-dlq")
+                    {
+                        ExchangeName = overrideDeadLetterExchangeName
+                    });
+
+                opts.LocalRoutingConventionDisabled = true;
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+
+        var queue = theTransport.Queues[queueName];
+
+        queue.DeadLetterQueue!.QueueName.ShouldBe(queueName + "-dlq");
+
+        // GH-4559: "during auto provision" is a claim about what Rabbit ended up with, so Rabbit answers
+        // it. queue.Arguments is only the dictionary Wolverine passed to QueueDeclareAsync
+        using var probe = await RabbitManagementProbe.RequireAsync(TestContext.Current.CancellationToken);
+
+        var arguments = await probe.GetQueueArgumentsAsync(queueName, token: TestContext.Current.CancellationToken);
+
+        arguments.ShouldNotBeNull();
+        arguments[RabbitMqTransport.DeadLetterQueueHeader].ShouldBe(overrideDeadLetterExchangeName);
+        arguments[RabbitMqTransport.DeadLetterQueueHeader].ShouldNotBe(defaultDeadLetterExchangeName);
+    }
+
+    [Fact]
+    public async Task publish_side_queue_can_disable_dead_letter_queueing_during_auto_provision()
+    {
+        var queueName = QueueName + "-publish-disabled";
+
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq()
+                    .AutoProvision()
+                    .AutoPurgeOnStartup()
+                    .CustomizeDeadLetterQueueing(new DeadLetterQueue("default-dlx")
+                    {
+                        ExchangeName = "default-dlx-exchange"
+                    });
+
+                opts.PublishMessage<PublishOverrideMessage>()
+                    .ToRabbitQueue(queueName)
+                    .DisableDeadLetterQueueing();
+
+                opts.LocalRoutingConventionDisabled = true;
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+
+        var queue = theTransport.Queues[queueName];
+
+        queue.DeadLetterQueue.ShouldBeNull();
+
+        // GH-4559: and Rabbit's own copy of the queue carries no dead letter exchange either
+        using var probe = await RabbitManagementProbe.RequireAsync(TestContext.Current.CancellationToken);
+
+        var arguments = await probe.GetQueueArgumentsAsync(queueName, token: TestContext.Current.CancellationToken);
+
+        arguments.ShouldNotBeNull("Auto provisioning never created the queue, so its arguments prove nothing");
+        arguments.ContainsKey(RabbitMqTransport.DeadLetterQueueHeader).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task no_dead_letter_queue_if_disabled()
+    {
+        var queueName = "queue_with_no_native_dead_letter_queue";
+        var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq().AutoProvision().DisableDeadLetterQueueing();
+                opts.ListenToRabbitQueue(queueName);
+
+
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+
+        var transport = host.Services.GetRequiredService<IWolverineRuntime>().Options.RabbitMqTransport();
+
+        transport.Exchanges.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+        transport.Queues.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+
+        transport.Queues[QueueName].Arguments.ContainsKey(RabbitMqTransport.DeadLetterQueueHeader).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task customize_dead_letter_queueing()
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq().AutoProvision().AutoPurgeOnStartup().CustomizeDeadLetterQueueing(new DeadLetterQueue("dlq"){ExchangeName = "dlq"});;
+
+                opts.PublishAllMessages()
+                    .ToRabbitQueue(QueueName);
+
+                opts.ListenToRabbitQueue(QueueName);
+
+                opts.LocalRoutingConventionDisabled = true;
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+
+        theTransport.Exchanges.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+        theTransport.Queues.Contains(RabbitMqTransport.DeadLetterQueueName).ShouldBeFalse();
+
+        theTransport.Exchanges.Contains("dlq").ShouldBeTrue();
+        theTransport.Queues.Contains("dlq").ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task move_failed_messages_to_the_dlq()
+    {
+        await afterBootstrapping();
+
+        await _host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(new AlwaysErrors());
+
+        var initialQueue = theTransport.Queues[QueueName];
+        var deadLetterQueue = theTransport.Queues[RabbitMqTransport.DeadLetterQueueName];
+
+        (await initialQueue.QueuedCountAsync()).ShouldBe(0);
+
+        var deadline = DateTimeOffset.UtcNow.Add(30.Seconds());
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            var queuedCount = await deadLetterQueue.QueuedCountAsync();
+            if (queuedCount > 0) return;
+
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+        }
+
+        throw new Exception("Never got a message in the dead letter queue");
+    }
+
+    [Fact]
+    public async Task uses_overridden_dead_letter_exchange_per_queue_when_transport_has_custom_default()
+    {
+        var queueName = "queue-alpha";
+        var defaultDeadLetterQueueName = "default-dlq";
+        var defaultDeadLetterExchangeName = "dlx-exchange";
+        var overriddenDeadLetterQueueName = "queue-alpha-dlx";
+
+        var options = new WolverineOptions();
+        options.UseRabbitMq()
+            .CustomizeDeadLetterQueueing(new DeadLetterQueue(defaultDeadLetterQueueName)
+            {
+                ExchangeName = defaultDeadLetterExchangeName
+            });
+
+        options.ListenToRabbitQueue(queueName, q => q.QueueType = QueueType.quorum)
+            .DeadLetterQueueing(new DeadLetterQueue(overriddenDeadLetterQueueName));
+
+        var runtime = Substitute.For<IWolverineRuntime>();
+        runtime.Options.Returns(options);
+
+        var transport = options.RabbitMqTransport();
+        var queue = transport.Queues[transport.MaybeCorrectName(queueName)];
+
+        queue.Compile(runtime);
+
+        var channel = Substitute.For<IChannel>();
+        channel.QueueDeclareAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), cancellationToken: Arg.Any<CancellationToken>()).Returns(Task.FromResult(new QueueDeclareOk(queue.QueueName, 0, 0)));
+
+        await queue.DeclareAsync(channel, NullLogger.Instance);
+
+        queue.Arguments[RabbitMqTransport.DeadLetterQueueHeader]
+            .ShouldBe(overriddenDeadLetterQueueName);
+    }
+
+    [Fact]
+    public void keeps_per_queue_dead_letter_exchange_when_transport_has_custom_default()
+    {
+        var queueName = "queue-beta";
+        var defaultDeadLetterQueueName = "default-dlq";
+        var defaultDeadLetterExchangeName = "dlx-exchange";
+        var overriddenDeadLetterQueueName = "queue-beta-dlx";
+        var overriddenDeadLetterExchangeName = "queue-beta-dlx-exchange";
+
+        var options = new WolverineOptions();
+        var transportExpression = options.UseRabbitMq()
+            .CustomizeDeadLetterQueueing(new DeadLetterQueue(defaultDeadLetterQueueName)
+            {
+                ExchangeName = defaultDeadLetterExchangeName
+            });
+        var transport = transportExpression.Transport;
+
+        options.ListenToRabbitQueue(queueName)
+            .DeadLetterQueueing(new DeadLetterQueue(overriddenDeadLetterQueueName)
+        {
+            ExchangeName = overriddenDeadLetterExchangeName
+        });
+
+        var queue = transport.Queues[transport.MaybeCorrectName(queueName)];
+
+        var runtime = Substitute.For<IWolverineRuntime>();
+        runtime.Options.Returns(options);
+
+        queue.Compile(runtime);
+
+        queue.DeadLetterQueue!.ExchangeName.ShouldBe(overriddenDeadLetterExchangeName);
+        transport.DeadLetterQueue.ExchangeName.ShouldBe(defaultDeadLetterExchangeName);
+    }
+
+    [Fact]
+    public async Task default_and_override_queues_keep_their_own_dlx_exchange_on_declare()
+    {
+        var defaultExchange = "default-dlx-exchange";
+        var defaultQueue = "queue-default";
+        var overrideQueue = "queue-override";
+        var overrideExchange = "override-dlx-exchange";
+
+        var options = new WolverineOptions();
+        var transport = options.UseRabbitMq()
+            .CustomizeDeadLetterQueueing(new DeadLetterQueue("default-dlq")
+            {
+                ExchangeName = defaultExchange
+            }).Transport;
+
+        options.ListenToRabbitQueue(defaultQueue);
+        options.ListenToRabbitQueue(overrideQueue)
+            .DeadLetterQueueing(new DeadLetterQueue(overrideQueue + "-dlq")
+            {
+                ExchangeName = overrideExchange
+            });
+
+        var runtime = Substitute.For<IWolverineRuntime>();
+        runtime.Options.Returns(options);
+
+        var defaultEndpoint = transport.Queues[transport.MaybeCorrectName(defaultQueue)];
+        var overrideEndpoint = transport.Queues[transport.MaybeCorrectName(overrideQueue)];
+
+        defaultEndpoint.Compile(runtime);
+        overrideEndpoint.Compile(runtime);
+
+        var channel = Substitute.For<IChannel>();
+        channel.QueueDeclareAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), cancellationToken: Arg.Any<CancellationToken>()).Returns(Task.FromResult(new QueueDeclareOk(defaultQueue, 0, 0)));
+
+        await defaultEndpoint.DeclareAsync(channel, NullLogger.Instance);
+        await overrideEndpoint.DeclareAsync(channel, NullLogger.Instance);
+
+        // GH-4559: asserted on what went out ON THE CHANNEL rather than on the endpoint's own Arguments
+        // dictionary. This test drives DeclareAsync against a substitute precisely so it can see the
+        // declaration; reading the endpoint back afterwards made the declare call incidental, and the
+        // assertion would have held with the two DeclareAsync lines above deleted
+        await channel.Received().QueueDeclareAsync(defaultQueue, Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(),
+            Arg.Is<IDictionary<string, object?>>(x =>
+                (string)x[RabbitMqTransport.DeadLetterQueueHeader]! == defaultExchange),
+            cancellationToken: Arg.Any<CancellationToken>());
+
+        await channel.Received().QueueDeclareAsync(overrideQueue, Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(),
+            Arg.Is<IDictionary<string, object?>>(x =>
+                (string)x[RabbitMqTransport.DeadLetterQueueHeader]! == overrideExchange),
+            cancellationToken: Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task overriding_dead_letter_queue_for_specific_queue()
+    {
+        var deadLetterQueueName = QueueName + "_dlq";
+
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseRabbitMq().AutoProvision().AutoPurgeOnStartup();
+
+                opts.PublishAllMessages()
+                    .ToRabbitQueue(QueueName + "Different");
+
+                opts.LocalRoutingConventionDisabled = true;
+
+                opts.ListenToRabbitQueue(QueueName + "Different").DeadLetterQueueing(new DeadLetterQueue(deadLetterQueueName));
+            }).StartAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        theTransport = _host
+            .Services
+            .GetRequiredService<IWolverineRuntime>()
+            .Options
+            .Transports
+            .GetOrCreate<RabbitMqTransport>();
+
+        await _host.TrackActivity().DoNotAssertOnExceptionsDetected().PublishMessageAndWaitAsync(new AlwaysErrors());
+
+        var initialQueue = theTransport.Queues[QueueName + "Different"];
+        var deadLetterQueue = theTransport.Queues[deadLetterQueueName];
+
+        (await initialQueue.QueuedCountAsync()).ShouldBe(0);
+
+        var deadline = DateTimeOffset.UtcNow.Add(30.Seconds());
+        while (DateTimeOffset.UtcNow < deadline)
+        {
+            var queuedCount = await deadLetterQueue.QueuedCountAsync();
+            if (queuedCount > 0) return;
+
+            await Task.Delay(250.Milliseconds(), TestContext.Current.CancellationToken);
+        }
+
+        throw new Exception("Never got a message in the dead letter queue");
+    }
+}
+
+public record AlwaysErrors;
+
+public record PublishOverrideMessage;
+
+public static class AlwaysErrorsHandler
+{
+    public static void Handle(AlwaysErrors command)
+    {
+        throw new DivideByZeroException("Boom.");
+    }
+}

@@ -1,0 +1,316 @@
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Configuration;
+using Wolverine.Configuration;
+using Wolverine.Nats.Configuration;
+using Wolverine.Nats.Internal;
+using Wolverine.Runtime.Partitioning;
+using Wolverine.Runtime.Routing;
+
+namespace Wolverine.Nats;
+
+public static class NatsTransportExtensions
+{
+    /// <summary>
+    /// Get access to the NATS transport for advanced configuration. Pass a <paramref name="name"/> to
+    /// resolve an additional, named NATS broker (see <see cref="AddNamedNatsBroker(WolverineOptions, BrokerName, string)"/>).
+    /// </summary>
+    internal static NatsTransport NatsTransport(this WolverineOptions options, BrokerName? name = null)
+    {
+        return options.Transports.GetOrCreate<NatsTransport>(name);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to use NATS as a message transport
+    /// </summary>
+    public static NatsTransportExpression UseNats(
+        this WolverineOptions options,
+        string connectionString = "nats://localhost:4222"
+    )
+    {
+        var transport = options.NatsTransport();
+        transport.Configuration.ConnectionString = connectionString;
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to use NATS as a message transport with custom configuration
+    /// </summary>
+    public static NatsTransportExpression UseNats(
+        this WolverineOptions options,
+        Action<NatsTransportConfiguration> configure
+    )
+    {
+        var transport = options.NatsTransport();
+        configure(transport.Configuration);
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Configure Wolverine to use NATS as a message transport using IConfiguration
+    /// Reads configuration from "Wolverine:Nats" section
+    /// </summary>
+    public static NatsTransportExpression UseNats(
+        this WolverineOptions options,
+        IConfiguration configuration
+    )
+    {
+        var transport = options.NatsTransport();
+
+        // First try to bind from Wolverine:Nats section (proper nested configuration)
+        var wolverineSection = configuration.GetSection("Wolverine:Nats");
+        if (wolverineSection.Exists())
+        {
+            wolverineSection.Bind(transport.Configuration);
+        }
+
+        // Fall back to root-level Nats section for backward compatibility
+        var natsSection = configuration.GetSection("Nats");
+        if (natsSection.Exists() && !wolverineSection.Exists())
+        {
+            natsSection.Bind(transport.Configuration);
+        }
+
+        // Override with environment variable if set (for containers/cloud deployments)
+        var envUrl = Environment.GetEnvironmentVariable("NATS_URL");
+        if (!string.IsNullOrEmpty(envUrl))
+        {
+            transport.Configuration.ConnectionString = envUrl;
+        }
+
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Configure connection and authentication information for a secondary NATS broker used by this
+    /// application. Only use this overload if your Wolverine application needs to talk to two or more
+    /// NATS brokers. The <paramref name="name"/> doubles as the URI scheme for the additional broker's
+    /// endpoints, so pin publishing/listening to it with <see cref="ToNatsSubjectOnNamedBroker"/> /
+    /// <see cref="ListenToNatsSubjectOnNamedBroker"/>.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="name">Identity of the additional NATS broker</param>
+    /// <param name="connectionString">The NATS connection string for the additional broker</param>
+    public static NatsTransportExpression AddNamedNatsBroker(
+        this WolverineOptions options,
+        BrokerName name,
+        string connectionString
+    )
+    {
+        var transport = options.NatsTransport(name);
+        transport.Configuration.ConnectionString = connectionString;
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Configure connection and authentication information for a secondary NATS broker used by this
+    /// application with full access to the <see cref="NatsTransportConfiguration"/> (auth, TLS, JetStream).
+    /// Only use this overload if your Wolverine application needs to talk to two or more NATS brokers.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="name">Identity of the additional NATS broker</param>
+    /// <param name="configure">Configuration for the additional broker's connection</param>
+    public static NatsTransportExpression AddNamedNatsBroker(
+        this WolverineOptions options,
+        BrokerName name,
+        Action<NatsTransportConfiguration> configure
+    )
+    {
+        var transport = options.NatsTransport(name);
+        configure(transport.Configuration);
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Publish messages to a NATS subject
+    /// </summary>
+    public static NatsSubscriberConfiguration ToNatsSubject(
+        this IPublishToExpression publishing,
+        string subject
+    )
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<NatsTransport>();
+
+        var endpoint = transport.EndpointForSubject(subject);
+
+        // This is necessary to hook up the subscription rules
+        publishing.To(endpoint.Uri);
+
+        return new NatsSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Publish messages to a NATS subject on an additional, named broker registered via
+    /// <see cref="AddNamedNatsBroker(WolverineOptions, BrokerName, string)"/>.
+    /// </summary>
+    /// <param name="publishing"></param>
+    /// <param name="name">Identity of the additional NATS broker</param>
+    /// <param name="subject">The NATS subject</param>
+    public static NatsSubscriberConfiguration ToNatsSubjectOnNamedBroker(
+        this IPublishToExpression publishing,
+        BrokerName name,
+        string subject
+    )
+    {
+        var transports = publishing.As<PublishingExpression>().Parent.Transports;
+        var transport = transports.GetOrCreate<NatsTransport>(name);
+
+        var endpoint = transport.EndpointForSubject(subject);
+
+        // This is necessary to hook up the subscription rules
+        publishing.To(endpoint.Uri);
+
+        return new NatsSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Publish messages to a NATS subject
+    /// </summary>
+    public static NatsSubscriberConfiguration PublishToNatsSubject<T>(
+        this WolverineOptions options,
+        string subject
+    )
+    {
+        var transport = options.NatsTransport();
+        var endpoint = transport.EndpointForSubject(subject);
+
+        options.PublishMessage<T>().To(endpoint.Uri);
+
+        return new NatsSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Publish messages of type <typeparamref name="T"/> (or castable to it) to a NATS subject
+    /// computed per message by <paramref name="subjectSource"/>. Enables per-message dynamic
+    /// subjects such as <c>orders.events.{id}</c> using Wolverine's generic topic routing
+    /// (<see cref="RoutingMode.ByTopic"/> / <c>Envelope.TopicName</c>), so these messages also
+    /// participate in <see cref="IMessageBus.BroadcastToTopicAsync"/>.
+    /// </summary>
+    public static NatsSubscriberConfiguration PublishMessagesToNatsSubject<T>(
+        this WolverineOptions options,
+        Func<T, string> subjectSource
+    )
+    {
+        return options.PublishMessagesToNatsSubject(subjectSource, additive: false);
+    }
+
+    /// <summary>
+    /// Publish messages of type <typeparamref name="T"/> (or castable to it) to a NATS subject
+    /// computed per message by <paramref name="subjectSource"/>, choosing whether Wolverine's other
+    /// routing rules still apply to the same messages.
+    /// </summary>
+    /// <param name="subjectSource">Computes the NATS subject for each message</param>
+    /// <param name="additive">
+    /// When true, the NATS route is added to whatever else would route the message: an explicit rule
+    /// such as <c>PublishMessage&lt;T&gt;().ToLocalQueue("name")</c>, or local routing to a handler for
+    /// <typeparamref name="T"/> in this application, still applies, so one publish goes to the NATS subject
+    /// and to the local queue at the same time. When false -- the behavior of
+    /// <see cref="PublishMessagesToNatsSubject{T}(WolverineOptions, Func{T, string})"/> -- the NATS
+    /// subject is the only route those terminating rules leave the message. See GH-4930.
+    /// </param>
+    public static NatsSubscriberConfiguration PublishMessagesToNatsSubject<T>(
+        this WolverineOptions options,
+        Func<T, string> subjectSource,
+        bool additive
+    )
+    {
+        var transport = options.NatsTransport();
+        var endpoint = transport.NewTopicSender();
+
+        var routing = new TopicRouting<T>(subjectSource, endpoint) { IsPassThrough = additive };
+        options.PublishWithMessageRoutingSource(routing);
+
+        return new NatsSubscriberConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Listen to messages from a NATS subject
+    /// </summary>
+    public static NatsListenerConfiguration ListenToNatsSubject(
+        this WolverineOptions options,
+        string subject
+    )
+    {
+        var transport = options.NatsTransport();
+        var endpoint = transport.EndpointForSubject(subject);
+        endpoint.IsListener = true;
+
+        return new NatsListenerConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Listen to messages from a NATS subject on an additional, named broker registered via
+    /// <see cref="AddNamedNatsBroker(WolverineOptions, BrokerName, string)"/>.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="name">Identity of the additional NATS broker</param>
+    /// <param name="subject">The NATS subject</param>
+    public static NatsListenerConfiguration ListenToNatsSubjectOnNamedBroker(
+        this WolverineOptions options,
+        BrokerName name,
+        string subject
+    )
+    {
+        var transport = options.NatsTransport(name);
+        var endpoint = transport.EndpointForSubject(subject);
+        endpoint.IsListener = true;
+
+        return new NatsListenerConfiguration(endpoint);
+    }
+
+    /// <summary>
+    /// Access the NATS transport configuration for advanced scenarios.
+    /// This is useful for adding policies or modifying configuration after initial setup.
+    /// </summary>
+    public static NatsTransportExpression ConfigureNats(this WolverineOptions options)
+    {
+        var transport = options.NatsTransport();
+        return new NatsTransportExpression(transport, options);
+    }
+
+    /// <summary>
+    /// Create a sharded message topology with NATS subjects named
+    /// baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="rules"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static MessagePartitioningRules PublishToShardedNatsSubjects(this MessagePartitioningRules rules, string baseName, int numberOfEndpoints, Action<PartitionedMessageTopologyWithSubjects> configure)
+    {
+        rules.AddPublishingTopology((opts, _) =>
+        {
+            var topology = new PartitionedMessageTopologyWithSubjects(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            topology.ConfigureListening(x => {});
+            configure(topology);
+            topology.AssertValidity();
+
+            return topology;
+        });
+
+        return rules;
+    }
+
+    /// <summary>
+    /// Use sharded NATS subjects for global partitioned message processing.
+    /// Subjects will be named baseName1, baseName2, etc.
+    /// </summary>
+    /// <param name="topology"></param>
+    /// <param name="baseName"></param>
+    /// <param name="numberOfEndpoints"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    public static GlobalPartitionedMessageTopology UseShardedNatsSubjects(
+        this GlobalPartitionedMessageTopology topology, string baseName, int numberOfEndpoints,
+        Action<PartitionedMessageTopologyWithSubjects>? configure = null)
+    {
+        topology.SetExternalTopology(opts =>
+        {
+            var t = new PartitionedMessageTopologyWithSubjects(opts, PartitionSlots.Five, baseName, numberOfEndpoints);
+            configure?.Invoke(t);
+            return t;
+        }, baseName);
+        return topology;
+    }
+}

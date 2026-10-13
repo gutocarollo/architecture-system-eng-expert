@@ -1,0 +1,37 @@
+using JasperFx;
+using JasperFx.Resources;
+using Pinger;
+using Wolverine;
+using Wolverine.RabbitMQ;
+
+#region sample_bootstrapping_rabbitmq
+return await Host.CreateDefaultBuilder(args)
+    .UseWolverine(opts =>
+    {
+        opts.ApplicationAssembly = typeof(Program).Assembly;
+
+        // Listen for messages coming into the pongs queue
+        opts.ListenToRabbitQueue("pongs");
+
+        // Publish messages to the pings queue
+        opts.PublishMessage<PingMessage>().ToRabbitExchange("pings");
+
+        // Configure Rabbit MQ connection to the connection string
+        // named "rabbit" from IConfiguration. This is *a* way to use
+        // Wolverine + Rabbit MQ using Aspire
+        opts.UseRabbitMqUsingNamedConnection("rabbit")
+            // Directs Wolverine to build any declared queues, exchanges, or
+            // bindings with the Rabbit MQ broker as needed
+            .AutoProvision();
+
+        // Adds an IHostedService that sets up *all* known JasperFx resources
+        // at application startup, including Wolverine and Marten resources.
+        // This does not require AutoProvision().
+        opts.Services.AddResourceSetupOnStartup();
+
+        // This will send ping messages on a continuous
+        // loop
+        opts.Services.AddHostedService<PingerService>();
+    }).RunJasperFxCommands(args);
+
+#endregion

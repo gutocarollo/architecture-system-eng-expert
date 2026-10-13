@@ -1,0 +1,712 @@
+# Sending Messages with IMessageBus
+
+The main entry point into Wolverine to initiate any message handling or publishing is the `IMessageBus` service
+that is registered by Wolverine into your application's IoC container as a scoped service. Here's a brief sample
+of the most common operations you'll use with `IMessageBus` and Wolverine itself:
+
+There's also a second abstraction called `IMessageContext` that can be optionally consumed
+within message handlers to add some extra operations and metadata for the
+current message being processed in a handler:
+
+```mermaid
+classDiagram
+    
+
+class IMessageBus
+class IMessageContext
+
+IMessageContext ..> IMessageBus
+IMessageContext --> Envelope : Current Message
+```
+
+Here's a quick sample usage of the most common operations you'll use with Wolverine:
+
+<!-- snippet: sample_message_bus_basics -->
+<a id='snippet-sample_message_bus_basics'></a>
+```cs
+public static async Task use_message_bus(IMessageBus bus)
+{
+    // Execute this command message right now! And wait until
+    // it's completed or acknowledged
+    await bus.InvokeAsync(new DebitAccount(1111, 100));
+
+    // Execute this message right now, but wait for the declared response
+    var status = await bus.InvokeAsync<AccountStatus>(new DebitAccount(1111, 250));
+
+    // Send the message expecting there to be at least one subscriber to be executed later, but
+    // don't wait around
+    await bus.SendAsync(new DebitAccount(1111, 250));
+
+    // Or instead, publish it to any interested subscribers,
+    // but don't worry about it if there are actually any subscribers
+    // This is probably best for raising event messages
+    await bus.PublishAsync(new DebitAccount(1111, 300));
+
+    // Send a message to be sent or executed at a specific time
+    await bus.ScheduleAsync(new DebitAccount(1111, 100), DateTimeOffset.UtcNow.AddDays(1));
+
+    // Or do the same, but this time express the time as a delay
+    await bus.ScheduleAsync(new DebitAccount(1111, 225), 1.Days());
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/MessageBusBasics.cs#L8-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_message_bus_basics' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: tip
+The only practical difference between `SendAsync()` and `PublishAsync()` is that `SendAsync()` will assert that there is at least
+one subscriber for the message and throw an exception if there is not.
+:::
+
+## Accessing IMessageBus from IoC
+
+::: tip
+This applies to `IHostedService` registrations that use Wolverine. 
+:::
+
+`IMessageBus` is registered as `Scoped` in your IoC container. In most common application scenarios you can just let your IoC container inject
+an instance into your services, but if you ever need to use `IMessageBus` outside of a scoped container (AspNetCore requests or Wolverine message
+handlers), you might run into trouble with the built in `ServiceProvider` not letting you resolve a `Scoped` service from
+the root container or injected into a `Singleton` scoped service.
+
+Not to worry! You have a couple options:
+
+1. Follow the admittedly annoying steps in [this article about using `Scoped` services from `Singleton` services](https://learn.microsoft.com/en-us/dotnet/core/extensions/scoped-service)
+2. Inject `IWolverineRuntime`, and build `new MessageBus(runtime)` instances at will.
+
+## Invoking Message Execution
+
+To execute the message processing immediately and wait until it's finished, use this syntax:
+
+<!-- snippet: sample_invoke_locally -->
+<a id='snippet-sample_invoke_locally'></a>
+```cs
+public static async Task invoke_locally(IMessageBus bus)
+{
+    // Execute the message inline
+    await bus.InvokeAsync(new Message1());
+    
+    // Execute the message inline, but this time pass in
+    // messaging metadata for Wolverine
+    await bus.InvokeAsync(new Message1(),
+        new DeliveryOptions { TenantId = "one", SagaId = "two" }.WithHeader("user.id", "admin"));
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/EnqueueSamples.cs#L9-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_invoke_locally' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If the `Message1` message has a local subscription, the message handler will be invoked in the calling thread. In this usage, the `InvokeAsync()` feature will utilize any registered [retry or retry with cooldown error handling rules](/guide/handlers/error-handling)
+for potentially transient errors.
+
+::: tip
+While the syntax for a remote invocation of a message is identical to a local invocation, it's obviously much more expensive
+and slower to do so remotely. The Wolverine team recommends using remote invocations cautiously.
+:::
+
+If the `Message1` message has a remote subscription (to a Rabbit MQ queue for example), Wolverine will send the message through its
+normal transport, but the thread will wait until Wolverine receives an acknowledgement message back from the remote service. In this
+case, Wolverine does enforce timeout conditions with a default of 5 seconds which can be overridden by the caller.
+
+## Request/Reply
+
+::: warning
+There was a breaking change in behavior for this functionality in Wolverine 3.0. The response type, the `T` in `InvokeAsync<T>()` is **not**
+sent as a cascaded message if that type is the requested response type. You will have to explicitly send the response out through `IMessageBus.PublishAsync()`
+to force that to be sent out instead of just being the response.
+:::
+
+Wolverine also has direct support for the [request/reply](https://www.enterpriseintegrationpatterns.com/RequestReply.html) pattern or really just mediating between your code and complex query handlers through
+the `IMessageBus.InvokeAsync<T>()` API. To make that concrete, let's assume you want to request the results of a mathematical operation as shown below
+in these message types and a corresponding message handler:
+
+<!-- snippet: sample_numbers_and_results_for_request_response -->
+<a id='snippet-sample_numbers_and_results_for_request_response'></a>
+```cs
+public record Numbers(int X, int Y);
+
+public record Results(int Sum, int Product);
+
+public static class NumbersHandler
+{
+    public static Results Handle(Numbers numbers)
+    {
+        return new Results(numbers.X + numbers.Y, numbers.X * numbers.Y);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/MessageBusBasics.cs#L83-L96' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_numbers_and_results_for_request_response' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Note in the sample above that the message handler that accepts `Numbers` returns a `Results` object. That return value is necessary for Wolverine to be able to
+use that handler in a request/reply operation. Finally, to actually invoke the handler and retrieve a `Results` object, we can use the `IMessageBus.InvokeAsync<T>(message)`
+API as shown below:
+
+<!-- snippet: sample_using_invoke_with_response_type -->
+<a id='snippet-sample_using_invoke_with_response_type'></a>
+```cs
+public async Task invoke_math_operations(IMessageBus bus)
+{
+    var results = await bus.InvokeAsync<Results>(new Numbers(3, 4));
+
+    // Same functionality, but this time we'll configure the active
+    // tenant id and add a message header
+    var results2 = await bus.InvokeAsync<Results>(new Numbers(5, 6), new DeliveryOptions
+    {
+        TenantId = "north.america"
+    }.WithHeader("user.id", "professor"));
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/MessageBusBasics.cs#L45-L58' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_invoke_with_response_type' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Note that this API hides whether or not this operation is a local operation running on the same thread and invoking a local message handler or sending a message through to a remote
+endpoint and waiting for the response. The same timeout mechanics and performance concerns apply to this operation as the `InvokeAsync()` method described in the previous section.
+
+Note that if you execute the `Numbers` message from above with `InvokeAsync<Results>()`, the `Results` response will only be
+returned as the response and will not be published as a message. This was a breaking change in Wolverine 3.0. We think (hope)
+that this will be less confusing.
+
+You can explicitly override this behavior on a handler by handler basis with the `[AlwaysPublishResponse]` attribute
+as shown below:
+
+<!-- snippet: sample_using_alwayspublishresponse -->
+<a id='snippet-sample_using_alwayspublishresponse'></a>
+```cs
+public class CreateItemCommandHandler
+{
+    // Using this attribute will force Wolverine to also publish the ItemCreated event even if
+    // this is called by IMessageBus.InvokeAsync<ItemCreated>()
+    [AlwaysPublishResponse]
+    public async Task<(ItemCreated, SecondItemCreated)> Handle(CreateItemCommand command, IDocumentSession session)
+    {
+        var item = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = command.Name
+        };
+
+        session.Store(item);
+
+        return (new ItemCreated(item.Id, item.Name), new SecondItemCreated(item.Id, item.Name));
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Bugs/Bug_305_invoke_async_with_return_not_publishing_with_tuple_return_value.cs#L77-L97' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_alwayspublishresponse' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Global Timeout Default for Request/Reply <Badge type="tip" text="5.11" />
+
+The default timeout for all remote invocations, request/reply, or send and wait messaging is 5 seconds. You can override that
+on a case by case basis, or you can set a default global timeout value:
+
+<!-- snippet: sample_global_timeout_for_remote_invocation -->
+<a id='snippet-sample_global_timeout_for_remote_invocation'></a>
+```cs
+using var host = await Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        // Set a global default timeout for remote
+        // invocation or request/reply operations
+        opts.DefaultRemoteInvocationTimeout = 10.Seconds();
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/GlobalTimeoutRequestReply.cs#L11-L20' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_global_timeout_for_remote_invocation' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Disabling Remote Request/Reply
+
+When you call `IMessageBus.InvokeAsync()` or `IMessageBus.InvokeAsync<T>()`, depending on whether Wolverine has a local message
+handler for the message type or has a configured subscription rule for the message type, Wolverine *might* be making a remote
+call through external messaging transports to execute that message. It's a perfectly valid use case to do the remote
+invocation, but if you don't want this to ever happen or catch a team by surprise when an operation fails, you can completely
+disable all remote request/reply usage through `InvokeAsync()` by changing this setting:
+
+<!-- snippet: sample_disabling_remote_invocation -->
+<a id='snippet-sample_disabling_remote_invocation'></a>
+```cs
+using var host = Host.CreateDefaultBuilder()
+    .UseWolverine(opts =>
+    {
+        // This will disallow Wolverine from making remote calls
+        // through IMessageBus.InvokeAsync() or InvokeAsync<T>()
+        // Instead, Wolverine will throw an InvalidOperationException
+        opts.EnableRemoteInvocation = false;
+    }).StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Testing/CoreTests/BootstrappingSamples.cs#L25-L35' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_disabling_remote_invocation' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Streaming Responses
+
+When a handler needs to return a sequence of values rather than a single response, declare its return type
+as `IAsyncEnumerable<T>` and invoke it through `IMessageBus.StreamAsync<T>`:
+
+```cs
+public static class PriceFeedHandler
+{
+    public static async IAsyncEnumerable<PriceTick> Handle(
+        SubscribePrices request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        foreach (var symbol in request.Symbols)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            yield return new PriceTick(symbol, GetCurrentPrice(symbol));
+            await Task.Delay(100, cancellationToken);
+        }
+    }
+}
+
+public static async Task stream_price_feed(IMessageBus bus, CancellationToken ct)
+{
+    await foreach (var tick in bus.StreamAsync<PriceTick>(new SubscribePrices(["MSFT", "GOOG"]), ct))
+    {
+        Console.WriteLine($"{tick.Symbol}: {tick.Price}");
+    }
+}
+```
+
+A few things worth knowing about `StreamAsync<T>`:
+
+- **Locally-handled messages only.** Unlike `InvokeAsync<T>`, there is no remote-streaming fallback — if the message
+  doesn't resolve to a local handler, the call fails. Streaming is an in-process or adapter-level concern (see
+  [gRPC Services](/guide/grpc/streaming) for exposing a streaming handler over the wire).
+- **Cancellation propagates into the handler.** Pass a `CancellationToken` into `StreamAsync<T>` and Wolverine
+  forwards it to the handler method — iterators that respect the token via `ThrowIfCancellationRequested` or
+  `[EnumeratorCancellation]` will cleanly unwind mid-stream.
+- **Partial results surface before an exception.** If the handler yields N items and then throws, the caller
+  sees those N items on the enumerator, then observes the exception on the next `MoveNextAsync`. Nothing is
+  swallowed.
+- **Middleware still runs.** Streaming calls go through the same Wolverine pipeline as `InvokeAsync` —
+  activities, middleware, and error-handling rules apply.
+- **`DeliveryOptions` is supported** for headers, tenant id, and correlation metadata via the overload
+  `StreamAsync<T>(object message, DeliveryOptions options, CancellationToken cancellation)`.
+
+::: tip
+Handlers that return a typed `IAsyncEnumerable<T>` are also compatible with regular `InvokeAsync` — in that case
+Wolverine iterates the sequence and cascades each item as a new message. `StreamAsync<T>` is the explicit opt-in
+when the caller wants to consume the items directly.
+:::
+
+## Streaming Requests
+
+`StreamAsync` also has an inverse overload: `StreamAsync<TRequest, TResponse>` sends a **stream of
+request messages** to one handler invocation and awaits a **single** `Task<TResponse>` — the arity
+tells the two apart (one type argument streams responses out; two stream requests in). The handler
+declares `IAsyncEnumerable<TRequest>` as its message type and folds the stream however it likes:
+
+```cs
+public static class LocationIngestHandler
+{
+    public static async Task<LocationIngestAck> Handle(
+        IAsyncEnumerable<LocationPing> pings,
+        CancellationToken cancellationToken)
+    {
+        var count = 0;
+        await foreach (var ping in pings.WithCancellation(cancellationToken))
+        {
+            count++; // process incrementally — nothing is buffered by the framework
+        }
+
+        return new LocationIngestAck(count);
+    }
+}
+
+public static async Task ingest(IMessageBus bus, IAsyncEnumerable<LocationPing> pings, CancellationToken ct)
+{
+    var ack = await bus.StreamAsync<LocationPing, LocationIngestAck>(pings, ct);
+    Console.WriteLine($"Ingested {ack.Count} pings");
+}
+```
+
+A few things worth knowing about `StreamAsync<TRequest, TResponse>`:
+
+- **The handler's message type is `IAsyncEnumerable<TRequest>` itself.** Discovery and dispatch key off
+  that closed generic type, so exactly one handler per element type receives the whole stream.
+- **Locally-handled messages only.** A stream can't be serialized to a remote endpoint. If no local handler
+  accepts `IAsyncEnumerable<TRequest>`, the call fails fast with a `NotSupportedException` naming the
+  expected handler signature.
+- **Consumption is incremental.** Wolverine hands the live stream to the handler without materializing
+  it — memory stays constant no matter how many items the caller streams. An empty stream still invokes
+  the handler, which returns its response from a zero-item drain.
+- **Cancellation propagates into the handler** through the handler's `CancellationToken` parameter, and
+  from there into the stream via `WithCancellation`.
+- **Cascading messages work as usual.** Return a tuple to both answer the caller and publish follow-on
+  messages, exactly like any other invoked handler.
+- **`DeliveryOptions` is supported** for headers, tenant id, and correlation metadata via the overload
+  `StreamAsync<TRequest, TResponse>(IAsyncEnumerable<TRequest> messages, DeliveryOptions options, ...)`.
+
+This is the primitive behind gRPC client streaming — see
+[gRPC Services / Streaming](/guide/grpc/streaming#client-streaming) for exposing a
+stream-folding handler over the wire.
+
+## Sending or Publishing Messages
+
+[Publish/Subscribe](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) is a messaging pattern where the senders of messages do not need to specifically know what the specific subscribers are for a given message. In this case, some kind of middleware or infrastructure is responsible for either allowing subscribers to express interest in what messages they need to receive or apply routing rules to send the published messages to the right places. Wolverine's messaging support was largely built to support the publish/subscribe messaging pattern.
+
+To send a message with Wolverine, use the `IMessageBus` interface or the bigger `IMessageContext` interface that
+are registered in your application's IoC container. The sample below shows the most common usage:
+
+<!-- snippet: sample_sending_message_with_servicebus -->
+<a id='snippet-sample_sending_message_with_servicebus'></a>
+```cs
+public ValueTask SendMessage(IMessageContext bus)
+{
+    // In this case, we're sending an "InvoiceCreated"
+    // message
+    var @event = new InvoiceCreated
+    {
+        Time = DateTimeOffset.Now,
+        Purchaser = "Guy Fieri",
+        Amount = 112.34,
+        Item = "Cookbook"
+    };
+
+    return bus.SendAsync(@event);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/PublishingSamples.cs#L189-L205' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_sending_message_with_servicebus' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+That by itself will send the `InvoiceCreated` message to whatever subscribers are interested in
+that message. The `SendAsync()` method will throw an exception if Wolverine doesn't know where to send the message. In other words,
+there has to be a subscriber of some sort for that message.
+
+On the other hand, the `PublishAsync()` method will send a message if there is a known subscriber and ignore the message if there is
+no subscriber:
+
+<!-- snippet: sample_publishing_message_with_servicebus -->
+<a id='snippet-sample_publishing_message_with_servicebus'></a>
+```cs
+public ValueTask PublishMessage(IMessageContext bus)
+{
+    // In this case, we're sending an "InvoiceCreated"
+    // message
+    var @event = new InvoiceCreated
+    {
+        Time = DateTimeOffset.Now,
+        Purchaser = "Guy Fieri",
+        Amount = 112.34,
+        Item = "Cookbook"
+    };
+
+    return bus.PublishAsync(@event);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/PublishingSamples.cs#L208-L224' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_publishing_message_with_servicebus' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Scheduling Message Delivery or Execution
+
+::: tip
+While Wolverine has an in memory scheduled delivery and execution model by default, that was only intended for delayed message
+execution retries. You will most likely want to either use a transport type that supports native scheduled delivery like
+the [Azure Service Bus transport](/guide/messaging/transports/azureservicebus/scheduled), or utilize the [database backed
+message persistence](/guide/durability/) to enable durable message scheduling. 
+:::
+
+Wolverine supports the concept of scheduled message delivery. Likewise, Wolverine also supports scheduled message execution 
+if you're publishing to a [local queue](/guide/messaging/transports/local) within your current application. The actual 
+mechanics for message scheduling will vary according to the endpoint destination that a message is being published to, 
+including whether or not the scheduled message is durable and will outlive any unexpected or planned process terminations.
+
+::: tip
+The built in outbox message scheduling was meant for relatively low numbers of messages, and was primarily meant for scheduled
+message retries. If you have an excessive number of scheduled messages, you may want to utilize the database backed queues
+in Wolverine which are optimized for much higher number of scheduled messages.
+:::
+
+First off, your guide for understanding the scheduled message delivery mechanics in effective order: 
+
+* If the destination endpoint has native message delivery capabilities, Wolverine uses that capability. Outbox mechanics 
+  still apply to when the outgoing message is released to the external endpoint's sender
+* If the destination endpoint is durable, meaning that it's enrolled in Wolverine's [transactional outbox](/guide/durability/), then Wolverine
+  will store the scheduled messages in the outgoing envelope storage for later execution. In this case, Wolverine is polling
+  for the ready to execute or deliver messages across all running Wolverine nodes. This option is durable in case of process 
+  exits.
+* In lieu of any other support, Wolverine has an in memory option that can do scheduled delivery or execution
+
+To schedule message delivery (scheduled execution really just means scheduling message publishing to a local queue), you
+actually have a couple different syntactical options. First, if you're directly using the `IMessageBus` interface, you
+can schedule a message with a delay using this extension method:
+
+<!-- snippet: sample_schedulesend_in_3_days -->
+<a id='snippet-sample_schedulesend_in_3_days'></a>
+```cs
+public async Task schedule_send(IMessageContext context, Guid issueId)
+{
+    var timeout = new WarnIfIssueIsStale
+    {
+        IssueId = issueId
+    };
+
+    // Process the issue timeout logic 3 days from now
+    await context.ScheduleAsync(timeout, 3.Days());
+
+    // The code above is short hand for this:
+    await context.PublishAsync(timeout, new DeliveryOptions
+    {
+        ScheduleDelay = 3.Days()
+    });
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/ScheduledExecutionSamples.cs#L8-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_schedulesend_in_3_days' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Or using an absolute time, with this overload of the extension method:
+
+<!-- snippet: sample_schedulesend_at_5_pm_tomorrow -->
+<a id='snippet-sample_schedulesend_at_5_pm_tomorrow'></a>
+```cs
+public async Task schedule_send_at_5_tomorrow_afternoon(IMessageContext context, Guid issueId)
+{
+    var timeout = new WarnIfIssueIsStale
+    {
+        IssueId = issueId
+    };
+
+    var time = DateTime.Today.AddDays(1).AddHours(17);
+
+    // Process the issue timeout at 5PM tomorrow
+    // Do note that Wolverine quietly converts this
+    // to universal time in storage
+    await context.ScheduleAsync(timeout, time);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/ScheduledExecutionSamples.cs#L28-L45' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_schedulesend_at_5_pm_tomorrow' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Now, Wolverine tries really hard to enable you to use [pure functions](https://en.wikipedia.org/wiki/Pure_function) for as many message handlers as possible, so
+there's of course an option to schedule message delivery while still using [cascading messages](/guide/handlers/cascading) with the `DelayedFor()` and 
+`ScheduledAt()` extension methods shown below:
+
+<!-- snippet: sample_customized_cascaded_messages -->
+<a id='snippet-sample_customized_cascaded_messages'></a>
+```cs
+public static IEnumerable<object> Consume(Incoming incoming)
+{
+    // Delay the message delivery by 10 minutes
+    yield return new Message1().DelayedFor(10.Minutes());
+
+    // Schedule the message delivery for a certain time
+    yield return new Message2().ScheduledAt(new DateTimeOffset(DateTime.Today.AddDays(2)));
+
+    // Customize the message delivery however you please...
+    yield return new Message3()
+        .WithDeliveryOptions(new DeliveryOptions().WithHeader("foo", "bar"));
+
+    // Send back to the original sender
+    yield return Respond.ToSender(new Message4());
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/OutgoingMessagesSample.cs#L36-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_customized_cascaded_messages' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Lastly, there's a special base class called `TimeoutMessage` that your message types can extend to add scheduling logic
+directly to the message itself for easy usage as a cascaded message. Here's an example message type:
+
+<!-- snippet: sample_ordertimeout -->
+<a id='snippet-sample_ordertimeout'></a>
+```cs
+// This message will always be scheduled to be delivered after
+// a one minute delay
+public record OrderTimeout(string Id) : TimeoutMessage(1.Minutes());
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/OrderSagaSample/OrderSaga.cs#L11-L16' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_ordertimeout' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Which is used within this sample saga implementation:
+
+<!-- snippet: sample_starting_a_saga_inside_a_handler -->
+<a id='snippet-sample_starting_a_saga_inside_a_handler'></a>
+```cs
+// This method would be called when a StartOrder message arrives
+// to start a new Order
+public static (Order, OrderTimeout) Start(StartOrder order, ILogger<Order> logger)
+{
+    logger.LogInformation("Got a new order with id {Id}", order.OrderId);
+
+    // creating a timeout message for the saga
+    return (new Order{Id = order.OrderId}, new OrderTimeout(order.OrderId));
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/OrderSagaSample/OrderSaga.cs#L22-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_starting_a_saga_inside_a_handler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+## Customizing Message Delivery
+
+When you publish or send a message you can optionally pass a `DeliveryOptions` object to override how — and
+when — that particular message is delivered. Every overload of `IMessageBus.PublishAsync()` and
+`IMessageBus.SendAsync()` accepts an optional `DeliveryOptions` argument, so you can tailor a single message
+without changing any endpoint-wide configuration.
+
+`DeliveryOptions` lets you control things like:
+
+* **Custom headers** — add arbitrary string metadata that travels with the message, either through the
+  `Headers` dictionary or the fluent `WithHeader(key, value)` method.
+* **Expiration** — `DeliverBy` (an absolute time) or the `DeliverWithin` convenience setter (a `TimeSpan` from
+  now) tell Wolverine to discard the message if it hasn't been delivered and processed in time. See
+  [Message Expiration](/guide/messaging/expiration).
+* **Scheduled delivery** — `ScheduledTime` (an absolute time) or `ScheduleDelay` (a `TimeSpan` from now) defer
+  processing until later.
+* **Request/response** — set `ResponseType` (or use the static `DeliveryOptions.RequireResponse<T>()` helper) to
+  ask the receiver to send a reply message of that type back to you.
+* **Tenancy and tracing** — override the `TenantId`, `CorrelationId`, or `CausationId` stamped onto the outgoing
+  envelope for just this message.
+* **Acknowledgements** — set `AckRequested` to request an acknowledgement from the receiver.
+* **Transport-specific routing** — `GroupId` (AMQP 1.0 group id / Azure Service Bus session id / Amazon SQS FIFO
+  `MessageGroupId`), `DeduplicationId` (Amazon SQS FIFO), and `PartitionKey` (Kafka) map onto the corresponding
+  native broker concepts.
+
+Here's an example exercising several of these options at once:
+
+<!-- snippet: sample_sendmessageswithdeliveryoptions -->
+<a id='snippet-sample_sendmessageswithdeliveryoptions'></a>
+```cs
+public static async Task SendMessagesWithDeliveryOptions(IMessageBus bus)
+{
+    await bus.PublishAsync(new Message1(), new DeliveryOptions
+        {
+            AckRequested = true,
+            ContentType = "text/xml", // you can do this, but I'm not sure why you'd want to override this
+            DeliverBy = DateTimeOffset.Now.AddHours(1), // set a message expiration date
+            DeliverWithin = 1.Hours(), // convenience method to set the deliver-by expiration date
+            ScheduleDelay = 1.Hours(), // Send this in one hour, or...
+            ScheduledTime = DateTimeOffset.Now.AddHours(1),
+            ResponseType = typeof(Message2) // ask the receiver to send this message back to you if it can
+        }
+        // There's a chained fluent interface for adding header values too
+        .WithHeader("tenant", "one"));
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Samples/DocumentationSamples/CustomizingMessageDelivery.cs#L9-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_sendmessageswithdeliveryoptions' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: tip
+If you need to automatically forward headers from incoming messages to all outgoing messages within a handler context, see [Header Propagation](/guide/messaging/header-propagation).
+:::
+
+## Sending Raw Message Data  <Badge type="tip" text="5.8" />
+
+In some particular cases, you may want to use Wolverine to send a message to another system (or the same system)
+when you already have the raw binary message data but not an actual .NET message object. An example use case is integrating
+scheduling libraries like Quartz.NET or Hangfire where you might be persisting a `byte[]` for a message to be 
+sent via Wolverine at a certain time. 
+
+Regardless of why you need to do this, Wolverine has a capability to do exactly this, but with the proviso that
+you will have to select the messaging endpoint first. To make this concrete,
+let's say that you've got this application set up:
+
+<!-- snippet: sample_simple_rabbit_mq_setup_for_raw_messages -->
+<a id='snippet-sample_simple_rabbit_mq_setup_for_raw_messages'></a>
+```cs
+var builder = Host.CreateApplicationBuilder();
+var connectionString = builder.Configuration.GetConnectionString("rabbit");
+
+builder.UseWolverine(opts =>
+{
+    opts.UseRabbitMq(connectionString!).AutoProvision();
+
+    opts.ListenToRabbitQueue("batches")
+
+        // Pay attention to this. This helps Wolverine
+        // "know" that if the message type isn't specified
+        // on the incoming Rabbit MQ message to assume that
+        // the .NET message type is RunBatch
+        .DefaultIncomingMessage<RunBatch>()
+        
+        // The default endpoint name would be "batches" anyway, but still
+        // good to show this if you want to use more readable names:
+        .Named("batches");
+
+    opts.ListenToRabbitQueue("control");
+});
+
+using var host = builder.Build();
+await host.StartAsync();
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/RabbitMQ/Wolverine.RabbitMQ.Tests/sending_raw_messages.cs#L145-L171' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_simple_rabbit_mq_setup_for_raw_messages' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And some more context for the subsequent sample usages:
+
+<!-- snippet: sample_context_for_raw_message_sending -->
+<a id='snippet-sample_context_for_raw_message_sending'></a>
+```cs
+// Helper method for testing in Wolverine that
+// gives you a new IMessageBus instance without having to 
+// muck around with scoped service providers
+IMessageBus bus = host.MessageBus();
+
+// The raw message data, but pretend this was sourced from a database
+// table or some other non-Wolverine storage in your system
+byte[] messageData 
+    = Encoding.UTF8.GetBytes("{\"Name\": \"George Karlaftis\"}");
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/RabbitMQ/Wolverine.RabbitMQ.Tests/sending_raw_messages.cs#L173-L184' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_context_for_raw_message_sending' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The simplest possible usage is when you can assume that the receiving Wolverine
+endpoint or downstream system will "know" what the message type is without you
+having to tell it:
+
+<!-- snippet: sample_simple_usage_of_sending_by_raw_data -->
+<a id='snippet-sample_simple_usage_of_sending_by_raw_data'></a>
+```cs
+// Simplest possible usage. This can work because the
+// listening endpoint has a configured default message
+// type
+await bus
+    
+    // choosing the destination endpoint by its name
+    // Rabbit MQ queues use the queue name by default
+    .EndpointFor("batches")
+    .SendRawMessageAsync(messageData);
+
+// Same usage, but locate by the Wolverine Uri
+await bus
+    
+    // choosing the destination endpoint by its name
+    // Rabbit MQ queues use the queue name by default
+    .EndpointFor(new Uri("rabbitmq://queue/batches"))
+    .SendRawMessageAsync(messageData);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/RabbitMQ/Wolverine.RabbitMQ.Tests/sending_raw_messages.cs#L187-L206' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_simple_usage_of_sending_by_raw_data' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Note that in this case, you'll have to help Wolverine out by explicitly choosing
+the destination for the raw message data by either using a `Uri` or the endpoint name. 
+
+You can also specify the .NET message type to help Wolverine create the necessary
+metadata for the outgoing message like so:
+
+<!-- snippet: sample_more_advanced_usage_of_raw_message_sending -->
+<a id='snippet-sample_more_advanced_usage_of_raw_message_sending'></a>
+```cs
+await bus
+    .EndpointFor(new Uri("rabbitmq://queue/control"))
+    
+    // In this case I helped Wolverine out by telling it
+    // what the .NET message type is for this message
+    .SendRawMessageAsync(messageData, typeof(RunBatch));
+
+await bus
+    .EndpointFor(new Uri("rabbitmq://queue/control"))
+    
+    // In this case I helped Wolverine out by telling it
+    // what the .NET message type is for this message
+    .SendRawMessageAsync(messageData, configure: env =>
+    {
+        
+        // Alternative usage to just work directly
+        // with Wolverine's Envelope wrapper
+        env.SetMessageType<RunBatch>();
+
+        // And you can do *anything* with message metadata
+        // using the Envelope wrapper
+        // Use a little bit of caution with this though
+        env.Headers["user"] = "jack";
+    });
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Transports/RabbitMQ/Wolverine.RabbitMQ.Tests/sending_raw_messages.cs#L208-L234' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_more_advanced_usage_of_raw_message_sending' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->

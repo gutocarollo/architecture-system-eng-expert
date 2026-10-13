@@ -1,0 +1,98 @@
+using System;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
+using Marten.Internal;
+using Marten.Services;
+using Npgsql;
+
+namespace Marten.Storage;
+
+public partial class MartenDatabase : ISingleQueryRunner
+{
+    internal record SingleQuery<T>(ISingleQueryHandler<T> Handler, MartenDatabase Database)
+    {
+        public async Task<T> ExecuteAsync(CancellationToken cancellation)
+        {
+            await using var conn = Database.CreateConnection();
+            await conn.OpenAsync(cancellation).ConfigureAwait(false);
+
+            var command = Handler.BuildCommand();
+            command.Connection = conn;
+
+            await using var reader = await command.ExecuteReaderAsync(cancellation).ConfigureAwait(false);
+
+            try
+            {
+                return await Handler.HandleAsync(reader, cancellation).ConfigureAwait(false);
+            }
+            finally
+            {
+                try
+                {
+                    await reader.CloseAsync().ConfigureAwait(false);
+                    await conn.CloseAsync().ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    // don't let anything escape here
+                }
+            }
+        }
+    }
+
+    public Task<T> Query<T>(ISingleQueryHandler<T> handler, CancellationToken cancellation)
+    {
+        return Options.ResiliencePipeline.ExecuteAsync<T, SingleQuery<T>>(
+            static (query, t) => new ValueTask<T>(query.ExecuteAsync(t)), new SingleQuery<T>(handler, this), cancellation).AsTask();
+    }
+
+    public async Task SingleCommit(DbCommand command, CancellationToken cancellation)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(cancellation).ConfigureAwait(false);
+
+        try
+        {
+            command.Connection = conn;
+
+            await command.ExecuteNonQueryAsync(cancellation).ConfigureAwait(false);
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+    public NpgsqlConnection CreateConnection(ConnectionUsage connectionUsage = ConnectionUsage.ReadWrite)
+    {
+        if (connectionUsage == ConnectionUsage.Read)
+        {
+            return CreateConnection(Options.Advanced.MultiHostSettings.ReadSessionPreference);
+        }
+
+        return CreateConnection(Options.Advanced.MultiHostSettings.WriteSessionPreference);
+    }
+
+    // Neutral IStorageDatabase surface the closed-shape storage runtime targets. The public
+    // CreateConnection above returns the Npgsql-typed connection for Marten's own callers; this
+    // exposes it as a DbConnection so the movable storage code stays Npgsql-free.
+    DbConnection IStorageDatabase.CreateStorageConnection() => CreateConnection();
+
+    async Task IStorageDatabase.RunSqlAsync(string sql, CancellationToken ct)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        try
+        {
+            var command = conn.CreateCommand();
+            command.CommandText = sql;
+            await command.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            await conn.CloseAsync().ConfigureAwait(false);
+        }
+    }
+
+}

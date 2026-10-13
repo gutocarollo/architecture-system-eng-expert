@@ -1,0 +1,200 @@
+using Alba;
+using Marten;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Shouldly;
+using Swashbuckle.AspNetCore.Swagger;
+using Wolverine.Tracking;
+using WolverineWebApi.TestSupport;
+using JasperFx;
+
+namespace Wolverine.Http.Tests;
+
+public class AppFixture : IAsyncLifetime
+{
+    public IAlbaHost? Host { get; private set; }
+
+    public async ValueTask InitializeAsync()
+    {
+        // For "integration" test collection (based on this fixture) ApplicationAssembly is WolverineWebApi.
+        // If not set explicitly here other tests may set it to the test assembly causing issues with endpoints discovery.
+        JasperFxOptions.RememberedApplicationAssembly = typeof(WolverineWebApi.Program).Assembly;
+
+        #region sample_using_run_wolverine_in_solo_mode_with_extension
+        // This is bootstrapping the actual application using
+        // its implied Program.Main() set up
+        // For non-Alba users, this is using IWebHostBuilder 
+        Host = await AlbaHost.For<WolverineWebApi.Program>(x =>
+        {
+            x.ConfigureServices(services =>
+            {
+                // Override the Wolverine configuration in the application
+                // to run the application in "solo" mode for faster
+                // testing cold starts
+                services.RunWolverineInSoloMode();
+
+                // And just for completion, disable all Wolverine external
+                // messaging transports
+                services.DisableAllExternalWolverineTransports();
+            });
+        });
+
+        #endregion
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (Host is null)
+            return;
+
+        await Host.StopAsync();
+
+        await Host.DisposeAsync();
+        Host = null;
+    }
+}
+
+[CollectionDefinition("integration")]
+public class IntegrationCollection : ICollectionFixture<AppFixture>;
+
+[Collection("integration")]
+public abstract class IntegrationContext : IAsyncLifetime, IOpenApiSource
+{
+    private readonly AppFixture _fixture;
+
+    protected IntegrationContext(AppFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
+    // more....
+
+    public HttpGraph HttpChains => Host.Services.GetRequiredService<WolverineHttpOptions>().Endpoints!;
+
+    public IAlbaHost Host => _fixture.Host!;
+
+    public IDocumentStore Store => Host.Services.GetRequiredService<IDocumentStore>();
+
+    async ValueTask IAsyncLifetime.InitializeAsync()
+    {
+        // Using Marten, wipe out all data and reset the state
+        // back to exactly what we described in InitialAccountData
+        await Store.Advanced.ResetAllData();
+    }
+
+    // This is required because of the IAsyncLifetime
+    // interface. Note that I do *not* tear down database
+    // state after the test. That's purposeful
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public async Task<IScenarioResult> Scenario(Action<Scenario> configure)
+    {
+        return await Host.Scenario(configure);
+    }
+
+    // This method allows us to make HTTP calls into our system
+    // in memory with Alba, but do so within Wolverine's test support
+    // for message tracking to both record outgoing messages and to ensure
+    // that any cascaded work spawned by the initial command is completed
+    // before passing control back to the calling test
+    protected async Task<(ITrackedSession, IScenarioResult)> TrackedHttpCall(Action<Scenario> configuration, int timeoutInMilliseconds = 5000)
+    {
+        IScenarioResult result = null!;
+
+        // The outer part is tying into Wolverine's test support
+        // to "wait" for all detected message activity to complete
+        var tracked = await Host.ExecuteAndWaitAsync(async () =>
+        {
+            // The inner part here is actually making an HTTP request
+            // to the system under test with Alba
+            result = await Host.Scenario(configuration);
+        }, timeoutInMilliseconds);
+
+        return (tracked, result);
+    }
+
+    /// <summary>
+    /// Same as <see cref="TrackedHttpCall(Action{Scenario},int)"/>, but lets the test state up front which
+    /// message executions it is waiting on. Necessary whenever the HTTP request only *enqueues* work — the
+    /// Wolverine HTTP transport endpoints (/_wolverine/batch, /_wolverine/invoke with a local queue) return
+    /// as soon as the envelopes are handed to the local queue, so the tracked session can observe zero
+    /// activity and complete before the first envelope reaches the handler pipeline. See GH-3714.
+    /// </summary>
+    protected async Task<(ITrackedSession, IScenarioResult)> TrackedHttpCall(
+        Action<Scenario> configuration,
+        Func<TrackedSessionConfiguration, TrackedSessionConfiguration> configureTracking,
+        int timeoutInMilliseconds = 5000)
+    {
+        IScenarioResult result = null!;
+
+        var session = configureTracking(Host.TrackActivity(TimeSpan.FromMilliseconds(timeoutInMilliseconds)));
+
+        Func<IMessageContext, Task> execution = async _ =>
+        {
+            result = await Host.Scenario(configuration);
+        };
+
+        var tracked = await session.ExecuteAndWaitAsync(execution);
+
+        return (tracked, result);
+    }
+
+    protected Endpoint EndpointFor(string routePattern)
+    {
+        var endpoint = Host.Services.GetRequiredService<EndpointDataSource>()
+            .Endpoints.OfType<RouteEndpoint>().FirstOrDefault(x => x.RoutePattern.RawText == routePattern);
+
+        endpoint.ShouldNotBeNull();
+
+        return endpoint;
+    }
+
+    protected (OpenApiPathItem, OpenApiOperation) FindOpenApiDocument(string path)
+    {
+        var swagger = Host.Services.GetRequiredService<ISwaggerProvider>();
+        var document = swagger.GetSwagger("default");
+
+        if (document.Paths.TryGetValue(path, out var item))
+        {
+            return (item, item.Operations.Values.Single());
+        }
+
+        throw new Exception($"Unable to find {path}");
+    }
+
+    public (OpenApiPathItem, OpenApiOperation) FindOpenApiDocument(OperationType httpMethod, string path)
+    {
+        var document = GetOpenApiDocument();
+
+        if (!document.Paths.TryGetValue(path, out var item))
+        {
+            // Generated document path keys drop inline route constraints (e.g. {id:guid} -> {id}),
+            // while the harness looks up by the raw route pattern. Fall back to a constraint-stripped
+            // comparison so constrained routes resolve. See GH-3135.
+            var normalized = StripRouteConstraints(path);
+            item = document.Paths
+                .FirstOrDefault(kv => StripRouteConstraints(kv.Key) == normalized).Value;
+        }
+
+        if (item != null && item.Operations.TryGetValue(httpMethod, out var operation))
+        {
+            return (item, operation);
+        }
+
+        throw new Exception($"Unable to find {httpMethod} {path}");
+    }
+
+    private static string StripRouteConstraints(string path)
+        => System.Text.RegularExpressions.Regex.Replace(path, "\\{([^:}?*]+)[^}]*\\}", "{$1}");
+
+    public OpenApiDocument GetOpenApiDocument()
+    {
+        var swagger = Host.Services.GetRequiredService<ISwaggerProvider>();
+        return swagger.GetSwagger("default");
+    }
+}

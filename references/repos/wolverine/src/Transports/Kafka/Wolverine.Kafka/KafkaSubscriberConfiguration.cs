@@ -1,0 +1,125 @@
+using System.Text.Json;
+using Confluent.Kafka;
+using Confluent.Kafka.Admin;
+using Wolverine.Configuration;
+using Wolverine.Kafka.Internals;
+using Wolverine.Runtime.Serialization;
+
+namespace Wolverine.Kafka;
+
+public class KafkaSubscriberConfiguration : InteroperableSubscriberConfiguration<KafkaSubscriberConfiguration, KafkaTopic, IKafkaEnvelopeMapper, KafkaEnvelopeMapper>
+{
+    internal KafkaSubscriberConfiguration(KafkaTopic endpoint) : base(endpoint)
+    {
+    }
+    
+    /// <summary>
+    /// If you need to do anything "special" to create topics at runtime with Wolverine,
+    /// this overrides the simple logic that Wolverine uses and replaces
+    /// it with whatever you need to do having full access to the Kafka IAdminClient
+    /// and the Wolverine KafkaTopic configuration
+    /// </summary>
+    /// <param name="creation"></param>
+    /// <returns></returns>
+    public KafkaSubscriberConfiguration TopicCreation(Func<IAdminClient, KafkaTopic, Task> creation)
+    {
+        if (creation == null)
+        {
+            throw new ArgumentNullException(nameof(creation));
+        }
+
+        add(topic => topic.CreateTopicFunc = creation);
+        return this;
+    }
+
+    /// <summary>
+    /// Fine tune the TopicSpecification for this Kafka Topic if it is being created by Wolverine
+    /// </summary>
+    /// <param name="configure"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public KafkaSubscriberConfiguration Specification(Action<TopicSpecification> configure)
+    {
+        if (configure == null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
+
+        add(topic => configure(topic.Specification));
+        return this;
+    }
+
+    /// <summary>
+    /// Publish only the raw, serialized JSON representation of messages to the downstream
+    /// Kafka subscribers
+    /// </summary>
+    /// <param name="options">
+    /// When supplied, becomes this endpoint's default JSON serialization settings for outgoing
+    /// message bodies. When omitted, Wolverine's default System.Text.Json settings
+    /// (camel-cased property names) apply.
+    /// </param>
+    /// <returns></returns>
+    public KafkaSubscriberConfiguration PublishRawJson(JsonSerializerOptions? options = null)
+    {
+        if (options != null)
+        {
+            // Envelope.Data serializes outgoing message bodies through the endpoint's
+            // serializer before the mapper runs, so the endpoint's default serializer is
+            // the one true place these options can take effect.
+            add(e => e.DefaultSerializer = new SystemTextJsonSerializer(options));
+        }
+
+        // The parameter order matters here! (e, _) would bind to the Action<TEndpoint, TConcreteMapper>
+        // customization overload of UseInterop, silently discarding the JsonOnlyMapper and leaving the
+        // default KafkaEnvelopeMapper (and all of its Wolverine protocol headers) in effect. See GH-3407.
+        return UseInterop((_, e) => new JsonOnlyMapper(e));
+    }
+
+    /// <summary>
+    /// Configure the producer config for only this topic. This overrides the default
+    /// settings at the transport level
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    public KafkaSubscriberConfiguration ConfigureProducer(Action<ProducerConfig> configuration)
+    {
+        add(topic =>
+        {
+            var config = new ProducerConfig();
+            configuration(config);
+
+            topic.ProducerConfig = config;
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Opt this topic's producer into the idempotent producer (<c>enable.idempotence = true</c>, which
+    /// implies <c>acks=all</c> and bounded in-flight requests) so producer-side retries can't write
+    /// duplicates to the broker. Opt-in; producer→broker de-duplication only (not transactional
+    /// exactly-once). See GH-3149. Call after <see cref="ConfigureProducer"/> if you also use that.
+    /// </summary>
+    public KafkaSubscriberConfiguration UseIdempotentProducer()
+    {
+        add(topic =>
+        {
+            topic.ProducerConfig ??= new ProducerConfig();
+            topic.ProducerConfig.EnableIdempotence = true;
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Marks this topic as owned by an external system. Wolverine
+    /// will not attempt to create it during startup or delete it during resource
+    /// teardown, even when AutoProvision is enabled on the parent transport.
+    /// Use this when the calling identity lacks CreateTopics or DeleteTopics
+    /// ACLs on the target topic.
+    /// </summary>
+    /// <returns></returns>
+    public KafkaSubscriberConfiguration ExternallyOwned()
+    {
+        add(topic => topic.IsExternallyOwned = true);
+        return this;
+    }
+}

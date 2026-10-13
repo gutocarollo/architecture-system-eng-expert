@@ -1,0 +1,666 @@
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
+using JasperFx.Core;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+using Wolverine.Transports.Local;
+using Wolverine.Transports.Sending;
+using Wolverine.Util;
+
+namespace Wolverine;
+
+public enum EnvelopeStatus
+{
+    Outgoing,
+    Scheduled,
+    Incoming,
+    Handled
+}
+
+// Why is this a partial you ask?
+// The elements in this file are all things that only matter
+// inside the Wolverine runtime so we can keep it out of the WireProtocol
+public partial class Envelope
+{
+    private bool _enqueued;
+
+    private List<KeyValuePair<string, object?>>? _metricHeaders;
+    private long _startTimestamp;
+    private long _elapsedMs;
+
+    internal Envelope(object message, ISendingAgent agent)
+    {
+        Message = message;
+        Sender = agent;
+        // GH-4720: this constructor, not MessageRoute, is what the agent control path goes through --
+        // IAgentRuntime.InvokeAsync sends via EndpointFor(controlUri), and DestinationEndpoint builds the
+        // envelope here. Compression is chosen by picking a serializer with its own content type, so the
+        // receiving node resolves the right reader from the envelope header rather than sniffing the payload.
+        Serializer = message is ISerializable
+            ? agent.Endpoint.CompressAgentCommands && message is Runtime.Agents.IAgentCommand
+                ? CompressedIntrinsicSerializer.Instance
+                : IntrinsicSerializer.Instance
+            : agent.Endpoint.DefaultSerializer;
+        ContentType = Serializer!.ContentType;
+        Destination = agent.Destination;
+        ReplyUri = agent.ReplyUri?.MaybeCorrectScheme(agent.Destination.Scheme);
+    }
+
+    internal Envelope(object message, IMessageSerializer writer)
+    {
+        Message = message;
+        Serializer = writer ?? throw new ArgumentNullException(nameof(writer));
+        ContentType = writer.ContentType;
+    }
+    
+    /// <summary>
+    /// Helps denote to the transactional middleware that this envelope was
+    /// persisted or not to aid in the "Handled" behavior
+    /// </summary>
+    [JsonIgnore]
+    public bool WasPersistedInInbox { get; set; }
+
+    /// <summary>
+    /// GH-4135. Guards against reporting IMessageTracker.Received more than once for a single
+    /// receipt. Partitioned processing deserializes an envelope up front -- through
+    /// HandlerPipeline.TryDeserializeEnvelope, so it can read the group id off the message -- and the
+    /// envelope then arrives at the pipeline already carrying a Message, which is the other branch
+    /// that reports Received. Two reports per delivery double-counted the received metric, double-fed
+    /// the CritterWatch accumulator, logged each receipt twice, and put two Received records in a
+    /// tracked session so Received.SingleMessage&lt;T&gt;() failed against correct behaviour.
+    /// </summary>
+    [JsonIgnore]
+    internal bool WasTrackedAsReceived { get; set; }
+
+    [JsonIgnore]
+    public IMessageSerializer? Serializer { get; set; }
+
+    /// <summary>
+    ///     Used by IMessageContext.Invoke<T> to denote the response type
+    /// </summary>
+    [JsonIgnore]
+    internal Type? ResponseType { get; set; }
+
+    /// <summary>
+    ///     Also used by IMessageContext.Invoke<T> to catch the response
+    /// </summary>
+    [JsonIgnore]
+    internal object? Response { get; set; }
+    
+    /// <summary>
+    /// Used internally only, tells Wolverine's cascading
+    /// message logic to *not* publish the designated response
+    /// message as a cascading message. Originally added for the
+    /// Http transport request/reply
+    /// </summary>
+    [JsonIgnore]
+    public bool DoNotCascadeResponse { get; set; }
+
+    /// <summary>
+    /// Used by the [AlwaysPublishResponse] attribute to explicitly signal
+    /// that the response should be published as a cascading message in addition
+    /// to being sent back via request/reply. This flag works for both in-process
+    /// and remote request/reply scenarios.
+    /// </summary>
+    [JsonIgnore]
+    public bool AlwaysPublishResponse { get; set; }
+
+    /// <summary>
+    ///     Status according to the message persistence
+    /// </summary>
+    [JsonIgnore]
+    public EnvelopeStatus Status { get; set; }
+
+    /// <summary>
+    ///     Node owner of this message. 0 denotes that no node owns this message
+    /// </summary>
+    [JsonIgnore]
+    public int OwnerId { get; set; }
+    
+    [JsonIgnore]
+    internal bool InBatch { get; set; }
+
+    // GH-3289: identifies which coalesced group a batch member belongs to when the batch was assembled by
+    // CoalescingMessageBatcher (CoalesceBy). Members sharing a key get the same id, so ApplyItemException
+    // can poison every member that collapsed into a flagged key. Null for non-coalesced batches.
+    [JsonIgnore]
+    internal int? BatchGroupId { get; set; }
+
+    /// <summary>
+    /// Set to <c>true</c> by <see cref="Runtime.WolverineRuntime.AcquireInternalEnvelope"/>
+    /// when this envelope was pulled from <see cref="Runtime.WolverineRuntime.EnvelopePool"/>.
+    /// Consumers downstream of the acquire site (e.g. the outgoing send path's
+    /// <see cref="Transports.Sending.InlineSendingAgent"/> success branch) check this
+    /// flag to know whether they should return the envelope to the pool when the
+    /// envelope's lifecycle ends. Cleared by <see cref="Reset"/>. See wolverine#2955.
+    /// </summary>
+    internal bool FromPool { get; set; }
+    
+    [JsonIgnore]
+    internal ISendingAgent? Sender { get; set; }
+
+    [JsonIgnore]
+    public IListener? Listener { get; internal set; }
+    
+    [JsonIgnore]
+    public bool IsResponse { get; set; }
+    
+    [JsonIgnore]
+    public Exception? Failure { get; set; }
+    
+    [JsonIgnore]
+    internal Envelope[]? Batch { get; set; }
+
+    /// <summary>
+    /// CritterWatch#942 — set once when <see cref="Runtime.Batching.BatchingPendingCounts"/> settles
+    /// this grouped batch envelope's members at its terminal, so a repeated CompleteAsync can't
+    /// drive the pending count negative.
+    /// </summary>
+    internal bool BatchPendingSettled { get; set; }
+
+    /// <summary>
+    /// GH-4397 — true on a grouped batch envelope whose members were counted into their batching
+    /// pipeline's total in <see cref="Runtime.Batching.BatchingPendingCounts"/>, so its terminal releases
+    /// them. Set by whoever built the batch and counted it: <c>BatchingProcessor</c> for assembled batches
+    /// and expired-member carriers, <c>BatchReplay</c> for a reduced batch. A batch nobody counted must
+    /// not subtract members it never added.
+    /// </summary>
+    internal bool BatchPipelineCounted { get; set; }
+
+    [JsonIgnore]
+    internal bool HasBeenAcked { get; set; }
+
+    /// <summary>
+    /// Latches the failure acknowledgement so the sender gets at most one per envelope, however many
+    /// error handling paths try to send it
+    /// </summary>
+    [JsonIgnore]
+    internal bool HasSentFailureAcknowledgement { get; set; }
+
+    /// <summary>
+    /// GH-4012. Counts real attempts to settle (ack/nack) this delivery with its broker, shared by
+    /// every retry layer on the completion path so their budgets add rather than multiply. See
+    /// <see cref="DurabilitySettings.MaximumAckAttempts"/>.
+    ///
+    /// Deliberately runtime-only and never persisted: each broker redelivery constructs a brand new
+    /// envelope, so this cannot bound a redeliver -> dedupe -> re-ack loop.
+    /// </summary>
+    [JsonIgnore]
+    internal int AckAttempts { get; set; }
+
+    /// <summary>
+    /// GH-4012. Records one settle attempt against this delivery's shared budget, returning false
+    /// when the budget is already spent.
+    ///
+    /// A false return means "stop trying", NOT "fail": callers swallow rather than throw, because an
+    /// unsettled delivery is the recoverable outcome -- the broker redelivers it and the durable
+    /// inbox deduplicates. Throwing would just feed the enclosing RetryBlock.
+    /// </summary>
+    internal bool TryRecordAckAttempt(int maximumAttempts)
+    {
+        if (AckAttempts >= maximumAttempts)
+        {
+            return false;
+        }
+
+        AckAttempts++;
+        return true;
+    }
+
+    /// <summary>
+    /// The active wire tap for this envelope, set from the endpoint configuration
+    /// during message receive or send. Used by the message tracker to record
+    /// success/failure without coupling the tracking infrastructure to endpoint config.
+    /// </summary>
+    [JsonIgnore]
+    internal IWireTap? WireTap { get; set; }
+
+    internal void StartTiming()
+    {
+        _startTimestamp = Stopwatch.GetTimestamp();
+    }
+
+    /// <summary>
+    /// Returns the elapsed handler execution time in fractional milliseconds, or -1 if timing
+    /// never started. Previously this truncated to whole milliseconds, which — combined with the
+    /// callers' "only record positive values" guard — silently dropped every sub-millisecond
+    /// execution and biased the wolverine-execution-time histogram upward for fast handlers
+    /// (GH-3490).
+    /// </summary>
+    internal double StopTiming()
+    {
+        if (_startTimestamp == 0)
+        {
+            return -1;
+        }
+
+        var elapsed = Stopwatch.GetElapsedTime(_startTimestamp).TotalMilliseconds;
+        _elapsedMs = (long)elapsed;
+        return elapsed;
+    }
+
+    /// <summary>
+    /// How long did the current execution take?
+    /// </summary>
+    [JsonIgnore]
+    internal long ExecutionTime => _elapsedMs;
+
+    /// <summary>
+    /// </summary>
+    /// <returns></returns>
+    internal TagList ToMetricsHeaders()
+    {
+        var tagList = new TagList(CollectionsMarshal.AsSpan(_metricHeaders)) { { MetricsConstants.MessageTypeKey, MessageType } };
+
+        if (Destination != null)
+        {
+            tagList.Add(MetricsConstants.MessageDestinationKey, Destination.ToString());
+        }
+        if (TenantId != null)
+        {
+            tagList.Add(MetricsConstants.TenantIdKey, TenantId);
+        }
+
+        // GH-4445. Read off the header rather than the SetMetricsTag seam: the metric tag list is a
+        // private field that is never serialized, so an occurrence published on one node and handled
+        // on another would reach the success / failure / effective-time counters with no attribution
+        // at all. The header round-trips every transport, so the counters can be sliced per schedule
+        // on whichever node actually handled the occurrence. Costs one lookup on a lazily-allocated
+        // dictionary, which short-circuits to false for every message that has no headers.
+        if (TryGetHeader(RecurringMessage.HeaderKey, out var scheduleName))
+        {
+            tagList.Add(MetricsConstants.ScheduleNameKey, scheduleName);
+        }
+
+        return tagList;
+    }
+
+    /// <summary>
+    ///     Add an additional tag for information written to metrics. This is purposely
+    ///     kept separate from open telemetry activity tracking
+    /// </summary>
+    /// <param name="tagName"></param>
+    /// <param name="value"></param>
+    public void SetMetricsTag(string tagName, object value)
+    {
+        _metricHeaders ??= [];
+        _metricHeaders.Add(new KeyValuePair<string, object?>(tagName, value));
+    }
+
+    internal void MarkReceived(IListener listener, DateTimeOffset now, DurabilitySettings settings,
+        IWireTap? wireTap = null)
+    {
+        Listener = listener;
+        WireTap = wireTap;
+        ReceivedAt = now;
+
+        // If this is a stream with multiple consumers, use the consumer-specific address
+        if (listener is ISupportMultipleConsumers multiConsumerListener)
+        {
+            Destination = multiConsumerListener.ConsumerAddress;
+        }
+        else
+        {
+            Destination = listener.Address;
+        }
+
+        if (IsScheduledForLater(now))
+        {
+            Status = EnvelopeStatus.Scheduled;
+            OwnerId = TransportConstants.AnyNode;
+        }
+        else
+        {
+            Status = EnvelopeStatus.Incoming;
+            OwnerId = settings.AssignedNodeNumber;
+        }
+    }
+
+    /// <summary>
+    ///     Copy the context-correlation fields (<see cref="CorrelationId"/>,
+    ///     <see cref="ConversationId"/>, <see cref="TenantId"/>, <see cref="UserName"/>,
+    ///     <see cref="ParentId"/>, <see cref="SagaId"/>) from <paramref name="source"/>
+    ///     onto this envelope. Used wherever a wrapped scheduled envelope is unwrapped
+    ///     and forwarded so the inner picks up the wrapper's context — the durable
+    ///     scheduled-send unwrap path (<c>ScheduledSendEnvelopeHandler</c>) and the
+    ///     in-memory tracked-session replay path (<c>TrackedSession.ReplayAll</c>).
+    ///     See GH-2571 / PR #2572.
+    /// </summary>
+    internal void CopyContextCorrelationFrom(Envelope source)
+    {
+        CorrelationId = source.CorrelationId;
+        ConversationId = source.ConversationId;
+        TenantId = source.TenantId;
+        UserName = source.UserName;
+        ParentId = source.ParentId;
+        SagaId = source.SagaId;
+    }
+
+    /// <summary>
+    ///     Create a new Envelope that is a response to the current
+    ///     Envelope
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
+    internal Envelope CreateForResponse(object message)
+    {
+        var child = new Envelope
+        {
+            Message = message,
+            CorrelationId = CorrelationId,
+            ConversationId = Id,
+            SagaId = SagaId,
+            TenantId = TenantId
+        };
+
+        if (message.GetType().ToMessageTypeName() == ReplyRequested)
+        {
+            child.Destination = ReplyUri;
+            child.AcceptedContentTypes = AcceptedContentTypes;
+        }
+
+        if (message is ISerializable)
+        {
+            child.Serializer = IntrinsicSerializer.Instance;
+            child.ContentType = IntrinsicSerializer.MimeType;
+        }
+
+        return child;
+    }
+
+    internal ValueTask StoreAndForwardAsync()
+    {
+        if (_enqueued)
+        {
+            throw new InvalidOperationException("This envelope has already been enqueued");
+        }
+
+        if (Sender == null)
+        {
+            throw new InvalidOperationException("This envelope has not been routed");
+        }
+
+        _enqueued = true;
+
+        return Sender.StoreAndForwardAsync(this);
+    }
+
+    internal void PrepareForIncomingPersistence(DateTimeOffset now, DurabilitySettings settings)
+    {
+        Status = IsScheduledForLater(now)
+            ? EnvelopeStatus.Scheduled
+            : EnvelopeStatus.Incoming;
+
+        OwnerId = Status == EnvelopeStatus.Incoming
+            ? settings.AssignedNodeNumber
+            : TransportConstants.AnyNode;
+    }
+
+    internal async ValueTask QuickSendAsync()
+    {
+        if (_enqueued)
+        {
+            throw new InvalidOperationException("This envelope has already been enqueued");
+        }
+
+        if (Sender == null)
+        {
+            throw new InvalidOperationException("This envelope has not been routed");
+        }
+
+        _enqueued = true;
+
+        if (Sender.Latched)
+        {
+            // If the sender is latched, it indicates that the endpoint is currently unavailable 
+            // (e.g., due to a network disconnection or a failure in the transport).
+            // In such cases, we should *not* attempt to send the message immediately.
+            //
+            // Instead, if the sender is a SendingAgent, we explicitly mark the envelope as failed 
+            // so that it will be retried later when the connection is re-established. 
+            //
+            // This conditional block ensures that latched agents skip enqueuing the message, 
+            // but still track the failure to maintain durability and retry logic.
+            if (Sender is SendingAgent sendingAgent)
+            {
+                await sendingAgent.MarkProcessingFailureAsync(this, null);
+            }
+
+            return;
+        }
+
+        if (Sender.Endpoint?.TelemetryEnabled ?? false)
+        {
+            using var activity = WolverineTracing.StartSending(this);
+            try
+            {
+                await Sender.EnqueueOutgoingAsync(this);
+            }
+            finally
+            {
+                activity?.Stop();
+            }
+        }
+        else
+        {
+            await Sender.EnqueueOutgoingAsync(this);
+        }
+    }
+
+    /// <summary>
+    ///     Is this envelope for a "ping" message used by Wolverine to evaluate
+    ///     whether a sending endpoint can be restarted
+    /// </summary>
+    /// <returns></returns>
+    public bool IsPing()
+    {
+        return MessageType == PingMessageType;
+    }
+
+    public static Envelope ForPing(Uri destination)
+    {
+        return new Envelope
+        {
+            MessageType = PingMessageType,
+            Data = [1, 2, 3, 4],
+            ContentType = "wolverine/ping",
+            Destination = destination,
+            
+            // According to both AWS SQS & Azure Service Bus docs, it does no
+            // harm to send a session identifier to a non-FIFO queue, and it's 
+            // most certainly needed for FIFO queues
+            GroupId = Guid.NewGuid().ToString()
+        };
+    }
+
+    internal void WriteTags(Activity activity)
+    {
+        activity.MaybeSetTag(WolverineTracing.MessagingSystem, Destination?.Scheme); // This needs to vary
+        activity.MaybeSetTag(WolverineTracing.MessagingDestination, Destination);
+        activity.SetTag(WolverineTracing.MessagingMessageId, Id);
+        activity.SetTag(WolverineTracing.MessagingConversationId, CorrelationId);
+        activity.SetTag(WolverineTracing.MessageType, MessageType); // Wolverine specific
+        activity.MaybeSetTag(WolverineTracing.PayloadSizeBytes, MessagePayloadSize);
+        activity.MaybeSetTag(MetricsConstants.TenantIdKey, TenantId);
+        activity.MaybeSetTag(WolverineTracing.SagaId, SagaId);
+
+        // True when this envelope was scheduled for delayed delivery and is
+        // now being processed (or sent) past its ScheduledTime. Useful for
+        // trace consumers that want to distinguish a saga-timeout
+        // re-entrance from an immediate-delivery handle.
+        if (ScheduledTime.HasValue)
+        {
+            activity.SetTag(WolverineTracing.MessageScheduled, true);
+        }
+
+        // An occurrence published by opts.Schedules carries its schedule's name in a header;
+        // surfacing it as a tag is what lets trace consumers (CritterWatch among them) attribute
+        // the handler span to the cron job that caused it.
+        if (TryGetHeader(RecurringMessage.HeaderKey, out var scheduleName))
+        {
+            activity.MaybeSetTag(WolverineTracing.ScheduleName, scheduleName);
+        }
+
+        // ...and which firing of that schedule this span belongs to. Trace-only by design: the
+        // instant takes a distinct value every occurrence, so it is fine on a span and would be
+        // unbounded cardinality on a metric.
+        if (TryGetHeader(RecurringMessage.OccurrenceHeaderKey, out var occurrence))
+        {
+            activity.MaybeSetTag(WolverineTracing.ScheduleOccurrence, occurrence);
+        }
+    }
+
+    internal ValueTask PersistAsync(IEnvelopeTransaction transaction)
+    {
+        if (Sender is { IsDurable: true })
+        {
+            if (Sender.Latched)
+            {
+                OwnerId = TransportConstants.AnyNode;
+            }
+
+            return new ValueTask(transaction.PersistAsync(this));
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    internal bool IsFromLocalDurableQueue()
+    {
+        return Sender is DurableLocalQueue;
+    }
+
+    internal void MaybeCorrectReplyUri()
+    {
+        if (ReplyUri != null && Destination != null)
+        {
+            ReplyUri = ReplyUri.MaybeCorrectScheme(Destination.Scheme);
+        }
+    }
+
+    internal DeliveryOptions ToDeliveryOptions()
+    {
+        return new DeliveryOptions
+        {
+            AckRequested = AckRequested,
+            DeduplicationId = DeduplicationId,
+            DeliverBy = DeliverBy,
+            Headers = Headers,
+            IsResponse = IsResponse,
+            PartitionKey = PartitionKey,
+            TenantId = TenantId,
+            ScheduledTime = ScheduledTime,
+            SagaId = SagaId
+        };
+    }
+
+    internal void ClearAnyScheduling()
+    {
+        Status = EnvelopeStatus.Incoming;
+        ScheduledTime = null;
+    }
+
+    /// <summary>
+    /// Zero every settable field so this envelope can be safely returned to
+    /// an <see cref="Microsoft.Extensions.ObjectPool.ObjectPool{T}"/>. Hand-
+    /// rolled rather than reflective so the JIT inlines it on the hot path;
+    /// the <c>Reset_zeroes_every_settable_property</c> guard test
+    /// (CoreTests) reflects over <see cref="Envelope"/>'s public surface
+    /// post-Reset to catch drift when new fields are added without being
+    /// zeroed here. See wolverine#2726.
+    ///
+    /// Reset is intentionally <b>not</b> equivalent to <c>new Envelope()</c>:
+    /// a freshly-constructed envelope assigns <see cref="Id"/> from
+    /// <see cref="IdGenerator"/> and <see cref="SentAt"/> from
+    /// <see cref="DateTimeOffset.UtcNow"/>. Reset zeroes both — the pool
+    /// consumer must re-stamp Id / SentAt before use. That's a deliberate
+    /// shape: the pool only returns "blank slates"; framing values are the
+    /// consumer's responsibility.
+    /// </summary>
+    internal void Reset()
+    {
+        // Private backing fields (Envelope.cs)
+        // GH-4333: hand any pooled payload buffer back BEFORE dropping the reference to it. Reset is
+        // the one point the runtime has already decided this envelope is finished with -- the same
+        // decision that makes re-pooling the envelope itself safe.
+        releasePooledBody();
+        _data = null;
+        _deliverBy = null;
+        _deliverWithin = null;
+        _message = null;
+        _scheduleDelay = null;
+        _scheduledTime = null;
+        _headers = null;
+
+        // Private backing fields (Envelope.Internals.cs)
+        _enqueued = false;
+        _metricHeaders = null;
+        _startTimestamp = 0L;
+        _elapsedMs = 0L;
+
+        // Public settable properties — wire-protocol surface (Envelope.cs)
+        AckRequested = false;
+        Attempts = 0;
+        SendAttempts = 0;
+        SentAt = default;
+        ReceivedAt = null;
+        Source = null;
+        MessageType = null;
+        ReplyUri = null;
+        ContentType = null;
+        CorrelationId = null;
+        SagaId = null;
+        ConversationId = Guid.Empty;
+        Destination = null;
+        ParentId = null;
+        TenantId = null;
+        UserName = null;
+        AcceptedContentTypes = DefaultAcceptedContentTypes;
+        Id = Guid.Empty;
+        ReplyRequested = null;
+        TopicName = null;
+        EndpointName = null;
+        WasPersistedInOutbox = false;
+        GroupId = null;
+        DeduplicationId = null;
+        PartitionKey = null;
+        RoutingInformation = null;
+        Offset = 0L;
+        PartitionId = null;
+        KeepUntil = null;
+
+        // Public / internal settable properties — runtime-only (Envelope.Internals.cs)
+        WasPersistedInInbox = false;
+        WasTrackedAsReceived = false;
+        Serializer = null;
+        ResponseType = null;
+        Response = null;
+        DoNotCascadeResponse = false;
+        AlwaysPublishResponse = false;
+        Status = default;
+        OwnerId = 0;
+        InBatch = false;
+        BatchGroupId = null;
+        FromPool = false;
+        Sender = null;
+        Listener = null;
+        IsResponse = false;
+        Failure = null;
+        Batch = null;
+        BatchPendingSettled = false;
+        BatchPipelineCounted = false;
+        HasBeenAcked = false;
+        HasSentFailureAcknowledgement = false;
+        AckAttempts = 0;
+        WireTap = null;
+        Store = null;
+    }
+
+    internal bool IsEmpty()
+    {
+        return (_message == null && (_data == null || (MessageType.IsEmpty()))) ;
+    }
+}

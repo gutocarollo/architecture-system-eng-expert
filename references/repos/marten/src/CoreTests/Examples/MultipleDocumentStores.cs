@@ -1,0 +1,123 @@
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Events.Daemon;
+using Marten;
+using Marten.Schema;
+using Microsoft.Extensions.Hosting;
+
+namespace CoreTests.Examples;
+
+public class MultipleDocumentStores
+{
+    public static async Task bootstrap()
+    {
+        #region sample_bootstrapping_separate_store
+
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                // You can still use AddMarten() for the main document store
+                // of this application
+                services.AddMarten("some connection string");
+
+                services.AddMartenStore<IInvoicingStore>(opts =>
+                    {
+                        // All the normal options are available here
+                        opts.Connection("different connection string");
+
+                        // more configuration
+                    })
+                    // Optionally apply all database schema
+                    // changes on startup
+                    .ApplyAllDatabaseChangesOnStartup()
+
+                    // Run the async daemon for this database
+                    .AddAsyncDaemon(DaemonMode.HotCold)
+
+                    // Use IInitialData
+                    .InitializeWith(new DefaultDataSet());
+
+                // In a "Production" environment, we're turning off the
+                // automatic database migrations
+                services.CritterStackDefaults(x =>
+                {
+                    x.Production.ResourceAutoCreate = AutoCreate.None;
+                });
+            }).StartAsync();
+
+        #endregion
+    }
+
+    public static async Task bootstrap_with_session_config()
+    {
+        #region sample_bootstrapping_separate_store_with_session_config
+
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddMarten("some connection string");
+
+                services.AddMartenStore<IInvoicingStore>(opts =>
+                    {
+                        opts.Connection("different connection string");
+                    })
+                    // Use lightweight sessions for this ancillary store
+                    .UseLightweightSessions();
+
+                // Or use identity map sessions
+                // .UseIdentitySessions();
+
+                // Or use dirty-tracked sessions
+                // .UseDirtyTrackedSessions();
+
+                // Or use a custom session factory
+                // .BuildSessionsWith<CustomSessionFactory>();
+            }).StartAsync();
+
+        #endregion
+    }
+}
+
+public class DefaultDataSet: IInitialData
+{
+    public Task Populate(IDocumentStore store, CancellationToken cancellation)
+    {
+        throw new System.NotImplementedException();
+    }
+}
+
+#region sample_iinvoicingstore
+
+// These marker interfaces *must* be public
+public interface IInvoicingStore : IDocumentStore
+{
+
+}
+
+#endregion
+
+#region sample_invoicingservice
+
+public class InvoicingService
+{
+    private readonly IInvoicingStore _store;
+
+    // IInvoicingStore can be injected like any other
+    // service in your IoC container
+    public InvoicingService(IInvoicingStore store)
+    {
+        _store = store;
+    }
+
+    public async Task DoSomethingWithInvoices()
+    {
+        // Important to dispose the session when you're done
+        // with it
+        await using var session = _store.LightweightSession();
+
+        // do stuff with the session you just opened
+    }
+}
+
+#endregion

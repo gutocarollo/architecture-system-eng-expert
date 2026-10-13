@@ -1,0 +1,122 @@
+﻿using JasperFx.Core;
+using Microsoft.Extensions.Hosting;
+using NSubstitute;
+using NSubstitute.ReceivedExtensions;
+using JasperFx.Resources;
+using Shouldly;
+using Wolverine.ComplianceTests.Compliance;
+using Wolverine.Tracking;
+
+namespace Wolverine.Kafka.Tests;
+
+public class when_publishing_and_receiving_by_partition_key : IAsyncLifetime
+{
+    #region sample_publish_to_kafka_by_partition_key
+    public static ValueTask publish_by_partition_key(IMessageBus bus)
+    {
+        return bus.PublishAsync(new Message1(), new DeliveryOptions { PartitionKey = "one" });
+    }
+
+    #endregion
+    
+    private IHost _sender = null!;
+    private IHost _receiver = null!;
+    public async ValueTask InitializeAsync()
+    {
+        _sender = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.Policies.DisableConventionalLocalRouting();
+
+                opts.Services.AddResourceSetupOnStartup();
+
+                opts.PublishMessage<ColorMessage>()
+                .ToKafkaTopic("colorswithkey")
+                .BufferedInMemory();              
+                
+            }).StartAsync();
+
+        _receiver = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.UseKafka(KafkaContainerFixture.ConnectionString).AutoProvision();
+                opts.ListenToKafkaTopic("colorswithkey")
+                .ProcessInline();
+
+                // Include test assembly for handler discovery
+                opts.Discovery.IncludeAssembly(GetType().Assembly);
+
+                opts.Services.AddResourceSetupOnStartup();
+            }).StartAsync();
+    }
+
+    [Fact]
+    public async Task can_receive_message_with_delivery_option_key()
+    {
+        var session = await _sender.TrackActivity()
+            .Timeout(60.Seconds())
+            .AlsoTrack(_receiver)
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .PublishMessageAndWaitAsync(new ColorMessage("tortoise"), new DeliveryOptions()
+            {
+                PartitionKey = "key1"
+            });
+        session.Received.SingleMessage<ColorMessage>()
+            .Color.ShouldBe("tortoise");
+    }
+
+    [Fact]
+    public async Task  received_message_with_key_and_offset()
+    {
+        await _sender.TrackActivity()
+            .Timeout(60.Seconds())
+            .AlsoTrack(_receiver)
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .PublishMessageAndWaitAsync(new ColorMessage("hare"), new DeliveryOptions()
+            {
+                PartitionKey = "key1"
+            });
+
+        var session = await _sender.TrackActivity()
+            .Timeout(60.Seconds())
+            .AlsoTrack(_receiver)
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .PublishMessageAndWaitAsync(new ColorMessage("tortoise"), new DeliveryOptions()
+            {
+                PartitionKey = "key1"
+            });
+        var singleEnvelope = session.Received.SingleEnvelope<ColorMessage>();
+        singleEnvelope.PartitionKey.ShouldBe("key1");
+        singleEnvelope.Offset.ShouldBeGreaterThan(0);
+    }
+
+    // receive_message_with_group_id used to live here with an empty body -- an always-green test
+    // that asserted nothing. Envelope.GroupId is really covered by
+    // configure_consumers_and_publishers.can_receive_the_group_id_for_the_consumer_on_the_envelope
+    // and by broadcast_to_topic_rules.route_by_derived_topics_1. GH-3763.
+
+    [Fact]
+    public async Task received_message_has_partition_id()
+    {
+        var session = await _sender.TrackActivity()
+            .Timeout(60.Seconds())
+            .AlsoTrack(_receiver)
+            .WaitForMessageToBeReceivedAt<ColorMessage>(_receiver)
+            .PublishMessageAndWaitAsync(new ColorMessage("parrot"), new DeliveryOptions()
+            {
+                PartitionKey = "key1"
+            });
+        var singleEnvelope = session.Received.SingleEnvelope<ColorMessage>();
+        singleEnvelope.PartitionId.ShouldNotBeNull();
+        singleEnvelope.PartitionId.Value.ShouldBeGreaterThanOrEqualTo(0);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _sender.StopAsync();
+        _sender.Dispose();
+        await _receiver.StopAsync();
+        _receiver.Dispose();
+    }
+}

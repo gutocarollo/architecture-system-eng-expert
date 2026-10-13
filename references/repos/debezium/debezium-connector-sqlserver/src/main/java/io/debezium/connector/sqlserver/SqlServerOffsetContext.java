@@ -1,0 +1,183 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.connector.sqlserver;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.kafka.connect.data.Schema;
+
+import io.debezium.connector.AbstractSourceInfo;
+import io.debezium.connector.SnapshotRecord;
+import io.debezium.connector.SnapshotType;
+import io.debezium.pipeline.CommonOffsetContext;
+import io.debezium.pipeline.source.snapshot.incremental.IncrementalSnapshotContext;
+import io.debezium.pipeline.spi.OffsetContext;
+import io.debezium.pipeline.txmetadata.TransactionContext;
+import io.debezium.relational.TableId;
+import io.debezium.spi.schema.DataCollectionId;
+
+public class SqlServerOffsetContext extends CommonOffsetContext<SourceInfo> {
+
+    private final Schema sourceInfoSchema;
+    private final TransactionContext transactionContext;
+    private final IncrementalSnapshotContext<TableId> incrementalSnapshotContext;
+
+    /**
+     * The index of the current event within the current transaction.
+     */
+    private long eventSerialNo;
+
+    public SqlServerOffsetContext(SqlServerConnectorConfig connectorConfig, TxLogPosition position, SnapshotType snapshot,
+                                  boolean snapshotCompleted, long eventSerialNo, TransactionContext transactionContext,
+                                  IncrementalSnapshotContext<TableId> incrementalSnapshotContext) {
+        super(new SourceInfo(connectorConfig), snapshotCompleted);
+
+        sourceInfo.setCommitLsn(position.getCommitLsn());
+        sourceInfo.setChangeLsn(position.getInTxLsn());
+        sourceInfo.setCommandId(position.getCommandId());
+        sourceInfoSchema = sourceInfo.schema();
+
+        if (this.snapshotCompleted) {
+            postSnapshotCompletion();
+        }
+        else {
+            setSnapshot(snapshot);
+            sourceInfo.setSnapshot(snapshot != null ? SnapshotRecord.TRUE : SnapshotRecord.FALSE);
+        }
+        this.eventSerialNo = eventSerialNo;
+        this.transactionContext = transactionContext;
+        this.incrementalSnapshotContext = incrementalSnapshotContext;
+    }
+
+    public SqlServerOffsetContext(SqlServerConnectorConfig connectorConfig, TxLogPosition position, SnapshotType snapshot, boolean snapshotCompleted) {
+        this(connectorConfig, position, snapshot, snapshotCompleted, 1, new TransactionContext(),
+                new SqlServerIncrementalSnapshotContext<>());
+    }
+
+    @Override
+    public Map<String, ?> getOffset() {
+        Map<String, Object> offset = new HashMap<>();
+        if (getSnapshot().isPresent()) {
+            offset.put(AbstractSourceInfo.SNAPSHOT_KEY, getSnapshot().get().toString());
+            offset.put(SNAPSHOT_COMPLETED_KEY, snapshotCompleted);
+        }
+        offset.put(SourceInfo.COMMIT_LSN_KEY, sourceInfo.getCommitLsn().toString());
+        offset.put(SourceInfo.CHANGE_LSN_KEY,
+                sourceInfo.getChangeLsn() == null ? null : sourceInfo.getChangeLsn().toString());
+        offset.put(SourceInfo.EVENT_SERIAL_NO_KEY, eventSerialNo);
+        offset.put(SourceInfo.COMMAND_ID_KEY, sourceInfo.getCommandId());
+        return sourceInfo.isSnapshot() ? offset : incrementalSnapshotContext.store(transactionContext.store(offset));
+    }
+
+    @Override
+    public Schema getSourceInfoSchema() {
+        return sourceInfoSchema;
+    }
+
+    public TxLogPosition getChangePosition() {
+        return TxLogPosition.valueOf(sourceInfo.getCommitLsn(), sourceInfo.getChangeLsn(), 0, sourceInfo.getCommandId());
+    }
+
+    public long getEventSerialNo() {
+        return eventSerialNo;
+    }
+
+    public void setChangePosition(TxLogPosition position, int eventCount) {
+        if (shouldUpdateEventSerialNo(position)) {
+            eventSerialNo += eventCount;
+        }
+        else {
+            eventSerialNo = eventCount;
+        }
+        sourceInfo.setCommitLsn(position.getCommitLsn());
+        sourceInfo.setChangeLsn(position.getInTxLsn());
+        sourceInfo.setCommandId(position.getCommandId());
+        sourceInfo.setEventSerialNo(eventSerialNo);
+    }
+
+    public boolean isSnapshotCompleted() {
+        return snapshotCompleted;
+    }
+
+    public static class Loader implements OffsetContext.Loader<SqlServerOffsetContext> {
+
+        private final SqlServerConnectorConfig connectorConfig;
+
+        public Loader(SqlServerConnectorConfig connectorConfig) {
+            this.connectorConfig = connectorConfig;
+        }
+
+        @Override
+        public SqlServerOffsetContext load(Map<String, ?> offset) {
+            final Lsn changeLsn = Lsn.valueOf((String) offset.get(SourceInfo.CHANGE_LSN_KEY));
+            final Lsn commitLsn = Lsn.valueOf((String) offset.get(SourceInfo.COMMIT_LSN_KEY));
+            final SnapshotType snapshot = loadSnapshot(offset).orElse(null);
+            final boolean snapshotCompleted = loadSnapshotCompleted(offset);
+            // A committed offset comes back as a Long, so casting straight to Integer fails
+            // the task on restart.
+            final Number storedCommandId = (Number) offset.get(SourceInfo.COMMAND_ID_KEY);
+            final Integer commandId = storedCommandId == null ? null : storedCommandId.intValue();
+
+            // only introduced in 0.10.Beta1, so it might be not present when upgrading from earlier versions
+            Long eventSerialNo = ((Long) offset.get(SourceInfo.EVENT_SERIAL_NO_KEY));
+            if (eventSerialNo == null) {
+                eventSerialNo = Long.valueOf(0);
+            }
+
+            return new SqlServerOffsetContext(connectorConfig,
+                    TxLogPosition.valueOf(commitLsn, changeLsn, 0, commandId),
+                    snapshot, snapshotCompleted, eventSerialNo,
+                    TransactionContext.load(offset), SqlServerIncrementalSnapshotContext.load(offset));
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "SqlServerOffsetContext [" +
+                "sourceInfoSchema=" + sourceInfoSchema +
+                ", sourceInfo=" + sourceInfo +
+                ", snapshotCompleted=" + snapshotCompleted +
+                ", eventSerialNo=" + eventSerialNo +
+                "]";
+    }
+
+    @Override
+    public void event(DataCollectionId tableId, Instant timestamp) {
+        sourceInfo.setSourceTime(timestamp);
+        sourceInfo.setTableId((TableId) tableId);
+    }
+
+    @Override
+    public TransactionContext getTransactionContext() {
+        return transactionContext;
+    }
+
+    @Override
+    public IncrementalSnapshotContext<?> getIncrementalSnapshotContext() {
+        return incrementalSnapshotContext;
+    }
+
+    public Instant getSourceTime() {
+        return sourceInfo.timestamp();
+    }
+
+    private boolean shouldUpdateEventSerialNo(TxLogPosition position) {
+        // On mode switch from direct to function, commandId would be not-null in sourceInfo and null in the position
+        // On mode switch from function to direct, commandId would be null in sourceInfo and not-null in the position
+        if ((position.getCommandId() == null && sourceInfo.getCommandId() != null)
+                || position.getCommandId() != null && sourceInfo.getCommandId() == null) {
+            return false;
+        }
+
+        // for adjacent insert/delete coming from same operation, command_id will be different so its skipped from event_serial_no increment check
+        TxLogPosition lastPosition = TxLogPosition.valueOf(sourceInfo.getCommitLsn(), sourceInfo.getChangeLsn(), null);
+        TxLogPosition currentPosition = TxLogPosition.valueOf(position.getCommitLsn(), position.getInTxLsn(), null);
+
+        return lastPosition.equals(currentPosition);
+    }
+}

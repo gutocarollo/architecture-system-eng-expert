@@ -1,0 +1,156 @@
+using System.Diagnostics;
+using System.Reflection;
+using JasperFx;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+
+namespace Wolverine.Attributes;
+
+/// <summary>
+/// Base class for any attributes on parameters to Wolverine message handler or HTTP endpoint
+/// methods that modifies the codegen for that handler
+/// </summary>
+[AttributeUsage(AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+public abstract class WolverineParameterAttribute : Attribute
+{
+    protected WolverineParameterAttribute()
+    {
+    }
+
+    protected WolverineParameterAttribute(string argumentName)
+    {
+        ArgumentName = argumentName;
+    }
+
+    public string ArgumentName { get; set; } = null!;
+
+    /// <summary>
+    /// Where should the identity value for resolving this parameter come from?
+    /// Default is a named member on the message type or HTTP request type (if one exists)
+    /// </summary>
+    public ValueSource ValueSource { get; set; } = ValueSource.InputMember;
+
+    /// <summary>
+    /// Resolve the value from an HTTP request header or an Envelope header in message handlers.
+    /// Sets ValueSource to Header and ArgumentName to the specified header name.
+    /// </summary>
+    public string? FromHeader
+    {
+        get => ValueSource == ValueSource.Header ? ArgumentName : null;
+        set
+        {
+            ValueSource = ValueSource.Header;
+            ArgumentName = value!;
+        }
+    }
+
+    /// <summary>
+    /// Resolve the value from an HTTP route argument.
+    /// Sets ValueSource to RouteValue and ArgumentName to the specified route parameter name.
+    /// </summary>
+    public string? FromRoute
+    {
+        get => ValueSource == ValueSource.RouteValue ? ArgumentName : null;
+        set
+        {
+            ValueSource = ValueSource.RouteValue;
+            ArgumentName = value!;
+        }
+    }
+
+    /// <summary>
+    /// Resolve the value from a claim on the ClaimsPrincipal. Only supported in HTTP endpoints.
+    /// Sets ValueSource to Claim and ArgumentName to the specified claim type.
+    /// </summary>
+    public string? FromClaim
+    {
+        get => ValueSource == ValueSource.Claim ? ArgumentName : null;
+        set
+        {
+            ValueSource = ValueSource.Claim;
+            ArgumentName = value!;
+        }
+    }
+
+    /// <summary>
+    /// Resolve the value from the return value of a named static method on the handler or endpoint class.
+    /// Sets ValueSource to Method and ArgumentName to the specified method name.
+    /// </summary>
+    public string? FromMethod
+    {
+        get => ValueSource == ValueSource.Method ? ArgumentName : null;
+        set
+        {
+            ValueSource = ValueSource.Method;
+            ArgumentName = value!;
+        }
+    }
+
+    /// <summary>
+    ///     Called by Wolverine during bootstrapping to modify the code generation
+    /// for an HTTP endpoint with the decorated parameter
+    /// </summary>
+    /// <param name="chain"></param>
+    /// <param name="parameter"></param>
+    /// <param name="container"></param>
+    /// <param name="rules"></param>
+    public abstract Variable Modify(IChain chain, ParameterInfo parameter,
+        IServiceContainer container, GenerationRules rules);
+
+    /// <summary>
+    ///     The method a decorated parameter is declared on, as <c>Namespace.DeclaringType.MethodName()</c>.
+    /// </summary>
+    /// <remarks>
+    ///     GH-3937: these attributes validate at <b>codegen</b>, so a failure can surface on a chain the
+    ///     developer did not know was being compiled — an assembly carrying <c>[WolverineModule]</c> puts every
+    ///     endpoint in it into discovery. A message naming only the parameter and its element type leaves no
+    ///     thread back to a recognisable type; the declaring method is that thread.
+    /// </remarks>
+    internal static string DescribeMember(ParameterInfo parameter)
+    {
+        var member = parameter.Member;
+        return $"{member.DeclaringType?.FullNameInCode()}.{member.Name}()";
+    }
+
+    internal static void TryApply(MethodCall call, IServiceContainer container, GenerationRules rules, IChain chain)
+    {
+        var parameters = call.Method.GetParameters();
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i].TryGetAttribute<WolverineParameterAttribute>(out var att))
+            {
+                var variable = att.Modify(chain, parameters[i], container, rules);
+                call.Arguments[i] = variable;
+            }
+        }
+    }
+
+    protected bool tryFindIdentityVariable(IChain chain, ParameterInfo parameter, Type idType, out Variable variable)
+    {
+        if (ArgumentName.IsNotEmpty())
+        {
+            if (chain.TryFindVariable(ArgumentName, ValueSource, idType, out variable))
+            {
+                return true;
+            }
+        }
+        
+        if (chain.TryFindVariable(parameter.ParameterType.Name + "Id", ValueSource, idType, out variable))
+        {
+            return true;
+        }
+        
+        if (chain.TryFindVariable("Id", ValueSource, idType, out variable))
+        {
+            return true;
+        }
+
+        variable = default!;
+        return false;
+    }
+}

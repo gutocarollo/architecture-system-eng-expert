@@ -1,0 +1,310 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Events.Daemon;
+using Lamar;
+using Marten;
+using Marten.Events.Daemon.Coordination;
+using Marten.Internal;
+using Marten.Services;
+using Marten.Testing;
+using Marten.Testing.Documents;
+using Marten.Testing.Harness;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Shouldly;
+using Weasel.Core;
+using Weasel.Core.Migrations;
+using Weasel.Core.MultiTenancy;
+using Xunit;
+
+namespace StressTests;
+
+public class using_multiple_document_stores_in_same_host : IDisposable
+{
+    private readonly Container theContainer;
+
+    public using_multiple_document_stores_in_same_host()
+    {
+        theContainer = Container.For(services =>
+        {
+            // Mostly just to prove we can mix and match
+            services.AddMarten(ConnectionSource.ConnectionString);
+
+            services.AddMartenStore<IFirstStore>(opts =>
+            {
+                opts.Connection(ConnectionSource.ConnectionString);
+                opts.DatabaseSchemaName = "first_store";
+            });
+
+            // Just to prove that this doesn't blow up, see GH-2892
+            services.AddKeyedSingleton<IMartenSessionLogger>("blue", new RecordingLogger());
+
+            services.AddMartenStore<ISecondStore>(services =>
+            {
+                var opts = new StoreOptions();
+                opts.Connection(ConnectionSource.ConnectionString);
+                opts.DatabaseSchemaName = "second_store";
+
+                opts.Policies.AllDocumentsAreMultiTenanted();
+                opts.Policies.PartitionMultiTenantedDocumentsUsingMartenManagement("tenants");
+
+                opts.Schema.For<SomeSingleTenantedDocument>()
+                    .DoNotPartition()
+                    .SingleTenanted();
+
+                return opts;
+            });
+        });
+    }
+
+    [Fact]
+    public void all_stores_are_registered_as_master_table_tenancy()
+    {
+        var masterTableTenancyList = theContainer.GetAllInstances<IMasterTableMultiTenancy>();
+        masterTableTenancyList.Count.ShouldBe(3);
+        masterTableTenancyList.Any(x => x.GetType() == typeof(DocumentStore)).ShouldBeTrue();
+        masterTableTenancyList.OfType<IFirstStore>().Any().ShouldBeTrue();
+        masterTableTenancyList.OfType<ISecondStore>().Any().ShouldBeTrue();
+    }
+
+    [Fact]
+    public void get_all_document_stores()
+    {
+        var allDocumentStores = theContainer.AllDocumentStores();
+        allDocumentStores.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public void has_a_registration_for_IDatabaseSource_for_tenancy()
+    {
+        var store1 = theContainer.GetInstance<IFirstStore>().As<DocumentStore>();
+        var store2 = theContainer.GetInstance<ISecondStore>().As<DocumentStore>();
+        var sources = theContainer.GetAllInstances<IDatabaseSource>();
+
+        sources.ShouldContain(store1.Tenancy);
+        sources.ShouldContain(store2.Tenancy);
+    }
+
+    [Fact]
+    public void should_have_a_single_registration_for_each_secondary_stores()
+    {
+        theContainer.Model.HasRegistrationFor<IFirstStore>().ShouldBeTrue();
+        theContainer.Model.HasRegistrationFor<ISecondStore>().ShouldBeTrue();
+    }
+
+    [Fact]
+    public void should_have_a_single_SecondaryDocumentStores_registration()
+    {
+        // Phase 3 (#4454) retired SecondaryDocumentStores' ICodeFileCollection
+        // role — it's no longer part of the JasperFx codegen-write pipeline.
+        // The invariant we still need: a single shared SecondaryDocumentStores
+        // catalog per host, not one per AddMartenStore<T> call.
+        theContainer.GetAllInstances<SecondaryDocumentStores>().Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public void can_build_both_stores()
+    {
+        theContainer.GetInstance<IFirstStore>().ShouldNotBeNull();
+        theContainer.GetInstance<ISecondStore>().ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task use_the_generated_store()
+    {
+        var store = theContainer.GetInstance<IFirstStore>();
+        await using var session = store.LightweightSession();
+
+        var target = Target.Random();
+        session.Store(target);
+
+        await session.SaveChangesAsync();
+
+        await using var query = store.QuerySession();
+        var target2 = await query.LoadAsync<Target>(target.Id);
+        target2.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task use_a_single_tenanted_document_in_multi_tenancy_ancillary_store()
+    {
+        var store = theContainer.GetInstance<ISecondStore>();
+        await using var session = store.LightweightSession();
+
+        var singleTenantedDocument = new SomeSingleTenantedDocument(Guid.NewGuid());
+        session.Store(singleTenantedDocument);
+
+        await session.SaveChangesAsync();
+
+        await using var query = store.QuerySession();
+        var target2 = await query.LoadAsync<SomeSingleTenantedDocument>(singleTenantedDocument.Id);
+        target2.ShouldNotBeNull();
+    }
+
+    public void Dispose()
+    {
+        theContainer?.Dispose();
+    }
+}
+
+public record SomeSingleTenantedDocument(Guid Id);
+
+public class additional_document_store_registration_and_optimized_artifact_workflow
+{
+    [Fact]
+    public async Task can_resolve_all_stores()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddMarten(ConnectionSource.ConnectionString);
+
+                services.AddMartenStore<IFirstStore>(opts =>
+                {
+                    opts.Connection(ConnectionSource.ConnectionString);
+                    opts.DatabaseSchemaName = "first_store";
+                });
+            }).StartAsync();
+
+        var stores = host.AllDocumentStores();
+        stores.Count.ShouldBe(2);
+        stores.OfType<IFirstStore>().Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public void use_secondary_options_configure_against_additional_store()
+    {
+        using var host = new HostBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddMarten(ConnectionSource.ConnectionString);
+
+                services.AddMartenStore<IFirstStore>(opts =>
+                {
+                    opts.Connection(ConnectionSource.ConnectionString);
+                    opts.DatabaseSchemaName = "first_store";
+                });
+
+                // Override configuration of IFirstStore
+                services.ConfigureMarten<IFirstStore>(opts =>
+                {
+                    opts.AutoCreateSchemaObjects = AutoCreate.None;
+                });
+
+                // In a "Production" environment, we're turning off the
+                // automatic database migrations
+                services.CritterStackDefaults(x =>
+                {
+                    x.Production.ResourceAutoCreate = AutoCreate.None;
+                });
+            })
+            .Start();
+
+
+        var store = host.Services.GetRequiredService<IFirstStore>().As<DocumentStore>();
+        store.Options.AutoCreateSchemaObjects.ShouldBe(AutoCreate.None);
+
+    }
+
+    [Fact]
+    public void bootstrap_async_daemon_for_secondary_store()
+    {
+        using var host = new HostBuilder()
+
+            .ConfigureServices(services =>
+            {
+                services.AddMarten(ConnectionSource.ConnectionString);
+
+                services.AddMartenStore<IFirstStore>(opts =>
+                {
+                    opts.Connection(ConnectionSource.ConnectionString);
+                    opts.DatabaseSchemaName = "first_store";
+                }).AddAsyncDaemon(DaemonMode.HotCold);
+
+                // In a "Production" environment, we're turning off the
+                // automatic database migrations
+                services.CritterStackDefaults(x =>
+                {
+                    x.Production.ResourceAutoCreate = AutoCreate.None;
+                });
+
+
+            })
+            .Start();
+
+        var store = host.Services.GetRequiredService<IFirstStore>().As<DocumentStore>();
+        store.Options.Projections.AsyncMode.ShouldBe(DaemonMode.HotCold);
+
+        var hostedService = host.Services.GetServices<IHostedService>()
+            .OfType<ProjectionCoordinator<IFirstStore>>().Single();
+
+        (hostedService.Store is IFirstStore).ShouldBeTrue();
+
+
+    }
+
+    [Fact]
+    public async Task apply_changes_on_startup()
+    {
+        await using var container = Container.For(x =>
+        {
+            x.AddLogging();
+            x.AddMartenStore<IFirstStore>(opts =>
+                {
+                    opts.ApplyChangesLockId += 19;
+                    opts.Connection(ConnectionSource.ConnectionString);
+                    opts.RegisterDocumentType<User>();
+                    opts.DatabaseSchemaName = "first_store";
+                })
+                .ApplyAllDatabaseChangesOnStartup();
+        });
+
+        var store = container.GetInstance<IFirstStore>();
+        await store.Advanced.Clean.CompletelyRemoveAllAsync();
+
+        var instance = container.Model.For<IHostedService>().Instances.First();
+        instance.ImplementationType.ShouldBe(typeof(MartenActivator<IFirstStore>));
+        instance.Lifetime.ShouldBe(ServiceLifetime.Singleton);
+
+        // Just a smoke test here
+        await container.GetAllInstances<IHostedService>().First().StartAsync(default);
+
+        await store.Storage.Database.AssertDatabaseMatchesConfigurationAsync();
+    }
+
+    [Fact]
+    public async Task jasperfx_options_usage_with_ancillary_stores()
+    {
+        using var host = await Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddMarten(ConnectionSource.ConnectionString);
+
+                services.AddMartenStore<IFirstStore>(opts =>
+                    {
+                        opts.ApplyChangesLockId += 19;
+                        opts.Connection(ConnectionSource.ConnectionString);
+                        opts.RegisterDocumentType<User>();
+                        opts.DatabaseSchemaName = "first_store";
+                    })
+                    .ApplyAllDatabaseChangesOnStartup();
+
+                services.AddJasperFx(opts =>
+                {
+                    opts.Development.ResourceAutoCreate = AutoCreate.None;
+                });
+            })
+            .UseEnvironment("Development").StartAsync();
+
+        var store = (DocumentStore)host.DocumentStore<IFirstStore>();
+        store.Options.AutoCreateSchemaObjects.ShouldBe(AutoCreate.None);
+    }
+}
+
+public interface IFirstStore : IDocumentStore{}
+public interface ISecondStore : IDocumentStore{}

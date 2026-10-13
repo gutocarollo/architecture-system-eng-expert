@@ -1,0 +1,250 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DaemonTests.TestingSupport;
+using JasperFx.Core;
+using JasperFx.Events;
+using Marten.Events.Daemon.HighWater;
+using Marten.Storage;
+using Marten.Testing;
+using Microsoft.Extensions.Logging.Abstractions;
+using NpgsqlTypes;
+using Shouldly;
+using Weasel.Core;
+using Weasel.Postgresql;
+using Xunit;
+
+namespace DaemonTests.Internals;
+
+public class HighWaterDetectorTests: DaemonContext
+{
+    private HighWaterDetector _detector;
+
+    public HighWaterDetectorTests(ITestOutputHelper output) : base(output)
+    {
+        theStore.EnsureStorageExists(typeof(IEvent));
+    }
+
+    internal HighWaterDetector theDetector
+    {
+        get
+        {
+            _detector ??= new HighWaterDetector((MartenDatabase)theStore.Tenancy.Default.Database, theStore.Events, NullLogger.Instance);
+            return _detector;
+        }
+    }
+
+    [Fact]
+    public async Task find_all_zeros_with_no_state()
+    {
+        var statistics = await theDetector.Detect(CancellationToken.None);
+        statistics.CurrentMark.ShouldBe(0);
+        statistics.LastMark.ShouldBe(0);
+        statistics.HighestSequence.ShouldBe(1);
+        statistics.LastUpdated.ShouldBeNull();
+    }
+
+    [Fact]
+    public async Task starting_from_first_detection_all_contiguous_events()
+    {
+        NumberOfStreams = 10;
+        await PublishSingleThreaded();
+
+        var statistics = await theDetector.Detect(CancellationToken.None);
+        statistics.CurrentMark.ShouldBe(NumberOfEvents);
+        statistics.LastMark.ShouldBe(0);
+        statistics.HighestSequence.ShouldBe(NumberOfEvents);
+    }
+
+    [Fact]
+    public async Task starting_from_first_detection_some_gaps_with_zero_buffer()
+    {
+        NumberOfStreams = 10;
+        await PublishSingleThreaded();
+
+        var gaps = new long[] {NumberOfEvents - 100, NumberOfEvents - 95, NumberOfEvents - 88};
+        await deleteEvents(gaps);
+
+        var statistics = await theDetector.Detect(CancellationToken.None);
+
+        // This gets under the gap
+        statistics.CurrentMark.ShouldBe(NumberOfEvents - 101);
+        statistics.LastMark.ShouldBe(0);
+        statistics.HighestSequence.ShouldBe(NumberOfEvents);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task second_run_detect_same_gap_when_stale(bool useAdvancedTracking)
+    {
+        StoreOptions(opts => opts.Events.EnableAdvancedAsyncTracking = useAdvancedTracking);
+        await theStore.EnsureStorageExistsAsync(typeof(IEvent), TestContext.Current.CancellationToken);
+
+        NumberOfStreams = 10;
+        await PublishSingleThreaded();
+
+        var gaps = new long[] { NumberOfEvents - 100 };
+        await deleteEvents(gaps);
+
+        var statistics = await theDetector.Detect(CancellationToken.None);
+        statistics.CurrentMark.ShouldBe(NumberOfEvents - 101);
+
+        statistics = await theDetector.Detect(CancellationToken.None);
+        statistics.CurrentMark.ShouldBe(NumberOfEvents - 101);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task starting_from_first_detection_some_gaps_with_nonzero_buffer(bool useAdvancedTracking)
+    {
+        StoreOptions(opts =>
+        {
+            opts.Events.EnableAdvancedAsyncTracking = useAdvancedTracking;
+            opts.Projections.StaleSequenceThreshold = 500.Milliseconds();
+        });
+        await theStore.EnsureStorageExistsAsync(typeof(IEvent), TestContext.Current.CancellationToken);
+
+        NumberOfStreams = 10;
+        await PublishSingleThreaded();
+
+        var gaps = new long[] {NumberOfEvents - 100, NumberOfEvents - 95, NumberOfEvents - 88, NumberOfEvents - 33};
+        await deleteEvents(gaps);
+
+
+
+        var statistics = await theDetector.Detect(CancellationToken.None);
+
+        // This gets under the gap, using the buffer
+        statistics.CurrentMark.ShouldBe(NumberOfEvents - 101);
+        statistics.HighestSequence.ShouldBe(NumberOfEvents);
+
+        // #4953: a stale gap is no longer skipped on first sighting — the safe zone holds until the
+        // gap has been stuck past StaleSequenceThreshold (measured from when the detector first
+        // observed it) and no live transaction could still fill it
+        var held = await theDetector.DetectInSafeZone(CancellationToken.None);
+        held.CurrentMark.ShouldBe(NumberOfEvents - 101);
+
+        await Task.Delay(700, TestContext.Current.CancellationToken);
+
+        var statistics2 = await theDetector.DetectInSafeZone(CancellationToken.None);
+
+        // #5108 §2: all four dead gaps clear in ONE cycle, not one gap per cycle. Every sequence
+        // number at or below the ceiling recorded at observation was handed out before that moment,
+        // and the liveness probe just established that no transaction from before it is still alive —
+        // so every one of these gaps is provably dead, not just the first. Previously each gap cost
+        // its own detection cycle plus a fresh StaleSequenceThreshold, which is what made recovery
+        // time grow linearly with the number of gaps.
+        statistics2.CurrentMark.ShouldBe(NumberOfEvents);
+        statistics2.IncludesSkipping.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task look_for_safe_harbor_time_if_there_are_gaps_between_highest_assigned_event_and_the_sequence(bool useAdvancedTracking)
+    {
+        StoreOptions(opts =>
+        {
+            opts.Events.EnableAdvancedAsyncTracking = useAdvancedTracking;
+            opts.Projections.StaleSequenceThreshold = 500.Milliseconds();
+        });
+        await theStore.EnsureStorageExistsAsync(typeof(IEvent), TestContext.Current.CancellationToken);
+
+        NumberOfStreams = 10;
+        await PublishSingleThreaded();
+
+        var statistics = await theDetector.Detect(CancellationToken.None);
+
+        // A tail of reserved-but-never-committed sequence numbers (rolled-back appends)
+        await advanceSequenceBy(20);
+
+        // #4953: first sighting of the dead tail — hold, never teleport on sight
+        var statistics2 = await theDetector.DetectInSafeZone(CancellationToken.None);
+
+        statistics2.CurrentMark.ShouldBe(statistics.CurrentMark);
+
+        await Task.Delay(700, TestContext.Current.CancellationToken);
+
+        // Stuck past the threshold with no live transaction that could fill the tail: advance to the
+        // reserved ceiling recorded when the gap was first observed — the whole dead tail, no magic -32
+        var statistics3 = await theDetector.DetectInSafeZone(CancellationToken.None);
+
+        statistics3.CurrentMark.ShouldBe(statistics.CurrentMark + 20);
+        statistics3.IncludesSkipping.ShouldBeTrue();
+
+        // A LATER batch of dead reservations needs its own observation cycle
+        await advanceSequenceBy(20);
+
+        var statistics4 = await theDetector.DetectInSafeZone(CancellationToken.None);
+        statistics4.CurrentMark.ShouldBe(statistics.CurrentMark + 20);
+
+        await Task.Delay(700, TestContext.Current.CancellationToken);
+
+        var statistics5 = await theDetector.DetectInSafeZone(CancellationToken.None);
+        statistics5.CurrentMark.ShouldBe(statistics.CurrentMark + 40);
+
+        if (useAdvancedTracking)
+        {
+            var skips = await theDetector.FetchLastProgressionSkipsAsync(100, CancellationToken.None);
+            skips.Any().ShouldBeTrue();
+        }
+    }
+
+
+
+    protected async Task deleteEvents(params long[] ids)
+    {
+        await using var conn = theStore.CreateConnection();
+        await conn.OpenAsync();
+
+        await conn
+            .CreateCommand($"delete from {theStore.Events.DatabaseSchemaName}.mt_events where seq_id = ANY(:ids)")
+            .With("ids", ids, NpgsqlDbType.Bigint | NpgsqlDbType.Array)
+            .ExecuteNonQueryAsync();
+
+
+    }
+
+    protected async Task advanceSequenceBy(int count)
+    {
+        var data = await theStore.Advanced.FetchEventStoreStatistics();
+
+        await using var conn = theStore.CreateConnection();
+        await conn.OpenAsync();
+
+        await conn.CreateCommand(
+            $"alter sequence {theStore.Events.DatabaseSchemaName}.mt_events_sequence RESTART WITH {data.EventSequenceNumber + count}")
+            .ExecuteNonQueryAsync();
+
+        await conn.CloseAsync();
+
+        await Task.Delay(250.Milliseconds());
+    }
+
+
+    protected async Task makeOldWhereSequenceIsLessThanOrEqualTo(long seqId)
+    {
+        await using var conn = theStore.CreateConnection();
+        await conn.OpenAsync();
+
+        await conn
+            .CreateCommand($"update {theStore.Events.DatabaseSchemaName}.mt_events set timestamp = transaction_timestamp() - interval '1 hour' where seq_id <= :id")
+            .With("id", seqId)
+            .ExecuteNonQueryAsync();
+    }
+
+    protected async Task makeNewerWhereSequenceIsGreaterThan(long seqId)
+    {
+        await using var conn = theStore.CreateConnection();
+        await conn.OpenAsync();
+
+        await conn
+            .CreateCommand($"update {theStore.Events.DatabaseSchemaName}.mt_events set timestamp = :timestamp where seq_id > :id")
+            .With("id", seqId)
+            .With("timestamp", DateTime.UtcNow.Add(30.Seconds()))
+            .ExecuteNonQueryAsync();
+    }
+}

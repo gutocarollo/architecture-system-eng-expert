@@ -1,0 +1,154 @@
+using JasperFx;
+using JasperFx.Core;
+using Oracle.ManagedDataAccess.Client;
+using Spectre.Console;
+using Weasel.Oracle;
+using Wolverine.Configuration;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.MultiTenancy;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+using MultiTenantedMessageStore = Wolverine.Persistence.Durability.MultiTenantedMessageStore;
+
+namespace Wolverine.Oracle.Transport;
+
+public class OracleTransport : BrokerTransport<OracleQueue>
+{
+    public const string ProtocolName = "oracle";
+
+    public OracleTransport() : base(ProtocolName, "Oracle Transport", [ProtocolName])
+    {
+        Queues = new LightweightCache<string, OracleQueue>(name => new OracleQueue(name, this));
+    }
+
+    public override Uri ResourceUri => new Uri("oracle-transport://");
+
+    private string _transportSchemaName = "WOLVERINE_QUEUES";
+
+    /// <summary>
+    /// Schema name for the queue and scheduled message tables
+    /// </summary>
+    public string TransportSchemaName
+    {
+        get => _transportSchemaName;
+        set
+        {
+            SchemaNameValidation.AssertValid(value, nameof(TransportSchemaName));
+            _transportSchemaName = value;
+        }
+    }
+
+    private string _messageStorageSchemaName = "WOLVERINE";
+
+    /// <summary>
+    /// Schema name for the message storage tables
+    /// </summary>
+    public string MessageStorageSchemaName
+    {
+        get => _messageStorageSchemaName;
+        set
+        {
+            SchemaNameValidation.AssertValid(value, nameof(MessageStorageSchemaName));
+            _messageStorageSchemaName = value;
+        }
+    }
+
+    public LightweightCache<string, OracleQueue> Queues { get; }
+
+    /// <summary>
+    ///     Enables persistent identity values to break timestamp ties when dequeueing Oracle
+    ///     queue messages. This adds columns and indexes to the ready and scheduled queue tables.
+    ///     It applies to queues managed by this transport, including tenant databases, and is
+    ///     opt-in to avoid changing existing schemas automatically. Configure it before startup;
+    ///     changing it at runtime is not supported.
+    /// </summary>
+    public bool EnableDeterministicQueueOrdering { get; set; }
+
+    protected override IEnumerable<OracleQueue> endpoints()
+    {
+        return Queues;
+    }
+
+    public override string SanitizeIdentifier(string identifier)
+    {
+        return identifier.Replace('-', '_').ToUpperInvariant();
+    }
+
+    protected override OracleQueue findEndpointByUri(Uri uri)
+    {
+        // GH-3820. Unlike the Postgres and SQL Server transports this was copied from, Oracle
+        // upper-cases identifiers (see SanitizeIdentifier) while System.Uri normalises the
+        // authority to lower case. A bare Queues[uri.Host] therefore never matches the key the
+        // queue was registered under, and LightweightCache quietly mints a *second* OracleQueue
+        // over the same physical tables. Correcting the name here is safe and idempotent: the
+        // host segment already went through SanitizeIdentifier when the Uri was built, so the
+        // only thing left to undo is Uri's lower-casing. Note SanitizeIdentifier rather than
+        // MaybeCorrectName -- the host already carries any IdentifierPrefix, which
+        // MaybeCorrectName would prepend a second time.
+        var queueName = SanitizeIdentifier(uri.Host);
+        return Queues[queueName];
+    }
+
+    public override async ValueTask ConnectAsync(IWolverineRuntime runtime)
+    {
+        if (runtime.Storage is OracleMessageStore store)
+        {
+            Store = store;
+        }
+        else if (runtime.Storage is MultiTenantedMessageStore mt && mt.Main is OracleMessageStore s)
+        {
+            Store = s;
+            Databases = mt;
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException(
+                "The Oracle transport can only be used if Oracle is the backing message store");
+        }
+
+        // This is de facto a little environment test
+        await runtime.Storage.Admin.CheckConnectivityAsync(CancellationToken.None);
+
+        AutoProvision = AutoProvision || runtime.Options.AutoBuildMessageStorageOnStartup != AutoCreate.None;
+
+        foreach (var queue in Queues)
+        {
+            Store.AddTable(queue.QueueTable);
+            Store.AddTable(queue.ScheduledTable);
+        }
+
+        MessageStorageSchemaName = Store.SchemaName;
+    }
+
+    internal MultiTenantedMessageStore? Databases { get; set; }
+
+    internal OracleMessageStore? Store { get; set; }
+
+    public override IEnumerable<PropertyColumn> DiagnosticColumns()
+    {
+        yield return new PropertyColumn("Name");
+        yield return new PropertyColumn("Count", Justify.Right);
+        yield return new PropertyColumn("Scheduled", Justify.Right);
+    }
+
+    public async Task<DateTimeOffset> SystemTimeAsync()
+    {
+        OracleDataSource? dataSource = null;
+        if (Store is OracleMessageStore store)
+        {
+            dataSource = store.OracleDataSource;
+        }
+
+        await using var conn = await dataSource!.OpenConnectionAsync();
+        try
+        {
+            await using var cmd = conn.CreateCommand("SELECT SYSTIMESTAMP AT TIME ZONE 'UTC' FROM DUAL");
+            var raw = await cmd.ExecuteScalarAsync();
+            return (DateTimeOffset)raw!;
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+}

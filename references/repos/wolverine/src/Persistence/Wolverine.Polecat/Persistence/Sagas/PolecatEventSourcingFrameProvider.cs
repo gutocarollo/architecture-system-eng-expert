@@ -1,0 +1,71 @@
+using System.Diagnostics.CodeAnalysis;
+using JasperFx;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core.Reflection;
+using JasperFx.Events;
+using Microsoft.Extensions.DependencyInjection;
+using Polecat;
+using Wolverine.Configuration;
+using Wolverine.Persistence;
+using Wolverine.Persistence.EventSourcing;
+using Wolverine.Polecat.Codegen;
+
+namespace Wolverine.Polecat.Persistence.Sagas;
+
+// GH-3907: the Polecat half of the shared aggregate handler workflow's store seam. Deliberately a
+// sibling of IPersistenceFrameProvider's contract rather than more members on it, so stores with no
+// event sourcing never grow no-op aggregate members - but implemented on the *same class*, which is
+// what lets Wolverine find it through the persistence strategies already registered on
+// GenerationRules instead of a second registry that would have to know Polecat exists.
+internal partial class PolecatPersistenceFrameProvider : IEventSourcingFrameProvider
+{
+    public string StoreName => "Polecat";
+
+    // Wolverine.Polecat.Events and UnknownAggregateException stay public and store-side - GH-3907
+    // retires nothing. The workflow only needs to recognize them, so they come over the seam rather
+    // than core naming either one.
+    public Type EventsCollectionType => typeof(Events);
+
+    public Type UnknownAggregateExceptionType => typeof(UnknownAggregateException);
+
+    // Core never writes "session.Events.FetchForWriting<T>(...)" itself. Handing back a finished frame
+    // is what keeps that spelling on this side of the seam - and lets Polecat's frame stay a plain
+    // AsyncFrame where Marten's also implements IBatchableFrame.
+    public Frame BuildLoadAggregateFrame(AggregateLoadRequest request) => new LoadAggregateFrame(request);
+
+    // GH-3627. Polecat's spelling of the raw stream reads.
+    public Frame BuildFetchStreamStateFrame(Variable identity) => new Codegen.FetchStreamStateFrame(identity);
+
+    public Frame BuildFetchStreamFrame(Variable identity) => new Codegen.FetchStreamFrame(identity);
+
+    public Frame BuildFetchLatestFrame(Type aggregateType, Variable identity)
+        => new FetchLatestAggregateFrame(aggregateType, identity);
+
+    public Frame BuildLoadBoundaryFrame(Type modelType) => new LoadBoundaryFrame(modelType);
+
+    public StreamIdentity DetermineStreamIdentity(IServiceContainer container)
+        => container.Services.GetRequiredService<StoreOptions>().Events.StreamIdentity;
+
+    [UnconditionalSuppressMessage("Trimming", "IL2072",
+        Justification = "The aggregate type comes from handler discovery, which already roots it. Codegen-time only. See docs/guide/aot.md.")]
+    public Type? TryDetermineNaturalKeyType(Type aggregateType, IChain chain, IServiceContainer container)
+        => resolveStoreOptions(chain, container)?.Projections
+            .FindNaturalKeyDefinition(aggregateType)?.OuterType;
+
+    /// <summary>
+    /// The <see cref="StoreOptions"/> of the store this chain writes to. GH-4439, and the same reasoning as
+    /// Marten's twin: <c>FindNaturalKeyDefinition</c> searches one store's registered projections, so asking
+    /// the default store for an aggregate registered only on an ancillary store silently skips the
+    /// natural-key branch.
+    /// </summary>
+    private static StoreOptions? resolveStoreOptions(IChain chain, IServiceContainer container)
+    {
+        if (chain.DetermineAncillaryStoreType() is { } storeType && storeType.CanBeCastTo<IDocumentStore>())
+        {
+            return (container.Services.GetService(storeType) as IDocumentStore)?.Options;
+        }
+
+        return container.Services.GetRequiredService<StoreOptions>();
+    }
+}

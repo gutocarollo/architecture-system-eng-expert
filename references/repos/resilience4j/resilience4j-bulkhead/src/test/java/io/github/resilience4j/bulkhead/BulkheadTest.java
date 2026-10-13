@@ -1,0 +1,486 @@
+/*
+ *
+ *  Copyright 2026 Robert Winkler, Lucas Lech
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+package io.github.resilience4j.bulkhead;
+
+import io.github.resilience4j.core.functions.CheckedConsumer;
+import io.github.resilience4j.core.functions.CheckedFunction;
+import io.github.resilience4j.core.functions.CheckedRunnable;
+import io.github.resilience4j.core.functions.CheckedSupplier;
+import io.github.resilience4j.test.HelloWorldException;
+import io.github.resilience4j.test.HelloWorldService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
+class BulkheadTest {
+
+    private HelloWorldService helloWorldService;
+    private BulkheadConfig config;
+
+    @BeforeEach
+    void setUp() {
+        helloWorldService = mock(HelloWorldService.class);
+        config = BulkheadConfig.custom()
+            .maxConcurrentCalls(1)
+            .build();
+    }
+
+    @Test
+    void shouldDecorateSupplierAndReturnWithSuccess() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld()).willReturn("Hello world");
+        Supplier<String> supplier = Bulkhead
+            .decorateSupplier(bulkhead, helloWorldService::returnHelloWorld);
+
+        String result = supplier.get();
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+    }
+
+    @Test
+    void acquirePermissionAsyncDefaultImplementationShouldBridgeAcquirePermission() {
+        Bulkhead bulkhead = mock(Bulkhead.class);
+        given(bulkhead.acquirePermissionAsync()).willCallRealMethod();
+
+        CompletableFuture<Void> granted = bulkhead.acquirePermissionAsync();
+
+        assertThat(granted).isCompleted();
+        then(bulkhead).should(times(1)).acquirePermission();
+    }
+
+    @Test
+    void acquirePermissionAsyncDefaultImplementationShouldCompleteExceptionallyWhenFull() {
+        Bulkhead bulkhead = mock(Bulkhead.class);
+        given(bulkhead.getBulkheadConfig()).willReturn(config);
+        given(bulkhead.getName()).willReturn("test");
+        given(bulkhead.acquirePermissionAsync()).willCallRealMethod();
+        BulkheadFullException exception = BulkheadFullException
+            .createBulkheadFullException(bulkhead);
+        willThrow(exception).given(bulkhead).acquirePermission();
+
+        CompletableFuture<Void> rejected = bulkhead.acquirePermissionAsync();
+
+        assertThat(rejected).isCompletedExceptionally();
+        assertThatThrownBy(rejected::join).hasCause(exception);
+    }
+
+    @Test
+    void shouldExecuteSupplierAndReturnWithSuccess() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld()).willReturn("Hello world");
+
+        String result = bulkhead.executeSupplier(helloWorldService::returnHelloWorld);
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+    }
+
+    @Test
+    void shouldDecorateSupplierAndReturnWithException() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld()).willThrow(new RuntimeException("BAM!"));
+        Supplier<String> supplier = Bulkhead
+            .decorateSupplier(bulkhead, helloWorldService::returnHelloWorld);
+
+        assertThatThrownBy(supplier::get).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+    }
+
+    @Test
+    void shouldDecorateCheckedSupplierAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithException()).willReturn("Hello world");
+        CheckedSupplier<String> checkedSupplier = Bulkhead
+            .decorateCheckedSupplier(bulkhead, helloWorldService::returnHelloWorldWithException);
+
+        String result = checkedSupplier.get();
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithException();
+    }
+
+    @Test
+    void shouldDecorateCheckedSupplierAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithException())
+            .willThrow(new RuntimeException("BAM!"));
+        CheckedSupplier<String> checkedSupplier = Bulkhead
+            .decorateCheckedSupplier(bulkhead, helloWorldService::returnHelloWorldWithException);
+
+        assertThatThrownBy(checkedSupplier::get).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithException();
+    }
+
+    @Test
+    void shouldDecorateCallableAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithException()).willReturn("Hello world");
+        Callable<String> callable = Bulkhead
+            .decorateCallable(bulkhead, helloWorldService::returnHelloWorldWithException);
+
+        String result = callable.call();
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithException();
+    }
+
+    @Test
+    void shouldExecuteCallableAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithException()).willReturn("Hello world");
+
+        String result = bulkhead.executeCallable(helloWorldService::returnHelloWorldWithException);
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithException();
+    }
+
+    @Test
+    void shouldDecorateCallableAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithException())
+            .willThrow(new RuntimeException("BAM!"));
+        Callable<String> callable = Bulkhead
+            .decorateCallable(bulkhead, helloWorldService::returnHelloWorldWithException);
+
+        assertThatThrownBy(callable::call).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithException();
+    }
+
+    @Test
+    void shouldDecorateCheckedRunnableAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+
+        Bulkhead.decorateCheckedRunnable(bulkhead, helloWorldService::sayHelloWorldWithException)
+            .run();
+
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).sayHelloWorldWithException();
+    }
+
+    @Test
+    void shouldDecorateCheckedRunnableAndReturnWithException() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        CheckedRunnable checkedRunnable = Bulkhead.decorateCheckedRunnable(bulkhead, () -> {
+            throw new RuntimeException("BAM!");
+        });
+
+        assertThatThrownBy(checkedRunnable::run).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateRunnableAndReturnWithSuccess() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+
+        Bulkhead.decorateRunnable(bulkhead, helloWorldService::sayHelloWorld)
+            .run();
+
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).sayHelloWorld();
+    }
+
+    @Test
+    void shouldExecuteRunnableAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+
+        bulkhead.executeRunnable(helloWorldService::sayHelloWorld);
+
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).sayHelloWorld();
+    }
+
+    @Test
+    void shouldDecorateRunnableAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        Runnable runnable = Bulkhead.decorateRunnable(bulkhead, () -> {
+            throw new RuntimeException("BAM!");
+        });
+
+        assertThatThrownBy(runnable::run).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateConsumerAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+
+        Bulkhead.decorateConsumer(bulkhead, helloWorldService::sayHelloWorldWithName)
+            .accept("Tom");
+
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).sayHelloWorldWithName("Tom");
+    }
+
+    @Test
+    void shouldDecorateConsumerAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        Consumer<String> consumer = Bulkhead.decorateConsumer(bulkhead, (value) -> {
+            throw new RuntimeException("BAM!");
+        });
+
+        assertThatThrownBy(() -> consumer.accept("Tom")).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateCheckedConsumerAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+
+        Bulkhead.decorateCheckedConsumer(bulkhead,
+            helloWorldService::sayHelloWorldWithNameWithException)
+            .accept("Tom");
+
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).sayHelloWorldWithNameWithException("Tom");
+    }
+
+    @Test
+    void shouldDecorateCheckedConsumerAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        CheckedConsumer<String> checkedConsumer = Bulkhead
+            .decorateCheckedConsumer(bulkhead, (value) -> {
+                throw new RuntimeException("BAM!");
+            });
+
+        assertThatThrownBy(() -> checkedConsumer.accept("Tom")).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateFunctionAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithName("Tom")).willReturn("Hello world Tom");
+        Function<String, String> function = Bulkhead
+            .decorateFunction(bulkhead, helloWorldService::returnHelloWorldWithName);
+
+        String result = function.apply("Tom");
+
+        assertThat(result).isEqualTo("Hello world Tom");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithName("Tom");
+    }
+
+    @Test
+    void shouldDecorateFunctionAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithName("Tom"))
+            .willThrow(new RuntimeException("BAM!"));
+        Function<String, String> function = Bulkhead
+            .decorateFunction(bulkhead, helloWorldService::returnHelloWorldWithName);
+
+        assertThatThrownBy(() -> function.apply("Tom")).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateCheckedFunctionAndReturnWithSuccess() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithNameWithException("Tom"))
+            .willReturn("Hello world Tom");
+
+        String result = Bulkhead
+            .decorateCheckedFunction(bulkhead,
+                helloWorldService::returnHelloWorldWithNameWithException)
+            .apply("Tom");
+
+        assertThat(result).isEqualTo("Hello world Tom");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorldWithNameWithException("Tom");
+    }
+
+    @Test
+    void shouldDecorateCheckedFunctionAndReturnWithException() throws Throwable {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorldWithNameWithException("Tom"))
+            .willThrow(new RuntimeException("BAM!"));
+        CheckedFunction<String, String> function = Bulkhead
+            .decorateCheckedFunction(bulkhead,
+                helloWorldService::returnHelloWorldWithNameWithException);
+
+        assertThatThrownBy(() -> function.apply("Tom")).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldReturnFailureWithBulkheadFullException() {
+        // tag::bulkheadFullException[]
+        BulkheadConfig config = BulkheadConfig.custom().maxConcurrentCalls(2).build();
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        bulkhead.tryAcquirePermission();
+        bulkhead.tryAcquirePermission();
+        CheckedRunnable checkedRunnable = Bulkhead.decorateCheckedRunnable(bulkhead, () -> {
+            throw new RuntimeException("BAM!");
+        });
+
+        assertThatThrownBy(checkedRunnable::run)
+            .isInstanceOf(BulkheadFullException.class)
+            .extracting(t -> ((BulkheadFullException) t).getBulkheadName())
+            .isEqualTo(bulkhead.getName());
+        // end::bulkheadFullException[]
+    }
+
+    @Test
+    void shouldReturnFailureWithRuntimeException() {
+        BulkheadConfig config = BulkheadConfig.custom().maxConcurrentCalls(2).build();
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        bulkhead.tryAcquirePermission();
+        CheckedRunnable checkedRunnable = Bulkhead.decorateCheckedRunnable(bulkhead, () -> {
+            throw new RuntimeException("BAM!");
+        });
+
+        assertThatThrownBy(checkedRunnable::run).isInstanceOf(RuntimeException.class);
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldInvokeAsyncApply() throws Exception {
+        // tag::shouldInvokeAsyncApply[]
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        Supplier<String> decoratedSupplier = Bulkhead
+            .decorateSupplier(bulkhead, () -> "This can be any method which returns: 'Hello");
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(decoratedSupplier)
+            .thenApply(value -> value + " world'");
+
+        String result = future.get();
+
+        assertThat(result).isEqualTo("This can be any method which returns: 'Hello world'");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        // end::shouldInvokeAsyncApply[]
+    }
+
+    @Test
+    void shouldDecorateCompletionStageAndReturnWithSuccess()
+        throws Exception {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld()).willReturn("Hello");
+        Supplier<CompletionStage<String>> completionStageSupplier =
+            () -> CompletableFuture.supplyAsync(helloWorldService::returnHelloWorld);
+        Supplier<CompletionStage<String>> decoratedCompletionStageSupplier =
+            Bulkhead.decorateCompletionStage(bulkhead, completionStageSupplier);
+
+        CompletionStage<String> decoratedCompletionStage = decoratedCompletionStageSupplier
+            .get()
+            .thenApply(value -> value + " world");
+
+        assertThat(decoratedCompletionStage.toCompletableFuture().get()).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+    }
+
+    @Test
+    void shouldExecuteCompletionStageAndReturnWithSuccess()
+        throws Exception {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld()).willReturn("Hello");
+
+        CompletionStage<String> decoratedCompletionStage = bulkhead
+            .executeCompletionStage(
+                () -> CompletableFuture.supplyAsync(helloWorldService::returnHelloWorld))
+            .thenApply(value -> value + " world");
+
+        assertThat(decoratedCompletionStage.toCompletableFuture().get()).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+    }
+
+    @Test
+    void shouldDecorateCompletionStageAndReturnWithExceptionAtSyncStage() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        Supplier<CompletionStage<String>> completionStageSupplier = () -> {
+            throw new HelloWorldException();
+        };
+        Supplier<CompletionStage<String>> decoratedCompletionStageSupplier =
+            Bulkhead.decorateCompletionStage(bulkhead, completionStageSupplier);
+
+        // NOTE: the decorated supplier wraps a sync exception into a completed-exceptionally stage
+        CompletionStage<String> result = decoratedCompletionStageSupplier.get();
+
+        then(helloWorldService).should(times(0)).returnHelloWorld();
+        result.exceptionally(error -> {
+                assertThat(error).isInstanceOf(HelloWorldException.class);
+                return null;
+            }
+        );
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldDecorateCompletionStageAndReturnWithExceptionAtAsyncStage() {
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        given(helloWorldService.returnHelloWorld())
+            .willThrow(new RuntimeException("BAM! At async stage"));
+        Supplier<CompletionStage<String>> completionStageSupplier =
+            () -> CompletableFuture.supplyAsync(helloWorldService::returnHelloWorld);
+        Supplier<CompletionStage<String>> decoratedCompletionStageSupplier =
+            Bulkhead.decorateCompletionStage(bulkhead, completionStageSupplier);
+
+        CompletionStage<String> decoratedCompletionStage = decoratedCompletionStageSupplier.get();
+
+        assertThatThrownBy(decoratedCompletionStage.toCompletableFuture()::get)
+            .isInstanceOf(ExecutionException.class)
+            .hasCause(new RuntimeException("BAM! At async stage"));
+        then(helloWorldService).should(times(1)).returnHelloWorld();
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+    }
+
+    @Test
+    void shouldChainDecoratedFunctions() throws Throwable {
+        // tag::shouldChainDecoratedFunctions[]
+        Bulkhead bulkhead = Bulkhead.of("test", config);
+        Bulkhead anotherBulkhead = Bulkhead.of("testAnother", config);
+        // When I create a Supplier and a Function which are decorated by different Bulkheads
+        CheckedSupplier<String> decoratedSupplier
+            = Bulkhead.decorateCheckedSupplier(bulkhead, () -> "Hello");
+        CheckedFunction<String, String> decoratedFunction
+            = Bulkhead.decorateCheckedFunction(anotherBulkhead, (input) -> input + " world");
+
+        String result = decoratedFunction.apply(decoratedSupplier.get());
+
+        assertThat(result).isEqualTo("Hello world");
+        assertThat(bulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        assertThat(anotherBulkhead.getMetrics().getAvailableConcurrentCalls()).isOne();
+        // end::shouldChainDecoratedFunctions[]
+    }
+
+}

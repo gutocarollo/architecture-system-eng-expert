@@ -1,0 +1,352 @@
+using System.Diagnostics.Metrics;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.Sagas;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.Handlers;
+using Wolverine.Runtime.Metrics;
+using Wolverine.Runtime.RemoteInvocation;
+using Wolverine.Runtime.Routing;
+using Wolverine.Runtime.Scheduled;
+using Wolverine.Runtime.Stubs;
+using Wolverine.Transports;
+using Wolverine.Transports.Stub;
+
+namespace Wolverine.Runtime;
+
+public sealed partial class WolverineRuntime : IWolverineRuntime, IWolverineRuntimeInternal, IHostedService
+{
+    private readonly IServiceContainer _container;
+    private readonly EndpointCollection _endpoints;
+    private readonly LightweightCache<Type, IMessageInvoker> _invokers;
+
+    private string _serviceName;
+    private readonly Guid _uniqueNodeId;
+
+    private ImHashMap<Type, object?> _extensions = ImHashMap<Type, object?>.Empty;
+
+    // Non-null the moment a shutdown is claimed, and completes when that shutdown has FINISHED.
+    // Doubles as the single-entry latch for StopAsync: whoever wins the CompareExchange drives the
+    // shutdown and everyone else awaits this. See StopAsync and IAsyncDisposable.DisposeAsync.
+    private Task? _stopped;
+
+    private readonly Lazy<MessageStoreCollection> _stores;
+
+    /// <summary>
+    /// CritterWatch#942 — per-listener-address count of member envelopes pending inside message
+    /// batching pipelines, folded into ListeningAgent.QueueCount so back-pressure sees the depth
+    /// of the (unbounded, GH-3287) batch execution queues.
+    /// </summary>
+    public Batching.BatchingPendingCounts BatchingPendingCounts { get; } = new();
+    private readonly Lazy<MetricsAccumulator> _accumulator;
+    private readonly Lazy<ISagaStoreDiagnostics> _sagaStorage;
+
+    internal static Func<Guid> IdGeneratorFor(EnvelopeIdGeneration generation)
+    {
+        return generation switch
+        {
+            EnvelopeIdGeneration.GuidV7 => Guid.CreateVersion7,
+            EnvelopeIdGeneration.NewIdSqlServerOrder => MassTransit.NewId.NextGuid,
+            _ => MassTransit.NewId.NextSequentialGuid
+        };
+    }
+
+    public WolverineRuntime(WolverineOptions options,
+        IServiceContainer container,
+        ILoggerFactory loggers)
+    {
+        DurabilitySettings = options.Durability;
+        Options = options;
+        Handlers = options.HandlerGraph;
+
+        Envelope.IdGenerator = IdGeneratorFor(options.EnvelopeIdGeneration);
+
+        _accumulator = new Lazy<MetricsAccumulator>(() => new MetricsAccumulator(this));
+
+        _stores =
+            new Lazy<MessageStoreCollection>(() => container.Services.GetRequiredService<MessageStoreCollection>());
+
+        // Aggregate every registered ISagaStoreDiagnostics behind one
+        // fan-out facade so callers (CritterWatch, /describe ...) see a
+        // single saga catalog regardless of how many backing stores are
+        // wired into this host.
+        _sagaStorage = new Lazy<ISagaStoreDiagnostics>(() =>
+            new AggregateSagaStoreDiagnostics(
+                container.Services.GetServices<ISagaStoreDiagnostics>()));
+
+        LoggerFactory = loggers;
+        Logger = loggers.CreateLogger<WolverineRuntime>();
+        
+        Observer = new PersistenceWolverineObserver(this);
+
+        Meter = new Meter("Wolverine:" + options.ServiceName, GetType().Assembly.GetName().Version?.ToString());
+        Logger.LogInformation("Exporting Open Telemetry metrics from Wolverine with name {Name}, version {Version}",
+            Meter.Name, Meter.Version);
+
+        _uniqueNodeId = options.UniqueNodeId;
+        _serviceName = options.ServiceName;
+
+        var provider = container.GetInstance<ObjectPoolProvider>();
+        ExecutionPool = provider.Create(this);
+
+        // Separate pool for Envelope. See wolverine#2726 — pools envelopes
+        // allocated by the internal receive pipeline (the three Executor.cs
+        // InvokeAsync request/reply sites). Gated on ActiveSession == null
+        // at acquire time so tracking sessions, observer tests, and the
+        // ITrackedSession.Events capture-after-handler scenario all see
+        // fresh allocations and zero behavior change.
+        EnvelopePool = provider.Create(new EnvelopePoolPolicy());
+
+        Pipeline = new HandlerPipeline(this, this);
+
+        _container = container;
+
+        // GH-3564: when UseClaimCheck deferred to a DI-registered IClaimCheckStore (the
+        // ...FromServices overloads), hand it the built service provider now so the claim-check
+        // serializer resolves the real backend instead of silently falling back to the file system.
+        options.DeferredClaimCheckStore?.AttachProvider(container.Services);
+
+        Cancellation = DurabilitySettings.Cancellation;
+        _agentCancellation = CancellationTokenSource.CreateLinkedTokenSource(Cancellation);
+
+        // GH-4321: one shared 2s sweep serves every back-pressure-enforcing listener; its loop
+        // only starts when the first agent registers and dies with Cancellation
+        BackPressureSweeper = new BackPressureSweeper(Logger, Cancellation);
+
+        Tracker = new WolverineTracker(Logger);
+
+        _endpoints = new EndpointCollection(this);
+
+        Replies = new ReplyTracker(loggers.CreateLogger<ReplyTracker>(), DurabilitySettings.AssignedNodeNumber,
+            Options.ResultTypes);
+        Handlers.AddMessageHandler(typeof(Acknowledgement), new AcknowledgementHandler(Replies));
+        Handlers.AddMessageHandler(typeof(FailureAcknowledgement), new FailureAcknowledgementHandler(Replies, LoggerFactory.CreateLogger<FailureAcknowledgementHandler>()));
+
+        // GH-3224: millisecond-tuned histogram bucket boundaries (advice). Null => OpenTelemetry SDK
+        // defaults. Both time histograms are double-typed: execution time moved from long to
+        // double in GH-3490 so sub-millisecond handler executions are recorded instead of
+        // silently dropped.
+        var bucketBoundaries = options.Metrics.HistogramBucketBoundaries;
+        var timeAdvice = bucketBoundaries == null
+            ? null
+            : new InstrumentAdvice<double> { HistogramBucketBoundaries = bucketBoundaries.ToArray() };
+
+        _sentCounter = Meter.CreateCounter<int>(MetricsConstants.MessagesSent, MetricsConstants.Messages,
+            "Number of messages sent");
+        _executionCounter = Meter.CreateHistogram<double>(MetricsConstants.ExecutionTime, MetricsConstants.Milliseconds,
+            "Execution time in milliseconds", tags: null, advice: timeAdvice);
+        _successCounter = Meter.CreateCounter<int>(MetricsConstants.MessagesSucceeded, MetricsConstants.Messages,
+            "Number of messages successfully processed");
+
+        _failureCounter = Meter.CreateCounter<int>(MetricsConstants.MessagesFailed, MetricsConstants.Messages,
+            "Number of message execution failures");
+
+        _deadLetterQueueCounter = Meter.CreateCounter<int>(MetricsConstants.DeadLetterQueue, MetricsConstants.Messages,
+            "Number of messages moved to dead letter queues");
+
+        _receivedCounter = Meter.CreateCounter<int>(MetricsConstants.MessagesReceived, MetricsConstants.Messages,
+            "Number of messages received from external transports");
+
+        _effectiveTime = Meter.CreateHistogram<double>(MetricsConstants.EffectiveMessageTime,
+            MetricsConstants.Milliseconds,
+            "Effective time between a message being sent and being completely handled in milliseconds",
+            tags: null, advice: timeAdvice);
+
+        _invokers = new LightweightCache<Type, IMessageInvoker>(findInvoker);
+
+        // Resolve IFaultPublisher lazily: the DI factory in HostBuilderExtensions reads
+        // back IWolverineRuntime to get the Meter, which would deadlock if we resolved
+        // it eagerly here while the runtime singleton is still being constructed.
+        _faultPublisher = new Lazy<IFaultPublisher>(() => _container.GetInstance<IFaultPublisher>());
+
+        var activators = container.GetAllInstances<IWolverineActivator>();
+        foreach (var activator in activators)
+        {
+            activator.Apply(this);
+        }
+    }
+
+    private readonly Lazy<IFaultPublisher> _faultPublisher;
+    IFaultPublisher IWolverineRuntimeInternal.FaultPublisher => _faultPublisher.Value;
+
+    public IStubHandlers Stubs => Options.Transports.GetOrCreate<StubTransport>();
+
+    public MetricsAccumulator MetricsAccumulator => _accumulator.Value;
+
+    public IWolverineObserver Observer { get; set; }
+
+    public IServiceProvider Services => _container.Services;
+
+    public ObjectPool<MessageContext> ExecutionPool { get; }
+
+    /// <summary>
+    /// Pool of <see cref="Envelope"/> instances for the internal receive pipeline.
+    /// Acquire / release via <see cref="AcquireInternalEnvelope"/> and
+    /// <see cref="ReleaseInternalEnvelope"/> — those helpers gate on
+    /// <see cref="ActiveSession"/> so envelopes participating in a tracking
+    /// session always allocate fresh (preventing the
+    /// <see cref="EnvelopeRecord"/> capture-after-recycle hazard).
+    /// See wolverine#2726.
+    /// </summary>
+    internal ObjectPool<Envelope> EnvelopePool { get; }
+
+    internal BackPressureSweeper BackPressureSweeper { get; }
+
+    public HandlerGraph Handlers { get; }
+
+    internal IScheduledJobProcessor ScheduledJobs { get; private set; } = null!;
+
+    public IMessageInvoker FindInvoker(Type messageType)
+    {
+        return _invokers[messageType];
+    }
+
+    public IMessageInvoker FindInvoker(string envelopeMessageType)
+    {
+        if (Handlers.TryFindMessageType(envelopeMessageType, out var messageType))
+        {
+            return FindInvoker(messageType);
+        }
+
+        return new NulloMessageInvoker();
+    }
+    
+    internal class NulloMessageInvoker : IMessageInvoker
+    {
+        public Task<T> InvokeAsync<T>(object message, MessageBus bus, CancellationToken cancellation = default,
+            TimeSpan? timeout = null,
+            DeliveryOptions? options = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task InvokeAsync(object message, MessageBus bus, CancellationToken cancellation = default,
+            TimeSpan? timeout = null,
+            DeliveryOptions? options = null)
+        {
+            return Task.CompletedTask;
+        }
+
+        public IAsyncEnumerable<T> StreamAsync<T>(object message, MessageBus bus,
+            CancellationToken cancellation = default,
+            DeliveryOptions? options = null)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public void AssertHasStarted()
+    {
+        if (!_hasStarted)
+        {
+            throw new WolverineHasNotStartedException();
+        }
+    }
+
+    public ILoggerFactory LoggerFactory { get; }
+
+    public Meter Meter { get; }
+
+    public IReplyTracker Replies { get; }
+
+    public IEndpointCollection Endpoints => _endpoints;
+
+    public WolverineTracker Tracker { get; }
+
+    public CancellationToken Cancellation { get; }
+
+    public T? TryFindExtension<T>() where T : class
+    {
+        if (_extensions.TryFind(typeof(T), out var raw))
+        {
+            return raw as T;
+        }
+
+        var extension = Options.AppliedExtensions.OfType<T>().FirstOrDefault();
+        _extensions = _extensions.AddOrUpdate(typeof(T), extension);
+
+        return extension;
+    }
+
+    public AgentRestrictions Restrictions { get; set; } = new AgentRestrictions();
+
+    public DurabilitySettings DurabilitySettings { get; }
+
+    public ILogger Logger { get; }
+
+    public WolverineOptions Options { get; }
+
+    public void ScheduleLocalExecutionInMemory(DateTimeOffset executionTime, Envelope envelope)
+    {
+        if (ScheduledJobs == null)
+            throw new InvalidOperationException(
+                $"This action is invalid when {nameof(WolverineOptions)}.{nameof(WolverineOptions.Durability)}.{nameof(DurabilitySettings.Mode)} = {Options.Durability.Mode}");
+
+        Logger.LogDebug("Scheduling envelope {EnvelopeId} ({MessageType}) for in-memory execution at {ExecutionTime}", envelope.Id, envelope.MessageType, executionTime);
+        MessageTracking.Sent(envelope);
+        ScheduledJobs.Enqueue(executionTime, envelope);
+    }
+
+    public IMessageStore FindAncillaryStoreForMarkerType(Type markerType)
+    {
+        return _stores.Value.FindAncillaryStore(markerType);
+    }
+
+    public MessageStoreCollection Stores => _stores.Value;
+
+    public ISagaStoreDiagnostics SagaStorage => _sagaStorage.Value;
+
+    public async Task<T?> TryFindMainMessageStore<T>() where T : class
+    {
+        await _stores.Value.InitializeAsync().ConfigureAwait(false);
+        return _stores.Value.Main as T;
+    }
+
+    public IHandlerPipeline Pipeline { get; }
+
+    public IMessageTracker MessageTracking => this;
+
+    public IMessageStore Storage => _stores.Value.Main;
+
+    private IMessageInvoker findInvoker(Type messageType)
+    {
+        try
+        {
+            foreach (var rule in Options.HandledTypeRules)
+            {
+                if (rule.TryFindHandledType(messageType, out var handledType))
+                {
+                    return this.As<IExecutorFactory>().BuildFor(handledType);
+                }
+            }
+
+            if (Options.HandlerGraph.CanHandle(messageType))
+            {
+                return this.As<IExecutorFactory>().BuildFor(messageType);
+            }
+
+            return (IMessageInvoker)RoutingFor(messageType).FindSingleRouteForSending();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Failed to create a message handler for {MessageType}", messageType.FullNameInCode());
+            return new NoHandlerExecutor(messageType, this) { Exception = e };
+        }
+    }
+
+    internal IReadOnlyList<IMissingHandler> MissingHandlers()
+    {
+        return _container.GetAllInstances<IMissingHandler>();
+    }
+}

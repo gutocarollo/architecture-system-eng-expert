@@ -1,0 +1,619 @@
+#nullable disable
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using JasperFx.Core.Reflection;
+using Marten.Exceptions;
+using Marten.Linq.Members;
+using Marten.Linq.Members.ValueCollections;
+using Marten.Linq.QueryHandlers;
+using Marten.Linq.SqlGeneration;
+using Marten.Util;
+using Weasel.Postgresql;
+using Weasel.Postgresql.SqlGeneration;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Marten.Linq.Parsing;
+
+/// <summary>
+/// Signals that a Select() projection is not a "simple" flat member-access transform
+/// (GH-5011) -- e.g. it contains a method call, arithmetic, a cast/conversion, or a
+/// conditional expression -- and cannot be translated to a server-side
+/// <c>jsonb_build_object(...)</c> expression. Callers catch this and fall back to
+/// compiling the original Select() lambda and applying it against the fully
+/// deserialized document on the client, so behavior is unchanged from before the
+/// jsonb_build_object optimization was introduced.
+/// </summary>
+internal sealed class SelectProjectionNotSimpleException: MartenException
+{
+}
+
+[UnconditionalSuppressMessage("Trimming", "IL2075",
+    Justification = "Class-level: PublicMethods/PublicProperties access via a Type obtained from object.GetType() / GetGenericArguments. Source instance is preserved at the StoreOptions / projection-registration boundary.")]
+internal class SelectParser: ExpressionVisitor
+{
+    private readonly ISerializer _serializer;
+    private readonly IQueryableMemberCollection _members;
+    private string _currentField;
+
+    public SelectParser(ISerializer serializer, IQueryableMemberCollection members, Expression expression)
+    {
+        NewObject = new NewObject(serializer);
+        _serializer = serializer;
+        _members = members;
+        Visit(expression);
+    }
+
+    public NewObject NewObject { get; private set; }
+
+    public override Expression Visit(Expression node)
+    {
+        return base.Visit(node);
+    }
+
+    protected override Expression VisitBinary(BinaryExpression node)
+    {
+        if (node.TryToParseConstant(out var constant))
+        {
+            VisitConstant(constant);
+            return null;
+        }
+
+        switch (node.NodeType)
+        {
+            case ExpressionType.ArrayIndex:
+                var index = (int)node.Right.ReduceToConstant().Value;
+
+                var inner = _members.MemberFor(node.Left);
+                if (inner is IHasChildrenMembers parent)
+                {
+                    var member = parent.FindMember(new ArrayIndexMember(index));
+                    NewObject.Members[_currentField] = member;
+
+                    _currentField = null;
+                }
+                else
+                {
+                    throw new BadLinqExpressionException("Marten is not (yet) able to process this Select() transform");
+                }
+
+                return null;
+        }
+
+        // Any other binary node reaching here is arithmetic/computation (Add, Subtract,
+        // string concatenation via '+', comparisons used as a projected bool, etc.) that
+        // can't be proven equivalent to a jsonb_build_object() expression. Signal the
+        // caller to fall back to a client-side compiled transform (GH-5011) instead of
+        // silently dropping the operation and returning the raw member value.
+        throw new SelectProjectionNotSimpleException();
+    }
+
+    protected override Expression VisitUnary(UnaryExpression node)
+    {
+        // GH-5031: A no-op / reference / value-preserving-widening Convert leaves the
+        // underlying member's raw JSON value equal to the converted value, so we can keep
+        // translating the operand into the jsonb_build_object() SELECT list (and preserve
+        // streamability). Only genuinely lossy or computed conversions -- narrowing,
+        // enum<->string, Convert.ToXxx, negation, logical-not, etc. -- fall back to the
+        // client-side compiled transform (GH-5011).
+        if (isSafeSelectConversion(node))
+        {
+            Visit(node.Operand);
+            return null;
+        }
+
+        throw new SelectProjectionNotSimpleException();
+    }
+
+    // Rank of the primitive numeric types for widening checks. Higher == wider.
+    private static readonly Dictionary<Type, int> _numericRank = new()
+    {
+        [typeof(byte)] = 1, [typeof(sbyte)] = 1,
+        [typeof(short)] = 2, [typeof(ushort)] = 2,
+        [typeof(int)] = 3, [typeof(uint)] = 3,
+        [typeof(long)] = 4, [typeof(ulong)] = 4,
+        [typeof(float)] = 5,
+        [typeof(double)] = 6,
+        [typeof(decimal)] = 7
+    };
+
+    private bool isSafeSelectConversion(UnaryExpression node)
+    {
+        // Only Convert/ConvertChecked can be safe; negation, logical-not, TypeAs, etc. are computed.
+        if (node.NodeType != ExpressionType.Convert && node.NodeType != ExpressionType.ConvertChecked)
+        {
+            return false;
+        }
+
+        var source = node.Operand.Type;
+        var target = node.Type;
+
+        // Identity conversion.
+        if (source == target)
+        {
+            return true;
+        }
+
+        // Boxing / reference upcast (T -> object, T -> base/interface): the stored JSON is unchanged.
+        if (!target.IsValueType && target.IsAssignableFrom(source))
+        {
+            return true;
+        }
+
+        var sourceUnderlying = Nullable.GetUnderlyingType(source) ?? source;
+        var targetUnderlying = Nullable.GetUnderlyingType(target) ?? target;
+
+        // Nullable wrapping (int -> int?) or unwrap to the same underlying type.
+        if (sourceUnderlying == targetUnderlying)
+        {
+            return true;
+        }
+
+        // enum -> its underlying integral, only when enums are persisted as integers (so the
+        // raw JSON already holds the integral value). Under EnumStorage.AsString the JSON is
+        // the name and the conversion is NOT value-preserving, so fall back.
+        if (sourceUnderlying.IsEnum
+            && _serializer.EnumStorage == Weasel.Core.EnumStorage.AsInteger
+            && targetUnderlying == Enum.GetUnderlyingType(sourceUnderlying))
+        {
+            return true;
+        }
+
+        // Value-preserving numeric widening (int -> long, int -> decimal, float -> double, ...).
+        return isWideningNumeric(sourceUnderlying, targetUnderlying);
+    }
+
+    private static bool isWideningNumeric(Type source, Type target)
+    {
+        if (!_numericRank.TryGetValue(source, out var sourceRank)
+            || !_numericRank.TryGetValue(target, out var targetRank))
+        {
+            return false;
+        }
+
+        // Integer -> wider integer (int -> long): strictly wider rank within the integer range.
+        // Integer -> floating/decimal (int -> double/decimal) and float -> double are widening too.
+        // Everything else (narrowing, floating/double -> decimal, same-rank sign flips) falls back.
+        const int integerCeiling = 4; // long/ulong
+
+        if (sourceRank <= integerCeiling)
+        {
+            return targetRank > sourceRank;
+        }
+
+        // float (5) -> double (6) only; double/decimal never widen to something value-preserving here.
+        return source == typeof(float) && target == typeof(double);
+    }
+
+    protected override Expression VisitConditional(ConditionalExpression node)
+    {
+        // Ternary/conditional expressions are computed expressions; fall back to a
+        // client-side compiled transform (GH-5011).
+        throw new SelectProjectionNotSimpleException();
+    }
+
+    protected override Expression VisitConstant(ConstantExpression node)
+    {
+        var value = node.ReduceToConstant();
+        var raw = value.Value;
+        if (raw is string r)
+        {
+            // The projected constant is a runtime value (ReduceToConstant evaluates captured
+            // locals), so it can be attacker-influenced. It is emitted verbatim into the
+            // jsonb_build_object SELECT list, so escape embedded single quotes to keep it as
+            // data and prevent SQL injection — mirroring Ordering.BuildNgramRankExpression.
+            var literal = r.TrimStart('"').TrimEnd('"').Replace("'", "''");
+            NewObject.Members[_currentField] = new LiteralSql($"'{literal}'");
+        }
+        else if (raw is null)
+        {
+            NewObject.Members[_currentField] = new LiteralSql("''");
+        }
+        else
+        {
+            // The projected constant is a runtime value (ReduceToConstant evaluates captured
+            // locals), so it can be attacker-influenced. A non-string CLR type has no
+            // SQL-safe ToString() guarantee (e.g. a JsonElement bound from a request body),
+            // so bind it as a command parameter instead of inlining ToString() into the SQL.
+            NewObject.Members[_currentField] = new ConstantParameterSql(raw);
+        }
+
+        _currentField = null;
+
+        return base.VisitConstant(node);
+    }
+
+    protected override Expression VisitMemberInit(MemberInitExpression node)
+    {
+        var child = new SelectParser(_serializer, _members, node.NewExpression);
+        foreach (var binding in node.Bindings.OfType<MemberAssignment>())
+        {
+            child.ReadBinding(binding);
+        }
+
+        if (_currentField == null)
+        {
+            // It's from an x => new Person{Age = x.Number, Name = x.Name} kind
+            // of transform, so use the child's new object
+            NewObject = child.NewObject;
+        }
+        else
+        {
+            NewObject.Members[_currentField] = child.NewObject;
+        }
+
+        return null;
+    }
+
+    public void ReadBinding(MemberAssignment binding)
+    {
+        _currentField = binding.Member.Name;
+        NewObject.MemberTypes[_currentField] = binding.Member.GetRawMemberType();
+        Visit(binding.Expression);
+    }
+
+    protected override MemberBinding VisitMemberBinding(MemberBinding node)
+    {
+        _currentField = node.Member.Name;
+        NewObject.MemberTypes[_currentField] = node.Member.GetRawMemberType();
+
+        return base.VisitMemberBinding(node);
+    }
+
+    protected override Expression VisitMethodCall(MethodCallExpression node)
+    {
+        if (node.Method.Name == nameof(QueryableExtensions.ExplicitSql))
+        {
+            var sql = (string)node.Arguments.Last().ReduceToConstant().Value;
+            if (_currentField != null)
+            {
+                NewObject.Members[_currentField] = new LiteralSql(sql);
+                return null;
+            }
+        }
+
+        // GH-5223: Count() over a child collection is the one LINQ aggregate a
+        // jsonb_build_object() SELECT list can reproduce exactly, because PostgreSQL already
+        // has the two expressions it needs -- jsonb_array_length() for the whole collection,
+        // and jsonb_array_length(jsonb_path_query_array(...)) for a filtered one, which is the
+        // same translation Where(x => x.Lines.Count(l => ...) > n) has used since 9.14.1.
+        // Anything it cannot translate falls through to the client-side transform below rather
+        // than failing the query.
+        if (_currentField != null
+            && node.Method.Name == nameof(Enumerable.Count)
+            && node.Method.DeclaringType == typeof(Enumerable)
+            && tryParseCollectionCount(node, out var count))
+        {
+            NewObject.Members[_currentField] = count;
+            _currentField = null;
+            return null;
+        }
+
+        // Any other method call (string.ToUpper(), custom methods, LINQ helpers, etc.)
+        // is a computed expression that jsonb_build_object() cannot reproduce. Signal the
+        // caller to fall back to a client-side compiled transform (GH-5011) instead of
+        // silently dropping the call and returning the raw member value underneath it.
+        throw new SelectProjectionNotSimpleException();
+    }
+
+    private bool tryParseCollectionCount(MethodCallExpression node, out ISqlFragment fragment)
+    {
+        fragment = null;
+
+        IQueryableMember member;
+        try
+        {
+            member = _members.MemberFor(node.Arguments[0]);
+        }
+        catch (Exception)
+        {
+            // Not something Marten can resolve to a stored member -- e.g. Count() over a local
+            // collection or a computed sub-expression. Client-side transform.
+            return false;
+        }
+
+        if (member is not ICollectionMember collection)
+        {
+            return false;
+        }
+
+        // Count() with no predicate is just the array length, and the collection already exposes
+        // that as a member -- the same one x.Lines.Count (the property) resolves to.
+        if (node.Arguments.Count == 1)
+        {
+            if (collection is not IHasChildrenMembers hasChildren)
+            {
+                return false;
+            }
+
+            fragment = hasChildren.FindMember(LinqConstants.ArrayLength);
+            return true;
+        }
+
+        return node.Arguments.Count == 2
+               && collection is ICountableCollection countable
+               && countable.TryBuildCountExpression(node.Arguments[1], out fragment);
+    }
+
+    protected override Expression VisitMember(MemberExpression node)
+    {
+        if (_currentField == null) return base.VisitMember(node);
+
+        if (node.TryToParseConstant(out var constant))
+        {
+            VisitConstant(constant);
+            return null;
+        }
+
+        var member = _members.MemberFor(node);
+        NewObject.Members[_currentField] = member;
+        _currentField = null;
+
+        return base.VisitMember(node);
+    }
+
+    private bool _hasStarted;
+
+    protected override Expression VisitNew(NewExpression node)
+    {
+        if (_hasStarted)
+        {
+            var child = new SelectParser(_serializer, _members, node);
+            NewObject.Members[_currentField] = child.NewObject;
+
+            return null;
+        }
+
+        _hasStarted = true;
+
+        var parameters = node.Constructor.GetParameters();
+
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            _currentField = ResolveFieldName(node, parameters, i);
+
+            // #5499: for an anonymous type or a positional record the constructor parameter IS the
+            // projected member, so its type is the one the JSON deserializes into.
+            NewObject.MemberTypes[_currentField] = parameters[i].ParameterType;
+
+            Visit(node.Arguments[i]);
+        }
+
+        return node;
+    }
+
+    /// <summary>
+    /// Resolves the field name for a constructor parameter in a NewExpression.
+    /// Prefers NewExpression.Members (populated for C# anonymous types), then falls back
+    /// to matching properties by position for F# records where constructor parameters
+    /// are camelCase but properties are PascalCase.
+    /// </summary>
+    internal static string ResolveFieldName(NewExpression node, System.Reflection.ParameterInfo[] parameters, int index)
+    {
+        // Prefer NewExpression.Members when available (C# anonymous types, F# anonymous records)
+        if (node.Members != null && index < node.Members.Count)
+        {
+            return node.Members[index].Name;
+        }
+
+        // For F# records, constructor params are camelCase but properties are PascalCase.
+        // F# records are marked with CompilationMappingAttribute(SourceConstructFlags.RecordType).
+        // Match by position since F# guarantees property order matches constructor parameter order.
+        if (IsFSharpRecord(node.Type))
+        {
+            var properties = node.Type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            if (index < properties.Length &&
+                string.Equals(properties[index].Name, parameters[index].Name, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return properties[index].Name;
+            }
+        }
+
+        return parameters[index].Name;
+    }
+
+    private static bool IsFSharpRecord(System.Type type)
+    {
+        return type.GetCustomAttributes(false)
+            .Any(a => a.GetType().FullName == "Microsoft.FSharp.Core.CompilationMappingAttribute"
+                      && a.GetType().GetProperty("SourceConstructFlags")?.GetValue(a)?.ToString() == "RecordType");
+    }
+}
+
+
+public interface ISelectableMember
+{
+    void Apply(ICommandBuilder builder, ISerializer serializer);
+}
+
+/// <summary>
+/// #5461: marks a SELECT-list fragment that resolves to SQL NULL when the stored document simply
+/// does not have the underlying key -- as opposed to one that can only be null because the document
+/// really does hold a null there. <see cref="NewObject"/> strips those pairs back out of the
+/// constructed object so an absent key stays absent instead of becoming an explicit JSON null.
+/// </summary>
+internal interface IOmittedWhenNull
+{
+}
+
+internal class NewObject : ISqlFragment
+{
+    private readonly ISerializer _serializer;
+
+    public NewObject(ISerializer serializer)
+    {
+        _serializer = serializer;
+    }
+
+    public Dictionary<string, ISqlFragment> Members { get; } = new();
+
+    /// <summary>
+    /// #5499: the declared type of each projected member on the TARGET type, keyed the same as
+    /// <see cref="Members" />. Recorded by <see cref="SelectParser" /> wherever it names a target
+    /// member, because that -- not the document member the value came from -- is the type the
+    /// projected JSON has to deserialize into. See <see cref="isOmittedWhenNull" />.
+    /// </summary>
+    public Dictionary<string, Type> MemberTypes { get; } = new();
+
+    /// <summary>
+    /// #5233: every fragment in this projection, nested objects included. Compiled-query parameter
+    /// discovery needs to see these, because a fragment that carries a query member's value inside
+    /// a composite parameter (a jsonpath vars payload) can only be re-bound through its own
+    /// ICompiledQueryAwareFilter -- a plain value match against the parameter cannot find it.
+    /// </summary>
+    public IEnumerable<ISqlFragment> AllFragments()
+    {
+        foreach (var member in Members.Values)
+        {
+            if (member is NewObject nested)
+            {
+                foreach (var inner in nested.AllFragments())
+                {
+                    yield return inner;
+                }
+            }
+            else
+            {
+                yield return member;
+                if (member is GroupBySqlFragment aggregate)
+                {
+                    foreach (var filter in aggregate.AllFragments())
+                    {
+                        yield return filter;
+                    }
+                }
+            }
+        }
+    }
+
+    public void Apply(ICommandBuilder builder)
+    {
+        var pairs = Members.ToArray();
+
+        // #5461: a document that simply does not have the key -- a property added to the document
+        // type after those documents were written -- locates as SQL NULL, and jsonb_build_object()
+        // has no way to leave a pair out. The projection therefore gains a key the stored document
+        // never had, holding an explicit null, and deserializing that null into a non-nullable
+        // value type (bool, int, Guid, an enum) throws -- while the very same document loads fine
+        // as a whole document and projects fine as a bare scalar. jsonb_strip_nulls() puts the
+        // absence back, but it also recurses into object and array values, which would quietly drop
+        // meaningful nulls out of a projected Dictionary<string, T?> or nested document. So only
+        // the pairs that locate a scalar go through the strip; every other pair is built exactly as
+        // it was before.
+        var omitted = pairs.Where(isOmittedWhenNull).ToArray();
+        if (omitted.Length == 0)
+        {
+            builder.Append(' ');
+            writeObject(builder, pairs);
+            builder.Append(' ');
+            return;
+        }
+
+        if (omitted.Length == pairs.Length)
+        {
+            builder.Append(" jsonb_strip_nulls(");
+            writeObject(builder, omitted);
+            builder.Append(") ");
+            return;
+        }
+
+        builder.Append(" (");
+        writeObject(builder, pairs.Where(x => !isOmittedWhenNull(x)).ToArray());
+        builder.Append(" || jsonb_strip_nulls(");
+        writeObject(builder, omitted);
+        builder.Append(")) ");
+    }
+
+    /// <summary>
+    /// #5461: true for a pair whose SQL NULL means "the stored document has no such key" rather than
+    /// "the stored document holds a null here", and whose value is a scalar -- so removing the pair
+    /// cannot reach inside a nested object or array. Collection and child document members are
+    /// deliberately excluded: their values ARE objects and arrays.
+    ///
+    /// #5499: the decision is made from the type the projection is deserialized INTO -- the target's
+    /// own member, recorded in <see cref="MemberTypes" /> -- and not from the document member the
+    /// value was read from. Those two are usually the same type, which is why reading the source
+    /// member looked like it worked, but each direction of the mismatch is a real defect:
+    ///
+    ///   * Select(x => new Target { End = x.End }) over a nullable DateOnly? drops a genuine stored
+    ///     null, because a source member's MemberType has already been unwrapped from Nullable&lt;T&gt;
+    ///     by GetMemberType(). A duplicated field or a CTE-aliased member delegates MemberType to the
+    ///     member underneath and hides the declared type just as thoroughly, so reading the source's
+    ///     raw MemberInfo fixes only the plainest shape of this.
+    ///   * Select(x => new Target { Count = x.Count.Value }) projects a nullable source into a
+    ///     non-nullable int, and an absent key has to be stripped or the target cannot deserialize
+    ///     it -- which is #5461 all over again.
+    ///
+    /// The target type answers both, and it answers them without having to know what kind of
+    /// IQueryableMember produced the value.
+    /// </summary>
+    private bool isOmittedWhenNull(KeyValuePair<string, ISqlFragment> pair)
+    {
+        var fragment = pair.Value;
+
+        if (fragment is not IOmittedWhenNull)
+        {
+            if (fragment is not IQueryableMember)
+            {
+                return false;
+            }
+
+            if (fragment is ICollectionMember or IQueryableMemberCollection)
+            {
+                return false;
+            }
+        }
+
+        // A null can only break deserialization when the projected member is a non-nullable value
+        // type. Leaving strings and nullable members alone keeps this fix to the case that throws.
+        var targetType = targetTypeFor(pair);
+        return targetType is { IsValueType: true } && Nullable.GetUnderlyingType(targetType) == null;
+    }
+
+    /// <summary>
+    /// The declared type of the member this pair is projected into. Every expression shape that names
+    /// a target member records it (an object initializer's binding, a constructor parameter of an
+    /// anonymous type or record), so the fallback is only reached by a pair whose key was not written
+    /// by one of those -- and it keeps the pre-#5499 reading of the source member for those.
+    /// </summary>
+    private Type targetTypeFor(KeyValuePair<string, ISqlFragment> pair)
+    {
+        if (MemberTypes.TryGetValue(pair.Key, out var declared))
+        {
+            return declared;
+        }
+
+        return pair.Value is IQueryableMember member ? member.MemberType : null;
+    }
+
+    private void writeObject(ICommandBuilder builder, KeyValuePair<string, ISqlFragment>[] pairs)
+    {
+        builder.Append("jsonb_build_object(");
+
+        for (var i = 0; i < pairs.Length - 1; i++)
+        {
+            writeMember(builder, pairs[i]);
+            builder.Append(", ");
+        }
+
+        writeMember(builder, pairs.Last());
+
+        builder.Append(")");
+    }
+
+    private void writeMember(ICommandBuilder builder, KeyValuePair<string, ISqlFragment> pair)
+    {
+        builder.Append($"'{pair.Key.FormatCase(_serializer.Casing)}', ");
+        if (pair.Value is ISelectableMember selectable)
+        {
+            selectable.Apply(builder, _serializer);
+        }
+        else
+        {
+            pair.Value.Apply(builder);
+        }
+    }
+
+}

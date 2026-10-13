@@ -1,0 +1,175 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Marten;
+using Marten.Testing.Harness;
+using Shouldly;
+namespace LinqTests.Bugs;
+
+public class Bug_1884_multi_tenancy_and_Any_query: BugIntegrationContext
+{
+    public class ComplexRole(string id)
+    {
+        public string Id { get; set; } = id;
+    }
+
+    public class User
+    {
+        public string Id { get; set; }
+        public string UserName { get; set; }
+        public string[] Roles { get; set; }
+        public IReadOnlyCollection<ComplexRole> ComplexRoles { get; set; } = [];
+    }
+
+    public Bug_1884_multi_tenancy_and_Any_query()
+    {
+        StoreOptions(x =>
+        {
+            x.Policies.AllDocumentsAreMultiTenanted();
+        });
+    }
+
+    [Fact]
+    public async Task any_tenant_with_child_collection_any_in_separate_where_clauses()
+    {
+        var store = theStore;
+
+        var validRoles = new List<string> { "admin", "user" };
+
+        // GH-4146: AnyTenant() in a separate Where clause from a child collection Any()
+        // should not filter by tenant
+        await using var query = store.QuerySession("tenant1");
+        var sql = query.Query<User>()
+            .Where(x => x.AnyTenant())
+            .Where(x => x.ComplexRoles.Any(cr => validRoles.Contains(cr.Id)))
+            .ToCommand().CommandText;
+
+        sql.ShouldNotContain("tenant_id");
+    }
+
+    [Fact]
+    public async Task any_filter_honors_tenancy()
+    {
+        var store = theStore;
+
+        // Write some User documents to tenant "tenant1"
+        await using (var session = store.LightweightSession("tenant1"))
+        {
+            session.Store(new User { Id = "u1", UserName = "Bill", Roles = ["admin"] });
+            session.Store(new User { Id = "u2", UserName = "Lindsey", Roles = [] });
+            await session.SaveChangesAsync();
+        }
+
+        // Write some User documents to tenant "tenant2"
+        await using (var session = store.LightweightSession("tenant2"))
+        {
+            session.Store(new User { Id = "u1", UserName = "Frank", Roles = [] });
+            session.Store(new User { Id = "u2", UserName = "Jill", Roles = ["admin", "user"] });
+            await session.SaveChangesAsync();
+        }
+
+        // When you query for data from the "tenant1" tenant,
+        // you only get data for that tenant
+        var validRoles = new[] { "admin", "user" };
+
+        await using (var query = store.QuerySession("tenant1"))
+        {
+            var linq = query.Query<User>()
+                .Where(x => x.Roles.Any(_ => validRoles.Contains(_)) && x.AnyTenant())
+                .OrderBy(x => x.UserName)
+                .Select(x => x.UserName);
+
+            linq.ToCommand().CommandText.ShouldNotContain("tenant_id");
+
+            (await linq.ToListAsync()).ShouldHaveTheSameElementsAs("Bill", "Jill");
+        }
+    }
+
+    [Fact]
+    public async Task will_isolate_tenants_when_using_any_and_tenants_use_unique_ids()
+    {
+        #region sample_tenancy-scoping-session-write
+
+        // Write some User documents to tenant "tenant1"
+        using (var session = theStore.LightweightSession("tenant1"))
+        {
+            session.Store(new User { Id = "u1", UserName = "Bill", Roles = ["admin"] });
+            session.Store(new User { Id = "u2", UserName = "Lindsey", Roles = [] });
+            await session.SaveChangesAsync();
+        }
+
+        #endregion sample_tenancy-scoping-session-write
+
+        // Write some User documents to tenant "tenant2"
+        using (var session = theStore.LightweightSession("tenant2"))
+        {
+            session.Store(new User { Id = "u3", UserName = "Frank", Roles = [] });
+            session.Store(new User { Id = "u4", UserName = "Jill", Roles = ["admin", "user"] });
+            await session.SaveChangesAsync();
+        }
+
+        // When you query for data from the "tenant1" tenant,
+        // you only get data for that tenant
+
+        var validRoles = new[] { "admin", "user" };
+
+        await using (var query = theStore.QuerySession("tenant1"))
+        {
+            (await query.Query<User>()
+                .Where(x => x.Roles.Any(_ => validRoles.Contains(_)))
+                .OrderBy(x => x.UserName)
+                .Select(x => x.UserName)
+                .ToListAsync())
+                .ShouldHaveTheSameElementsAs("Bill");
+        }
+
+        await using (var query = theStore.QuerySession("tenant2"))
+        {
+            (await query.Query<User>()
+                .Where(x => x.Roles.Any(_ => validRoles.Contains(_)))
+                .OrderBy(x => x.UserName)
+                .Select(x => x.UserName)
+                .ToListAsync())
+                .ShouldHaveTheSameElementsAs("Jill");
+        }
+    }
+
+    [Fact]
+    public async Task can_query_with_AnyTenant()
+    {
+        #region sample_tenancy-scoping-session-write
+
+        // Write some User documents to tenant "tenant1"
+        using (var session = theStore.LightweightSession("tenant1"))
+        {
+            session.Store(new User { Id = "u1", UserName = "Bill", Roles = ["admin"] });
+            session.Store(new User { Id = "u2", UserName = "Lindsey", Roles = [] });
+            await session.SaveChangesAsync();
+        }
+
+        #endregion sample_tenancy-scoping-session-write
+
+        // Write some User documents to tenant "tenant2"
+        using (var session = theStore.LightweightSession("tenant2"))
+        {
+            session.Store(new User { Id = "u3", UserName = "Frank", Roles = [] });
+            session.Store(new User { Id = "u4", UserName = "Jill", Roles = ["admin", "user"] });
+            await session.SaveChangesAsync();
+        }
+
+        // When you query for data from the "tenant1" tenant,
+        // you only get data for that tenant
+
+        var validRoles = new[] { "admin", "user" };
+
+        await using (var query = theStore.QuerySession("tenant1"))
+        {
+            (await query.Query<User>()
+                .Where(x => x.Roles.Any(_ => validRoles.Contains(_)) && x.AnyTenant())
+                .OrderBy(x => x.UserName)
+                .Select(x => x.UserName)
+                .ToListAsync())
+                .ShouldHaveTheSameElementsAs("Bill", "Jill");
+        }
+    }
+}

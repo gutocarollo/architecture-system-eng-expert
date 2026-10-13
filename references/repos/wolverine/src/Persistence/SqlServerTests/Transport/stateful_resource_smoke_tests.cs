@@ -1,0 +1,132 @@
+using IntegrationTests;
+using JasperFx.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Hosting;
+using JasperFx;
+using JasperFx.Resources;
+using Shouldly;
+using Weasel.SqlServer;
+using Wolverine;
+using Wolverine.SqlServer;
+using Wolverine.SqlServer.Transport;
+
+namespace SqlServerTests.Transport;
+
+public class stateful_resource_smoke_tests : IAsyncLifetime
+{
+    public async ValueTask InitializeAsync()
+    {
+        await using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync();
+        await conn.DropSchemaAsync("queues");
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    private IHostBuilder ConfigureBuilder(bool autoProvision, int starting = 1)
+    {
+        return Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                if (autoProvision)
+                {
+                    opts.UseSqlServerPersistenceAndTransport(Servers.SqlServerConnectionString, "sqlserver")
+                        .AutoProvision();
+                }
+                else
+                {
+                    opts.UseSqlServerPersistenceAndTransport(Servers.SqlServerConnectionString, "sqlserver");
+                }
+
+                opts.PublishMessage<SRMessage1>()
+                    .ToSqlServerQueue("sr" + starting++);
+
+                opts.PublishMessage<SRMessage2>()
+                    .ToSqlServerQueue("sr" + starting++);
+
+                opts.PublishMessage<SRMessage3>()
+                    .ToSqlServerQueue("sr" + starting++);
+
+                opts.PublishMessage<SRMessage3>()
+                    .ToSqlServerQueue("sr" + starting++);
+
+            });
+    }
+
+    [Fact]
+    public async Task run_setup()
+    {
+        var result = await ConfigureBuilder(false)
+            .RunJasperFxCommands(["resources", "setup"]);
+        result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task statistics()
+    {
+        (await ConfigureBuilder(false)
+            .RunJasperFxCommands(["resources", "setup"])).ShouldBe(0);
+
+        var result = await ConfigureBuilder(false)
+            .RunJasperFxCommands(["resources", "statistics"]);
+
+        result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task check_positive()
+    {
+        (await ConfigureBuilder(false)
+            .RunJasperFxCommands(["resources", "setup"])).ShouldBe(0);
+
+        var result = await ConfigureBuilder(false)
+            .RunJasperFxCommands(["resources", "check"]);
+
+        result.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task check_negative()
+    {
+        using var conn = new SqlConnection(Servers.SqlServerConnectionString);
+        await conn.OpenAsync(TestContext.Current.CancellationToken);
+        await conn.DropSchemaAsync("sqlserver", ct: TestContext.Current.CancellationToken);
+        await conn.CloseAsync();
+        
+        var result = await ConfigureBuilder(false, 10)
+            .RunJasperFxCommands(["resources", "check"]);
+
+        result.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task clear_state()
+    {
+        (await ConfigureBuilder(false, 20)
+            .RunJasperFxCommands(["resources", "setup"])).ShouldBe(0);
+
+        (await ConfigureBuilder(false, 20)
+            .RunJasperFxCommands(["resources", "clear"])).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task teardown()
+    {
+        (await ConfigureBuilder(false, 30)
+            .RunJasperFxCommands(["resources", "setup"])).ShouldBe(0);
+
+        (await ConfigureBuilder(false, 30)
+            .RunJasperFxCommands(["resources", "teardown"])).ShouldBe(0);
+    }
+}
+
+public class SRMessage1;
+
+public class SRMessage2;
+
+public class SRMessage3;
+
+public class SRMessage4;

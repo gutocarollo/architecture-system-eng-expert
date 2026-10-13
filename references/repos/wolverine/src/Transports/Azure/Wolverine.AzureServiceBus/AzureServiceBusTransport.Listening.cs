@@ -1,0 +1,291 @@
+using Azure.Messaging.ServiceBus;
+using JasperFx.Core.Reflection;
+using Microsoft.Extensions.Logging;
+using Wolverine.AzureServiceBus.Internal;
+using Wolverine.Configuration;
+using Wolverine.Runtime;
+using Wolverine.Transports;
+
+namespace Wolverine.AzureServiceBus;
+
+public partial class AzureServiceBusTransport
+{
+    internal Task<ServiceBusSessionReceiver> AcceptNextSessionAsync(AzureServiceBusEndpoint endpoint, CancellationToken cancellationToken)
+    {
+        if (endpoint is AzureServiceBusQueue queue)
+        {
+            return BusClient.AcceptNextSessionAsync(queue.QueueName, BuildSessionReceiverOptions(queue),
+                cancellationToken);
+        }
+
+        if (endpoint is AzureServiceBusSubscription subscription)
+        {
+            return BusClient.AcceptNextSessionAsync(subscription.Topic.TopicName, subscription.SubscriptionName,
+                BuildSessionReceiverOptions(subscription), cancellationToken);
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(endpoint),
+            "This usage only works with queues or subscriptions, but got " + endpoint.GetType().FullNameInCode());
+
+    }
+
+    internal async ValueTask<IListener> BuildListenerForQueue(IWolverineRuntime runtime, IReceiver receiver, AzureServiceBusQueue queue)
+    {
+        var mapper = queue.BuildMapper(runtime);
+
+        var listener = await buildListenerForQueue(runtime, receiver, queue, mapper);
+
+        if (Tenants.Any() && queue.TenancyBehavior == TenancyBehavior.TenantAware)
+        {
+            var compound = new CompoundListener(queue.Uri);
+            compound.Inner.Add(listener);
+
+            foreach (var tenant in Tenants)
+            {
+                var rule = new TenantIdRule(tenant.TenantId);
+                var wrapped = new ReceiverWithRules(receiver, [rule]);
+                var tenantListener = await tenant.Transport.buildListenerForQueue(runtime, wrapped, queue, mapper);
+                compound.Inner.Add(tenantListener);
+            }
+
+            return compound;
+        }
+
+        return listener;
+    }
+
+    private async Task<IListener> buildListenerForQueue(IWolverineRuntime runtime, IReceiver receiver, AzureServiceBusQueue queue,
+        IAzureServiceBusEnvelopeMapper mapper)
+    {
+        // GH-4049. This selection asks about sessions BEFORE it asks about the mode, so a native ack endpoint that
+        // also requires sessions would silently take the session branch -- where the session receiver is disposed
+        // at the end of the accept loop iteration that created it, long before any handler has run, and
+        // AzureServiceBusSessionListener.CompleteAsync throws outright. ListenerConfigurationValidator already
+        // refuses that pairing at bootstrap; this is the second gate for any path that builds a listener directly.
+        queue.AssertSessionsAreCompatibleWithMode();
+
+        var requeue = BuildInlineSenderForQueue(runtime, queue);
+
+        if (queue.Options.RequiresSession)
+        {
+            // GH-3533: when the endpoint carries any ServiceBusSessionProcessorOptions customization
+            // (most importantly SessionIds pinning), use the SDK's ServiceBusSessionProcessor instead
+            // of the default AcceptNextSession loop. Gated so current session listeners are unchanged.
+            if (queue.ConfigureSessionProcessor != null)
+            {
+                var sessionProcessor =
+                    BusClient.CreateSessionProcessor(queue.QueueName, BuildSessionProcessorOptions(queue));
+
+                var sessionListener = new InlineAzureServiceBusSessionListener(queue,
+                    runtime.LoggerFactory.CreateLogger<InlineAzureServiceBusSessionListener>(), sessionProcessor,
+                    receiver, mapper, requeue);
+
+                await sessionListener.StartAsync();
+
+                return sessionListener;
+            }
+
+            return new AzureServiceBusSessionListener(this, queue, receiver, mapper,
+                runtime.LoggerFactory.CreateLogger<AzureServiceBusSessionListener>(), requeue);
+        }
+
+        if (queue.Mode == EndpointMode.Inline)
+        {
+            var messageProcessor = BusClient.CreateProcessor(queue.QueueName, BuildProcessorOptions(queue));
+
+            var inlineListener = new InlineAzureServiceBusListener(queue,
+                runtime.LoggerFactory.CreateLogger<InlineAzureServiceBusListener>(), messageProcessor, receiver,
+                mapper,
+                requeue, runtime.DurabilitySettings.MaximumAckAttempts);
+
+            await inlineListener.StartAsync();
+
+            return inlineListener;
+        }
+
+        var messageReceiver = BusClient.CreateReceiver(queue.QueueName, BuildReceiverOptions(queue));
+        var logger = runtime.LoggerFactory.CreateLogger<BatchedAzureServiceBusListener>();
+        var listener = new BatchedAzureServiceBusListener(queue, logger, receiver, messageReceiver, mapper, requeue,
+            runtime.DurabilitySettings.MaximumAckAttempts);
+
+        return listener;
+    }
+
+    public async ValueTask<IListener> BuildListenerForSubscription(IWolverineRuntime runtime, IReceiver receiver, AzureServiceBusSubscription subscription)
+    {
+        var mapper = subscription.BuildMapper(runtime);
+        var listener = await buildListenerForSubscription(runtime, receiver, subscription, mapper);
+        if (Tenants.Any() && subscription.TenancyBehavior == TenancyBehavior.TenantAware)
+        {
+            var compound = new CompoundListener(subscription.Uri);
+            compound.Inner.Add(listener);
+
+            foreach (var tenant in Tenants)
+            {
+                var rule = new TenantIdRule(tenant.TenantId);
+                var wrapped = new ReceiverWithRules(receiver, [rule]);
+                var tenantListener = await tenant.Transport.buildListenerForSubscription(runtime, wrapped, subscription, mapper);
+                compound.Inner.Add(tenantListener);
+            }
+
+            return compound;
+        }
+
+        return listener;
+    }
+
+    private async Task<IListener> buildListenerForSubscription(IWolverineRuntime runtime, IReceiver receiver,
+        AzureServiceBusSubscription subscription, IAzureServiceBusEnvelopeMapper mapper)
+    {
+        // GH-4049: see buildListenerForQueue — native acks and sessions cannot be combined, and this branch
+        // is taken ahead of the mode check.
+        subscription.AssertSessionsAreCompatibleWithMode();
+
+        var requeue = RetryQueue != null ? BuildInlineSenderForQueue(runtime, RetryQueue) : BuildInlineSenderForTopic(runtime, subscription.Topic);
+
+        if (subscription.Options.RequiresSession)
+        {
+            // GH-3533: see buildListenerForQueue — the session processor path is opt-in via
+            // ConfigureSessionProcessor (e.g. RequireSessionsWithOnlyTheseIdentifiers).
+            if (subscription.ConfigureSessionProcessor != null)
+            {
+                var sessionProcessor = BusClient.CreateSessionProcessor(subscription.Topic.TopicName,
+                    subscription.SubscriptionName, BuildSessionProcessorOptions(subscription));
+
+                var sessionListener = new InlineAzureServiceBusSessionListener(subscription,
+                    runtime.LoggerFactory.CreateLogger<InlineAzureServiceBusSessionListener>(), sessionProcessor,
+                    receiver, mapper, requeue);
+
+                await sessionListener.StartAsync();
+
+                return sessionListener;
+            }
+
+            return new AzureServiceBusSessionListener(this, subscription, receiver, mapper,
+                runtime.LoggerFactory.CreateLogger<AzureServiceBusSessionListener>(), requeue);
+        }
+
+        if (subscription.Mode == EndpointMode.Inline)
+        {
+            var messageProcessor = BusClient.CreateProcessor(subscription.Topic.TopicName, subscription.SubscriptionName, BuildProcessorOptions(subscription));
+            var inlineListener = new InlineAzureServiceBusListener(subscription,
+                runtime.LoggerFactory.CreateLogger<InlineAzureServiceBusListener>(), messageProcessor, receiver, mapper,  requeue,
+                runtime.DurabilitySettings.MaximumAckAttempts
+            );
+
+            await inlineListener.StartAsync();
+
+            return inlineListener;
+        }
+
+        var messageReceiver = BusClient.CreateReceiver(subscription.Topic.TopicName, subscription.SubscriptionName,
+            BuildReceiverOptions(subscription));
+
+        var listener = new BatchedAzureServiceBusListener(subscription,
+            runtime.LoggerFactory.CreateLogger<BatchedAzureServiceBusListener>(), receiver, messageReceiver, mapper,
+            requeue, runtime.DurabilitySettings.MaximumAckAttempts);
+
+        return listener;
+    }
+
+    // Builds the ServiceBusProcessorOptions for an inline listener, applying any user supplied
+    // customization and then re-asserting the properties that Wolverine's inline acknowledgement
+    // logic depends on. InlineAzureServiceBusListener explicitly completes, defers, and dead
+    // letters messages against the message lock, so the processor must run in PeekLock mode; the
+    // ReceiveAndDelete mode would remove messages before Wolverine can process them and would break
+    // dead lettering and deferral.
+    internal static ServiceBusProcessorOptions BuildProcessorOptions(AzureServiceBusEndpoint endpoint)
+    {
+        var options = new ServiceBusProcessorOptions
+        {
+            // Seeded from the endpoint (or the transport-wide default), but deliberately applied
+            // before ConfigureProcessor so a user customization can still override it for inline
+            // listeners.
+            PrefetchCount = endpoint.PrefetchCount
+        };
+
+        // GH-3494 (AO3): Wolverine never set MaxConcurrentCalls, so an inline listener ran on the
+        // SDK default of 1 -- single threaded per endpoint, reachable only through the raw
+        // ConfigureProcessor hook. Applied before ConfigureProcessor so that hook still wins.
+        if (endpoint.MaximumConcurrentCalls.HasValue)
+        {
+            options.MaxConcurrentCalls = endpoint.MaximumConcurrentCalls.Value;
+        }
+
+        endpoint.ConfigureProcessor?.Invoke(options);
+
+        // Reserved by Wolverine: the inline listener relies on the peek-lock model to complete,
+        // defer, and dead letter messages, so this cannot be honored from user configuration.
+        options.ReceiveMode = ServiceBusReceiveMode.PeekLock;
+
+        // GH-4018: Wolverine settles every inline delivery itself through the ProcessMessageEventArgs
+        // (complete / defer / dead letter, each behind a RetryBlock). The SDK default of true let the
+        // processor ALSO complete any message it had not seen settled successfully when the callback
+        // returned -- and a settle attempt that threw does not count. So a dead-letter whose first
+        // attempt failed transiently was completed by the processor on the way out, and the queued
+        // retry then hit an invalid lock: the message was neither dead lettered nor redelivered.
+        // The session-processor path already forces this off; the two must agree.
+        options.AutoCompleteMessages = false;
+
+        return options;
+    }
+
+    // Builds the ServiceBusReceiverOptions for the batched (buffered/durable) listeners, carrying
+    // the endpoint's client-side prefetch configuration onto the receiver
+    internal static ServiceBusReceiverOptions BuildReceiverOptions(AzureServiceBusEndpoint endpoint)
+    {
+        return new ServiceBusReceiverOptions
+        {
+            PrefetchCount = endpoint.PrefetchCount
+        };
+    }
+
+    // Builds the ServiceBusSessionReceiverOptions for session-based listeners, carrying the
+    // endpoint's client-side prefetch configuration onto the session receiver
+    internal static ServiceBusSessionReceiverOptions BuildSessionReceiverOptions(AzureServiceBusEndpoint endpoint)
+    {
+        return new ServiceBusSessionReceiverOptions
+        {
+            PrefetchCount = endpoint.PrefetchCount
+        };
+    }
+
+    // Builds the ServiceBusSessionProcessorOptions for the opt-in ServiceBusSessionProcessor session
+    // listener (GH-3533). Mirrors BuildProcessorOptions: seed the endpoint defaults, apply the user's
+    // (multicast) customization — including any SessionIds pinning — then re-assert the acknowledgement
+    // properties Wolverine's InlineAzureServiceBusSessionListener depends on.
+    internal static ServiceBusSessionProcessorOptions BuildSessionProcessorOptions(AzureServiceBusEndpoint endpoint)
+    {
+        var options = new ServiceBusSessionProcessorOptions
+        {
+            PrefetchCount = endpoint.PrefetchCount,
+
+            // GH-3494 (AO2): ONE session per processor. ListeningAgent already builds
+            // Endpoint.ListenerCount of these listeners, so mapping RequireSessions(n) onto each
+            // processor's MaxConcurrentSessions meant n listeners x n sessions = n-squared
+            // concurrent sessions -- 64 of them for RequireSessions(8). One per listener keeps the
+            // documented meaning of RequireSessions(n): n parallel sessions in total.
+            // A user may still override this in ConfigureSessionProcessor.
+            MaxConcurrentSessions = 1,
+
+            // Preserve the in-session FIFO ordering the hand-rolled loop provided
+            MaxConcurrentCallsPerSession = 1
+        };
+
+        // GH-3494 (AO3): opt-in concurrency WITHIN a session. Left at 1 unless asked for, because
+        // raising it gives up the per-session FIFO ordering that is the whole point of sessions.
+        if (endpoint.MaximumConcurrentCalls.HasValue)
+        {
+            options.MaxConcurrentCallsPerSession = endpoint.MaximumConcurrentCalls.Value;
+        }
+
+        endpoint.ConfigureSessionProcessor?.Invoke(options);
+
+        // Reserved by Wolverine: the listener relies on the peek-lock model to explicitly complete,
+        // defer, and dead letter messages, so these cannot be honored from user configuration.
+        options.ReceiveMode = ServiceBusReceiveMode.PeekLock;
+        options.AutoCompleteMessages = false;
+
+        return options;
+    }
+}

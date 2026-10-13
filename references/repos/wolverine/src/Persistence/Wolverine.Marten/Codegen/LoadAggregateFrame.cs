@@ -1,0 +1,235 @@
+using System.Reflection;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
+using JasperFx.CodeGeneration.Model;
+using JasperFx.Core.Reflection;
+using Marten;
+using JasperFx.Events;
+using Marten.Events;
+using Wolverine.Persistence.EventSourcing;
+using CoreConcurrencyStyle = Wolverine.Persistence.EventSourcing.ModelConcurrencyStyle;
+
+namespace Wolverine.Marten.Codegen;
+
+internal class LoadAggregateFrame : AsyncFrame,  IBatchableFrame
+{
+    private readonly AggregateLoadRequest _att;
+    private Variable? _session;
+    private Variable? _token;
+    private Variable? _batchQuery;
+    private Variable? _batchQueryItem;
+    private readonly Variable _identity;
+    private readonly Variable? _version;
+    private readonly Type _eventStreamType;
+    private readonly Variable _rawIdentity;
+
+
+    public LoadAggregateFrame(AggregateLoadRequest att)
+    {
+        _att = att;
+        _identity = _att.AggregateId;
+
+        if (_att is { LoadStyle: CoreConcurrencyStyle.Optimistic, Version: not null })
+        {
+            _version = _att.Version;
+        }
+
+        _eventStreamType = typeof(IEventStream<>).MakeGenericType(_att.AggregateType);
+        Stream = new Variable(_eventStreamType, this);
+
+        _rawIdentity = _identity;
+        // For natural keys, keep the full natural key object (don't unwrap)
+        if (!_att.IsNaturalKey && _rawIdentity.VariableType != typeof(Guid) && _rawIdentity.VariableType != typeof(string))
+        {
+            var valueType = ValueTypeInfo.ForType(_rawIdentity.VariableType);
+            _rawIdentity = new MemberAccessVariable(_identity, valueType.ValueProperty);
+        }
+    }
+
+    public Variable Stream { get; }
+    public bool IsNaturalKey => _att.IsNaturalKey;
+
+    private string NaturalKeyFetchForWriting(string targetUsage, string? cancellationTokenUsage = null)
+    {
+        var aggType = _att.AggregateType.FullNameInCode();
+        var nkType = _identity.VariableType.FullNameInCode();
+        var args = cancellationTokenUsage != null
+            ? $"{_identity.Usage}, {cancellationTokenUsage}"
+            : _identity.Usage;
+        return $"{targetUsage}.Events.FetchForWriting<{aggType}, {nkType}>({args})";
+    }
+
+    public void WriteCodeToEnlistInBatchQuery(GeneratedMethod method, ISourceWriter writer)
+    {
+        // GH-4567: this used to emit batchQuery.Events.FetchForWriting<T, TNaturalKey>(...), which is
+        // precisely the overload IBatchedQuery does not have -- so had it ever run it would have emitted
+        // code that does not compile. It could not run: MartenBatchingPolicy is the only thing that enlists
+        // these frames and MartenBatchingPolicy.IsBatchable refuses natural-key loads for exactly that
+        // reason. Kept as a throw rather than deleted so that relaxing IsBatchable fails here, loudly and
+        // at codegen time, instead of producing an uncompilable generated type.
+        if (_att.IsNaturalKey)
+        {
+            throw new InvalidOperationException(
+                $"A natural-key aggregate load for {_att.AggregateType.FullNameInCode()} cannot be batched: " +
+                $"IBatchedQuery has no FetchForWriting<T, TNaturalKey> overload. " +
+                $"{nameof(MartenBatchingPolicy)}.IsBatchable is supposed to have excluded this frame.");
+        }
+
+        if (_att.LoadStyle == CoreConcurrencyStyle.Exclusive)
+        {
+            writer.WriteLine($"var {_batchQueryItem!.Usage} = {_batchQuery!.Usage}.Events.FetchForExclusiveWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage});");
+        }
+        else if (_version == null)
+        {
+            writer.WriteLine($"var {_batchQueryItem!.Usage} = {_batchQuery!.Usage}.Events.FetchForWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage});");
+        }
+        else
+        {
+            writer.WriteLine($"var {_batchQueryItem!.Usage} = {_batchQuery!.Usage}.Events.FetchForWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage}, {_version.Usage});");
+        }
+    }
+
+    public void EnlistInBatchQuery(Variable batchQuery)
+    {
+        _batchQueryItem = new Variable(typeof(Task<>).MakeGenericType(_eventStreamType), Stream.Usage + "_BatchItem",
+            this);
+        _batchQuery = batchQuery;
+    }
+
+    public override IEnumerable<Variable> FindVariables(IMethodVariables chain)
+    {
+        yield return _identity;
+        if (_version != null) yield return _version;
+
+        _session = chain.FindVariable(typeof(IDocumentSession));
+        yield return _session;
+
+        _token = chain.FindVariable(typeof(CancellationToken));
+        yield return _token;
+
+        if (_batchQuery != null)
+        {
+            yield return _batchQuery;
+        }
+    }
+
+    /// <summary>
+    /// Set to true after GenerateCodeForBatchResolution has been called,
+    /// to prevent duplicate variable declarations.
+    /// </summary>
+    internal bool BatchResolutionGenerated { get; private set; }
+
+    /// <summary>
+    /// When this frame is part of a batch query, generate only the code that
+    /// resolves the batch item result (var stream_entity = await ...BatchItem).
+    /// This is called by MartenBatchFrame after the batch execute, ensuring
+    /// the variable is declared before any guard frames reference it.
+    /// </summary>
+    public void GenerateCodeForBatchResolution(GeneratedMethod method, ISourceWriter writer)
+    {
+        if (_batchQueryItem == null) return;
+
+        writer.WriteComment("Loading Marten aggregate as part of the aggregate handler workflow");
+        writer.Write(
+            $"var {Stream.Usage} = await {_batchQueryItem.Usage}.ConfigureAwait(false);");
+
+        if (_att.AlwaysEnforceConsistency)
+        {
+            writer.WriteLine($"{Stream.Usage}.{nameof(IEventStream<string>.AlwaysEnforceConsistency)} = true;");
+        }
+
+        BatchResolutionGenerated = true;
+    }
+
+    public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
+    {
+        // If batch resolution already generated the variable declaration, skip
+        if (BatchResolutionGenerated)
+        {
+            Next?.GenerateCode(method, writer);
+            return;
+        }
+
+        writer.WriteComment("Loading Marten aggregate as part of the aggregate handler workflow");
+        if (_batchQueryItem == null)
+        {
+            if (_att.IsNaturalKey)
+            {
+                writer.WriteLine($"var {Stream.Usage} = await {NaturalKeyFetchForWriting(_session!.Usage, _token!.Usage)};");
+            }
+            else if (_att.LoadStyle == CoreConcurrencyStyle.Exclusive)
+            {
+                writer.WriteLine($"var {Stream.Usage} = await {_session!.Usage}.Events.FetchForExclusiveWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage}, {_token!.Usage});");
+            }
+            else if (_version == null)
+            {
+                writer.WriteLine($"var {Stream.Usage} = await {_session!.Usage}.Events.FetchForWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage}, {_token!.Usage});");
+            }
+            else
+            {
+                writer.WriteLine($"var {Stream.Usage} = await {_session!.Usage}.Events.FetchForWriting<{_att.AggregateType.FullNameInCode()}>({_rawIdentity.Usage}, {_version.Usage}, {_token!.Usage});");
+            }
+        }
+        else
+        {
+            writer.Write(
+                $"var {Stream.Usage} = await {_batchQueryItem.Usage}.ConfigureAwait(false);");
+        }
+
+        if (_att.AlwaysEnforceConsistency)
+        {
+            writer.WriteLine($"{Stream.Usage}.{nameof(IEventStream<string>.AlwaysEnforceConsistency)} = true;");
+        }
+
+        Next?.GenerateCode(method, writer);
+    }
+
+    private string NaturalKeyFetchForWritingFSharp(string targetUsage, string cancellationTokenUsage)
+    {
+        var aggType = _att.AggregateType.FSharpName();
+        var nkType = _identity.VariableType.FSharpName();
+        return $"{targetUsage}.Events.FetchForWriting<{aggType}, {nkType}>({_identity.FSharpUsage}, {cancellationTokenUsage})";
+    }
+
+    public override void GenerateFSharpCode(GeneratedMethod method, ISourceWriter writer)
+    {
+        if (BatchResolutionGenerated)
+        {
+            Next?.GenerateFSharpCode(method, writer);
+            return;
+        }
+
+        writer.WriteComment("Loading Marten aggregate as part of the aggregate handler workflow");
+        if (_batchQueryItem == null)
+        {
+            // `var x = await ...` -> F# `let! x = ...` inside the task { } CE (drop ConfigureAwait).
+            if (_att.IsNaturalKey)
+            {
+                writer.WriteLine($"let! {Stream.Usage} = {NaturalKeyFetchForWritingFSharp(_session!.FSharpUsage, _token!.FSharpUsage)}");
+            }
+            else if (_att.LoadStyle == CoreConcurrencyStyle.Exclusive)
+            {
+                writer.WriteLine($"let! {Stream.Usage} = {_session!.FSharpUsage}.Events.FetchForExclusiveWriting<{_att.AggregateType.FSharpName()}>({_rawIdentity.FSharpUsage}, {_token!.FSharpUsage})");
+            }
+            else if (_version == null)
+            {
+                writer.WriteLine($"let! {Stream.Usage} = {_session!.FSharpUsage}.Events.FetchForWriting<{_att.AggregateType.FSharpName()}>({_rawIdentity.FSharpUsage}, {_token!.FSharpUsage})");
+            }
+            else
+            {
+                writer.WriteLine($"let! {Stream.Usage} = {_session!.FSharpUsage}.Events.FetchForWriting<{_att.AggregateType.FSharpName()}>({_rawIdentity.FSharpUsage}, {_version.FSharpUsage}, {_token!.FSharpUsage})");
+            }
+        }
+        else
+        {
+            writer.WriteLine($"let! {Stream.Usage} = {_batchQueryItem.FSharpUsage}");
+        }
+
+        if (_att.AlwaysEnforceConsistency)
+        {
+            writer.WriteLine($"{Stream.Usage}.{nameof(IEventStream<string>.AlwaysEnforceConsistency)} <- true");
+        }
+
+        Next?.GenerateFSharpCode(method, writer);
+    }
+}

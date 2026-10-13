@@ -1,0 +1,9 @@
+
+dependencies {
+    api "io.eventuate.tram.core:eventuate-tram-spring-reactive-messaging-starter:$eventuateTramVersion"
+
+    api project(":eventuate-tram-sagas-spring-reactive-participant")
+}
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}

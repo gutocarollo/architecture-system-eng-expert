@@ -1,0 +1,32 @@
+using Microsoft.Extensions.Hosting;
+using Wolverine;
+
+namespace DocumentationSamples;
+
+internal static class DurableScheduleMessagesSample
+{
+    public static async Task Configuration()
+    {
+        #region sample_durablescheduledmessageslocalqueue
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts =>
+            {
+                opts.DurableScheduledMessagesLocalQueue
+
+                    // Allow no more than 3 scheduled messages
+                    // to execute at one time
+                    .MaximumParallelMessages(3);
+            }).StartAsync();
+
+        #endregion
+    }
+
+    public static async Task ConfigureDefaultQueue()
+    {
+        #region sample_configuredefaultqueue
+        using var host = await Host.CreateDefaultBuilder()
+            .UseWolverine(opts => { opts.DefaultLocalQueue.MaximumParallelMessages(3); }).StartAsync();
+
+        #endregion
+    }
+}

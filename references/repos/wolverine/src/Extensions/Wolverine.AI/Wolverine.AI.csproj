@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>Durable LLM callouts as Wolverine messages, on top of Microsoft.Extensions.AI</Description>
+        <PackageId>WolverineFx.AI</PackageId>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+        <!--
+          AOT-compatible as of GH-4230, on one condition the AOT guide spells out:
+          the application registers its response types with ai.RegisterResponseType()
+          and assigns LlmCalloutOptions.JsonSerializerOptions a source-generated
+          JsonSerializerContext over those same types.
+
+          Neither of the two things the executor does with a response type needs
+          reflection once that holds. AIJsonUtilities.CreateJsonSchema(Type, ...) carries
+          no trim annotations at all, because it builds the schema from the JsonTypeInfo
+          the options resolve, and deserialization goes through the JsonTypeInfo overload
+          rather than JsonSerializer.Deserialize(string, Type, options), which is the one
+          that is annotated. Proven by Wolverine.AI.AotSmoke, which is analyzer-gated
+          under TrimMode=full and run in CIAotSmoke.
+
+          The single reflective site left is the Type.GetType fallback for a response
+          type the application never registered, suppressed narrowly at its call site.
+        -->
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Wolverine\Wolverine.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+    </ItemGroup>
+
+</Project>

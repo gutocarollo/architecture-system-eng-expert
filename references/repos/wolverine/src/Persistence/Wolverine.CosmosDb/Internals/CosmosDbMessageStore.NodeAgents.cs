@@ -1,0 +1,688 @@
+using System.Net;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Microsoft.Azure.Cosmos;
+using Wolverine.Runtime.Agents;
+
+namespace Wolverine.CosmosDb.Internals;
+
+public partial class CosmosDbMessageStore : INodeAgentPersistence
+{
+    // GH-4593: a document store has no schema to migrate and no column to gate. Unlike RavenDB this one
+    // maps through a hand-written DTO rather than storing the WolverineNode whole, so the property had to
+    // be added to CosmosWolverineNode and to both halves of its mapping.
+    bool INodeAgentPersistence.AdvertisesNodeLoad => true;
+
+    async Task INodeAgentPersistence.ClearAllAsync(CancellationToken cancellationToken)
+    {
+        var nodes = await Nodes.LoadAllNodesAsync(cancellationToken);
+        foreach (var node in nodes)
+        {
+            try
+            {
+                await _container.DeleteItemAsync<dynamic>(
+                    $"node|{node.NodeId}", new PartitionKey(DocumentTypes.SystemPartition),
+                    cancellationToken: cancellationToken);
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+            }
+
+            foreach (var agent in node.ActiveAgents)
+            {
+                try
+                {
+                    await _container.DeleteItemAsync<dynamic>(
+                        CosmosAgentAssignment.ToId(agent), new PartitionKey(DocumentTypes.SystemPartition),
+                        cancellationToken: cancellationToken);
+                }
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                }
+            }
+        }
+    }
+
+    public async Task<int> PersistAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        var sequenceId = $"{DocumentTypes.NodeSequence}|sequence";
+
+        // GH-4285: the node number becomes the envelope owner id, and shutdown releases ownership BY
+        // number — so two nodes sharing a number cross-release each other's in-flight envelopes. The
+        // increment must be optimistic-concurrency safe: replace guarded by the ETag of the read, retry
+        // on 412 (a peer bumped the sequence first) or 409 (a peer created the missing document first).
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                CosmosNodeSequence sequence;
+                try
+                {
+                    var response = await _container.ReadItemAsync<CosmosNodeSequence>(
+                        sequenceId, new PartitionKey(DocumentTypes.SystemPartition),
+                        cancellationToken: cancellationToken);
+                    sequence = response.Resource;
+                    sequence.Count++;
+
+                    await _container.ReplaceItemAsync(sequence, sequenceId,
+                        new PartitionKey(DocumentTypes.SystemPartition),
+                        new ItemRequestOptions { IfMatchEtag = response.ETag },
+                        cancellationToken);
+                }
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                    sequence = new CosmosNodeSequence { Id = sequenceId, Count = 1 };
+                    await _container.CreateItemAsync(sequence, new PartitionKey(DocumentTypes.SystemPartition),
+                        cancellationToken: cancellationToken);
+                }
+
+                node.AssignedNodeNumber = sequence.Count;
+                break;
+            }
+            catch (CosmosException e) when (e.StatusCode is HttpStatusCode.PreconditionFailed
+                                                or HttpStatusCode.Conflict)
+            {
+                if (attempt >= 24)
+                {
+                    throw new InvalidOperationException(
+                        $"Unable to assign a node number for node {node.NodeId} after {attempt + 1} attempts because of contention on the node sequence document",
+                        e);
+                }
+
+                await Task.Delay(Random.Shared.Next(5, 25), cancellationToken);
+            }
+        }
+
+        var nodeDoc = new CosmosWolverineNode(node);
+        await _container.UpsertItemAsync(nodeDoc, new PartitionKey(DocumentTypes.SystemPartition),
+            cancellationToken: cancellationToken);
+
+        return node.AssignedNodeNumber;
+    }
+
+    public async Task DeleteAsync(Guid nodeId, int assignedNodeNumber)
+    {
+        try
+        {
+            await _container.DeleteItemAsync<dynamic>(
+                $"node|{nodeId}", new PartitionKey(DocumentTypes.SystemPartition));
+        }
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+        }
+
+        // Delete agent assignments for this node
+        var queryText =
+            "SELECT * FROM c WHERE c.docType = @docType AND c.nodeId = @nodeId";
+        var query = new QueryDefinition(queryText)
+            .WithParameter("@docType", DocumentTypes.AgentAssignment)
+            .WithParameter("@nodeId", nodeId.ToString());
+
+        using var iterator = _container.GetItemQueryIterator<CosmosAgentAssignment>(query,
+            requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+            });
+
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync();
+            foreach (var assignment in response)
+            {
+                try
+                {
+                    await _container.DeleteItemAsync<dynamic>(
+                        assignment.Id, new PartitionKey(DocumentTypes.SystemPartition));
+                }
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                }
+            }
+        }
+
+        await ReleaseAllOwnershipAsync(assignedNodeNumber);
+    }
+
+    public async Task<IReadOnlyList<WolverineNode>> LoadAllNodesAsync(CancellationToken cancellationToken)
+    {
+        var nodeQuery = new QueryDefinition("SELECT * FROM c WHERE c.docType = @docType")
+            .WithParameter("@docType", DocumentTypes.Node);
+
+        var nodes = new List<CosmosWolverineNode>();
+        using (var iterator = _container.GetItemQueryIterator<CosmosWolverineNode>(nodeQuery,
+                   requestOptions: new QueryRequestOptions
+                   {
+                       PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+                   }))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+                nodes.AddRange(response);
+            }
+        }
+
+        var assignmentQuery = new QueryDefinition("SELECT * FROM c WHERE c.docType = @docType")
+            .WithParameter("@docType", DocumentTypes.AgentAssignment);
+
+        var assignments = new List<CosmosAgentAssignment>();
+        using (var iterator = _container.GetItemQueryIterator<CosmosAgentAssignment>(assignmentQuery,
+                   requestOptions: new QueryRequestOptions
+                   {
+                       PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+                   }))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+                assignments.AddRange(response);
+            }
+        }
+
+        var result = new List<WolverineNode>();
+        foreach (var nodeDoc in nodes)
+        {
+            var node = nodeDoc.ToWolverineNode();
+            node.ActiveAgents.Clear();
+            node.ActiveAgents.AddRange(assignments.Where(x => x.NodeId == node.NodeId.ToString())
+                .Select(x => new Uri(x.AgentUri)));
+            result.Add(node);
+        }
+
+        return result;
+    }
+
+    public async Task PersistAgentRestrictionsAsync(IReadOnlyList<AgentRestriction> restrictions,
+        CancellationToken cancellationToken)
+    {
+        foreach (var restriction in restrictions)
+        {
+            if (restriction.Type == AgentRestrictionType.None)
+            {
+                try
+                {
+                    await _container.DeleteItemAsync<dynamic>(
+                        $"restriction|{restriction.Id}", new PartitionKey(DocumentTypes.SystemPartition),
+                        cancellationToken: cancellationToken);
+                }
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                }
+            }
+            else
+            {
+                var doc = new CosmosAgentRestriction
+                {
+                    Id = $"restriction|{restriction.Id}",
+                    AgentUri = restriction.AgentUri.ToString(),
+                    Type = restriction.Type,
+                    NodeNumber = restriction.NodeNumber
+                };
+                await _container.UpsertItemAsync(doc, new PartitionKey(DocumentTypes.SystemPartition),
+                    cancellationToken: cancellationToken);
+            }
+        }
+    }
+
+    public async Task<NodeAgentState> LoadNodeAgentStateAsync(CancellationToken cancellationToken)
+    {
+        var nodes = await LoadAllNodesAsync(cancellationToken);
+
+        var restrictionQuery = new QueryDefinition("SELECT * FROM c WHERE c.docType = @docType")
+            .WithParameter("@docType", DocumentTypes.AgentRestriction);
+
+        var restrictions = new List<CosmosAgentRestriction>();
+        using var iterator = _container.GetItemQueryIterator<CosmosAgentRestriction>(restrictionQuery,
+            requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+            });
+
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync(cancellationToken);
+            restrictions.AddRange(response);
+        }
+
+        var agentRestrictions = restrictions.Select(
+            x => new AgentRestriction(Guid.Parse(x.Id.Replace("restriction|", "")),
+                new Uri(x.AgentUri), x.Type, x.NodeNumber)
+        );
+
+        return new NodeAgentState(nodes, new AgentRestrictions([.. agentRestrictions]));
+    }
+
+    public async Task AssignAgentsAsync(Guid nodeId, IReadOnlyList<Uri> agents,
+        CancellationToken cancellationToken)
+    {
+        foreach (var agent in agents)
+        {
+            var assignment = new CosmosAgentAssignment(agent, nodeId);
+            await _container.UpsertItemAsync(assignment, new PartitionKey(DocumentTypes.SystemPartition),
+                cancellationToken: cancellationToken);
+        }
+    }
+
+    public async Task RemoveAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        // GH-4407: only this node's own claim. Deleting by id alone let a node stopping a copy it did not own
+        // delete the owner's row, which the leader then read as an unassigned agent and placed again. The
+        // delete is conditioned on the ETag of the read, so a row that changes hands in between survives.
+        var id = CosmosAgentAssignment.ToId(agentUri);
+        var partition = new PartitionKey(DocumentTypes.SystemPartition);
+
+        try
+        {
+            var existing = await _container.ReadItemAsync<CosmosAgentAssignment>(id, partition,
+                cancellationToken: cancellationToken);
+            if (existing.Resource.NodeId != nodeId.ToString())
+            {
+                return;
+            }
+
+            await _container.DeleteItemAsync<CosmosAgentAssignment>(id, partition,
+                new ItemRequestOptions { IfMatchEtag = existing.ETag }, cancellationToken);
+        }
+        catch (CosmosException e) when (e.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.PreconditionFailed)
+        {
+            // Already gone, or it changed hands between the read and the delete -- not ours to remove
+        }
+    }
+
+    public async Task<bool> TryClaimAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        var partition = new PartitionKey(DocumentTypes.SystemPartition);
+
+        try
+        {
+            // GH-4407: create, never upsert, so a peer's existing claim is never overwritten
+            await _container.CreateItemAsync(new CosmosAgentAssignment(agentUri, nodeId), partition,
+                cancellationToken: cancellationToken);
+            return true;
+        }
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.Conflict)
+        {
+            try
+            {
+                var existing = await _container.ReadItemAsync<CosmosAgentAssignment>(
+                    CosmosAgentAssignment.ToId(agentUri), partition, cancellationToken: cancellationToken);
+                return existing.Resource.NodeId == nodeId.ToString();
+            }
+            catch (CosmosException missing) when (missing.StatusCode == HttpStatusCode.NotFound)
+            {
+                // Deleted again between the conflict and the read; nobody can be said to own it for us
+                return false;
+            }
+        }
+    }
+
+    public async Task AddAssignmentAsync(Guid nodeId, Uri agentUri, CancellationToken cancellationToken)
+    {
+        var assignment = new CosmosAgentAssignment(agentUri, nodeId);
+        await _container.UpsertItemAsync(assignment, new PartitionKey(DocumentTypes.SystemPartition),
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<WolverineNode?> LoadNodeAsync(Guid nodeId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _container.ReadItemAsync<CosmosWolverineNode>(
+                $"node|{nodeId}", new PartitionKey(DocumentTypes.SystemPartition),
+                cancellationToken: cancellationToken);
+
+            var node = response.Resource.ToWolverineNode();
+
+            var assignmentQuery =
+                new QueryDefinition(
+                        "SELECT * FROM c WHERE c.docType = @docType AND c.nodeId = @nodeId")
+                    .WithParameter("@docType", DocumentTypes.AgentAssignment)
+                    .WithParameter("@nodeId", nodeId.ToString());
+
+            var assignments = new List<CosmosAgentAssignment>();
+            using var iterator = _container.GetItemQueryIterator<CosmosAgentAssignment>(assignmentQuery,
+                requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+                });
+
+            while (iterator.HasMoreResults)
+            {
+                var resp = await iterator.ReadNextAsync(cancellationToken);
+                assignments.AddRange(resp);
+            }
+
+            node.ActiveAgents.Clear();
+            node.ActiveAgents.AddRange(assignments.OrderBy(x => x.Id).Select(x => new Uri(x.AgentUri)));
+
+            return node;
+        }
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+    }
+
+    public async Task<bool> MarkHealthCheckAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _container.ReadItemAsync<CosmosWolverineNode>(
+                $"node|{node.NodeId}", new PartitionKey(DocumentTypes.SystemPartition),
+                cancellationToken: cancellationToken);
+            var doc = response.Resource;
+            doc.LastHealthCheck = DateTimeOffset.UtcNow;
+
+            // GH-4593: the other two write paths rebuild the whole document from the node, but this one
+            // edits the document it just read -- so without this the advertisement would be written once
+            // at registration and never refreshed. This is the once-per-heartbeat path.
+            doc.LoadFactor = node.LoadFactor;
+
+            await _container.ReplaceItemAsync(doc, doc.Id, new PartitionKey(DocumentTypes.SystemPartition),
+                cancellationToken: cancellationToken);
+            return true;
+        }
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+            // GH-3604 / D2: a miss means a peer deleted this still-live node's row; report it to the caller
+            // (which re-registers with real identity) instead of creating a skeleton with a fresh number.
+            return false;
+        }
+    }
+
+    public async Task ReregisterNodeAsync(WolverineNode node, CancellationToken cancellationToken)
+    {
+        // Upsert the node document with its preserved AssignedNodeNumber WITHOUT incrementing the
+        // CosmosNodeSequence (unlike PersistAsync, which allocates a fresh number). The caller restores the
+        // agent-assignment documents separately.
+        var doc = new CosmosWolverineNode(node) { LastHealthCheck = DateTimeOffset.UtcNow };
+        await _container.UpsertItemAsync(doc, new PartitionKey(DocumentTypes.SystemPartition),
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task OverwriteHealthCheckTimeAsync(Guid nodeId, DateTimeOffset lastHeartbeatTime)
+    {
+        try
+        {
+            var response = await _container.ReadItemAsync<CosmosWolverineNode>(
+                $"node|{nodeId}", new PartitionKey(DocumentTypes.SystemPartition));
+            var doc = response.Resource;
+            doc.LastHealthCheck = lastHeartbeatTime;
+            await _container.ReplaceItemAsync(doc, doc.Id, new PartitionKey(DocumentTypes.SystemPartition));
+        }
+        catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Node doesn't exist
+        }
+    }
+
+    public async Task LogRecordsAsync(params NodeRecord[] records)
+    {
+        foreach (var record in records)
+        {
+            var doc = new CosmosNodeRecord(record);
+            await _container.UpsertItemAsync(doc, new PartitionKey(DocumentTypes.SystemPartition));
+        }
+    }
+
+    public async Task<IReadOnlyList<NodeRecord>> FetchRecentRecordsAsync(int count)
+    {
+        var queryText =
+            "SELECT * FROM c WHERE c.docType = @docType ORDER BY c.timestamp DESC OFFSET 0 LIMIT @limit";
+        var query = new QueryDefinition(queryText)
+            .WithParameter("@docType", DocumentTypes.NodeRecord)
+            .WithParameter("@limit", count);
+
+        var results = new List<CosmosNodeRecord>();
+        using var iterator = _container.GetItemQueryIterator<CosmosNodeRecord>(query,
+            requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(DocumentTypes.SystemPartition)
+            });
+
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync();
+            results.AddRange(response);
+        }
+
+        results.Reverse();
+        return results.Select(x => x.ToNodeRecord()).ToList();
+    }
+}
+
+// Helper document types for CosmosDB
+
+public class CosmosWolverineNode
+{
+    public CosmosWolverineNode()
+    {
+    }
+
+    public CosmosWolverineNode(WolverineNode node)
+    {
+        Id = $"node|{node.NodeId}";
+        NodeId = node.NodeId.ToString();
+        Description = node.Description;
+        AssignedNodeNumber = node.AssignedNodeNumber;
+        ControlUri = node.ControlUri?.ToString();
+        LastHealthCheck = node.LastHealthCheck;
+        Started = node.Started;
+        Version = node.Version?.ToString();
+        Capabilities = node.Capabilities.Select(x => x.ToString()).ToList();
+        LoadFactor = node.LoadFactor;
+    }
+
+    [JsonProperty("id")]
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonProperty("docType")]
+    [JsonPropertyName("docType")]
+    public string DocType { get; set; } = DocumentTypes.Node;
+
+    [JsonProperty("partitionKey")]
+    [JsonPropertyName("partitionKey")]
+    public string PartitionKey { get; set; } = DocumentTypes.SystemPartition;
+
+    [JsonProperty("nodeId")]
+    [JsonPropertyName("nodeId")]
+    public string NodeId { get; set; } = string.Empty;
+
+    [JsonProperty("description")]
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonProperty("assignedNodeNumber")]
+    [JsonPropertyName("assignedNodeNumber")]
+    public int AssignedNodeNumber { get; set; }
+
+    [JsonProperty("controlUri")]
+    [JsonPropertyName("controlUri")]
+    public string? ControlUri { get; set; }
+
+    [JsonProperty("lastHealthCheck")]
+    [JsonPropertyName("lastHealthCheck")]
+    public DateTimeOffset LastHealthCheck { get; set; }
+
+    [JsonProperty("started")]
+    [JsonPropertyName("started")]
+    public DateTimeOffset Started { get; set; }
+
+    [JsonProperty("version")]
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
+
+    [JsonProperty("capabilities")]
+    [JsonPropertyName("capabilities")]
+    public List<string> Capabilities { get; set; } = new();
+
+    // GH-4593. Absent on a document written before this shipped, which deserializes to null -- exactly
+    // "this node is not advertising a load reading".
+    [JsonProperty("loadFactor")]
+    [JsonPropertyName("loadFactor")]
+    public double? LoadFactor { get; set; }
+
+    public WolverineNode ToWolverineNode()
+    {
+        var node = new WolverineNode
+        {
+            NodeId = Guid.Parse(NodeId),
+            Description = Description ?? Environment.MachineName,
+            AssignedNodeNumber = AssignedNodeNumber,
+            ControlUri = ControlUri != null ? new Uri(ControlUri) : null,
+            LastHealthCheck = LastHealthCheck,
+            Started = Started,
+            Version = Version != null ? new Version(Version) : new Version(0, 0, 0, 0),
+            LoadFactor = LoadFactor
+        };
+        node.Capabilities.AddRange(Capabilities.Select(x => new Uri(x)));
+        return node;
+    }
+}
+
+public class CosmosAgentAssignment
+{
+    public static string ToId(Uri uri)
+    {
+        return "agent|" + uri.ToString().TrimEnd('/').Replace("//", "/").Replace(':', '_').Replace('/', '_');
+    }
+
+    public CosmosAgentAssignment()
+    {
+    }
+
+    public CosmosAgentAssignment(Uri agentUri, Guid nodeId)
+    {
+        Id = ToId(agentUri);
+        NodeId = nodeId.ToString();
+        AgentUri = agentUri.ToString();
+    }
+
+    [JsonProperty("id")]
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonProperty("docType")]
+    [JsonPropertyName("docType")]
+    public string DocType { get; set; } = DocumentTypes.AgentAssignment;
+
+    [JsonProperty("partitionKey")]
+    [JsonPropertyName("partitionKey")]
+    public string PartitionKey { get; set; } = DocumentTypes.SystemPartition;
+
+    [JsonProperty("nodeId")]
+    [JsonPropertyName("nodeId")]
+    public string NodeId { get; set; } = string.Empty;
+
+    [JsonProperty("agentUri")]
+    [JsonPropertyName("agentUri")]
+    public string AgentUri { get; set; } = string.Empty;
+}
+
+public class CosmosNodeSequence
+{
+    [JsonProperty("id")]
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = $"{DocumentTypes.NodeSequence}|sequence";
+
+    [JsonProperty("docType")]
+    [JsonPropertyName("docType")]
+    public string DocType { get; set; } = DocumentTypes.NodeSequence;
+
+    [JsonProperty("partitionKey")]
+    [JsonPropertyName("partitionKey")]
+    public string PartitionKey { get; set; } = DocumentTypes.SystemPartition;
+
+    [JsonProperty("count")]
+    [JsonPropertyName("count")]
+    public int Count { get; set; }
+}
+
+public class CosmosAgentRestriction
+{
+    [JsonProperty("id")]
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonProperty("docType")]
+    [JsonPropertyName("docType")]
+    public string DocType { get; set; } = DocumentTypes.AgentRestriction;
+
+    [JsonProperty("partitionKey")]
+    [JsonPropertyName("partitionKey")]
+    public string PartitionKey { get; set; } = DocumentTypes.SystemPartition;
+
+    [JsonProperty("agentUri")]
+    [JsonPropertyName("agentUri")]
+    public string AgentUri { get; set; } = string.Empty;
+
+    [JsonProperty("type")]
+    [JsonPropertyName("type")]
+    public AgentRestrictionType Type { get; set; }
+
+    [JsonProperty("nodeNumber")]
+    [JsonPropertyName("nodeNumber")]
+    public int NodeNumber { get; set; }
+}
+
+public class CosmosNodeRecord
+{
+    public CosmosNodeRecord()
+    {
+    }
+
+    public CosmosNodeRecord(NodeRecord record)
+    {
+        Id = $"record|{Guid.NewGuid()}";
+        NodeNumber = record.NodeNumber;
+        RecordType = record.RecordType;
+        Timestamp = record.Timestamp;
+        Description = record.Description;
+        ServiceName = record.ServiceName;
+    }
+
+    [JsonProperty("id")]
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonProperty("docType")]
+    [JsonPropertyName("docType")]
+    public string DocType { get; set; } = DocumentTypes.NodeRecord;
+
+    [JsonProperty("partitionKey")]
+    [JsonPropertyName("partitionKey")]
+    public string PartitionKey { get; set; } = DocumentTypes.SystemPartition;
+
+    [JsonProperty("nodeNumber")]
+    [JsonPropertyName("nodeNumber")]
+    public int NodeNumber { get; set; }
+
+    [JsonProperty("recordType")]
+    [JsonPropertyName("recordType")]
+    public NodeRecordType RecordType { get; set; }
+
+    [JsonProperty("timestamp")]
+    [JsonPropertyName("timestamp")]
+    public DateTimeOffset Timestamp { get; set; }
+
+    [JsonProperty("description")]
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonProperty("serviceName")]
+    [JsonPropertyName("serviceName")]
+    public string? ServiceName { get; set; }
+
+    public NodeRecord ToNodeRecord()
+    {
+        return new NodeRecord
+        {
+            NodeNumber = NodeNumber,
+            RecordType = RecordType,
+            Timestamp = Timestamp,
+            Description = Description ?? string.Empty,
+            ServiceName = ServiceName ?? string.Empty
+        };
+    }
+}

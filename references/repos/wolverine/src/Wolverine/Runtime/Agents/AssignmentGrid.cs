@@ -1,0 +1,368 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using JasperFx.Core;
+
+namespace Wolverine.Runtime.Agents;
+
+
+/// <summary>
+///     Models the desired assignment of agents between Wolverine nodes
+/// </summary>
+public partial class AssignmentGrid
+{
+    private readonly Dictionary<Uri, Agent> _agents = new();
+    private readonly List<Node> _nodes = new();
+    private readonly List<DuplicateAgentReport> _duplicateAgentReports = new();
+
+    /// <summary>
+    /// Reports of the same agent URI being claimed-as-running by more than
+    /// one <see cref="WolverineNode"/> when this grid was assembled. The
+    /// leader uses these to emit <c>StopRemoteAgent</c> commands so the
+    /// duplicates are healed even after a stale-leader split-brain. See
+    /// GH-2602.
+    /// </summary>
+    internal IReadOnlyList<DuplicateAgentReport> DuplicateAgentReports => _duplicateAgentReports;
+
+    internal void RecordDuplicateAgent(Uri agentUri, Node existingNode, Node newNode)
+    {
+        _duplicateAgentReports.Add(new DuplicateAgentReport(agentUri, existingNode, newNode));
+    }
+
+    /// <summary>
+    ///     The identity of all currently unassigned agents
+    /// </summary>
+    public IReadOnlyList<Agent> UnassignedAgents => _agents.Values.Where(x => x.AssignedNode == null).ToArray();
+
+    /// <summary>
+    ///     Identity and location of all the currently executing nodes for this Wolverine application
+    /// </summary>
+    public IReadOnlyList<Node> Nodes => _nodes;
+
+    /// <summary>
+    ///     All agents, including a model of their current and intended node assignments
+    /// </summary>
+    public IReadOnlyList<Agent> AllAgents => _agents.Values.ToList();
+
+    /// <summary>
+    ///     Timestamp when this assignment grid was last updated
+    /// </summary>
+    public DateTimeOffset EvaluationTime { get; internal set; }
+
+    /// <summary>
+    ///     How many agents per scheme the distribution methods move off an overloaded node in one
+    ///     evaluation. Stamped from <see cref="DurabilitySettings.OverloadShedBatchSize" />.
+    /// </summary>
+    public int OverloadShedBatchSize { get; internal set; } = 1;
+
+    /// <summary>
+    ///     The load reading a node that advertises nothing is ordered as. Deliberately mid-range: such
+    ///     a node is still eligible for placement, but must not outrank nodes that have actually
+    ///     reported themselves lightly loaded. See the ordering in
+    ///     <see cref="DistributeEvenly(string, Func{Uri, bool})" />.
+    /// </summary>
+    internal const double UnadvertisedLoadBand = 50;
+
+    /// <summary>
+    ///     A node's advertised load bucketed into 10-point bands. Raw readings almost never tie, so
+    ///     ordering on them directly would leave every subsequent tie-break deciding nothing and have
+    ///     each family's pass chase the same marginally-least-loaded node between two heartbeats —
+    ///     the cross-scheme stacking GH-3877 fixed. Within a band the readings are treated as equal.
+    /// </summary>
+    internal static double LoadBandOf(Node node) => Math.Floor((node.LoadFactor ?? UnadvertisedLoadBand) / 10);
+
+    /// <summary>
+    ///     GH-4592. Order candidate nodes for a placement: nodes with headroom first, then by advertised
+    ///     load band, then by whatever per-pass count the caller is balancing, then the existing
+    ///     deterministic tie-breaks.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         This is a PREFERENCE, not a filter, and that is the whole design decision in the
+    ///         capability-aware distribution paths. <see cref="DistributeEvenly(string, Func{Uri, bool})" />
+    ///         can safely refuse to place onto an overloaded node because every node is a candidate there,
+    ///         so refusing some of them can never strand an agent that nothing else could have run. In the
+    ///         capability-aware paths the candidate set has ALREADY been narrowed — by declared
+    ///         capabilities, by the GH-3341 rescue for a partition no node declares, by the GH-4562
+    ///         per-member grandfathering — and stacking a second hard constraint on top of that can empty
+    ///         it. An empty candidate set in those methods is not "the agent waits": it is a shard
+    ///         database that silently stops projecting with no running agent, no log, and no self-heal
+    ///         until a restart, which is precisely the failure GH-3341 exists to prevent. Memory pressure
+    ///         is transient; a stalled shard is not.
+    ///     </para>
+    ///     <para>
+    ///         With capacity-aware assignment off, every node is accepting and none advertises a load, so
+    ///         the first two keys are constant and this is exactly the pre-existing
+    ///         load/IsLeader/AssignedId ordering.
+    ///     </para>
+    /// </remarks>
+    internal static IOrderedEnumerable<Node> InCapacityOrder(IEnumerable<Node> nodes, Func<Node, int> load)
+    {
+        return nodes
+            .OrderBy(n => n.IsAcceptingAgents ? 0 : 1)
+            .ThenBy(LoadBandOf)
+            .ThenBy(load)
+            .ThenBy(n => n.IsLeader)
+            .ThenBy(n => n.AssignedId);
+    }
+
+    public IReadOnlyList<Agent> AgentsForScheme(string scheme)
+    {
+        return _agents.Values.Where(x => x.Uri.Scheme.EqualsIgnoreCase(scheme)).ToList();
+    }
+    
+    public IReadOnlyList<Agent> AvailableAgentsForScheme(string scheme)
+    {
+        return _agents.Values.Where(x => x.Uri.Scheme.EqualsIgnoreCase(scheme) && !x.IsPaused).ToList();
+    }
+
+    /// <summary>
+    ///     Same as <see cref="AvailableAgentsForScheme(string)" />, restricted to the agents matching
+    ///     <paramref name="filter" />. Used when one scheme's agents are distributed in independent passes
+    ///     (e.g. per event store; see <see cref="EventSubscriptionAgentFamily.EvaluateAssignmentsAsync" />).
+    /// </summary>
+    public IReadOnlyList<Agent> AvailableAgentsForScheme(string scheme, Func<Uri, bool> filter)
+    {
+        return _agents.Values
+            .Where(x => x.Uri.Scheme.EqualsIgnoreCase(scheme) && !x.IsPaused && filter(x.Uri)).ToList();
+    }
+
+    /// <summary>
+    ///     Add an executing node to the grid. Useful for testing custom agent assignment
+    ///     schemes
+    /// </summary>
+    /// <param name="assignedId"></param>
+    /// <param name="id"></param>
+    /// <param name="capabilities"></param>
+    /// <returns></returns>
+    public Node WithNode(WolverineNode wolverineNode)
+    {
+        var node = new Node(this, wolverineNode.AssignedNodeNumber, wolverineNode.NodeId, wolverineNode.Capabilities);
+        node.ControlUri = wolverineNode.ControlUri;
+        node.LoadFactor = wolverineNode.LoadFactor;
+
+        node.IsLeader = wolverineNode.ActiveAgents.Contains(NodeAgentController.LeaderUri);
+        
+        _nodes.Add(node);
+
+        node.Running(wolverineNode.ActiveAgents.ToArray());
+        
+        return node;
+    }
+
+    public Node WithNode(int assignedId, Guid id)
+    {
+        var node = new Node(this, assignedId, id, new List<Uri>());
+        _nodes.Add(node);
+
+        return node;
+    }
+
+    /// <summary>
+    ///     Add additional agent uris to this assignment grid. This is intended for
+    ///     testing scenarios
+    /// </summary>
+    /// <param name="uris"></param>
+    /// <returns></returns>
+    public AssignmentGrid WithAgents(params Uri[] uris)
+    {
+        foreach (var uri in uris)
+        {
+            if (!_agents.ContainsKey(uri))
+            {
+                _agents.Add(uri, new Agent(uri));
+            }
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Match up the agents for a particular scheme to any nodes that could
+    /// run that agent. This is meant for blue/green development
+    /// </summary>
+    /// <param name="scheme"></param>
+    /// <returns></returns>
+    public IReadOnlyList<Agent> MatchAgentsToCapableNodesFor(string scheme)
+    {
+        return MatchAgentsToCapableNodesFor(scheme, _ => true);
+    }
+
+    /// <summary>
+    /// Match up the agents for a particular scheme, restricted by <paramref name="filter" />, to any
+    /// nodes that could run that agent. This is meant for blue/green development
+    /// </summary>
+    public IReadOnlyList<Agent> MatchAgentsToCapableNodesFor(string scheme, Func<Uri, bool> filter)
+    {
+        var agents = AvailableAgentsForScheme(scheme, filter);
+
+        // Candidate nodes are ordered by AssignedId; sort the nodes once rather than once per agent
+        var byAssignedId = _nodes.OrderBy(x => x.AssignedId).ToList();
+
+        foreach (var agent in agents)
+        {
+            agent.CandidateNodes.Clear();
+            foreach (var node in byAssignedId)
+            {
+                if (node.Declares(agent.Uri))
+                {
+                    agent.CandidateNodes.Add(node);
+                }
+            }
+        }
+
+        return agents;
+    }
+
+    /// <summary>
+    ///     Find information about a single agent by its Uri
+    /// </summary>
+    /// <param name="agentUri"></param>
+    /// <returns></returns>
+    public Agent AgentFor(Uri agentUri)
+    {
+        return _agents[agentUri];
+    }
+
+    public Node? NodeFor(int nodeNumber)
+    {
+        return _nodes.FirstOrDefault(x => x.AssignedId == nodeNumber);
+    }
+
+    /// <summary>
+    ///     Testing helper, adds a new agent to the current assignment grid
+    /// </summary>
+    /// <param name="uri"></param>
+    /// <returns></returns>
+    public Agent WithAgent(Uri uri)
+    {
+        WithAgents(uri);
+
+        return AgentFor(uri);
+    }
+
+
+    /// <summary>
+    ///     Probably just for testing to simulate nodes going down
+    /// </summary>
+    /// <param name="node"></param>
+    public void Remove(Node node)
+    {
+        foreach (var agent in node.Agents.ToArray()) agent.Detach();
+
+        _nodes.Remove(node);
+    }
+
+    /// <summary>
+    ///     The point of this is to find any agents that are currently misaligned with the
+    ///     expected assignments
+    /// </summary>
+    /// <param name="actuals"></param>
+    /// <returns></returns>
+    public IEnumerable<IAgentCommand> FindDelta(Dictionary<Uri, NodeDestination> actuals)
+    {
+        foreach (var assignment in _agents)
+        {
+            if (assignment.Key.Scheme == "wolverine")
+            {
+                continue;
+            }
+
+            if (actuals.TryGetValue(assignment.Key, out var actual))
+            {
+                var specified = assignment.Value.AssignedNode?.ToDestination();
+                if (specified == null)
+                {
+                    // Should not be running, so stop it
+                    yield return new StopRemoteAgent(assignment.Key, actual);
+                }
+                else if (actual != specified)
+                {
+                    // Running in wrong place, reassign to correct place
+                    yield return new ReassignAgent(assignment.Key, actual, specified);
+                }
+            }
+            else if (assignment.Value.AssignedNode != null)
+            {
+                // Missing, so add it
+                yield return new AssignAgent(assignment.Key, assignment.Value.AssignedNode.ToDestination());
+            }
+        }
+
+        foreach (var actual in actuals.Where(pair => !_agents.ContainsKey(pair.Key)))
+        {
+            yield return new StopRemoteAgent(actual.Key, actual.Value);
+        }
+    }
+
+    internal Dictionary<Uri, NodeDestination> CompileAssignments()
+    {
+        var dict = new Dictionary<Uri, NodeDestination>();
+        foreach (var pair in _agents)
+        {
+            if (pair.Value.AssignedNode != null)
+            {
+                dict.Add(pair.Key, pair.Value.AssignedNode.ToDestination());
+            }
+        }
+
+        return dict;
+    }
+
+    public void RunOnLeader(Uri agentUri)
+    {
+        var node = _nodes.FirstOrDefault(x => x.IsLeader);
+        node?.Assign(agentUri);
+    }
+
+    public void ApplyRestrictions(AgentRestrictions restrictions)
+    {
+        Restrictions = restrictions;
+        
+        // Assume that the AssignmentGrid is completely fleshed out with the 
+        // known agents and nodes at this point
+        foreach (var pin in restrictions.Pins())
+        {
+            var agent = AgentFor(pin.AgentUri);
+            if (agent == null) continue;
+            
+            var node = NodeFor(pin.NodeNumber);
+
+            if (node == null)
+            {
+                restrictions.RemovePin(pin.AgentUri);
+            }
+            else
+            {
+                if (node.TryAssign(pin.AgentUri))
+                {
+                    agent.IsPinned = true;
+                }
+            }
+        }
+
+        foreach (var agentUri in restrictions.FindPausedAgentUris())
+        {
+            // A paused-agent restriction can legitimately reference a URI that is NOT a distributable
+            // grid agent — e.g. a receiving-endpoint listener paused application-wide (CritterWatch #533).
+            // Such a URI honors its pause directly in ListeningAgent.StartAsync() via FindPausedAgentUris(),
+            // not through the assignment grid, so it simply has no Agent here. AgentFor(uri) does a dictionary
+            // indexer lookup that THROWS KeyNotFoundException for a missing key (the `agent == null` guard
+            // below was dead code), which poisoned every subsequent EvaluateAssignmentsAsync cycle once such
+            // a restriction was persisted. Skip URIs that aren't grid agents instead.
+            if (!_agents.TryGetValue(agentUri, out var agent))
+            {
+                continue;
+            }
+
+            agent.IsPaused = true;
+            if (agent.AssignedNode != null)
+            {
+                agent.Detach();
+            }
+        }
+        
+    }
+
+    public AgentRestrictions? Restrictions { get; set; }
+}

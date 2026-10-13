@@ -1,0 +1,125 @@
+using JasperFx;
+using JasperFx.Core;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Wolverine.Configuration;
+using Wolverine.Transports;
+
+namespace Wolverine.Runtime.Agents;
+
+internal class LeaderPinnedListenerAgent : IAgent
+{
+    private readonly Endpoint _endpoint;
+    private readonly IWolverineRuntime _runtime;
+
+    public LeaderPinnedListenerAgent(Endpoint endpoint, IWolverineRuntime runtime)
+    {
+        _endpoint = endpoint;
+        _runtime = runtime;
+
+        // Include the endpoint's transport scheme so two endpoints that share the same logical
+        // EndpointName across different transports (e.g. a "critterwatch" queue on both Rabbit and
+        // SQS) don't collapse to the same agent Uri and collide in the family's ToDictionary. GH-3027.
+        Uri = new Uri($"{LeaderPinnedListenerFamily.SchemeName}://{_endpoint.Uri.Scheme}/{_endpoint.EndpointName}");
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await _runtime.Endpoints.StartListenerAsync(_endpoint, cancellationToken);
+
+        // GH-3604: same cached-instance hazard as ExclusiveListenerAgent -- a leader-pinned listener is
+        // stopped on the old leader and started on the new one, so every election after the first would
+        // otherwise restart this listener while still reporting it Stopped.
+        Status = AgentStatus.Running;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _runtime.Endpoints.StopListenerAsync(_endpoint, cancellationToken);
+        Status = AgentStatus.Stopped;
+    }
+
+    public Uri Uri { get; set; }
+
+    public AgentStatus Status { get; set; } = AgentStatus.Running;
+
+    /// <summary>
+    /// Human-readable description for monitoring tools — see
+    /// <see cref="IAgent.Description"/>.
+    /// </summary>
+    public string Description => $"Leader-pinned listener for {_endpoint.Uri} — runs only on the cluster's elected leader node, so the listening role moves with leader elections.";
+
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        if (Status != AgentStatus.Running)
+        {
+            return Task.FromResult(HealthCheckResult.Unhealthy($"Agent {Uri} is {Status}"));
+        }
+
+        var listeningAgent = _runtime.Endpoints.FindListeningAgent(_endpoint.Uri);
+        if (listeningAgent == null)
+        {
+            return Task.FromResult(HealthCheckResult.Healthy());
+        }
+
+        return Task.FromResult(listeningAgent.Status switch
+        {
+            ListeningStatus.TooBusy => HealthCheckResult.Degraded($"Listener {_endpoint.EndpointName} is too busy"),
+            ListeningStatus.Paused => HealthCheckResult.Degraded($"Listener {_endpoint.EndpointName} is administratively paused and will not self-resume"),
+            ListeningStatus.GloballyLatched => HealthCheckResult.Unhealthy($"Listener {_endpoint.EndpointName} is globally latched"),
+            _ => HealthCheckResult.Healthy()
+        });
+    }
+}
+
+public class LeaderPinnedListenerFamily : IStaticAgentFamily
+{
+    private readonly IWolverineRuntime _runtime;
+    internal const string SchemeName = "wolverine-leader-listener";
+
+    #pragma warning disable CS0414
+    private readonly WolverineOptions _options = null!;
+    #pragma warning restore CS0414
+    private readonly Dictionary<Uri,LeaderPinnedListenerAgent> _agents;
+
+    public LeaderPinnedListenerFamily(IWolverineRuntime runtime)
+    {
+        _runtime = runtime;
+
+        _agents = _runtime.Endpoints.LeaderPinnedListeners().Select(e => new LeaderPinnedListenerAgent(e, runtime))
+            .ToDictionary(e => e.Uri);
+    }
+
+    public string Scheme { get; set; } = SchemeName;
+    public ValueTask<IReadOnlyList<Uri>> AllKnownAgentsAsync()
+    {
+        var uris = _agents.Keys.ToList();
+        return ValueTask.FromResult<IReadOnlyList<Uri>>(uris);
+    }
+
+    public ValueTask<IAgent> BuildAgentAsync(Uri uri, IWolverineRuntime wolverineRuntime)
+    {
+        if (_agents.TryGetValue(uri, out var agent))
+        {
+            return ValueTask.FromResult<IAgent>(agent);
+        }
+
+        throw new InvalidAgentException(
+            $"'{uri}' is not a known exclusive listener Uri. The valid values for this system are {_agents.Keys.Select(x => x.ToString()).Join(", ")}");
+    }
+
+    public ValueTask<IReadOnlyList<Uri>> SupportedAgentsAsync()
+    {
+        return AllKnownAgentsAsync();
+    }
+
+    public ValueTask EvaluateAssignmentsAsync(AssignmentGrid assignments)
+    {
+        foreach (var agentUri in _agents.Keys)
+        {
+            assignments.RunOnLeader(agentUri);
+        }
+
+        return new ValueTask();
+    }
+}

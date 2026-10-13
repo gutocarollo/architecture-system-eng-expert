@@ -1,0 +1,103 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using JasperFx.Core;
+using Marten;
+using Marten.Testing.Harness;
+using Shouldly;
+using Vogen;
+
+namespace ValueTypeTests;
+
+public class include_usage : OneOffConfigurationsContext
+{
+    #region sample_include_a_single_reference_with_strong_identifier
+
+    [Fact]
+    public async Task include_a_single_reference()
+    {
+        var teacher = new Teacher();
+        var c = new Class();
+
+        theSession.Store(teacher);
+
+        c.TeacherId = teacher.Id;
+        theSession.Store(c);
+
+        await theSession.SaveChangesAsync();
+
+        var list = new List<Teacher>();
+
+        var loaded = await theSession
+            .Query<Class>()
+            .Include<Teacher>(c => c.TeacherId, list)
+            .Where(x => x.Id == c.Id)
+            .FirstOrDefaultAsync();
+
+        loaded.Id.ShouldBe(c.Id);
+        list.Single().Id.ShouldBe(teacher.Id);
+    }
+
+    #endregion
+
+    [Fact]
+    public async Task include_multiple_references()
+    {
+        var teacher1 = new Teacher();
+        var teacher2 = new Teacher();
+        var teacher3 = new Teacher();
+        var teacher4 = new Teacher();
+
+        theSession.Store(teacher1, teacher2, teacher3, teacher4);
+
+        var grade = new Grade();
+        grade.Teachers.Add(teacher1.Id.Value);
+        grade.Teachers.Add(teacher2.Id.Value);
+        grade.Teachers.Add(teacher3.Id.Value);
+
+        theSession.Store(grade);
+
+        await theSession.SaveChangesAsync();
+
+        var list = new List<Teacher>();
+
+        var loaded = await theSession
+            .Query<Grade>()
+            .Include<Teacher>(c => c.Teachers, list)
+            .Where(x => x.Id == grade.Id)
+            .FirstOrDefaultAsync();
+
+        loaded.Id.ShouldBe(grade.Id);
+        list.Count.ShouldBe(3);
+    }
+}
+
+[ValueObject<Guid>]
+public readonly partial struct TeacherId;
+
+public class Teacher
+{
+    public TeacherId? Id { get; set; }
+}
+
+[ValueObject<Guid>]
+public readonly partial struct ClassId;
+
+public class Class
+{
+    public ClassId? Id { get; set; }
+    public TeacherId? TeacherId { get; set; }
+}
+
+[ValueObject<Guid>]
+public readonly partial struct GradeId;
+
+public class Grade
+{
+    public GradeId? Id { get; set; }
+    public List<TeacherId>? Teachers { get; set; } = new();
+}
+
+
+

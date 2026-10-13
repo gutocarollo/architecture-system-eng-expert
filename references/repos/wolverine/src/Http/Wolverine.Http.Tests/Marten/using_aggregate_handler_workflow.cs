@@ -1,0 +1,406 @@
+using Marten;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
+using Wolverine.Http.Marten;
+using Wolverine.Marten;
+using WolverineWebApi.Marten;
+
+namespace Wolverine.Http.Tests.Marten;
+
+public class using_aggregate_handler_workflow(AppFixture fixture) : IntegrationContext(fixture)
+{
+    [Theory]
+    [InlineData("/orders/create")]
+    [InlineData("/orders/create2")]
+    public async Task use_marten_command_workflow(string createEndpoint)
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl(createEndpoint);
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Json(new MarkItemReady(status1.OrderId, "Socks", 1)).ToUrl("/orders/itemready");
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Items["Socks"].Ready.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task automatically_apply_stream_id_as_audit_member_marked_with_AggregateHandler()
+    {
+        // Guaranteeing that it's warmed up
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        
+        await Scenario(x =>
+        {
+            x.Post.Json(new ShipOrder(status1.OrderId)).ToUrl("/orders/ship");
+
+            x.StatusCodeShouldBe(204);
+        });
+        
+        var chain = Host.Services.GetRequiredService<WolverineHttpOptions>().Endpoints!.ChainFor("POST", "/orders/ship");
+        chain.ShouldNotBeNull();
+        
+        chain.AuditedMembers.Single().MemberName.ShouldBe(nameof(ShipOrder.OrderId));
+    }
+    
+    [Fact]
+    public async Task automatically_apply_stream_id_as_audit_member_marked_with_WriteAggregate()
+    {
+        // Guaranteeing that it's warmed up
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        
+        await Scenario(x =>
+        {
+            x.Post.Json(new ShipOrder(status1.OrderId)).ToUrl("/orders/ship3");
+
+            x.StatusCodeShouldBe(204);
+        });
+        
+        var chain = Host.Services.GetRequiredService<WolverineHttpOptions>().Endpoints!.ChainFor("POST", "/orders/ship3");
+        chain.ShouldNotBeNull();
+        
+        chain.AuditedMembers.Single().MemberName.ShouldBe(nameof(ShipOrder.OrderId));
+    }
+
+    [Fact]
+    public async Task mix_creation_response_and_start_stream()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create3");
+            x.StatusCodeShouldBe(201);
+        });
+
+        var response = await result1.ReadAsJsonAsync<CreationResponse>();
+        response.ShouldNotBeNull();
+        var raw = response.Url.Split('/').Last();
+        var id = Guid.Parse(raw);
+
+        await Scenario(x =>
+        {
+            x.Post.Json(new MarkItemReady(id, "Socks", 1)).ToUrl("/orders/itemready");
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(id, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Items["Socks"].Ready.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_a_return_value_as_event()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Json(new ShipOrder(status1.OrderId)).ToUrl("/orders/ship");
+            x.StatusCodeShouldBe(204);
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Shipped.HasValue.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_a_return_value_as_event_using_route_id_and_command_aggregate()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Json(new ShipOrder2("Something")).ToUrl($"/orders/{status1.OrderId}/ship2");
+
+            x.StatusCodeShouldBe(204);
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Shipped.HasValue.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_a_return_value_as_event_using_route_id_and_aggregate_but_no_command()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Url($"/orders/{status1.OrderId}/ship3");
+
+            x.StatusCodeShouldBe(204);
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Shipped.HasValue.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_a_return_value_as_event_using_route_id_and_aggregate_but_no_command_expect_404()
+    {
+        await Scenario(x =>
+        {
+            x.Post.Url($"/orders/{Guid.NewGuid()}/ship3");
+
+            x.StatusCodeShouldBe(404);
+        });
+    }
+
+    [Fact]
+    public async Task use_a_return_value_as_event_using_route_id_but_no_parameter_and_aggregate_but_no_command()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Url($"/orders/{status1.OrderId}/ship4");
+
+            x.StatusCodeShouldBe(204);
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Shipped.HasValue.ShouldBeTrue();
+    }
+    
+    [Fact]
+    public async Task use_aggregate_in_endpoint_from_query_param_in_url()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        status1.ShouldNotBeNull();
+
+        await Scenario(x =>
+        {
+            x.Post.Url($"/orders/ship/from-query?id={status1.OrderId}");
+
+            x.StatusCodeShouldBe(204);
+        });
+
+        await using var session = Store.LightweightSession();
+
+        var order = await session.Events.AggregateStreamAsync<Order>(status1.OrderId, token: TestContext.Current.CancellationToken);
+
+        order.ShouldNotBeNull();
+        order.Shipped.HasValue.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task use_stream_collision_policy()
+    {
+        var id = Guid.NewGuid();
+
+        // First time should be fine
+        await Scenario(x =>
+        {
+            x.Post.Json(new StartOrderWithId(id, ["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create4");
+        });
+
+        // Second time hits an exception from stream id collision
+        var result2 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrderWithId(id, ["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create4");
+            x.StatusCodeShouldBe(400);
+        });
+
+        // And let's verify that we got what we expected for the ProblemDetails
+        // in the HTTP response body of the 2nd request
+        var details = await result2.ReadAsJsonAsync<ProblemDetails>();
+        details.ShouldNotBeNull();
+        var detailsId = details.Extensions["Id"]?.ToString();
+        detailsId.ShouldNotBeEmpty();
+
+        Guid.Parse(detailsId).ShouldBe(id);
+        details.Detail.ShouldBe($"Duplicated id '{id}'");
+    }
+
+    [Fact]
+    public async Task accept_response_returns_proper_status_and_url()
+    {
+        var result = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status = await result.ReadAsJsonAsync<OrderStatus>();
+        status.ShouldNotBeNull();
+
+        result = await Scenario(x =>
+        {
+            x.Post.Json(new ConfirmOrder(status.OrderId)).ToUrl($"/orders/{status.OrderId}/confirm");
+
+            x.StatusCodeShouldBe(202);
+        });
+
+        var acceptResponse = await result.ReadAsJsonAsync<AcceptResponse>();
+        acceptResponse.ShouldNotBeNull();
+        acceptResponse.Url.ShouldBe($"/orders/{status.OrderId}");
+    }
+    
+    [Fact]
+    public async Task return_updated_aggregate()
+    {
+        var result = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status = await result.ReadAsJsonAsync<OrderStatus>();
+        status.ShouldNotBeNull();
+
+        result = await Scenario(x =>
+        {
+            x.Post.Json(new ConfirmOrder(status.OrderId)).ToUrl($"/orders/{status.OrderId}/confirm2");
+
+            x.StatusCodeShouldBe(200);
+        });
+
+        var order = await result.ReadAsJsonAsync<Order>();
+        order.IsConfirmed.ShouldBeTrue();
+        
+    }
+    
+    [Fact]
+    public async Task return_updated_aggregate_in_tuple()
+    {
+        var result = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+
+        var status = await result.ReadAsJsonAsync<OrderStatus>();
+        status.ShouldNotBeNull();
+
+        result = await Scenario(x =>
+        {
+            x.Post.Json(new ConfirmOrder(status.OrderId)).ToUrl($"/orders/{status.OrderId}/confirm3");
+
+            x.StatusCodeShouldBe(200);
+        });
+
+        var order = await result.ReadAsJsonAsync<Order>();
+        order.IsConfirmed.ShouldBeTrue();
+
+        using var session = Host.DocumentStore().LightweightSession();
+        var stream = await session.Events.FetchStreamAsync(status.OrderId, token: TestContext.Current.CancellationToken);
+        stream.Select(x => x.Data).OfType<UpdatedAggregate>().Any().ShouldBeFalse();
+
+    }
+    
+    [Fact]
+    public async Task aggregate_id_variable_is_fetchable_from_chain_for_handler_marked_with_AggregateHandler()
+    {
+        // Guaranteeing that it's warmed up
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+        
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        
+        await Scenario(x =>
+        {
+            x.Post.Json(new MarkItemReady(status1.OrderId, "Socks", 1)).ToUrl("/orders/itemready");
+        });
+
+        var chain = Host.Services.GetRequiredService<WolverineHttpOptions>().Endpoints!.ChainFor("POST", "/orders/itemready");
+        chain.ShouldNotBeNull();
+
+        var aggregateIdVariable = chain.GetAggregateIdVariable();
+        aggregateIdVariable.ShouldNotBeNull();
+        
+        aggregateIdVariable.VariableType.FullName.ShouldBe(typeof(Guid).FullName);
+        aggregateIdVariable.Usage.ShouldBe("order_Id");
+    }
+
+    [Fact]
+    public async Task aggregate_type_is_fetchable_from_chain_for_handler_marked_with_AggregateHandler()
+    {
+        var result1 = await Scenario(x =>
+        {
+            x.Post.Json(new StartOrder(["Socks", "Shoes", "Shirt"])).ToUrl("/orders/create");
+        });
+        
+        var status1 = await result1.ReadAsJsonAsync<OrderStatus>();
+        
+        await Scenario(x =>
+        {
+            x.Post.Json(new MarkItemReady(status1.OrderId, "Socks", 1)).ToUrl("/orders/itemready");
+        });
+
+        var chain = Host.Services.GetRequiredService<WolverineHttpOptions>().Endpoints!.ChainFor("POST", "/orders/itemready");
+        chain.ShouldNotBeNull();
+
+        var aggregateType = chain.GetAggregateType();
+        aggregateType.ShouldNotBeNull();
+        
+        aggregateType.FullName.ShouldBe(typeof(Order).FullName);
+    }
+
+}

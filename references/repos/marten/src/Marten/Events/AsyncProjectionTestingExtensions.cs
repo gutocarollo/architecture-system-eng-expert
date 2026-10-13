@@ -1,0 +1,615 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using JasperFx.CommandLine.TextualDisplays;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Events.Projections;
+using Marten.Events.Daemon;
+using Marten.Events.Daemon.Coordination;
+using Marten.Services;
+using Marten.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Marten.Events;
+
+public static class TestingExtensions
+{
+    /// <summary>
+    ///     Use with caution! This will try to wait for all projections to "catch up" to the currently
+    ///     known farthest known sequence of the event store
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <returns></returns>
+    public static Task WaitForNonStaleProjectionDataAsync(this IHost host, TimeSpan timeout)
+    {
+        return host.DocumentStore().WaitForNonStaleProjectionDataAsync(timeout);
+    }
+
+    /// <summary>
+    ///     Use with caution! This will try to wait for all projections to "catch up" to the currently
+    ///     known farthest known sequence of the event store for the supplied "ancillary" store
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <returns></returns>
+    public static Task WaitForNonStaleProjectionDataAsync<T>(this IHost host, TimeSpan timeout) where T : class, IDocumentStore
+    {
+        return host.DocumentStore<T>().WaitForNonStaleProjectionDataAsync(timeout);
+    }
+
+    /// <summary>
+    ///     Wait for any running async daemon for a specific tenant id or database name to catch up to the latest event
+    ///     sequence at the time
+    ///     this method is invoked for all projections. This method is meant to aid in automated testing
+    /// </summary>
+    /// <param name="tenantIdOrDatabaseName">Either a tenant id or the name of a database within the system</param>
+    public static async Task WaitForNonStaleProjectionDataAsync(this IHost host,
+        string tenantIdOrDatabaseName, TimeSpan timeout)
+    {
+        // Assuming there's only one database in this usage
+        var database = await host.DocumentStore().Storage.FindOrCreateDatabase(tenantIdOrDatabaseName).ConfigureAwait(false);
+
+        await database.WaitForNonStaleProjectionDataAsync(timeout).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Wait for any running async daemons to catch up to the latest event sequence at the time
+    ///     this method is invoked for all projections. This method is meant to aid in automated testing.
+    ///     Under multi-tenancy with separate databases (including
+    ///     <c>MultiTenantedWithShardedDatabases</c>), this iterates every database produced by
+    ///     <c>IMartenStorage.AllDatabases()</c> and waits on each shard's daemon — mirroring the
+    ///     <c>IHost.ForceAllMartenDaemonActivityToCatchUpAsync()</c> shape so test fixtures that
+    ///     construct an <see cref="IDocumentStore"/> directly (no <c>IHost</c>) can still use this
+    ///     method against sharded stores. See <a href="https://github.com/JasperFx/marten/issues/4366">#4366</a>.
+    /// </summary>
+    /// <param name="store"></param>
+    /// <param name="timeout"></param>
+    public static async Task WaitForNonStaleProjectionDataAsync(this IDocumentStore store, TimeSpan timeout)
+    {
+        if (store.As<DocumentStore>().Tenancy is DefaultTenancy)
+        {
+            await store.Storage.Database.WaitForNonStaleProjectionDataAsync(timeout).ConfigureAwait(false);
+            return;
+        }
+
+        // Multi-tenancy through separate databases (sharded, conjoined, single-server, etc.):
+        // there is no single "default" database to wait on. Iterate every database the store
+        // knows about and wait on each. Each call gets its own copy of the timeout because the
+        // waits run sequentially; in practice the high-water-mark check is cheap when projections
+        // are already caught up.
+        var databases = await store.Storage.AllDatabases().ConfigureAwait(false);
+        if (databases.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "The document store has no databases registered with its tenancy. Either configure a tenancy strategy that exposes databases (e.g. MultiTenantedWithShardedDatabases) or invoke a specific tenant id / database name overload.");
+        }
+
+        foreach (var database in databases)
+        {
+            await database.WaitForNonStaleProjectionDataAsync(timeout).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    ///     Wait for any running async daemon for a specific tenant id or database name to catch up to the latest event
+    ///     sequence at the time
+    ///     this method is invoked for all projections. This method is meant to aid in automated testing
+    /// </summary>
+    /// <param name="tenantIdOrDatabaseName">Either a tenant id or the name of a database within the system</param>
+    public static async Task WaitForNonStaleProjectionDataAsync(this IDocumentStore store,
+        string tenantIdOrDatabaseName, TimeSpan timeout)
+    {
+        // Assuming there's only one database in this usage
+        var database = await store.Storage.FindOrCreateDatabase(tenantIdOrDatabaseName).ConfigureAwait(false);
+
+        await WaitForNonStaleProjectionDataAsync(database, timeout).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Wait for any running async daemon to catch up to the latest event sequence at the time
+    ///     this is invoked. *Note*, this method was intended for test automation and will wait
+    ///     until there is any event data. If this is not what you intended, use WaitForNonStaleQueryableDataAsync()
+    ///     instead
+    /// </summary>
+    /// <param name="projectionsCount">
+    ///     Will be awaited till all shards have been started before checking if they've caught up
+    ///     with the sequence number
+    /// </param>
+    /// <exception cref="TimeoutException"></exception>
+    public static async Task WaitForNonStaleProjectionDataAsync(this IMartenDatabase database, TimeSpan timeout)
+    {
+        // Number of active projection shards, plus the high water mark
+        var projectionsCount = database.As<MartenDatabase>().Options.Projections.AllShards().Count + 1;
+
+        // Just get out of there if there are no projections
+        if (projectionsCount == 1)
+        {
+            return;
+        }
+
+        using var cancellationSource = new CancellationTokenSource();
+        cancellationSource.CancelAfter(timeout);
+
+        EventStoreStatistics initial;
+        do
+        {
+            initial = await database.FetchEventStoreStatistics(cancellationSource.Token).ConfigureAwait(false);
+            if (initial.EventSequenceNumber > 0 || cancellationSource.IsCancellationRequested)
+            {
+                break;
+            }
+
+            await Task.Delay(100.Milliseconds(), cancellationSource.Token).ConfigureAwait(false);
+        } while (true);
+
+        if (initial.EventSequenceNumber == 0 || initial.EventCount == 0)
+        {
+            throw new TimeoutException("No event activity was detected within the timeout span");
+        }
+
+        await database.WaitForNonStaleDataAsync(cancellationSource, projectionsCount, initial).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Wait for all projections and subscriptions to catch up to the high water mark at the point this is called.
+    /// This method will cleanly exit if there is no event data upfront
+    /// </summary>
+    /// <param name="database"></param>
+    /// <param name="timeout"></param>
+    /// <param name="cancellation"></param>
+    public static async Task WaitForNonStaleQueryableDataAsync(this IMartenDatabase database, TimeSpan timeout, CancellationToken cancellation)
+    {
+        // Number of active projection shards, plus the high water mark
+        var projectionsCount = database.As<MartenDatabase>().Options.Projections.AllShards().Count + 1;
+
+        // Just get out of there if there are no projections
+        if (projectionsCount == 1)
+        {
+            return;
+        }
+
+        var initial = await database.FetchEventStoreStatistics(cancellation).ConfigureAwait(false);
+
+        // No data, get out of here
+        if (initial.EventCount == 0 || initial.EventSequenceNumber == 1) return;
+
+        using var cancellationSource = new CancellationTokenSource();
+        cancellationSource.CancelAfter(timeout);
+
+        await database.WaitForNonStaleDataAsync(cancellationSource, projectionsCount, initial).ConfigureAwait(false);
+    }
+
+    public static async Task WaitForNonStaleDataAsync(this IMartenDatabase database, CancellationTokenSource cancellationSource,
+        int projectionsCount, EventStoreStatistics initial)
+    {
+        var options = database.As<MartenDatabase>().Options;
+        var perTenant = options.Events.UseTenantPartitionedEvents;
+        var shardIdentities = options.Projections.AllShards().Select(s => s.Name.Identity).ToArray();
+
+        // #5161: AllProjectionProgress returns EVERY row in mt_event_progression, and not all of them
+        // track the event sequence. High-water bookkeeping (HighWaterAllocationFence, #5108) records an
+        // observed sequence allocation and legitimately sits below the mark; a row left behind by a
+        // projection that is no longer registered is never advanced by anyone at all. Holding the wait
+        // open until rows like those reach the initial sequence means holding it open forever, so the
+        // bar has to be applied only to rows that represent progress this store is actually making.
+        //
+        // Recognised shapes, matching ShardName.Compose: the store-global high water mark and its
+        // per-tenant HighWaterMark:{tenant} form, plus each registered shard identity and its
+        // {shard}:{tenant} form. Anything else is bookkeeping or residue and is ignored — which is also
+        // what keeps the next such row from reintroducing this.
+        bool isProgressRow(ShardState row)
+        {
+            var name = row.ShardName;
+
+            if (name == ShardState.HighWaterMark
+                || name.StartsWith(ShardState.HighWaterMark + ":", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            return shardIdentities.Any(identity =>
+                name == identity || name.StartsWith(identity + ":", StringComparison.Ordinal));
+        }
+
+        bool isCaughtUp(IReadOnlyList<ShardState> rows)
+        {
+            // #4761: under per-tenant event partitioning each tenant has its own mt_events_sequence, so a
+            // single store-global "initial" cannot be the bar for every progression row — a tenant with
+            // fewer events legitimately tops out below the global max, and comparing its rows against the
+            // global max makes the wait time out forever. Instead require each registered projection shard
+            // to have caught its OWN tenant up to that tenant's high-water mark.
+            const string hw = ShardState.HighWaterMark;
+            var tenantHighWater = rows
+                .Where(x => x.ShardName.StartsWith(hw + ":", StringComparison.Ordinal))
+                .ToDictionary(x => x.ShardName.Substring(hw.Length + 1), x => x.Sequence);
+
+            // The per-tenant bar only applies when the daemon actually distributes a shard PER TENANT and
+            // therefore records per-tenant high-water rows (HighWaterMark:<tenant>). A single agent that
+            // spans every tenant partition — the common "<shard>:All" case, including Wolverine-managed
+            // event-subscription distribution — records ONE global HighWaterMark plus one global
+            // shard-progress row and no per-tenant rows. #4761's bar then has no high-water rows to check
+            // and waits forever (#4761 follow-up). Fall back to the store-global check, which is exactly
+            // the pre-#4761 behaviour for that shape.
+            if (!perTenant || tenantHighWater.Count == 0)
+            {
+                // projectionsCount is "registered shards + 1" for the high water mark, so the count bar
+                // is measured against progress rows only — see isProgressRow.
+                var progress = rows.Where(isProgressRow).ToArray();
+                return progress.Length >= projectionsCount &&
+                       progress.All(x => x.Sequence >= initial.EventSequenceNumber);
+            }
+
+            // The leading tenant has not reached the store-wide high-water yet — keep waiting so we never
+            // report "caught up" before the daemon has actually done the work.
+            if (tenantHighWater.Values.Max() < initial.EventSequenceNumber)
+            {
+                return false;
+            }
+
+            var byName = rows.ToDictionary(x => x.ShardName, x => x.Sequence);
+            foreach (var (tenant, highWater) in tenantHighWater)
+            {
+                foreach (var shard in shardIdentities)
+                {
+                    if (!byName.TryGetValue($"{shard}:{tenant}", out var seq) || seq < highWater)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        IReadOnlyList<ShardState> projections = [];
+        try
+        {
+            do
+            {
+                projections = await database.AllProjectionProgress(cancellationSource.Token).ConfigureAwait(false);
+                if (isCaughtUp(projections) || cancellationSource.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                await Task.Delay(250.Milliseconds(), cancellationSource.Token).ConfigureAwait(false);
+            } while (true);
+        }
+        catch (TaskCanceledException)
+        {
+            // We just didn't finish
+        }
+
+        if (projections.Count < projectionsCount)
+        {
+            var writer = new StringWriter();
+            await writer.WriteLineAsync($"The projection shards (in total of {projectionsCount}) haven't been completely started within the timeout span").ConfigureAwait(false);
+            await writer.WriteLineAsync().ConfigureAwait(false);
+            await writer.WriteLineAsync(writeStatusMessage(database, projections)).ConfigureAwait(false);
+            await writer.WriteLineAsync().ConfigureAwait(false);
+
+            throw new TimeoutException(writer.ToString());
+        }
+
+        if (cancellationSource.IsCancellationRequested)
+        {
+            var writer = new StringWriter();
+            await writer.WriteLineAsync($"The projections timed out before reaching the initial sequence of {initial.EventSequenceNumber}").ConfigureAwait(false);
+            await writer.WriteLineAsync().ConfigureAwait(false);
+            await writer.WriteLineAsync(writeStatusMessage(database, projections)).ConfigureAwait(false);
+            await writer.WriteLineAsync().ConfigureAwait(false);
+
+            throw new TimeoutException(writer.ToString());
+        }
+    }
+
+    private static string writeStatusMessage(IMartenDatabase database, IReadOnlyList<ShardState> projections)
+    {
+        if (!projections.Any())
+            return
+                "There is no recorded projection, subscription, or even high water mark activity detected. Is the daemon started correctly?";
+
+        // All async names
+        var names = database.As<MartenDatabase>().Options.Projections.AllShards();
+        var missing = names
+            .Where(x => !projections.Any(p => p.ShardName == x.Name.Identity))
+            .Select(x => new ShardState(x.Name.Identity, 0));
+
+        projections = projections.Concat(missing).ToList();
+
+        var grid = new Grid<ShardState>();
+        grid.AddColumn("Shard Name", x => x.ShardName);
+        grid.AddColumn("Sequence", x => x.Sequence.ToString(), true);
+
+        return grid.Write(projections);
+
+
+    }
+
+    private static bool isComplete(this Dictionary<string, long> tracking, long highWaterMark)
+    {
+        return tracking.Values.All(x => x >= highWaterMark);
+    }
+
+    public static async Task WaitForNonStaleProjectionDataAsync(this IMartenDatabase database, Type aggregationType, TimeSpan timeout, CancellationToken token)
+    {
+        // Number of active projection shards, plus the high water mark
+        var shards = database.As<MartenDatabase>().Options.Projections.AsyncShardsPublishingType(aggregationType);
+        if (shards.Length == 0) throw new InvalidOperationException($"Cannot find any registered async projection shards for aggregate type {aggregationType.FullNameInCode()}");
+
+        var tracking = new Dictionary<string, long>();
+        foreach (var shard in shards)
+        {
+            tracking[shard.Identity] = 0;
+        }
+
+        var highWaterMark = await database.FetchHighestEventSequenceNumber(token).ConfigureAwait(false);
+        if (highWaterMark <= 1) return;
+
+        if (tracking.isComplete(highWaterMark)) return;
+
+        using var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+        cancellationSource.CancelAfter(timeout);
+
+        try
+        {
+            while (true)
+            {
+                var current = await database.FetchProjectionProgressFor(shards, cancellationSource.Token).ConfigureAwait(false);
+                foreach (var state in current)
+                {
+                    tracking[state.ShardName] = state.Sequence;
+                }
+
+                if (tracking.isComplete(highWaterMark)) return;
+
+                await Task.Delay(100.Milliseconds(), cancellationSource.Token).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // #4749: distinguish the internal timeout from caller-initiated cancellation. The awaited
+            // operations above throw a TaskCanceledException/OperationCanceledException when EITHER token
+            // fires; previously that leaked out of this method, so a caller's `catch (TimeoutException)`
+            // never triggered and QueryForNonStaleData never "truly" timed out. Propagate genuine caller
+            // cancellation as-is; convert our own timeout into a clean TimeoutException.
+            token.ThrowIfCancellationRequested();
+            throw new TimeoutException(
+                $"The query for {aggregationType.FullNameInCode()} timed out after {timeout} while waiting for the projection to reach the event store high-water mark of {highWaterMark}");
+        }
+    }
+
+    /// <summary>
+    /// Force any Marten async daemons to immediately advance to the latest changes. This is strictly
+    /// meant for test automation scenarios with small to medium sized databases
+    /// </summary>
+    /// <param name="host"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="mode">Optionally control whether the projections and subscriptions should be restarted after they have caught up</param>
+    /// <returns></returns>
+    public static Task<IReadOnlyList<Exception>> ForceAllMartenDaemonActivityToCatchUpAsync(this IHost host, CancellationToken cancellation,
+        CatchUpMode mode = CatchUpMode.AndResumeNormally)
+    {
+        return host.Services.ForceAllMartenDaemonActivityToCatchUpAsync(cancellation, mode);
+    }
+
+    /// <summary>
+    /// Force any Marten async daemons to immediately advance to the latest changes. This is strictly
+    /// meant for test automation scenarios with small to medium sized databases
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="mode">Optionally control whether the projections and subscriptions should be restarted after they have caught up</param>
+    /// <returns></returns>
+    public static async Task<IReadOnlyList<Exception>> ForceAllMartenDaemonActivityToCatchUpAsync(this IServiceProvider services, CancellationToken cancellation,
+        CatchUpMode mode = CatchUpMode.AndResumeNormally)
+    {
+        var logger = services.GetService<ILogger<ProjectionDaemon>>() ?? new NullLogger<ProjectionDaemon>();
+
+        // #4904: under DaemonMode.ExternallyManaged an external system (e.g. Wolverine's managed
+        // event-subscription distribution) OWNS the projection agents and their assignment; Marten
+        // registers no coordinator of its own (see AddAsyncDaemon). Driving the usual
+        // Pause -> Stop -> CatchUp cycle here is unsafe: PauseAsync stops the running agent instances,
+        // but the external supervisor immediately reassigns/restarts them, so our CatchUpAsync and the
+        // restarted per-tenant agent both advance the same <proj>:All:<tenant> mt_event_progression row
+        // -> ProgressionProgressOutOfOrderException. We do not own the daemon, so we cannot "force" it;
+        // degrade to a read-only wait until the externally-run agents reach the current high-water mark.
+        // (The proper active-quiesce — the external coordinator suspending agent assignment during a
+        // forced catch-up — lives in that external coordinator, not here; tracked on #4904.)
+        if (services.GetService<IDocumentStore>() is DocumentStore
+            {
+                Options.Projections.AsyncMode: JasperFx.Events.Daemon.DaemonMode.ExternallyManaged
+            } externallyManagedStore)
+        {
+            return await waitForExternallyManagedCatchUpAsync(externallyManagedStore, cancellation).ConfigureAwait(false);
+        }
+
+        var coordinator = services.GetRequiredService<IProjectionCoordinator>();
+
+        // Has to be paused first
+        await coordinator.PauseAsync().ConfigureAwait(false);
+
+        var daemons = await coordinator.AllDaemonsAsync().ConfigureAwait(false);
+
+        var list = new List<Exception>();
+
+        foreach (var daemon in daemons)
+        {
+            try
+            {
+                await daemon.StopAllAsync().ConfigureAwait(false);
+                await daemon.CatchUpAsync(cancellation).ConfigureAwait(false);
+
+
+                logger.LogDebug("Executed a ProjectionDaemon.CatchUp() against {Daemon} in the main Marten store", daemon);
+            }
+            catch (Exception e) when (cancellation.IsCancellationRequested && IsCallerCancellation(e))
+            {
+                // Caller-initiated cancellation — propagate as a normal cancellation
+                // signal rather than reporting it as a daemon error. Without this,
+                // a test that supplies a CTS that fires while the daemon's
+                // catch-up pipeline (Polly-wrapped per-shard execution) is mid-
+                // flight would see the propagated OperationCanceledException
+                // surface as a fake "exceptions list is non-empty" assertion
+                // failure. See #4462 (initial fix) + the AggregateException
+                // unwrap added here for the case where JasperFxAsyncDaemon
+                // bundles per-shard cancellation exceptions before throwing.
+                throw new OperationCanceledException(cancellation);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error trying to execute a CatchUp on {Daemon} in the main Marten store", daemon);
+                list.Add(e);
+            }
+        }
+
+        if (mode == CatchUpMode.AndResumeNormally)
+        {
+            await coordinator.StartAsync(cancellation).ConfigureAwait(false);
+        }
+
+        return list;
+    }
+
+    private static bool IsCallerCancellation(Exception e) =>
+        e switch
+        {
+            OperationCanceledException => true,
+            AggregateException agg => agg.InnerExceptions.Count > 0
+                                      && agg.InnerExceptions.All(IsCallerCancellation),
+            _ => false
+        };
+
+    // #4904: read-only catch-up wait used when the daemon is externally managed (see both
+    // ForceAll... overloads). Iterates every database the store knows about and blocks until each
+    // one's registered projection shards reach that database's current high-water mark, reusing the
+    // exact non-stale bar the WaitForNonStale* helpers use — including the per-tenant-partitioned
+    // handling in WaitForNonStaleDataAsync. It never starts, stops, or drives an agent (the external
+    // system owns that), so it cannot race the running agents into an out-of-order progression write.
+    private static async Task<IReadOnlyList<Exception>> waitForExternallyManagedCatchUpAsync(
+        DocumentStore store, CancellationToken cancellation)
+    {
+        var databases = await store.Storage.AllDatabases().ConfigureAwait(false);
+        foreach (var database in databases.OfType<MartenDatabase>())
+        {
+            // Number of active projection shards, plus the high water mark; nothing to wait on otherwise.
+            var projectionsCount = database.Options.Projections.AllShards().Count + 1;
+            if (projectionsCount == 1)
+            {
+                continue;
+            }
+
+            var initial = await database.FetchEventStoreStatistics(cancellation).ConfigureAwait(false);
+
+            // No event activity on this database yet -> nothing to catch up to.
+            if (initial.EventCount == 0 || initial.EventSequenceNumber == 0)
+            {
+                continue;
+            }
+
+            using var cancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+            await database.WaitForNonStaleDataAsync(cancellationSource, projectionsCount, initial).ConfigureAwait(false);
+        }
+
+        return Array.Empty<Exception>();
+    }
+
+        /// <summary>
+    /// Force any Marten async daemons for an ancillary Marten store to immediately advance to the latest changes. This is strictly
+    /// meant for test automation scenarios with small to medium sized databases
+    /// </summary>
+    /// <param name="host"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="mode">Optionally control whether the projections and subscriptions should be restarted after they have caught up</param>
+    /// <returns></returns>
+    public static Task<IReadOnlyList<Exception>> ForceAllMartenDaemonActivityToCatchUpAsync<T>(this IHost host, CancellationToken cancellation,
+        CatchUpMode mode = CatchUpMode.AndResumeNormally) where T : class, IDocumentStore
+    {
+        return host.Services.ForceAllMartenDaemonActivityToCatchUpAsync<T>(cancellation, mode);
+    }
+
+    /// <summary>
+    /// Force any Marten async daemons for an ancillary Marten store to immediately advance to the latest changes. This is strictly
+    /// meant for test automation scenarios with small to medium sized databases
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="cancellation"></param>
+    /// <param name="mode">Optionally control whether the projections and subscriptions should be restarted after they have caught up</param>
+    /// <returns></returns>
+    public static async Task<IReadOnlyList<Exception>> ForceAllMartenDaemonActivityToCatchUpAsync<T>(this IServiceProvider services, CancellationToken cancellation,
+        CatchUpMode mode = CatchUpMode.AndResumeNormally) where T : class, IDocumentStore
+    {
+        var logger = services.GetService<ILogger<ProjectionDaemon>>() ?? new NullLogger<ProjectionDaemon>();
+
+        // #4904: see the main-store overload above — under ExternallyManaged the ancillary store's
+        // agents are also externally owned, so forcing a second-writer CatchUp races the external
+        // supervisor. Degrade to a read-only wait for the ancillary store's databases.
+        if (services.GetService<T>() is DocumentStore
+            {
+                Options.Projections.AsyncMode: JasperFx.Events.Daemon.DaemonMode.ExternallyManaged
+            } externallyManagedStore)
+        {
+            return await waitForExternallyManagedCatchUpAsync(externallyManagedStore, cancellation).ConfigureAwait(false);
+        }
+
+        var coordinator = services.GetRequiredService<IProjectionCoordinator<T>>();
+        var daemons = await coordinator.AllDaemonsAsync().ConfigureAwait(false);
+
+        var list = new List<Exception>();
+
+        foreach (var daemon in daemons)
+        {
+            try
+            {
+                await daemon.StopAllAsync().ConfigureAwait(false);
+                await daemon.CatchUpAsync(cancellation).ConfigureAwait(false);
+
+                if (mode == CatchUpMode.AndResumeNormally)
+                {
+                    await daemon.StartAllAsync().ConfigureAwait(false);
+                }
+
+                logger.LogDebug("Executed a ProjectionDaemon.CatchUp() against {Daemon} in Marten store {StoreType}", daemon, typeof(T).FullNameInCode());
+            }
+            catch (Exception e) when (cancellation.IsCancellationRequested && IsCallerCancellation(e))
+            {
+                // Caller-initiated cancellation — propagate, do not classify as
+                // a daemon error. See #4462 + matching guard on the main-store
+                // variant above. The IsCallerCancellation helper unwraps the
+                // AggregateException JasperFxAsyncDaemon wraps per-shard
+                // cancellations in.
+                throw new OperationCanceledException(cancellation);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error trying to execute a CatchUp on {Daemon} in Marten store {StoreType}", daemon, typeof(T).FullNameInCode());
+                list.Add(e);
+            }
+        }
+
+        return list;
+    }
+}
+
+
+public enum CatchUpMode
+{
+    /// <summary>
+    /// Default setting, in this case the projections and subscriptions will be restarted in normal operation
+    /// after the CatchUp operation is complete
+    /// </summary>
+    AndResumeNormally,
+
+    /// <summary>
+    /// Do not resume the asynchronous projection or synchronous behavior after the CatchUp operation is complete
+    /// This may be useful for test automation
+    /// </summary>
+    AndDoNothing
+}
+

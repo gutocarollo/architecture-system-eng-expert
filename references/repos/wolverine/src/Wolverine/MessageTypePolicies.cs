@@ -1,0 +1,230 @@
+using System.Linq.Expressions;
+using System.Reflection;
+using JasperFx.Core.Reflection;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.RateLimiting;
+using Wolverine.Runtime.Deduplication;
+using Wolverine.Runtime.Serialization.Encryption;
+
+namespace Wolverine;
+
+public class MessageTypePolicies<T>
+{
+    private readonly WolverineOptions _parent;
+
+    public MessageTypePolicies(WolverineOptions parent)
+    {
+        _parent = parent;
+    }
+
+    /// <summary>
+    ///     Specify that the following members on every message that can be cast
+    ///     to type T should be audited as part of telemetry, logging, and metrics
+    ///     data exported from this application
+    /// </summary>
+    /// <param name="memberExpressions">Direct member access expressions on the message type, e.g. <c>x => x.AccountId</c></param>
+    /// <typeparam name="T"></typeparam>
+    /// <exception cref="ArgumentOutOfRangeException">One of the expressions is not a direct member access on the message type</exception>
+    public MessageTypePolicies<T> Audit(params Expression<Func<T, object>>[] memberExpressions)
+    {
+        var members = memberExpressions.Select(determineAuditedMember).ToArray();
+
+        var policy = new AuditMembersPolicy<T>(members);
+        _parent.RegisteredPolicies.Insert(0, policy);
+        return this;
+
+        // The generated code writes the audited member as "{message}.{MemberName}", so only a direct
+        // member access on the message type can be audited
+        static MemberInfo determineAuditedMember(Expression<Func<T, object>> expression)
+        {
+            // Boxing a value type member to object shows up as a Convert() around the member access
+            var body = expression.Body;
+            while (body is UnaryExpression { NodeType: ExpressionType.Convert or ExpressionType.ConvertChecked } unary)
+            {
+                body = unary.Operand;
+            }
+
+            if (body is MemberExpression { Expression: ParameterExpression } member)
+            {
+                return member.Member;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(memberExpressions),
+                $"'{expression}' is not a direct member access on {typeof(T).FullNameInCode()} and cannot be audited. " +
+                "Audit a single public field or property of the message type, or use a computed member on the " +
+                "message type itself and mark it with [Audit].");
+        }
+    }
+
+    /// <summary>
+    ///     Add middleware only on handlers where the message type can be cast to the message
+    ///     type of the middleware type
+    /// </summary>
+    /// <param name="middlewareType"></param>
+    public MessageTypePolicies<T> AddMiddleware(Type middlewareType)
+    {
+        var policy = _parent.FindOrCreateMiddlewarePolicy();
+
+        policy.AddType(middlewareType, c => c.InputType().CanBeCastTo<T>()).MatchByMessageType = true;
+        return this;
+    }
+
+    /// <summary>
+    ///     Add middleware only on handlers where the message type can be cast to the message
+    ///     type of the middleware type
+    /// </summary>
+    /// <param name="middlewareType"></param>
+    public MessageTypePolicies<T> AddMiddleware<TMiddleware>()
+    {
+        return AddMiddleware(typeof(TMiddleware));
+    }
+
+    /// <summary>
+    /// Apply a rate limit schedule to messages assignable to type T
+    /// </summary>
+    public MessageTypePolicies<T> RateLimit(RateLimit defaultLimit, Action<RateLimitSchedule>? configure = null)
+    {
+        return RateLimit(null, defaultLimit, configure);
+    }
+
+    /// <summary>
+    /// Apply a rate limit schedule to messages assignable to type T using a shared key
+    /// </summary>
+    public MessageTypePolicies<T> RateLimit(string? key, RateLimit defaultLimit,
+        Action<RateLimitSchedule>? configure = null)
+    {
+        var schedule = new RateLimitSchedule(defaultLimit);
+        configure?.Invoke(schedule);
+        _parent.ConfigureRateLimit(typeof(T), schedule, key);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Mark messages assignable to <typeparamref name="T"/> as requiring AES-256-GCM
+    /// encryption on send and on receive. Resolves the encrypting serializer at the
+    /// time this method is invoked, so <see cref="WolverineOptions.UseEncryption"/> or
+    /// <see cref="WolverineOptions.RegisterEncryptionSerializer"/> must be called
+    /// <b>before</b> this method is invoked. Inbound envelopes of this type whose
+    /// content-type is not the encrypted content-type are routed to the dead-letter
+    /// queue with <see cref="EncryptionPolicyViolationException"/>.
+    /// </summary>
+    public MessageTypePolicies<T> Encrypt()
+    {
+        var encrypting = _parent.TryFindSerializer(EncryptionHeaders.EncryptedContentType)
+            ?? throw new InvalidOperationException(
+                "No encrypting serializer is registered. Call " +
+                "WolverineOptions.UseEncryption(provider) or " +
+                "WolverineOptions.RegisterEncryptionSerializer(provider) " +
+                $"before .ForMessagesOfType<{typeof(T).Name}>().Encrypt().");
+
+        _parent.MetadataRules.Add(new EncryptMessageTypeRule<T>(encrypting));
+        _parent.RequiredEncryptedTypes.Add(typeof(T));
+
+        // Pair the rule for Fault<T> so auto-published fault events for this
+        // message type are also routed through the encrypting serializer. The
+        // EncryptMessageTypeRule<T>.Modify gate is invariant in T, so a separate
+        // rule is required (the one for T does not match Fault<T>).
+        //
+        // Skipped when T is a value type because Fault<T> is constrained to
+        // T : class. The FaultPublisher already silently no-ops on value-type
+        // messages, so no Fault<T> is ever produced for those types.
+        //
+        // Reflective construction keeps Encrypt<T>() callable for any T (no
+        // new generic constraint at the entry point). If a user calls Encrypt<T>()
+        // for the same T more than once, the rules accumulate in MetadataRules
+        // (a list, not a set, mirroring the existing behavior for the T rule);
+        // the duplicate rules are behaviorally idempotent — the second swap of
+        // Serializer/ContentType writes the same values — but the list grows.
+        if (!typeof(T).IsValueType)
+        {
+            var faultType = typeof(Fault<>).MakeGenericType(typeof(T));
+            var faultRuleType = typeof(EncryptMessageTypeRule<>).MakeGenericType(faultType);
+            var faultRule = (IEnvelopeRule)Activator.CreateInstance(faultRuleType, encrypting)!;
+            _parent.MetadataRules.Add(faultRule);
+            _parent.RequiredEncryptedTypes.Add(faultType);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Opt this message type into auto-published <see cref="Fault{T}"/> events on
+    /// terminal handler failure. Overrides any global setting.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <see cref="Fault{T}"/> requires <typeparamref name="T"/> to be a reference type.
+    /// Calling this for value-type messages compiles but will not produce a fault at runtime.
+    /// </para>
+    /// <para>
+    /// <b>Delivery semantics.</b> See <see cref="WolverineOptions.PublishFaultEvents(bool, bool, bool)"/>
+    /// — auto-published fault events are best-effort and not transactionally co-committed with
+    /// the dead-letter-queue move.
+    /// </para>
+    /// <para>
+    /// <b>Scope.</b> See <see cref="WolverineOptions.PublishFaultEvents(bool, bool, bool)"/> —
+    /// fault events are not emitted for send-side DLQ movements or unknown-message-type envelopes.
+    /// </para>
+    /// <para>
+    /// <b>Fully-specified override.</b> The values passed here — including the defaults for
+    /// <paramref name="includeExceptionMessage"/> and <paramref name="includeStackTrace"/> — are
+    /// stored as the override for <typeparamref name="T"/>. They do <i>not</i> inherit subsequent
+    /// changes to globals on <see cref="WolverineOptions.PublishFaultEvents(bool, bool, bool)"/>.
+    /// If you want this type to redact exception messages, pass
+    /// <c>includeExceptionMessage: false</c> here explicitly.
+    /// </para>
+    /// </remarks>
+    public MessageTypePolicies<T> PublishFault(
+        bool includeDiscarded = false,
+        bool includeExceptionMessage = true,
+        bool includeStackTrace = true)
+    {
+        var mode = includeDiscarded
+            ? FaultPublishingMode.DlqAndDiscard
+            : FaultPublishingMode.DlqOnly;
+        _parent.FaultPublishing.SetOverride(
+            typeof(T), mode, includeExceptionMessage, includeStackTrace);
+        return this;
+    }
+
+    /// <summary>
+    /// GH-4180 follow up. Derive the <b>logical</b> <see cref="Envelope.DeduplicationId"/> for every
+    /// outgoing message assignable to <typeparamref name="T"/> from the message itself, so publishers
+    /// do not have to set <c>DeliveryOptions.DeduplicationId</c> at every call site.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This never overwrites an id that is already present -- an explicit
+    /// <c>DeliveryOptions.DeduplicationId</c> wins -- and <paramref name="source"/> may return null or
+    /// an empty string to leave a particular message without one.
+    /// </para>
+    /// <para>
+    /// Deriving an id does not deduplicate anything on its own. Enforcement is <c>[Deduplicated]</c>
+    /// on the receiving handler or endpoint, plus
+    /// <see cref="DurabilitySettings.MessageDeduplicationMode"/>.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// opts.Policies.ForMessagesOfType&lt;RebuildProjection&gt;()
+    ///     .DeduplicateBy(x => $"{x.ProjectionName}|{x.Occurrence:O}");
+    /// </code>
+    /// </example>
+    public MessageTypePolicies<T> DeduplicateBy(Func<T, string?> source)
+    {
+        _parent.MessageDeduplication.ByMessage(source);
+        return this;
+    }
+
+    /// <summary>
+    /// Opt this message type out of auto-published <see cref="Fault{T}"/> events,
+    /// even when the global default is on.
+    /// </summary>
+    public MessageTypePolicies<T> DoNotPublishFault()
+    {
+        _parent.FaultPublishing.SetOverride(typeof(T), FaultPublishingMode.None);
+        return this;
+    }
+}

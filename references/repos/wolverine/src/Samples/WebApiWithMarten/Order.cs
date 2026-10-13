@@ -1,0 +1,135 @@
+using JasperFx.Core;
+using Marten;
+using Microsoft.AspNetCore.Mvc;
+using Wolverine;
+using Wolverine.Attributes;
+using Wolverine.Marten;
+
+namespace WebApiWithMarten;
+
+public class Order
+{
+    public Guid Id { get; set; }
+    public string Description { get; set; } = null!;
+}
+
+public record CreateOrder(string Description);
+
+public record OrderCreated(Guid Id);
+
+#region sample_createordercontroller
+public class CreateOrderController : ControllerBase
+{
+    [HttpPost("/orders/create2")]
+    public async Task Create(
+        [FromBody] CreateOrder command,
+        [FromServices] IDocumentSession session,
+        [FromServices] IMartenOutbox outbox)
+    {
+        var order = new Order
+        {
+            Description = command.Description
+        };
+
+        // Register the new document with Marten
+        session.Store(order);
+
+        // Don't worry, this message doesn't go out until
+        // after the Marten transaction succeeds
+        await outbox.PublishAsync(new OrderCreated(order.Id));
+
+        // Commit the Marten transaction
+        await session.SaveChangesAsync();
+    }
+}
+
+#endregion
+
+public class OrderHandler
+{
+    #region sample_shorthand_order_handler
+    // Note that we're able to avoid doing any kind of asynchronous
+    // code in this handler
+    [Transactional]
+    public static OrderCreated Handle(CreateOrder command, IDocumentSession session)
+    {
+        var order = new Order
+        {
+            Description = command.Description
+        };
+
+        // Register the new document with Marten
+        session.Store(order);
+
+        // Utilizing Wolverine's "cascading messages" functionality
+        // to have this message sent through Wolverine
+        return new OrderCreated(order.Id);
+    }
+
+    #endregion
+}
+
+public class OrderHandler2
+{
+    #region sample_shorthand_order_handler_alternative
+    [Transactional]
+    public static ValueTask Handle(
+        CreateOrder command,
+        IDocumentSession session,
+        IMessageBus bus)
+    {
+        var order = new Order
+        {
+            Description = command.Description
+        };
+
+        // Register the new document with Marten
+        session.Store(order);
+
+        // Utilizing Wolverine's "cascading messages" functionality
+        // to have this message sent through Wolverine
+        return bus.SendAsync(
+            new OrderCreated(order.Id),
+            new DeliveryOptions { DeliverWithin = 5.Minutes() });
+    }
+
+    #endregion
+}
+
+public class LonghandOrderHandler
+{
+    #region sample_longhand_order_handler
+    public static async Task Handle(
+        CreateOrder command,
+        IDocumentSession session,
+        IMartenOutbox outbox,
+        CancellationToken cancellation)
+    {
+        var order = new Order
+        {
+            Description = command.Description
+        };
+
+        // Register the new document with Marten
+        session.Store(order);
+
+        // Hold on though, this message isn't actually sent
+        // until the Marten session is committed
+        await outbox.SendAsync(new OrderCreated(order.Id));
+
+        // This makes the database commits, *then* flushed the
+        // previously registered messages to Wolverine's sending
+        // agents
+        await session.SaveChangesAsync(cancellation);
+    }
+
+    #endregion
+}
+
+public class OrderCreatedHandler
+{
+    public static void Handle(OrderCreated created)
+    {
+        Console.WriteLine($"I got an OrderCreated {created.Id}");
+    }
+}

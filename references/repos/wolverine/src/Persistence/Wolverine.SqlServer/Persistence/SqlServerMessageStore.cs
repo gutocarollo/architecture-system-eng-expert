@@ -1,0 +1,969 @@
+using Wolverine.Persistence.Sagas;
+﻿using System.Data;
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
+using ImTools;
+using JasperFx;
+using JasperFx.Core;
+using JasperFx.Core.Reflection;
+using JasperFx.Descriptors;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
+using Weasel.Core;
+using Weasel.SqlServer;
+using Wolverine.Logging;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Persistence.Durability.DeadLetterManagement;
+using Wolverine.Persistence.Durability.ScheduledMessageManagement;
+using Wolverine.RDBMS;
+using Wolverine.RDBMS.Sagas;
+using Wolverine.RDBMS.Transport;
+using Wolverine.Runtime;
+using Wolverine.Runtime.Agents;
+using Wolverine.Runtime.WorkerQueues;
+using Wolverine.SqlServer.Internals;
+using Wolverine.SqlServer.Schema;
+using Wolverine.SqlServer.Util;
+using Wolverine.Transports;
+using CascadeAction = Weasel.SqlServer.CascadeAction;
+using DbCommandBuilder = Weasel.Core.DbCommandBuilder;
+using Table = Weasel.SqlServer.Tables.Table;
+
+namespace Wolverine.SqlServer.Persistence;
+
+public class SqlServerMessageStore : MessageDatabase<SqlConnection>, IConnectionBudgetProbe, ISagaStorageCodeSource
+{
+    /// <summary>
+    /// GH-4902. SQL Server compares a uniqueidentifier from its last six bytes, and the envelope tables are
+    /// clustered on the id, so SQL Server-ordered ids keep them from fragmenting. Used automatically when every
+    /// message store in the application agrees and nothing was set explicitly.
+    /// </summary>
+    public override EnvelopeIdGeneration? PreferredEnvelopeIdGeneration => EnvelopeIdGeneration.NewIdSqlServerOrder;
+
+    /// <summary>
+    ///     GH-4805. Lets generated saga code construct <c>DatabaseSagaSchema<TId, TSaga></c> itself, which is the only way the
+    ///     saga path runs in a native image — <c>SagaSchemaFor</c> is an abstract generic method, and ILC
+    ///     cannot dispatch one.
+    /// </summary>
+    /// <remarks>
+    ///     <c>MakeGenericType</c> is safe here and nowhere near the runtime path: called once per saga
+    ///     chain while the chain model is built, under the JIT, and the <see cref="Type" /> it returns is
+    ///     only rendered as source text. <b>Note the argument order</b> — this store's schema is
+    ///     <c>DatabaseSagaSchema<TId, TSaga></c>, and the five relational stores do not agree on it, which is exactly why each
+    ///     answers this for itself rather than a shared helper guessing.
+    /// </remarks>
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "GH-4805. The closed type is RENDERED AS SOURCE TEXT by EnrollAndFetchSagaStorageFrame and never instantiated from this Type. Called at codegen time under the JIT, so it does not execute in a native image at all -- the generated code that replaces it is what runs there.")]
+    public SagaSchemaCodegen? SagaSchemaCodegenFor(Type sagaType, Type idType)
+    {
+        return new SagaSchemaCodegen(typeof(DatabaseSagaSchema<,>).MakeGenericType(idType, sagaType), typeof(RelationalSagaStorage));
+    }
+
+    /// <summary>
+    /// GH-4375. SQL Server's hard limit, and the tightest of any provider Wolverine ships. Measured:
+    /// 349 outgoing envelopes in one transaction succeed (2,095 parameters) and 350 fail (2,101); 233
+    /// incoming succeed (2,097) and 234 fail (2,106).
+    /// </summary>
+    public override int MaximumParameterCount => 2100;
+
+    private readonly string _findAtLargeEnvelopesSql;
+    private readonly string _scheduledLockId;
+    private DatabaseServerId? _serverId;
+    private ImHashMap<Type, IDatabaseSagaSchema> _sagaStorage = ImHashMap<Type, IDatabaseSagaSchema>.Empty;
+    
+    private readonly List<ISchemaObject> _externalTables = new();
+    
+    // typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(...) at L56
+    // closes the saga schema generic over (sagaType, idType) at startup. Same
+    // chunk D / I / J / K / AE CloseAndBuildAs pattern: AOT-clean apps preserve
+    // saga state types via TrimmerRootDescriptor. Cross-link to #2769.
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050",
+        Justification = "DatabaseSagaSchema<,> closed over runtime saga / id types at startup; AOT consumers preserve via TrimmerRootDescriptor. See AOT guide / #2769.")]
+    public SqlServerMessageStore(DatabaseSettings database, DurabilitySettings settings,
+        ILogger<SqlServerMessageStore> logger, IEnumerable<SagaTableDefinition> sagaTypes)
+        : base(database, SqlClientFactory.Instance.CreateDataSource(database.ConnectionString!), settings, logger, new SqlServerMigrator(), SqlServerProvider.Instance)
+    {
+        _findAtLargeEnvelopesSql =
+            $"select top (@limit) {DatabaseConstants.IncomingFields} from {database.SchemaName}.{DatabaseConstants.IncomingTable} where owner_id = {TransportConstants.AnyNode} and status = '{EnvelopeStatus.Incoming}' and {DatabaseConstants.ReceivedAt} = @address";
+
+        _scheduledLockId = "Wolverine:Scheduled:" + database.ScheduledJobLockId.ToString();
+        // Use the Wolverine-owned SqlServerAdvisoryLock (not Weasel.SqlServer.AdvisoryLock)
+        // so HasLock pings the held SQL session and detects KILL SPID / AlwaysOn
+        // failover / network drops. See GH-2602.
+        AdvisoryLock = new SqlServerAdvisoryLock(() => new SqlConnection(database.ConnectionString),
+            logger, Identifier);
+
+        foreach (var sagaTableDefinition in sagaTypes)
+        {
+            var storage = typeof(DatabaseSagaSchema<,>).CloseAndBuildAs<IDatabaseSagaSchema>(sagaTableDefinition, _settings, sagaTableDefinition.IdMember.GetMemberType()!, sagaTableDefinition.SagaType);
+            _sagaStorage = _sagaStorage.AddOrUpdate(sagaTableDefinition.SagaType, storage);
+        }
+        
+        // ReSharper disable once VirtualMemberCallInConstructor
+        var descriptor = Describe();
+        Id = new DatabaseId(descriptor.ServerName, descriptor.DatabaseName);
+    }
+
+    protected override void writeMessageIdArrayQueryList(DbCommandBuilder builder, Guid[] messageIds)
+    {
+        if (messageIds.Length == 1)
+        {
+            builder.Append($" and {DatabaseConstants.Id} = ");
+            builder.AppendParameter(messageIds.Single());
+        }
+        else
+        {
+            builder.Append(" and (");
+            builder.Append($"{DatabaseConstants.Id} = ");
+            builder.AppendParameter(messageIds[0]);
+
+            for (int i = 1; i < messageIds.Length; i++)
+            {
+                builder.Append($" or {DatabaseConstants.Id} = ");
+                builder.AppendParameter(messageIds[i]);
+            }
+            
+            builder.Append(")");
+        }
+    }
+
+    /// <summary>
+    ///     Fetch a list of the existing tables in the database filtered by schemas
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    // TODO -- get this moved to Weasel. Shouldn't be here, but Claude brute forced it
+    public async Task<IReadOnlyList<DbObjectName>> SchemaTables(CancellationToken ct = default)
+    {
+        var schemaNames = AllSchemaNames();
+
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+
+        var tables = new List<DbObjectName>();
+        foreach (var schemaName in schemaNames)
+        {
+            var sql = $"SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema = @schema";
+            await using var cmd = conn.CreateCommand(sql).With("schema", schemaName);
+
+            await using var reader = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
+            while (await reader.ReadAsync(ct).ConfigureAwait(false))
+            {
+                var schema = reader.GetString(0);
+                var name = reader.GetString(1);
+                tables.Add(new DbObjectName(schema, name));
+            }
+
+            await reader.CloseAsync().ConfigureAwait(false);
+        }
+
+        await conn.CloseAsync().ConfigureAwait(false);
+        return tables;
+    }
+
+    protected override INodeAgentPersistence? buildNodeStorage(DatabaseSettings databaseSettings,
+        DbDataSource dataSource)
+    {
+        return new SqlServerNodePersistence(databaseSettings, this, Durability);
+    }
+
+    protected override bool isExceptionFromDuplicateEnvelope(Exception ex)
+    {
+        if (ex is SqlException sqlEx)
+        {
+            if (sqlEx.Number == 2627 || sqlEx.Number == 2601) return true;
+            return sqlEx.Message.ContainsIgnoreCase("Violation of PRIMARY KEY constraint")
+                || sqlEx.Message.ContainsIgnoreCase("Violation of UNIQUE KEY constraint");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// GH-4565. Whether <paramref name="ex"/> is a unique-constraint violation raised by the INBOX table
+    /// specifically, as opposed to anywhere else in the transaction.
+    /// </summary>
+    /// <remarks>
+    /// <para>Distinct from <see cref="isExceptionFromDuplicateEnvelope"/>, which is deliberately
+    /// table-agnostic: its caller has already established that the failing insert was the inbox one, and it
+    /// is reused for the deduplication table and the dynamic listener registry. This predicate is for
+    /// callers with no such context — the <c>Discard()</c> rule in <c>PolecatIntegration</c>, which sees
+    /// every exception a handler's transaction can raise.</para>
+    ///
+    /// <para><c>SqlException</c> carries no table name, but 2627 / 2601 always name the object in the
+    /// message: <c>Violation of PRIMARY KEY constraint 'pkey_x'. Cannot insert duplicate key in object
+    /// 'schema.table'.</c> Nothing but the message will say, so the message is what is read.</para>
+    /// </remarks>
+    public static bool IsDuplicateIncomingEnvelope(Exception ex)
+    {
+        for (var current = ex; current != null; current = current.InnerException)
+        {
+            if (current is SqlException sqlEx
+                && (sqlEx.Number == 2627 || sqlEx.Number == 2601)
+                && IncomingTableNaming.IsIncomingTable(objectNameFrom(sqlEx.Message)))
+            {
+                return true;
+            }
+
+            if (current is AggregateException aggregate
+                && aggregate.InnerExceptions.Any(IsDuplicateIncomingEnvelope))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// The object name out of <c>Cannot insert duplicate key in object 'schema.table'</c>, or null when the
+    /// message is not that shape.
+    /// </summary>
+    private static string? objectNameFrom(string message)
+    {
+        const string marker = "in object '";
+
+        var start = message.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (start < 0) return null;
+
+        start += marker.Length;
+        var end = message.IndexOf('\'', start);
+
+        return end < 0 ? null : message.Substring(start, end - start);
+    }
+
+    public override string? BatchedDeleteExpiredHandledEnvelopesSql(int batchSize)
+    {
+        // DELETE TOP bounds each statement so locks are held only briefly, reducing contention
+        // with live inbox traffic under heavy load.
+        return
+            $"delete top ({batchSize}) from {SchemaName}.{DatabaseConstants.IncomingTable} " +
+            $"where {DatabaseConstants.Status} = '{EnvelopeStatus.Handled}' and {DatabaseConstants.KeepUntil} <= @now;";
+    }
+
+    public override string? BatchedDeleteExpiredDeduplicationClaimsSql(int batchSize)
+    {
+        return
+            // GH-4757: whichever table the configured mode provisioned.
+            $"delete top ({batchSize}) from {SchemaName}.{DeduplicationTableNameFor(Durability)} " +
+            $"where {DatabaseConstants.Expires} <= @now;";
+    }
+
+    /// <summary>GH-4742. As <see cref="BatchedDeleteExpiredDeduplicationClaimsSql" />.</summary>
+    public override string? BatchedDeleteExpiredDeduplicatedResponsesSql(int batchSize)
+    {
+        return
+            $"delete top ({batchSize}) from {SchemaName}.{DatabaseConstants.DeduplicatedResponsesTableName} " +
+            $"where {DatabaseConstants.Expires} <= @now;";
+    }
+
+    // GH-3971: deliberately NOT overriding DistinctOwnerIdsSql. The recursive index skip-scan
+    // PostgreSQL uses cannot be expressed in T-SQL: SQL Server forbids aggregate functions, TOP and
+    // subqueries in the recursive member of a recursive CTE, and every spelling of "next distinct value"
+    // needs one of them. The portable `select distinct` stands, which with the owner_id index is an
+    // index scan over a narrow key rather than the heap scan over 12 KB rows it replaces -- a real
+    // improvement, just not the constant-time one Postgres gets. The batched, indexable UPDATE below is
+    // the larger half of the win and applies here unchanged.
+
+    public override string? BatchedReleaseOwnershipSql(DbObjectName table, string deadOwnerList, int batchSize)
+    {
+        var owner = DatabaseConstants.OwnerId;
+
+        // UPDATE TOP bounds each statement so locks are held only briefly, the same shape as
+        // BatchedDeleteExpiredHandledEnvelopesSql.
+        return $"update top ({batchSize}) {table} set {owner} = 0 where {owner} in ({deadOwnerList});";
+    }
+
+    protected override void writePagingAfter(DbCommandBuilder builder, int offset, int limit)
+    {
+        if (offset == 0) return;
+        
+        if (offset > 0)
+        {
+            builder.Append(" OFFSET ");
+            builder.AppendParameter(offset);
+            builder.Append(" ROWS ");
+        }
+        
+        if (limit > 0)
+        {
+            builder.Append(" FETCH NEXT ");
+            builder.AppendParameter(limit);
+            builder.Append(" ROWS ONLY");
+        }
+    }
+
+    protected override string toTopClause(DeadLetterEnvelopeQuery query)
+    {
+        if (query.PageSize > 0 && query.PageNumber <= 1)
+        {
+            return $" top {query.PageSize}";
+        }
+
+        return string.Empty;
+    }
+
+    protected override string toTopClause(ScheduledMessageQuery query)
+    {
+        if (query.PageSize > 0 && query.PageNumber <= 1)
+        {
+            return $" top {query.PageSize}";
+        }
+
+        return string.Empty;
+    }
+
+    public override async Task<PersistedCounts> FetchCountsAsync()
+    {
+        // GH-4318: this runs on every UpdateMetricsPeriod tick (5s default), and the scanning
+        // form below pays three full scans of tables that can hold millions of retained rows.
+        // sys.dm_db_partition_stats.row_count is transactionally-maintained metadata — exact,
+        // unlike PostgreSQL's sampled reltuples — and the GH-4316/GH-4318 filtered indexes carry
+        // the per-status split (Handled and Scheduled slices) as their own row counts, so one
+        // metadata query answers everything with zero scans at any table size. Reading the DMV
+        // needs VIEW DATABASE STATE, and an old schema may lack the filtered indexes; both cases
+        // fall back to the scanning form.
+        try
+        {
+            var counts = await tryFetchCountsFromPartitionStatsAsync();
+            if (counts != null)
+            {
+        // GH-4499 follow-up: the head of the outbox, so a stuck outbox can be told from a busy one
+        await fetchOldestOutgoingAsync(counts);
+
+                return counts;
+            }
+        }
+        catch (SqlException)
+        {
+            // Most likely a principal without VIEW DATABASE STATE — pay for the scans instead
+        }
+
+        return await fetchCountsWithScansAsync();
+    }
+
+    private async Task<PersistedCounts?> tryFetchCountsFromPartitionStatsAsync()
+    {
+        var sql = $@"
+select o.name, ps.index_id, isnull(i.name, ''), sum(ps.row_count)
+from sys.dm_db_partition_stats ps
+join sys.objects o on ps.object_id = o.object_id
+join sys.schemas s on o.schema_id = s.schema_id
+join sys.indexes i on ps.object_id = i.object_id and ps.index_id = i.index_id
+where s.name = @schema
+  and o.name in ('{DatabaseConstants.IncomingTable}', '{DatabaseConstants.OutgoingTable}', '{DatabaseConstants.DeadLetterTable}')
+group by o.name, ps.index_id, i.name";
+
+        long incomingTotal = 0;
+        long? handled = null;
+        long? scheduled = null;
+        var counts = new PersistedCounts();
+
+        await using (var reader = await CreateCommand(sql).With("schema", SchemaName).ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                var tableName = await reader.GetFieldValueAsync<string>(0);
+                var indexId = await reader.GetFieldValueAsync<int>(1);
+                var indexName = await reader.GetFieldValueAsync<string>(2);
+                var rows = await reader.GetFieldValueAsync<long>(3);
+
+                if (tableName == DatabaseConstants.OutgoingTable)
+                {
+                    if (indexId <= 1) counts.Outgoing = (int)rows;
+                }
+                else if (tableName == DatabaseConstants.DeadLetterTable)
+                {
+                    if (indexId <= 1) counts.DeadLetter = (int)rows;
+                }
+                else if (indexId <= 1)
+                {
+                    incomingTotal = rows;
+                }
+                else if (indexName == $"idx_{DatabaseConstants.IncomingTable}_keep_until")
+                {
+                    handled = rows;
+                }
+                else if (indexName == $"idx_{DatabaseConstants.IncomingTable}_scheduled")
+                {
+                    scheduled = rows;
+                }
+            }
+
+            await reader.CloseAsync();
+        }
+
+        // Without both filtered indexes there is no per-status split — an older schema that was
+        // never migrated. Let the caller take the scanning path.
+        if (handled == null || scheduled == null)
+        {
+            return null;
+        }
+
+        counts.Handled = (int)handled.Value;
+        counts.Scheduled = (int)scheduled.Value;
+        counts.Incoming = (int)Math.Max(0, incomingTotal - handled.Value - scheduled.Value);
+
+        return counts;
+    }
+
+    private async Task<PersistedCounts> fetchCountsWithScansAsync()
+    {
+        var counts = new PersistedCounts();
+
+        await using (var reader = await CreateCommand($"select status, count(*) from {SchemaName}.{DatabaseConstants.IncomingTable} group by status")
+                         .ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                var status = Enum.Parse<EnvelopeStatus>(await reader.GetFieldValueAsync<string>(0));
+                var count = await reader.GetFieldValueAsync<int>(1);
+
+                switch (status)
+                {
+                    case EnvelopeStatus.Incoming:
+                        counts.Incoming = count;
+                        break;
+
+                    case EnvelopeStatus.Handled:
+                        counts.Handled = count;
+                        break;
+
+                    case EnvelopeStatus.Scheduled:
+                        counts.Scheduled = count;
+                        break;
+                }
+            }
+
+            await reader.CloseAsync();
+        }
+
+        counts.Outgoing = (int)(await CreateCommand($"select count(*) from {SchemaName}.{DatabaseConstants.OutgoingTable}")
+            .ExecuteScalarAsync())!;
+
+        counts.DeadLetter = (int)(await CreateCommand($"select count(*) from {SchemaName}.{DatabaseConstants.DeadLetterTable}")
+            .ExecuteScalarAsync())!;
+
+        return counts;
+    }
+
+    /// <summary>
+    ///     The value of the 'database_principal' parameter in calls to APPLOCK_TEST
+    /// </summary>
+    public string DatabasePrincipal { get; set; } = "dbo";
+
+    protected override string determineOutgoingEnvelopeSql(DurabilitySettings settings)
+    {
+        return
+            $"select top {settings.RecoveryBatchSize} {DatabaseConstants.OutgoingFields} from {SchemaName}.{DatabaseConstants.OutgoingTable} where owner_id = {TransportConstants.AnyNode} and destination = @destination";
+    }
+
+    public override Task DiscardAndReassignOutgoingAsync(Envelope[] discards, Envelope[] reassigned, int nodeId)
+    {
+        var cmd = CallFunction("uspDiscardAndReassignOutgoing")
+            .WithIdList(this, discards, "discards")
+            .WithIdList(this, reassigned, "reassigned")
+            .With("ownerId", nodeId);
+
+        return cmd.ExecuteNonQueryAsync(_cancellation);
+    }
+
+    public override Task DeleteOutgoingAsync(Envelope[] envelopes)
+    {
+        if (HasDisposed) return Task.CompletedTask;
+
+        return CallFunction("uspDeleteOutgoingEnvelopes")
+            .WithIdList(this, envelopes).ExecuteNonQueryAsync(_cancellation);
+    }
+
+    public override Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress, int limit)
+    {
+        return CreateCommand(_findAtLargeEnvelopesSql)
+            .With("address", listenerAddress.ToString())
+            .With("limit", limit)
+            .FetchListAsync(r => DatabasePersistence.ReadIncomingAsync(r));
+    }
+
+    public override DbCommandBuilder ToCommandBuilder()
+    {
+        return new DbCommandBuilder(new SqlCommand());
+    }
+
+    public override async Task<bool> ExistsAsync(Envelope envelope, CancellationToken cancellation)
+    {
+        if (HasDisposed) return false;
+
+        if (Durability.MessageIdentity == MessageIdentity.IdOnly)
+        {
+            await using var conn = CreateConnection();
+            await conn.OpenAsync(cancellation);
+            var count = await conn
+                .CreateCommand($"select count(id) from {SchemaName}.{DatabaseConstants.IncomingTable} where id = @id")
+                .With("id", envelope.Id)
+                .ExecuteScalarAsync(cancellation);
+
+            return ((int)count) > 0;
+        }
+        else
+        {
+            await using var conn = CreateConnection();
+            await conn.OpenAsync(cancellation);
+            var count = await conn
+                .CreateCommand($"select count(id) from {SchemaName}.{DatabaseConstants.IncomingTable} where id = @id and {DatabaseConstants.ReceivedAt} = @destination")
+                .With("id", envelope.Id)
+                .With("destination", envelope.Destination!.ToString())
+                .ExecuteScalarAsync(cancellation);
+
+            return ((int)count) > 0;
+        }
+    }
+
+    /// <summary>
+    /// GH-4216. The promotion statement for <see cref="MessageIdentity.IdAndDestination"/>, where the identity
+    /// is <c>(id, received_at)</c>. <c>uspMarkIncomingOwnership</c> cannot express this: its <c>@IDLIST</c> is
+    /// an <c>EnvelopeIdList</c> TVP of ids alone, shared with three other procedures, so matching on it also
+    /// rewrites a row for a different message that merely shares the id at another destination -- reassigning
+    /// an <c>owner_id</c> the poller never selected, and promoting a scheduled sibling that is not due yet so
+    /// a message scheduled an hour out executes now.
+    ///
+    /// The pairs have to be matched together; an <c>id IN (...) AND received_at IN (...)</c> pair of lists
+    /// would match the cross product, which is the same bug wearing a longer statement. Mirrors
+    /// <c>PostgresqlMessageStore._reassignIncomingSql</c>, which does the same job through
+    /// <c>unnest(@ids, @uris)</c>. See GH-4209 for the incident that first exposed the shape.
+    ///
+    /// Under IdOnly the procedure is still exactly right and is still what runs -- an id is the whole identity
+    /// there -- so this path is the composite key's alone.
+    /// </summary>
+    private string writePromotionSql(DbCommand command, IReadOnlyList<Envelope> envelopes)
+    {
+        var clauses = new List<string>(envelopes.Count);
+
+        for (var i = 0; i < envelopes.Count; i++)
+        {
+            var idParameter = command.CreateParameter();
+            idParameter.ParameterName = $"@id_{i}";
+            idParameter.Value = envelopes[i].Id;
+            command.Parameters.Add(idParameter);
+
+            var uriParameter = command.CreateParameter();
+            uriParameter.ParameterName = $"@uri_{i}";
+            uriParameter.Value = envelopes[i].Destination!.ToString();
+            command.Parameters.Add(uriParameter);
+
+            clauses.Add($"(id = @id_{i} and {DatabaseConstants.ReceivedAt} = @uri_{i})");
+        }
+
+        return $"update {SchemaName}.{DatabaseConstants.IncomingTable} set owner_id = @owner, status = '{EnvelopeStatus.Incoming}' " +
+               $"where status = '{EnvelopeStatus.Scheduled}' and ({string.Join(" or ", clauses)})";
+    }
+
+    public override void WriteLoadScheduledEnvelopeSql(DbCommandBuilder builder, DateTimeOffset utcNow)
+    {
+        builder.Append( $"select TOP {Durability.RecoveryBatchSize} {DatabaseConstants.IncomingFields} from {SchemaName}.{DatabaseConstants.IncomingTable} where status = '{EnvelopeStatus.Scheduled}' and execution_time <= ");
+        builder.AppendParameter(utcNow);
+        builder.Append(" order by execution_time");
+        builder.Append(';');
+    }
+
+    public override async Task MigrateExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = (Table)AddExternalMessageTable(definition);
+        await using var conn = CreateConnection();
+        await conn.OpenAsync();
+        await table.MigrateAsync(conn);
+        await conn.CloseAsync();
+    }
+
+    public override async Task PublishMessageToExternalTableAsync(ExternalMessageTable table, string? messageTypeName, byte[] json,
+        CancellationToken token)
+    {
+        await using var conn = CreateConnection();
+        await conn.OpenAsync(token);
+
+        if (table.MessageTypeColumnName.IsEmpty())
+        {
+            await conn.CreateCommand(
+                    $"insert into {table.TableName.QualifiedName} ({table.IdColumnName}, {table.JsonBodyColumnName}) values (@id, @json)")
+                .With("id", Guid.NewGuid())
+                .With("json", json)
+                .ExecuteNonQueryAsync(token);
+        }
+        else
+        {
+            await conn.CreateCommand(
+                    $"insert into {table.TableName.QualifiedName} ({table.IdColumnName}, {table.JsonBodyColumnName}, {table.MessageTypeColumnName}) values (@id, @json, @message)")
+                .With("id", Guid.NewGuid())
+                .With("json", json)
+                .With("message", messageTypeName!)
+                .ExecuteNonQueryAsync(token);
+        }
+        
+        await conn.CloseAsync();
+    }
+
+    public override ITable AddExternalMessageTable(ExternalMessageTable definition)
+    {
+        var table = new Table(definition.TableName);
+        table.AddColumn<Guid>(definition.IdColumnName).AsPrimaryKey();
+        table.AddColumn(definition.JsonBodyColumnName, "varbinary(max)").NotNull();
+        if (definition.TimestampColumnName.IsNotEmpty())
+        {
+            table.AddColumn<DateTimeOffset>(definition.TimestampColumnName).DefaultValueByExpression("SYSDATETIMEOFFSET()");
+        }
+
+        if (definition.MessageTypeColumnName.IsNotEmpty())
+        {
+            table.AddColumn(definition.MessageTypeColumnName, "varchar(250)");
+        }
+
+        return table;
+    }
+
+    protected override async Task deleteManyAsync(DbTransaction tx, Guid[] ids, DbObjectName tableName, string idColumnName, CancellationToken token)
+    {
+        var builder = new BatchBuilder();
+
+        foreach (var id in ids)
+        {
+            builder.StartNewCommand();
+            builder.Append($"delete from {tableName.QualifiedName} where {idColumnName} = ");
+            builder.AppendParameter(id);
+        }
+
+        await using var batch = builder.Compile();
+        batch.Connection = (SqlConnection)tx.Connection!;
+        batch.Transaction = (SqlTransaction)tx;
+
+        await batch.ExecuteNonQueryAsync(token);
+    }
+
+    protected override Task<bool> TryAttainLockAsync(int lockId, SqlConnection connection, CancellationToken token)
+    {
+        return connection.TryGetGlobalLock(lockId.ToString(), token);
+    }
+
+    protected override Task ReleaseLockAsync(int lockId, SqlConnection connection, CancellationToken token)
+    {
+        return connection.ReleaseGlobalLock(lockId.ToString(), token);
+    }
+
+    protected override DbCommand buildFetchSql(SqlConnection conn, DbObjectName tableName, string[] columnNames, int maxRecords)
+    {
+        return conn.CreateCommand($"select top(@limit) {columnNames.Join(", ")} from {tableName.QualifiedName}")
+            .With("limit", maxRecords);
+    }
+
+    public override async Task PollForScheduledMessagesAsync(IWolverineRuntime runtime,
+        ILogger logger,
+        DurabilitySettings durabilitySettings, CancellationToken cancellationToken)
+    {
+        if (HasDisposed) return;
+
+        IReadOnlyList<Envelope> envelopes;
+
+        await using var conn = new SqlConnection(_settings.ConnectionString);
+        await conn.OpenAsync(cancellationToken);
+        try
+        {
+            // GH-3664: transaction-scoped lock — keep this transaction short and never await anything
+            // that isn't a command on this connection while it is open. See the fuller discussion on the
+            // Postgres twin (PostgresqlMessageStore.PollForScheduledMessagesAsync); the same hygiene
+            // applies here even though Marten's gap-liveness gate is Postgres-only.
+            var tx = (SqlTransaction)await conn.BeginTransactionAsync(cancellationToken);
+            if (await tx.TryGetGlobalTxLock(_scheduledLockId, cancellationToken))
+            {
+                var builder = new DbCommandBuilder(conn);
+                WriteLoadScheduledEnvelopeSql(builder, DateTimeOffset.UtcNow);
+                await using var cmd = builder.Compile();
+                cmd.Connection = conn;
+                cmd.Transaction = tx;
+
+                envelopes = await cmd.FetchListAsync(reader =>
+                    DatabasePersistence.ReadIncomingAsync(reader, cancellationToken), cancellation: cancellationToken);
+
+                if (!envelopes.Any())
+                {
+                    await tx.RollbackAsync(cancellationToken);
+                    return;
+                }
+
+                if (Durability.MessageIdentity == MessageIdentity.IdOnly)
+                {
+                    await using var reassign =
+                        conn.CreateCommand($"{_settings.SchemaName}.uspMarkIncomingOwnership", tx);
+                    reassign.CommandType = CommandType.StoredProcedure;
+
+                    await reassign
+                        .WithIdList(this, envelopes)
+                        .With("owner", durabilitySettings.AssignedNodeNumber)
+                        .ExecuteNonQueryAsync(_cancellation);
+                }
+                else
+                {
+                    await using var reassign = conn.CreateCommand("", tx);
+                    reassign.CommandText = writePromotionSql(reassign, envelopes);
+                    await reassign
+                        .With("owner", durabilitySettings.AssignedNodeNumber)
+                        .ExecuteNonQueryAsync(_cancellation);
+                }
+
+                await tx.CommitAsync(cancellationToken);
+
+                // Mirror onto the in-memory envelopes what the UPDATE above just did to their rows:
+                // owning store (GH-2576) and promoted status (GH-4673).
+                DatabasePersistence.MarkPromotedFromScheduled(envelopes, this,
+                    durabilitySettings.AssignedNodeNumber);
+
+                // Judging that there's very little chance of errors here
+                await runtime.EnqueueDirectlyAsync(envelopes);
+            }
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// The SQL Server instance this database lives on (#3397). Unlike PostgreSQL, the port is left
+    /// null: SQL Server's <c>Data Source</c> already carries it (<c>host,1433</c>) or a named
+    /// instance (<c>host\SQLEXPRESS</c>), so it is kept whole and is already unique.
+    /// </summary>
+    public DatabaseServerId ServerId
+    {
+        get
+        {
+            if (_serverId.HasValue)
+            {
+                return _serverId.Value;
+            }
+
+            // Sourced from Describe() so the server id and the diagnostic descriptor can't disagree
+            // about the host. Cached, so the descriptor is only built once.
+            _serverId = DatabaseServerId.For(Describe());
+
+            return _serverId.Value;
+        }
+    }
+
+    /// <summary>
+    /// Note that this needs the <c>VIEW SERVER STATE</c> permission, which locked-down hosting does
+    /// not always grant. The sweeper degrades to "budget unknown" (one warning, then silence) rather
+    /// than failing the metrics pass when it is missing — see #3397.
+    /// </summary>
+    public async ValueTask<int> CountServerConnectionsAsync(CancellationToken token)
+    {
+        // Server-wide, across every database and application on the instance — connections are an
+        // instance-scoped resource, so scoping the count to this database would measure the wrong
+        // thing.
+        var raw = await CreateCommand("select count(*) from sys.dm_exec_connections")
+            .ExecuteScalarAsync(token).ConfigureAwait(false);
+
+        return raw is int count ? count : 0;
+    }
+
+    public async ValueTask<int?> ProbeMaxConnectionsAsync(CancellationToken token)
+    {
+        var raw = await CreateCommand("select @@MAX_CONNECTIONS")
+            .ExecuteScalarAsync(token).ConfigureAwait(false);
+
+        // Zero means "unlimited, SQL Server sizes it dynamically" — which is not a budget, so report
+        // it as unknown rather than charting a limit of nothing.
+        return raw is int max && max > 0 ? max : null;
+    }
+
+    public override DatabaseDescriptor Describe()
+    {
+        var builder = new SqlConnectionStringBuilder(_settings.ConnectionString);
+        var descriptor = new DatabaseDescriptor()
+        {
+            Engine = "SqlServer",
+            ServerName = builder.DataSource ?? string.Empty,
+            // Deliberately null: SqlServer's Data Source already carries the port (host,1433) or a
+            // named instance (host\SQLEXPRESS), so splitting it back out would only invent ambiguity.
+            Port = null,
+            DatabaseName = builder.InitialCatalog ?? string.Empty,
+            Subject = GetType().FullNameInCode(),
+            SchemaOrNamespace = _settings.SchemaName!,
+            SubjectUri = SubjectUri
+        };
+        
+        descriptor.TenantIds.AddRange(TenantIds);
+
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.ApplicationName));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Enlist));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.PersistSecurityInfo));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.Pooling));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.MinPoolSize));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.MaxPoolSize));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.CommandTimeout));
+        descriptor.Properties.Add(OptionsValue.Read(builder, x => x.TrustServerCertificate));
+
+        descriptor.Properties.RemoveAll(x => x.Name.ContainsIgnoreCase("password"));
+        descriptor.Properties.RemoveAll(x => x.Name.ContainsIgnoreCase("certificate"));
+
+        return descriptor;
+    }
+
+    public override IEnumerable<ISchemaObject> AllObjects()
+    {
+        yield return new OutgoingEnvelopeTable(Durability, SchemaName);
+        yield return new IncomingEnvelopeTable(Durability, SchemaName);
+        yield return new DeadLettersTable(Durability, SchemaName);
+        yield return new EnvelopeIdTable(SchemaName);
+        yield return new WolverineStoredProcedure("uspDeleteIncomingEnvelopes.sql", this);
+        yield return new WolverineStoredProcedure("uspDeleteOutgoingEnvelopes.sql", this);
+        yield return new WolverineStoredProcedure("uspDiscardAndReassignOutgoing.sql", this);
+        yield return new WolverineStoredProcedure("uspMarkIncomingOwnership.sql", this);
+        yield return new WolverineStoredProcedure("uspMarkOutgoingOwnership.sql", this);
+
+        // GH-4180. Every store role, not just Main -- see the PostgreSQL twin.
+        // GH-4757: exactly one of the two, never both. The hash mode's key is a binary column, which
+        // cannot be reached from the original table by any migration Weasel can express.
+        if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByString)
+        {
+            yield return new DeduplicationTable(SchemaName);
+        }
+        else if (Durability.MessageDeduplicationMode == MessageDeduplicationMode.CompareByHash)
+        {
+            yield return new HashedDeduplicationTable(SchemaName);
+        }
+
+        // GH-4742. Every store role, behind its own opt-in.
+        if (Durability.EnableDeduplicatedResponses)
+        {
+            yield return new DeduplicatedResponsesTable(SchemaName);
+        }
+
+        // Recurring-message tracking — Main store only, behind the opt-in. See the PostgreSQL twin.
+        if (Durability.EnableRecurringMessages && Role == MessageStoreRole.Main)
+        {
+            yield return new RecurringMessagesTable(SchemaName);
+        }
+
+        foreach (var table in _externalTables)
+        {
+            yield return table;
+        }
+        
+        if (Role == MessageStoreRole.Main)
+        {
+            var nodeTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeTableName));
+            nodeTable.AddColumn<Guid>("id").AsPrimaryKey();
+            nodeTable.AddColumn<int>("node_number").AutoNumber().NotNull();
+            nodeTable.AddColumn("description", "varchar(max)").NotNull();
+            nodeTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("started").DefaultValueByExpression("GETUTCDATE()").NotNull();
+            nodeTable.AddColumn<DateTimeOffset>("health_check").DefaultValueByExpression("GETUTCDATE()").NotNull();
+            // GH-4246: a bare AddColumn<string>() lands on Weasel.SqlServer's varchar(100) default, which
+            // is narrower than the VARCHAR2(4000) Oracle declares here and narrower than Postgres's
+            // unbounded varchar. 500 is the width the rest of this node-table family already uses.
+            nodeTable.AddColumn("version", "varchar(500)");
+            nodeTable.AddColumn("capabilities", "nvarchar(max)").AllowNulls();
+
+            // GH-4593, mirroring the PostgreSQL gate from GH-3959: provisioned only behind the opt-in so
+            // an upgrade migrates nothing, and SqlServerNodePersistence gates every statement naming it on
+            // the same flag. `float` is T-SQL's IEEE double.
+            if (Durability.CapacityAwareAssignment)
+            {
+                nodeTable.AddColumn(DatabaseConstants.LoadFactor, "float").AllowNulls();
+            }
+
+            yield return nodeTable;
+
+            var assignmentTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeAssignmentsTableName));
+            assignmentTable.AddColumn("id", $"varchar({AgentUri.MaximumLength})").AsPrimaryKey();
+            assignmentTable.AddColumn<Guid>("node_id").ForeignKeyTo(nodeTable.Identifier, "id", onDelete:CascadeAction.Cascade);
+            assignmentTable.AddColumn<DateTimeOffset>("started").DefaultValueByExpression("GETUTCDATE()").NotNull();
+
+            yield return assignmentTable;
+
+            if (_settings.CommandQueuesEnabled)
+            {
+                var queueTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.ControlQueueTableName));
+                queueTable.AddColumn<Guid>("id").AsPrimaryKey();
+                // GH-4246: varchar(100) again, against Oracle's VARCHAR2(4000) and MySQL's varchar(500).
+                queueTable.AddColumn(DatabaseConstants.MessageType, "varchar(500)").NotNull();
+                queueTable.AddColumn<Guid>("node_id").NotNull();
+                queueTable.AddColumn(DatabaseConstants.Body, "varbinary(max)").NotNull();
+                queueTable.AddColumn<DateTimeOffset>("posted").NotNull().DefaultValueByExpression("GETUTCDATE()");
+                queueTable.AddColumn<DateTimeOffset>("expires");
+
+                yield return queueTable;
+            }
+            
+            if (_settings.AddTenantLookupTable)
+            {
+                var tenantTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.TenantsTableName));
+                tenantTable.AddColumn(StorageConstants.TenantIdColumn, "varchar(100)").AsPrimaryKey();
+                tenantTable.AddColumn(StorageConstants.ConnectionStringColumn, "varchar(500)").NotNull();
+                tenantTable.AddColumn(DatabaseConstants.DisabledColumn, "bit").DefaultValueByExpression("0").NotNull();
+                yield return tenantTable;
+            }
+            
+            var restrictionTable =
+                new Table(new DbObjectName(SchemaName, DatabaseConstants.AgentRestrictionsTableName));
+            restrictionTable.AddColumn<Guid>("id").AsPrimaryKey();
+            // GH-4246: same varchar(100) default, and these two hold an agent URI and an agent type name.
+            // An "event-subscriptions://marten/SomeProjection@some-tenant" or a
+            // "wolverinedb://sqlserver/host/schema/database" goes past 100 characters without trying.
+            restrictionTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").NotNull();
+            restrictionTable.AddColumn("type", $"varchar({AgentUri.MaximumLength})").NotNull();
+            restrictionTable.AddColumn<int>("node").NotNull().DefaultValue(0);
+            yield return restrictionTable;
+
+            var eventTable = new Table(new DbObjectName(SchemaName, DatabaseConstants.NodeRecordTableName));
+            eventTable.AddColumn<int>("id").AutoNumber().AsPrimaryKey();
+            eventTable.AddColumn<int>("node_number").NotNull();
+            eventTable.AddColumn("event_name", "varchar(500)").NotNull();
+            eventTable.AddColumn<DateTimeOffset>("timestamp").DefaultValueByExpression("GETUTCDATE()").NotNull();
+            // GH-4246: an AssignmentChanged description is an agent command's ToString(), which carries an
+            // agent URI, a schema name and a destination node -- 500 characters is not the ceiling it
+            // looked like on a real cluster.
+            eventTable.AddColumn("description", $"varchar({NodeRecord.DescriptionLength})").AllowNulls();
+            yield return eventTable;
+
+            // Dynamic listener registry (GH-2685). Provisioned only when the opt-in
+            // flag is set so existing apps see no migration churn.
+            if (Durability.EnableDynamicListeners)
+            {
+                var listenerTable =
+                    new Table(new DbObjectName(SchemaName, DatabaseConstants.ListenersTableName));
+                // GH-4246: a listener URI is at least as long as an agent URI, and this one is the
+                // primary key. MySQL and Oracle both declare varchar(500) here.
+                listenerTable.AddColumn("uri", $"varchar({AgentUri.MaximumLength})").AsPrimaryKey();
+                yield return listenerTable;
+            }
+        }
+        
+        foreach (var entry in _sagaStorage.Enumerate())
+        {
+            yield return entry.Value.Table;
+        }
+    }
+
+    public void AddTable(Table table)
+    {
+        _externalTables.Add(table);
+    }
+
+    public override IDatabaseSagaSchema<TId, TSaga> SagaSchemaFor<TSaga, TId>() 
+    {
+        if (_sagaStorage.TryFind(typeof(TSaga), out var raw))
+        {
+            if (raw is DatabaseSagaSchema<TId, TSaga> sagaStorage)
+            {
+                return sagaStorage;
+            }
+        }
+        
+        var definition = new SagaTableDefinition(typeof(TSaga), null);
+        var storage = new DatabaseSagaSchema<TId, TSaga>(definition, _settings);
+        _sagaStorage = _sagaStorage.AddOrUpdate(typeof(TSaga), storage);
+        
+        return storage;
+    }
+}

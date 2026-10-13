@@ -1,0 +1,253 @@
+# Wolverine
+
+.NET distributed application framework providing in-process mediator and message bus capabilities for event-driven architectures. Part of the "critter stack" with Marten.
+
+## Tech Stack
+
+- **Language**: C# 12+
+- **Frameworks**: .NET 9.0, 10.0 (net8.0 dropped in 6.0; 5.x maintained on the `5.0` branch)
+- **Build**: MSBuild + Nuke (scripted automation)
+- **Core Dependencies**: JasperFx (runtime compilation), Microsoft.Extensions.*, System.Threading.Tasks.Dataflow
+- **Docs**: Vitepress (in `/docs`)
+
+## Project Structure
+
+```
+src/
+├── Wolverine/              # Core framework - message bus, handlers, middleware
+├── Http/                   # HTTP/REST support
+│   ├── Wolverine.Http/     # ASP.NET Core integration
+│   └── Wolverine.Http.Marten/
+├── Persistence/            # Storage providers
+│   ├── Wolverine.RDBMS/    # Base RDBMS implementation
+│   ├── Wolverine.SqlServer/
+│   ├── Wolverine.Postgresql/
+│   ├── Wolverine.EntityFrameworkCore/
+│   ├── Wolverine.Marten/   # Event sourcing with Marten
+│   └── Wolverine.RavenDb/
+├── Transports/             # Message brokers
+│   ├── RabbitMQ/
+│   ├── AWS/                # SQS, SNS
+│   ├── Azure/              # Service Bus
+│   ├── Kafka/
+│   ├── Redis/
+│   └── [NATS, Pulsar, GCP, MQTT, SignalR]
+├── Extensions/             # Serialization & validation
+│   ├── Wolverine.FluentValidation/
+│   ├── Wolverine.MessagePack/
+│   └── Wolverine.MemoryPack/
+├── Samples/                # Example applications
+└── Testing/                # Test suites
+    ├── CoreTests/
+    ├── Wolverine.ComplianceTests/
+    └── SlowTests/
+```
+
+## Build & Test
+
+```bash
+# Build (uses Nuke)
+./build.sh              # macOS/Linux
+build.ps1               # Windows
+
+# Start test infrastructure
+docker compose up -d    # PostgreSQL, SQL Server, RabbitMQ, Kafka, etc.
+
+# Run tests: dotnet test names the project or solution with an option, never positionally
+dotnet test --solution wolverine.slnx
+dotnet test --project src/Testing/CoreTests -f net9.0
+dotnet test --project src/Testing/CoreTests -f net9.0 --filter-class "*Acceptance.wolverine_as_command_bus*"
+dotnet test --project src/Testing/CoreTests -f net9.0 --filter "FullyQualifiedName~batching"
+
+# Documentation
+npm install && npm run docs
+```
+
+**Test stack:** every test project is xUnit v3 **4.x** on **Microsoft.Testing.Platform 2.x** (GH-4979).
+The root `global.json` sets `"test": {"runner": "Microsoft.Testing.Platform"}`, which platform 2.x needs on
+the .NET 10 SDK, so `dotnet test` runs in the platform's own mode:
+
+- Name the target with `--project` or `--solution`. The positional form (`dotnet test src/Testing/CoreTests`)
+  is refused.
+- Test-host options go straight on the command line, with no `--` separator. An option the host does not
+  know exits 5 ("Zero tests ran") before anything runs; `--nologo` is one such option.
+- Filters: xUnit's `--filter-class`, `--filter-method`, `--filter-namespace`, `--filter-trait`,
+  `--filter-not-*` and `--filter-query`. xUnit 4 also takes the old VSTest grammar via `--filter`
+  (`"FullyQualifiedName~X"`, `"Category!=Flaky"`).
+- Running the built executable directly works too, with the same options:
+  `src/Testing/CoreTests/bin/Release/net9.0/CoreTests --filter-class "*Acceptance*"`.
+- CI does not use `dotnet test` except in `fsharp.yml`. The Nuke targets run each test host through
+  Bobcat's supervisor (`build/SupervisedTests.cs`) with C# filter predicates, so a CI target is
+  `./build.sh CoreTests --framework net9.0` locally.
+- `[assembly: CollectionBehavior(DisableTestParallelization = true)]` no longer compiles; use
+  `[assembly: Xunit.v3.Parallelization(Mode = Xunit.Sdk.ParallelMode.None)]`. A helper library that
+  references the platform but is not a test host needs `IsTestingPlatformApplication=false`; none does today.
+
+**Solutions** (new `.slnx` XML format):
+- `wolverine.slnx` - Full solution
+- `wolverine_slim.slnx` - Lightweight variant
+
+> ⚠️ **CI builds `wolverine.slnx` (the full solution)** — pinned in
+> `.nuke/parameters.json` (`"Solution": "wolverine.slnx"`) and consumed by
+> the `Compile` target in `build/Build.cs`.
+>
+> `wolverine_slim.slnx` omits several extension projects — most notably
+> `Wolverine.EntityFrameworkCore`, `Wolverine.Polecat`, `Wolverine.RavenDb`,
+> `Wolverine.Http.Newtonsoft`, `Wolverine.FluentValidation`,
+> `Wolverine.AzureServiceBus.Tests`, the `PolecatTests` / `MartenTests`
+> suites, and `WolverineWebApi`. A clean slim build is **not sufficient
+> evidence** that a tightening change to a dependency (e.g. a new AOT/trim
+> annotation in JasperFx, a type lift from Marten/Polecat into JasperFx.Events)
+> is clean across Wolverine. **Build `wolverine.slnx` before pushing**:
+>
+> ```bash
+> dotnet build wolverine.slnx -c Release -f net9.0
+> ```
+>
+> ⚠️ **Pass `-f net9.0`.** `.nuke/parameters.json` pins `"Framework": "net9.0"`, so the `Compile`
+> target builds the solution *pinned to a single framework*. A bare
+> `dotnet build wolverine.slnx` builds each project for its own `TargetFrameworks` instead, which
+> is a **weaker** check — a net10.0-only project passes locally and then fails CI with
+> `NETSDK1005: Assets file ... doesn't have a target for 'net9.0'`. That is not hypothetical; it
+> is what made GH-3839's first push red after a clean local build. Build the unpinned form too if
+> you like, but the pinned one is the gate.
+
+## Key Entry Points
+
+| Concept | Location |
+|---------|----------|
+| Options/Config | `src/Wolverine/WolverineOptions.cs:97` |
+| Message Bus | `src/Wolverine/Runtime/MessageBus.cs` |
+| Message Context | `src/Wolverine/Runtime/MessageContext.cs:34` |
+| Handler Discovery | `src/Wolverine/Configuration/HandlerDiscovery.cs:17` |
+| Endpoint Config | `src/Wolverine/Configuration/ListenerConfiguration.cs` |
+| Sagas | `src/Wolverine/Saga.cs:8` |
+| HTTP Endpoints | `src/Http/Wolverine.Http/` |
+
+## Do NOT edit CHANGELOG.md
+
+**Never add a `CHANGELOG.md` entry as part of a change.** Every concurrent branch appends to the
+same "Unreleased" section, so every one of them conflicts with every other on merge — a guaranteed
+manual resolution per PR, paid repeatedly, for a file nothing actually reads. The PR description
+and the commit message are where a change explains itself; both are attached to the work forever
+and neither collides.
+
+This applies to bug fixes, features, and perf work alike. If a change genuinely needs release
+notes, that is a release-time activity, not a per-PR one.
+
+## Handler Conventions
+
+Valid handler method names: `Handle`, `HandleAsync`, `Consume`, `ConsumeAsync` (`HandlerDiscovery.cs:17-22`)
+
+Handlers are discovered by scanning assemblies. Use attributes like `[WolverineHandler]`, `[WolverineMessage]`, `[WolverineIgnore]` to control discovery.
+
+## Naming conventions
+
+Member casing is driven by **accessibility**, not by member kind:
+
+- **`internal` and `public` members** (methods, properties, events, constants) use **PascalCase**.
+- **`private` and `protected` members** (methods, properties) use **camelCase** — e.g. `buildSenderIfMissing()`,
+  `writeOutgoingHeader()`, `tableExistsAsync()`. This includes `private static` helper methods.
+- Private/protected **fields** keep the conventional leading underscore + camelCase (`_sender`, `_queueTable`).
+
+When in doubt, match the surrounding file. Examples: `EnvelopeMapper` (`buildIncoming`/`buildOutgoing` private vs
+`MapProperty`/`ReceivesMessage` public), `SqlServerQueue` (`buildSenderIfMissing` private vs `SendAsync` public).
+
+## Performance conventions
+
+### Use `ImHashMap` for hot-path dictionary lookups
+
+For any dictionary lookup where performance matters — per-message work, per-Envelope work, per-handler dispatch — use `ImHashMap<TKey, TValue>` from `JasperFx.Core`. **Do not replace `ImHashMap` with `FrozenDictionary`** even when the data is post-bootstrap-immutable.
+
+`ImHashMap` is a copy-on-write hash trie:
+- Lookups are lock-free and don't allocate.
+- Writes return a new map; callers swap via `Interlocked.CompareExchange` or a plain field assignment.
+- The trie structure is friendlier to the JIT for our hot paths than `FrozenDictionary`'s hash-bucket layout in practice.
+
+If a hot path is paying for **mutation** (not lookup), the right fix is **pre-population at bootstrap** — typically inside the relevant `chain.Compile()` or `WolverineRuntime.HostService.StartAsync()` path — so steady-state runtime sees pure reads. Keep the `ImHashMap` field type.
+
+Examples in the codebase:
+- `WolverineMessageNaming._typeNames` (`src/Wolverine/Util/WolverineMessageNaming.cs:140`) — pre-populated via `PrepopulateCache(IEnumerable<Type>)` at startup.
+- `HandlerGraph._chains` / `_handlers` (`src/Wolverine/Runtime/Handlers/HandlerGraph.cs:41,43`) — built once in `Compile()`.
+- `Endpoint._serializers` (`src/Wolverine/Configuration/Endpoint.cs:185`) — `Endpoint.Compile()` pre-seeds the map with every globally-registered content type (`Endpoint.cs:524-537`), so `TryFindSerializer` (`Endpoint.cs:593-613`) is a pure lock-free read on the hot path; an unregistered content type falls back to `Runtime.Options.TryFindSerializer` without mutating the endpoint cache.
+
+`FrozenDictionary` may still be appropriate for **non-hot-path** snapshots, e.g. metadata exposed to user code that doesn't participate in dispatch. Default to `ImHashMap` unless you have a specific reason otherwise.
+
+## Test conventions
+
+### Getting an `IMessageBus` from an `IHost` in tests
+
+`IMessageBus` is scoped per-message, so resolving it from the host's root container yields a bus that isn't wired into the active `MessageContext` and won't behave correctly under tracking, outbox, or context-propagation tests.
+
+```csharp
+// ❌ Don't — pulls the bus from the root scope, missing the per-message context
+var bus = host.Services.GetRequiredService<IMessageBus>();
+
+// ✅ Do — extension method in the `Wolverine` namespace that hands you a
+// scoped bus already attached to the current message context
+var bus = host.MessageBus();
+```
+
+### Database connection strings come from `Servers`
+
+Always obtain database connection strings from the `Servers` type (`src/Servers.cs`,
+e.g. `Servers.PostgresConnectionString`, `Servers.SqlServerConnectionString`). **Never
+hardcode a connection string literal in a test.** This keeps host/port/credentials
+centralized and CI-portable — e.g. Wolverine's own docker-compose Postgres runs on port
+**5433** (`docker compose up -d postgresql`), distinct from Marten's `5432`, and only
+`Servers` knows that.
+
+## Configuration Organization
+
+WolverineOptions uses partial classes to organize concerns:
+- `WolverineOptions.cs` - Main options
+- `WolverineOptions.Serialization.cs` - Message serialization
+- `WolverineOptions.Endpoints.cs` - Endpoint configuration
+- `WolverineOptions.Policies.cs` - Error handling policies
+- `WolverineOptions.Assemblies.cs` - Assembly scanning
+
+## Test Infrastructure (docker-compose.yml)
+
+| Service | Port |
+|---------|------|
+| PostgreSQL | 5433 |
+| SQL Server | 1434 |
+| RabbitMQ | 5672 (mgmt: 15672) |
+| Kafka | 9092 |
+| Redis | 6379 |
+| NATS | 4222 |
+| LocalStack (AWS) | 4566 |
+| GCP Pub/Sub | 8085 |
+| Pulsar | 6650 |
+
+## Performance Rig (`src/Testing/KafkaPerfRig`)
+
+Multi-transport load rig (Kafka, RabbitMQ, NATS JetStream, Pulsar + native twins) used for the
+GH-3490/3492/4026/4039 perf waves. Outside both solutions and CI — build/run standalone via
+`rig.sh` / `cells*.sh` in that folder; see its README for roles, knobs, and required brokers.
+Ground rules when measuring:
+
+- **No perf claim without rig numbers**: interleaved runs, "before" pinned in the same build
+  (`RIG_MAX_RECEIVE=1`-style knobs) or **two independently built worktrees** once the change is
+  committed — `git stash push` of committed paths silently stashes nothing and measures
+  fix-vs-fix.
+- Trust the hygiene in `rig.sh` (per-run schema drop + broker cleanup) and keep it working —
+  leftover inbox rows/stream backlogs have produced multi-x measurement errors and hosts that
+  fail to start. Build with `MSBUILDDISABLENODEREUSE=1`.
+- Negative results go in the ledger too (ack coalescing was measured at −10% on RabbitMQ and
+  is a standing "do not revisit").
+
+## Additional Documentation
+
+When working on specific areas, consult these files:
+
+| Topic | File |
+|-------|------|
+| Architectural patterns & conventions | `.claude/docs/architectural_patterns.md` |
+| AOT suppression audit (GH-4810) | `.claude/docs/aot_suppression_audit.md` |
+
+## Version
+
+- **5.39.0** — last shipped on the 5.x line (see `Directory.Build.props`).
+- **6.0** — `main` branch ongoing development (JasperFx 2.0-alpha line, net9.0/net10.0).
+- **5.x maintenance** — bug fixes only, off the `5.0` branch.

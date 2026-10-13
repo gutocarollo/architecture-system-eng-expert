@@ -1,0 +1,370 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
+package io.debezium.connector.mongodb;
+
+import java.time.Instant;
+import java.util.Optional;
+
+import org.apache.kafka.connect.data.Struct;
+import org.bson.BsonDocument;
+import org.bson.BsonTimestamp;
+import org.bson.types.BSONTimestamp;
+
+import com.mongodb.client.MongoChangeStreamCursor;
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
+
+import io.debezium.DebeziumException;
+import io.debezium.annotation.Immutable;
+import io.debezium.annotation.NotThreadSafe;
+import io.debezium.connector.SnapshotRecord;
+import io.debezium.connector.common.BaseSourceInfo;
+import io.debezium.connector.mongodb.events.BufferingChangeStreamCursor.ResumableChangeStreamEvent;
+import io.debezium.connector.mongodb.events.SplitEventHandler;
+
+/**
+ * Information about the source of information, which includes the partitions and offsets within those partitions. The MongoDB
+ * connector considers each MongoDB database a separate "partitions" (in Kafka Connect terminology), and each partition has
+ * an "offset" (if Kafka Connect terminology) that defines the position within that partition/database where the connector
+ * finds a particular record. As the connector uses the Kafka Connect framework to process each record in a partition, Kafka
+ * Connect keeps track of the most recent offset for that partition.
+ * <p>
+ * The {@link #partition() source partition} information identifies the particular MongoDB replica set and the connector's
+ * logical name of the MongoDB server. A JSON-like representation of the source partition for a database named "customers" hosted
+ * in a MongoDB replica set named "myMongoServer" is as follows:
+ *
+ * <pre>
+ * {
+ *     "server_id" : "myMongoServer",
+ *     "replicaSetName" : "rs0"
+ * }
+ * </pre>
+ *
+ * <p>
+ * The {@link #lastOffset() source offset} information describes the position within a particular partition of each record.
+ * Since each event in MongoDB's oplog is identified by a {@link BSONTimestamp} that tracks the time and the order of the
+ * event for that particular time (e.g., multiple events that occur at the same time will have unique orders), the offset
+ * includes the BSONTimetamp representation. (The event's {@code h} field is the unique ID for the operation, so this is also
+ * included in the offset.) And, if an initial sync is in progress, the offset will include the {@code initsync} field.
+ * <p>
+ * Here's a JSON-like representation of an example timestamp:
+ *
+ * <pre>
+ * {
+ *         "sec" = 1422998530,
+ *         "ord" = 0,
+ *         "h" = 398278732173914406,
+ *         "initsync" = true
+ * }
+ * </pre>
+ *
+ * @author Randall Hauch
+ */
+@NotThreadSafe
+public final class SourceInfo extends BaseSourceInfo {
+
+    public static final String RESUME_TOKEN = "resume_token";
+    public static final String TIMESTAMP = "sec";
+    public static final String ORDER = "ord";
+    public static final String INITIAL_SYNC = "initsync";
+    public static final String COLLECTION = "collection";
+    public static final String LSID = "lsid";
+    public static final String TXN_NUMBER = "txnNumber";
+
+    public static final String WALL_TIME = "wallTime";
+
+    // Change Stream fields
+    private static final BsonTimestamp INITIAL_TIMESTAMP = new BsonTimestamp();
+    private static final Position INITIAL_POSITION = new Position(INITIAL_TIMESTAMP, null, null);
+    public boolean initialSnapshot = false;
+    private final JsonSerialization jsonSerialization;
+
+    /**
+     * Id of collection the current event applies to. May be {@code null} after noop events,
+     * after which the recorded offset may be retrieved but not the source struct.
+     */
+    private CollectionId collectionId;
+    private Position position = null;
+    // The current data event's token is separate from snapshot and heartbeat resume positions.
+    private BsonDocument eventResumeToken;
+
+    private long wallTime;
+
+    @Immutable
+    protected static final class Position {
+        private final BsonTimestamp ts;
+        private final SessionTransactionId changeStreamSessionTxnId;
+        private final String resumeToken;
+
+        public Position(BsonTimestamp ts, SessionTransactionId changeStreamsSessionTxnId, String resumeToken) {
+            this.ts = ts;
+            this.changeStreamSessionTxnId = changeStreamsSessionTxnId;
+            this.resumeToken = resumeToken;
+        }
+
+        public static Position changeStreamPosition(BsonTimestamp ts, String resumeToken, SessionTransactionId sessionTxnId) {
+            return new Position(ts, sessionTxnId, resumeToken);
+        }
+
+        public BsonTimestamp getTimestamp() {
+            return this.ts;
+        }
+
+        public int getTime() {
+            return (this.ts != null) ? this.ts.getTime() : -1;
+        }
+
+        public int getInc() {
+            return (this.ts != null) ? this.ts.getInc() : -1;
+        }
+
+        public SessionTransactionId getChangeStreamSessionTxnId() {
+            return changeStreamSessionTxnId;
+        }
+
+        public Optional<String> getResumeToken() {
+            return Optional.ofNullable(resumeToken);
+        }
+
+        @Override
+        public String toString() {
+            return "Position [ts=" + ts + ", changeStreamSessionTxnId=" + changeStreamSessionTxnId + ", resumeToken="
+                    + resumeToken + "]";
+        }
+    }
+
+    static final class SessionTransactionId {
+
+        public final String lsid;
+        public final Long txnNumber;
+
+        SessionTransactionId(String lsid, Long txnNumber) {
+            super();
+            this.txnNumber = txnNumber;
+            this.lsid = lsid;
+        }
+    }
+
+    public SourceInfo(MongoDbConnectorConfig connectorConfig) {
+        super(connectorConfig);
+        this.jsonSerialization = new JsonSerialization(connectorConfig.getJsonSerializationMode());
+    }
+
+    CollectionId collectionId() {
+        return collectionId;
+    }
+
+    Position position() {
+        return position != null ? position : INITIAL_POSITION;
+    }
+
+    public String lastResumeToken() {
+        return position != null ? position.resumeToken : null;
+    }
+
+    String eventResumeTokenJson() {
+        if (snapshot() != SnapshotRecord.FALSE || eventResumeToken == null) {
+            return null;
+        }
+
+        // Defer serialization until the source struct is built for the current data event.
+        return jsonSerialization.getDocumentValue(eventResumeToken);
+    }
+
+    public BsonTimestamp lastTimestamp() {
+        return position != null ? position.getTimestamp() : null;
+    }
+
+    /**
+     * Get a {@link Struct} representation of the source partition and offset
+     * information where we have last read. The Struct complies with the {@link #schema} for the MongoDB connector.
+     *
+     * @param collectionId the event's collection identifier; may not be null
+     * @see #schema()
+     */
+    public void readEvent(CollectionId collectionId, long wallTime) {
+        onEvent(collectionId, position, wallTime);
+    }
+
+    public void initEvent(MongoChangeStreamCursor<ChangeStreamDocument<BsonDocument>> cursor) {
+        eventResumeToken = null;
+        if (cursor == null) {
+            return;
+        }
+
+        ChangeStreamDocument<BsonDocument> result = cursor.tryNext();
+        if (result == null) {
+            noEvent(cursor);
+        }
+        else {
+            changeStreamEvent(readCompleteEvent(cursor, result));
+            // This event establishes the snapshot's resume position; it is not emitted as a data event.
+            eventResumeToken = null;
+        }
+    }
+
+    /**
+     * Resuming from an intermediate fragment's token skips earlier fragments, preventing streaming
+     * from reconstructing the complete event. Reassemble the first event so the snapshot start offset
+     * uses its final fragment's token while retaining the event's metadata.
+     */
+    private static ChangeStreamDocument<BsonDocument> readCompleteEvent(MongoChangeStreamCursor<ChangeStreamDocument<BsonDocument>> cursor,
+                                                                        ChangeStreamDocument<BsonDocument> event) {
+        if (event.getSplitEvent() == null) {
+            return event;
+        }
+
+        final var totalFragments = event.getSplitEvent().getOf();
+        final var handler = new SplitEventHandler<BsonDocument>();
+        for (var expectedFragment = 1;; expectedFragment++) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new DebeziumException("Interrupted while determining MongoDB snapshot start position");
+            }
+            if (event == null || event.getSplitEvent() == null
+                    || event.getSplitEvent().getFragment() != expectedFragment
+                    || event.getSplitEvent().getOf() != totalFragments || expectedFragment > totalFragments) {
+                throw new DebeziumException("Missing or out-of-order change stream fragment while determining MongoDB snapshot start position");
+            }
+
+            final var complete = handler.handle(event);
+            if (complete.isPresent()) {
+                // Keep the event's metadata, but resume after its final fragment. Do not consume the next event.
+                return complete.get();
+            }
+            event = cursor.tryNext();
+        }
+    }
+
+    public void noEvent(ResumableChangeStreamEvent<BsonDocument> event) {
+        if (event.hasDocument()) {
+            return;
+        }
+        noEvent(ResumeTokens.toBase64(event.resumeToken));
+    }
+
+    public void noEvent(MongoChangeStreamCursor<?> cursor) {
+        if (cursor == null || cursor.getResumeToken() == null) {
+            return;
+        }
+        noEvent(ResumeTokens.toBase64(cursor.getResumeToken()));
+    }
+
+    public void noEvent(BsonTimestamp timestamp) {
+        if (timestamp == null) {
+            return;
+        }
+        Position position = Position.changeStreamPosition(timestamp, null, null);
+        noEvent(position);
+    }
+
+    private void noEvent(String resumeToken) {
+        if (resumeToken == null) {
+            return;
+        }
+        Position position = Position.changeStreamPosition(null, resumeToken, null);
+        noEvent(position);
+    }
+
+    private void noEvent(Position position) {
+        String namespace = "";
+        long wallTime = 0L;
+        onEvent(CollectionId.parse(namespace), position, wallTime);
+    }
+
+    public void changeStreamEvent(ChangeStreamDocument<BsonDocument> changeStreamEvent) {
+        Position position = INITIAL_POSITION;
+        String namespace = "";
+        long wallTime = 0L;
+        if (changeStreamEvent != null) {
+            String resumeToken = ResumeTokens.toBase64(changeStreamEvent.getResumeToken());
+            BsonTimestamp ts = changeStreamEvent.getClusterTime();
+            position = Position.changeStreamPosition(ts, resumeToken, MongoUtils.getChangeStreamSessionTransactionId(changeStreamEvent));
+            namespace = changeStreamEvent.getNamespace().getFullName();
+            if (changeStreamEvent.getWallTime() != null) {
+                wallTime = changeStreamEvent.getWallTime().getValue();
+            }
+        }
+
+        onEvent(CollectionId.parse(namespace), position, wallTime);
+        eventResumeToken = changeStreamEvent != null ? changeStreamEvent.getResumeToken() : null;
+    }
+
+    private void onEvent(CollectionId collectionId, Position position, long wallTime) {
+        setPosition((position == null) ? INITIAL_POSITION : position);
+        this.collectionId = collectionId;
+        this.wallTime = wallTime;
+    }
+
+    /**
+     * Determine whether we have previously recorded a MongoDB timestamp for the replica set.
+     *
+     * @return {@code true} if an offset has been recorded for the replica set, or {@code false} if the replica set has not
+     *         yet been seen
+     */
+    public boolean hasPosition() {
+        return position != null;
+    }
+
+    /**
+     * Set the resume position and clear the previous data event's token.
+     */
+    public void setPosition(Position position) {
+        this.position = position;
+        this.eventResumeToken = null;
+    }
+
+    /**
+     * Record that an initial sync has started for the given replica set.
+     */
+    public void startInitialSnapshot() {
+        this.initialSnapshot = true;
+        this.eventResumeToken = null;
+    }
+
+    /**
+     * Record that an initial sync has stopped for the given replica set.
+     */
+    public void stopInitialSnapshot() {
+        this.initialSnapshot = false;
+    }
+
+    /**
+     * Returns whether any replica sets are still running a snapshot.
+     */
+    public boolean isSnapshotRunning() {
+        return initialSnapshot;
+    }
+
+    @Override
+    protected Instant timestamp() {
+        // Prefer wallTime (actual database change time) over clusterTime when available (version 6.0 and onwards)
+        if (wallTime != 0L) {
+            return Instant.ofEpochMilli(wallTime);
+        }
+        // Fall back to position timestamp (clusterTime)
+        var time = position().getTime();
+        return (time == -1) ? null : Instant.ofEpochSecond(time);
+    }
+
+    @Override
+    public SnapshotRecord snapshot() {
+        return isSnapshotRunning() ? SnapshotRecord.TRUE
+                : snapshotRecord == SnapshotRecord.INCREMENTAL ? SnapshotRecord.INCREMENTAL : SnapshotRecord.FALSE;
+    }
+
+    @Override
+    protected String database() {
+        return collectionId != null ? collectionId.dbName() : null;
+    }
+
+    long wallTime() {
+        return wallTime;
+    }
+
+    @Override
+    public String toString() {
+        return "SourceInfo [initialSync=" + initialSnapshot + ", collectionId=" + collectionId + ", position=" + position + "]";
+    }
+}

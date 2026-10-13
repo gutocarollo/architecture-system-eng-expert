@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+        <PackageReference Include="Marten.AspNetCore" />
+        <PackageReference Include="Marten" />
+        <PackageReference Include="Confluent.Kafka" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\web.config" />
+      <_ContentIncludedByDefault Remove="out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\appsettings.Production.json" />
+      <_ContentIncludedByDefault Remove="out\Helpdesk.Api.deps.json" />
+      <_ContentIncludedByDefault Remove="out\Helpdesk.Api.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\appsettings.Production.json" />
+      <_ContentIncludedByDefault Remove="out\out\Helpdesk.Api.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\Helpdesk.Api.runtimeconfig.json" />
+    </ItemGroup>
+
+<!--    <ItemGroup>-->
+<!--      <ProjectReference Include="..\..\..\Core.WebApi\Core.WebApi.csproj" />-->
+<!--    </ItemGroup>-->
+</Project>

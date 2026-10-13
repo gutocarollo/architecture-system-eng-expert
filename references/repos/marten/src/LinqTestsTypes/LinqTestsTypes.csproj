@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <!-- References only the base JasperFx package (no Marten / Weasel / JasperFx.Events),
+             so the shared dedupe-alias file would not resolve. Opt out. -->
+        <IncludeMartenDedupeAliases>false</IncludeMartenDedupeAliases>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\Marten.Testing\Documents\Target.cs">
+        <Link>Target.cs</Link>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.Core" />
+      <PackageReference Include="JasperFx" />
+    </ItemGroup>
+</Project>

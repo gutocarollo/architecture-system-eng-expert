@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0</TargetFrameworks>
+        <RootNamespace>GreeterCodeFirstGrpc.Messages</RootNamespace>
+        <AssemblyName>GreeterCodeFirstGrpc.Messages</AssemblyName>
+    </PropertyGroup>
+
+    <!-- No WolverineFx.Grpc reference: the Server registers the contract with IncludeCodeFirstContract<T>(). -->
+    <ItemGroup>
+        <PackageReference Include="protobuf-net.Grpc"/>
+    </ItemGroup>
+
+</Project>

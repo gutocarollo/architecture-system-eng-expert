@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+
+        <!-- This suite has been swept for xUnit1051 (#5067): every call that accepts a
+             CancellationToken is handed TestContext.Current.CancellationToken, so a hung
+             daemon test is cancelled and reported instead of hanging until CI's own timeout.
+             Keeping the rule ON guards the sweep. Must be set before Tests.props is imported. -->
+        <ThreadTestCancellationToken>true</ThreadTestCancellationToken>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Bobcat" />
+        <PackageReference Include="Bobcat.Generators" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <!-- The xUnit v3 runner adapter. Replaces the copy this repo used to keep in
+             TestingSupport, which never read the runner's verdict. -->
+        <PackageReference Include="Bobcat.Xunit" />
+        <PackageReference Include="Bogus" />
+        <PackageReference Include="Confluent.Kafka" />
+        <PackageReference Include="Lamar.Microsoft.DependencyInjection" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Neovolve.Logging.Xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="xunit.v3" />
+
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\EventSourcingTests\EventSourcingTests.csproj"/>
+        <ProjectReference Include="..\Marten.AspNetCore\Marten.AspNetCore.csproj"/>
+        <ProjectReference Include="..\Marten\Marten.csproj"/>
+        <PackageReference Include="JasperFx.Events.SourceGenerator" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+    <Import Project="../Tests.props" />
+
+</Project>

@@ -1,0 +1,72 @@
+package io.github.resilience4j.ratelimiter.operator;
+
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.reactivex.Completable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+
+/**
+ * Unit test for {@link CompletableRateLimiter}.
+ */
+class CompletableRateLimiterTest {
+
+    private RateLimiter rateLimiter;
+
+    @BeforeEach
+    void setUp() {
+        rateLimiter = mock(RateLimiter.class, RETURNS_DEEP_STUBS);
+    }
+
+    @Test
+    void shouldEmitCompleted() {
+        given(rateLimiter.reservePermission()).willReturn(Duration.ofSeconds(0).toNanos());
+
+        Completable.complete()
+            .compose(RateLimiterOperator.of(rateLimiter))
+            .test()
+            .assertComplete();
+    }
+
+    @Test
+    void shouldDelaySubscription() {
+        given(rateLimiter.reservePermission()).willReturn(Duration.ofSeconds(1).toNanos());
+
+        Completable.complete()
+            .compose(RateLimiterOperator.of(rateLimiter))
+            .test()
+            .awaitTerminalEvent(1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void shouldPropagateError() {
+        given(rateLimiter.reservePermission()).willReturn(Duration.ofSeconds(0).toNanos());
+
+        Completable.error(new IOException("BAM!"))
+            .compose(RateLimiterOperator.of(rateLimiter))
+            .test()
+            .assertSubscribed()
+            .assertError(IOException.class)
+            .assertNotComplete();
+    }
+
+    @Test
+    void shouldEmitErrorWithRequestNotPermittedException() {
+        given(rateLimiter.reservePermission()).willReturn(-1L);
+
+        Completable.complete()
+            .compose(RateLimiterOperator.of(rateLimiter))
+            .test()
+            .assertSubscribed()
+            .assertError(RequestNotPermitted.class)
+            .assertNotComplete();
+    }
+}

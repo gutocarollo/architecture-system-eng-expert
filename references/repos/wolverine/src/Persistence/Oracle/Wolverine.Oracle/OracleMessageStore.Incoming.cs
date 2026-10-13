@@ -1,0 +1,430 @@
+using System.Data.Common;
+using JasperFx.Core.Reflection;
+using Oracle.ManagedDataAccess.Client;
+using Weasel.Oracle;
+using Wolverine.Oracle.Util;
+using Wolverine.Persistence.Durability;
+using Wolverine.RDBMS;
+using Wolverine.Runtime.Serialization;
+using Wolverine.Transports;
+
+namespace Wolverine.Oracle;
+
+internal partial class OracleMessageStore
+{
+    public async Task StoreIncomingAsync(Envelope envelope)
+    {
+        var data = envelope.Status == EnvelopeStatus.Handled
+            ? Array.Empty<byte>()
+            : EnvelopeSerializer.Serialize(envelope);
+
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"INSERT INTO {SchemaName}.{DatabaseConstants.IncomingTable} ({DatabaseConstants.IncomingFields}) " +
+            "VALUES (:body, :id, :status, :ownerId, :executionTime, :attempts, :messageType, :receivedAt, :keepUntil)");
+
+        cmd.Parameters.Add(new OracleParameter("body", OracleDbType.Blob) { Value = data });
+        cmd.With("id", envelope.Id);
+        cmd.With("status", envelope.Status.ToString());
+        cmd.With("ownerId", envelope.OwnerId);
+        cmd.Parameters.Add(new OracleParameter("executionTime", OracleDbType.TimeStampTZ) { Value = (object?)envelope.ScheduledTime ?? DBNull.Value });
+        cmd.With("attempts", envelope.Attempts);
+        cmd.With("messageType", envelope.MessageType!);
+        cmd.With("receivedAt", envelope.Destination?.ToString() ?? string.Empty);
+        cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = (object?)envelope.KeepUntil ?? DBNull.Value });
+
+        try
+        {
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+        catch (OracleException e) when (e.Number == 1) // ORA-00001: unique constraint violated
+        {
+            throw new DuplicateIncomingEnvelopeException(envelope);
+        }
+        finally
+        {
+            await conn.CloseAsync();
+        }
+    }
+
+    public async Task StoreIncomingAsync(IReadOnlyList<Envelope> envelopes)
+    {
+        if (envelopes.Count == 0) return;
+
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        var tx = (OracleTransaction)await conn.BeginTransactionAsync(_cancellation);
+
+        var duplicates = new List<Envelope>();
+
+        foreach (var envelope in envelopes)
+        {
+            var data = envelope.Status == EnvelopeStatus.Handled
+                ? Array.Empty<byte>()
+                : EnvelopeSerializer.Serialize(envelope);
+
+            await using var cmd = conn.CreateCommand(
+                $"INSERT INTO {SchemaName}.{DatabaseConstants.IncomingTable} ({DatabaseConstants.IncomingFields}) " +
+                "VALUES (:body, :id, :status, :ownerId, :executionTime, :attempts, :messageType, :receivedAt, :keepUntil)");
+            cmd.Transaction = tx;
+
+            cmd.Parameters.Add(new OracleParameter("body", OracleDbType.Blob) { Value = data });
+            cmd.With("id", envelope.Id);
+            cmd.With("status", envelope.Status.ToString());
+            cmd.With("ownerId", envelope.OwnerId);
+            cmd.Parameters.Add(new OracleParameter("executionTime", OracleDbType.TimeStampTZ) { Value = (object?)envelope.ScheduledTime ?? DBNull.Value });
+            cmd.With("attempts", envelope.Attempts);
+            cmd.With("messageType", envelope.MessageType!);
+            cmd.With("receivedAt", envelope.Destination?.ToString() ?? string.Empty);
+            cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = (object?)envelope.KeepUntil ?? DBNull.Value });
+
+            try
+            {
+                await cmd.ExecuteNonQueryAsync(_cancellation);
+            }
+            catch (OracleException e) when (e.Number == 1)
+            {
+                duplicates.Add(envelope);
+            }
+        }
+
+        await tx.CommitAsync(_cancellation);
+        await conn.CloseAsync();
+
+        if (duplicates.Count > 0)
+        {
+            throw new DuplicateIncomingEnvelopeException(duplicates);
+        }
+    }
+
+    public async Task<bool> ExistsAsync(Envelope envelope, CancellationToken cancellation)
+    {
+        if (HasDisposed) return false;
+
+        await using var conn = await _dataSource.OpenConnectionAsync(cancellation);
+        OracleCommand cmd;
+
+        if (_durability.MessageIdentity == MessageIdentity.IdOnly)
+        {
+            cmd = conn.CreateCommand(
+                $"SELECT COUNT(id) FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE id = :id");
+            cmd.With("id", envelope.Id);
+        }
+        else
+        {
+            cmd = conn.CreateCommand(
+                $"SELECT COUNT(id) FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :destination");
+            cmd.With("id", envelope.Id);
+            cmd.With("destination", envelope.Destination!.ToString());
+        }
+
+        var count = await cmd.ExecuteScalarAsync(cancellation);
+        await conn.CloseAsync();
+
+        return Convert.ToInt64(count) > 0;
+    }
+
+    public async Task RescheduleExistingEnvelopeForRetryAsync(Envelope envelope)
+    {
+        envelope.Status = EnvelopeStatus.Scheduled;
+        envelope.OwnerId = TransportConstants.AnyNode;
+
+        // Upsert, aligned with MessageDatabase<T>.RescheduleExistingEnvelopeForRetryAsync.
+        // Try the same UPDATE shape ScheduleExecutionAsync uses; if no row exists
+        // (ProcessInline retry #1, BufferedLocalQueue's scheduled-publish path) fall back
+        // to an INSERT via StoreIncomingAsync. See #2823 for the unconditional-INSERT
+        // failure mode this replaces in the SQL Server / Postgres providers.
+        int rowsAffected;
+        await using (var conn = await _dataSource.OpenConnectionAsync(_cancellation))
+        {
+            await using var cmd = conn.CreateCommand(
+                $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+                $"{DatabaseConstants.ExecutionTime} = :time, {DatabaseConstants.Status} = '{EnvelopeStatus.Scheduled}', " +
+                $"{DatabaseConstants.Attempts} = :attempts, {DatabaseConstants.OwnerId} = {TransportConstants.AnyNode} " +
+                $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri AND {DatabaseConstants.Status} <> '{EnvelopeStatus.Handled}'");
+            cmd.With("id", envelope.Id);
+            cmd.Parameters.Add(new OracleParameter("time", OracleDbType.TimeStampTZ) { Value = envelope.ScheduledTime!.Value });
+            cmd.With("attempts", envelope.Attempts);
+            cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+            rowsAffected = await cmd.ExecuteNonQueryAsync(_cancellation);
+            await conn.CloseAsync();
+        }
+
+        if (rowsAffected == 0)
+        {
+            try
+            {
+                await StoreIncomingAsync(envelope);
+            }
+            catch (DuplicateIncomingEnvelopeException)
+            {
+                // GH-4216: the only row for this identity is a retained Handled one. The message already
+                // completed, so a retry booked after the fact is discarded rather than executed again
+            }
+        }
+    }
+
+    public async Task ScheduleExecutionAsync(Envelope envelope)
+    {
+        // GH-4216: a Handled row is never resurrected by a late retry booking; see MessageDatabase<T>.ScheduleExecutionSql
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+            $"{DatabaseConstants.ExecutionTime} = :time, {DatabaseConstants.Status} = '{EnvelopeStatus.Scheduled}', " +
+            $"{DatabaseConstants.Attempts} = :attempts, {DatabaseConstants.OwnerId} = {TransportConstants.AnyNode} " +
+            $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri AND {DatabaseConstants.Status} <> '{EnvelopeStatus.Handled}'");
+        cmd.With("id", envelope.Id);
+        cmd.Parameters.Add(new OracleParameter("time", OracleDbType.TimeStampTZ) { Value = envelope.ScheduledTime!.Value });
+        cmd.With("attempts", envelope.Attempts);
+        cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task DeleteIncomingEnvelopeAsync(Envelope envelope)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"DELETE FROM {SchemaName}.{DatabaseConstants.IncomingTable} " +
+            $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri");
+        cmd.With("id", envelope.Id);
+        cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task MoveToDeadLetterStorageAsync(Envelope envelope, Exception? exception)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        var tx = (OracleTransaction)await conn.BeginTransactionAsync(_cancellation);
+
+        // Delete from incoming
+        await using var deleteCmd = conn.CreateCommand(
+            $"DELETE FROM {SchemaName}.{DatabaseConstants.IncomingTable} WHERE id = :id");
+        deleteCmd.Transaction = tx;
+        deleteCmd.With("id", envelope.Id);
+        await deleteCmd.ExecuteNonQueryAsync(_cancellation);
+
+        // Insert into dead letters
+        byte[] data;
+        try
+        {
+            data = EnvelopeSerializer.Serialize(envelope);
+        }
+        catch
+        {
+            data = Array.Empty<byte>();
+        }
+
+        var deadLetterFields = DatabaseConstants.DeadLetterFields;
+        var deadLetterValues =
+            ":id, :executionTime, :body, :messageType, :receivedAt, :source, :exceptionType, :exceptionMessage, :sentAt, :replayable";
+
+        if (_durability.DeadLetterQueueExpirationEnabled)
+        {
+            deadLetterFields += ", " + DatabaseConstants.Expires;
+            deadLetterValues += ", :expires";
+        }
+
+        await using var insertCmd = conn.CreateCommand(
+            $"INSERT INTO {SchemaName}.{DatabaseConstants.DeadLetterTable} ({deadLetterFields}) " +
+            $"VALUES ({deadLetterValues})");
+        insertCmd.Transaction = tx;
+
+        insertCmd.With("id", envelope.Id);
+        insertCmd.Parameters.Add(new OracleParameter("executionTime", OracleDbType.TimeStampTZ) { Value = (object?)envelope.ScheduledTime ?? DBNull.Value });
+        insertCmd.Parameters.Add(new OracleParameter("body", OracleDbType.Blob) { Value = data });
+        insertCmd.With("messageType", envelope.MessageType ?? string.Empty);
+        insertCmd.With("receivedAt", envelope.Destination?.ToString() ?? string.Empty);
+        insertCmd.With("source", envelope.Source ?? string.Empty);
+        insertCmd.With("exceptionType", exception.DeadLetterExceptionType() ?? string.Empty);
+        insertCmd.With("exceptionMessage", exception.DeadLetterExceptionMessage() ?? string.Empty);
+        insertCmd.Parameters.Add(new OracleParameter("sentAt", OracleDbType.TimeStampTZ) { Value = envelope.SentAt.ToUniversalTime() });
+        insertCmd.With("replayable", 0); // Oracle stores bool as NUMBER(1)
+
+        if (_durability.DeadLetterQueueExpirationEnabled)
+        {
+            var expiration = envelope.DeliverBy ?? DateTimeOffset.UtcNow.Add(_durability.DeadLetterQueueExpiration);
+            insertCmd.Parameters.Add(new OracleParameter("expires", OracleDbType.TimeStampTZ) { Value = expiration });
+        }
+
+        await insertCmd.ExecuteNonQueryAsync(_cancellation);
+
+        await tx.CommitAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task IncrementIncomingEnvelopeAttemptsAsync(Envelope envelope)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET {DatabaseConstants.Attempts} = :attempts " +
+            $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri");
+        cmd.With("attempts", envelope.Attempts);
+        cmd.With("id", envelope.Id);
+        cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task MarkIncomingEnvelopeAsHandledAsync(Envelope envelope)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+            $"{DatabaseConstants.Status} = '{EnvelopeStatus.Handled}', {DatabaseConstants.KeepUntil} = :keepUntil, {DatabaseConstants.OwnerId} = {TransportConstants.AnyNode} " +
+            $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri");
+        cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = (object?)envelope.KeepUntil ?? DBNull.Value });
+        cmd.With("id", envelope.Id);
+        cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    /// <summary>
+    /// GH-3581: the generic <see cref="IMessageDatabase"/> default binds the envelope id as
+    /// <c>DbType.Guid</c>, which ODP.NET rejects against a <c>RAW(16)</c> column with "Value does not
+    /// fall within the expected range". Oracle's id columns are <c>RAW(16)</c>, so this override casts to
+    /// the concrete <see cref="OracleConnection"/> and lets <c>Weasel.Oracle</c>'s <c>With</c> bind the
+    /// Guid as <c>byte[]</c> — exactly what <see cref="StoreIncomingAsync(DbTransaction, Envelope[])"/> and
+    /// <see cref="MarkIncomingEnvelopeAsHandledAsync(Envelope)"/> already do. Runs inside the caller's EF
+    /// Core transaction, so the durable-inbox mark-as-handled stays part of the application's commit.
+    /// Matches the whole inbox identity (id and received_at), like the other mark-as-handled statements in
+    /// this store.
+    /// </summary>
+    public async Task MarkIncomingEnvelopeAsHandledInTransactionAsync(DbConnection conn, DbTransaction? tx,
+        Envelope envelope, DateTimeOffset keepUntil, CancellationToken cancellation)
+    {
+        await using var cmd = ((OracleConnection)conn).CreateCommand(
+            $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+            $"{DatabaseConstants.Status} = '{EnvelopeStatus.Handled}', {DatabaseConstants.KeepUntil} = :keepUntil, {DatabaseConstants.OwnerId} = {TransportConstants.AnyNode} " +
+            $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri");
+        if (tx != null)
+        {
+            cmd.Transaction = (OracleTransaction)tx;
+        }
+
+        cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = keepUntil });
+        cmd.With("id", envelope.Id);
+        cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+        await cmd.ExecuteNonQueryAsync(cancellation);
+    }
+
+    public async Task MarkIncomingEnvelopeAsHandledAsync(IReadOnlyList<Envelope> envelopes)
+    {
+        if (envelopes.Count == 0) return;
+
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        var tx = (OracleTransaction)await conn.BeginTransactionAsync(_cancellation);
+
+        foreach (var envelope in envelopes)
+        {
+            await using var cmd = conn.CreateCommand(
+                $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+                $"{DatabaseConstants.Status} = '{EnvelopeStatus.Handled}', {DatabaseConstants.KeepUntil} = :keepUntil, {DatabaseConstants.OwnerId} = {TransportConstants.AnyNode} " +
+                $"WHERE id = :id AND {DatabaseConstants.ReceivedAt} = :uri");
+            cmd.Transaction = tx;
+            cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = (object?)envelope.KeepUntil ?? DBNull.Value });
+            cmd.With("id", envelope.Id);
+            cmd.With("uri", envelope.Destination?.ToString() ?? string.Empty);
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+
+        await tx.CommitAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task ReleaseIncomingAsync(int ownerId, Uri receivedAt)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET " +
+            $"{DatabaseConstants.OwnerId} = 0 " +
+            // GH-4739: see MessageDatabase.ReleaseIncomingAsync. Oracle's owner index is unfiltered, so the
+            // extra clause buys nothing here, but keeping the statement identical to the portable one means
+            // the next person does not have to wonder which of the two is right.
+            $"WHERE {DatabaseConstants.OwnerId} = :ownerId AND {DatabaseConstants.OwnerId} <> 0 AND {DatabaseConstants.ReceivedAt} = :uri");
+        cmd.With("ownerId", ownerId);
+        cmd.With("uri", receivedAt.ToString());
+        await cmd.ExecuteNonQueryAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    public async Task<IReadOnlyList<Envelope>> LoadPageOfGloballyOwnedIncomingAsync(Uri listenerAddress, int limit)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        await using var cmd = conn.CreateCommand(
+            $"SELECT {DatabaseConstants.IncomingFields} FROM {SchemaName}.{DatabaseConstants.IncomingTable} " +
+            $"WHERE owner_id = {TransportConstants.AnyNode} AND status = '{EnvelopeStatus.Incoming}' AND {DatabaseConstants.ReceivedAt} = :address " +
+            $"FETCH FIRST :limit ROWS ONLY");
+        cmd.With("address", listenerAddress.ToString());
+        cmd.With("limit", limit);
+
+        var list = await cmd.FetchListAsync(r => OracleEnvelopeReader.ReadIncomingAsync(r), _cancellation);
+        await conn.CloseAsync();
+        return list;
+    }
+
+    public async Task ReassignIncomingAsync(int ownerId, IReadOnlyList<Envelope> incoming)
+    {
+        if (incoming.Count == 0) return;
+
+        await using var conn = await _dataSource.OpenConnectionAsync(_cancellation);
+        var tx = (OracleTransaction)await conn.BeginTransactionAsync(_cancellation);
+
+        foreach (var envelope in incoming)
+        {
+            await using var cmd = conn.CreateCommand(
+                $"UPDATE {SchemaName}.{DatabaseConstants.IncomingTable} SET {DatabaseConstants.OwnerId} = :owner " +
+                "WHERE id = :id");
+            cmd.Transaction = tx;
+            cmd.With("owner", ownerId);
+            cmd.With("id", envelope.Id);
+            await cmd.ExecuteNonQueryAsync(_cancellation);
+        }
+
+        await tx.CommitAsync(_cancellation);
+        await conn.CloseAsync();
+    }
+
+    // IMessageDatabase
+    public async Task StoreIncomingAsync(DbTransaction tx, Envelope[] envelopes)
+    {
+        var duplicates = new List<Envelope>();
+
+        foreach (var envelope in envelopes)
+        {
+            var data = envelope.Status == EnvelopeStatus.Handled
+                ? Array.Empty<byte>()
+                : EnvelopeSerializer.Serialize(envelope);
+
+            await using var cmd = ((OracleConnection)tx.Connection!).CreateCommand(
+                $"INSERT INTO {SchemaName}.{DatabaseConstants.IncomingTable} ({DatabaseConstants.IncomingFields}) " +
+                "VALUES (:body, :id, :status, :ownerId, :executionTime, :attempts, :messageType, :receivedAt, :keepUntil)");
+            cmd.Transaction = (OracleTransaction)tx;
+
+            cmd.Parameters.Add(new OracleParameter("body", OracleDbType.Blob) { Value = data });
+            cmd.With("id", envelope.Id);
+            cmd.With("status", envelope.Status.ToString());
+            cmd.With("ownerId", envelope.OwnerId);
+            cmd.Parameters.Add(new OracleParameter("executionTime", OracleDbType.TimeStampTZ) { Value = (object?)envelope.ScheduledTime ?? DBNull.Value });
+            cmd.With("attempts", envelope.Attempts);
+            cmd.With("messageType", envelope.MessageType!);
+            cmd.With("receivedAt", envelope.Destination?.ToString() ?? string.Empty);
+            cmd.Parameters.Add(new OracleParameter("keepUntil", OracleDbType.TimeStampTZ) { Value = (object?)envelope.KeepUntil ?? DBNull.Value });
+
+            try
+            {
+                await cmd.ExecuteNonQueryAsync(_cancellation);
+            }
+            catch (OracleException e) when (e.Number == 1)
+            {
+                duplicates.Add(envelope);
+            }
+        }
+
+        if (duplicates.Count > 0)
+        {
+            throw new DuplicateIncomingEnvelopeException(duplicates);
+        }
+    }
+}

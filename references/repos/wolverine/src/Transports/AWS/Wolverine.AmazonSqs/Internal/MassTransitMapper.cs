@@ -1,0 +1,57 @@
+using System.Text;
+using Amazon.SQS.Model;
+using Wolverine.Runtime.Interop.MassTransit;
+
+namespace Wolverine.AmazonSqs.Internal;
+
+#region sample_masstransitmapper_for_sqs
+// This guy is the envelope mapper for interoperating
+// with MassTransit 
+internal class MassTransitMapper : ISqsEnvelopeMapper
+{
+    private readonly IMassTransitInteropEndpoint _endpoint;
+    private MassTransitJsonSerializer _serializer;
+
+    public MassTransitMapper(IMassTransitInteropEndpoint endpoint, Action<IMassTransitInterop>? configure = null)
+    {
+        _endpoint = endpoint;
+        _serializer = new MassTransitJsonSerializer(endpoint);
+        configure?.Invoke(_serializer);
+    }
+
+    public override string ToString() => "MassTransit Interop";
+
+    public MassTransitJsonSerializer Serializer => _serializer;
+
+    public string BuildMessageBody(Envelope envelope)
+    {
+        return Encoding.UTF8.GetString(_serializer.Write(envelope));
+    }
+
+    public IEnumerable<KeyValuePair<string, MessageAttributeValue>> ToAttributes(Envelope envelope)
+    {
+        if (!string.IsNullOrEmpty(envelope.ParentId))
+        {
+            yield return new KeyValuePair<string, MessageAttributeValue>(
+                MassTransitHeaders.ActivityId,
+                new MessageAttributeValue { DataType = "String", StringValue = envelope.ParentId });
+        }
+    }
+
+    public void ReadEnvelopeData(Envelope envelope, string messageBody, IDictionary<string, MessageAttributeValue> attributes)
+    {
+        // TODO -- this could be more efficient of course
+        envelope.Data = Encoding.UTF8.GetBytes(messageBody);
+
+        // This is the really important part
+        // of the mapping
+        envelope.Serializer = _serializer;
+
+        if (attributes.TryGetValue(MassTransitHeaders.ActivityId, out var activityId))
+        {
+            envelope.ParentId = activityId.StringValue;
+        }
+    }
+}
+
+#endregion

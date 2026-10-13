@@ -1,0 +1,472 @@
+using JasperFx.Blocks;
+using JasperFx.Core;
+using Microsoft.Extensions.Logging;
+using Wolverine.Configuration;
+using Wolverine.ErrorHandling;
+using Wolverine.Logging;
+using Wolverine.Persistence.Durability;
+using Wolverine.Runtime;
+
+namespace Wolverine.Transports.Sending;
+
+public abstract class SendingAgent : ISendingAgent, ISenderCallback, ISenderCircuit, IAsyncDisposable
+{
+    private readonly SemaphoreSlim _failureCountLock = new(1, 1);
+    private readonly ILogger _logger;
+    private readonly IMessageTracker _messageLogger;
+    protected readonly ISender _sender;
+
+    protected readonly RetryBlock<Envelope> _sending;
+    protected readonly DurabilitySettings _settings;
+    private CircuitWatcher? _circuitWatcher;
+    private int _failureCount;
+    private DateTimeOffset _lastMessageSentAt = DateTimeOffset.UtcNow;
+
+    private readonly IWolverineRuntime? _runtime;
+    private readonly SendingFailurePolicies? _sendingFailurePolicies;
+
+    public SendingAgent(ILogger logger, IMessageTracker messageLogger, ISender sender, DurabilitySettings settings,
+        Endpoint endpoint) : this(logger, messageLogger, sender, settings, endpoint, null, null)
+    {
+    }
+
+    public SendingAgent(ILogger logger, IMessageTracker messageLogger, ISender sender, DurabilitySettings settings,
+        Endpoint endpoint, IWolverineRuntime? runtime, SendingFailurePolicies? sendingFailurePolicies)
+    {
+        _logger = logger;
+        _messageLogger = messageLogger;
+        _sender = sender;
+        _settings = settings;
+        Endpoint = endpoint;
+        _runtime = runtime;
+        _sendingFailurePolicies = sendingFailurePolicies;
+
+        Func<Envelope, CancellationToken, Task> senderDelegate = _sender is ISenderRequiresCallback
+            ? sendWithCallbackHandlingAsync
+            : sendWithExplicitHandlingAsync;
+
+        _sending = new RetryBlock<Envelope>(senderDelegate, logger, _settings.Cancellation);
+    }
+
+    public ISender Sender => _sender;
+
+    public virtual async ValueTask DisposeAsync()
+    {
+        // Stop the circuit-breaker ping loop before tearing down the sender it pings through --
+        // otherwise it keeps running against a disposed/unreachable destination indefinitely.
+        _circuitWatcher?.SafeDispose();
+        _circuitWatcher = null;
+
+        if (_sender is IAsyncDisposable ad)
+        {
+            await ad.DisposeAsync().ConfigureAwait(false);
+        }
+        else if (_sender is IDisposable d)
+        {
+            d.SafeDispose();
+        }
+
+        _sending.Dispose();
+        _failureCountLock.Dispose();
+    }
+
+    Task ISenderCallback.MarkTimedOutAsync(OutgoingMessageBatch outgoing)
+    {
+        _logger.OutgoingBatchFailed(outgoing);
+        return markFailedAsync(outgoing);
+    }
+
+    /// <summary>
+    ///     The envelopes in this batch can never be sent to this destination -- the transport has already
+    ///     decided that retrying would fail identically forever. Log them and let them go. A buffered
+    ///     agent is done at that point; a durable one also has to clear them out of the outgoing table,
+    ///     which is why this is virtual.
+    /// </summary>
+    public virtual Task MarkSerializationFailureAsync(OutgoingMessageBatch outgoing)
+    {
+        _logger.OutgoingBatchFailed(outgoing);
+        var exception = new Exception("Serialization failure with outgoing envelopes " +
+                                      outgoing.Messages.Select(x => x.ToString()).Join(", "));
+        _logger.LogError(exception, "Serialization failure");
+
+        return Task.CompletedTask;
+    }
+
+    Task ISenderCallback.MarkQueueDoesNotExistAsync(OutgoingMessageBatch outgoing)
+    {
+        _logger.OutgoingBatchFailed(outgoing, new QueueDoesNotExistException(outgoing));
+
+        return Task.CompletedTask;
+    }
+
+    Task ISenderCallback.MarkProcessingFailureAsync(OutgoingMessageBatch outgoing)
+    {
+        _logger.OutgoingBatchFailed(outgoing);
+        return markFailedAsync(outgoing);
+    }
+
+    public Task MarkProcessingFailureAsync(OutgoingMessageBatch outgoing, Exception? exception)
+    {
+        _logger.LogError(exception,
+            "Failure trying to send a message batch to {Destination}", outgoing.Destination);
+        _logger.OutgoingBatchFailed(outgoing, exception);
+        return markFailedAsync(outgoing, exception);
+    }
+
+    Task ISenderCallback.MarkSenderIsLatchedAsync(OutgoingMessageBatch outgoing)
+    {
+        return markFailedAsync(outgoing);
+    }
+
+    public abstract Task MarkSuccessfulAsync(OutgoingMessageBatch outgoing);
+
+    public Task<bool> TryToResumeAsync(CancellationToken cancellationToken)
+    {
+        return _sender.PingAsync();
+    }
+
+    TimeSpan ISenderCircuit.RetryInterval => Endpoint.PingIntervalForCircuitResume;
+
+    async Task ISenderCircuit.ResumeAsync(CancellationToken cancellationToken)
+    {
+        using var activity = WolverineTracing.ActivitySource.StartActivity(WolverineTracing.SendingResumed);
+        activity?.SetTag(WolverineTracing.EndpointAddress, Endpoint.Uri);
+
+        await MarkSuccessAsync();
+
+        await executeWithRetriesAsync(() => afterRestartingAsync(_sender));
+    }
+
+    public Endpoint Endpoint { get; }
+
+    public Uri? ReplyUri { get; set; }
+
+    public Uri Destination => _sender.Destination;
+
+    public bool Latched { get; private set; }
+    public abstract bool IsDurable { get; }
+
+    public async ValueTask EnqueueOutgoingAsync(Envelope envelope)
+    {
+        setDefaults(envelope);
+
+        var pooled = envelope.FromPool;
+        if (pooled) _messageLogger.Sent(envelope);
+
+        await _sending.PostAsync(envelope);
+
+        _lastMessageSentAt = DateTimeOffset.UtcNow;
+        if (!pooled) _messageLogger.Sent(envelope);
+    }
+
+    public async ValueTask StoreAndForwardAsync(Envelope envelope)
+    {
+        setDefaults(envelope);
+
+        // GH-3709. Handing a POOLED envelope to the sending block publishes it to another thread that may
+        // send it, succeed, and return it to the pool -- Envelope.Reset(), which nulls Destination and
+        // MessageType -- before this frame resumes. Reading it afterwards for metrics is therefore a data
+        // race, and it surfaced as an intermittent NullReferenceException out of Envelope.ToMetricsHeaders()
+        // (Destination non-null at its own guard, null one line later) under concurrent publishing. It was
+        // found through EndpointMode.NativeAck, which mapped to BufferedSendingAgent at the time; GH-4061 has
+        // since moved NativeAck onto the inline agent, so the remaining exposure is any BufferedInMemory
+        // endpoint. Non-pooled envelopes -- every durable send, and anything published inside a tracking
+        // session -- keep the original ordering, so a store that throws still reports no send.
+        var pooled = envelope.FromPool;
+        if (pooled) _messageLogger.Sent(envelope);
+
+        await storeAndForwardAsync(envelope);
+
+        _lastMessageSentAt = DateTimeOffset.UtcNow;
+        if (!pooled) _messageLogger.Sent(envelope);
+    }
+
+    /// <summary>
+    ///     GH-4824. Only an agent with an outbox behind it can answer true; see
+    ///     <see cref="ISendingAgent.TryStoreOutgoingAsync" />. <c>DurableSendingAgent</c> overrides this.
+    /// </summary>
+    public virtual ValueTask<bool> TryStoreOutgoingAsync(Envelope envelope)
+    {
+        return new ValueTask<bool>(false);
+    }
+
+    public bool SupportsNativeScheduledSend => _sender.SupportsNativeScheduledSend;
+
+    public DateTimeOffset LastMessageSentAt => _lastMessageSentAt;
+
+    protected async Task executeWithRetriesAsync(Func<Task> action)
+    {
+        var i = 0;
+        while (true)
+        {
+            try
+            {
+                await action().ConfigureAwait(false);
+                return;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Unexpected failure");
+                i++;
+                await Task.Delay(i * 100).ConfigureAwait(false);
+            }
+        }
+    }
+
+    // GH-4824: protected rather than private so DurableSendingAgent.TryStoreOutgoingAsync can apply the
+    // same defaults before writing the outbox row. Pure assignments, so applying them twice is a no-op.
+    protected void setDefaults(Envelope envelope)
+    {
+        envelope.Status = EnvelopeStatus.Outgoing;
+        envelope.OwnerId = _settings.AssignedNodeNumber;
+        envelope.ReplyUri ??= ReplyUri;
+    }
+
+    protected abstract Task storeAndForwardAsync(Envelope envelope);
+
+    protected abstract Task afterRestartingAsync(ISender sender);
+
+    public abstract Task MarkSuccessfulAsync(Envelope outgoing);
+
+    public async Task LatchAndDrainAsync()
+    {
+        Latched = true;
+
+        try
+        {
+            await drainOtherAsync();
+            await _sending.DrainAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while trying to drain the outgoing sender for {Uri}", Destination);
+        }
+
+        _logger.CircuitBroken(Destination);
+    }
+
+    /// <summary>
+    /// Pause sending for the specified duration, then automatically resume.
+    /// </summary>
+    public async Task PauseAsync(TimeSpan pauseTime)
+    {
+        await LatchAndDrainAsync();
+
+        _logger.LogInformation("Pausing sending to {Destination} for {PauseTime}", Destination, pauseTime);
+
+        _ = Task.Delay(pauseTime, _settings.Cancellation).ContinueWith(async _ =>
+        {
+            if (_settings.Cancellation.IsCancellationRequested) return;
+
+            try
+            {
+                _logger.LogInformation("Resuming sending to {Destination} after pause", Destination);
+                await (this as ISenderCircuit).ResumeAsync(_settings.Cancellation);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error trying to resume sending to {Destination} after pause", Destination);
+
+                // Fall back to the circuit watcher to keep trying
+                _circuitWatcher ??= new CircuitWatcher(this, _settings.Cancellation);
+            }
+        }, TaskScheduler.Default);
+    }
+
+    protected virtual Task drainOtherAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public void Unlatch()
+    {
+        if (Latched)
+        {
+            _logger.CircuitResumed(Destination);
+        }
+
+        Latched = false;
+    }
+
+    private async Task sendWithCallbackHandlingAsync(Envelope envelope, CancellationToken token)
+    {
+        try
+        {
+            await _sender.SendAsync(envelope);
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                await MarkProcessingFailureAsync(envelope, e);
+            }
+            catch (Exception? exception)
+            {
+                _logger.LogError(exception, "Error while trying to process a failure");
+            }
+        }
+    }
+
+    private async Task sendWithExplicitHandlingAsync(Envelope envelope, CancellationToken token)
+    {
+        try
+        {
+            await _sender.SendAsync(envelope);
+
+            await MarkSuccessfulAsync(envelope);
+
+            // wolverine#2955: success branch only — a retried/failed envelope is
+            // re-queued by MarkProcessingFailureAsync and must not be released
+            // out from under the retry. _runtime is null in test paths that
+            // hand-construct a SendingAgent; pooling is opt-in for those.
+            if (envelope.FromPool && _runtime is Runtime.WolverineRuntime runtime)
+            {
+                runtime.ReleaseInternalEnvelope(envelope, true);
+            }
+        }
+        catch (NotSupportedException)
+        {
+            // Ignore it, most likely a failure ack that should not have been sent
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                await MarkProcessingFailureAsync(envelope, e);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Error while trying to process a batch send failure");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Try to apply sending failure policies to each envelope in the batch.
+    /// Returns true if all envelopes were handled by policies; false if any were not.
+    /// </summary>
+    private async Task<bool> tryApplySendingFailurePoliciesAsync(OutgoingMessageBatch batch, Exception? exception)
+    {
+        if (_sendingFailurePolicies == null || !_sendingFailurePolicies.HasAnyRules || _runtime == null || exception == null)
+        {
+            return false;
+        }
+
+        var allHandled = true;
+
+        foreach (var envelope in batch.Messages)
+        {
+            envelope.SendAttempts++;
+
+            var continuation = _sendingFailurePolicies.DetermineAction(exception, envelope);
+            if (continuation != null)
+            {
+                try
+                {
+                    var outbox = resolveOutbox();
+                    var lifecycle = new SendingEnvelopeLifecycle(envelope, _runtime, this, outbox);
+                    await continuation.ExecuteAsync(lifecycle, _runtime, DateTimeOffset.UtcNow, null);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error executing sending failure policy for envelope {EnvelopeId}", envelope.Id);
+                    allHandled = false;
+                }
+            }
+            else
+            {
+                allHandled = false;
+            }
+        }
+
+        return allHandled;
+    }
+
+    /// <summary>
+    /// Resolve the outbox for creating SendingEnvelopeLifecycle instances.
+    /// Overridden in DurableSendingAgent to provide the actual outbox.
+    /// </summary>
+    protected virtual IMessageOutbox? resolveOutbox() => null;
+
+    private async Task markFailedAsync(OutgoingMessageBatch batch, Exception? exception = null)
+    {
+        // Try sending failure policies first
+        if (exception != null && await tryApplySendingFailurePoliciesAsync(batch, exception))
+        {
+            return;
+        }
+
+        // If it's already latched, just enqueue again
+        if (Latched)
+        {
+            await EnqueueForRetryAsync(batch);
+            return;
+        }
+
+        var count = Interlocked.Increment(ref _failureCount);
+
+        if (count >= Endpoint.FailuresBeforeCircuitBreaks)
+        {
+            // Only take the lock for the circuit breaker state transition
+            await _failureCountLock.WaitAsync();
+            try
+            {
+                if (!Latched)
+                {
+                    using var activity =
+                        WolverineTracing.ActivitySource.StartActivity(WolverineTracing.SendingPaused);
+                    activity?.SetTag(WolverineTracing.StopReason, WolverineTracing.TooManySenderFailures);
+                    activity?.SetTag(WolverineTracing.EndpointAddress, Endpoint.Uri);
+
+                    await LatchAndDrainAsync();
+
+                    _circuitWatcher ??= new CircuitWatcher(this, _settings.Cancellation);
+                }
+            }
+            finally
+            {
+                _failureCountLock.Release();
+            }
+
+            await EnqueueForRetryAsync(batch);
+            return;
+        }
+
+        foreach (var envelope in batch.Messages) await _sending.PostAsync(envelope);
+    }
+
+    public abstract Task EnqueueForRetryAsync(OutgoingMessageBatch batch);
+
+    public async Task MarkSuccessAsync()
+    {
+        Interlocked.Exchange(ref _failureCount, 0);
+
+        // Only take the lock if there's circuit breaker state to clean up
+        if (Latched || _circuitWatcher != null)
+        {
+            await _failureCountLock.WaitAsync();
+            try
+            {
+                Unlatch();
+                _circuitWatcher?.SafeDispose();
+                _circuitWatcher = null;
+            }
+            finally
+            {
+                _failureCountLock.Release();
+            }
+        }
+    }
+
+    public Task MarkProcessingFailureAsync(Envelope outgoing, Exception? exception)
+    {
+        if (outgoing.Destination == null)
+        {
+            throw new InvalidOperationException("This envelope has not been routed");
+        }
+
+        var batch = new OutgoingMessageBatch(outgoing.Destination, new[] { outgoing });
+        _logger.OutgoingBatchFailed(batch, exception);
+        return markFailedAsync(batch, exception);
+    }
+}

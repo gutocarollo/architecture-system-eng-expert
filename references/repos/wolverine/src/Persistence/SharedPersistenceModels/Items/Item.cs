@@ -1,0 +1,36 @@
+namespace SharedPersistenceModels.Items;
+
+public class Item : Entity
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = null!;
+
+    public bool Approved { get; set; }
+
+    public void Approve()
+    {
+        Approved = true;
+        Publish(new ItemApproved(Id));
+    }
+}
+
+public record ItemApproved(Guid Id) : IDomainEvent;
+
+public interface IDomainEvent;
+
+public interface IEntity
+{
+    IReadOnlyList<IDomainEvent> Events { get; }
+}
+
+public abstract class Entity : IEntity
+{
+    public List<object> Events { get; } = new();
+
+    IReadOnlyList<IDomainEvent> IEntity.Events => Events.OfType<IDomainEvent>().ToList();
+
+    public void Publish(IDomainEvent e)
+    {
+        Events.Add(e);
+    }
+}

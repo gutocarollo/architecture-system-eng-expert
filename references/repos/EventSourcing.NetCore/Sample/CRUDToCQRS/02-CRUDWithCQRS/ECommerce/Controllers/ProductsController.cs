@@ -1,0 +1,56 @@
+using ECommerce.Core.Controllers;
+using ECommerce.Model;
+using ECommerce.Requests;
+using ECommerce.Responses;
+using ECommerce.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ECommerce.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController(ProductService service, ProductReadOnlyService readOnlyService)
+    : CRUDController<Product>(service, readOnlyService)
+{
+    protected override Func<object, string> GetEntityByIdUri { get; } = id => $"/api/Products/{id}";
+
+    [HttpPost]
+    public Task<IActionResult> CreateAsync(
+        [FromBody] CreateProductRequest request,
+        CancellationToken ct
+    )
+    {
+        request.Id = Guid.CreateVersion7();
+
+        return CreateAsync<CreateProductRequest>(
+            request,
+            ct
+        );
+    }
+
+    [HttpPut("{id}")]
+    public Task<IActionResult> UpdateAsync(
+        [FromBody] UpdateProductRequest request,
+        CancellationToken ct
+    ) =>
+        UpdateAsync<UpdateProductRequest>(
+            request,
+            ct
+        );
+
+    [HttpDelete("{id:guid}")]
+    public new Task<IActionResult> DeleteByIdAsync([FromRoute] Guid id, CancellationToken ct) =>
+        base.DeleteByIdAsync(id, ct);
+
+    [HttpGet("{id}")]
+    public Task<ProductDetailsResponse> GetById(Guid id, CancellationToken ct) =>
+        ReadOnlyService.GetByIdAsync<ProductDetailsResponse>(id, ct);
+
+    [HttpGet]
+    public Task<List<ProductShortInfoResponse>> Get(
+        CancellationToken ct,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20
+    ) =>
+        ReadOnlyService.GetPagedAsync<ProductShortInfoResponse>(ct, pageNumber, pageSize);
+}

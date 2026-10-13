@@ -1,0 +1,1664 @@
+# Aggregate Handlers and Event Sourcing
+
+::: info NEW in 6.26
+`[WriteAggregate]`, `[ReadAggregate]` and `[AggregateHandler]` now inherit from the
+persistence-strategy-agnostic `[WriteModel]`, `[ReadModel]` and `[DeciderFunction]` attributes in
+Wolverine core, which work identically against Marten or any other event store integration. As of 6.27
+`[BoundaryModel]` likewise inherits from `[DcbModel]`. Everything on this page still applies
+unchanged. See [Event Sourced Models](/guide/handlers/persistence.html#event-sourced-models) for the
+agnostic spelling, which is the one to prefer in new code.
+:::
+
+::: tip
+For unit testing one of these handlers without a database, see
+[Unit Testing Aggregate Handlers](/guide/durability/unit-testing-aggregate-handlers).
+:::
+
+::: tip
+Only use the "aggregate handler workflow" if you are wanting to potentially write new events to an existing event stream. If all you
+need in a message handler or HTTP endpoint is a read-only copy of an event streamed aggregate from Marten, use the `[ReadAggregate]` attribute
+instead that has a little bit lighter weight runtime within Marten.
+:::
+
+::: info
+If your message handler or HTTP endpoint uses more than one declarative attribute for retrieving Marten data,
+Wolverine 5.0+ is able to utilize [Marten's Batch Querying capability](https://martendb.io/documents/querying/batched-queries.html#batched-queries) for more efficient interaction with the database.
+
+This batching behavior is also supported for all the declarative attributes and the "aggregate handler workflow" in general
+described in this page.
+:::
+
+See the [OrderEventSourcingSample project on GitHub](https://github.com/JasperFx/wolverine/tree/main/src/Persistence/OrderEventSourcingSample) for more samples.
+
+That Wolverine + Marten combination is optimized for efficient and productive development using a [CQRS architecture style](https://martinfowler.com/bliki/CQRS.html) with [Marten's event sourcing](https://martendb.io/events/) support.
+Specifically, let's dive into the responsibilities of a typical command handler in a CQRS with event sourcing architecture:
+
+1. Fetch any current state of the system that's necessary to evaluate or validate the incoming event
+2. *Decide* what events should be emitted and captured in response to an incoming event
+3. Manage concurrent access to system state
+4. Safely commit the new events
+5. Selectively publish some of the events based on system needs to other parts of your system or even external systems
+6. Instrument all of the above
+
+And then lastly, you're going to want some resiliency and selective retry capabilities for concurrent access violations or just normal infrastructure hiccups.
+
+Let's just right into an example order management system. I'm going to model the order workflow with this aggregate model:
+
+<!-- snippet: sample_order_event_sourced_aggregate -->
+<a id='snippet-sample_order_event_sourced_aggregate'></a>
+```cs
+public class Item
+{
+    public string Name { get; set; } = null!;
+    public bool Ready { get; set; }
+}
+
+public class Order
+{
+    public Order(OrderCreated created)
+    {
+        foreach (var item in created.Items) Items[item.Name] = item;
+    }
+
+    // This would be the stream id
+    public Guid Id { get; set; }
+
+    // This is important, by Marten convention this would
+    // be the
+    public int Version { get; set; }
+
+    public DateTimeOffset? Shipped { get; private set; }
+
+    public Dictionary<string, Item> Items { get; set; } = new();
+
+    // These methods are used by Marten to update the aggregate
+    // from the raw events
+    public void Apply(IEvent<OrderShipped> shipped)
+    {
+        Shipped = shipped.Timestamp;
+    }
+
+    public void Apply(ItemReady ready)
+    {
+        Items[ready.Name].Ready = true;
+    }
+
+    public bool IsReadyToShip()
+    {
+        return Shipped == null && Items.Values.All(x => x.Ready);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L22-L65' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_order_event_sourced_aggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+At a minimum, we're going to want a command handler for this command message that marks an order item as ready to ship and then evaluates whether
+or not based on the current state of the `Order` aggregate whether or not the logical order is ready to be shipped out:
+
+<!-- snippet: sample_markitemready -->
+<a id='snippet-sample_markitemready'></a>
+```cs
+// OrderId refers to the identity of the Order aggregate
+public record MarkItemReady(Guid OrderId, string ItemName, int Version);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L67-L71' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemready' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+In the code above, we're also utilizing Wolverine's [outbox messaging](/guide/durability/) support to both order and guarantee the delivery of a `ShipOrder` message when
+the Marten transaction
+
+Before getting into Wolverine middleware strategies, let's first build out an MVC controller method for the command above:
+
+<!-- snippet: sample_markitemcontroller -->
+<a id='snippet-sample_markitemcontroller'></a>
+```cs
+[HttpPost("/orders/itemready")]
+public async Task Post(
+    [FromBody] MarkItemReady command,
+    [FromServices] IDocumentSession session,
+    [FromServices] IMartenOutbox outbox
+)
+{
+    // This is important!
+    outbox.Enroll(session);
+
+    // Fetch the current value of the Order aggregate
+    var stream = await session
+        .Events
+
+        // We're also opting into Marten optimistic concurrency checks here
+        .FetchForWriting<Order>(command.OrderId, command.Version);
+
+    var order = stream.Aggregate!;
+
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        stream.AppendOne(new ItemReady(command.ItemName));
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        // Publish a cascading command to do whatever it takes
+        // to actually ship the order
+        // Note that because the context here is enrolled in a Wolverine
+        // outbox, the message is registered, but not "released" to
+        // be sent out until SaveChangesAsync() is called down below
+        await outbox.PublishAsync(new ShipOrder(command.OrderId));
+        stream.AppendOne(new OrderReady());
+    }
+
+    // This will also persist and flush out any outgoing messages
+    // registered into the context outbox
+    await session.SaveChangesAsync();
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L75-L125' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemcontroller' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Hopefully, that code is easy to understand, but there's some potentially repetitive code
+(loading aggregates, appending events, committing transactions) that will reoccur
+across all your command handlers. Likewise, it would be best to completely
+isolate your business logic that *decides* what new events should be appended completely
+away from the infrastructure code so that you can more easily reason about that code and
+easily test that business logic. To that end, Wolverine supports the [Decider](https://thinkbeforecoding.com/post/2021/12/17/functional-event-sourcing-decider)
+pattern with Marten using the `[AggregateHandler]` middleware.
+Using that middleware, we get this slimmer code:
+
+<!-- snippet: sample_markitemreadyhandler -->
+<a id='snippet-sample_markitemreadyhandler'></a>
+```cs
+[AggregateHandler]
+public static IEnumerable<object> Handle(MarkItemReady command, Order order)
+{
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        yield return new ItemReady(command.ItemName);
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        yield return new OrderReady();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L251-L277' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemreadyhandler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+In the case above, Wolverine is wrapping middleware around our basic command handler to
+to:
+
+1. Fetch the appropriate `Order` aggregate matching the command
+2. Append any new events returned from the handle method to the Marten event stream
+   for this `Order`
+3. Saves any outstanding changes and commits the Marten unit of work
+
+To make this more clear, here's the generated code (with some reformatting and extra comments):
+
+
+```cs
+public class MarkItemReadyHandler1442193977 : MessageHandler
+{
+    private readonly OutboxedSessionFactory _outboxedSessionFactory;
+
+    public MarkItemReadyHandler1442193977(OutboxedSessionFactory outboxedSessionFactory)
+    {
+        _outboxedSessionFactory = outboxedSessionFactory;
+    }
+
+    public override async Task HandleAsync(MessageContext context, CancellationToken cancellation)
+    {
+        var markItemReady = (MarkItemReady)context.Envelope.Message;
+        await using var documentSession = _outboxedSessionFactory.OpenSession(context);
+        var eventStore = documentSession.Events;
+        // Loading Marten aggregate
+        var eventStream = await eventStore.FetchForWriting<Order>(markItemReady.OrderId, markItemReady.Version, cancellation).ConfigureAwait(false);
+
+        var outgoing1 = MarkItemReadyHandler.Handle(markItemReady, eventStream.Aggregate);
+        if (outgoing1 != null)
+        {
+            // Capturing any possible events returned from the command handlers
+            eventStream.AppendMany(outgoing1);
+
+        }
+
+        await documentSession.SaveChangesAsync(cancellation).ConfigureAwait(false);
+    }
+
+}
+```
+
+As you probably guessed, there are some naming conventions or other questions you need to be aware of
+before you use this middleware strategy.
+
+::: warning
+There are some open, let's call them _imperfections_ with Wolverine's code generation against the `[WriteAggregate]` and `[ReadAggregate]`
+usage. For best results, only use these attributes on a parameter within the main HTTP endpoint method and not in `Validate/Before/Load` methods.
+:::
+
+::: info
+The `[Aggregate]` and `[WriteAggregate]` attributes _require the requested stream and aggregate to be found by default_, meaning that the handler or HTTP
+endpoint will be stopped if the requested data is not found. You can explicitly mark individual attributes as `Required=false`.
+:::
+
+Alternatively, there is also the newer `[WriteAggregate]` usage, with this example being a functional alternative
+mark up:
+
+<!-- snippet: sample_markitemreadyhandler_with_writeaggregate -->
+<a id='snippet-sample_markitemreadyhandler_with_writeaggregate'></a>
+```cs
+public static IEnumerable<object> Handle(
+    // The command
+    MarkItemReady command, 
+    
+    // This time we'll mark the parameter as the "aggregate"
+    [WriteAggregate] Order order)
+{
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        yield return new ItemReady(command.ItemName);
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        yield return new OrderReady();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L282-L312' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemreadyhandler_with_writeaggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The `[WriteAggregate]` attribute also opts into the "aggregate handler workflow", but is placed at the parameter level
+instead of the class level. This was added to extend the "aggregate handler workflow" to operations that involve multiple
+event streams in one transaction. 
+
+::: tip
+`[WriteAggregate]` works equally on message handlers as it does on HTTP endpoints. In fact, the older `[Aggregate]` attribute
+in Wolverine.Http.Marten is now just a subclass of `[WriteAggregate]`.
+:::
+
+## Validation on Stream Existence <Badge type="tip" text="4.8" />
+
+By default, the "aggregate handler workflow" _requires_ the identified event stream to exist at runtime. If the stream is
+missing, an HTTP endpoint returns a 404 status code and a message handler logs that the aggregate was not found and stops
+processing (effectively discarding the message). The `[WriteAggregate]` parameter in this example is required by default:
+
+<!-- snippet: sample_markitemreadyhandler_with_writeaggregate -->
+<a id='snippet-sample_markitemreadyhandler_with_writeaggregate'></a>
+```cs
+public static IEnumerable<object> Handle(
+    // The command
+    MarkItemReady command, 
+    
+    // This time we'll mark the parameter as the "aggregate"
+    [WriteAggregate] Order order)
+{
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        yield return new ItemReady(command.ItemName);
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        yield return new OrderReady();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L282-L312' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemreadyhandler_with_writeaggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+If you instead mark the aggregate as `Required = false`, the parameter can be null when the stream does not exist. As long
+as you handle the null case, you can even effectively start a new stream by emitting events from your handler or HTTP endpoint.
+
+You can also control how Wolverine deals with the aggregate being missing — explicitly marking the aggregate as required (the
+default) or customizing the missing-stream behavior — as shown in these sample signatures below:
+
+<!-- snippet: sample_validation_on_aggregate_being_missing_in_aggregate_handler_workflow -->
+<a id='snippet-sample_validation_on_aggregate_being_missing_in_aggregate_handler_workflow'></a>
+```cs
+public static class ValidatedMarkItemReadyHandler
+{
+    public static IEnumerable<object> Handle(
+        // The command
+        MarkItemReady command,
+
+        // In HTTP this will return a 404 status code and stop
+        // the request if the Order is not found
+        
+        // In message handlers, this will log that the Order was not found,
+        // then stop processing. The message would be effectively
+        // discarded
+        [WriteAggregate(Required = true)] Order order) => [];
+
+    [WolverineHandler]
+    public static IEnumerable<object> Handle2(
+        // The command
+        MarkItemReady command,
+
+        // In HTTP this will return a 400 status code and 
+        // write out a ProblemDetails response with a default message explaining
+        // the data that could not be found
+        [WriteAggregate(Required = true, OnMissing = OnMissing.ProblemDetailsWith400)] Order order) => [];
+    
+    [WolverineHandler]
+    public static IEnumerable<object> Handle3(
+        // The command
+        MarkItemReady command,
+
+        // In HTTP this will return a 404 status code and 
+        // write out a ProblemDetails response with a default message explaining
+        // the data that could not be found
+        [WriteAggregate(Required = true, OnMissing = OnMissing.ProblemDetailsWith404)] Order order) => [];
+
+    
+    [WolverineHandler]
+    public static IEnumerable<object> Handle4(
+        // The command
+        MarkItemReady command,
+
+        // In HTTP this will return a 400 status code and 
+        // write out a ProblemDetails response with a custom message.
+        // Wolverine will substitute in the order identity into the message for "{0}"
+        // In message handlers, Wolverine will log using your custom message then discard the message
+        [WriteAggregate(Required = true, OnMissing = OnMissing.ProblemDetailsWith404, MissingMessage = "Cannot find Order {0}")] Order order) => [];
+
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L366-L415' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_validation_on_aggregate_being_missing_in_aggregate_handler_workflow' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The `Required`, `OnMissing`, and `MissingMessage` properties behave consistently on all Wolverine attributes
+like `[Entity]` or `[WriteAggregate]` or `[ReadAggregate]`.
+
+### What Happens When the Stream Is Missing
+
+The behavior you get for a missing stream depends on *where the handler method lives*, and that trips people up
+because it is invisible at the call site.
+
+With `Required = true` on a parameter of a normal handler class -- the default, and the code above -- Wolverine
+stops before the handler body runs. In a message handler that means it logs that the required data was missing
+and discards the message. In an HTTP endpoint it means a 404, or whatever you asked for with `OnMissing`.
+
+If the handler method is on the aggregate type itself, though, there is no object for Wolverine to call the
+method on, so it cannot quietly carry on. That case throws `UnknownAggregateException`:
+
+> Could not find an aggregate of type MyApp.Order with id 8a2c4d... The parameter is required; to handle a
+> missing stream in the handler instead of failing, make the parameter nullable or use
+> `[WriteAggregate(Required = false)]` (or the equivalent on `[ReadAggregate]`/`[Aggregate]`).
+
+From there it is an ordinary handler exception. It follows whatever [error handling policy](/guide/handlers/error-handling)
+matches, which with no matching policy means the dead letter queue, and it comes straight back to you if you
+invoked the message inline with `IMessageBus.InvokeAsync()`.
+
+::: tip
+If a missing stream is a legitimate outcome in your system rather than a bug, either make the parameter nullable
+or set `Required = false` so the decision about what a missing stream means is yours and lives in your handler.
+:::
+
+### Handler Method Signatures
+
+The Marten workflow command handler method signature needs to follow these rules:
+
+* Either explicitly use the `[AggregateHandler]` attribute on the handler method **or use the `AggregateHandler` suffix** on the message handler type to tell Wolverine to opt into the aggregate command workflow. Note that the suffix opts in _by name alone_: a handler type that happens to end in `AggregateHandler` is promoted into this workflow, so its return values are appended to the event stream as events instead of being published as cascading messages. See the warning under [Reading the Latest Version of an Aggregate](#reading-the-latest-version-of-an-aggregate) if that surprises you.
+* The first argument should be the command type, just like any other Wolverine message handler
+* The 2nd argument should be the aggregate -- either the aggregate itself (`Order`) or wrapped
+  in the Marten `IEventStream<T>` type (`IEventStream<Order>`). There is an example of that usage below:
+
+<!-- snippet: sample_markitemreadyhandler_with_explicit_stream -->
+<a id='snippet-sample_markitemreadyhandler_with_explicit_stream'></a>
+```cs
+[AggregateHandler]
+public static void Handle(OrderEventSourcingSample.MarkItemReady command, IEventStream<Order> stream)
+{
+    var order = stream.Aggregate!;
+
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        stream.AppendOne(new ItemReady(command.ItemName));
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        stream.AppendOne(new OrderReady());
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Alternatives/Signatures.cs#L27-L55' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemreadyhandler_with_explicit_stream' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Just as in other Wolverine [message handlers](/guide/handlers/), you can use
+additional method arguments for registered services ("method injection"), the `CancellationToken`
+for the message, and the message `Envelope` if you need access to message metadata.
+
+As for the return values from these handler methods, you can use:
+
+* It's legal to have **no** return values if you are directly using `IEventStream<T>` to append events
+* `IEnumerable<object>` or `object[]` to denote that a value is events to append to the current event stream
+* `IAsyncEnumerable<object` will also be treated as a variable enumerable to events to append to the current event stream
+* `Wolverine.Marten.Events` to denote a list of events. You *may* find this to lead to more readable code in some cases
+* `OutgoingMessages` to refer to additional command messages to be published that should *not* be captured as events
+* `ISideEffect` objects
+* Any other type would be considered to be a separate event type, and you may happily use that for either a single event
+  or a tuple of separate events that will be appended to the event stream
+
+Here's an alternative to the `MarkItemReady` handler that uses `Events`:
+
+<!-- snippet: sample_using_events_and_messages_from_aggregatehandler -->
+<a id='snippet-sample_using_events_and_messages_from_aggregatehandler'></a>
+```cs
+[AggregateHandler]
+public static async Task<(Events, OutgoingMessages)> HandleAsync(MarkItemReady command, Order order, ISomeService service)
+{
+    // All contrived, let's say we need to call some
+    // kind of service to get data so this handler has to be
+    // async
+    var data = await service.FindDataAsync();
+
+    var messages = new OutgoingMessages();
+    var events = new Events();
+
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        events += new ItemReady(command.ItemName);
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        events += new OrderReady();
+        messages.Add(new ShipOrder(order.Id));
+    }
+
+    // This results in both new events being captured
+    // and potentially the ShipOrder message going out
+    return (events, messages);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L324-L363' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_events_and_messages_from_aggregatehandler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+
+### Determining the Aggregate Identity
+
+Wolverine is trying to determine a public member on the command type that refers to the identity
+of the aggregate type. You've got two options, either use the implied naming convention below
+where the `OrderId` property is assumed to be the identity of the `Order` aggregate
+by appending "Id" to the aggregate type name (it's not case sensitive if you were wondering):
+
+<!-- snippet: sample_markitemready -->
+<a id='snippet-sample_markitemready'></a>
+```cs
+// OrderId refers to the identity of the Order aggregate
+public record MarkItemReady(Guid OrderId, string ItemName, int Version);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Order.cs#L67-L71' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemready' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Or if you want to use a different member, bypass the convention, or just don't like conventional
+magic, you can decorate a public member
+on the command class with Marten's `[Identity]` attribute like so:
+
+<!-- snippet: sample_markitemready_with_explicit_identity -->
+<a id='snippet-sample_markitemready_with_explicit_identity'></a>
+```cs
+public class MarkItemReady
+{
+    // This attribute tells Wolverine that this property will refer to the
+    // Order aggregate
+    [Identity] public Guid Id { get; init; }
+
+    public string ItemName { get; init; } = null!;
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Alternatives/Signatures.cs#L11-L21' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemready_with_explicit_identity' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Validation <Badge type="tip" text="4.8" />
+
+Every possible attribute for triggering the "aggregate handler workflow" includes support for data requirements as
+shown below with `[ReadAggregate]`: 
+
+<!-- snippet: sample_read_aggregate_fine_grained_validation_control -->
+<a id='snippet-sample_read_aggregate_fine_grained_validation_control'></a>
+```cs
+// Straight up 404 on missing
+[WolverineGet("/letters1/{id}")]
+public static LetterAggregate GetLetter1([ReadAggregate] LetterAggregate letters) => letters;
+
+// Not required
+[WolverineGet("/letters2/{id}")]
+public static string GetLetter2([ReadAggregate(Required = false)] LetterAggregate letters)
+{
+    return letters == null ? "No Letters" : "Got Letters";
+}
+
+// Straight up 404 & problem details on missing
+[WolverineGet("/letters3/{id}")]
+public static LetterAggregate GetLetter3([ReadAggregate(OnMissing = OnMissing.ProblemDetailsWith404)] LetterAggregate letters) => letters;
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/Wolverine.Http.Tests/Marten/reacting_to_read_aggregate.cs#L153-L171' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_read_aggregate_fine_grained_validation_control' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Forwarding Events
+
+See [Event Forwarding](./event-forwarding) for more information.
+
+## Returning the Updated Aggregate <Badge type="tip" text="3.5" />
+
+A common use case for the "aggregate handler workflow" has been to respond with the now updated state of the projected
+aggregate that has just been updated by appending new events. Until now, that's effectively meant making a completely separate
+call to the database through Marten to retrieve the latest updates. 
+
+::: info
+To understand more about the inner workings of the next section, see the Marten documentation on its [FetchLatest](https://martendb.io/events/projections/read-aggregates.html#fetchlatest)
+API.
+:::
+
+As a quick tip for performance, assuming that you are *not* mutating the projected documents within your command
+handlers, you can opt for this significant Marten optimization to eliminate extra database round trips while
+using the aggregate handler workflow:
+
+```csharp
+builder.Services.AddMarten(opts =>
+{
+    // Other Marten configuration
+
+    // Use this setting to get the very best performance out
+    // of the UpdatedAggregate workflow and aggregate handler
+    // workflow over all
+    opts.Events.UseIdentityMapForAggregates = true;
+}).IntegrateWithWolverine();
+```
+
+::: info
+The setting above cannot be a default in Marten because it can break some existing code with a very different
+workflow than what the Critter Stack team recommends for the aggregate handler workflow.
+:::
+
+Wolverine.Marten has a special response type for message handlers or HTTP endpoints we can use as a directive to tell Wolverine
+to respond with the latest state of a projected aggregate as part of the command execution. Let's make this concrete by
+taking the `MarkItemReady` command handler we've used earlier in this guide and building a slightly new version that
+produces a response of the latest aggregate:
+
+<!-- snippet: sample_markitemreadyhandler_with_response_for_updated_aggregate -->
+<a id='snippet-sample_markitemreadyhandler_with_response_for_updated_aggregate'></a>
+```cs
+[AggregateHandler]
+public static (
+    // Just tells Wolverine to use Marten's FetchLatest API to respond with
+    // the updated version of Order that reflects whatever events were appended
+    // in this command
+    UpdatedAggregate, 
+    
+    // The events that should be appended to the event stream for this order
+    Events) Handle(OrderEventSourcingSample.MarkItemReady command, Order order)
+{
+    var events = new Events();
+    
+    if (order.Items.TryGetValue(command.ItemName, out var item))
+    {
+        // Not doing this in a purist way here, but just
+        // trying to illustrate the Wolverine mechanics
+        item.Ready = true;
+
+        // Mark that the this item is ready
+        events.Add(new ItemReady(command.ItemName));
+    }
+    else
+    {
+        // Some crude validation
+        throw new InvalidOperationException($"Item {command.ItemName} does not exist in this order");
+    }
+
+    // If the order is ready to ship, also emit an OrderReady event
+    if (order.IsReadyToShip())
+    {
+        events.Add(new OrderReady());
+    }
+
+    return (new UpdatedAggregate(), events);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Alternatives/Signatures.cs#L63-L100' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_markitemreadyhandler_with_response_for_updated_aggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Note the usage of the `Wolverine.Marten.UpdatedAggregate` response in the handler. That type by itself is just a directive 
+to Wolverine to generate the necessary code to call `FetchLatest` and respond with that. The command handler above allows
+us to use the command in a mediator usage like so:
+
+<!-- snippet: sample_using_updatedaggregate_with_invoke_async -->
+<a id='snippet-sample_using_updatedaggregate_with_invoke_async'></a>
+```cs
+public static Task<Order> update_and_get_latest(IMessageBus bus, MarkItemReady command)
+{
+    // This will return the updated version of the Order
+    // aggregate that incorporates whatever events were appended
+    // in the course of processing the command
+    return bus.InvokeAsync<Order>(command);
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/OrderEventSourcingSample/Alternatives/Signatures.cs#L102-L111' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_updatedaggregate_with_invoke_async' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Likewise, you can use `UpdatedAggregate` as the response body of an HTTP endpoint with Wolverine.HTTP [as shown here](/guide/http/marten.html#responding-with-the-updated-aggregate~~~~).
+
+::: info
+This feature has been more or less requested several times, but was finally brought about because of the need
+to consume Wolverine + Marten commands within Hot Chocolate mutations and always return the current state of
+the projected aggregate being updated to the user interface.
+:::
+
+### Passing the Aggregate to Before/Validate/Load Methods
+
+The "[compound handler](/guide/handlers/#compound-handlers)" feature is a valuable way in Wolverine to organize your handler code, and fully supported
+within the aggregate handler workflow as well. If you have a command handler method marked with `[AggregateHandler]` or
+the `[Aggregate]` attribute in HTTP usage, you can also pass the aggregate type as an argument to any `Before` / `LoadAsync` / `Validate`
+method on that handler to do validation before the main handler method. Here's a sample from the tests of doing just that:
+
+<!-- snippet: sample_passing_aggregate_into_validate_method -->
+<a id='snippet-sample_passing_aggregate_into_validate_method'></a>
+```cs
+public record RaiseIfValidated(Guid LetterAggregateId);
+
+public static class RaiseIfValidatedHandler
+{
+    public static HandlerContinuation Validate(LetterAggregate aggregate) =>
+        aggregate.ACount == 0 ? HandlerContinuation.Continue : HandlerContinuation.Stop;
+    
+    [AggregateHandler]
+    public static IEnumerable<object> Handle(RaiseIfValidated command, LetterAggregate aggregate)
+    {
+        yield return new BEvent();
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/aggregate_handler_workflow.cs#L448-L463' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_passing_aggregate_into_validate_method' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+## Archiving Streams
+
+To mark a Marten event stream as archived from a Wolverine aggregate handler, just append the special Marten [Archived](https://martendb.io/events/archiving.html#archived-event)
+event to the stream just like you would in any other aggregate handler. 
+
+## Reading the Latest Version of an Aggregate
+
+::: info
+This is using Marten's [FetchLatest](https://martendb.io/events/projections/read-aggregates.html#fetchlatest) API and is limited to single stream
+projections.
+:::
+
+If you want to inject the current state of an event sourced aggregate as a parameter into
+a message handler method strictly for information and don't need the heavier "aggregate handler workflow," use the `[ReadAggregate]` attribute like this:
+
+<!-- snippet: sample_using_readaggregate_in_messsage_handlers -->
+<a id='snippet-sample_using_readaggregate_in_messsage_handlers'></a>
+```cs
+public record FindAggregate(Guid Id);
+
+public static class FindLettersHandler
+{
+    // This is admittedly just some weak sauce testing support code
+    public static LetterAggregateEnvelope Handle(FindAggregate command, [ReadAggregate] LetterAggregate aggregate)
+    {
+        return new LetterAggregateEnvelope(aggregate);
+    }
+    
+    /* ALTERNATIVE VERSION
+    [WolverineHandler]
+    public static LetterAggregateEnvelope Handle2(
+        FindAggregate command, 
+        
+        // Just showing you that you can disable the validation
+        [ReadAggregate(Required = false)] LetterAggregate aggregate)
+    {
+        return aggregate == null ? null : new LetterAggregateEnvelope(aggregate);
+    }
+    */
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/read_aggregate_attribute_usage.cs#L81-L105' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_readaggregate_in_messsage_handlers' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+::: warning
+`[ReadAggregate]` only _loads_ the aggregate; on its own it does **not** opt the handler into the
+heavier aggregate event-sourcing workflow. But remember that Wolverine _also_ opts a handler into that
+workflow when its **type name ends with `AggregateHandler`** (see [Handler Method Signatures](#handler-method-signatures)).
+If both are true, the handler's return value is **appended to the aggregate's event stream as an event**
+rather than published as a cascading message — almost never what you want for a read-only handler, and it
+can look like the message simply vanished. Wolverine logs a startup warning when it detects this
+combination. If you intend the return value to be published as a message, rename the handler type so it
+does **not** end in `AggregateHandler`. See [JasperFx/wolverine#2922](https://github.com/JasperFx/wolverine/pull/2922).
+:::
+
+If the aggregate doesn't exist, the HTTP request will stop with a 404 status code.
+The aggregate/stream identity is found with the same rules as the `[Entity]` or `[Aggregate]` attributes:
+
+1. You can specify a particular request body property name or route argument
+2. Look for a request body property or route argument named "EntityTypeId"
+3. Look for a request body property or route argument named "Id" or "id"
+
+You can override the validation rules for how Wolverine handles an aggregate / event stream not being found
+by setting these properties on `[ReadAttribute]` (which is much more useful for HTTP endpoints):
+
+<!-- snippet: sample_read_aggregate_fine_grained_validation_control -->
+<a id='snippet-sample_read_aggregate_fine_grained_validation_control'></a>
+```cs
+// Straight up 404 on missing
+[WolverineGet("/letters1/{id}")]
+public static LetterAggregate GetLetter1([ReadAggregate] LetterAggregate letters) => letters;
+
+// Not required
+[WolverineGet("/letters2/{id}")]
+public static string GetLetter2([ReadAggregate(Required = false)] LetterAggregate letters)
+{
+    return letters == null ? "No Letters" : "Got Letters";
+}
+
+// Straight up 404 & problem details on missing
+[WolverineGet("/letters3/{id}")]
+public static LetterAggregate GetLetter3([ReadAggregate(OnMissing = OnMissing.ProblemDetailsWith404)] LetterAggregate letters) => letters;
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/Wolverine.Http.Tests/Marten/reacting_to_read_aggregate.cs#L153-L171' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_read_aggregate_fine_grained_validation_control' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+There is also an option with `OnMissing` to throw a `RequiredDataMissingException` exception if a required data element
+is missing. This option is probably most useful with message handlers where you may want to key off the exception with custom
+error handling rules.
+
+## Targeting Multiple Streams at Once <Badge type="tip" text="4.9.0" />
+
+It's now possible to use the "aggregate handler workflow" while needing to append events to more
+than one event stream at a time.
+
+::: tip
+You can use read only views of event streams through `[ReadAggregate]` at will, and that will use
+Marten's `FetchLatest()` API underneath. For appending to multiple streams though, for now you will 
+have to directly target `IEventStream<T>` to help Marten know which stream you're appending events to.
+:::
+
+Using the canonical example of a use case where you move money from one account to another account and need both
+changes to be persisted in one atomic transaction. Let’s start with a simplified domain model of
+events and a “self-aggregating” Account type like this:
+
+<!-- snippet: sample_account_domain_code -->
+<a id='snippet-sample_account_domain_code'></a>
+```cs
+public record AccountCreated(double InitialAmount);
+public record Debited(double Amount);
+public record Withdrawn(double Amount);
+
+public class Account
+{
+    public Guid Id { get; set; }
+    public double Amount { get; set; }
+
+    public static Account Create(IEvent<AccountCreated> e)
+        => new Account { Id = e.StreamId, Amount = e.Data.InitialAmount};
+
+    public void Apply(Debited e) => Amount += e.Amount;
+    public void Apply(Withdrawn e) => Amount -= e.Amount;
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Accounts/AccountCode.cs#L9-L26' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_account_domain_code' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And you need to handle a command like this:
+
+<!-- snippet: sample_transfermoney_command -->
+<a id='snippet-sample_transfermoney_command'></a>
+```cs
+public record TransferMoney(Guid FromId, Guid ToId, double Amount);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Accounts/AccountCode.cs#L28-L31' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_transfermoney_command' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Using the `[WriteAggregate]` attribute to denote the event streams we need to work with,
+we could write this message handler + HTTP endpoint:
+
+<!-- snippet: sample_transfermoneyendpoint -->
+<a id='snippet-sample_transfermoneyendpoint'></a>
+```cs
+public static class TransferMoneyHandler    
+{
+    [WolverinePost("/accounts/transfer")]
+    public static void Handle(
+        TransferMoney command,
+
+        [WriteAggregate(nameof(TransferMoney.FromId))] IEventStream<Account> fromAccount,
+        
+        [WriteAggregate(nameof(TransferMoney.ToId))] IEventStream<Account> toAccount)
+    {
+        // Would already 404 if either referenced account does not exist
+        if (fromAccount.Aggregate!.Amount >= command.Amount)
+        {
+            fromAccount.AppendOne(new Withdrawn(command.Amount));
+            toAccount.AppendOne(new Debited(command.Amount));
+        }
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Accounts/AccountCode.cs#L33-L53' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_transfermoneyendpoint' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The `IEventStream<T>` abstraction comes from Marten’s `FetchForWriting()` API that is our
+recommended way to interact with Marten streams in typical command handlers. This
+API is used underneath Wolverine’s “aggregate handler workflow”, but normally hidden
+from user written code if you’re only working with one stream at a time. In this case
+though, we’ll need to work with the raw `IEventStream<T>` objects that both wrap the
+projected aggregation of each Account as well as providing a point where we can explicitly
+append events separately to each event stream. `FetchForWriting()` guarantees that you get
+the most up to date information for the Account view of each event stream regardless of
+how you have configured Marten’s `ProjectionLifecycle` for `Account` (kind of an important
+detail here!).
+
+The typical Marten transactional middleware within Wolverine is calling `SaveChangesAsync()`
+for us on the Marten unit of work IDocumentSession for the command. If there’s enough funds in
+the “From” account, this command will append a `Withdrawn` event to the “From” account and
+a `Debited` event to the “To” account. If either account has been written to between
+fetching the original information, Marten will reject the changes and throw its
+`ConcurrencyException` as an optimistic concurrency check.
+
+In unit testing, we could write a unit test for the “happy path” where you have enough funds to cover the transfer like this:
+
+<!-- snippet: sample_when_transfering_money -->
+<a id='snippet-sample_when_transfering_money'></a>
+```cs
+public class when_transfering_money
+{
+    [Fact]
+    public void happy_path_have_enough_funds()
+    {
+        // StubEventStream<T> lives in JasperFx.Events, so this same test shape works
+        // against Marten, Polecat or Fisher. See the "Unit Testing Aggregate Handlers"
+        // page for the whole pattern.
+        var fromAccount = new StubEventStream<Account>(new Account { Amount = 1000 })
+        {
+            Id = Guid.NewGuid()
+        };
+        
+        var toAccount = new StubEventStream<Account>(new Account { Amount = 100})
+        {
+            Id = Guid.NewGuid()
+        };
+        
+        TransferMoneyHandler.Handle(new TransferMoney(fromAccount.Id, toAccount.Id, 100), fromAccount, toAccount);
+
+        // Now check the events we expected to be appended
+        fromAccount.Events.Single().Data.ShouldBeOfType<Withdrawn>().Amount.ShouldBe(100);
+        toAccount.Events.Single().Data.ShouldBeOfType<Debited>().Amount.ShouldBe(100);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/Wolverine.Http.Tests/Marten/working_against_multiple_streams.cs#L163-L190' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_when_transfering_money' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Finer-Grained Optimistic Concurrency in Multi-Stream Operations <Badge type="tip" text="5.17" />
+
+When a handler uses multiple `[WriteAggregate]` parameters, Wolverine automatically applies version discovery only
+to the **first** aggregate parameter. Secondary aggregate parameters will **not** automatically look for a `Version`
+variable, preventing them from accidentally sharing the same version source.
+
+To opt a secondary stream into optimistic concurrency checking, use the `VersionSource` property to explicitly point
+it at a different member:
+
+```cs
+public record TransferMoney(Guid FromId, Guid ToId, decimal Amount,
+    long FromVersion, long ToVersion);
+
+public static class TransferMoneyHandler
+{
+    public static void Handle(
+        TransferMoney command,
+
+        // First parameter: discovers "Version" automatically, or use
+        // VersionSource for an explicit member name
+        [WriteAggregate(nameof(TransferMoney.FromId),
+            VersionSource = nameof(TransferMoney.FromVersion))]
+        IEventStream<Account> fromAccount,
+
+        // Secondary parameter: only gets version checking if VersionSource is set
+        [WriteAggregate(nameof(TransferMoney.ToId),
+            VersionSource = nameof(TransferMoney.ToVersion))]
+        IEventStream<Account> toAccount)
+    {
+        if (fromAccount.Aggregate.Amount >= command.Amount)
+        {
+            fromAccount.AppendOne(new Withdrawn(command.Amount));
+            toAccount.AppendOne(new Debited(command.Amount));
+        }
+    }
+}
+```
+
+You can also use `AlwaysEnforceConsistency` on individual streams within a multi-stream operation to ensure a
+concurrency check even when no events are appended to that stream:
+
+```cs
+public static void Handle(
+    TransferMoney command,
+    [WriteAggregate(nameof(TransferMoney.FromId),
+        AlwaysEnforceConsistency = true)]
+    IEventStream<Account> fromAccount,
+    [WriteAggregate(nameof(TransferMoney.ToId))]
+    IEventStream<Account> toAccount)
+{
+    // Even if insufficient funds cause no events to be appended
+    // to fromAccount, Marten will still verify its version hasn't changed
+    if (fromAccount.Aggregate.Amount >= command.Amount)
+    {
+        fromAccount.AppendOne(new Withdrawn(command.Amount));
+        toAccount.AppendOne(new Debited(command.Amount));
+    }
+}
+```
+
+## Enforcing Consistency Without New Events <Badge type="tip" text="5.17" />
+
+In some cases, your command handler may decide not to emit any new events after evaluating the current aggregate state.
+By default, Marten will silently succeed in this case without checking whether the stream has been modified since it was fetched.
+This can be problematic for cross-stream operations where you need to guarantee that all referenced aggregates are still in the
+state you expect at commit time.
+
+The `AlwaysEnforceConsistency` option tells Marten to perform an optimistic concurrency check on the stream even if no events
+are appended. If another session has written to the stream between your `FetchForWriting()` and `SaveChangesAsync()`, Marten
+will throw a `ConcurrencyException`.
+
+### Using the property on `[AggregateHandler]`
+
+You can set `AlwaysEnforceConsistency = true` on the `[AggregateHandler]` attribute:
+
+```cs
+[AggregateHandler(AlwaysEnforceConsistency = true)]
+public static class MyAggregateHandler
+{
+    public static void Handle(DoSomething command, IEventStream<MyAggregate> stream)
+    {
+        // Even if no events are appended, Marten will verify
+        // the stream version hasn't changed since it was fetched
+    }
+}
+```
+
+### Using `[ConsistentAggregateHandler]`
+
+For convenience, there is a `[ConsistentAggregateHandler]` attribute that automatically sets `AlwaysEnforceConsistency = true`:
+
+```cs
+[ConsistentAggregateHandler]
+public static class MyAggregateHandler
+{
+    public static void Handle(DoSomething command, IEventStream<MyAggregate> stream)
+    {
+        // AlwaysEnforceConsistency is automatically true
+    }
+}
+```
+
+### Parameter-level usage with `[ConsistentAggregate]`
+
+When using parameter-level attributes (the `[Aggregate]` pattern), you can use `[ConsistentAggregate]` instead:
+
+```cs
+public static class MyHandler
+{
+    public static void Handle(DoSomething command,
+        [ConsistentAggregate] IEventStream<MyAggregate> stream)
+    {
+        // AlwaysEnforceConsistency is automatically true
+    }
+}
+```
+
+Or set the property directly on `[Aggregate]`:
+
+```cs
+public static class MyHandler
+{
+    public static void Handle(DoSomething command,
+        [Aggregate(AlwaysEnforceConsistency = true)] IEventStream<MyAggregate> stream)
+    {
+        // Explicitly opt into consistency enforcement
+    }
+}
+```
+
+## Overriding Version Discovery <Badge type="tip" text="5.17" />
+
+By default, Wolverine discovers a version member on your command type by looking for a property or field named `Version`
+of type `int` or `long`. In multi-stream operations where each stream needs its own version source, this convention
+breaks down because you can't have multiple properties all named "Version".
+
+The `VersionSource` property lets you explicitly specify which member supplies the expected stream version for
+optimistic concurrency checks.
+
+### On `[AggregateHandler]`
+
+```cs
+public record TransferMoney(Guid FromId, Guid ToId, decimal Amount, long FromVersion);
+
+[AggregateHandler(VersionSource = nameof(TransferMoney.FromVersion))]
+public static class TransferMoneyHandler
+{
+    public static IEnumerable<object> Handle(TransferMoney command, Account account)
+    {
+        // FromVersion will be checked against the "from" account's stream version
+        yield return new Withdrawn(command.Amount);
+    }
+}
+```
+
+### On `[WriteAggregate]` / `[Aggregate]`
+
+This is particularly useful for multi-stream operations where each stream needs independent version tracking:
+
+```cs
+public record TransferMoney(Guid FromId, Guid ToId, decimal Amount,
+    long FromVersion, long ToVersion);
+
+public static class TransferMoneyHandler
+{
+    public static void Handle(
+        TransferMoney command,
+        [WriteAggregate(nameof(TransferMoney.FromId),
+            VersionSource = nameof(TransferMoney.FromVersion))]
+        IEventStream<Account> fromAccount,
+        [WriteAggregate(nameof(TransferMoney.ToId),
+            VersionSource = nameof(TransferMoney.ToVersion))]
+        IEventStream<Account> toAccount)
+    {
+        if (fromAccount.Aggregate.Amount >= command.Amount)
+        {
+            fromAccount.AppendOne(new Withdrawn(command.Amount));
+            toAccount.AppendOne(new Debited(command.Amount));
+        }
+    }
+}
+```
+
+For HTTP endpoints, `VersionSource` can resolve from route arguments, query string parameters, or request body members:
+
+```cs
+[WolverinePost("/orders/{orderId}/ship/{expectedVersion}")]
+[EmptyResponse]
+public static OrderShipped Ship(
+    ShipOrder command,
+    [Aggregate(VersionSource = "expectedVersion")] Order order)
+{
+    return new OrderShipped();
+}
+```
+
+## Strong Typed Identifiers <Badge type="tip" text="5.0" />
+
+If you're so inclined, you can use strong typed identifiers from tools like  [Vogen](https://github.com/SteveDunn/Vogen) and [StronglyTypedId](https://github.com/andrewlock/StronglyTypedId)
+within the "Aggregate Handler Workflow." You can also use hand rolled value types that wrap either `Guid` or `string`
+depending on your Marten event store configuration (`StreamIdentity`) as long as it conforms to [Marten's
+own rules about value type identifiers](https://martendb.io/documents/identity.html#strong-typed-identifiers).
+
+For a message handler, let's start with this example identifier type and aggregate from the Wolverine tests:
+
+<!-- snippet: sample_strong_typed_identifier_with_aggregate -->
+<a id='snippet-sample_strong_typed_identifier_with_aggregate'></a>
+```cs
+[StronglyTypedId(Template.Guid)]
+public readonly partial struct LetterId;
+
+public class StrongLetterAggregate
+{
+    public StrongLetterAggregate()
+    {
+    }
+
+    public LetterId Id { get; set; }
+
+    public int ACount { get; set; }
+    public int BCount { get; set; }
+    public int CCount { get; set; }
+    public int DCount { get; set; }
+
+    public void Apply(AEvent _) => ACount++;
+    public void Apply(BEvent _) => BCount++;
+    public void Apply(CEvent _) => CCount++;
+    public void Apply(DEvent _) => DCount++;
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/strong_named_identifiers.cs#L187-L210' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_strong_typed_identifier_with_aggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And now let's use that identifier type in message handlers:
+
+<!-- snippet: sample_using_strong_typed_identifier_with_aggregate_handler_workflow -->
+<a id='snippet-sample_using_strong_typed_identifier_with_aggregate_handler_workflow'></a>
+```cs
+public record IncrementStrongA(LetterId Id);
+
+public record AddFrom(LetterId Id1, LetterId Id2);
+
+public record IncrementBOnBoth(LetterId Id1, LetterId Id2);
+
+public record FetchCounts(LetterId Id);
+
+public static class StrongLetterHandler
+{
+    public static StrongLetterAggregate Handle(FetchCounts counts,
+        [ReadAggregate] StrongLetterAggregate aggregate) => aggregate;
+
+    public static AEvent Handle(IncrementStrongA command, [WriteAggregate] StrongLetterAggregate aggregate)
+    {
+        return new();
+    }
+
+    public static void Handle(
+        IncrementBOnBoth command,
+        [WriteAggregate(nameof(IncrementBOnBoth.Id1))] IEventStream<StrongLetterAggregate> stream1,
+        [WriteAggregate(nameof(IncrementBOnBoth.Id2))] IEventStream<StrongLetterAggregate> stream2
+    )
+    {
+        stream1.AppendOne(new BEvent());
+        stream2.AppendOne(new BEvent());
+    }
+
+    public static IEnumerable<object> Handle(
+        AddFrom command,
+        [WriteAggregate(nameof(AddFrom.Id1))] StrongLetterAggregate _,
+        [ReadAggregate(nameof(AddFrom.Id2))] StrongLetterAggregate readOnly)
+    {
+        for (int i = 0; i < readOnly.ACount; i++)
+        {
+            yield return new AEvent();
+        }
+        
+        for (int i = 0; i < readOnly.BCount; i++)
+        {
+            yield return new BEvent();
+        }
+        
+        for (int i = 0; i < readOnly.CCount; i++)
+        {
+            yield return new CEvent();
+        }
+        
+        for (int i = 0; i < readOnly.DCount; i++)
+        {
+            yield return new DEvent();
+        }
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/strong_named_identifiers.cs#L127-L183' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_strong_typed_identifier_with_aggregate_handler_workflow' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+And also in some of the equivalent Wolverine.HTTP endpoints:
+
+<!-- snippet: sample_using_strong_typed_id_as_route_argument -->
+<a id='snippet-sample_using_strong_typed_id_as_route_argument'></a>
+```cs
+[WolverineGet("/sti/aggregate/longhand/{id}")]
+public static async ValueTask<StrongLetterAggregate> Handle2(LetterId id, IDocumentSession session) =>
+    (await session.Events.FetchLatest<StrongLetterAggregate>(id.Value))!;
+
+// This is an equivalent to the endpoint above 
+[WolverineGet("/sti/aggregate/{id}")]
+public static StrongLetterAggregate Handle(
+    [ReadAggregate] StrongLetterAggregate aggregate) => aggregate;
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Http/WolverineWebApi/Marten/StrongTypedIdentifiers.cs#L12-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_using_strong_typed_id_as_route_argument' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
+tools do this for you, and value types generated by these tools are
+legal route argument variables for Wolverine.HTTP now.
+
+## Natural Keys
+
+Marten supports [natural keys](/events/natural-keys) on aggregates, allowing you to look up event streams by a domain-meaningful identifier (like an order number) instead of the internal stream id. Wolverine's aggregate handler workflow fully supports natural keys, letting you route commands to the correct aggregate using a business identifier.
+
+### Defining the Aggregate with a Natural Key
+
+First, define your aggregate with a `[NaturalKey]` property and mark the methods that set the key with `[NaturalKeySource]`:
+
+<!-- snippet: sample_wolverine_marten_natural_key_aggregate -->
+<a id='snippet-sample_wolverine_marten_natural_key_aggregate'></a>
+```cs
+public record NkHandlerOrderNumber(string Value);
+
+public class NkOrderAggregate
+{
+    public Guid Id { get; set; }
+
+    [NaturalKey]
+    public NkHandlerOrderNumber OrderNum { get; set; } = null!;
+
+    public decimal TotalAmount { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public bool IsComplete { get; set; }
+
+    [NaturalKeySource]
+    public void Apply(NkHandlerOrderCreated e)
+    {
+        OrderNum = e.OrderNumber;
+        CustomerName = e.CustomerName;
+    }
+
+    public void Apply(NkHandlerItemAdded e)
+    {
+        TotalAmount += e.Price;
+    }
+
+    public void Apply(NkHandlerOrderCompleted e)
+    {
+        IsComplete = true;
+    }
+}
+
+public record NkHandlerOrderCreated(NkHandlerOrderNumber OrderNumber, string CustomerName);
+public record NkHandlerItemAdded(string ItemName, decimal Price);
+public record NkHandlerOrderCompleted;
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/natural_key_aggregate_handler_workflow.cs#L134-L170' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_marten_natural_key_aggregate' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Using Natural Keys in Command Handlers
+
+When your command carries the natural key value instead of a stream id, Wolverine can resolve it automatically. The command property should match the aggregate's natural key type:
+
+<!-- snippet: sample_wolverine_marten_natural_key_commands -->
+<a id='snippet-sample_wolverine_marten_natural_key_commands'></a>
+```cs
+public record AddNkOrderItem(NkHandlerOrderNumber OrderNum, string ItemName, decimal Price);
+public record AddNkOrderItems(NkHandlerOrderNumber OrderNum, (string Name, decimal Price)[] Items);
+public record CompleteNkOrder(NkHandlerOrderNumber OrderNum);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/natural_key_aggregate_handler_workflow.cs#L172-L177' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_marten_natural_key_commands' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Wolverine uses the natural key type on the command property to call `FetchForWriting<TAggregate, TNaturalKey>()` under the covers, resolving the stream by the natural key in a single database round-trip.
+
+### Handler Examples
+
+Here are the handlers that process those commands, using `[WriteAggregate]` and `IEventStream<T>`:
+
+<!-- snippet: sample_wolverine_marten_natural_key_handlers -->
+<a id='snippet-sample_wolverine_marten_natural_key_handlers'></a>
+```cs
+public static class NkOrderHandler
+{
+    public static NkHandlerItemAdded Handle(AddNkOrderItem command,
+        [WriteAggregate] NkOrderAggregate aggregate)
+    {
+        return new NkHandlerItemAdded(command.ItemName, command.Price);
+    }
+
+    public static IEnumerable<object> Handle(AddNkOrderItems command,
+        [WriteAggregate] NkOrderAggregate aggregate)
+    {
+        foreach (var (name, price) in command.Items)
+        {
+            yield return new NkHandlerItemAdded(name, price);
+        }
+    }
+
+    public static void Handle(CompleteNkOrder command,
+        [WriteAggregate] IEventStream<NkOrderAggregate> stream)
+    {
+        stream.AppendOne(new NkHandlerOrderCompleted());
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/AggregateHandlerWorkflow/natural_key_aggregate_handler_workflow.cs#L179-L204' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_marten_natural_key_handlers' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+For more details on how natural keys work at the Marten level, see the [Marten natural keys documentation](https://martendb.io/events/natural-keys).
+
+## Dynamic Consistency Boundary (DCB)
+
+::: tip
+The [Dynamic Consistency Boundary](https://dcb.events/) pattern enables event-sourced handlers to work across **multiple event streams simultaneously** within a single consistency boundary. This is essential for domain logic that naturally spans multiple entities.
+:::
+
+Traditional aggregate handlers work with a single event stream at a time. But some business decisions require state from multiple streams — for example, subscribing a student to a course requires checking both the student's enrollment history and the course's capacity. The DCB pattern solves this by loading events from multiple streams based on **event tags**, projecting them into a single aggregate state, and appending new events atomically.
+
+### How It Works
+
+1. A `Load()` or `Before()` method returns an `EventTagQuery` that specifies which tagged events to load
+2. Marten loads all matching events and projects them into your aggregate type using the standard `Apply()` methods
+3. Your handler receives the projected state and makes decisions
+4. Returned events are appended atomically through the `IEventBoundary<T>` interface
+
+### Example: University Course Subscription
+
+This example is ported from the [AxonIQ DCB demo](https://dcb.events/). A student subscribing to a course must enforce rules spanning both the student and course boundaries:
+
+- Student must be enrolled in faculty
+- Student can't subscribe to more than 3 courses
+- Course must exist and have vacant spots
+- Student not already subscribed
+
+First, define your domain events and strong-typed IDs:
+
+<!-- snippet: sample_wolverine_dcb_university_ids -->
+<a id='snippet-sample_wolverine_dcb_university_ids'></a>
+```cs
+namespace MartenTests.Dcb.University;
+
+/// <summary>
+/// Strong-typed ID for a course. Uses string value with "Course:" prefix.
+/// </summary>
+public record CourseId(string Value)
+{
+    public static CourseId Random() => new($"Course:{Guid.NewGuid()}");
+    public static CourseId Of(string raw) => new(raw.StartsWith("Course:") ? raw : $"Course:{raw}");
+    public override string ToString() => Value;
+}
+
+/// <summary>
+/// Strong-typed ID for a student. Uses string value with "Student:" prefix.
+/// </summary>
+public record StudentId(string Value)
+{
+    public static StudentId Random() => new($"Student:{Guid.NewGuid()}");
+    public static StudentId Of(string raw) => new(raw.StartsWith("Student:") ? raw : $"Student:{raw}");
+    public override string ToString() => Value;
+}
+
+/// <summary>
+/// Strong-typed ID for the faculty. Single-instance in this demo.
+/// </summary>
+public record FacultyId(string Value)
+{
+    public static readonly FacultyId Default = new("Faculty:ONLY_FACULTY_ID");
+    public static FacultyId Of(string raw) => new(raw.StartsWith("Faculty:") ? raw : $"Faculty:{raw}");
+    public override string ToString() => Value;
+}
+
+/// <summary>
+/// Composite ID for a student-course subscription.
+/// </summary>
+public record SubscriptionId(CourseId CourseId, StudentId StudentId);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Dcb/University/UniversityIds.cs#L1-L38' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_dcb_university_ids' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+<!-- snippet: sample_wolverine_dcb_university_events -->
+<a id='snippet-sample_wolverine_dcb_university_events'></a>
+```cs
+namespace MartenTests.Dcb.University;
+
+public record CourseCreated(FacultyId FacultyId, CourseId CourseId, string Name, int Capacity);
+
+public record CourseRenamed(FacultyId FacultyId, CourseId CourseId, string Name);
+
+public record CourseCapacityChanged(FacultyId FacultyId, CourseId CourseId, int Capacity);
+
+public record StudentEnrolledInFaculty(FacultyId FacultyId, StudentId StudentId, string FirstName, string LastName);
+
+public record StudentSubscribedToCourse(FacultyId FacultyId, StudentId StudentId, CourseId CourseId);
+
+public record StudentUnsubscribedFromCourse(FacultyId FacultyId, StudentId StudentId, CourseId CourseId);
+
+public record AllCoursesFullyBookedNotificationSent(FacultyId FacultyId);
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Dcb/University/UniversityEvents.cs#L1-L17' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_dcb_university_events' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Next, define the aggregate state that spans both boundaries. This single type projects events tagged with either a `CourseId` or `StudentId`:
+
+<!-- snippet: sample_wolverine_dcb_subscription_state -->
+<a id='snippet-sample_wolverine_dcb_subscription_state'></a>
+```cs
+namespace MartenTests.Dcb.University;
+/// Built from events tagged with BOTH CourseId and StudentId.
+/// This is the core DCB pattern — the consistency boundary spans multiple streams.
+///
+/// Ported from the Axon SubscribeStudentToCourseCommandHandler.State which uses
+/// EventCriteria.either() to load events matching CourseId OR StudentId.
+/// </summary>
+public partial class SubscriptionState
+{
+    // Required so the aggregate can be registered as a single-stream projection
+    // (LiveStreamAggregation), which is what makes the JasperFx.Events source generator
+    // emit the dispatcher that FetchForWritingByTags<SubscriptionState> resolves. For the
+    // boundary (tag-query) path this Id is not stream-bound — it just satisfies the
+    // single-stream projection shape, the same way Marten's own DCB aggregates carry one.
+    public string Id { get; set; } = null!;
+    public CourseId? CourseId { get; private set; }
+    public int CourseCapacity { get; private set; }
+    public int StudentsSubscribedToCourse { get; private set; }
+
+    public StudentId? StudentId { get; private set; }
+    public int CoursesStudentSubscribed { get; private set; }
+    public bool AlreadySubscribed { get; private set; }
+
+    public void Apply(CourseCreated e)
+    {
+        CourseId = e.CourseId;
+        CourseCapacity = e.Capacity;
+    }
+
+    public void Apply(CourseCapacityChanged e)
+    {
+        CourseCapacity = e.Capacity;
+    }
+
+    public void Apply(StudentEnrolledInFaculty e)
+    {
+        StudentId = e.StudentId;
+    }
+
+    public void Apply(StudentSubscribedToCourse e)
+    {
+        if (e.CourseId == CourseId)
+            StudentsSubscribedToCourse++;
+        if (e.StudentId == StudentId)
+            CoursesStudentSubscribed++;
+        if (e.StudentId == StudentId && e.CourseId == CourseId)
+            AlreadySubscribed = true;
+    }
+
+    public void Apply(StudentUnsubscribedFromCourse e)
+    {
+        if (e.CourseId == CourseId)
+            StudentsSubscribedToCourse--;
+        if (e.StudentId == StudentId)
+            CoursesStudentSubscribed--;
+        if (e.StudentId == StudentId && e.CourseId == CourseId)
+            AlreadySubscribed = false;
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Dcb/University/SubscriptionState.cs#L1-L61' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_dcb_subscription_state' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+### Identity-less Boundary Aggregates with `[BoundaryAggregate]`
+
+A boundary aggregate is built from `Apply` / `Create` methods, and the source generator emits the evolver that `FetchForWritingByTags<T>()` (and `AggregateByTagsAsync<T>()`) resolve at runtime. The generator normally discovers the aggregate's identity (`TId`) from an `Id` property or an `[AggregateIdentity]` member. A *true* boundary aggregate, though, has **no single-stream identity** — it spans multiple streams by tag — so the generator cannot infer a `TId`, emits nothing, and the DCB fetch throws:
+
+```
+JasperFx.Events.Projections.InvalidProjectionException : No source-generated dispatcher found for ...
+```
+
+Mark such an identity-less aggregate with `[BoundaryAggregate]` (from `JasperFx.Events.Aggregation`) to opt it into evolver generation:
+
+```cs
+using JasperFx.Events.Aggregation;
+
+[BoundaryAggregate]
+public partial class SubscriptionState
+{
+    // No Id property, no [AggregateIdentity] — spans streams by tag only
+    public CourseId? CourseId { get; private set; }
+    public StudentId? StudentId { get; private set; }
+
+    public void Apply(StudentEnrolledInFaculty e) => StudentId = e.StudentId;
+    public void Apply(CourseCreated e) => CourseId = e.CourseId;
+    // ... remaining Apply methods
+}
+```
+
+Requirements:
+
+- The aggregate must be `partial` and live in an assembly that references the `JasperFx.Events.SourceGenerator` analyzer.
+- The `[BoundaryAggregate]` attribute must sit on the type **in its own defining assembly** — that is the compilation the generator emits into and the assembly the runtime scans (`typeof(T).Assembly`) when resolving the evolver.
+
+::: tip
+This is only needed for the **identity-less** case. An aggregate that carries an `Id` (or an `[AggregateIdentity]` member) — like the `SubscriptionState` shown above, which keeps an `Id` and is registered as a live single-stream projection — already gets an evolver and needs no marker.
+:::
+
+The `[BoundaryAggregate]` marker comes from JasperFx.Events 2.0.0-alpha.21 / JasperFx.Events.SourceGenerator 2.0.0-alpha.13 ([jasperfx#324](https://github.com/JasperFx/jasperfx/issues/324)). See the [Marten DCB documentation](https://github.com/JasperFx/marten/issues/4513) for the canonical attribute reference; the note here covers the Wolverine handler-side workflow.
+
+### Using the `[BoundaryModel]` Attribute
+
+The `[BoundaryModel]` attribute on a handler parameter triggers the DCB workflow. Your handler class must include a `Load()` (or `LoadAsync()`, `Before()`, `BeforeAsync()`) method that returns an `EventTagQuery`:
+
+<!-- snippet: sample_wolverine_dcb_boundary_model_handler -->
+<a id='snippet-sample_wolverine_dcb_boundary_model_handler'></a>
+```cs
+public static class BoundaryModelSubscribeStudentHandler
+{
+    public const int MaxCoursesPerStudent = 3;
+
+    public static EventTagQuery Load(BoundaryModelSubscribeStudentToCourse command)
+        => EventTagQuery
+            .For(command.CourseId)
+            .AndEventsOfType<CourseCreated, CourseCapacityChanged, StudentSubscribedToCourse, StudentUnsubscribedFromCourse>()
+            .Or(command.StudentId)
+            .AndEventsOfType<StudentEnrolledInFaculty, StudentSubscribedToCourse, StudentUnsubscribedFromCourse>();
+
+    public static StudentSubscribedToCourse Handle(
+        BoundaryModelSubscribeStudentToCourse command,
+        [BoundaryModel]
+        SubscriptionState state)
+    {
+        if (state.StudentId == null)
+            throw new InvalidOperationException("Student with given id never enrolled the faculty");
+
+        if (state.CoursesStudentSubscribed >= MaxCoursesPerStudent)
+            throw new InvalidOperationException("Student subscribed to too many courses");
+
+        if (state.CourseId == null)
+            throw new InvalidOperationException("Course with given id does not exist");
+
+        if (state.StudentsSubscribedToCourse >= state.CourseCapacity)
+            throw new InvalidOperationException("Course is fully booked");
+
+        if (state.AlreadySubscribed)
+            throw new InvalidOperationException("Student already subscribed to this course");
+
+        return new StudentSubscribedToCourse(FacultyId.Default, command.StudentId, command.CourseId);
+    }
+}
+```
+<sup><a href='https://github.com/JasperFx/wolverine/blob/main/src/Persistence/MartenTests/Dcb/University/BoundaryModelSubscribeStudentToCourse.cs#L8-L43' title='Snippet source file'>snippet source</a> | <a href='#snippet-sample_wolverine_dcb_boundary_model_handler' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+The `EventTagQuery` uses a fluent API to define which events to load:
+
+- `EventTagQuery.For(tag)` — start with a tag value (e.g., a `CourseId`)
+- `.AndEventsOfType<T1, T2, ...>()` — filter to specific event types for that tag
+- `.Or(tag)` — add another tag to query (e.g., a `StudentId`)
+
+Marten loads all events matching **any** of the tag criteria, projects them into your aggregate using the standard `Apply()` methods, and provides the result to your handler.
+
+### Using `IEventBoundary<T>` Directly
+
+For more control over event appending, you can accept `IEventBoundary<T>` as a parameter instead of the aggregate type:
+
+```cs
+public static void Handle(
+    SubscribeStudentToCourse command,
+    [BoundaryModel] IEventBoundary<SubscriptionState> boundary)
+{
+    var state = boundary.Aggregate;
+
+    // validation logic...
+
+    boundary.AppendOne(new StudentSubscribedToCourse(
+        FacultyId.Default, command.StudentId, command.CourseId));
+}
+```
+
+### Return Value Handling
+
+The DCB workflow supports the same return value patterns as the standard aggregate handler workflow:
+
+- Single event objects are appended via `boundary.AppendOne()`
+- `IEnumerable<object>` or `Events` collections are appended via `boundary.AppendMany()`
+- `IAsyncEnumerable<object>` events are appended one at a time
+- `OutgoingMessages` and `ISideEffect` are handled as cascading messages, not events
+
+### Validation on Boundary Existence
+
+Use the `Required` property to enforce that the projected aggregate state is not null:
+
+```cs
+public static StudentSubscribedToCourse Handle(
+    SubscribeStudentToCourse command,
+    [BoundaryModel(Required = true)] SubscriptionState state)
+{
+    // state is guaranteed to be non-null
+    // ...
+}
+```

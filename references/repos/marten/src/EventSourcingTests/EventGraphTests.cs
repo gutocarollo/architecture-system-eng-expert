@@ -1,0 +1,256 @@
+using System;
+using System.Linq;
+using EventSourcingTests.Aggregation;
+using EventSourcingTests.Projections;
+using JasperFx.Events;
+using Marten;
+using Marten.Events;
+using Marten.Events.Aggregation;
+using Marten.Events.Operations;
+using Marten.Testing.Harness;
+using Shouldly;
+using Xunit;
+
+namespace EventSourcingTests;
+
+public class EventGraphTests
+{
+    private readonly EventGraph theGraph;
+
+    public EventGraphTests()
+    {
+        theGraph = new StoreOptions().EventGraph;
+    }
+
+    [Fact]
+    public void default_naming_style_is_classic()
+    {
+        theGraph.EventNamingStyle.ShouldBe(EventNamingStyle.ClassicTypeName);
+    }
+
+    [Fact]
+    public void override_the_naming_style_1()
+    {
+        theGraph.EventNamingStyle = EventNamingStyle.ClassicTypeName;
+        theGraph.EventMappingFor<AEvent>().EventTypeName.ShouldBe("a_event");
+    }
+
+    [Fact]
+    public void override_the_naming_style_2()
+    {
+        theGraph.EventNamingStyle = EventNamingStyle.SmarterTypeName;
+        theGraph.EventMappingFor<UserEvents.Created>().EventTypeName.ShouldBe("user_events.created");
+    }
+
+    [Fact]
+    public void override_the_naming_style_3()
+    {
+        theGraph.EventNamingStyle = EventNamingStyle.FullTypeName;
+        theGraph.EventMappingFor<UserEvents.Created>().EventTypeName.ShouldBe("EventSourcingTests.UserEvents.Created");
+    }
+
+    [Fact]
+    public void get_backwards_compatible_name_for_archived()
+    {
+        theGraph.TypeForDotNetName("Marten.Events.Archived, Marten").ShouldBe(typeof(Archived));
+        theGraph.TypeForDotNetName("Marten.Events.Operations.Tombstone, Marten").ShouldBe(typeof(Tombstone));
+    }
+
+    [Fact]
+    public void use_optimized_projection_rebuilds_is_false_by_default()
+    {
+        theGraph.UseOptimizedProjectionRebuilds.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void use_mandatory_stream_type_declaration_is_false()
+    {
+        theGraph.UseMandatoryStreamTypeDeclaration.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void build_event()
+    {
+        var slayed = new MonsterSlayed {Name = "The Gorgon"};
+        var @event = theGraph.BuildEvent(slayed);
+
+        @event.ShouldBeOfType<Event<MonsterSlayed>>();
+
+        @event.Data.ShouldBe(slayed);
+        var mapping = theGraph.EventMappingFor<MonsterSlayed>();
+        @event.EventTypeName.ShouldBe(mapping.EventTypeName);
+        @event.DotNetTypeName.ShouldBe(mapping.DotNetTypeName);
+    }
+
+    [Fact]
+    public void use_nullo_message_outbox_by_default()
+    {
+        theGraph.MessageOutbox.ShouldBeOfType<NulloMessageOutbox>();
+    }
+
+    [Fact]
+    public void archive_partitioning_is_off_by_default()
+    {
+        theGraph.UseArchivedStreamPartitioning.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void enable_unique_index_on_event_id_is_false_by_default()
+    {
+        theGraph.EnableUniqueIndexOnEventId.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void stream_identity_is_guid_by_default()
+    {
+        theGraph.StreamIdentity.ShouldBe(StreamIdentity.AsGuid);
+    }
+
+    [Fact]
+    public void caches_the_stream_mapping()
+    {
+        theGraph.Options.Projections.AggregatorFor<IssueAggregate>()
+            .ShouldBeSameAs(theGraph.Options.Projections.AggregatorFor<IssueAggregate>());
+    }
+
+    [Fact]
+    public void register_event_types_and_retrieve()
+    {
+        theGraph.AddEventType(typeof(IssueAssigned));
+        theGraph.AddEventType(typeof(IssueCreated));
+        theGraph.AddEventType(typeof(MembersJoined));
+        theGraph.AddEventType(typeof(MembersDeparted));
+
+        theGraph.EventMappingFor<IssueAssigned>().ShouldBeSameAs(theGraph.EventMappingFor<IssueAssigned>());
+    }
+
+    [Fact]
+    public void find_event_by_event_type_name()
+    {
+        theGraph.AddEventType(typeof(IssueAssigned));
+        theGraph.AddEventType(typeof(IssueCreated));
+        theGraph.AddEventType(typeof(MembersJoined));
+        theGraph.AddEventType(typeof(MembersDeparted));
+
+        theGraph.EventMappingFor("members_joined").DocumentType.ShouldBe(typeof(MembersJoined));
+
+        theGraph.EventMappingFor("issue_created").DocumentType.ShouldBe(typeof(IssueCreated));
+    }
+
+    [Fact]
+    public void has_any_in_starting_state()
+    {
+        theGraph.IsActive(null).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void has_any_is_true_with_any_events()
+    {
+        theGraph.AddEventType(typeof(IssueAssigned));
+        theGraph.IsActive(null).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void default_append_mode_is_quick_with_server_timestamps()
+    {
+        theGraph.AppendMode.ShouldBe(EventAppendMode.QuickWithServerTimestamps);
+        theGraph.EventAppender.ShouldBeOfType<QuickEventAppender>();
+    }
+
+    [Fact]
+    public void switch_to_quick()
+    {
+        theGraph.AppendMode = EventAppendMode.Quick;
+        theGraph.EventAppender.ShouldBeOfType<QuickEventAppender>();
+        theGraph.AppendMode.ShouldBe(EventAppendMode.Quick);
+    }
+
+    [Fact]
+    public void switch_to_quick_and_back_to_rich()
+    {
+        theGraph.AppendMode = EventAppendMode.Quick;
+        theGraph.AppendMode = EventAppendMode.Rich;
+        theGraph.AppendMode.ShouldBe(EventAppendMode.Rich);
+        theGraph.EventAppender.ShouldBeOfType<RichEventAppender>();
+    }
+
+    [Fact]
+    public void use_identity_map_for_inline_aggregates_is_true_by_default()
+    {
+        theGraph.UseIdentityMapForAggregates.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void archived_event_type_is_registered_by_default()
+    {
+        theGraph.AllEvents().ShouldContain(x => x.DocumentType == typeof(Archived));
+    }
+
+    [Fact]
+    public void add_event_directly()
+    {
+        var e = Event.For(new AEvent());
+        theGraph.BuildEvent(e).ShouldBeSameAs(e);
+
+        e.EventTypeName.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public void enable_event_skipping_should_be_disabled_by_default()
+    {
+        // Opt-in feature: defaults to false (the V8 behavior was retained for 9.0).
+        // Silently skipping poison events is too surprising to be on out of the box.
+        theGraph.EnableEventSkippingInProjectionsOrSubscriptions.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void generic_add_event_type_registers_the_same_mapping_as_the_type_overload()
+    {
+        theGraph.AddEventType<AEvent>();
+        theGraph.AllEvents().ShouldContain(x => x.DocumentType == typeof(AEvent));
+    }
+
+    // #4917 follow-up: AddEventType<TEvent> and QueryRawEventDataOnly<T> are intentionally NOT constrained to
+    // `where T : class`. This method won't compile if either constraint is tightened back, because a
+    // `where T : notnull` type parameter does not satisfy `where T : class` -- which is exactly the generic
+    // relay pattern in downstream code that the tightening broke. The QueryRawEventDataOnly reference is a
+    // compile-time check only; it lives in a delegate that is never invoked, so the null store is never used.
+    private static void notnull_relay_still_compiles<T>(IEventStoreOptions options, Marten.Events.IQueryEventStore events)
+        where T : notnull
+    {
+        options.AddEventType<T>();
+        _ = new Action(() => events.QueryRawEventDataOnly<T>());
+    }
+
+    [Fact]
+    public void generic_relay_over_a_notnull_type_parameter_registers_the_event()
+    {
+        notnull_relay_still_compiles<AEvent>(theGraph, events: null!);
+        theGraph.AllEvents().ShouldContain(x => x.DocumentType == typeof(AEvent));
+    }
+
+    public class HouseRemodeling
+    {
+        public Guid Id { get; set; }
+    }
+}
+
+public class IssueAggregate
+{
+    public Guid Id { get; set; }
+
+    public void Apply(IssueAssigned e)
+    {
+        // Do stuff
+    }
+}
+
+public class GroupEvents
+{
+    public record Created(string Name);
+}
+
+public class UserEvents
+{
+    public record Created(string Name);
+}

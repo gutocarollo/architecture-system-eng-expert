@@ -1,0 +1,405 @@
+using JasperFx.Events.EventModeling;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Wolverine.Configuration;
+using Wolverine.Configuration.Capabilities;
+using Wolverine.Configuration.EventModeling;
+using Wolverine.Persistence;
+using Wolverine.Persistence.EventSourcing;
+using Wolverine.Runtime.Handlers;
+using Wolverine.Tracking;
+using Xunit;
+
+namespace CoreTests.Acceptance.EventModel3988;
+
+// GH-3988: every chain derives its own Event Modeling roles — command, handler, aggregates, emitted
+// events, read models, published messages, trigger kind, slice pattern — and writes them as the
+// JasperFx EventModelSliceDescriptor. Nothing here is declared; it is all read off the chain. These
+// tests need no store: the roles are read from the handler signature (and from the chain's tags when
+// the aggregate workflow has run), so a chain whose code has not been generated yet reports the same.
+public class event_model_roles_on_chains_3988
+{
+    private static HandlerChain chainFor<THandler>(System.Linq.Expressions.Expression<Action<THandler>> expression)
+        => HandlerChain.For(expression, new HandlerGraph());
+
+    [Fact]
+    public void a_plain_handler_with_a_cascading_message_publishes_a_message_and_leaves_the_pattern_unclaimed()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<PlaceOrderHandler>(x => PlaceOrderHandler.Handle(null!)));
+
+        slice.Name.ShouldBe(nameof(PlaceOrder));
+        // GH-4387: a message handler cannot say whether it is a Command or an Automation, so it says
+        // nothing and an overlay's declaration survives
+        slice.Pattern.ShouldBeNull();
+        slice.TriggerKind.ShouldBe(TriggerKind.MessageHandler);
+        slice.CommandType!.Name.ShouldBe(nameof(PlaceOrder));
+        slice.HandlerType!.Name.ShouldBe(nameof(PlaceOrderHandler));
+        slice.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlacedNotification) });
+        slice.EmittedEvents.ShouldBeEmpty();
+        slice.AggregateTypes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void write_model_parameter_makes_the_returns_emitted_events_on_that_aggregate()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<ShipOrderHandler>(x => ShipOrderHandler.Handle(null!, null!)));
+
+        slice.AggregateTypes.Select(x => x.Name).ShouldBe(new[] { nameof(Order) });
+        slice.EmittedEvents.Select(x => x.Name).ShouldBe(new[] { nameof(OrderShipped) });
+        slice.PublishedMessages.ShouldBeEmpty();
+        slice.Pattern.ShouldBeNull(); // GH-4387
+    }
+
+    [Fact]
+    public void decider_function_infers_the_aggregate_from_the_signature_and_reads_every_return_as_an_event()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<ConfirmOrderHandler>(x => ConfirmOrderHandler.Handle(null!, null!)));
+
+        slice.AggregateTypes.Select(x => x.Name).ShouldBe(new[] { nameof(Order) });
+        slice.EmittedEvents.Select(x => x.Name).ShouldBe(new[] { nameof(OrderConfirmed), nameof(OrderNotified) });
+        slice.PublishedMessages.ShouldBeEmpty();
+    }
+
+    // GH-4419 §2: a [ReadModel] / [Entity] parameter is something the slice READS, which is a different
+    // role from the read models it PRODUCES. They used to share ReadModelTypes, which meant the Automation
+    // input edge — Event → Read Model → ⚙ Command — could not be drawn: a link needs a producer at one end
+    // and a reader at the other, and one list cannot say which a given entry is.
+    [Fact]
+    public void read_model_and_entity_parameters_are_types_the_slice_reads_from()
+    {
+        var readModel = EventModelRoles.ForHandlerChain(chainFor<GetOrderHandler>(x => GetOrderHandler.Handle(null!, null!)));
+        readModel.ReadsFrom.Select(x => x.Name).ShouldBe(new[] { nameof(Order) });
+        readModel.ReadModelTypes.ShouldBeEmpty("the slice reads Order; it does not produce it");
+        readModel.AggregateTypes.ShouldBeEmpty();
+        readModel.EmittedEvents.ShouldBeEmpty();
+        readModel.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderSummary) });
+
+        var entity = EventModelRoles.ForHandlerChain(chainFor<GetCustomerHandler>(x => GetCustomerHandler.Handle(null!, null!)));
+        entity.ReadsFrom.Select(x => x.Name).ShouldBe(new[] { nameof(Customer) });
+        entity.ReadModelTypes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void dcb_model_parameter_is_a_boundary_aggregate()
+    {
+        var chain = chainFor<ChangeCourseCapacityHandler>(x => ChangeCourseCapacityHandler.Handle(null!, null!));
+        var slice = EventModelRoles.ForHandlerChain(chain);
+
+        slice.AggregateTypes.Select(x => x.Name).ShouldBe(new[] { nameof(CourseState) });
+        slice.EmittedEvents.Select(x => x.Name).ShouldBe(new[] { nameof(CourseCapacityChanged) });
+
+        var aggregate = EventModelRoles.AggregatesFor(chain).ShouldHaveSingleItem();
+        aggregate.Type.Name.ShouldBe(nameof(CourseState));
+        aggregate.Kind.ShouldBe(AggregateKind.BoundaryModel);
+    }
+
+    [Fact]
+    public void storage_action_returns_are_read_models_the_slice_produces()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<RegisterCustomerHandler>(x => RegisterCustomerHandler.Handle(null!)));
+
+        slice.ReadModelTypes.Select(x => x.Name).ShouldBe(new[] { nameof(Customer) });
+        slice.PublishedMessages.ShouldBeEmpty();
+        slice.EmittedEvents.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void a_timeout_message_is_triggered_by_the_job_scheduler()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<ShipmentTimeoutHandler>(x => ShipmentTimeoutHandler.Handle(null!)));
+        slice.TriggerKind.ShouldBe(TriggerKind.JobScheduler);
+    }
+
+    [Fact]
+    public void a_saga_returned_from_its_own_start_is_not_a_published_message()
+    {
+        var slice = EventModelRoles.ForHandlerChain(chainFor<OrderSaga>(x => OrderSaga.Start(null!)));
+        slice.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlacedNotification) });
+    }
+
+    [Fact]
+    public void the_aggregate_element_carries_the_events_the_type_applies()
+    {
+        var chain = chainFor<ShipOrderHandler>(x => ShipOrderHandler.Handle(null!, null!));
+        var aggregate = EventModelRoles.AggregatesFor(chain).ShouldHaveSingleItem();
+
+        aggregate.Type.Name.ShouldBe(nameof(Order));
+        aggregate.Kind.ShouldBe(AggregateKind.WriteAggregate);
+        aggregate.AppliedEvents.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlaced), nameof(OrderShipped), nameof(OrderConfirmed) });
+    }
+
+    [Fact]
+    public void a_slice_whose_command_is_an_event_another_slice_emits_is_an_automation()
+    {
+        var ship = EventModelRoles.ForHandlerChain(chainFor<ShipOrderHandler>(x => ShipOrderHandler.Handle(null!, null!)));
+        var reaction = EventModelRoles.ForHandlerChain(chainFor<OrderShippedHandler>(x => OrderShippedHandler.Handle(null!)));
+        reaction.Pattern.ShouldBeNull(); // on its own the chain cannot tell you which pattern it is
+
+        var model = WolverineEventModelSource.FinishModel(new EventModelDescriptor("app", new[] { ship, reaction }));
+
+        // the whole model is the evidence: this slice's command is an event another slice emits
+        model.Slices.Single(x => x.Name == nameof(OrderShipped)).Pattern.ShouldBe(SlicePattern.Automation);
+        // and nothing says that about this one, so it stays unclaimed rather than guessing Command
+        model.Slices.Single(x => x.Name == nameof(ShipOrder)).Pattern.ShouldBeNull();
+    }
+
+    [Fact]
+    public void a_grpc_rpc_that_forwards_a_message_is_that_slices_trigger()
+    {
+        var place = EventModelRoles.ForHandlerChain(chainFor<PlaceOrderHandler>(x => PlaceOrderHandler.Handle(null!)));
+        var model = new EventModelDescriptor("app", new[] { place });
+
+        var manifest = new StubGrpcManifest(
+            new GrpcEndpointDescriptor("Orders", "Place", typeof(PlaceOrder), null, typeof(PlaceOrderHandler), GrpcServiceDiscoveryMode.CodeFirst, GrpcRpcStreamKind.Unary),
+            new GrpcEndpointDescriptor("Orders", "Cancel", typeof(CancelOrder), null, typeof(PlaceOrderHandler), GrpcServiceDiscoveryMode.CodeFirst, GrpcRpcStreamKind.Unary));
+
+        var applied = WolverineEventModelSource.ApplyGrpcTriggers(model, manifest);
+
+        var placeSlice = applied.Slices.Single(x => x.Name == nameof(PlaceOrder));
+        placeSlice.TriggerKind.ShouldBe(TriggerKind.Grpc);
+        placeSlice.TriggerOrigin!.GrpcService.ShouldBe("Orders");
+        placeSlice.TriggerOrigin.GrpcMethod.ShouldBe("Place");
+        placeSlice.HandlerType!.Name.ShouldBe(nameof(PlaceOrderHandler)); // the handler roles survive
+
+        // No handler chain for CancelOrder in this process: a trigger-only slice so the RPC still renders
+        var cancel = applied.Slices.Single(x => x.Name == nameof(CancelOrder));
+        cancel.TriggerKind.ShouldBe(TriggerKind.Grpc);
+        cancel.CommandType!.Name.ShouldBe(nameof(CancelOrder));
+        // jasperfx#1007: the RPC's service type and method, the only code behind this slice
+        cancel.HandlerType!.Name.ShouldBe(nameof(PlaceOrderHandler));
+        cancel.HandlerMethod.ShouldBe("Cancel");
+    }
+
+    private sealed class StubGrpcManifest(params GrpcEndpointDescriptor[] endpoints) : IGrpcEndpointManifest
+    {
+        public IReadOnlyList<GrpcEndpointDescriptor> Endpoints { get; } = endpoints;
+    }
+}
+
+// GH-3988 / GH-3990: the roles reach the outside through the registered IEventModelDefinitionSource,
+// the ServiceCapabilities snapshot, and the event-model export — all from a booted host, none of
+// which needs a source generator.
+public class event_model_sources_and_capabilities_3988 : IAsyncLifetime
+{
+    private IHost _host = null!;
+
+    public async ValueTask InitializeAsync()
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                // Registered BEFORE UseWolverine() on purpose: the derived source must still win on
+                // merge, so the overlay may only fill gaps (the trigger label) — never a derived role.
+                // GH-4152: this is now the regression guard for the provenance ladder specifically. The
+                // overlay is registered first and is no longer beaten by registration order, so if the
+                // Derived stamp ever came off, this fixture would start losing derived roles to it.
+                services.AddEventModel("Overlay", model =>
+                {
+                    model.InDomain("Sales");
+                    model.Slice(nameof(PlaceOrder)).TriggeredBy("UI: Place order");
+                });
+            })
+            .UseWolverine(opts =>
+            {
+                opts.ServiceName = "event-model-3988";
+                opts.Discovery.DisableConventionalDiscovery()
+                    .IncludeType(typeof(PlaceOrderHandler))
+                    .IncludeType(typeof(ShipmentTimeoutHandler));
+            }).StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _host.StopAsync();
+        _host.Dispose();
+    }
+
+    // GH-4152: this used to assert the Wolverine source was registered FIRST, because until JasperFx 2.56
+    // that ordering was the only thing making derived roles beat an overlay's -- hence the
+    // services.Insert(0, ...) in UseWolverine(). Precedence now rides the provenance ladder, so the
+    // registration order is no longer meaningful and asserting it would be pinning an implementation
+    // detail we deliberately removed. What has to hold is the rung.
+    [Fact]
+    public void the_wolverine_source_claims_the_derived_rung()
+    {
+        var sources = _host.Services.GetServices<IEventModelDefinitionSource>().ToArray();
+
+        // Wolverine's derived source, the discovered-definitions source (GH-4916) and the overlay
+        sources.Length.ShouldBe(3);
+        sources.OfType<DiscoveredEventModelDefinitions>().Count().ShouldBe(1);
+
+        // Through the interface on purpose: Provenance is a default interface member, so reading it off
+        // the concrete type would only compile when the override exists and would assert nothing.
+        IEventModelDefinitionSource wolverine = sources.OfType<WolverineEventModelSource>().Single();
+        wolverine.Provenance.ShouldBe(EventModelProvenance.Derived);
+
+        // The overlay registered in InitializeAsync is unstamped, so it stays on the bottom rung -- which
+        // is what lets it fill gaps without overwriting anything derived, whatever order it registered in.
+        var overlay = sources.Single(x => x is not WolverineEventModelSource and not DiscoveredEventModelDefinitions);
+        overlay.Provenance.ShouldBe(EventModelProvenance.Declared);
+    }
+
+    [Fact]
+    public async Task discovery_assembles_the_derived_roles_with_the_overlay_only_filling_gaps()
+    {
+        var model = await WolverineEventModelExport.AssembleAsync(_host.Services, token: TestContext.Current.CancellationToken);
+
+        model.Name.ShouldBe("event-model-3988");
+        var slice = model.Slices.Single(x => x.Name == nameof(PlaceOrder));
+
+        // derived
+        slice.CommandType!.Name.ShouldBe(nameof(PlaceOrder));
+        slice.HandlerType!.Name.ShouldBe(nameof(PlaceOrderHandler));
+        slice.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlacedNotification) });
+        slice.TriggerKind.ShouldBe(TriggerKind.MessageHandler);
+
+        // overlay
+        slice.TriggerLabel.ShouldBe("UI: Place order");
+        slice.Domain.ShouldBe("Sales");
+
+        model.Slices.Single(x => x.Name == nameof(ShipmentTimeout)).TriggerKind.ShouldBe(TriggerKind.JobScheduler);
+    }
+
+    [Fact]
+    public async Task the_capabilities_snapshot_carries_the_model_and_the_per_handler_slice()
+    {
+        var capabilities = await ServiceCapabilities.ReadFrom(_host.GetRuntime(), null, CancellationToken.None);
+
+        // GH-4424. The capabilities document carries the SET of models this service hosts, and this host
+        // hosts TWO: Wolverine's derived model, named for the service, and the "Overlay" model the fixture
+        // registers in InitializeAsync. That is the entire point of the change — the old export folded them
+        // into one named for the service, so the overlay's NAME was lost outright and nothing said so.
+        var set = capabilities.EventModel.ShouldNotBeNull();
+
+        set.Models.Select(x => x.Name).OrderBy(x => x, StringComparer.Ordinal)
+            .ShouldBe(new[] { "Overlay", "event-model-3988" });
+        set.IsAmbiguous.ShouldBeTrue();
+        set.Sole.ShouldBeNull("two models, so no single descriptor can stand for this service without loss");
+
+        // ...and a consumer that wants one names it, rather than being handed a guess.
+        var model = set.Find("event-model-3988").ShouldNotBeNull();
+        model.Slices.Select(x => x.Name).ShouldContain(nameof(PlaceOrder));
+
+        var handler = capabilities.Messages.Single(x => x.Type.Name == nameof(PlaceOrder)).Handlers.Single();
+        handler.EventModel.ShouldNotBeNull();
+        handler.EventModel.CommandType!.Name.ShouldBe(nameof(PlaceOrder));
+        handler.EventModel.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlacedNotification) });
+    }
+
+    [Fact]
+    public async Task the_export_round_trips_through_the_wire_descriptor()
+    {
+        var model = await WolverineEventModelExport.AssembleAsync(_host.Services, token: TestContext.Current.CancellationToken);
+
+        var json = WolverineEventModelExport.ToJson(model);
+
+        // the wire shape CritterWatch serialises: camelCase, enums as strings, rendering contract present
+        json.ShouldContain("\"triggerKind\": \"MessageHandler\"");
+        // GH-4387: the scheduled slice is the one that claims a pattern here; a plain message handler
+        // does not, so the enum-as-string check rides on the timeout handler
+        json.ShouldContain("\"pattern\": \"Automation\"");
+        json.ShouldContain("\"elements\"");
+        json.ShouldContain("\"edges\"");
+
+        var back = WolverineEventModelExport.FromJson(json)!;
+        back.Name.ShouldBe(model.Name);
+        back.Slices.Select(x => x.Name).ShouldBe(model.Slices.Select(x => x.Name));
+        var slice = back.Slices.Single(x => x.Name == nameof(PlaceOrder));
+        slice.CommandType!.FullName.ShouldBe(typeof(PlaceOrder).FullName);
+        slice.TriggerKind.ShouldBe(TriggerKind.MessageHandler);
+        slice.Pattern.ShouldBeNull(); // GH-4387
+        slice.PublishedMessages.Select(x => x.Name).ShouldBe(new[] { nameof(OrderPlacedNotification) });
+        slice.TriggerLabel.ShouldBe("UI: Place order");
+        slice.Elements.Count.ShouldBe(model.Slices.Single(x => x.Name == nameof(PlaceOrder)).Elements.Count);
+    }
+}
+
+#region sample types for GH-3988
+
+public record PlaceOrder(string OrderId);
+public record CancelOrder(string OrderId);
+public record OrderPlacedNotification(string OrderId);
+
+public class PlaceOrderHandler
+{
+    public static OrderPlacedNotification Handle(PlaceOrder command) => new(command.OrderId);
+}
+
+public record ShipOrder(string OrderId);
+public record ConfirmOrder(string OrderId);
+public record GetOrder(string OrderId);
+public record OrderPlaced;
+public record OrderShipped;
+public record OrderConfirmed;
+public record OrderNotified;
+public record OrderSummary(string OrderId);
+
+public class Order
+{
+    public string Id { get; set; } = null!;
+    public static Order Create(OrderPlaced placed) => new();
+    public void Apply(OrderShipped shipped) { }
+    public void Apply(OrderConfirmed confirmed) { }
+}
+
+public class ShipOrderHandler
+{
+    public static OrderShipped Handle(ShipOrder command, [WriteModel] Order order) => new();
+}
+
+public class ConfirmOrderHandler
+{
+    [DeciderFunction]
+    public static (OrderConfirmed, OrderNotified) Handle(ConfirmOrder command, Order order) => (new(), new());
+}
+
+public class GetOrderHandler
+{
+    public static OrderSummary Handle(GetOrder query, [ReadModel] Order order) => new(order.Id);
+}
+
+public class OrderShippedHandler
+{
+    public static void Handle(OrderShipped shipped) { }
+}
+
+public record GetCustomer(string CustomerId);
+public record RegisterCustomer(string CustomerId);
+public class Customer { public string Id { get; set; } = null!; }
+
+public class GetCustomerHandler
+{
+    public static OrderSummary Handle(GetCustomer query, [Entity] Customer customer) => new(customer.Id);
+}
+
+public class RegisterCustomerHandler
+{
+    public static IStorageAction<Customer> Handle(RegisterCustomer command) => Storage.Insert(new Customer { Id = command.CustomerId });
+}
+
+public record ChangeCourseCapacity(string CourseId, int Capacity);
+public record CourseCapacityChanged(int Capacity);
+public class CourseState { public int Capacity { get; set; } }
+
+public class ChangeCourseCapacityHandler
+{
+    public static CourseCapacityChanged Handle(ChangeCourseCapacity command, [DcbModel] CourseState state) => new(command.Capacity);
+}
+
+public record ShipmentTimeout(string OrderId) : TimeoutMessage(TimeSpan.FromMinutes(5));
+
+public class ShipmentTimeoutHandler
+{
+    public static void Handle(ShipmentTimeout timeout) { }
+}
+
+public class OrderSaga : Saga
+{
+    public string Id { get; set; } = null!;
+
+    public static (OrderSaga, OrderPlacedNotification) Start(PlaceOrder command) => (new OrderSaga { Id = command.OrderId }, new(command.OrderId));
+
+    public void Handle(OrderShipped shipped) => MarkCompleted();
+}
+
+#endregion

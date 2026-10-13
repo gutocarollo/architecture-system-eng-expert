@@ -1,0 +1,76 @@
+using Wolverine.Runtime;
+
+namespace Wolverine.Transports;
+
+public interface IListener : IChannelCallback, IAsyncDisposable
+{
+    Uri Address { get; }
+
+    /// <summary>
+    ///     Stop the receiving of any new messages, but leave any connection
+    ///     open for possible calls to Defer/Complete
+    /// </summary>
+    /// <returns></returns>
+    ValueTask StopAsync();
+}
+
+public class CompoundListener : IListener
+{
+    public readonly List<IListener> Inner = new();
+
+    public CompoundListener(Uri address)
+    {
+        Address = address;
+    }
+
+    public IHandlerPipeline? Pipeline => Inner.First().Pipeline;
+
+    public ValueTask CompleteAsync(Envelope envelope)
+    {
+        throw new NotSupportedException();
+    }
+
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        throw new NotSupportedException();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        var exceptions = new List<Exception>();
+        foreach (var listener in Inner)
+        {
+            try
+            {
+                await listener.DisposeAsync();
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e);
+            }
+        }
+
+        if (exceptions.Count == 1)
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exceptions[0]).Throw();
+        if (exceptions.Count > 1) throw new AggregateException(exceptions);
+    }
+
+    public Uri Address { get; }
+    public async ValueTask StopAsync()
+    {
+        var exceptions = new List<Exception>();
+        foreach (var listener in Inner)
+        {
+            try
+            {
+                await listener.StopAsync();
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e);
+            }
+        }
+
+        if (exceptions.Any()) throw new AggregateException(exceptions);
+    }
+}

@@ -1,0 +1,434 @@
+using IntegrationTests;
+using JasperFx.Descriptors;
+using JasperFx.Resources;
+using Marten;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Npgsql;
+using Shouldly;
+using Weasel.Core.MultiTenancy;
+using Weasel.Postgresql;
+using Weasel.Postgresql.Migrations;
+using Wolverine;
+using Wolverine.EntityFrameworkCore;
+using Wolverine.Marten;
+using Wolverine.Persistence;
+using Wolverine.Persistence.Durability;
+using Wolverine.Postgresql;
+using Wolverine.Runtime;
+using Wolverine.SqlServer;
+using Wolverine.SqlServer.Persistence;
+using Wolverine.Tracking;
+using Xunit;
+
+namespace PersistenceTests.ModularMonoliths;
+
+/*
+ * TODO -- register multiple postgresql outside of Marten
+ * TODO -- register multiple Sql Server
+ * TODO -- make all main, see assertion, postgresql
+ * TODO -- make all main, see assertion, sql server
+ * TODO -- make none, "Service" should be Nullo
+ * TODO -- make one main, other ancillary, postgresql
+ * TODO -- make one main, other ancillary, sql server
+ * Move on to the durability agent family
+ *
+ *
+ * 
+ */
+
+public class registration_of_message_stores : IAsyncLifetime
+{
+    private IHost _host = null!;
+    private string connectionString1 = null!;
+    private string connectionString2 = null!;
+    private string connectionString3 = null!;
+    private string connectionString4 = null!;
+
+    private async Task<string> CreateDatabaseIfNotExists(NpgsqlConnection conn, string databaseName)
+    {
+        var builder = new NpgsqlConnectionStringBuilder(Servers.PostgresConnectionString);
+
+        var exists = await conn.DatabaseExists(databaseName);
+        if (!exists)
+        {
+            await new DatabaseSpecification().BuildDatabase(conn, databaseName);
+        }
+
+        builder.Database = databaseName;
+
+        return builder.ConnectionString;
+    }
+
+    public async ValueTask InitializeAsync()
+    {
+        using var conn = new NpgsqlConnection(Servers.PostgresConnectionString);
+        await conn.OpenAsync();
+
+        connectionString1 = await CreateDatabaseIfNotExists(conn, "database1");
+        connectionString2 = await CreateDatabaseIfNotExists(conn, "database2");
+        connectionString3 = await CreateDatabaseIfNotExists(conn, "database3");
+        connectionString4 = await CreateDatabaseIfNotExists(conn, "database4");
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_host != null)
+        {
+            await _host.StopAsync();
+            _host.Dispose();
+        }
+    }
+
+
+    private async Task<MessageStoreCollection> startHost(Action<WolverineOptions> configure)
+    {
+        _host = await Host.CreateDefaultBuilder()
+            .UseWolverine(configure).ConfigureServices(services => services.AddResourceSetupOnStartup()).StartAsync();
+
+        var collection = new MessageStoreCollection(_host.GetRuntime(), _host.Services.GetServices<IMessageStore>(), _host.Services.GetServices<AncillaryMessageStore>());
+
+        await collection.InitializeAsync();
+
+        return collection;
+    }
+
+    [Fact]
+    public async Task for_single_database()
+    {
+        // Not much to it
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString);
+        });
+
+        var expected = new Uri("wolverinedb://postgresql/localhost/postgres/wolverine");
+        (await collection.FindAllAsync()).Single().Uri.ShouldBe(expected);
+
+        (await collection.FindDatabasesAsync([expected])).Single().Uri.ShouldBe(expected);
+        
+        (await collection.FindDatabaseAsync(expected))!.Uri.ShouldBe(expected);
+
+        collection.Cardinality().ShouldBe(DatabaseCardinality.Single);
+    }
+
+    [Fact]
+    public async Task for_several_ancillary_marten_databases()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.Durability.MessageStorageSchemaName = "wolverine";
+            
+            opts.Services.AddMarten(m =>
+            {
+                m.Connection(Servers.PostgresConnectionString);
+            }).IntegrateWithWolverine();
+
+            opts.Services.AddMartenStore<IFirstStore>(m =>
+            {
+                m.Connection(Servers.PostgresConnectionString);
+                m.DatabaseSchemaName = "first";
+            }).IntegrateWithWolverine();
+
+            opts.Services.AddMartenStore<ISecondStore>(m =>
+            {
+                m.Connection(Servers.PostgresConnectionString);
+                m.DatabaseSchemaName = "second";
+            }).IntegrateWithWolverine();
+        });
+        
+        // STILL only one expected message store here
+        var expected = new Uri("wolverinedb://postgresql/localhost/postgres/wolverine");
+        var services = await collection.FindAllAsync();
+
+        services.Single().Uri.ShouldBe(expected);
+
+        (await collection.FindDatabasesAsync([expected])).Single().Uri.ShouldBe(expected);
+        
+        (await collection.FindDatabaseAsync(expected))!.Uri.ShouldBe(expected);
+
+        collection.Cardinality().ShouldBe(DatabaseCardinality.Single);
+    }
+
+    [Fact]
+    public async Task ancillary_marten_databases_using_different_databases()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.Durability.MessageStorageSchemaName = "wolverine";
+            
+            opts.Services.AddMarten(m =>
+            {
+                m.Connection(Servers.PostgresConnectionString);
+            }).IntegrateWithWolverine();
+
+            opts.Services.AddMartenStore<IFirstStore>(m =>
+            {
+                m.Connection(connectionString1);
+                m.DatabaseSchemaName = "first";
+            }).IntegrateWithWolverine();
+
+            opts.Services.AddMartenStore<ISecondStore>(m =>
+            {
+                m.Connection(connectionString2);
+                m.DatabaseSchemaName = "second";
+            }).IntegrateWithWolverine();
+        });
+        
+        // STILL only one expected message store here
+        var main = new Uri("wolverinedb://postgresql/localhost/postgres/wolverine");
+        var first = new Uri("wolverinedb://postgresql/localhost/database1/wolverine");
+        var second = new Uri("wolverinedb://postgresql/localhost/database2/wolverine");
+        
+        var services = await collection.FindAllAsync();
+        
+        services.Select(x => x.Uri).OrderBy(x => x.ToString())
+            .ShouldBe([first, second, main]);
+
+        
+
+        (await collection.FindDatabasesAsync([first, main])).Select(x => x.Uri).ShouldBe([first, main]);
+        
+        (await collection.FindDatabaseAsync(second))!.Uri.ShouldBe(second);
+
+        collection.Cardinality().ShouldBe(DatabaseCardinality.Single);
+    }
+
+    [Fact]
+    public async Task using_static_multi_tenancy()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.Durability.MessageStorageSchemaName = "wolverine";
+            opts.Services.AddMarten(m =>
+            {
+                m.DisableNpgsqlLogging = true;
+                m.MultiTenantedDatabases(t =>
+                {
+                    t.AddSingleTenantDatabase(connectionString1, "t1");
+                    t.AddSingleTenantDatabase(connectionString2, "t2");
+                    t.AddSingleTenantDatabase(connectionString3, "t3");
+                    t.AddSingleTenantDatabase(connectionString4, "t4");
+                });
+            }).IntegrateWithWolverine(w => w.MainDatabaseConnectionString = Servers.PostgresConnectionString);
+        });
+        
+        var main = new Uri("wolverinedb://postgresql/localhost/postgres/wolverine");
+        var db1 = new Uri("wolverinedb://postgresql/localhost/database1/wolverine");
+        var db2 = new Uri("wolverinedb://postgresql/localhost/database2/wolverine");
+        var db3 = new Uri("wolverinedb://postgresql/localhost/database3/wolverine");
+        var db4 = new Uri("wolverinedb://postgresql/localhost/database4/wolverine");
+        
+        
+        var services = await collection.FindAllAsync();
+        
+        services.Select(x => x.Uri).OrderBy(x => x.ToString())
+            .ShouldBe([db1, db2, db3, db4, main]);
+        
+        (await collection.FindDatabaseAsync(db3))!.Uri.ShouldBe(db3);
+        (await collection.FindDatabaseAsync(main))!.Uri.ShouldBe(main);
+
+        (await collection.FindDatabasesAsync([db1, main])).Select(x => x.Uri).ShouldBe([db1, main]);
+
+        collection.Cardinality().ShouldBe(DatabaseCardinality.StaticMultiple);
+    }
+    
+    [Fact]
+    public async Task using_dynamic_multi_tenancy()
+    {
+        await dropWolverineSchema();
+
+        // This test ends by registering t3 and t4, so it poisons its own next run. Marten reads the
+        // master tenant table as the host boots and MessageStoreCollection.InitializeAsync() caches
+        // whatever it finds, so clearing the records *after* startHost() -- which is what this test
+        // used to do -- is already too late: the leftover tenant databases are in memory by then.
+        // Reset the table before anything reads it.
+        await dropTenantDatabaseTable();
+
+        var collection = await startHost(opts =>
+        {
+            opts.Durability.MessageStorageSchemaName = "wolverine";
+            opts.Services.AddMarten(m =>
+            {
+                m.MultiTenantedDatabasesWithMasterDatabaseTable(Servers.PostgresConnectionString);
+
+
+            }).IntegrateWithWolverine(w => w.MainDatabaseConnectionString = Servers.PostgresConnectionString);
+        });
+
+        await _host.AddTenantDatabaseAsync("t1", connectionString1);
+        await _host.AddTenantDatabaseAsync("t2", connectionString2);
+        
+        
+        var main = new Uri("wolverinedb://postgresql/localhost/postgres/wolverine");
+        var db1 = new Uri("wolverinedb://postgresql/localhost/database1/wolverine");
+        var db2 = new Uri("wolverinedb://postgresql/localhost/database2/wolverine");
+        var db3 = new Uri("wolverinedb://postgresql/localhost/database3/wolverine");
+        var db4 = new Uri("wolverinedb://postgresql/localhost/database4/wolverine");
+        
+        
+        var services = await collection.FindAllAsync();
+        
+        services.Select(x => x.Uri).OrderBy(x => x.ToString())
+            .ShouldBe([db1, db2, main]);
+        
+        (await collection.FindDatabaseAsync(db2))!.Uri.ShouldBe(db2);
+        (await collection.FindDatabaseAsync(main))!.Uri.ShouldBe(main);
+        
+        await _host.AddTenantDatabaseAsync("t3", connectionString3);
+        await _host.AddTenantDatabaseAsync("t4", connectionString4);
+        
+        services = await collection.FindAllAsync();
+        
+        services.Select(x => x.Uri).OrderBy(x => x.ToString())
+            .ShouldBe([db1, db2, db3, db4, main]);
+
+        (await collection.FindDatabasesAsync([db1, main])).Select(x => x.Uri).ShouldBe([db1, main]);
+        
+        collection.Cardinality().ShouldBe(DatabaseCardinality.DynamicMultiple);
+    }
+
+    private static async Task dropWolverineSchema()
+    {
+        using var conn = new NpgsqlConnection(Servers.PostgresConnectionString);
+        await conn.OpenAsync();
+        await conn.DropSchemaAsync("wolverine");
+        await conn.CloseAsync();
+    }
+
+    /// <summary>
+    /// Marten recreates this on startup through AddResourceSetupOnStartup(). This test is the only
+    /// user of the master tenant table in the default schema -- the Marten suite's tenancy tests all
+    /// pin their own "tenants" schema -- so dropping it cannot disturb anything else.
+    /// </summary>
+    private static async Task dropTenantDatabaseTable()
+    {
+        using var conn = new NpgsqlConnection(Servers.PostgresConnectionString);
+        await conn.OpenAsync();
+        await conn.CreateCommand("drop table if exists public.mt_tenant_databases;").ExecuteNonQueryAsync();
+        await conn.CloseAsync();
+    }
+
+    [Fact]
+    public async Task no_message_stores_still_works()
+    {
+        var collection = await startHost(opts => { });
+        collection.Main.ShouldBeOfType<NullMessageStore>();
+        
+        (await collection.FindAllAsync()).Any().ShouldBeFalse();
+        
+        collection.Cardinality().ShouldBe(DatabaseCardinality.None);
+    }
+
+    [Fact]
+    public async Task register_two_postgresql_both_main_throws()
+    {
+        await Should.ThrowAsync<InvalidWolverineStorageConfigurationException>(async () =>
+        {
+            var collection = await startHost(opts =>
+            {
+                opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString);
+                opts.PersistMessagesWithPostgresql(connectionString1);
+            });
+        });
+    }
+    
+    [Fact]
+    public async Task register_two_sql_server_both_main_throws()
+    {
+        await Should.ThrowAsync<InvalidWolverineStorageConfigurationException>(async () =>
+        {
+            var collection = await startHost(opts =>
+            {
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "one");
+                opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "two");
+                
+            });
+        });
+    }
+
+    [Fact]
+    public async Task register_one_main_and_one_ancillary_postgresql()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString);
+            opts.PersistMessagesWithPostgresql(connectionString1, role:MessageStoreRole.Ancillary);
+        });
+
+        collection.Main.ShouldBeOfType<PostgresqlMessageStore>();
+        (await collection.FindAllAsync()).Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task register_one_main_and_one_ancillary_sql_server()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "one");
+            opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, "two", role:MessageStoreRole.Ancillary);
+                
+        });
+    }
+    
+    [Fact]
+    public async Task basic_ancillary_store_registration_with_postgresql()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString, "main");
+
+            opts.PersistMessagesWithPostgresql(connectionString1, role:MessageStoreRole.Ancillary).Enroll(typeof(SampleDbContext));
+        });
+        
+        collection.HasAnyAncillaryStores().ShouldBeTrue();
+        var databases = await collection.FindAllAsync();
+        databases.Select(x => x.Uri).OrderBy(x => x.ToString()).ShouldBe([new Uri("wolverinedb://postgresql/localhost/database1/wolverine"), new Uri("wolverinedb://postgresql/localhost/postgres/main")]);
+
+        var store = _host.Services.GetRequiredService<AncillaryMessageStore>();
+        store.MarkerType.ShouldBe(typeof(SampleDbContext));
+        store.Inner.Uri.ShouldBe(new Uri("wolverinedb://postgresql/localhost/database1/wolverine"));
+    }
+    
+    [Fact]
+    public async Task basic_ancillary_store_registration_with_sql_server()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString, "main");
+
+            opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, role:MessageStoreRole.Ancillary).Enroll(typeof(SampleDbContext));
+        });
+        
+        collection.HasAnyAncillaryStores().ShouldBeTrue();
+        var databases = await collection.FindAllAsync();
+        databases.Select(x => x.Uri).OrderBy(x => x.ToString()).ShouldBe([new Uri("wolverinedb://postgresql/localhost/postgres/main"), new Uri("wolverinedb://sqlserver/localhost/master/dbo")]);
+        
+        var store = _host.Services.GetRequiredService<AncillaryMessageStore>();
+        store.MarkerType.ShouldBe(typeof(SampleDbContext));
+        store.Inner.Uri.ShouldBe(new Uri("wolverinedb://sqlserver/localhost/master/dbo"));
+    }
+
+    [Fact]
+    public async Task register_AncillaryMessageStoreApplication()
+    {
+        var collection = await startHost(opts =>
+        {
+            opts.PersistMessagesWithPostgresql(Servers.PostgresConnectionString, "main");
+
+            opts.PersistMessagesWithSqlServer(Servers.SqlServerConnectionString, role:MessageStoreRole.Ancillary).Enroll(typeof(SampleDbContext));
+        });
+
+        var application = _host.Services.GetRequiredService<AncillaryMessageStoreApplication<SampleDbContext>>();
+
+        var context = new MessageContext(_host.GetRuntime());
+        application.Apply(context);
+        context.Storage.Uri.ShouldBe(new Uri("wolverinedb://sqlserver/localhost/master/dbo"));
+    }
+}
+
+
+
+public interface IFirstStore : IDocumentStore{}
+public interface ISecondStore : IDocumentStore{}
+
