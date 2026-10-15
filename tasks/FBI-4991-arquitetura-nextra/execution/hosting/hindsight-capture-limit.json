@@ -1,0 +1,6 @@
+{
+  "operation": "capture_initiative",
+  "status": "FAILED",
+  "returned_error": "column cannot have more than 2000 dimensions for hnsw index",
+  "scope": "Current repository knowledge-page storage; no memory write is claimed."
+}

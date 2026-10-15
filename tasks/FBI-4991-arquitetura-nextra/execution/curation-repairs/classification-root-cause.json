@@ -1,0 +1,46 @@
+{
+  "observed_utc": "2026-10-15T03:31:42.749921+00:00",
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "classification_path": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py",
+      "lines": [
+        121,
+        133
+      ],
+      "excerpt": " if key in GAPS:issues.append({'kind':'SEMANTIC_GAP','reason':GAPS[key]})\n if sel.get('application_kind')!='PRODUCT_OSS':issues.append({'kind':'REAL_APPLICATION_MISSING','reason':'O localizador é '+sel.get('application_kind','UNKNOWN')+'. Ele não satisfaz a aplicação OSS real exigida.'})\n for role,items in [('base',bases),('application',apps),('skill',[primary_skill])]:\n  for item in items:\n   if item.get('kind') in ['FILE','UNRESOLVED_REVISION'] and item.get('http_status')!=200:issues.append({'kind':'SOURCE_UNAVAILABLE','role':role,'url':item['url']})\n   if role=='application' and (item.get('license',{}).get('license_spdx')=='Elastic-2.0' or 'sustainable use' in item.get('license',{}).get('excerpt','').lower()):issues.append({'kind':'APPLICATION_NOT_OSS','role':role,'url':item['url'],'reason':'A revisão tem licença source available; ela não é contada como aplicação OSS.'})\n   if item.get('license',{}).get('status')!='READ':issues.append({'kind':'LICENSE_UNRESOLVED','role':role,'url':item['url']})\n body_evidence=[{'role':role,'source_url':item['url'],'hits':evidence(item,sel.get('verification_terms',[]))} for role,items in [('base',bases),('application',apps)]for item in items]\n found={hit['term']for file in body_evidence for hit in file['hits']}\n missing=[term for term in sel.get('verification_terms',[])if term not in found]\n if sel.get('verification_terms') and not found:issues.append({'kind':'MECHANISM_NOT_LOCATED','reason':'Nenhum localizador textual do mecanismo foi encontrado nos arquivos selecionados.'})\n # Textual hits are receipts for navigation, never a substitute for the semantic finding above.\n status='PENDING' if issues else 'AUTHOR_SOURCE_MATCH'"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/select_sources.py",
+      "lines": [
+        8,
+        13
+      ],
+      "excerpt": "def url(repo, path, ref='HEAD'):\n    return f'https://github.com/{repo}/blob/{ref}/{path}'\n\ndef put(ids, base, application, mechanism, terms, limits='A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.'):\n    for concept_id in ids.split():\n        SELECTIONS[concept_id] = {'base_urls': base if isinstance(base,list) else [base], 'application_urls': application if isinstance(application,list) else [application], 'mechanism': mechanism, 'verification_terms': terms, 'limits': limits, 'application_kind': 'PRODUCT_OSS'}"
+    }
+  ],
+  "affected_rows": [
+    {
+      "concept_id": "websocket",
+      "status": "AUTHOR_SOURCE_MATCH",
+      "mechanism": "Zulip expõe API de mensagens e processa webhooks de GitHub. A base FastAPI permite comparar o contrato de entrada.",
+      "limits": "O trecho não demonstra WebSocket e esse conceito permanece pendente até localizar um consumidor real dessa conexão.",
+      "issues": []
+    },
+    {
+      "concept_id": "at-least-once-delivery",
+      "status": "AUTHOR_SOURCE_MATCH",
+      "mechanism": "Pulsar acompanha sequências de mensagens e conserva o progresso de deduplicação; Kafka fornece a base comparada de transação e produtor idempotente.",
+      "limits": "Deduplicação do broker não prova inbox transacional nem exactly once sobre efeitos no banco externo. Esses dois conceitos permanecem pendentes até localizar a fronteira transacional do consumidor.",
+      "issues": []
+    }
+  ],
+  "finding": "The generator treats the absence of enumerated issues as a positive semantic decision. The put helper assigns PRODUCT_OSS by default; generic keyword hits satisfy a locator gate. There is no required explicit current author adjudication that can preserve the missing-mechanism rationale as a blocking gate.",
+  "shared_legacy_prose_to_reconcile_in_the_single_batch": [
+    "rest and webhook retain the websocket-pending sentence from the grouped selection.",
+    "deduplication retains the sentence about inbox/exactly-once gaps even though those concepts were later overridden."
+  ],
+  "proposed_guard": "Require AUTHOR_SOURCE_MATCH explicitly, a current selection fingerprint, bound base/application excerpts, provenance, reasoning and remaining_gates == []. Missing/stale/pending judgments emit issues instead of a positive status.",
+  "migration_limit": "Do not mass-fill the adjudication ledger from the old green matrix. Use actual author source judgments and the independent first-pass results, bound to the unchanged selections; repair findings require a new current judgment.",
+  "independent_review": "A bound explicit author judgment still does not prove semantic correctness. The independent reviewer retains authority."
+}

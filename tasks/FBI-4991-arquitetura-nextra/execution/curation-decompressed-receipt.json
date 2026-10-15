@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-10-15T17:38:44.105936+00:00",
+  "files": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz",
+      "compressed_sha256": "77e1d00a55f270631c8f66d22b353b2ad9f51b7d8d113a6d1cb0fd7af0830b12",
+      "decoded_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+      "decoded_bytes": 5536231
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/sources.json.gz",
+      "compressed_sha256": "82cc3da725838de9f0edc48a43cb29ace960a463623312f9dcf69ae235ad33f3",
+      "decoded_sha256": "1cac764cd16b3d03dbfe658a96870dd0f6160cd2b81e2389eb0f7e226f40ec6f",
+      "decoded_bytes": 3122988
+    }
+  ],
+  "scope": "Decoded curation matrix and source metadata only.",
+  "initial_findings": 11,
+  "typed_git_revisions": [
+    {
+      "repo": "kubernetes/client-go",
+      "revision": "7aade4e921f65cb51c990ab0557a5556fd67a1be",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "kubernetes/kubernetes",
+      "revision": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "libp2p/go-libp2p",
+      "revision": "3c2c902122cb6fae3897f729a3dbb9d4665ae90d",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "n8n-io/n8n",
+      "revision": "e2529a849432bdb3082615c04b1702df61cb91d5",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "ncats/blackboard",
+      "revision": "b06a98b26e807e9ea3eab9a107ec24d2393f5040",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "openfga/openfga",
+      "revision": "526995eb202464e2cace266fb5be56c212af9ecf",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "playframework/playframework",
+      "revision": "01bc6d08bacb80835edd4e45fe3ce706151e35c0",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "postgres/postgres",
+      "revision": "3c6665bf0266a7ae78117c3ed0299bfbd1f1331a",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "python/cpython",
+      "revision": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+      "exit_code": 0,
+      "match": true
+    }
+  ],
+  "unexplained": [],
+  "verified_scan_exit": 0,
+  "no_global_scanner_rules_changed": true,
+  "verdict": "PASS"
+}

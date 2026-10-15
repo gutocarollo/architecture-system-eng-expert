@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pilot/pkg/security/authz/model/model.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--model.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.314308+00:00",
+  "sha256": "37ca74e3961f8b7c8e0a18c5798bdce33133ed386e0f51cf556675768f57cdb2",
+  "line_count": 426,
+  "source": "raw_primary"
+}

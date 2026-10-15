@@ -1,0 +1,15 @@
+{
+  "repo": "golang/crypto",
+  "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+  "path": "ssh/server.go",
+  "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go",
+  "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--server.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:51.772567+00:00",
+  "sha256": "a9ff150f87775be31f40685d38f1c6934101a461f9bce82936a35331f6949c82",
+  "line_count": 1117,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/084421eeac212496d4ea4891c036a5342bb1173c7bf9eec59841790fc451cfdc.txt",
+  "upstream_observed_utc": "2026-10-15T01:22:34.844215Z"
+}

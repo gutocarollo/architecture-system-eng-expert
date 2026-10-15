@@ -8,11 +8,11 @@ diataxis: reference
 
 Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
 
-Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
 
 ## Backpressure
 
-O identificador canônico é `backpressure`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `backpressure`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 NiFi interrompe a produção para conexões cheias. O limitador de memória Collector devolve recusa recuperável sob pressão.
 
@@ -20,7 +20,7 @@ A base de estudo é [open-telemetry/opentelemetry-collector / memorylimiter.go @
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `backpressure`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-core/src/main/java/org/apache/nifi/controller/tasks/ConnectableTask.java#L69-L75). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-core/src/main/java/org/apache/nifi/controller/tasks/ConnectableTask.java#L69-L75). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -28,7 +28,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Bulkhead
 
-O identificador canônico é `bulkhead`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `bulkhead`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 A base mantém os estados do circuit breaker. Envoy mantém orçamentos de recursos por cluster para impedir admissão acima da capacidade.
 
@@ -36,7 +36,7 @@ A base de estudo é [resilience4j/resilience4j / CircuitBreakerStateMachine.java
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `CircuitBreaker`](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L1376-L1382). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L1376-L1382). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O circuit breaker Resilience4j reage a resultados; circuit breaking Envoy limita recursos. Uma comparação exige conservar essa diferença. Bulkhead completo exige provar a separação de pools por cluster.
 
@@ -44,7 +44,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Chaos Engineering
 
-O identificador canônico é `chaos-engineering`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `chaos-engineering`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O controlador Chaos Mesh interpreta PodChaos e introduz a falha declarada para testar uma hipótese operacional.
 
@@ -52,7 +52,7 @@ A base de estudo é [chaos-mesh/chaos-mesh / podchaos_types.go @ 7ef417fe](https
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `PodChaos`](https://github.com/chaos-mesh/chaos-mesh/blob/7ef417fe21122db93d7da513dcd71e483deb3cd6/controllers/chaosimpl/podchaos/podfailure/impl.go#L37-L43). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/chaos-mesh/chaos-mesh/blob/7ef417fe21122db93d7da513dcd71e483deb3cd6/controllers/chaosimpl/podchaos/podfailure/impl.go#L37-L43). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -60,23 +60,23 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Circuit Breaker
 
-O identificador canônico é `circuit-breaker`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `circuit-breaker`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
-A base mantém os estados do circuit breaker. Envoy mantém orçamentos de recursos por cluster para impedir admissão acima da capacidade.
+Na busca de hashtags do Mastodon, a consulta ao Elasticsearch passa por um circuito com limite de dez falhas selecionadas e intervalo de recuperação de cinco minutos. Quando a biblioteca recusa a chamada com RedLight, o serviço consulta o banco. A base Resilience4j mostra separadamente o registro de falhas e as transições fechado, aberto e meio aberto; não é apresentada como biblioteca usada pelo Mastodon.
 
-A base de estudo é [resilience4j/resilience4j / CircuitBreakerStateMachine.java @ b7c00698](https://github.com/resilience4j/resilience4j/blob/b7c0069802e373ed72dff0b817c270fbb6e966ba/resilience4j-circuitbreaker/src/main/java/io/github/resilience4j/circuitbreaker/internal/CircuitBreakerStateMachine.java); licença [Apache-2.0](https://github.com/resilience4j/resilience4j/blob/b7c0069802e373ed72dff0b817c270fbb6e966ba/LICENSE.txt). A aplicação ou candidato de aplicação é [envoyproxy/envoy / upstream_impl.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE).
+A base de estudo é [resilience4j/resilience4j / CircuitBreakerStateMachine.java @ b7c00698](https://github.com/resilience4j/resilience4j/blob/b7c0069802e373ed72dff0b817c270fbb6e966ba/resilience4j-circuitbreaker/src/main/java/io/github/resilience4j/circuitbreaker/internal/CircuitBreakerStateMachine.java); licença [Apache-2.0](https://github.com/resilience4j/resilience4j/blob/b7c0069802e373ed72dff0b817c270fbb6e966ba/LICENSE.txt). A aplicação ou candidato de aplicação é [mastodon/mastodon / search_stoplight.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/concerns/search_stoplight.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / tag_search_service.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/tag_search_service.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / stoplight.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/config/initializers/stoplight.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE).
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `CircuitBreaker`](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L1376-L1382). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/concerns/search_stoplight.rb#L3-L13). O produto configura o circuito search:elasticsearch com dez falhas, cinco minutos de recuperação e classes de erro explícitas.
 
-O circuit breaker Resilience4j reage a resultados; circuit breaking Envoy limita recursos. Uma comparação exige conservar essa diferença. Bulkhead completo exige provar a separação de pools por cluster.
+O recorte é a busca de hashtags quando Chewy está habilitado. A política de contagem do Stoplight não é confundida com a taxa de falha do Resilience4j. O fallback pode devolver resultado e custo diferentes. Nenhuma falha remota nem recuperação foram executadas nesta leitura.
 
 No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#circuit-breaker). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
 
 ## Deadline Propagation
 
-O identificador canônico é `deadline-propagation`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `deadline-propagation`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Loki cria um contexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento.
 
@@ -84,7 +84,7 @@ A base de estudo é [grpc/grpc-go / clientconn.go @ 4d4d4284](https://github.com
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `ctx`](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go#L219-L225). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go#L219-L225). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Um timeout local não prova propagação para qualquer dependência: a fronteira é o contexto encaminhado nos caminhos citados.
 
@@ -92,7 +92,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Exponential Backoff
 
-O identificador canônico é `exponential-backoff`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `exponential-backoff`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Airflow calcula a próxima tentativa por backoff exponencial e espalha o atraso com hash determinístico da identidade da tentativa.
 
@@ -100,7 +100,7 @@ A base de estudo é [cenkalti/backoff / exponential.go @ b1a30d94](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `retry_exponential_backoff`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O jitter Airflow é determinístico. Esse recibo não o descreve como sorteio aleatório.
 
@@ -108,7 +108,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Fail Fast
 
-O identificador canônico é `fail-fast`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `fail-fast`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 A base mantém os estados do circuit breaker. Envoy mantém orçamentos de recursos por cluster para impedir admissão acima da capacidade.
 
@@ -116,7 +116,7 @@ A base de estudo é [resilience4j/resilience4j / CircuitBreakerStateMachine.java
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `CircuitBreaker`](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L1376-L1382). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/upstream_impl.cc#L1376-L1382). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O circuit breaker Resilience4j reage a resultados; circuit breaking Envoy limita recursos. Uma comparação exige conservar essa diferença. Bulkhead completo exige provar a separação de pools por cluster.
 
@@ -124,7 +124,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Fallback
 
-O identificador canônico é `fallback`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `fallback`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 CoreDNS pode servir o valor stale e iniciar sua atualização conforme a política de cache.
 
@@ -132,7 +132,7 @@ A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.co
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `stale`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L41-L47). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L41-L47). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Servir stale exige configuração e limita frescor. Isso não assegura que uma leitura financeira aceita dado antigo.
 
@@ -140,7 +140,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Graceful Degradation
 
-O identificador canônico é `graceful-degradation`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `graceful-degradation`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 CoreDNS pode servir o valor stale e iniciar sua atualização conforme a política de cache.
 
@@ -148,7 +148,7 @@ A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.co
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `stale`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L41-L47). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L41-L47). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Servir stale exige configuração e limita frescor. Isso não assegura que uma leitura financeira aceita dado antigo.
 
@@ -156,7 +156,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Health Check
 
-O identificador canônico é `health-check`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `health-check`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Kubelet consulta probes e sincroniza o estado do pod, permitindo que a política de reinício trate processos que falharam.
 
@@ -164,7 +164,7 @@ A base de estudo é [kubernetes/kubernetes / prober.go @ 4f2dd0c8](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `probe`](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/kubelet/kubelet.go#L728-L734). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/kubelet/kubelet.go#L728-L734). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -172,7 +172,7 @@ No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e 
 
 ## Heartbeat
 
-O identificador canônico é `heartbeat`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `heartbeat`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço systemd acompanha notificações e aciona a política de watchdog quando a janela expira.
 
@@ -180,7 +180,7 @@ A base de estudo é [systemd/systemd / sd-daemon.c @ 7f073ff5](https://github.co
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `WATCHDOG`](https://github.com/systemd/systemd/blob/7f073ff56f14e9b6ff7052998b640df88a359358/src/core/service.c#L344-L350). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/systemd/systemd/blob/7f073ff56f14e9b6ff7052998b640df88a359358/src/core/service.c#L344-L350). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -188,7 +188,7 @@ No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o 
 
 ## Jitter
 
-O identificador canônico é `jitter`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `jitter`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Airflow calcula a próxima tentativa por backoff exponencial e espalha o atraso com hash determinístico da identidade da tentativa.
 
@@ -196,7 +196,7 @@ A base de estudo é [cenkalti/backoff / exponential.go @ b1a30d94](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `retry_exponential_backoff`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O jitter Airflow é determinístico. Esse recibo não o descreve como sorteio aleatório.
 
@@ -204,7 +204,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Load Shedding
 
-O identificador canônico é `load-shedding`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `load-shedding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O filtro Envoy verifica o orçamento de concorrência durante a admissão e responde localmente quando não pode aceitar mais uma requisição.
 
@@ -212,7 +212,7 @@ A base de estudo é [resilience4j/resilience4j / SemaphoreBulkhead.java @ b7c006
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `forwardingDecision`](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/extensions/filters/http/adaptive_concurrency/adaptive_concurrency_filter.cc#L48-L54). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/extensions/filters/http/adaptive_concurrency/adaptive_concurrency_filter.cc#L48-L54). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A recusa protege a fronteira desse filtro. O cliente precisa de uma política compatível de retry para não recriar a mesma sobrecarga.
 
@@ -220,7 +220,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Rate Limiting
 
-O identificador canônico é `rate-limiting`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `rate-limiting`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Os limitadores verificam o orçamento e recusam a requisição quando o limite configurado foi consumido.
 
@@ -228,7 +228,7 @@ A base de estudo é [envoyproxy/ratelimit / fixed_cache_impl.go @ f4e76690](http
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `limit`](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua#L43-L49). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua#L43-L49). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -236,7 +236,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Retry
 
-O identificador canônico é `retry`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `retry`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Airflow calcula a próxima tentativa por backoff exponencial e espalha o atraso com hash determinístico da identidade da tentativa.
 
@@ -244,7 +244,7 @@ A base de estudo é [cenkalti/backoff / exponential.go @ b1a30d94](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `retry_exponential_backoff`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/taskinstance.py#L2049-L2055). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O jitter Airflow é determinístico. Esse recibo não o descreve como sorteio aleatório.
 
@@ -252,7 +252,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Self-Healing
 
-O identificador canônico é `self-healing`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `self-healing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Kubelet consulta probes e sincroniza o estado do pod, permitindo que a política de reinício trate processos que falharam.
 
@@ -260,7 +260,7 @@ A base de estudo é [kubernetes/kubernetes / prober.go @ 4f2dd0c8](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `probe`](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/kubelet/kubelet.go#L728-L734). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/kubelet/kubelet.go#L728-L734). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -268,7 +268,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Throttling
 
-O identificador canônico é `throttling`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `throttling`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Os limitadores verificam o orçamento e recusam a requisição quando o limite configurado foi consumido.
 
@@ -276,7 +276,7 @@ A base de estudo é [envoyproxy/ratelimit / fixed_cache_impl.go @ f4e76690](http
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `limit`](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua#L43-L49). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua#L43-L49). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -284,7 +284,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Timeout
 
-O identificador canônico é `timeout`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `timeout`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Loki cria um contexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento.
 
@@ -292,7 +292,7 @@ A base de estudo é [grpc/grpc-go / clientconn.go @ 4d4d4284](https://github.com
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `ctx`](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go#L219-L225). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go#L219-L225). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Um timeout local não prova propagação para qualquer dependência: a fronteira é o contexto encaminhado nos caminhos citados.
 
@@ -300,7 +300,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Watchdog
 
-O identificador canônico é `watchdog`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `watchdog`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço systemd acompanha notificações e aciona a política de watchdog quando a janela expira.
 
@@ -308,7 +308,7 @@ A base de estudo é [systemd/systemd / sd-daemon.c @ 7f073ff5](https://github.co
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-resilience/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `WATCHDOG`](https://github.com/systemd/systemd/blob/7f073ff56f14e9b6ff7052998b640df88a359358/src/core/service.c#L344-L350). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/systemd/systemd/blob/7f073ff56f14e9b6ff7052998b640df88a359358/src/core/service.c#L344-L350). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 

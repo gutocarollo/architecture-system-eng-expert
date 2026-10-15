@@ -1,0 +1,80 @@
+{
+  "observed_at_utc": "2026-10-15 17:18:57 UTC",
+  "scope": {
+    "checkout": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "branch": "docs/FBI-4991-arquitetura-aplicada",
+    "head": "32b80d5f",
+    "plugin": "/Users/augustocarollo/.codex/plugins/cache/openai-curated-remote/sites/1.0.1",
+    "activity": "read-only exploration; only this evidence artifact written"
+  },
+  "verdict": "Native owner-private Sites is supported and uses ChatGPT authentication. Shared-password-only access is not a native Sites access mode. The inspected contract does not certify Worker-first gating of a separate Nextra static asset bundle. Do not label private ChatGPT login as a shared password.",
+  "recommendation": "Reuse Nextra static export with native private Sites if ChatGPT identity meets the user's intent. If a shared password is mandatory, resolve that requirement explicitly before publishing or promising it; do not replace it silently. A Worker plus private R2 objects is a capability-supported additional-password architecture, but requires new server/upload implementation and production verification, and preserves ChatGPT sign-in when the Site remains private.",
+  "facts": [
+    {
+      "source": "skills/sites/references/identity-and-secrets.md",
+      "lines": "3-21",
+      "fact": "Sites owns hosted authentication; private Sites require authenticated access and visitors sign in. Preserve native authentication instead of scaffolding separate OAuth/session stack."
+    },
+    {
+      "source": "live tool metadata mcp__codex_apps__sites_update_site_access",
+      "fact": "Allowed request access_mode values are public, workspace_all, custom; allowlists and viewers are supported. There is no shared-password field. No tool invoked."
+    },
+    {
+      "source": "skills/sites/scripts/prepare-site-build.cjs",
+      "lines": "79-103,151-174",
+      "fact": "static only accepts directory and not_found_handling; Worker entrypoint is dist/server/index.js, static mode uses index.html; built static config is forbidden for Worker builds."
+    },
+    {
+      "source": "skills/sites/scripts/prepare-site-build.cjs",
+      "lines": "125-149",
+      "fact": "Worker mode copies the whole dist tree. This proves archive inclusion, not dispatch order, public routing, or an ASSETS binding."
+    },
+    {
+      "source": "skills/sites/templates/worker-esm-starter/README.md",
+      "lines": "3-7,18-28",
+      "fact": "ESM starter is for microsites, copies only worker/index.js and hosting.json, and forbids standalone assets."
+    },
+    {
+      "source": "skills/sites/templates/vinext-starter/build/sites-vite-plugin.ts",
+      "lines": "173-188",
+      "fact": "Sites plugin copies hosting manifest and migrations; no run_worker_first or asset routing contract appears in this integration."
+    },
+    {
+      "source": "skills/sites/references/storage.md",
+      "lines": "5-9",
+      "fact": "Sites provisions R2 bindings declared in hosting.json; R2 is accessed server-side through Workers env."
+    },
+    {
+      "source": "skills/sites/references/identity-and-secrets.md",
+      "lines": "23-33",
+      "fact": "Private service access and runtime secrets are supported. Secrets must remain out of source, client bundles and hosting manifest."
+    },
+    {
+      "source": "https://nextra.site/docs/guide/static-exports",
+      "lines": "230-274",
+      "fact": "Official Nextra export uses output: export, images.unoptimized and Pagefind output under out/_pagefind."
+    },
+    {
+      "source": "https://developers.cloudflare.com/r2/buckets/public-buckets/",
+      "lines": "138-144",
+      "fact": "R2 buckets are private by default; direct public exposure is opt-in. Sites R2 configuration has not been registered or inspected in production."
+    }
+  ],
+  "boundaries": {
+    "supported_native_path": "Nextra static export -> Sites static package -> native private audience -> ChatGPT login.",
+    "unproven_path": "Nextra out copied alongside Worker -> assume all asset reads pass custom password. No supported Sites setting guaranteeing this was found in the inspected manifests, starter and packager.",
+    "capability_supported_alternative": "Keep Site private, omit static deployment, package server-only Worker and R2 binding. Store all HTML/_next/_pagefind objects in private R2; authorize password server-side before every bucket read. This adds a password after native ChatGPT login, with no standalone public assets. Its object upload and versioning path still needs implementation and verification.",
+    "password_only": "Would require permitting unauthenticated traffic to the Worker, which changes native private access and cannot be done under the instruction to preserve platform identity."
+  },
+  "uncertainty": [
+    "No Site was created, registered, deployed or probed.",
+    "Sites backend implementation and generated deployment routing are not available from this local plugin.",
+    "No claim of universal impossibility: only native shared-password absence and missing supported Worker-first static-bundle guarantee.",
+    "Private R2 is a compositional architecture, not a validated deployment result; no password or secret was created."
+  ],
+  "receipts": [
+    "[2026-10-15 17:18:57 UTC] checkout \u2014 Python subprocess pwd/git read -> pwd=/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991; git branch --show-current=docs/FBI-4991-arquitetura-aplicada; git rev-parse --short HEAD=32b80d5f",
+    "[2026-10-15 17:18:57 UTC] checkout \u2014 Python Path.read_text next.config.mjs and JSON package.json scripts -> next.config.mjs=import nextra from 'nextra'  const withNextra = nextra({})  export default withNextra({   poweredByHeader: false }); build=next build --webpack; postbuild=pagefind --site .next/server/app --output-path public/_pagefind",
+    "[2026-10-15 17:18:57 UTC] checkout \u2014 Python Path.exists out/dist -> out.exists=False; dist.exists=False"
+  ]
+}

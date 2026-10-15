@@ -3096,5 +3096,140 @@
     "observed_utc": "2026-10-15T02:56:05.808216Z",
     "api_url": "https://api.github.com/repos/risingwavelabs/risingwave",
     "http_status": 200
+  },
+  "open-feature/js-sdk": {
+    "stars": 285,
+    "archived": false,
+    "pushed_at": "2026-10-14T13:25:57Z",
+    "observed_utc": "2026-10-15T03:50:39.071941+00:00",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/open-feature--js-sdk-metadata.json"
+  },
+  "fluent/fluent-bit": {
+    "repository": "fluent/fluent-bit",
+    "default_branch": "master",
+    "stars": 8153,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:46:45.152513+00:00",
+    "revisions": {
+      "master": "54b97f8ff1e69948ee794ca3e01c41d148f4fe36"
+    }
+  },
+  "Kludex/starlette": {
+    "stars": 12664,
+    "observed_utc": "2026-10-15T04:01:50.689394+00:00",
+    "archived": false,
+    "pushed_at": "2026-10-13T07:53:59Z",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/starlette-metadata.json"
+  },
+  "grafana/dskit": {
+    "repository": "grafana/dskit",
+    "default_branch": "main",
+    "stars": 586,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T04:08:16.425436+00:00",
+    "revisions": {
+      "b6a53f6bee29": "b6a53f6bee296a666061189f72aae0c87db2c2ea"
+    }
+  },
+  "github/scientist": {
+    "stars": 7769,
+    "archived": false,
+    "pushed_at": "2026-10-02T02:22:26Z",
+    "observed_utc": "2026-10-15T03:50:39.123430+00:00",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/github--scientist-metadata.json"
+  },
+  "pallets-eco/cachelib": {
+    "repository": "pallets-eco/cachelib",
+    "default_branch": "main",
+    "stars": 163,
+    "license_spdx": "BSD-3-Clause",
+    "observed_utc": "2026-10-15T03:46:41.126678+00:00",
+    "revisions": {
+      "main": "a282b23357c2f2c15b6849865b6993a3c956f241"
+    }
+  },
+  "pallets-eco/flask-caching": {
+    "repository": "pallets-eco/flask-caching",
+    "default_branch": "main",
+    "stars": 932,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T04:09:54.293014+00:00",
+    "revisions": {
+      "main": "0d131e699e978db12dfc22e511b79c4e7e1bfc9a"
+    }
+  },
+  "j-easy/easy-rules": {
+    "repository": "j-easy/easy-rules",
+    "default_branch": "master",
+    "stars": 5260,
+    "license_spdx": "MIT",
+    "observed_utc": "2026-10-15T04:09:55.500750+00:00",
+    "revisions": {
+      "master": "d4450831533e47a5c0cb361edb80dad43db228a4"
+    }
+  },
+  "killbill/killbill": {
+    "repository": "killbill/killbill",
+    "default_branch": "master",
+    "stars": 5796,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:49:26.027709+00:00",
+    "revisions": {
+      "master": "20e15525d1d9e56219c4f5651e06850fe793f5e0"
+    }
+  },
+  "xataio/pgroll": {
+    "stars": 6602,
+    "archived": false,
+    "pushed_at": "2026-09-21T08:39:12Z",
+    "observed_utc": "2026-10-15T03:50:39.086680+00:00",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/xataio--pgroll-metadata.json"
+  },
+  "AxonFramework/AxonFramework": {
+    "stars": 3625,
+    "archived": false,
+    "pushed_at": "2026-10-15T01:07:30Z",
+    "observed_utc": "2026-10-15T03:50:39.745995+00:00",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/AxonFramework--AxonFramework-metadata.json"
+  },
+  "redmine/redmine": {
+    "repository": "redmine/redmine",
+    "default_branch": "master",
+    "stars": 6045,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T03:58:54.391824+00:00",
+    "revisions": {
+      "master": "d1f69043e41175cc6a7b241c5e54664d855b2592"
+    }
+  },
+  "prometheus-community/helm-charts": {
+    "repository": "prometheus-community/helm-charts",
+    "default_branch": "main",
+    "stars": 6216,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T04:08:57.975749+00:00",
+    "revisions": {
+      "main": "e03ae02f8664ffa7ab88720c1c5542d6f678d293"
+    }
+  },
+  "encode/django-rest-framework": {
+    "repository": "encode/django-rest-framework",
+    "default_branch": "main",
+    "stars": 30208,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T03:49:23.589263+00:00",
+    "revisions": {
+      "main": "14998d0a735f8ed6abd86751fd6984a9277a1d40"
+    }
+  },
+  "spring-projects/spring-security": {
+    "repository": "spring-projects/spring-security",
+    "default_branch": "main",
+    "stars": 9648,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:49:24.723001+00:00",
+    "revisions": {
+      "main": "42192f9591763875eb2986bc8fd695a2eebefb02"
+    }
   }
 }

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "LICENSE",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "0392d4f052808d00604ad2fe446de86fde4d0d0f",
+    "sha256": "a60a07cfafa66191227557322bd764aee897a53fff11a1ade3630b58295042c3",
+    "api_equals_git": true
+  },
+  {
+    "path": "proto/operations.proto",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "7845b0caba648688e2c5ecce69793527b8748252",
+    "sha256": "c697f9649732d18c62c67b50a09026aba9112086c8765829f995ad18306ed7ab",
+    "api_equals_git": true
+  },
+  {
+    "path": "proto/go/gitalypb/operations_grpc.pb.go",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "f96626b59d499d3c67e37505a70e1e55836fae63",
+    "sha256": "93a023024e575e1703a65558caffe31fdab2706b4c9984abb004f174bd40b2b9",
+    "api_equals_git": true
+  },
+  {
+    "path": "internal/gitaly/service/operations/tags.go",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "6145f475039bd2a2a7d2c1bec42da00cfc1ef01f",
+    "sha256": "41fee348adc797cd79b5ac50ce62745b1804bfefc85bfeb315e263a37741ef13",
+    "api_equals_git": true
+  },
+  {
+    "path": "internal/gitaly/service/operations/server.go",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "e7ab2158faf00516b614869d8f2944c0d33f1143",
+    "sha256": "1da3022b632b8e86c84a30d716698aa62c460aae3fca3cebfb49d72a4039ac94",
+    "api_equals_git": true
+  },
+  {
+    "path": "go.mod",
+    "revision": "987854bc5e60a1b9c799eaf7220cb36964cc2356",
+    "http_status": 200,
+    "git_blob_oid": "6d69733676baf8e86494f583e5ebee56088ece94",
+    "sha256": "ac2465068d136d745a1e7ca94d0fa9e8170066c2d62b993d66215b6e2acb35b6",
+    "api_equals_git": true
+  }
+]

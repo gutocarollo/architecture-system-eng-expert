@@ -1,0 +1,358 @@
+{
+  "observed_at_utc": "2026-10-15T04:24:32.457250+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "checkpoint": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "scope": [
+    "query-grain-postgres",
+    "revision-cas-postgres",
+    "airflow-lock-retry"
+  ],
+  "verdict": "PASS",
+  "high_findings": [],
+  "prior_fifteen_case_T1_T3_pass": "PRESERVED_NOT_RERUN",
+  "source_sha256": {
+    "content/explicacoes/casos/_meta.js": "dbd51e9ac02e8f445958d0aa2cbd99985434d26740db0370cd811908127067be",
+    "content/explicacoes/casos/airflow-lock-retry/index.mdx": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+    "content/explicacoes/casos/query-grain-postgres/index.mdx": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
+    "content/explicacoes/casos/revision-cas-postgres/index.mdx": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+    "content/guias/casos/_meta.js": "dbd51e9ac02e8f445958d0aa2cbd99985434d26740db0370cd811908127067be",
+    "content/guias/casos/airflow-lock-retry/index.mdx": "30ef753fec3cd9040b207a23039398e6df11fcff964a2d1efa512e3ea2d60c2a",
+    "content/guias/casos/query-grain-postgres/index.mdx": "f8987275e32ae54525200e63481dfb618f62a2a8e1865d0f06e1bc7d58bcc0fb",
+    "content/guias/casos/revision-cas-postgres/index.mdx": "165877cb292b152aa025553777d57492012dcbcbe7ecfcd6585aa50c675973d1",
+    "content/jornadas/_meta.js": "f6173d5ee96c0b02d5927f849531e79dd78fba3c537e87def48aef903f0a5435",
+    "content/jornadas/airflow-lock-retry/index.mdx": "1121ebb6d491f0440062e8a5f802edba9f08aeb1b9ef72302d21a853c7fb0f3a",
+    "content/jornadas/query-grain-postgres/index.mdx": "3ecc0263baf7cd97edc771c5096633d43ea9091d3a0a6eb458e0dd8cef9979dd",
+    "content/jornadas/revision-cas-postgres/index.mdx": "c8403a52c09d6a4d1d9b24aa7533c969d52f6b6034ba93a9faae38d2907a4d05",
+    "content/referencia/casos/_meta.js": "5cc141c2dd6e62037ed70f8c4c58c6cc079179e7a7cdb9944df15d67c58c7bbc",
+    "content/referencia/casos/airflow-lock-retry/index.mdx": "3cdff5eb231d601c862e1bac9d0919eb70e12e54df14947531da75eb7d871469",
+    "content/referencia/casos/query-grain-postgres/index.mdx": "370bbd06632519aaa2536ab4b45922bf66177b22646204bfc970aeacf6796e6a",
+    "content/referencia/casos/revision-cas-postgres/index.mdx": "72c76c713092936e928490262a047ed452b731dd9339a48d05601c49f9793bc3",
+    "content/tutoriais/casos/_meta.js": "dbd51e9ac02e8f445958d0aa2cbd99985434d26740db0370cd811908127067be",
+    "content/tutoriais/casos/airflow-lock-retry/index.mdx": "e96eab7a00a1a42ad8c45dcab0a005aae7c21d28c238110b5f1497fc2fee5e4d",
+    "content/tutoriais/casos/query-grain-postgres/index.mdx": "86ee57bc963a944b0c06b58240250665c70bc2ea48ed19c517294a9001010a54",
+    "content/tutoriais/casos/revision-cas-postgres/index.mdx": "41c1a2430d444c85fde0c6710f114c3e405a3059f97523eaf4fc0715f2151dd1",
+    "labs/airflow-lock-retry/README.md": "81a209bd948b4993930bcf2753b029ef89057a1ca65841097557e710ec1d300b",
+    "labs/airflow-lock-retry/after.py": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731",
+    "labs/airflow-lock-retry/before.py": "3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753",
+    "labs/airflow-lock-retry/check_challenge.py": "779d2edcb15ca38dafeed5d9969c20041859c0c566d7981b6aaa6f4582407ad7",
+    "labs/airflow-lock-retry/manifest.json": "0379d1dc7b6cb0a5ee437e6e0b7bc6043aa56419acca6d4bb8559c95621356f4",
+    "labs/airflow-lock-retry/run.py": "33ac4ba4f4b92a7fe9e05e58f5cec942312636fb85482f9d62091737ccf7d399",
+    "labs/airflow-lock-retry/source.patch": "fa066a220e430488c8c6f8ebeca77cd2fc25e6439ad51485d95204a08d5126e3",
+    "labs/postgres-lineage/README.md": "a118a6986aa44402a3c9341886c4a374f1966b12de77e0cfb0460dbb8885c024",
+    "labs/postgres-lineage/check_challenges.py": "f65748a7c058d122670301b838aa3d34bc3b42242d1eabb45736175c78652f0b",
+    "labs/postgres-lineage/extract.py": "c82faef1289e434be41508f485a83db87ced925b604ee8602f62ffdfacf55953",
+    "labs/postgres-lineage/grain-after.function.txt": "d92e7aaf53db51580fb41c3275c2e51762ab7dd1c021c362802f5dfba9cbd08f",
+    "labs/postgres-lineage/grain-after.sql.template": "5763e281efee82243efd47520d27432fe59913720a0bb2ef2b5a25a147d13874",
+    "labs/postgres-lineage/grain-before.function.txt": "0a47c70b894c3142ac19331c60fa572ace46d9594c72b3f4132a76eee3b1a892",
+    "labs/postgres-lineage/grain-before.sql.template": "5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8",
+    "labs/postgres-lineage/grain.patch": "3dda3d79b0965db4fd26801e46005838c9977e264560161fa6176a8628ad080a",
+    "labs/postgres-lineage/manifest.json": "8c7214540cc8e33994bf3ed81f6221dbcce97eb94119a3fcea6e203a0a233927",
+    "labs/postgres-lineage/revision-after.function.txt": "5a91ba4db434e6c3d58be4019d7b2a602a629ce2f396e96e8a07d41024979fd7",
+    "labs/postgres-lineage/revision-after.sql.template": "7705f280f959ae8bcf09016a9f1085d0ceb4918a78777c666e54143e7a7e34de",
+    "labs/postgres-lineage/revision-before.function.txt": "333d61dedda0e92adddd6f1a424fab2a49c1d4c50c9ec1a22908f5762cde9979",
+    "labs/postgres-lineage/revision-before.sql.template": "290e9ade7894a339e5086b2ce6e81744f080b306aa2f4ad7059f67c3ea28c3a9",
+    "labs/postgres-lineage/revision.patch": "8ce30561d2668b24001346fe1ed1de5aa452bdbc71850813eef305975f1902b8",
+    "labs/postgres-lineage/run.py": "a79184d888323292944974208d846f41f6ec2971f4116f2a30d189fa1e54babb",
+    "tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/author_pages.py": "d80f9f98a2c00021d80f5d29218f2f8aaebb40f36ef64335ef1674343124e2a9",
+    "tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/families.json": "ae42403a630208379c700fe49c71588c8f219be7d99d9bff68d9b8ca719f2259",
+    "tasks/FBI-4991-arquitetura-nextra/execution/browser-review.json": "bb5239ee0e3562d753a1e18aa6aea1195afb592c96372934c3355387d7f6e3c0",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/airflow/candidate-packet.json": "628f3785e0a0a7966deb6773adf1f6610788db90d539158599fbf676dc818d32",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/airflow/historical-bridge.json": "5f89ff50ffd936c9867c7d7dbd89fb30afc2ba7405603db7bb56b69da0f48c95",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/airflow/manifest.json": "580810e347ebff829af217cb741e873233d168d8f772da807b9034eac9b81a23",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/airflow/read-receipt.json": "39edd6f94fbe169d5528d241e0eedf629bfb297c80cf4e3f3a41fd8a5adfc9eb",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/airflow/source-kernels.json": "cf6cd340e0b1c3cc6fa7006cdda89a453aad8f716f2c49ae389845cfc391588e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/causal-quotes-001.json": "6f1566a5f5fe7437f5bb92c3b303bfb460f3d672a5520a2c624635dabaeb59bb",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/history-issue-inventory.json": "6ede36062f0088fe02f9c500d92750cdf7d9f5f74ab9cfd5bf7c69144f68d79a",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/history-pr-inventory.json": "a7a0bb3055b4ba987716e383a1377fbf02909e18f997c4b03df848371570c319",
+    "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/author_pages.py": "574d25a2a74d8f2673e2317153ca771bc4014fc4cfd9cbe1234eb2eff23ca7e9",
+    "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/families.json": "16773f8d5da17da10b753bc2e1b1ed857c9c465facb73cb6829d18bcb1d355fe",
+    "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/integrate_pages.py": "71d37706685886e1b8f46fb317398b9abf973feaf97650fae2ffdbc4481d3fe2",
+    "tasks/FBI-4991-arquitetura-nextra/execution/reviews/round-gate-root-cases.json": "dc7fb2065504bafeb0333a6c4fef142aebfc29d46854baeefb7cdf557ac96d02"
+  },
+  "source_drift_from_checkpoint": [],
+  "captured_inputs_not_in_checkpoint": [
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/causal-quotes-001.json",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/history-issue-inventory.json",
+    "tasks/FBI-4991-arquitetura-nextra/execution/history/history-pr-inventory.json",
+    "tasks/FBI-4991-arquitetura-nextra/execution/reviews/round-gate-root-cases.json"
+  ],
+  "browser_receipt_differs_from_checkpoint": [
+    "clickedJourneys",
+    "completedAt",
+    "journeys",
+    "observedAt",
+    "routeResults",
+    "searchResults"
+  ],
+  "source_proof": {
+    "postgres_sql_and_functions": "Four templates and four function snapshots match AST extraction from the named immutable Git objects; each before is the selected correction parent. c5e8efc is ancestral to the recorded PR630 source.",
+    "airflow_python": "Both delivered snapshots match dedented captured excerpts and manifest hashes. All seven captured package payload hashes match the package manifest."
+  },
+  "execution": {
+    "postgres_version": "postgres (PostgreSQL) 16.15 (Homebrew)",
+    "postgres_run_receipt": "root-cases.pg-run.json",
+    "postgres_challenge_receipt": "root-cases.pg-challenges.json",
+    "postgres_cleanup_receipt": "root-cases.pg-cleanup.json",
+    "postgres_cleanup_observer": {
+      "observed_at": "2026-10-15T04:18:28.620105+00:00",
+      "servers": [
+        {
+          "pid": 23276,
+          "data": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/.pg-learning/run-wsclhhxr/data",
+          "sockets": "/tmp/arch-pg-cic_jl4a",
+          "listen_addresses_empty": true,
+          "process_stopped": true,
+          "data_removed": true,
+          "sockets_removed": true
+        }
+      ],
+      "psql_hosts": [
+        "/tmp/arch-pg-cic_jl4a"
+      ],
+      "pg_hostaddr_unset": true
+    },
+    "postgres_grain_result": {
+      "before": {
+        "rows": 2,
+        "commission_sum": 200,
+        "results": [
+          {
+            "month": "2026-01-01",
+            "account_code": 101,
+            "name": "SYNTHETIC-FAMILY",
+            "cluster": "SYNTHETIC-CLUSTER",
+            "commission": 100,
+            "monthly_roa": 0.01
+          },
+          {
+            "month": "2026-01-01",
+            "account_code": 101,
+            "name": "SYNTHETIC-FAMILY",
+            "cluster": "SYNTHETIC-CLUSTER",
+            "commission": 100,
+            "monthly_roa": 0.01
+          }
+        ]
+      },
+      "after": {
+        "rows": 1,
+        "commission_sum": 100,
+        "results": [
+          {
+            "month": "2026-01-01",
+            "account_code": 101,
+            "name": "SYNTHETIC-FAMILY",
+            "cluster": "SYNTHETIC-CLUSTER",
+            "commission": 100,
+            "net_assets": 1000000
+          }
+        ]
+      }
+    },
+    "postgres_revision_result": {
+      "before": {
+        "stale_writer_rejected": false,
+        "azure_id": "AZURE-OLD",
+        "current_rows": 1
+      },
+      "after": {
+        "stale_writer_rejected": true,
+        "azure_id": "AZURE-CONFIRMED",
+        "current_rows": 1
+      }
+    },
+    "airflow_run_receipt": "root-cases.airflow-run.json",
+    "airflow_challenge_receipt": "root-cases.airflow-challenge.json",
+    "airflow_mutation_receipt": "root-cases.airflow-mutations.json",
+    "airflow_observations": {
+      "transient_lock": {
+        "before": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "RuntimeError"
+        },
+        "after": {
+          "attempts": 2,
+          "waits": [
+            30
+          ],
+          "outcome": "success"
+        }
+      },
+      "permanent_error": {
+        "before": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "RuntimeError"
+        },
+        "after": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "RuntimeError"
+        }
+      },
+      "lock_budget": {
+        "before": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "RuntimeError"
+        },
+        "after": {
+          "attempts": 3,
+          "waits": [
+            30,
+            30
+          ],
+          "outcome": "RuntimeError"
+        }
+      },
+      "process_timeout": {
+        "before": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "TimeoutExpired"
+        },
+        "after": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "TimeoutExpired"
+        }
+      },
+      "clean_success": {
+        "before": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "success"
+        },
+        "after": {
+          "attempts": 1,
+          "waits": [],
+          "outcome": "success"
+        }
+      }
+    },
+    "airflow_real_database_connections": 0,
+    "airflow_real_subprocesses": 0,
+    "airflow_real_sleep_seconds": 0
+  },
+  "actual_commands": [
+    "python3 labs/postgres-lineage/run.py --out tasks/FBI-4991-arquitetura-nextra/execution/reviews/root-cases.pg-run.json",
+    "python3 labs/postgres-lineage/check_challenges.py [runpy wrapper redirects only report writes; identical patch writes suppressed]",
+    "python3 labs/airflow-lock-retry/run.py --out tasks/FBI-4991-arquitetura-nextra/execution/reviews/root-cases.airflow-run.json",
+    "python3 labs/airflow-lock-retry/check_challenge.py [runpy wrapper redirects only report write]"
+  ],
+  "new_destination_static_checks": [
+    {
+      "case": "query-grain-postgres",
+      "role": "journey",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "query-grain-postgres",
+      "role": "explanation",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "query-grain-postgres",
+      "role": "tutorial",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "query-grain-postgres",
+      "role": "how_to",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "query-grain-postgres",
+      "role": "reference",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "revision-cas-postgres",
+      "role": "journey",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "revision-cas-postgres",
+      "role": "explanation",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "revision-cas-postgres",
+      "role": "tutorial",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "revision-cas-postgres",
+      "role": "how_to",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "revision-cas-postgres",
+      "role": "reference",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "airflow-lock-retry",
+      "role": "journey",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "airflow-lock-retry",
+      "role": "explanation",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "airflow-lock-retry",
+      "role": "tutorial",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "airflow-lock-retry",
+      "role": "how_to",
+      "missing_sibling_links": []
+    },
+    {
+      "case": "airflow-lock-retry",
+      "role": "reference",
+      "missing_sibling_links": []
+    }
+  ],
+  "browser_receipt_readback": {
+    "source_sha256": "bb5239ee0e3562d753a1e18aa6aea1195afb592c96372934c3355387d7f6e3c0",
+    "observed_at": "2026-10-15T04:10:35.916Z",
+    "completed_at": "2026-10-15T04:12:14.524Z",
+    "routes": 181,
+    "non200": [],
+    "journeys": 18,
+    "destinations": 90,
+    "missing_sibling_links": 0,
+    "clicked_destinations": 20,
+    "clicked_cases": [
+      "single-flight-cancel",
+      "query-grain-postgres",
+      "revision-cas-postgres",
+      "airflow-lock-retry"
+    ],
+    "search_shortcut_focus": true,
+    "search_navigation": {
+      "selected": "/jornadas/single-flight-cancel/conceitos",
+      "actual": "http://127.0.0.1:59142/jornadas/single-flight-cancel/conceitos"
+    },
+    "page_errors": [],
+    "scope": "Read-back of author browser capture, not a fresh reviewer browser execution; changes are relative to checkpoint, not attributed to a measured update time."
+  },
+  "official_sources": [
+    "https://www.postgresql.org/docs/16/ddl-system-columns.html",
+    "https://www.postgresql.org/docs/16/errcodes-appendix.html"
+  ],
+  "limits": [
+    "No production database connections, source deployment or DAG execution in these learning runs.",
+    "The PostgreSQL cases prove selected SQL on minimal synthetic schemas; xmin is not certified as a durable or monotonic fencing token.",
+    "The Airflow case proves only the historical Python retry policy with controlled doubles, not Haskell atomicity/idempotency or the original lock blocker.",
+    "Fixed30-second delays and max3attempts do not establish exponential backoff, jitter or a global deadline.",
+    "No re-review of the prior fifteen cases,310-reference curation or whole-history completeness."
+  ]
+}

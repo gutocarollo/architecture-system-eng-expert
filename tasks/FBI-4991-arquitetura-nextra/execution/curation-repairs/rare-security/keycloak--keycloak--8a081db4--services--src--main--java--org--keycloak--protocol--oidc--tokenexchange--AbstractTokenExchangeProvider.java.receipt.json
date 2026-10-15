@@ -1,0 +1,15 @@
+{
+  "repo": "keycloak/keycloak",
+  "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+  "path": "services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+  "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+  "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--AbstractTokenExchangeProvider.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.146003+00:00",
+  "sha256": "e9bb19049343a2e336bb5618ac31ac475eb831f66b8842a1ee21ce6014b8474b",
+  "line_count": 472,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/4938cf820621756f29b509b5387eacec33810935e08d855f0aaa5a759a8f946c.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.489415+00:00"
+}

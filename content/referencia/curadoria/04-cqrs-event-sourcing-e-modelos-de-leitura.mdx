@@ -8,11 +8,11 @@ diataxis: reference
 
 Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
 
-Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
 
 ## Command Handler
 
-O identificador canônico é `command-handler`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `command-handler`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço de empréstimos coordena comandos, validações, alteração no domínio e persistência sob a transação declarada.
 
@@ -20,7 +20,7 @@ A base de estudo é [spring-projects/spring-framework / Transactional.java @ 4de
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Transactional`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L293-L299). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L293-L299). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -28,7 +28,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## CQRS
 
-O identificador canônico é `cqrs`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `cqrs`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Marten separa a consulta pelo contrato IQuerySession; Fineract separa o serviço de comandos do serviço de consulta e sua representação de resposta.
 
@@ -36,7 +36,7 @@ A base de estudo é [JasperFx/marten / IQuerySession.cs @ 4c6762d4](https://gith
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `LoanReadPlatformService`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A separação de responsabilidades de leitura e escrita não exige bancos separados nem Event Sourcing. O Fineract não foi descrito como consumidor de Marten.
 
@@ -44,7 +44,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Domain Event
 
-O identificador canônico é `domain-event`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `domain-event`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Fineract recebe eventos do domínio e separa notificações internas da persistência para integração externa.
 
@@ -52,7 +52,7 @@ A base de estudo é [ThreeDotsLabs/watermill / event_bus.go @ 080d4b4e](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BusinessEvent`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -60,7 +60,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Event Sourcing
 
-O identificador canônico é `event-sourcing`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `event-sourcing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
 
@@ -68,7 +68,7 @@ A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
 
@@ -76,7 +76,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Integration Event
 
-O identificador canônico é `integration-event`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `integration-event`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Fineract recebe eventos do domínio e separa notificações internas da persistência para integração externa.
 
@@ -84,7 +84,7 @@ A base de estudo é [ThreeDotsLabs/watermill / event_bus.go @ 080d4b4e](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BusinessEvent`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -92,23 +92,23 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Materialized View
 
-O identificador canônico é `materialized-view`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `materialized-view`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
-PostgreSQL materializa e atualiza resultados; Druid agrega os registros para obter uma representação de consulta.
+O PostgreSQL implementa uma view que guarda o resultado da consulta em armazenamento próprio. O comando do servidor cria a relação, executa a consulta para preenchê-la e, em um REFRESH posterior, substitui ou reconcilia seus dados. Uma consulta posterior pode ler as tuplas da relação materializada como dados físicos.
 
-A base de estudo é [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [apache/druid / GroupByQueryEngine.java @ b4b0fe57](https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java); licença [Apache-2.0](https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/LICENSE).
+A base de estudo é [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / utility.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / createas.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/createas.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / nodeSeqscan.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeSeqscan.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `GroupBy`](https://github.com/apache/druid/blob/b4b0fe5789d285157fdf2010821ae7bcadf8c2f1/processing/src/main/java/org/apache/druid/query/groupby/epinephelinae/GroupByQueryEngine.java#L443-L449). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c#L1679-L1698). O servidor PostgreSQL despacha CREATE TABLE AS e REFRESH MATERIALIZED VIEW para suas implementações reais.
 
-Pré cálculo e desnormalização não são sinônimos de qualquer agregado. A aplicação e a base oferecem mecanismos comparáveis com manutenção e frescor distintos.
+A aplicação escolhida é o próprio servidor PostgreSQL, um produto OSS de infraestrutura; a base são suas rotinas reutilizáveis de materialização. Os papéis são diferentes dentro do mesmo repositório. Não se afirma que uma aplicação financeira específica implantou esta view, que toda leitura usa SeqScan ou que o valor é atualizado automaticamente. REFRESH tem custo, locks e requisitos adicionais no modo concorrente; WITH NO DATA não produz um resultado consultável preenchido.
 
 No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a ação e o probe deste conceito](/jornadas/ledger-projection/conceitos/#materialized-view). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
 
 ## Projection
 
-O identificador canônico é `projection`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `projection`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
 
@@ -116,7 +116,7 @@ A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
 
@@ -124,7 +124,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Query Handler
 
-O identificador canônico é `query-handler`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `query-handler`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Fineract mantém serviços de escrita e leitura separados. A consulta retorna sua representação de dados sem obrigar a reutilização do modelo mutável.
 
@@ -132,7 +132,7 @@ A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `LoanRead`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 CQRS aqui descreve responsabilidade de leitura e escrita. Não pressupõe bancos separados nem Event Sourcing.
 
@@ -140,7 +140,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Read Model
 
-O identificador canônico é `read-model`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `read-model`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Fineract mantém serviços de escrita e leitura separados. A consulta retorna sua representação de dados sem obrigar a reutilização do modelo mutável.
 
@@ -148,7 +148,7 @@ A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `LoanRead`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L2629-L2635). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 CQRS aqui descreve responsabilidade de leitura e escrita. Não pressupõe bancos separados nem Event Sourcing.
 
@@ -156,7 +156,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Snapshotting
 
-O identificador canônico é `snapshotting`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `snapshotting`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
 
@@ -164,7 +164,7 @@ A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
 
@@ -172,7 +172,7 @@ No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a aç
 
 ## Write Model
 
-O identificador canônico é `write-model`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `write-model`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O empréstimo Fineract conserva identidade e comportamento sobre seus componentes; métodos do domínio validam e aplicam mudanças no empréstimo.
 
@@ -180,7 +180,7 @@ A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/cqrs-implementation/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `class Loan`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L90-L96). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java#L90-L96). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 JPA é base de persistência, não prova DDD sozinho. A fronteira do agregado é a entidade e seus métodos citados; uma transação entre serviços exige outra garantia.
 

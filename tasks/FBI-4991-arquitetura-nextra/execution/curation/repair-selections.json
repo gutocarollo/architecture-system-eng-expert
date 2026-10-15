@@ -1,0 +1,1103 @@
+{
+  "aggregate": {
+    "base_urls": [
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/LockingRepository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregateMetaModelFactory.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java"
+    ],
+    "mechanism": "Um agregado reúne uma raiz e os objetos que ela coordena dentro de uma fronteira de consistência. O Axon mantém a instância do agregado na unidade de trabalho, carrega o agregado com um lock configurado e verifica esse lock antes de salvar. Seu modelo executa o tratamento do evento no objeto principal e o propaga aos filhos registrados. No Fineract, Loan reúne encargos, garantias e parcelas. Ao adicionar uma parcela, o próprio Loan associa a parcela ao empréstimo e a inclui em sua coleção; o serviço valida e persiste o Loan na operação de submissão.",
+    "limits": "Axon e Fineract são exemplos independentes; não se afirma que o Fineract usa Axon. A fronteira de lock demonstrada pertence ao repositório configurado do Axon e à sua unidade de trabalho, não a uma transação distribuída entre serviços. No Fineract, o recorte demonstra composição e operações coordenadas pelo Loan, mas não prova que toda regra do produto ou todo acesso aos filhos passe exclusivamente pela raiz. As anotações JPA descrevem persistência das relações; os métodos e seus chamadores fornecem a prova de comportamento.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_DDD_MECHANISM_REFERENCES_NOT_A_DEPENDENCY_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "aggregate-root": {
+    "base_urls": [
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Aggregate.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/ChildForwardingCommandMessageHandlingMember.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java"
+    ],
+    "mechanism": "A raiz do agregado é o objeto que identifica o conjunto e recebe a operação que será aplicada nele. O Axon expõe identidade e tratamento de mensagens pelo wrapper Aggregate. A implementação seleciona um handler a partir da raiz e encaminha um comando destinado a um filho somente quando encontra esse filho dentro do agregado; a ausência produz erro. No Fineract, Loan atua como raiz no recorte: seu método de inclusão de parcela ajusta a associação do filho e o incorpora à coleção, e o serviço grava o empréstimo como objeto principal.",
+    "limits": "A API e a implementação do Axon demonstram uma entrada de mensagens mediada pela raiz e a resolução de filhos dentro dela. Isso não afirma que a linguagem Java impeça todo acesso direto a objetos internos. No Fineract, os métodos citados mostram o papel do Loan nessas operações; eles não provam uma disciplina universal de acesso exclusivo à raiz em todo o produto. Axon é uma referência de framework independente e não uma dependência atribuída ao Fineract. A raiz não é inferida de uma anotação JPA.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_DDD_MECHANISM_REFERENCES_NOT_A_DEPENDENCY_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "anti-corruption-layer": {
+    "base_urls": [
+      "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext"
+    ],
+    "application_urls": [
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/market-data-repository.ts",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/prices.ts",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts"
+    ],
+    "mechanism": "O cliente financeiro thndr-mcp conserva os DTOs do fornecedor na camada de dados e os traduz para modelos próprios. A tradução de preços distingue negócio executado, fechamento, valor de cota e taxa; resolve a precedência entre as leituras e mantém a natureza escolhida no resultado. A tradução de carteira valida os dados e aplica a política de valor e moeda do domínio. Os repositórios chamam essas funções antes de devolver os modelos à aplicação.",
+    "limits": "O recorte mostra escolhas semânticas e validação além da troca de nomes de campos. A correção financeira dessas políticas não foi certificada nem foi feita uma chamada à API financeira nesta pesquisa. Context Mapper é uma base de modelagem comparada; não foi identificado como dependência do cliente.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/additional-four-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "at-least-once-delivery": {
+    "base_urls": [
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/UnAckedMessageTracker.java",
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-client/src/main/java/org/apache/pulsar/client/impl/ConsumerImpl.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/Consumer.java",
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/ServerCnx.java",
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentSubscription.java",
+      "https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/PersistentDispatcherMultipleConsumers.java"
+    ],
+    "mechanism": "Pulsar conserva as mensagens entregues e ainda não confirmadas na coleção de pending acks. Com ackTimeout configurado, o cliente reúne os IDs vencidos e envia ao broker um pedido de redelivery. O servidor resolve o consumidor, encaminha o pedido à assinatura e acrescenta as posições ao replay. O dispatcher relê essas posições do cursor e as entrega novamente. Quando recebe o ACK, o broker registra a confirmação no cursor persistente e limpa as pendências correspondentes. Ao remover um consumidor enquanto outros continuam disponíveis, suas pendências também voltam ao replay.",
+    "limits": "A correspondência é a entrega repetível de mensagens em tópico persistente e assinatura Shared, delimitada pelo backlog disponível e pelo ciclo de ACK. Ack timeout depende de configuração; desconexão e pedidos de redelivery são caminhos distintos. Expiração, exclusão, disponibilidade de consumidores e políticas de retry/dead letter afetam a continuidade da entrega. O ACK de transporte não prova a conclusão de um pagamento, uma gravação externa ou exatamente uma execução de negócio. Não houve teste de falha nem implantação nesta pesquisa.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://pulsar.apache.org/docs/next/concepts-messaging/#message-redelivery",
+        "claim": "A documentação distingue ACK, redelivery por timeout, falha de consumidor, backlog e expiração; a prova decisiva usa o código fixado."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/two-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "branch-by-abstraction": {
+    "base_urls": [
+      "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+      "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb"
+    ],
+    "mechanism": "O MultiProvider do OpenFeature conserva a interface Provider enquanto consulta implementações selecionadas por uma estratégia. A estratégia FirstMatch tenta a próxima implementação quando a flag não existe na anterior. No caso real do GitLab, MultiStore conserva as operações Redis, e flags escolhem qual armazenamento responde como padrão e quando os dois recebem trabalho. Os chamadores continuam usando a abstração enquanto a seleção da implementação muda.",
+    "limits": "A base mostra a substituição de provedores de flags atrás de uma interface; o GitLab mostra a substituição de armazenamentos Redis. Estas são referências independentes do mesmo mecanismo, e não há afirmação de que o GitLab usa o SDK OpenFeature. A interface e a seleção não demonstram paridade de dados entre os armazenamentos nem uma migração concluída. FirstMatch não trata todo erro como motivo para fallback: o avanço demonstrado ocorre em FLAG_NOT_FOUND.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/recommendations.json",
+    "classification_basis": "Pattern correspondence is inferred from the actual common interface, concrete provider dispatch and implementation-selection code; upstream naming alone was not used as proof.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "cdc-migration": {
+    "base_urls": [
+      "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-common/src/main/java/io/debezium/pipeline/ChangeEventSourceCoordinator.java",
+      "https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresSnapshotChangeEventSource.java"
+    ],
+    "application_urls": [
+      "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py",
+      "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py"
+    ],
+    "mechanism": "O coordenador do Debezium executa o snapshot e, quando ele termina ou é dispensado, passa sua posição à leitura contínua das mudanças. No conector PostgreSQL, essa posição considera o ponto de WAL da transação ou do slot. A ferramenta real pg_chameleon aplica o mesmo princípio em MySQL para PostgreSQL: copia o conjunto inicial e depois lê o binlog desde a posição ou o GTID conservado. O código do leitor BinLogStreamReader, importado pela ferramenta, confirma a retomada desde a posição fornecida.",
+    "limits": "Debezium e pg_chameleon são exemplos independentes; o pg_chameleon usa python-mysql-replication, não Debezium. Snapshot e leitura contínua fornecem a base de captura, mas estes recortes não provam reconciliação completa, drenagem final, troca de autoridade da aplicação ou CDC habilitado em algum banco da Faz. O setup.py do pg_chameleon declara mysql-replication>=0.31; ele não fixa uma versão instalada. O leitor suplementar foi consultado em um commit fixo, e sua licença foi encontrada apenas como declaração Apache 2 no setup.py. As três fontes principais do Debezium têm licença Apache-2.0 integral capturada.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/recommendations.json",
+    "classification_basis": "DEBEZIUM_IS_A_PARALLEL_CDC_FRAMEWORK_EXAMPLE; PG_CHAMELEON_DIRECTLY_IMPORTS_BINLOGSTREAMREADER",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "centralized-logging": {
+    "base_urls": [
+      "https://github.com/fluent/fluent-bit/blob/54b97f8ff1e69948ee794ca3e01c41d148f4fe36/plugins/out_loki/loki.c"
+    ],
+    "application_urls": [
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/http.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/distributor.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/instance.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/ingester/stream.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/querier.go"
+    ],
+    "mechanism": "O Fluent Bit envia lotes de registros pelo plugin Loki. No serviço Loki, o handler recebe os streams de produtores externos, o distribuidor os encaminha aos ingesters e estes os agrupam por tenant e labels, acrescentando entradas aos chunks e ao WAL. O querier oferece o caminho para consultar esse conjunto pelo intervalo solicitado. Esse fluxo demonstra coleta e consulta centralizadas de logs.",
+    "limits": "O recorte são os componentes OSS de envio, ingestão e consulta. Não é uma observação de agentes instalados nem uma garantia de coleta de todos os logs de uma empresa. Retenção, falhas de rede, limites e configuração do WAL/armazenamento continuam relevantes; a prova não se baseia no logger interno do processo Loki.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "chain-of-responsibility": {
+    "base_urls": [
+      "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py",
+      "https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py",
+      "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py",
+      "https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py"
+    ],
+    "application_urls": [
+      "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py",
+      "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py",
+      "https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py"
+    ],
+    "mechanism": "A cadeia distribui responsabilidades entre componentes que podem encaminhar o pedido ou responder sem continuar. O FastAPI constrói essa cadeia envolvendo o próximo aplicativo em cada middleware. O middleware CORS do Starlette delega os pedidos comuns, mas responde ao preflight de OPTIONS e retorna antes de chamar o próximo componente. A API real do Airflow registra esses middlewares; seu middleware de log captura o envio da resposta e chama o próximo aplicativo ASGI para continuar o processamento.",
+    "limits": "O FastAPI possui seu próprio build_middleware_stack, por isso a prova usa sua implementação concreta e não presume que ele execute a implementação homônima do Starlette. O módulo CORS do FastAPI reexporta a classe do Starlette. O Airflow registra CORS quando há configuração correspondente; o recorte não demonstra uma configuração ativa, uma requisição de produção ou uma execução de DAG. Os commits das bibliotecas são referências fixas de implementação e não uma medição das versões instaladas em algum ambiente Airflow.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/recommendations.json",
+    "classification_basis": "AIRFLOW_IMPORTS_FASTAPI_AND_STARLETTE_APIS; FIXED_SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_LIBRARY_VERSIONS",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "choreography": {
+    "base_urls": [
+      "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+      "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb"
+    ],
+    "application_urls": [
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/authorize_follow_service.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/reject.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb"
+    ],
+    "mechanism": "Duas instâncias Mastodon conduzem o processo de follow por mensagens ActivityPub. A grava seu pedido e envia Follow; B reage ao receber a atividade e responde Accept ou Reject segundo seu estado e suas regras. A reage à resposta atualizando seu próprio estado. O cancelamento é comunicado por Undo e também provoca uma reação local em B. O processo avança pelas reações dos participantes, sem um coordenador global de transação.",
+    "limits": "Não se afirma atomicidade de todo handler, entrega exatamente uma vez, outbox transacional ou recuperação garantida de toda falha. A entrega tem retries finitos e estados de falha. Undo Accept por referência não é implementado no recorte, como o próprio código registra; a prova de compensação escolhida usa Reject e Undo Follow. A base Eventuate fornece dispatch de eventos para handlers como mecanismo comparativo; não é uma dependência declarada do Mastodon. Este recorte prova um processo entre participantes, não apenas publicação local em um bus.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "A classificação é uma interpretação da coreografia de transações locais com compensações semânticas, sustentada pelo fluxo de código. Não é uma alegação de que Mastodon usa Eventuate ou denomina esse fluxo Saga.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "circuit-breaker": {
+    "base_urls": [
+      "https://github.com/resilience4j/resilience4j/blob/b7c0069802e373ed72dff0b817c270fbb6e966ba/resilience4j-circuitbreaker/src/main/java/io/github/resilience4j/circuitbreaker/internal/CircuitBreakerStateMachine.java"
+    ],
+    "application_urls": [
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/concerns/search_stoplight.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/tag_search_service.rb",
+      "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/config/initializers/stoplight.rb"
+    ],
+    "mechanism": "Na busca de hashtags do Mastodon, a consulta ao Elasticsearch passa por um circuito com limite de dez falhas selecionadas e intervalo de recuperação de cinco minutos. Quando a biblioteca recusa a chamada com RedLight, o serviço consulta o banco. A base Resilience4j mostra separadamente o registro de falhas e as transições fechado, aberto e meio aberto; não é apresentada como biblioteca usada pelo Mastodon.",
+    "limits": "O recorte é a busca de hashtags quando Chewy está habilitado. A política de contagem do Stoplight não é confundida com a taxa de falha do Resilience4j. O fallback pode devolver resultado e custo diferentes. Nenhuma falha remota nem recuperação foram executadas nesta leitura.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "compensating-transaction": {
+    "base_urls": [
+      "https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java"
+    ],
+    "application_urls": [
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/steps/create-orders.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/steps/find-or-create-customer.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/orchestration/src/transaction/transaction-orchestrator.ts"
+    ],
+    "mechanism": "A etapa de criação de pedidos do Medusa devolve os IDs criados como dado de compensação e registra uma função que chama deleteOrders com esses IDs. Quando o motor muda para compensação, o handler recupera esse dado e executa a função. A exclusão é uma nova ação de negócio que desfaz a criação anterior; não é apresentada como rollback da transação original.",
+    "limits": "A prova é do fluxo real de criação de pedido e dos efeitos de criação de cliente/pedido que ele registra para desfazer. Não afirma que esse workflow reserva estoque: seu próprio comentário diz que apenas confirma disponibilidade. Compensações podem falhar e não apagam efeitos externos arbitrários. Não há promessa de isolamento global, rollback ACID entre módulos, outbox ou exatamente uma vez. Temporal é uma base comparativa; Medusa usa seu próprio motor.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "composite": {
+    "base_urls": [
+      "https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/javaparser-core/src/main/java/com/github/javaparser/ast/Node.java"
+    ],
+    "application_urls": [
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/Node.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/LogicalExpression.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/Identifier.java"
+    ],
+    "mechanism": "Na árvore SQL do Trino, tanto a folha Identifier quanto a expressão composta LogicalExpression são nós e expõem getChildren. A folha devolve uma lista vazia, enquanto o composto conserva e devolve suas expressões filhas. Isso permite percorrer a árvore pelo mesmo contrato sem exigir que o consumidor trate toda folha como uma estrutura diferente. O JavaParser mostra uma base reutilizável que mantém os vínculos e realiza uma operação recursiva.",
+    "limits": "O recorte é a estrutura da AST. Visitor pode complementar essa árvore, mas não é usado sozinho como prova de Composite. JavaParser é uma base comparativa, não uma dependência declarada do Trino. Foi escolhida a alternativa Apache-2.0 que o grant dual do JavaParser permite.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "consistent-hashing": {
+    "base_urls": [
+      "https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/ring/util.go",
+      "https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/ring/ring.go"
+    ],
+    "application_urls": [
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/go.mod",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/util/ring/ring.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/distributor.go"
+    ],
+    "mechanism": "O Loki transforma tenant e labels em uma chave de 32 bits e pede ao anel os ingesters responsáveis. O Dskit procura o token seguinte por busca binária, percorre o anel com retorno ao início e escolhe donos distintos para as réplicas. Assim, a seleção usa posições estáveis no anel em vez de apenas calcular um hash sem resolver seu dono.",
+    "limits": "O recorte é o caminho de ingestão por ingesters quando habilitado, sem confundir a alternativa Kafka/partition-ring. Saúde, fator de replicação e zonas podem ampliar ou filtrar os donos. A propriedade local do anel não é uma medição de balanceamento nem de percentual de dados movidos.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "context-map": {
+    "base_urls": [
+      "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl/src/org/contextmapper/dsl/ContextMappingDSL.xtext"
+    ],
+    "application_urls": [
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts",
+      "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts"
+    ],
+    "mechanism": "O mapa de contextos thndr-mcp descreve quem publica os serviços de mercado, quem os consome e quais tipos pertencem ao núcleo compartilhado. O ADR e o README registram as relações; GetPosition e CreateAlert mostram os dois consumidores usando a interface publicada de Market Data. Uma matriz de dependências e suas verificações conservam essas direções no código.",
+    "limits": "O recorte demonstra o mapa declarado e seus caminhos de implementação. Os rótulos supplier/customer pertencem ao ADR; por si só, não provam os compromissos de planejamento de outro padrão estratégico. Os testes foram inspecionados sem execução, e não se afirma conformidade de toda alteração futura.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/additional-four-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "dark-launch": {
+    "base_urls": [
+      "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+      "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb"
+    ],
+    "mechanism": "Scientist permite executar um comportamento candidato junto com o comportamento de controle. A execução observa os dois, publica o resultado do experimento e, na chamada run() padrão, devolve o valor do controle. No GitLab, o armazenamento secundário recebe uma escrita real antes de assumir a resposta ao chamador: write_both devolve o resultado do armazenamento padrão. Assim, o trabalho novo pode ser exercitado sem escolher seu resultado como resposta principal.",
+    "limits": "Scientist e o MultiStore do GitLab são exemplos independentes; não se afirma que esse recorte do GitLab usa Scientist. Scientist executa blocos no mesmo processo e não isola efeitos colaterais. O exemplo não é um teste A/B nem uma interface desligada. O padrão devolve o controle, mas a API também aceita o nome de outro comportamento e uma configuração de divergência pode lançar exceção. No GitLab, o destino secundário recebe efeitos reais, e sua falha é registrada sem tornar as duas escritas atômicas.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_MECHANISM_EXAMPLES_NOT_A_DEPENDENCY_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "database-decomposition": {
+    "base_urls": [
+      "https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord/lib/active_record/connection_handling.rb"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md",
+      "https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb"
+    ],
+    "mechanism": "A decomposição de banco separa os dados de domínios e encaminha cada modelo à conexão correspondente. O Rails implementa connects_to resolvendo a configuração de cada papel e criando os pools associados à classe e ao shard. Quando o modelo pede uma conexão, o framework a busca pelo nome da classe, pelo papel e pelo shard atuais. No GitLab, Ci::ApplicationRecord liga leitura e escrita à conexão ci quando essa configuração existe, e a documentação identifica as tabelas CI como um domínio separado das tabelas main.",
+    "limits": "O Rails fornece o roteamento entre conexões; ele não escolhe os domínios do GitLab nem executa sozinho a movimentação de dados necessária para decompor um banco. A aplicação pode ser configurada com um, dois ou três bancos, conforme sua documentação. O recorte prova o roteamento lógico por domínio e não mede hosts, instâncias ou configurações de uma implantação específica. A captura do modelo e a captura da documentação estão em commits distintos; elas não são apresentadas como um snapshot de produção. O commit do Rails é uma referência fixa de implementação da API, não uma afirmação sobre a versão de gem instalada no GitLab.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/recommendations.json",
+    "classification_basis": "GITLAB_USES_RAILS_CONNECTS_TO_API; DISTINCT_FIXED_SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_VERSION_OR_DEPLOYMENT",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "denormalization": {
+    "base_urls": [
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c"
+    ],
+    "application_urls": [
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/utils/prepare-line-item-data.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/models/line-item.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/services/order-module-service.ts"
+    ],
+    "mechanism": "Ao montar um pedido, o Medusa copia título do produto e SKU da variante para o item do pedido. O modelo guarda esses valores ao lado dos identificadores originais, e o serviço persiste os itens. Assim, o pedido conserva uma representação própria dos atributos que também existem no catálogo; sua leitura não depende de buscar novamente esses dois atributos no produto.",
+    "limits": "Este é um snapshot de atributos do pedido, não uma afirmação de que toda a entidade Product foi duplicada ou de que todos os dados são imutáveis. O fallback usa valores explicitamente informados quando presentes. A base PostgreSQL mostra o armazenamento de uma representação calculada em separado, como alternativa comparativa; não é apresentada como implementação da cópia feita pelo Medusa.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "distributed-cache": {
+    "base_urls": [
+      "https://github.com/pallets-eco/cachelib/blob/a282b23357c2f2c15b6849865b6993a3c956f241/src/cachelib/redis_base.py",
+      "https://github.com/pallets-eco/flask-caching/blob/0d131e699e978db12dfc22e511b79c4e7e1bfc9a/src/flask_caching/backends/rediscache.py"
+    ],
+    "application_urls": [
+      "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/docker/pythonpath_dev/superset_config.py",
+      "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/utils/cache_manager.py",
+      "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/utils/query_cache_manager.py",
+      "https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/utils/cache.py"
+    ],
+    "mechanism": "Na configuração Docker selecionada do Superset, o cache de resultados usa RedisCache. O gerenciador inicializa esse backend, e as consultas leem e gravam resultados pela região DATA. O backend Redis do Flask-Caching/Cachelib resolve essas operações em GET/SET no servidor Redis; processos com a mesma URL, banco e prefixo podem compartilhar o mesmo valor.",
+    "limits": "A prova vale para a configuração Docker capturada e para processos configurados com o mesmo namespace Redis. Não afirma que toda instalação Superset usa Redis nem que este backend está ativo no MakersHub. Revisões das bibliotecas são exemplos fixados do mecanismo; não houve resolução ou execução do lockfile dessa instalação.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "distributed-tracing": {
+    "base_urls": [
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/TracingModule.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/HttpServerModule.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+      "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java"
+    ],
+    "application_urls": [
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskResource.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/Server.java",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml",
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md"
+    ],
+    "mechanism": "HttpRemoteTask serializa stageSpan no TaskUpdateRequest e o envia por HTTP ao worker. O TracingModule instalado pelo servidor registra os serializers de Span: a serialização injeta o contexto em um mapa e a desserialização extrai um Span remoto desse mapa. TaskResource recebe o pedido e entrega o stageSpan a SqlTaskManager, que o passa para SqlTask. O worker cria o span task com esse stageSpan como pai. Em paralelo, o cliente HTTP injeta contexto em headers e o filtro do servidor extrai os headers para criar um span SERVER correlacionado. Com tracing habilitado, o mesmo módulo instala BatchSpanProcessor e exporter OTLP.",
+    "limits": "Tracing é desabilitado por padrão. A classificação comprova o caminho implementado e configurável; não comprova que algum cluster esteja exportando traces neste momento. O span task no worker é filho do stageSpan transportado no JSON. Ele não é apresentado como filho do span HTTP task-update; ambos pertencem à mesma árvore por rotas explícitas diferentes. A prova não pressupõe que todos os connectors propaguem contexto. A documentação exige suporte e habilitação nas integrações externas.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://trino.io/docs/current/admin/opentelemetry.html",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/rare-runtime-recommendations.json",
+    "classification_basis": "Airlift 451 fornece a propagação W3C, os carriers HTTP/JSON e o exporter OpenTelemetry usados pelo Trino. Trino é o motor SQL distribuído real; o recorte liga uma tarefa remota no coordinator ao processamento no worker.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "domain-policy": {
+    "base_urls": [
+      "https://github.com/j-easy/easy-rules/blob/d4450831533e47a5c0cb361edb80dad43db228a4/easy-rules-core/src/main/java/org/jeasy/rules/core/DefaultRulesEngine.java"
+    ],
+    "application_urls": [
+      "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java",
+      "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java"
+    ],
+    "mechanism": "O Kill Bill aplica uma política de faturamento antes de gerar a fatura: a data alvo não pode ficar além do número de meses futuros permitido para aquele tenant. A função compara a data alvo com o dia UTC do relógio e com a configuração; se o limite for excedido, lança o erro de domínio INVOICE_TARGET_DATE_TOO_FAR_IN_THE_FUTURE e impede a criação da fatura. O dispatcher chama esse gerador no fluxo real.",
+    "limits": "A política demonstrada é esse limite de data, não uma descrição de toda a entidade ou de toda validação. O Easy Rules oferece uma base comparativa de regra que avalia fatos e controla uma ação; não se afirma que o Kill Bill usa essa biblioteca. Nenhuma decisão financeira real de cliente foi executada.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "domain-service": {
+    "base_urls": [
+      "https://github.com/xmolecules/jmolecules/blob/20d2636beba2e3cb8f0a9b62c07e3606c49da84f/jmolecules-ddd/src/main/java/org/jmolecules/ddd/annotation/Service.java"
+    ],
+    "application_urls": [
+      "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/DefaultInvoiceGenerator.java",
+      "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/generator/FixedAndRecurringInvoiceItemGenerator.java",
+      "https://github.com/killbill/killbill/blob/20e15525d1d9e56219c4f5651e06850fe793f5e0/invoice/src/main/java/org/killbill/billing/invoice/InvoiceDispatcher.java"
+    ],
+    "mechanism": "Kill Bill executa a geração de fatura como uma operação entre conta, eventos de assinatura, catálogo e faturas anteriores. O gerador compõe a fatura e o gerador de itens recorrentes calcula o valor a partir dos ciclos, da tarifa e da quantidade. InvoiceDispatcher chama essa operação no fluxo da aplicação. A responsabilidade de cálculo atravessa esses objetos e não depende de a classe ter uma identidade própria de entidade.",
+    "limits": "O recorte é a regra de geração e composição de cobranças. Não se afirma que todos os geradores e plugins do produto sejam puros ou livres de I/O. jMolecules fornece a base de modelagem do papel; não foi identificada como dependência do Kill Bill.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/additional-four-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "dual-write-migration": {
+    "base_urls": [
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb"
+    ],
+    "mechanism": "O pgroll mantém duas representações de uma coluna durante a migração. A operação cria a coluna nova e triggers que propagam valores em ambos os sentidos; o executor instala os triggers antes de preencher as linhas antigas. A conclusão remove a representação antiga e os auxiliares da migração. O GitLab demonstra a variante em que a aplicação escreve em dois armazenamentos: ela grava no padrão, tenta o secundário e conserva a resposta da primeira gravação.",
+    "limits": "O pgroll sincroniza duas representações dentro do PostgreSQL por triggers na alteração da linha. O GitLab faz duas chamadas Redis sequenciais, que podem divergir. São referências independentes, e não uma afirmação de dependência do GitLab em pgroll. A garantia transacional local do trigger não se transfere para duas bases ou serviços separados. O recorte do GitLab registra falha secundária e diferenças de pipeline, mas não fornece reconciliação automática de todas as divergências. A fase Complete do pgroll é explícita; a pesquisa não executou uma migração nem demonstrou um cutover de produção.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_MECHANISM_EXAMPLES_WITH_DIFFERENT_TRANSACTION_BOUNDARIES",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "expand-contract": {
+    "base_urls": [
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/trigger.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration_helpers.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/conversions/bigint_converter.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migrations/trigger_helpers.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/unidirectional_copy_trigger.rb"
+    ],
+    "mechanism": "A mudança começa pela ampliação da estrutura, mantém a compatibilidade enquanto os dados são copiados e só depois remove a representação antiga. O pgroll implementa essas fases: duplica a coluna, instala triggers entre as representações, preenche as linhas antigas e oferece uma conclusão que remove a coluna e os auxiliares anteriores. No caso real do GitLab, as migrações de source_xid acrescentam a coluna de transição, agendam backfill em sublotes de 200, exigem sua conclusão, trocam as colunas e chamam a limpeza. O helper e seu conversor mostram como a coluna adicional e o trigger de cópia são criados e depois removidos.",
+    "limits": "O pgroll e a migração GitLab são referências independentes; o GitLab usa seus próprios helpers neste caso. Os arquivos de expansão e backfill estão em um commit histórico, enquanto a finalização, a troca e a limpeza aparecem em outro. A implementação dos helpers também está fixada e não é apresentada como prova de que seus bytes atuais foram os executados na etapa histórica. Os arquivos comprovam a definição das fases e da compatibilidade, não uma execução realizada nesta sessão. A chamada Complete do pgroll é uma etapa explícita e não prova, por si só, que todos os clientes antigos saíram ou que toda divergência foi reconciliada.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/recommendations.json",
+    "classification_basis": "PARALLEL_IMPLEMENTING_MIGRATION_BASE; GITLAB_HELPERS_ARE_DIRECT_APPLICATION_CODE; HISTORICAL_PHASE_REVISIONS_PRESERVED",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "factory": {
+    "base_urls": [
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/GenericJpaRepository.java",
+      "https://github.com/AxonFramework/AxonFramework/blob/3cb0254e037070da22e21ff589c8b001dc0d63e6/modelling/src/main/java/org/axonframework/modelling/command/inspection/AnnotatedAggregate.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/domain/Loan.java",
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssemblerImpl.java",
+      "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java"
+    ],
+    "mechanism": "A fábrica concentra uma construção que exige mais do que chamar um construtor vazio. No Axon, newInstance recebe a função que cria a raiz do agregado, executa essa função no ciclo de vida gerenciado e confere se o tipo criado corresponde ao repositório. No Fineract, o serviço de criação chama LoanAssemblerImpl. O montador resolve o produto e as partes do empréstimo, escolhe a criação individual ou em grupo e rejeita o pedido quando não há cliente nem grupo. Os métodos nomeados de Loan chamam um construtor privado que associa os componentes e inicia o empréstimo como submetido e pendente de aprovação.",
+    "limits": "Axon fornece o ciclo de construção gerenciada e os controles técnicos do agregado; ele não define as regras de crédito do Fineract. Não se afirma que o Fineract usa Axon. O montador e os métodos de Loan representam a fábrica de domínio neste recorte, enquanto o serviço aplica validações antes e depois da montagem. Portanto, não se atribui a toda chamada direta de um método estático a garantia de satisfazer todas as regras do empréstimo, nem se usa a persistência JPA como prova de Factory.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/recommendations.json",
+    "classification_basis": "The construction responsibility is established by the named creation API, real assembler invocation, private constructor, association initialization and caller validation boundary. A marker annotation, generic bean factory or entity name alone is not used as proof.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "feature-flags": {
+    "base_urls": [
+      "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/feature.rb",
+      "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/boolean.rb",
+      "https://github.com/flippercloud/flipper/blob/1d49644a2ea8696c7eb9b995f6eab020ad597deb/lib/flipper/gates/percentage_of_actors.rb"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb",
+      "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb"
+    ],
+    "mechanism": "Uma flag decide se um caminho de execução está habilitado para um contexto. O Flipper monta o contexto com os valores da flag e seus atores, consulta os gates e devolve verdadeiro quando um deles abre. Os gates citados implementam a habilitação booleana e a seleção determinística de uma porcentagem de atores. O GitLab constrói uma instância Flipper, obtém a flag e consulta enabled?; no MultiStore, duas flags controlam o uso dos dois armazenamentos e a escolha do armazenamento padrão.",
+    "limits": "O código do GitLab demonstra o uso real do Flipper, mas os commits fixados não identificam a versão de gem instalada em produção. A flag controla um ramo do programa; ela não concede por si só autorização de negócio, não reverte uma escrita Redis já concluída e não garante que os dois armazenamentos tenham o mesmo estado. A regra do GitLab ainda aplica seus defaults e exclusões de atores depois da avaliação do motor.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/recommendations.json",
+    "classification_basis": "GITLAB_DIRECTLY_USES_FLIPPER_API; SOURCE_COMMITS_DO_NOT_ASSERT_INSTALLED_GEM_VERSION",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "finite-state-machine": {
+    "base_urls": [
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go"
+    ],
+    "application_urls": [
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go"
+    ],
+    "mechanism": "Uma operação Nexus nasce no estado UNSPECIFIED. O comando de agendamento aplica uma transição para SCHEDULED. Se a chamada falha de forma recuperável, o executor muda o controle para BACKING_OFF; o timer de retry pode devolvê-lo a SCHEDULED. Uma resposta assíncrona muda o controle para STARTED, e um evento de conclusão permite SUCCEEDED. Cada transição declara suas origens aceitas. A base testa o estado atual e devolve ErrInvalidTransition quando a origem não está na lista.",
+    "limits": "A finitude demonstrada é a dos oito estados de controle. Payload, tentativas e timestamps são dados adicionais; não se afirma que todo o espaço de configuração do serviço seja finito. A base genérica aceita S comparable e, sozinha, não exige um conjunto finito. O enum Nexus e suas transições fornecem esse recorte. Não se deduz GoF State desse enum. Também não se afirma atomicidade de persistência a partir de Apply: a função troca o estado antes de chamar o callback, que pode retornar erro.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://docs.temporal.io/nexus/operations",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/rare-runtime-recommendations.json",
+    "classification_basis": "Temporal HSM é a infraestrutura genérica de transições dentro do servidor. Temporal Server é o produto OSS real; a aplicação escolhida é a máquina de uma operação Nexus, e não todo o motor de workflows.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "graphql-federation": {
+    "base_urls": [
+      "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go",
+      "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+      "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go"
+    ],
+    "application_urls": [
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/go.mod",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/utils.ts",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/federation/federation.ts",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/executor.go",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_prehandler.go",
+      "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go"
+    ],
+    "mechanism": "A CLI lê os SDLs dos subgraphs e chama a composição. O resultado fornece schema federado e configuração por subgraph. O builder gera a configuração do router com URLs, keys, requires e provides. O loader do router converte esses dados em datasources e metadados do planejador. O prehandler planeja a consulta contra RouterSchema, e o handler executa o plano com o Resolver. Para uma busca aninhada de entidade, a biblioteca constrói representations com os campos exigidos e gera _entities; o loader executa a árvore de fetches em sequência ou paralelo e combina seus resultados.",
+    "limits": "O recorte é o próprio router federado e sua ferramenta de composição; não se afirma uma adoção por uma empresa cliente ou um deployment medido. O caminho mostrado é GraphQL HTTP com entidades. Os ramos opcionais de gRPC, plugins e pub/sub não são necessários à classificação. Cosmo usa Apache-2.0 e a biblioteca selecionada usa MIT. O novo par dispensa Apollo Router e seu enquadramento de licença.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://cosmo-docs.wundergraph.com/router/intro",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/rare-runtime-recommendations.json",
+    "classification_basis": "graphql-go-tools v2.28.0 fornece o planejador e a execução federada usados pelo produto. WunderGraph Cosmo é o produto OSS de infraestrutura. Sua CLI compõe os schemas e seu router atende consultas usando a configuração composta. As provas vêm de código do produto, não de demo ou teste.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "materialized-view": {
+    "base_urls": [
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c"
+    ],
+    "application_urls": [
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/createas.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeSeqscan.c"
+    ],
+    "mechanism": "O PostgreSQL implementa uma view que guarda o resultado da consulta em armazenamento próprio. O comando do servidor cria a relação, executa a consulta para preenchê-la e, em um REFRESH posterior, substitui ou reconcilia seus dados. Uma consulta posterior pode ler as tuplas da relação materializada como dados físicos.",
+    "limits": "A aplicação escolhida é o próprio servidor PostgreSQL, um produto OSS de infraestrutura; a base são suas rotinas reutilizáveis de materialização. Os papéis são diferentes dentro do mesmo repositório. Não se afirma que uma aplicação financeira específica implantou esta view, que toda leitura usa SeqScan ou que o valor é atualizado automaticamente. REFRESH tem custo, locks e requisitos adicionais no modo concorrente; WITH NO DATA não produz um resultado consultável preenchido.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "mvc": {
+    "base_urls": [
+      "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/actionpack/lib/action_controller/metal/implicit_render.rb",
+      "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/actionview/lib/action_view/rendering.rb"
+    ],
+    "application_urls": [
+      "https://github.com/redmine/redmine/blob/d1f69043e41175cc6a7b241c5e54664d855b2592/Gemfile",
+      "https://github.com/redmine/redmine/blob/d1f69043e41175cc6a7b241c5e54664d855b2592/app/controllers/application_controller.rb",
+      "https://github.com/redmine/redmine/blob/d1f69043e41175cc6a7b241c5e54664d855b2592/app/models/issue.rb",
+      "https://github.com/redmine/redmine/blob/d1f69043e41175cc6a7b241c5e54664d855b2592/app/controllers/issues_controller.rb",
+      "https://github.com/redmine/redmine/blob/d1f69043e41175cc6a7b241c5e54664d855b2592/app/views/issues/show.html.erb"
+    ],
+    "mechanism": "Quando uma pessoa abre uma issue no Redmine, o controlador carrega o modelo Issue, verifica sua visibilidade e prepara os dados da página. A ação HTML manda renderizar issues/show. O template ERB lê assunto, status e pessoas ligadas à issue e produz a página. Rails fornece o contexto e o renderer que ligam controlador e view.",
+    "limits": "A evidência é o caminho HTML show de issues. A mesma aplicação também expõe formatos API/PDF, que não são usados como prova deste MVC. O mapeamento das responsabilidades é uma leitura do código, sem alegação de que todas as classes do produto seguem MVC puro. A licença Redmine é GPL-2.0-or-later pelo grant de LICENSE.txt, com texto integral em doc/COPYING.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "orchestration-saga": {
+    "base_urls": [
+      "https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java"
+    ],
+    "application_urls": [
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/steps/create-orders.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/steps/find-or-create-customer.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/orchestration/src/transaction/transaction-orchestrator.ts"
+    ],
+    "mechanism": "O workflow de criação de pedido do Medusa decide a sequência de etapas e centraliza os dados que cada uma recebe. Ele pode criar um cliente e depois um pedido, e ambas as etapas registram compensações concretas. Quando uma falha não permite prosseguir, o motor passa para compensação e invoca os handlers correspondentes. O coordenador controla o avanço e o retorno desse processo.",
+    "limits": "A prova é do fluxo real de criação de pedido e dos efeitos de criação de cliente/pedido que ele registra para desfazer. Não afirma que esse workflow reserva estoque: seu próprio comentário diz que apenas confirma disponibilidade. Compensações podem falhar e não apagam efeitos externos arbitrários. Não há promessa de isolamento global, rollback ACID entre módulos, outbox ou exatamente uma vez. Temporal é uma base comparativa; Medusa usa seu próprio motor.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "parallel-run": {
+    "base_urls": [
+      "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+      "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+      "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/result.rb"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb"
+    ],
+    "mechanism": "A execução comparativa aplica os comportamentos antigo e candidato e confronta seus resultados, conservando uma resposta escolhida como autoridade. O Scientist registra os dois comportamentos, executa cada um por meio de Observation e monta um Result que compara os candidatos com o controle. A chamada run() padrão publica as observações e devolve o valor do controle. O GitLab faz esse trabalho em pipelined_both: executa o mesmo pipeline nos dois armazenamentos Redis, registra os resultados diferentes e devolve o resultado do armazenamento padrão.",
+    "limits": "O paralelismo aqui é lógico: os dois comportamentos são exercitados para comparação; os trechos citados executam as chamadas sequencialmente e não garantem simultaneidade de threads ou processos. Scientist e o MultiStore GitLab são exemplos independentes; não se afirma que o GitLab use Scientist. Os blocos podem produzir efeitos reais, e repetir um bloco não idempotente pode duplicá-los. A comparação depende das entradas, da regra de equivalência e das diferenças ignoradas. Ela não prova equivalência global de todos os comportamentos do produto.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_COMPARATIVE_EXECUTION_EXAMPLES_NOT_A_DEPENDENCY_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "pipeline": {
+    "base_urls": [
+      "https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/core/camel-core-processor/src/main/java/org/apache/camel/processor/Pipeline.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-components/src/main/java/org/apache/nifi/connectable/StandardConnection.java",
+      "https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-components/src/main/java/org/apache/nifi/controller/repository/StandardProcessSession.java",
+      "https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-core/src/main/java/org/apache/nifi/controller/tasks/ConnectableTask.java"
+    ],
+    "mechanism": "No NiFi, uma conexão liga a saída de um componente à fila de entrada de outro. Um estágio retira um FlowFile, o transforma e marca sua relação de saída com transfer. Ao concluir a sessão, o produto resolve a conexão dessa relação e enfileira o resultado. O agendador pode então chamar o componente seguinte, respeitando trabalho disponível e backpressure. Essa cadeia de execução é o pipeline, e não apenas um processador isolado.",
+    "limits": "A topologia concreta é configurada pelos fluxos do usuário; o recorte prova o motor real que executa a cadeia, sem inventar uma pipeline financeira implantada. Ramificações, filas, retries e fronteiras de sessão continuam existindo. Camel é uma base comparativa de encadeamento e não uma dependência atribuída ao NiFi.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "precomputation": {
+    "base_urls": [
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c"
+    ],
+    "application_urls": [
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/createas.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c",
+      "https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeSeqscan.c"
+    ],
+    "mechanism": "No servidor PostgreSQL, CREATE ou REFRESH MATERIALIZED VIEW executa a consulta antes das leituras posteriores e guarda o resultado. A fase de cálculo preenche um heap; as consultas seguintes podem ler esse resultado já calculado. O trabalho é deslocado da leitura para a criação ou atualização da representação.",
+    "limits": "A aplicação escolhida é o próprio servidor PostgreSQL, um produto OSS de infraestrutura; a base são suas rotinas reutilizáveis de materialização. Os papéis são diferentes dentro do mesmo repositório. Não se afirma que uma aplicação financeira específica implantou esta view, que toda leitura usa SeqScan ou que o valor é atualizado automaticamente. REFRESH tem custo, locks e requisitos adicionais no modo concorrente; WITH NO DATA não produz um resultado consultável preenchido. O ganho de tempo de consulta depende da consulta, dos índices e do custo de atualização; nenhum benchmark foi feito.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "range-sharding": {
+    "base_urls": [
+      "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/key/key.go",
+      "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/key/destination.go"
+    ],
+    "application_urls": [
+      "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/numeric.go",
+      "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/engine/routing.go",
+      "https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/srvtopo/resolver.go"
+    ],
+    "mechanism": "No VTGate do Vitess, o caminho between com vindex sequencial numeric transforma os limites da consulta em um intervalo de keyspace IDs ordenados. O resolver compara esse intervalo com os intervalos dos shards e mantém somente os que se cruzam. Para uma chave pontual, a seleção usa contenção no intervalo do shard.",
+    "limits": "A prova vale para o vindex numeric/sequencial e para os intervalos do keyspace; não atribui essa propriedade a um vindex hash ou lookup. Os limites abertos e fechados seguem as funções KeyRange do Vitess. Não há claim de balanceamento, ausência de hotspots nem cluster implantado. Base de roteamento e produto VTGate ficam no mesmo repositório com papéis explícitos.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "recreate-deployment": {
+    "base_urls": [
+      "https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/recreate.go"
+    ],
+    "application_urls": [
+      "https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/charts/prometheus/values.yaml",
+      "https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/charts/prometheus/templates/deploy.yaml"
+    ],
+    "mechanism": "O chart mantido pela comunidade Prometheus escolhe Recreate para o Deployment do servidor por padrão. Seu template emite essa estratégia e elimina a configuração de rolling update. No controlador Kubernetes, o caminho correspondente primeiro escala as versões antigas para baixo, espera que não haja pods antigos em execução e só depois sobe a nova versão.",
+    "limits": "A aplicação é a configuração pública do servidor Prometheus, não uma inferência de um campo configurável do Airflow. O comportamento vale para o modo Deployment e para esses valores; opções StatefulSet/DaemonSet seguem outros caminhos. A leitura não comprova um rollout executado nem disponibilidade contínua: Recreate pode deixar um intervalo sem servidor.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "refresh-ahead": {
+    "base_urls": [
+      "https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/cache/LocalCache.java",
+      "https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/cache/CacheLoader.java"
+    ],
+    "application_urls": [
+      "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/lib/trino-metastore/src/main/java/io/trino/metastore/cache/CachingHiveMetastore.java"
+    ],
+    "mechanism": "O Trino pode atualizar metadados do Hive em segundo plano antes de seu TTL terminar. O construtor só habilita refresh se o intervalo for menor que o prazo de expiração, e envolve o carregador com asyncReloading. Uma leitura de uma entrada elegível dispara a carga; o valor anterior pode continuar atendendo enquanto a atualização termina.",
+    "limits": "Este é refresh antecipado disparado por acesso, não um agendador que atualiza todas as chaves. Se a chave não for consultada, ela pode expirar. O ramo não é ativado quando o intervalo de refresh é maior ou igual ao TTL; falhas de carga não tornam o dado automaticamente atual.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "rest": {
+    "base_urls": [
+      "https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/rest_framework/routers.py",
+      "https://github.com/encode/django-rest-framework/blob/14998d0a735f8ed6abd86751fd6984a9277a1d40/rest_framework/viewsets.py"
+    ],
+    "application_urls": [
+      "https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zproject/urls.py",
+      "https://github.com/zulip/zulip/blob/4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0/zerver/lib/rest.py"
+    ],
+    "mechanism": "Na API do Zulip, messages é a coleção de mensagens: GET lista e POST envia uma mensagem. A URI que contém message_id representa uma mensagem específica e aceita leitura, alteração parcial e exclusão por GET, PATCH e DELETE. O dispatcher seleciona o handler pelo método da requisição. O Django REST Framework mostra uma base comparativa que oferece o mesmo tipo de mapeamento entre recursos e verbos.",
+    "limits": "A classificação é uma API HTTP orientada a recursos no recorte de mensagens. Não certifica todos os níveis de maturidade REST, HATEOAS nem a pureza de todos os endpoints do produto. Zulip usa seu próprio dispatcher Django, não os ViewSets do DRF. O POST de envio pode ter efeitos de entrega e não recebe uma promessa de idempotência por esta referência.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "saga": {
+    "base_urls": [
+      "https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java"
+    ],
+    "application_urls": [
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/steps/create-orders.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/steps/find-or-create-customer.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/helpers/create-step-handler.ts",
+      "https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/orchestration/src/transaction/transaction-orchestrator.ts"
+    ],
+    "mechanism": "O Medusa compõe operações dos módulos de cliente e pedido em um workflow. Cada etapa conclui sua ação e entrega os dados necessários para uma ação posterior de compensação. Uma falha permanente pode iniciar o caminho que apaga o pedido criado e, se couber, o cliente criado pela própria etapa. Este é o recorte orquestrado de Saga do produto.",
+    "limits": "A prova é do fluxo real de criação de pedido e dos efeitos de criação de cliente/pedido que ele registra para desfazer. Não afirma que esse workflow reserva estoque: seu próprio comentário diz que apenas confirma disponibilidade. Compensações podem falhar e não apagam efeitos externos arbitrários. Não há promessa de isolamento global, rollback ACID entre módulos, outbox ou exatamente uma vez. Temporal é uma base comparativa; Medusa usa seu próprio motor.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/product-flow-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "scatter-gather": {
+    "base_urls": [
+      "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go"
+    ],
+    "application_urls": [
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/split_by_interval.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/codec.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/querier/queryrange/roundtrip.go"
+    ],
+    "mechanism": "Uma consulta de intervalo Loki é dividida em subrequisições. Process executa os intervalos com paralelismo limitado e coleta suas respostas. O caminho retorna a resposta combinada por MergeResponse. O middleware está instalado no pipeline do query frontend, portanto a divisão e a reunião pertencem à mesma requisição.",
+    "limits": "A configuração pode desabilitar a divisão. Erros cancelam os demais intervalos e um limite de linhas pode permitir encerramento antecipado. O recorte não exige coletar todas as respostas quando a própria consulta permite esse limite. Errgroup é uma base comparada de concorrência; não se afirma que esse arquivo Loki use errgroup.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/additional-four-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "service-extraction": {
+    "base_urls": [
+      "https://github.com/grpc/grpc-go/blob/4d4d42843b7154ede87a6cead454ccf8410baea8/server.go",
+      "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/operations.proto",
+      "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/proto/go/gitalypb/operations_grpc.pb.go",
+      "https://gitlab.com/gitlab-org/gitaly/-/blob/987854bc5e60a1b9c799eaf7220cb36964cc2356/internal/gitaly/service/operations/tags.go"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb"
+    ],
+    "mechanism": "A extração de serviço precisa de uma fronteira pela qual a aplicação continue pedindo uma operação enquanto outro processo a executa. O gRPC registra o contrato e a implementação de um serviço e entrega a requisição decodificada ao handler. No Gitaly, o contrato declara UserCreateTag, o código gerado encaminha essa chamada a OperationServiceServer e o servidor valida o pedido antes de executar a criação da tag. O cliente GitLab monta esse pedido, seleciona o armazenamento remoto, informa timeout e transforma a resposta no objeto usado pela aplicação.",
+    "limits": "As fontes demonstram o mecanismo da fronteira remota entre GitLab e Gitaly. Elas não reconstroem a cronologia inteira da extração, não provam que o monólito deixou de executar toda operação Git local e não medem a disponibilidade de um servidor. O gRPC fornece transporte e dispatch; ele não decide a fronteira de negócio nem garante que uma extração tenha sido concluída. Os commits do GitLab, do Gitaly e da biblioteca são referências fixas de código e não uma declaração das versões instaladas em uma implantação. Os links raw de página do Gitaly retornaram 403, mas a API oficial retornou 200; os arquivos foram comparados com os blobs obtidos do mesmo commit pelo protocolo Git e são idênticos.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/recommendations.json",
+    "classification_basis": "GITALY_PROTOCOL_AND_HANDLER_MATCH_GITLAB_OPERATION_NAMES; GRPC_IS_IMPLEMENTING_RPC_BASE; NO_EXTRACTION_HISTORY_OR_DEPLOYMENT_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "service-mesh": {
+    "base_urls": [
+      "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc",
+      "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_helper.cc"
+    ],
+    "application_urls": [
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/serviceregistry/kube/controller/controller.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/model/push_context.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/discovery.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/bootstrap/discovery.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/cds.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_builder.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_traffic_policy.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/ads.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/xds/xdsgen.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/agent.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/tools/packaging/common/envoy_bootstrap.json",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/envoy/proxy.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/istio-agent/xds_proxy.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/kube/inject/inject.go"
+    ],
+    "mechanism": "O controlador Kubernetes converte eventos de Service para o modelo do Istio e notifica a atualização. PushContext reúne o catálogo de serviços e as DestinationRules. O gerador CDS selecionado para ClusterType chama BuildClusters, que percorre os serviços visíveis ao sidecar, cria clusters e aplica a DestinationRule correspondente. applyTrafficPolicy altera o protobuf de cluster; por exemplo, LoadBalancerSettings_RANDOM vira Cluster_RANDOM. O servidor serializa esses recursos em DiscoveryResponse e os envia pelo stream xDS. No workload, o agente gera o bootstrap do Envoy com CDS/LDS via ADS e um cluster xds-grpc ligado ao socket local XDS. XdsProxy encaminha requisições para Istiod e respostas para Envoy. O consumidor CDS de Envoy recebe os recursos e chama addOrUpdateCluster ou removeCluster, atualizando sua configuração de comunicação.",
+    "limits": "A prova é estática e delimitada ao caminho sidecar e CDS. Ela não mede um cluster em execução, entrega real de xDS, ACKs, convergência ou desempenho. A política concreta demonstrada é DestinationRule aplicada a clusters. O pacote não afirma ter seguido toda tradução de VirtualService/RDS, EDS ou todas as políticas possíveis. O bootstrap pode ser substituído por configuração customizada, e Istio também possui caminho ambient. Não se afirma que toda instalação use o mesmo template ou sidecar. Os SHAs fixam fontes Istio e Envoy que implementam a fronteira xDS v3. Não se afirma que o binário Envoy empacotado com esse snapshot Istio tenha sido construído exatamente do SHA Envoy escolhido como base. O pacote anterior de identidade foi reaproveitado como suporte complementar de segurança no mesmo SHA Istio; a classificação Service Mesh aqui se sustenta na cadeia de controle e dados demonstrada, sem depender apenas de certificado ou injeção.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://istio.io/latest/docs/ops/deployment/architecture/",
+        "claim": "Contexto primário de suporte."
+      },
+      {
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/api-docs/xds_protocol",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/rare-service-mesh-recommendation.json",
+    "classification_basis": "Envoy fornece a assinatura CDS e o consumidor que instala clusters recebidos por xDS. A base selecionada agora mostra consumo efetivo de configuração, além do bootstrap genérico de servidor. Istio é o produto OSS real. O recorte é seu plano de controle e o caminho sidecar Envoy, com um exemplo concreto de DestinationRule que altera a política de balanceamento do cluster.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "service-to-service-identity": {
+    "base_urls": [
+      "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go",
+      "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/authorizer.go"
+    ],
+    "application_urls": [
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/cache/secretcache.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/server.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/san.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/generator.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/principal.go",
+      "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go"
+    ],
+    "mechanism": "A requisição SDS faz o agente pedir um segredo. O cache constrói uma URI SPIFFE a partir de trust domain, namespace e service account e gera um CSR. CitadelClient envia o pedido à CA com credenciais por RPC. A CA autentica o JWT por TokenReview, exige namespace e service account e constrói a identidade SPIFFE desses valores verificados. Ela usa essa identidade como SubjectIDs do certificado; o gerador de SAN codifica o prefixo spiffe:// como URI, em vez de confiar apenas no nome solicitado no CSR. O agente devolve certificado e chave por SDS ao Envoy. No lado consumidor, ISTIO_MUTUAL configura o certificado local, a raiz e o matcher de SAN do par. A política source.principal é convertida em principal autenticado do RBAC; o builder gera o filtro de autorização que o Envoy aplica.",
+    "limits": "A identidade Kubernetes deste caminho representa a service account dentro do namespace e trust domain. Diferentes pods que usam a mesma service account compartilham essa identidade lógica; não se alega um identificador exclusivo por processo. A análise demonstra o caminho Kubernetes em modo sidecar e as configurações geradas para mTLS e políticas de principal. Não demonstra um cluster em execução nem abrange todos os caminhos ambient, VMs ou CAs externas. mTLS e autorização dependem da configuração. Istio permite modo permissivo e políticas opcionais; não se deduz que qualquer requisição em toda instalação esteja autenticada e autorizada da mesma forma. A CA possui um ramo de impersonation para agentes de nó explicitamente autorizados. A cadeia descrita usa o ramo padrão sem impersonation. go-spiffe e Istio são duas implementações do mesmo modelo de identidade. Não se afirma que o código Istio selecionado chame go-spiffe; o caller completo dentro do produto é mostrado separadamente.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://istio.io/latest/docs/concepts/security/",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/rare-security-recommendations.json",
+    "classification_basis": "go-spiffe oferece configuração mTLS que valida X509-SVID e autoriza o SPIFFE ID verificado. AuthorizeID permite escolher um ID específico. Istio é o produto OSS de infraestrutura. O recorte acompanha o agente e a CA na emissão e entrega de identidade de uma carga Kubernetes, mais a geração de configuração de validação e autorização para o proxy.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "single-flight": {
+    "base_urls": [
+      "https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go"
+    ],
+    "application_urls": [
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/dataobj/metadatacache/cache.go",
+      "https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/dataobj/decoder.go"
+    ],
+    "mechanism": "No leitor de objetos de dados do Loki, misses concorrentes para a mesma região de metadados entram em Group.DoChan com a mesma chave. Uma carga lê o objeto e devolve seus bytes para todos os clientes que continuam esperando. O decoder consome esse resultado em sua leitura real de metadados.",
+    "limits": "O agrupamento é local à instância do Group; não é uma exclusão global entre processos. O cancelamento de um cliente não cancela a carga compartilhada, que tem seu próprio timeout. Depois que a chamada termina, uma nova falta pode executar outra carga; erros de cache podem fazer a operação recorrer ao armazenamento.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "state": {
+    "base_urls": [
+      "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java"
+    ],
+    "application_urls": [
+      "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java",
+      "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java",
+      "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+      "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java"
+    ],
+    "mechanism": "O NameNode guarda um campo HAState que pode conter ActiveState ou StandbyState. O contexto encaminha checkOperation para o objeto atual. ActiveState aceita operações, enquanto StandbyState recusa as operações que não passam pelas condições de leitura permitida. Ao trocar de estado, HAState executa a saída do objeto atual, atualiza o objeto guardado pelo contexto e chama a entrada do próximo objeto. O comportamento muda pela delegação ao mesmo contrato abstrato.",
+    "limits": "A interpretação GoF vale para o subsistema de alta disponibilidade do NameNode. As fontes chamam HAState de base para state machine; não se atribui ao projeto uma declaração textual de adesão ao catálogo GoF. StandbyState também representa observer mediante uma flag; o exemplo didático deve se limitar a ativo e standby e preservar a exceção de leituras obsoletas permitidas.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/build/source/hadoop-hdfs-project/hadoop-hdfs/target/api/org/apache/hadoop/hdfs/server/namenode/ha/HAState.html",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/rare-runtime-recommendations.json",
+    "classification_basis": "HAState é a classe abstrata de comportamento por estado usada pelo HDFS; não é um framework GoF separado. O daemon NameNode do Apache HDFS mantém e troca instâncias concretas de HAState.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "state-machine": {
+    "base_urls": [
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go"
+    ],
+    "application_urls": [
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+      "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go"
+    ],
+    "mechanism": "Uma operação Nexus nasce no estado UNSPECIFIED. O comando de agendamento aplica uma transição para SCHEDULED. Se a chamada falha de forma recuperável, o executor muda o controle para BACKING_OFF; o timer de retry pode devolvê-lo a SCHEDULED. Uma resposta assíncrona muda o controle para STARTED, e um evento de conclusão permite SUCCEEDED. Cada transição declara suas origens aceitas. A base testa o estado atual e devolve ErrInvalidTransition quando a origem não está na lista.",
+    "limits": "A finitude demonstrada é a dos oito estados de controle. Payload, tentativas e timestamps são dados adicionais; não se afirma que todo o espaço de configuração do serviço seja finito. A base genérica aceita S comparable e, sozinha, não exige um conjunto finito. O enum Nexus e suas transições fornecem esse recorte. Não se deduz GoF State desse enum. Também não se afirma atomicidade de persistência a partir de Apply: a função troca o estado antes de chamar o callback, que pode retornar erro.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://docs.temporal.io/nexus/operations",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/rare-runtime-recommendations.json",
+    "classification_basis": "Temporal HSM é a infraestrutura genérica de transições dentro do servidor. Temporal Server é o produto OSS real; a aplicação escolhida é a máquina de uma operação Nexus, e não todo o motor de workflows.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "template-method": {
+    "base_urls": [
+      "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+      "https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java"
+    ],
+    "application_urls": [
+      "https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs"
+    ],
+    "mechanism": "Um método de template organiza uma sequência comum e chama etapas que uma subclasse pode especializar. No Spring, refresh prepara o contexto e o bean factory, chama o hook postProcessBeanFactory e continua com os processadores, os listeners e a inicialização dos objetos. A subclasse web implementa esse hook para registrar recursos do ambiente servlet. No Jellyfin, o fluxo comum de configuração chama a propriedade virtual ConfigurationFileName ao montar o caminho e chama SaveConfiguration durante a atualização ou a criação da configuração padrão.",
+    "limits": "Spring e Jellyfin são exemplos independentes; não há afirmação de que o Jellyfin use Spring. A prova do padrão está na sequência comum chamando hooks efetivos, e não no nome da classe ou na presença isolada de um método virtual. O recorte do Jellyfin demonstra os pontos de extensão e suas chamadas, sem atribuir a um plugin específico uma implementação que não foi citada. Ele não demonstra Factory Method nem Abstract Factory.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-two/recommendations.json",
+    "classification_basis": "PARALLEL_PRIMARY_TEMPLATE_IMPLEMENTATIONS_NOT_A_DEPENDENCY_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "thread-pool": {
+    "base_urls": [
+      "https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py"
+    ],
+    "application_urls": [
+      "https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/fetcher/Fetcher.java",
+      "https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/fetcher/FetcherThread.java"
+    ],
+    "mechanism": "O coletor do Nutch inicia um conjunto de threads que compartilham a fila de URLs. Cada thread busca um item, executa a coleta pelo protocolo adequado e volta ao loop para o próximo trabalho. O tamanho inicial vem da configuração e pode ser ajustado pela política de largura de banda. O ThreadPoolExecutor do CPython oferece uma base comparativa com fila, reutilização e limite de workers.",
+    "limits": "O Nutch implementa seu próprio conjunto de workers Java; não usa o executor Python. A quantidade inicial não é uma garantia de concorrência útil nem de throughput. Filas por host, robots.txt, delays e threads bloqueadas ainda limitam o progresso.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/cache-and-concurrency-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "token-exchange": {
+    "base_urls": [
+      "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+      "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+      "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.java",
+      "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+      "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java"
+    ],
+    "application_urls": [
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+      "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java"
+    ],
+    "mechanism": "No framework, o provider obtém um subject token, constrói TokenExchangeGrantRequest e chama o cliente HTTP. O conversor envia o grant token-exchange com subject_token, subject_token_type e requested_token_type. No Keycloak, TokenEndpoint autentica o cliente e despacha o grant. TokenExchangeGrantType escolhe o provider compatível e dispara a política do pedido. O provider padrão exige que a funcionalidade esteja habilitada para o cliente e valida o access token de entrada, incluindo assinatura, emissor, validade e revogação pelo verificador. A regra de audiência rejeita cliente público, audiência desabilitada e solicitante ausente da audiência do subject token, salvo troca do próprio token. Depois, ele cria um novo access token com o contexto de escopos, confere as audiências efetivas, aplica políticas da resposta e devolve o novo token codificado com issued_token_type.",
+    "limits": "O recorte é Standard Token Exchange V2 interno-interno do SHA fixado. Não se atribuem a ele as capacidades do provider legacy V1, como impersonation arbitrária ou troca de tokens externos. O código exige habilitação de standard token exchange no cliente. Não se infere configuração de qualquer realm real nem se afirma que o recurso esteja ativo em produção. O pedido de audience filtra e valida audiências efetivamente disponíveis; ele não concede automaticamente uma nova audiência. Os escopos e client policies podem produzir comportamento além de downscoping; não se promete que toda troca reduza privilégios. Spring e Keycloak são exemplos independentes do protocolo, não uma integração executada. Spring envia subject_token_type=jwt para uma instância Jwt; o provider padrão Keycloak selecionado aceita access_token. Uma composição real precisa escolher o tipo aceito e configurar o cliente. Não foi executado um fluxo HTTP de teste. A evidência é a cadeia implementada no código fixado e sua documentação primária.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://www.keycloak.org/securing-apps/token-exchange",
+        "claim": "Contexto primário de suporte."
+      },
+      {
+        "url": "https://docs.spring.io/spring-security/reference/7.0/api/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.html",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/rare-security-recommendations.json",
+    "classification_basis": "Spring Security fornece um cliente RFC 8693 real, com TokenExchangeGrantRequest, conversão de parâmetros e POST ao token endpoint. Keycloak Server é o produto OSS real. O recorte é o provider StandardTokenExchangeProvider, ligado a TOKEN_EXCHANGE_STANDARD_V2, para troca interna entre clientes do mesmo realm.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "transitional-architecture": {
+    "base_urls": [
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/roll/execute.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/migrations/op_alter_column.go",
+      "https://github.com/xataio/pgroll/blob/777a5350e09012b29d26b9611122046d8a96fc1c/pkg/backfill/templates/function.go"
+    ],
+    "application_urls": [
+      "https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb"
+    ],
+    "mechanism": "Uma arquitetura de transição mantém uma ponte temporária enquanto o sistema muda de representação ou de destino. O pgroll cria views em esquemas de versão para conservar o contrato de colunas de cada versão, enquanto os triggers sincronizam as representações físicas. A conclusão remove o esquema da versão anterior e os auxiliares da migração. O MultiStore do GitLab implementa outra ponte temporária: começa no armazenamento antigo, pode executar nos dois, muda o padrão de resposta para o destino e permite desligar a execução dupla permanecendo nele.",
+    "limits": "pgroll e GitLab são referências independentes de pontes de transição; não há afirmação de dependência entre eles. O código e os comentários do GitLab definem fases e uma saída da execução dupla, mas não provam que uma implantação concluiu essas fases ou retirou a classe MultiStore. No pgroll, o chamador ainda precisa decidir quando os clientes antigos podem perder seu esquema de compatibilidade. A ponte traz custos e efeitos reais enquanto está ativa; sua existência não garante reconciliação de dados nem uma transição concluída.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/base-five/wave-three/recommendations.json",
+    "classification_basis": "PARALLEL_IMPLEMENTING_TRANSITION_BRIDGES; NO_HISTORICAL_OR_PRODUCTION_COMPLETION_CLAIM",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "websocket": {
+    "base_urls": [
+      "https://github.com/aio-libs/aiohttp/blob/f17c631bddcfd4ec712342db28f1d3381a3fec71/aiohttp/web_ws.py"
+    ],
+    "application_urls": [
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/__init__.py",
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/const.py",
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/http.py",
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/auth.py",
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/connection.py",
+      "https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/websocket_api/commands.py"
+    ],
+    "mechanism": "Home Assistant registra a rota WebSocket e cria WebSocketResponse do aiohttp. O handler prepara a conexão, valida a autenticação da sessão, recebe frames de comandos e entrega os dados ao dispatcher. Uma assinatura de eventos liga o barramento do aplicativo à fila de saída da conexão, que envia frames TEXT ao cliente. Assim, a aplicação usa uma conexão persistente para receber comandos e transmitir resultados e eventos.",
+    "limits": "O recorte é o protocolo da API WebSocket do Home Assistant. O handshake normal exige autenticação da sessão; a revisão também aceita a entrada Unix do Supervisor já autenticada pelo middleware. Conexões, filas e assinaturas são encerradas na limpeza, e a fila tem limites. Não se atribui durabilidade ou replay dos eventos após uma desconexão. O código usa internals de aiohttp, por isso a dependência 3.14.5 foi conferida na revisão do aplicativo. Não houve implantação nem ensaio de rede nesta pesquisa.",
+    "application_kind": "PRODUCT_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://developers.home-assistant.io/docs/api/websocket/",
+        "claim": "A documentação primária descreve a rota, as fases de autenticação/comandos e a transmissão de eventos."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/two-highs-source-recommendations.json",
+    "classification_basis": "",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "zero-trust": {
+    "base_urls": [
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go",
+      "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go",
+      "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go"
+    ],
+    "application_urls": [
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/access_checker.go",
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go",
+      "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/sshutils/server.go"
+    ],
+    "mechanism": "O servidor registra PublicKeyCallback e VerifiedPublicKeyCallback no adaptador SSH. O primeiro decodifica a identidade do certificado e autentica sua autoridade e metadados. Para um Node, ele avalia o servidor alvo e o login solicitado. Essa avaliação obtém papéis e atributos da identidade, cria um accessChecker e chama CheckConditionalAccess com o recurso e NewLoginMatcher. RoleSet verifica primeiro as regras de negação e depois exige que namespace, labels e matchers de uma regra de permissão correspondam. Sem permissão, o callback retorna erro e a autenticação é recusada. Quando a decisão tem pré-condições, a callback posterior à prova de posse verifica quais exigem autenticação adicional antes de prosseguir.",
+    "limits": "A interpretação é um recorte de acesso com Zero Trust: identidade e política são avaliadas para o recurso solicitado. Isso não certifica toda uma organização ou uma implantação como aderente à NIST SP 800-207. O caminho escolhido é o login comum em Node. O código possui uma exceção explícita para ingresso em sessão moderada sob condições específicas e caminhos separados para proxy, OpenSSH e identidades scoped; não se afirma que todos executem a mesma função. MFA e confiança no dispositivo dependem de política. A seleção mostra a integração das condições, mas não atesta que estejam habilitadas em uma instalação real nem promete revalidação contínua de toda operação durante uma sessão. A licença dos arquivos lib selecionados é AGPL-3.0-or-later, conforme seus headers no SHA fixado. Não se aplica a eles a licença Apache da API nem se faz afirmação sobre licenças de binários comerciais.",
+    "application_kind": "INFRASTRUCTURE_OSS",
+    "verification_terms": [],
+    "decision_evidence": [
+      {
+        "url": "https://csrc.nist.gov/pubs/sp/800/207/final",
+        "claim": "Contexto primário de suporte."
+      },
+      {
+        "url": "https://goteleport.com/docs/zero-trust-access/rbac-get-started/",
+        "claim": "Contexto primário de suporte."
+      }
+    ],
+    "research_packet": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/rare-security-recommendations.json",
+    "classification_basis": "O mecanismo reutilizável de decisão é RoleSet/checkAccess do Teleport, chamado por accessChecker. Go SSH é a base adicional de autenticação de certificado e prova de posse; a autenticação sozinha não sustenta a classificação. O servidor SSH do Teleport é o produto OSS real. O exemplo é o acesso normal de um usuário a um Node e login de sistema operacional específicos.",
+    "supersedes_first_pass_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  }
+}

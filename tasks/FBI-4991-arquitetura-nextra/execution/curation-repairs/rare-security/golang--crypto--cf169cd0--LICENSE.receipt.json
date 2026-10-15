@@ -1,0 +1,13 @@
+{
+  "repo": "golang/crypto",
+  "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+  "path": "LICENSE",
+  "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.040688+00:00",
+  "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+  "line_count": 27,
+  "source": "raw_primary"
+}

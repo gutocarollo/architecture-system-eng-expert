@@ -1,0 +1,13 @@
+{
+  "repo": "trinodb/trino",
+  "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+  "path": "pom.xml",
+  "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml",
+  "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--pom.xml",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.178740+00:00",
+  "sha256": "5518ad1909cd9ce2c29e9aee1c6f950ae2da2446f52f230229a2c2cfe4933b69",
+  "line_count": 2720
+}

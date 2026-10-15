@@ -425,5 +425,12 @@ for item in SELECTIONS.values():
  for key in ['base_urls','application_urls']:
   item[key]=[replacements.get(u,u) for u in item[key]]
 
+# Each repair is an explicit, individually adjudicated replacement.
+repair_path=BASE/'repair-selections.json'
+if repair_path.exists():
+ for concept_id,replacement in json.loads(repair_path.read_text()).items():
+  assert concept_id in SELECTIONS
+  SELECTIONS[concept_id]=replacement
+
 (BASE/'source-selections.json').write_text(json.dumps(SELECTIONS,ensure_ascii=False,indent=2))
 print(len(SELECTIONS),'explicit concept selections')

@@ -3,10 +3,10 @@
   "source": "matrix.json",
   "archive": "matrix.json.gz",
   "encoding": "gzip",
-  "contents_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
-  "archive_sha256": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
-  "source_bytes": 5469525,
-  "archive_bytes": 728325,
+  "contents_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+  "archive_sha256": "77e1d00a55f270631c8f66d22b353b2ad9f51b7d8d113a6d1cb0fd7af0830b12",
+  "source_bytes": 5536231,
+  "archive_bytes": 975896,
   "unpack_command": "python3 tasks/FBI-4991-arquitetura-nextra/execution/curation/unpack_matrix.py",
   "note": "The uncompressed generated JSON is local. Static MDX pages do not load this archive during the site build."
 }

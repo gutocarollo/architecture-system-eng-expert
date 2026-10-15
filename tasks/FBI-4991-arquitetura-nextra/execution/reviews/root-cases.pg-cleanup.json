@@ -1,0 +1,18 @@
+{
+  "observed_at": "2026-10-15T04:18:28.620105+00:00",
+  "servers": [
+    {
+      "pid": 23276,
+      "data": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/.pg-learning/run-wsclhhxr/data",
+      "sockets": "/tmp/arch-pg-cic_jl4a",
+      "listen_addresses_empty": true,
+      "process_stopped": true,
+      "data_removed": true,
+      "sockets_removed": true
+    }
+  ],
+  "psql_hosts": [
+    "/tmp/arch-pg-cic_jl4a"
+  ],
+  "pg_hostaddr_unset": true
+}

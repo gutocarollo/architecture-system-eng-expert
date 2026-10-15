@@ -1,0 +1,68 @@
+{
+  "observed_utc": "2026-10-15T03:12:17.077479+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "summary": {
+    "canonical_concepts": 310,
+    "author_source_matches": 310,
+    "pending_concepts": 0,
+    "independently_reviewed_concepts": 0,
+    "not_applicable_exemptions": 0,
+    "issues_by_kind": {}
+  },
+  "active_validation": {
+    "observed_utc": "2026-10-15T03:11:37.448976+00:00",
+    "scope": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+    "canonical_concepts": 310,
+    "priority_entries": 40,
+    "active_source_locators": 545,
+    "source_artifacts_checked": 538,
+    "license_revisions_checked": 176,
+    "matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+    "structural_integrity": "PASS",
+    "requested_gate": "PASS",
+    "semantic_pending": [],
+    "independent_pending_count": 310,
+    "errors_by_kind": {},
+    "errors": [],
+    "note": "Integrity, HTTP status and lexical locators do not establish semantic correctness or independent approval."
+  },
+  "reference_mdx": {
+    "files": 58,
+    "errors": 0
+  },
+  "all_historical_http200_source_records": 799,
+  "source_hash_mismatches": [],
+  "publications": [
+    {
+      "schema_version": 1,
+      "source": "matrix.json",
+      "archive": "matrix.json.gz",
+      "encoding": "gzip",
+      "contents_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+      "archive_sha256": "b7aedc4ff85625ec0546ceded96bf5d734bf19318f12637dea964998e43c6e4d",
+      "source_bytes": 5469525,
+      "archive_bytes": 728325,
+      "unpack_command": "python3 tasks/FBI-4991-arquitetura-nextra/execution/curation/unpack_matrix.py",
+      "note": "The uncompressed generated JSON is local. Static MDX pages do not load this archive during the site build."
+    },
+    {
+      "schema_version": 1,
+      "source": "sources.json",
+      "archive": "sources.json.gz",
+      "encoding": "gzip",
+      "contents_sha256": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209",
+      "archive_sha256": "87f2616ba1db8fd855b1e7bfde505db425e6f82167640eed0ca119c4115b7586",
+      "source_bytes": 2313023,
+      "archive_bytes": 499251
+    }
+  ],
+  "remaining_hard_gaps": [],
+  "independent_review": "PENDING_FOR_ALL_310_AUTHOR_CLAIMS",
+  "scope_notes": [
+    "No commit, push, Jira or administrative mutation.",
+    "Root-owned PostgreSQL cases and case navigation were preserved.",
+    "Uncompressed matrix/sources and tree caches are local artifacts to exclude from publication."
+  ]
+}

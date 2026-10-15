@@ -45,12 +45,14 @@
       "/root/applied_learning_build",
       "/root/curation_complete",
       "/root/rare_oss_sources",
-      "/root/jira_story_catalog"
+      "/root/jira_story_catalog",
+      "/root/sites_password_feasibility"
     ],
     "reviewers": [
       "/root/story_requirements_review",
       "/root/curation_independent",
-      "/root/curation_second"
+      "/root/curation_second",
+      "/root/terminal_delivery"
     ],
     "max_rechecks": 1
   },

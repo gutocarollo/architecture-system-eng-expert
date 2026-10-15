@@ -1,0 +1,13 @@
+{
+  "repo": "golang/crypto",
+  "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+  "path": "ssh/certs.go",
+  "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go",
+  "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--certs.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.073539+00:00",
+  "sha256": "093b1448a7e8a17a5056e31e007bd10cda2e0a67a74b8548cede45068b4b1f2c",
+  "line_count": 653,
+  "source": "raw_primary"
+}

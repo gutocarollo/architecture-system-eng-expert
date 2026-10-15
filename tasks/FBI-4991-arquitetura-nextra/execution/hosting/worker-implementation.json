@@ -1,0 +1,79 @@
+{
+  "measuredAt": "2026-10-15T17:55:31.980Z",
+  "checkout": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "baseSha": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "scope": "Local implementation and invariant evidence only; root owns native private audience, secrets, upload and deployment.",
+  "source": {
+    "workerSha256": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+    "testsSha256": "39ad235aa7573f74152bb2fde8568d7d1c0d00da4134c006b174c40f9a195154",
+    "packageLockSha256": "b1bdf1b4ea17b5a111ce52302c1e53ee72949e41f16b2e629d4754ada0ccda21"
+  },
+  "dependencies": {
+    "hono": "4.13.13",
+    "esbuild": "0.28.2"
+  },
+  "runtimeKeys": [
+    "COURSE_PASSWORD",
+    "COURSE_SESSION_SECRET",
+    "COURSE_UPLOAD_SECRET",
+    "COURSE_RELEASE_ID"
+  ],
+  "r2Binding": "COURSE_ASSETS",
+  "artifact": [
+    {
+      "path": "server/index.js",
+      "bytes": 75623,
+      "sha256": "d529084f4b9e776258cebee912bede540b65b8f89faa4abebc07bd7d143256c2"
+    },
+    {
+      "path": ".openai/hosting.json",
+      "bytes": 102,
+      "sha256": "ec98b0779b1de3fdf9c950459c46f5693d869f75df6e5e9bed996dc5c63c0baf"
+    }
+  ],
+  "verification": {
+    "report": "worker-verification.json",
+    "baselineTests": 15,
+    "baselinePass": 15,
+    "actualExportFiles": 1397,
+    "anonymousR2Reads": 0,
+    "mutationsKilled": 5,
+    "allExpectationsMet": true
+  },
+  "sources": [
+    {
+      "url": "https://hono.dev/docs/helpers/cookie",
+      "use": "Signed cookies and host cookie options"
+    },
+    {
+      "url": "https://github.com/honojs/hono/blob/v4.13.13/src/utils/buffer.ts",
+      "use": "Pinned timingSafeEqual implementation"
+    },
+    {
+      "url": "https://developers.cloudflare.com/r2/api/workers/workers-api-reference/",
+      "use": "get/put streams, metadata and sha256 integrity verification"
+    },
+    {
+      "url": "https://developers.cloudflare.com/workers/runtime-apis/streams/transformstream/",
+      "use": "FixedLengthStream exact byte contract"
+    }
+  ],
+  "context7": "Both resolve calls returned Monthly quota reached; official primary documentation and pinned package source used as fallback.",
+  "commands": {
+    "install": "npm ci --prefix sites/architecture-course/server-build --ignore-scripts --no-audit --no-fund",
+    "test": "npm test --prefix sites/architecture-course/server-build",
+    "verify": "npm run verify --prefix sites/architecture-course/server-build -- /Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/hosting/worker-verification.json",
+    "build": "npm run build --prefix sites/architecture-course/server-build",
+    "nativeWorkflowBuild": [
+      "node",
+      "server-build/build.mjs"
+    ]
+  },
+  "limitations": [
+    "R2 and FixedLengthStream are doubles in local tests; WebCrypto is real.",
+    "Real Chrome form regression passed locally; root must verify updated private live deployment before changing audience.",
+    "This author lane did not issue an independent adversarial verdict."
+  ],
+  "browserRegression": "worker-browser-regression.json"
+}

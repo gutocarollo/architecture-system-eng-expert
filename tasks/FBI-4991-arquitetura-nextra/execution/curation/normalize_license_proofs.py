@@ -2,12 +2,16 @@
 """Preserve API labels and add identifiers only where the exact primary text supports them."""
 import datetime,hashlib,json,urllib.request
 from pathlib import Path
+from license_classification import python_compound_license
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parents[3]
 p=BASE/'revision-licenses.json';records=json.loads(p.read_text());sources=json.loads((BASE/'sources.json').read_text())
 for key,item in records.items():
  text=(ROOT/item['artifact']).read_text(errors='replace')if item.get('artifact')and(ROOT/item['artifact']).exists()else ''
  lower=text.lower();spdx=item.get('license_spdx')
+ if python_compound_license(item.get('repo'),text):
+  item['license_spdx']='Python-2.0'
+  item['classification_basis']='The exact LICENSE contains the PSF version 2 grant together with the BeOpen, CNRI and CWI historical grants; SPDX Python-2.0 identifies that compound license.'
  if item.get('repo')=='eclipse-mosquitto/mosquitto' and 'SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause'in text:
   item['license_spdx']='EPL-2.0 OR BSD-3-Clause'
   item['classification_basis']='The exact root license notice explicitly declares this SPDX expression.'

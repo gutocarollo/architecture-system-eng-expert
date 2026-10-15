@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pilot/pkg/networking/core/cluster_tls.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_tls.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.531287+00:00",
+  "sha256": "ded0d757f71533f276b72a87a34751606ee5bc578917e406f6eed11108a49e6c",
+  "line_count": 506,
+  "source": "raw_primary"
+}

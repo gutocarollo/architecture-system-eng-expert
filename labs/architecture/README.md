@@ -2,7 +2,7 @@
 
 Estes programas permitem repetir uma condição com dados conhecidos e comparar o que muda quando uma proteção é aplicada. Os quatro primeiros casos preservam versões históricas do MakersHub. Os demais usam participantes, ordens e posições fictícios de uma corretora hipotética. A XP contextualiza somente o setor; nenhum programa descreve sua operação interna.
 
-Abra o terminal na raiz deste repositório. Use Python 3.11 ou posterior e a CLI OpenSSL 3.x. Confira sua versão com `openssl version`; a execução registrada usou 3.6.5. Prepare o SDK isolado com `python3 labs/architecture/setup_labs.py`; o lock fixa OpenTelemetry 1.45.1 e suas dependências. A instalação baixa os pacotes, e as práticas posteriores usam exportação somente para memória. O caso de data também usa Node e o TypeScript já registrado no lock das dependências do curso; execute `npm ci` se essas dependências ainda não estiverem instaladas. Os recibos informam as versões que foram efetivamente usadas.
+Abra o terminal na raiz deste repositório. Use Python 3.11 ou posterior e a CLI OpenSSL 3.x. Confira sua versão com `openssl version`; a execução registrada usou 3.6.5. Prepare o SDK isolado com `python3 labs/architecture/setup_labs.py`; o lock fixa OpenTelemetry 1.45.1 e suas dependências. A instalação baixa os pacotes, e as práticas posteriores usam exportação somente para memória. O caso de data também usa Node e o TypeScript fixado no lock dos laboratórios; execute `npm ci --prefix labs/architecture` para instalar essa dependência. Os recibos informam as versões que foram efetivamente usadas.
 
 Para executar todos os casos e registrar as saídas literais, use:
 

@@ -1,0 +1,15 @@
+{
+  "repo": "gravitational/teleport",
+  "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+  "path": "lib/srv/authhandlers.go",
+  "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+  "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--authhandlers.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.143193+00:00",
+  "sha256": "a9eccdc03e5293cbcfbad05b00902b7669b9a596b11589a0518ae93437a06c13",
+  "line_count": 1459,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/10cd532d782a454770abc0183325daa72c5f04b66d4151272a683e688cad816b.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.227652+00:00"
+}

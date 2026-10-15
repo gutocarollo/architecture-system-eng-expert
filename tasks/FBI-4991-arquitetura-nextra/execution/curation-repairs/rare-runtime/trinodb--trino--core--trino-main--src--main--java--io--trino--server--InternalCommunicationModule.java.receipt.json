@@ -1,0 +1,13 @@
+{
+  "repo": "trinodb/trino",
+  "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+  "path": "core/trino-main/src/main/java/io/trino/server/InternalCommunicationModule.java",
+  "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/InternalCommunicationModule.java",
+  "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/InternalCommunicationModule.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--server--InternalCommunicationModule.java",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.051003+00:00",
+  "sha256": "af092ffce211a9e1b101a1dff0c34089399a1fa461d0d3a3e477d22d6e1c00b1",
+  "line_count": 40
+}

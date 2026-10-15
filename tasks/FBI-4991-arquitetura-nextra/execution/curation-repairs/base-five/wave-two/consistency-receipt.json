@@ -1,0 +1,19 @@
+{
+  "observed_utc": "2026-10-15T04:04:15.564362+00:00",
+  "rows": 5,
+  "concept_ids": [
+    "aggregate",
+    "aggregate-root",
+    "chain-of-responsibility",
+    "feature-flags",
+    "template-method"
+  ],
+  "unique_source_artifacts": 24,
+  "hash_or_excerpt_errors": [],
+  "main_base_license_statuses": [
+    "READ"
+  ],
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "recommendations_sha256": "f68840af280ee247e7c113a61cb2fda6f0017ca807fc347fa972fd145b510438",
+  "scope": "Artifact consistency only; no independent semantic review or implementation test."
+}

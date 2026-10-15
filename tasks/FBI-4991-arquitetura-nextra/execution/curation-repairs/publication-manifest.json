@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T04:27:30.854891+00:00",
+  "source": "consolidated-recommendations.json",
+  "archive": "consolidated-recommendations.json.gz",
+  "contents_sha256": "3de457f9f69860dcacd7a66a01307aae6a55675db6c5457c417714597a37ba19",
+  "archive_sha256": "d82a6679abad729a5700dfa06f55f62bf440095577d4e07b31c0c509c042e072",
+  "source_bytes": 2595324,
+  "archive_bytes": 454549,
+  "note": "The uncompressed author integration source is local and can be restored byte for byte. This archive carries proposals and receipts, not independent approval."
+}

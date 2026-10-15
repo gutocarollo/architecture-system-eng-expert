@@ -1,0 +1,15 @@
+[
+  {
+    "repo": "rails/rails",
+    "ref": "v8.1.4",
+    "path": "actionview/lib/action_view/rendering.rb"
+  },
+  {
+    "repo": "redmine/redmine",
+    "path": "app/controllers/application_controller.rb"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/ingester/stream.go"
+  }
+]

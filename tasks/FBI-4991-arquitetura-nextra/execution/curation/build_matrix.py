@@ -2,6 +2,9 @@
 """Create a complete, evidence-bound author matrix without laundering partial matches."""
 import collections,datetime,gzip,hashlib,json,re
 from pathlib import Path
+from adjudication_gate import adjudication_issues, carry_forward_issues, independent_decision_issues
+from semantic_fingerprints import semantic_fingerprint
+from license_classification import scoped_license
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parents[3]
 load=lambda name:json.loads((BASE/name).read_text())
@@ -12,63 +15,13 @@ learning_by_id={x['concept_id']:x for x in learning['concepts']}
 heading_slugs=load('heading-slugs.json')
 assert {x['concept_id'] for x in coverage['concepts']}==set(selections)
 
-# These are explicit semantic findings, not exceptions to the requirement.
-GAPS={}
-def gaps(ids,reason):
- for key in ids.split():GAPS[key]=reason
-
-gaps('a-b-deployment','O controller Canary não demonstra a distribuição por atributo de usuário exigida por A/B.')
-gaps('actor-model single-writer-principle','A base de atores está verificada; falta uma aplicação OSS consumidora que delimite a propriedade e a escrita do estado.')
-gaps('clean-architecture onion-architecture','Immich declara adoção parcial de Hexagonal; isso não demonstra todas as regras de dependência de Clean ou Onion.')
-gaps('cell-based-architecture space-based-architecture pac vertical-slice-architecture three-phase-commit-3pc','O candidato disponível é framework, template, workshop ou demo. Falta uma aplicação OSS real que implemente o mecanismo completo.')
-gaps('customer-supplier conformist shared-kernel separate-ways','Context Mapper fornece o modelo de exemplo; falta a decisão e a implementação dos vínculos em um produto OSS real.')
-gaps('ubiquitous-language ddd modular-monolith','Os contextos nomeados GitLab são evidência parcial. Não demonstram sozinhos negociação de linguagem, o método DDD inteiro ou todas as fronteiras de um monólito modular.')
-gaps('distributed-lock','A base Mutex e o servidor de leases não demonstram ainda o uso completo da trava por uma aplicação consumidora delimitada.')
-gaps('reservation-pattern','O carrinho Medusa comprova idempotência; falta rastrear a reserva e os caminhos de confirmar e cancelar do estoque.')
-gaps('outbox-cdc','A persistência Fineract e o Event Router Debezium estão separados. Falta uma aplicação que conecte sua outbox ao CDC em configuração verificável.')
-gaps('transactional-inbox exactly-once-semantics','Deduplicação do broker não demonstra a transação que une inbox e efeito externo nem exactly once de ponta a ponta.')
-gaps('saga choreography-saga orchestration-saga compensating-transaction','O coordenador Seata TCC é adjacente. Falta o fluxo real de uma aplicação OSS que execute as etapas e as compensações da Saga correspondente.')
-gaps('write-through write-behind-write-back two-level-cache','A implementação Redisson está verificada; falta a configuração e o uso do mecanismo em uma aplicação OSS consumidora.')
-gaps('warm-standby cold-standby','A fonte encontrada é documentação primária. Falta uma aplicação ou configuração operacional OSS que mostre o procedimento correspondente.')
-gaps('pessimistic-locking','@Version comprova concorrência otimista. Falta o caminho de bloqueio pessimista no aplicativo consumidor.')
-gaps('fork-join','A execução concorrente foi localizada. Falta demonstrar a junção dos resultados da mesma operação.')
-gaps('lock-free wait-free','Operações atômicas ou ausência de mutex não provam a propriedade de progresso. Falta a análise do algoritmo e de seu limite de passos.')
-gaps('load-shedding','A interrupção por backpressure não comprova descarte ou recusa de carga na fronteira de admissão da aplicação escolhida.')
-gaps('eventual-consistency','Reconstruir estado por histórico não demonstra sozinho a consistência eventual entre uma escrita e a visão de leitura do produto.')
-gaps('oauth2 oidc','O arquivo de token exchange prova uma parte do protocolo. Falta o caminho de autorização e validação usado pela aplicação consumidora para o protocolo inteiro.')
-gaps('secrets-rotation','Criar uma credencial temporária não comprova a rotação da credencial estática. Falta o caminho de rotação e sua aplicação no banco.')
-gaps('serverless','O controlador Knative implementa a plataforma; falta uma aplicação OSS consumidora com função, trigger e configuração de execução.')
-gaps('retry-queue','O tracker de entrega futura não prova a transferência e o consumo de uma fila de nova tentativa da aplicação.')
-gaps('strangler-fig','Next.js implementa o roteamento necessário, mas falta uma migração identificada de uma aplicação OSS real entre o sistema anterior e o novo.')
-gaps('backend-for-frontend-bff api-composition gateway-aggregation','A fronteira Gitaly é um serviço. Falta a composição de múltiplas APIs para uma apresentação específica e seu consumidor real.')
-gaps('hateoas','URLs no retorno da API não demonstram navegação orientada por relações e ações disponíveis.')
-gaps('golden-signals','Os dashboards têm sinais úteis; falta conferir conjuntamente tráfego, erros, latência e saturação da mesma fronteira observada.')
-gaps('use-method-utilization-saturation-errors','O dashboard apresenta utilização e saturação. Falta comprovar o eixo de erros para cada recurso coberto.')
-gaps('opentelemetry','O trecho Loki usa tracing; é necessário provar a API OpenTelemetry efetivamente usada, em vez de inferir o SDK pelo nome de um span.')
-gaps('metrics','O trecho de tracing não demonstra os instrumentos de métricas e seus labels. Falta o arquivo do produto que cria e atualiza essas métricas.')
-gaps('memento','O log de sessão não demonstra ainda um snapshot opaco preservado e restaurado sem quebrar o encapsulamento.')
-gaps('bridge','O wrapper de logging pode ser Adapter. Falta demonstrar duas hierarquias que variam independentemente.')
-gaps('abstract-factory factory-method','A configuração genérica do plugin não demonstra ainda os métodos de criação e as famílias de produtos do padrão.')
-gaps('adapter facade proxy','O aplicativo FastAPI compõe middlewares. Falta o contrato específico do Adapter, da Facade ou do Proxy para fechar esses itens.')
-gaps('decorator','O middleware é um candidato de composição, mas falta rastrear o wrapper que conserva o contrato do objeto ou função decorado.')
-gaps('iterator interpreter','A árvore e o visitor foram localizados; falta o contrato de percurso ou o executor das expressões que demonstra esse conceito.')
-gaps('mediator','O serviço de escrita não demonstra ainda um mediador central que desacople os participantes.')
-gaps('specification','A consulta SQL do produto não demonstra um contrato Specification composto e reutilizado pelo domínio.')
-gaps('stateless-services','Um recurso API não prova ausência de estado local necessário em todos os caminhos do serviço.')
-gaps('tcc-try-confirm-cancel','Seata implementa o coordenador e o recurso TCC. Falta uma aplicação consumidora OSS real com reserva, confirmação e cancelamento de negócio.')
-gaps('kappa-architecture','Uma tarefa de stream não prova o reprocessamento pelo mesmo log nem a ausência de um caminho batch separado.')
-gaps('lambda-architecture','As ingestões batch e Kafka foram localizadas; falta ligar as visões ao caminho de consulta e à reconciliação do mesmo dado.')
-gaps('event-carried-state-transfer','Os eventos externos estão localizados. Falta conferir que o payload leva o estado necessário e que o consumidor não depende de uma consulta ao produtor.')
-gaps('correlation-id','Request ID está verificado. Falta propagar uma identidade de operação entre as requisições e mensagens da mesma jornada.')
-gaps('cqrs','Fineract separa leitura e escrita, mas a base JPA é persistência. Falta selecionar e confrontar uma base específica de CQRS com esse uso.')
-gaps('horizontal-partitioning','A base define partições; falta uma aplicação consumidora com tabela ou modelo particionado e a regra de roteamento explícitos.')
-gaps('geographic-sharding multi-region','O catálogo do servidor implementa placement. Falta uma configuração OSS de aplicação que liga sua população de dados e suas operações às regiões.')
-gaps('mapreduce','O motor e a definição de job estão verificados; falta um job consumidor OSS de negócio que ligue Mapper, Reducer e dados.')
-gaps('ambassador','A injeção de sidecar foi localizada. Falta demonstrar o proxy que representa o cliente no caminho de saída para a dependência remota.')
-
-# These replacements were read in actual product code after the first author inventory.
-for repaired in 'tcc-try-confirm-cancel choreography-saga strangler-fig geographic-sharding multi-region kappa-architecture lambda-architecture outbox-cdc transactional-inbox event-carried-state-transfer retry-queue horizontal-partitioning hateoas eventual-consistency golden-signals use-method-utilization-saturation-errors modular-monolith exactly-once-semantics mapreduce cell-based-architecture ambassador lock-free wait-free conformist serverless vertical-slice-architecture customer-supplier a-b-deployment pac three-phase-commit-3pc space-based-architecture shared-kernel separate-ways clean-architecture onion-architecture ddd ubiquitous-language warm-standby cold-standby bridge actor-model single-writer-principle distributed-lock reservation-pattern fork-join pessimistic-locking load-shedding specification stateless-services two-level-cache write-through write-behind-write-back backend-for-frontend-bff open-host-service published-language api-composition gateway-aggregation adapter facade proxy decorator factory-method abstract-factory iterator interpreter mediator memento oauth2 oidc metrics cqrs secrets-rotation saga orchestration-saga compensating-transaction opentelemetry correlation-id'.split():
- GAPS.pop(repaired,None)
+# Current author judgments and fingerprint-bound first-pass reviews are the only positive gates.
+adjudications=load('author-adjudications.json')
+review_baseline=load('review-baseline.json')
+baseline_by_id={row['concept_id']:row for row in review_baseline['concepts']}
+closure_path=BASE.parent/'curation-repairs/independent-closure.json'
+closure=json.loads(closure_path.read_text()) if closure_path.exists() else {}
+closure_by_id={row['concept_id']:row for row in closure.get('concepts',[])}
 
 GROUP_SKILLS={1:['architecture','microservices','ddd-specific'],2:['microservices','consensus','locking'],3:['microservices','event-driven','redpanda'],4:['cqrs','event-store'],5:['db','sql','storage','sharding'],6:['cache'],7:['resilience'],8:['concurrency','concurrency-specific'],9:['api','microservices'],10:['architecture','ddd-specific'],11:['migration'],12:['release','gitops'],13:['high-availability'],14:['k8s-security','identity','security'],15:['tracing','metrics','observability'],16:['workflow','workflow-specific'],17:['patterns','gof']}
 TREND_SKILL={1:'frontend',2:'process',3:'api',4:'process',5:'process',6:'process',7:'observability',8:'process',9:'api',10:'process',11:'release',12:'release',13:'observability',14:'security',15:'observability',16:'process',17:'process'}
@@ -81,8 +34,9 @@ def source_item(original):
  value['repo']=repo
  value['repository_metadata']=metadata.get(repo,{})
  if value.get('revision'):
-  value['license']=revision_licenses.get(repo+'@'+value['revision'],{})
+  value['license']=value.get('source_license') or revision_licenses.get(repo+'@'+value['revision'],{})
  else:value['license']=licenses.get(repo,{})
+ value['license']=scoped_license(value,value['license'],ROOT)
  return value
 
 def evidence(source,terms):
@@ -118,8 +72,7 @@ for concept in coverage['concepts']:
  primary_skill=candidates[0];trend=skill_item(TREND_SKILL[group]);trend['role']='ADJACENT_PROCESS_SUPPORT_NOT_PATTERN_IMPLEMENTATION'
  trend['trending']=next((r for r in trending['rows'] if r['repo']==trend['repo']),None)
  issues=[]
- if key in GAPS:issues.append({'kind':'SEMANTIC_GAP','reason':GAPS[key]})
- if sel.get('application_kind')!='PRODUCT_OSS':issues.append({'kind':'REAL_APPLICATION_MISSING','reason':'O localizador é '+sel.get('application_kind','UNKNOWN')+'. Ele não satisfaz a aplicação OSS real exigida.'})
+ if sel.get('application_kind') not in ['PRODUCT_OSS','INFRASTRUCTURE_OSS']:issues.append({'kind':'REAL_APPLICATION_MISSING','reason':'O localizador é '+sel.get('application_kind','UNKNOWN')+'. Ele não satisfaz a aplicação OSS real exigida.'})
  for role,items in [('base',bases),('application',apps),('skill',[primary_skill])]:
   for item in items:
    if item.get('kind') in ['FILE','UNRESOLVED_REVISION'] and item.get('http_status')!=200:issues.append({'kind':'SOURCE_UNAVAILABLE','role':role,'url':item['url']})
@@ -131,9 +84,43 @@ for concept in coverage['concepts']:
  if sel.get('verification_terms') and not found:issues.append({'kind':'MECHANISM_NOT_LOCATED','reason':'Nenhum localizador textual do mecanismo foi encontrado nos arquivos selecionados.'})
  # Textual hits are receipts for navigation, never a substitute for the semantic finding above.
  status='PENDING' if issues else 'AUTHOR_SOURCE_MATCH'
- entries.append({'concept_id':key,'canonical_name':concept['canonical_name'],'groups':concept['groups'],'primary_group':group,'priority_entries':concept['priority_entries'],'status':status,'independent_review':'PENDING','base':bases,'application':apps,'application_kind':sel.get('application_kind'),'mechanism':sel['mechanism'],'limits':sel['limits'],'decision_evidence':sel.get('decision_evidence',[]),'research_packet':sel.get('research_packet'),'classification_basis':sel.get('classification_basis'),'source_evidence':body_evidence,'source_locator_terms_not_found':missing,'skill':primary_skill,'skill_candidates':candidates,'skill_candidate_universe':'Only the explicitly selected public SKILL.md candidates in this row; stars compare their parent repositories, not individual skill quality.','trend_support':trend,'issues':issues,'learning':learning_by_id.get(key),'original_reference_paths':concept['reference_paths'],'not_applicable':False})
-summary={'canonical_concepts':len(entries),'author_source_matches':sum(e['status']=='AUTHOR_SOURCE_MATCH'for e in entries),'pending_concepts':sum(e['status']=='PENDING'for e in entries),'independently_reviewed_concepts':0,'not_applicable_exemptions':0,'issues_by_kind':dict(collections.Counter(i['kind']for e in entries for i in e['issues']))}
-result={'schema_version':'1.0','purpose':'Reconcile the complete 310-concept catalog with exact public sources, dated skill popularity, source licenses and explicit semantic gaps. AUTHOR_SOURCE_MATCH is an author claim awaiting independent review, not a completion certificate.','scope':{'workspace':str(ROOT),'branch':'docs/FBI-4991-arquitetura-aplicada','base_sha':'23d5d158d3a964dceba296296368ec14bcd8970b','generated_utc':datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'),'source_inventory_sha256':hashlib.sha256((BASE/'existing-sections.json').read_bytes()).hexdigest(),'coverage_sha256':hashlib.sha256((ROOT/'tasks/architecture-course-2026-10-14/evidence/coverage.json').read_bytes()).hexdigest()},'summary':summary,'trend_snapshot':trending,'concepts':entries}
+ entry={'concept_id':key,'canonical_name':concept['canonical_name'],'groups':concept['groups'],'primary_group':group,'priority_entries':concept['priority_entries'],'status':status,'independent_review':'PENDING','base':bases,'application':apps,'application_kind':sel.get('application_kind'),'mechanism':sel['mechanism'],'limits':sel['limits'],'decision_evidence':sel.get('decision_evidence',[]),'research_packet':sel.get('research_packet'),'classification_basis':sel.get('classification_basis'),'source_evidence':body_evidence,'source_locator_terms_not_found':missing,'skill':primary_skill,'skill_candidates':candidates,'skill_candidate_universe':'Only the explicitly selected public SKILL.md candidates in this row; stars compare their parent repositories, not individual skill quality.','trend_support':trend,'issues':issues,'learning':learning_by_id.get(key),'original_reference_paths':concept['reference_paths'],'not_applicable':False}
+ adjudication=adjudications.get(key)
+ if adjudication:
+  issues.extend(adjudication_issues(key,sel,sources,adjudication,ROOT))
+  explicit=[]
+  for proof in adjudication['primary_evidence']:
+   item=source_item(proof['source_url'])
+   lines=(ROOT/item['artifact']).read_text().splitlines()
+   hit={'term':proof['claim'],'claim':proof['claim'],'start_line':proof['start_line'],'end_line':proof['end_line'],
+        'excerpt':'\n'.join(lines[proof['start_line']-1:proof['end_line']]),'excerpt_sha256':proof['excerpt_sha256'],'url':proof['url']}
+   matching=next((record for record in explicit if record['role']==proof['role'] and record['source_url']==proof['source_url']),None)
+   if matching:matching['hits'].append(hit)
+   else:explicit.append({'role':proof['role'],'source_url':proof['source_url'],'hits':[hit]})
+  entry['source_evidence']=explicit
+  entry['author_adjudication']={field:adjudication[field]for field in ['decision','checked_by','checked_at_utc','selection_fingerprint','remaining_gates','repair_packet','repair_packet_sha256']}
+ else:
+  prior=baseline_by_id.get(key)
+  carry_issues=(independent_decision_issues(entry,closure_by_id[key],ROOT) if key in closure_by_id else carry_forward_issues(entry,prior,ROOT))
+  if not prior or prior.get('carry_eligible') is not True:
+   carry_issues.append({'kind':'AUTHOR_ADJUDICATION_MISSING','reason':'A repaired concept still requires its explicit current author judgment.'})
+  issues.extend(carry_issues)
+  if not carry_issues:
+   entry['independent_review']=prior['first_pass']['state']
+   entry['independent_review_detail']=prior['first_pass']
+   entry['author_adjudication']={'decision':'AUTHOR_SOURCE_MATCH','origin':'UNCHANGED_INDEPENDENT_FIRST_PASS','semantic_fingerprint':prior['semantic_fingerprint'],'remaining_gates':[]}
+ if key in closure_by_id:
+  decision=closure_by_id[key]
+  closure_issues=independent_decision_issues(entry,decision,ROOT)
+  issues.extend(closure_issues)
+  if not closure_issues:
+   entry['independent_review']=decision['state']
+   entry['independent_review_detail']={field:decision[field] for field in ['state','origin','review_path','review_sha256','reviewed_utc','reviewed_matrix_sha256']}
+ entry['status']='PENDING' if issues else 'AUTHOR_SOURCE_MATCH'
+ entry['semantic_fingerprint']=semantic_fingerprint(entry)
+ entries.append(entry)
+summary={'canonical_concepts':len(entries),'author_source_matches':sum(e['status']=='AUTHOR_SOURCE_MATCH'for e in entries),'pending_concepts':sum(e['status']=='PENDING'for e in entries),'independently_reviewed_concepts':sum(e['independent_review']!='PENDING'for e in entries),'independent_recheck_pending':sum(e['independent_review']=='PENDING'for e in entries),'independent_states':dict(collections.Counter(e['independent_review']for e in entries)),'not_applicable_exemptions':0,'issues_by_kind':dict(collections.Counter(i['kind']for e in entries for i in e['issues']))}
+result={'schema_version':'1.0','purpose':'Reconcile the complete 310-concept catalog with exact public sources, dated skill popularity, source licenses and explicit semantic gaps. AUTHOR_SOURCE_MATCH alone is an author claim. Independent decisions are imported from actual review receipts and remain bounded to each documented mechanism.','scope':{'workspace':str(ROOT),'branch':'docs/FBI-4991-arquitetura-aplicada','base_sha':'23d5d158d3a964dceba296296368ec14bcd8970b','generated_utc':datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00','Z'),'source_inventory_sha256':hashlib.sha256((BASE/'existing-sections.json').read_bytes()).hexdigest(),'coverage_sha256':hashlib.sha256((ROOT/'tasks/architecture-course-2026-10-14/evidence/coverage.json').read_bytes()).hexdigest()},'summary':summary,'trend_snapshot':trending,'concepts':entries}
 # The full raw receipts remain normalized in sources.json and revision-licenses.json.
 def compact_source(source):
  fields=['kind','repo','path','revision','url','http_status','observed_utc','sha256','remote_sha256','original_artifact_sha256','artifact_sha256','artifact_sanitization','artifact','key','scope','stars_rank_in_subject_candidate_set','role','trending']
@@ -149,7 +136,7 @@ for entry in entries:
  serial_entries.append(compact)
 result['concepts']=serial_entries
 result['skill_catalog']={key:skill_item(key)for key in skills}
-(BASE/'matrix.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+(BASE/'matrix.json').write_text(json.dumps(result,ensure_ascii=False,separators=(',',':')))
 contents=(BASE/'matrix.json').read_bytes()
 compressed=gzip.compress(contents,compresslevel=9,mtime=0)
 (BASE/'matrix.json.gz').write_bytes(compressed)
@@ -184,13 +171,14 @@ for group,info in group_info.items():
  title='Curadoria: '+info['title']
  text='---\ntitle: '+json.dumps(title,ensure_ascii=False)+'\ndescription: '+json.dumps('Fontes, skills, versões, licenças e lacunas dos conceitos de '+info['title']+'.',ensure_ascii=False)+'\ndiataxis: reference\n---\n\n# '+title+'\n\n'
  text+='Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.\n\n'
- text+='Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.\n\n'
+ text+='Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.\n\n'
  for row in rows:
   if heading_slugs[row['concept_id']]!=row['concept_id']:text+='<span id=\"'+row['concept_id']+'\" />\n\n'
   text+='## '+row['canonical_name']+'\n\n'
   text+='O identificador canônico é `'+row['concept_id']+'`. '
   if row['status']=='PENDING':text+='**A curadoria deste item permanece pendente.** '+ ' '.join(i.get('reason','A fonte ou a licença precisa ser verificada.')for i in row['issues'])+'\n\n'
-  else:text+='**Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.\n\n'
+  elif row['independent_review']!='PENDING':text+='**A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.\n\n'
+  else:text+='**Há uma correspondência autoral reparada com fontes primárias.** A rechecagem independente desta versão continua pendente.\n\n'
   text+=safe_mdx_text(row['mechanism'])+'\n\n'
   text+='A base de estudo é '+ '; '.join(link_item(i)for i in row['base'])+'. A aplicação ou candidato de aplicação é '+ '; '.join(link_item(i)for i in row['application'])+'.\n\n'
   skill=row['skill'];stars=skill['repository_metadata'].get('stars');observed=skill['repository_metadata'].get('observed_utc','')
@@ -198,7 +186,7 @@ for group,info in group_info.items():
   app_hits=[h for f in row['source_evidence']if f['role']=='application'for h in f['hits']]
   if app_hits:
    h=app_hits[0]
-   text+='Para localizar o mecanismo, comece pelo [trecho que contém `'+h['term']+'`]('+h['url']+'). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.\n\n'
+   text+='Para conferir o mecanismo no produto, comece por [este trecho do código]('+h['url']+'). '+safe_mdx_text(h.get('claim','O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.'))+'\n\n'
   text+=safe_mdx_text(row['limits'])+'\n\n'
   for decision in row.get('decision_evidence',[]):
    text+='A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto]('+decision['url']+'). '+safe_mdx_text(decision.get('claim',''))+'\n\n'
@@ -211,7 +199,7 @@ packs=['obra/superpowers','mattpocock/skills','addyosmani/agent-skills','wshobso
 ranked=sorted((metadata[r]for r in packs),key=lambda d:d.get('stars',0),reverse=True)
 old={x['repoURL'].removeprefix('https://github.com/'):x for name in ['github-snapshot.json','github-snapshot-supplement.json']for x in json.loads((ROOT/'tasks/architecture-course-2026-10-14/evidence'/name).read_text())}
 text='---\ntitle: Curadoria dos 310 conceitos\ndescription: Matriz completa de skills, frameworks e aplicações OSS, com versões, licenças, tendência datada e lacunas explícitas.\ndiataxis: reference\n---\n\n# Curadoria dos 310 conceitos\n\n'
-text+='Esta matriz responde ao pedido de uma orientação de agente, uma base de biblioteca ou framework e uma aplicação OSS real para cada conceito. Os **310 conceitos canônicos** possuem uma entrada própria com fontes e situação. Nesta versão autoral, **'+str(summary['author_source_matches'])+'** têm correspondência proposta entre mecanismo e fontes primárias, enquanto **'+str(summary['pending_concepts'])+'** conservam pendências. A revisão independente da nova matriz ainda não foi concluída; esses números não certificam o aceite integral. Nenhum conceito foi dispensado como “não aplicável”.\n\n'
+text+='Esta matriz responde ao pedido de uma orientação de agente, uma base de biblioteca ou framework e uma aplicação OSS real para cada conceito. Os **310 conceitos canônicos** possuem uma entrada própria com fontes e situação. Nesta versão autoral, **'+str(summary['author_source_matches'])+'** têm correspondência proposta entre mecanismo e fontes primárias, enquanto **'+str(summary['pending_concepts'])+'** conservam pendências. Os pareceres independentes cobrem '+str(summary['independently_reviewed_concepts'])+' entradas; '+str(summary['independent_recheck_pending'])+' aguardam decisão. A primeira passada conserva 259 decisões, incluindo 14 observações não bloqueantes; a rechecagem aceitou os 51 recortes reparados. A decisão vale para o mecanismo documentado, não certifica uma implantação ou todo o produto OSS. Nenhum conceito foi dispensado como “não aplicável”.\n\n'
 text+='Uma biblioteca mostra como o mecanismo é implementado. Um produto OSS mostra seu uso ou a execução desse mecanismo num sistema real, incluindo produtos de infraestrutura. Um sample, template ou workshop continua identificado como demonstração, mesmo quando executável. Uma documentação ou um localizador que apenas contém o nome do conceito não fecha a correspondência.\n\n'
 text+='## Consulte por família\n\n| Família | Conceitos canônicos nesta página | Correspondências autorais | Pendências |\n| --- | ---: | ---: | ---: |\n'
 for g,info in group_info.items():

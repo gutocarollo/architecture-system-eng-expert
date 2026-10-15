@@ -8,11 +8,11 @@ diataxis: reference
 
 Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
 
-Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
 
 ## Aggregator
 
-O identificador canônico é `aggregator`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `aggregator`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 NiFi reúne FlowFiles em bins e produz a representação agregada.
 
@@ -20,7 +20,7 @@ A base de estudo é [apache/camel / AggregateProcessor.java @ cd2ce899](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `merge`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/MergeContent.java#L141-L147). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/MergeContent.java#L141-L147). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -28,7 +28,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Competing Consumers
 
-O identificador canônico é `competing-consumers`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `competing-consumers`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Superset monta a aplicação Celery; workers concorrentes retiram tarefas da fila e executam por um pool.
 
@@ -36,7 +36,7 @@ A base de estudo é [celery/celery / worker.py @ 33868c3d](https://github.com/ce
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Celery`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -44,7 +44,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Content-Based Router
 
-O identificador canônico é `content-based-router`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `content-based-router`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Camel compõe filtros; o processador NiFi avalia atributos e transfere os registros pela relação selecionada.
 
@@ -52,7 +52,7 @@ A base de estudo é [apache/camel / FilterProcessor.java @ cd2ce899](https://git
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `evaluate`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -60,7 +60,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Correlation ID
 
-O identificador canônico é `correlation-id`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `correlation-id`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Airflow usa o SDK OpenTelemetry e TraceContextTextMapPropagator. Ao existir um contexto pai válido, o carrier reutiliza seu trace_id para relacionar os spans da execução.
 
@@ -68,7 +68,7 @@ A base de estudo é [open-telemetry/opentelemetry-python / tracecontext.py @ 155
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `opentelemetry`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/shared/observability/src/airflow_shared/observability/traces/__init__.py#L244-L250). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/shared/observability/src/airflow_shared/observability/traces/__init__.py#L244-L250). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O trace_id correlaciona o recorte de execução instrumentado. Ele não substitui a chave de negócio da ordem nem promete que todas as tentativas futuras conservam a mesma identidade.
 
@@ -76,7 +76,7 @@ No curso, [abra o caso aplicado](/jornadas/diagnostics/) e [consulte a ação e 
 
 ## Dead Letter Queue
 
-O identificador canônico é `dead-letter-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `dead-letter-queue`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 RabbitMQ encaminha mensagens descartadas para dead letter e limita a repetição de mensagens problemáticas nas filas quorum.
 
@@ -84,7 +84,7 @@ A base de estudo é [rabbitmq/rabbitmq-server / rabbit_dead_letter.erl @ 0d52908
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `dead_letter`](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_fifo.erl#L233-L239). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_fifo.erl#L233-L239). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -92,7 +92,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Delayed Queue
 
-O identificador canônico é `delayed-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `delayed-queue`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Pulsar conserva mensagens para entrega futura e acompanha o instante de elegibilidade.
 
@@ -100,7 +100,7 @@ A base de estudo é [apache/pulsar / ProducerImpl.java @ 7ddf52be](https://githu
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `delayed`](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/delayed/bucket/BucketDelayedDeliveryTracker.java#L70-L76). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/delayed/bucket/BucketDelayedDeliveryTracker.java#L70-L76). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Entrega futura não demonstra o fluxo de retry e transferência entre tópicos. O consumidor deve comprovar a política da nova tentativa.
 
@@ -108,7 +108,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Event Notification
 
-O identificador canônico é `event-notification`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `event-notification`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Fineract recebe eventos do domínio e separa notificações internas da persistência para integração externa.
 
@@ -116,7 +116,7 @@ A base de estudo é [ThreeDotsLabs/watermill / event_bus.go @ 080d4b4e](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BusinessEvent`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -124,7 +124,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Event Streaming
 
-O identificador canônico é `event-streaming`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `event-streaming`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Flink executa uma tarefa de stream e coordena checkpoints. Kafka Streams fornece uma base alternativa para processar um log contínuo.
 
@@ -132,7 +132,7 @@ A base de estudo é [apache/kafka / KafkaStreams.java @ e58847b4](https://github
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `StreamTask`](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/runtime/tasks/StreamTask.java#L222-L228). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/runtime/tasks/StreamTask.java#L222-L228). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Processar continuamente não prova Kappa sozinho: falta comprovar que o mesmo log sustenta reprocessamento sem caminho batch separado.
 
@@ -140,7 +140,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Event-Carried State Transfer
 
-O identificador canônico é `event-carried-state-transfer`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `event-carried-state-transfer`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O consumidor de binlog NiFi recebe o conteúdo das linhas modificadas no evento e escreve as imagens anterior e posterior nos registros de saída. Esse caminho transfere o estado carregado pelo evento sem precisar fazer uma consulta de negócio por identificador para obter novamente a linha.
 
@@ -148,7 +148,7 @@ A base de estudo é [osheroff/mysql-binlog-connector-java / UpdateRowsEventData.
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `getRows`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-cdc/nifi-cdc-mysql-bundle/nifi-cdc-mysql-processors/src/main/java/org/apache/nifi/cdc/mysql/event/UpdateRowsEventInfo.java#L32-L38). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-cdc/nifi-cdc-mysql-bundle/nifi-cdc-mysql-processors/src/main/java/org/apache/nifi/cdc/mysql/event/UpdateRowsEventInfo.java#L32-L38). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A abrangência da imagem depende de binlog_row_image e dos campos presentes no evento. A leitura de metadados da tabela não é uma consulta do estado atual da linha. O recorte é a transferência de estado das linhas de CDC, não a promessa de que todo evento de negócio carregue um agregado completo.
 
@@ -156,7 +156,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Fan-in
 
-O identificador canônico é `fan-in`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `fan-in`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O funnel NiFi reúne conexões de entrada em uma saída; o FanIn Watermill é a base comparada para reunir mensagens.
 
@@ -164,7 +164,7 @@ A base de estudo é [ThreeDotsLabs/watermill / fanin.go @ 080d4b4e](https://gith
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Funnel`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-core-api/src/main/java/org/apache/nifi/controller/StandardFunnel.java#L142-L148). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-core-api/src/main/java/org/apache/nifi/controller/StandardFunnel.java#L142-L148). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -172,7 +172,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Fan-out
 
-O identificador canônico é `fan-out`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `fan-out`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Home Assistant publica e assina tópicos MQTT; Mosquitto encaminha uma publicação aos assinantes correspondentes. A opção QoS 0 do cliente delimita o envio sem confirmação de entrega e sem reentrega do protocolo.
 
@@ -180,7 +180,7 @@ A base de estudo é [eclipse-paho/paho.mqtt.python / client.py @ 6335e3f2](https
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `async_publish`](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A semântica at most once está limitada ao QoS 0 escolhido. QoS 1 e 2 têm outros contratos. Aceitar o envio não confirma o efeito de negócio de cada assinante; esse é o limite do envio sem resposta da aplicação.
 
@@ -188,7 +188,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Fire-and-Forget
 
-O identificador canônico é `fire-and-forget`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `fire-and-forget`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Home Assistant publica e assina tópicos MQTT; Mosquitto encaminha uma publicação aos assinantes correspondentes. A opção QoS 0 do cliente delimita o envio sem confirmação de entrega e sem reentrega do protocolo.
 
@@ -196,7 +196,7 @@ A base de estudo é [eclipse-paho/paho.mqtt.python / client.py @ 6335e3f2](https
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `async_publish`](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A semântica at most once está limitada ao QoS 0 escolhido. QoS 1 e 2 têm outros contratos. Aceitar o envio não confirma o efeito de negócio de cada assinante; esse é o limite do envio sem resposta da aplicação.
 
@@ -204,7 +204,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Message Enricher
 
-O identificador canônico é `message-enricher`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `message-enricher`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 NiFi consulta um serviço de lookup e acrescenta os valores aos atributos do FlowFile.
 
@@ -212,7 +212,7 @@ A base de estudo é [apache/camel / Enricher.java @ cd2ce899](https://github.com
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `lookup`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/LookupAttribute.java#L129-L135). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/LookupAttribute.java#L129-L135). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -220,7 +220,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Message Filter
 
-O identificador canônico é `message-filter`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `message-filter`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Camel compõe filtros; o processador NiFi avalia atributos e transfere os registros pela relação selecionada.
 
@@ -228,7 +228,7 @@ A base de estudo é [apache/camel / FilterProcessor.java @ cd2ce899](https://git
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `evaluate`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -236,7 +236,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Message Queue
 
-O identificador canônico é `message-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `message-queue`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Superset monta a aplicação Celery; workers concorrentes retiram tarefas da fila e executam por um pool.
 
@@ -244,7 +244,7 @@ A base de estudo é [celery/celery / worker.py @ 33868c3d](https://github.com/ce
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Celery`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -252,7 +252,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Message Router
 
-O identificador canônico é `message-router`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `message-router`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Camel compõe filtros; o processador NiFi avalia atributos e transfere os registros pela relação selecionada.
 
@@ -260,7 +260,7 @@ A base de estudo é [apache/camel / FilterProcessor.java @ cd2ce899](https://git
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `evaluate`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java#L301-L307). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -268,7 +268,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Message Translator
 
-O identificador canônico é `message-translator`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `message-translator`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 ConvertRecord herda o processamento de AbstractRecordProcessor. A classe base do processador abre um RecordReader com a configuração de entrada e um RecordSetWriter com a configuração de saída; o processador converte a representação dos registros sem expor esse formato ao restante do fluxo.
 
@@ -276,7 +276,7 @@ A base de estudo é [apache/camel / TransformProcessor.java @ cd2ce899](https://
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `RecordReader`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/AbstractRecordProcessor.java#L113-L119). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/AbstractRecordProcessor.java#L113-L119). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -284,7 +284,7 @@ No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a aç�
 
 ## Poison Message Handling
 
-O identificador canônico é `poison-message-handling`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `poison-message-handling`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 RabbitMQ encaminha mensagens descartadas para dead letter e limita a repetição de mensagens problemáticas nas filas quorum.
 
@@ -292,7 +292,7 @@ A base de estudo é [rabbitmq/rabbitmq-server / rabbit_dead_letter.erl @ 0d52908
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `dead_letter`](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_fifo.erl#L233-L239). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_fifo.erl#L233-L239). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -300,15 +300,15 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Priority Queue
 
-O identificador canônico é `priority-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `priority-queue`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 A fila Python fornece a base de ordenação local; RabbitMQ seleciona filas por prioridade no broker.
 
-A base de estudo é [python/cpython / queue.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/queue.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [rabbitmq/rabbitmq-server / rabbit_priority_queue.erl @ 0d529086](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_priority_queue.erl); licença [MPL-2.0](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/LICENSE).
+A base de estudo é [python/cpython / queue.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/queue.py); licença [Python-2.0](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [rabbitmq/rabbitmq-server / rabbit_priority_queue.erl @ 0d529086](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_priority_queue.erl); licença [MPL-2.0](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/LICENSE).
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `priority`](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_priority_queue.erl#L37-L43). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_priority_queue.erl#L37-L43). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -318,7 +318,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Producer/Consumer
 
-O identificador canônico é `producer-consumer`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `producer-consumer`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Superset monta a aplicação Celery; workers concorrentes retiram tarefas da fila e executam por um pool.
 
@@ -326,7 +326,7 @@ A base de estudo é [celery/celery / worker.py @ 33868c3d](https://github.com/ce
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Celery`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -336,7 +336,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Publish/Subscribe
 
-O identificador canônico é `publish-subscribe`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `publish-subscribe`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Home Assistant publica e assina tópicos MQTT; Mosquitto encaminha uma publicação aos assinantes correspondentes. A opção QoS 0 do cliente delimita o envio sem confirmação de entrega e sem reentrega do protocolo.
 
@@ -344,7 +344,7 @@ A base de estudo é [eclipse-paho/paho.mqtt.python / client.py @ 6335e3f2](https
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `async_publish`](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A semântica at most once está limitada ao QoS 0 escolhido. QoS 1 e 2 têm outros contratos. Aceitar o envio não confirma o efeito de negócio de cada assinante; esse é o limite do envio sem resposta da aplicação.
 
@@ -354,7 +354,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Request/Reply
 
-O identificador canônico é `request-reply`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `request-reply`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 GitLab envia operações para o serviço Gitaly por RPC e usa a resposta da chamada.
 
@@ -362,7 +362,7 @@ A base de estudo é [grpc/grpc-go / server.go @ 4d4d4284](https://github.com/grp
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Gitaly`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb#L27-L33). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb#L27-L33). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -370,7 +370,7 @@ No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a aç�
 
 ## Resequencer
 
-O identificador canônico é `resequencer`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `resequencer`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 NiFi conserva índices de ordem e direciona registros que chegaram antes ou depois do índice esperado.
 
@@ -378,7 +378,7 @@ A base de estudo é [apache/camel / Resequencer.java @ cd2ce899](https://github.
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `order`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/EnforceOrder.java#L107-L113). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/EnforceOrder.java#L107-L113). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -386,7 +386,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Retry Queue
 
-O identificador canônico é `retry-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `retry-queue`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Postfix mantém mensagens cuja entrega falhou temporariamente na fila deferred e calcula quando elas podem voltar à fila ativa. O gerenciador de filas considera o horário de nova tentativa e o intervalo de backoff, em vez de repetir imediatamente a entrega que acabou de falhar.
 
@@ -394,7 +394,7 @@ A base de estudo é [rabbitmq/rabbitmq-server / rabbit_dead_letter.erl @ 0d52908
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `defer`](https://github.com/vdukhovni/postfix/blob/8e965decf941bba12afdd9ca7938957071ec2ac0/postfix/src/qmgr/qmgr_active.c#L129-L135). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/vdukhovni/postfix/blob/8e965decf941bba12afdd9ca7938957071ec2ac0/postfix/src/qmgr/qmgr_active.c#L129-L135). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O exemplo é a entrega de e-mail pelo daemon Postfix. Uma falha permanente pode produzir bounce em vez de nova tentativa; mensagens também têm prazo de expiração. A base RabbitMQ fornece mecanismos de filas e dead lettering comparáveis, sem afirmar que Postfix dependa dela.
 
@@ -402,7 +402,7 @@ No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação
 
 ## Splitter
 
-O identificador canônico é `splitter`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `splitter`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O processador NiFi divide o FlowFile em partes e conserva os atributos da divisão.
 
@@ -410,7 +410,7 @@ A base de estudo é [apache/camel / Splitter.java @ cd2ce899](https://github.com
 
 A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `split`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/SplitText.java#L79-L85). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/SplitText.java#L79-L85). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 

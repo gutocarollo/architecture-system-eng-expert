@@ -1,0 +1,12 @@
+{
+  "observed_utc": "2026-10-15T03:56:50.942321+00:00",
+  "rows": 5,
+  "unique_source_artifacts": 27,
+  "hash_or_excerpt_errors": [],
+  "main_base_license_statuses": [
+    "READ"
+  ],
+  "frozen_matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "recommendations_sha256": "b99f3878b5e793988a931178d39414d534ce4e782c2c8c941261af542f148997",
+  "scope": "Artifact consistency only; no implementation test or independent semantic verdict."
+}

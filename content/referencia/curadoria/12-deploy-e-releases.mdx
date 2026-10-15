@@ -8,13 +8,13 @@ diataxis: reference
 
 Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
 
-Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
 
 <span id="a-b-deployment" />
 
 ## A/B Deployment
 
-O identificador canônico é `a-b-deployment`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `a-b-deployment`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O Flagger usa condições de cabeçalhos ou cookies para selecionar uma população. O roteador produz uma regra Istio para esse grupo e uma regra de fallback para a versão primária. O controller executa runAB, encaminha o grupo à versão em avaliação, conta as iterações e promove a versão após o gate de promoção.
 
@@ -22,7 +22,7 @@ A base de estudo é [istio/api / virtual_service.proto @ 15dd4442](https://githu
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `HTTPMatchRequest`](https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go#L618-L624). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go#L618-L624). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 O trecho prova distribuição e promoção por grupo de requisições. Ele não prova aleatorização de experimento, cálculo de significância estatística ou um teste em produção. Istio é a base de roteamento; Flagger é o operador real que a consome.
 
@@ -32,7 +32,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Blue/Green Deployment
 
-O identificador canônico é `blue-green-deployment`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `blue-green-deployment`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O controller Argo Rollouts reconcilia os estados Blue/Green e Canary e avalia análises de promoção usando recursos Kubernetes.
 
@@ -40,7 +40,7 @@ A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BlueGreen`](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A/B por população não é um sinônimo de Canary por percentual. A linha A/B continua pendente do roteamento por critério de usuário.
 
@@ -48,7 +48,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Canary Release
 
-O identificador canônico é `canary-release`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `canary-release`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O controller Argo Rollouts reconcilia os estados Blue/Green e Canary e avalia análises de promoção usando recursos Kubernetes.
 
@@ -56,7 +56,7 @@ A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BlueGreen`](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A/B por população não é um sinônimo de Canary por percentual. A linha A/B continua pendente do roteamento por critério de usuário.
 
@@ -64,7 +64,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## GitOps
 
-O identificador canônico é `gitops`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `gitops`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O controller Argo CD compara a aplicação com a fonte desejada e inicia a reconciliação da operação.
 
@@ -72,7 +72,7 @@ A base de estudo é [kubernetes/client-go / simple.go @ 7aade4e9](https://github
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `reconcile`](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/controller/appcontroller.go#L1979-L1985). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/controller/appcontroller.go#L1979-L1985). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
 
@@ -80,7 +80,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Immutable Infrastructure
 
-O identificador canônico é `immutable-infrastructure`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `immutable-infrastructure`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O chart Airflow declara a estratégia do Deployment; o controller Kubernetes substitui conjuntos de pods conforme a estratégia.
 
@@ -88,7 +88,7 @@ A base de estudo é [kubernetes/kubernetes / sync.go @ 4f2dd0c8](https://github.
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `strategy`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml#L55-L61). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml#L55-L61). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Uma estratégia de Deployment não comprova sozinha infraestrutura imutável para banco, disco e configuração externa.
 
@@ -96,7 +96,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Infrastructure as Code
 
-O identificador canônico é `infrastructure-as-code`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `infrastructure-as-code`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O provider AWS reconcilia a declaração do cluster e as zonas de disponibilidade como failure domains.
 
@@ -104,7 +104,7 @@ A base de estudo é [kubernetes-sigs/cluster-api / cluster_types.go @ 3d286e2c](
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `FailureDomain`](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/controllers/awscluster_controller.go#L426-L432). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/controllers/awscluster_controller.go#L426-L432). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A reconciliação declarativa não comprova uma implantação específica nem continuidade durante perda de zona.
 
@@ -112,7 +112,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Progressive Delivery
 
-O identificador canônico é `progressive-delivery`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `progressive-delivery`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O controller Argo Rollouts reconcilia os estados Blue/Green e Canary e avalia análises de promoção usando recursos Kubernetes.
 
@@ -120,7 +120,7 @@ A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `BlueGreen`](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/argoproj/argo-rollouts/blob/ee7e28a1365553a3d2563a2c11ffea5ec0b7644a/rollout/bluegreen.go#L26-L32). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A/B por população não é um sinônimo de Canary por percentual. A linha A/B continua pendente do roteamento por critério de usuário.
 
@@ -128,23 +128,23 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Recreate Deployment
 
-O identificador canônico é `recreate-deployment`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `recreate-deployment`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
-O chart Airflow declara a estratégia do Deployment; o controller Kubernetes substitui conjuntos de pods conforme a estratégia.
+O chart mantido pela comunidade Prometheus escolhe Recreate para o Deployment do servidor por padrão. Seu template emite essa estratégia e elimina a configuração de rolling update. No controlador Kubernetes, o caminho correspondente primeiro escala as versões antigas para baixo, espera que não haja pods antigos em execução e só depois sobe a nova versão.
 
-A base de estudo é [kubernetes/kubernetes / sync.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/sync.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / api-server-deployment.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / scheduler-deployment.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/scheduler/scheduler-deployment.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+A base de estudo é [kubernetes/kubernetes / recreate.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/recreate.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE). A aplicação ou candidato de aplicação é [prometheus-community/helm-charts / values.yaml @ e03ae02f](https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/charts/prometheus/values.yaml); licença [Apache-2.0](https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/LICENSE); [prometheus-community/helm-charts / deploy.yaml @ e03ae02f](https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/charts/prometheus/templates/deploy.yaml); licença [Apache-2.0](https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/LICENSE).
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `strategy`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml#L55-L61). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/prometheus-community/helm-charts/blob/e03ae02f8664ffa7ab88720c1c5542d6f678d293/charts/prometheus/values.yaml#L470-L472). O chart do Prometheus escolhe concretamente strategy.type Recreate.
 
-Uma estratégia de Deployment não comprova sozinha infraestrutura imutável para banco, disco e configuração externa.
+A aplicação é a configuração pública do servidor Prometheus, não uma inferência de um campo configurável do Airflow. O comportamento vale para o modo Deployment e para esses valores; opções StatefulSet/DaemonSet seguem outros caminhos. A leitura não comprova um rollout executado nem disponibilidade contínua: Recreate pode deixar um intervalo sem servidor.
 
 No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#recreate-deployment). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
 
 ## Rolling Deployment
 
-O identificador canônico é `rolling-deployment`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `rolling-deployment`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 O chart Airflow declara a estratégia do Deployment; o controller Kubernetes substitui conjuntos de pods conforme a estratégia.
 
@@ -152,7 +152,7 @@ A base de estudo é [kubernetes/kubernetes / sync.go @ 4f2dd0c8](https://github.
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `strategy`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml#L55-L61). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-deployment.yaml#L55-L61). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 Uma estratégia de Deployment não comprova sozinha infraestrutura imutável para banco, disco e configuração externa.
 
@@ -160,7 +160,7 @@ No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e
 
 ## Shadow Deployment
 
-O identificador canônico é `shadow-deployment`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+O identificador canônico é `shadow-deployment`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
 
 Istio traduz a política mirror em configuração de envio de cópia da requisição pelo proxy.
 
@@ -168,7 +168,7 @@ A base de estudo é [envoyproxy/envoy / router.cc @ 960eacbb](https://github.com
 
 A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/ci-cd-and-automation/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
 
-Para localizar o mecanismo, comece pelo [trecho que contém `Mirror`](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/route/route.go#L682-L688). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/route/route.go#L682-L688). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
 
 A cópia precisa isolar efeitos no destino espelho. O código de roteamento não garante essa ausência de efeito por si só.
 

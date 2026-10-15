@@ -1,0 +1,12 @@
+{
+  "repo": "wundergraph/cosmo",
+  "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+  "path": "composition/src/v1/federation/federation-factory.ts",
+  "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--composition--src--v1--federation--federation-factory.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:50:34.038600+00:00",
+  "sha256": "7c97dca90515348188a6c2fff1f50744147509e4a25077fdb5fb084510ce49b9",
+  "line_count": 3705
+}

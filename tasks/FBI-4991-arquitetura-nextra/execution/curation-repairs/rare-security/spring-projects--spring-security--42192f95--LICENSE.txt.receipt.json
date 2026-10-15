@@ -1,0 +1,15 @@
+{
+  "repo": "spring-projects/spring-security",
+  "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+  "path": "LICENSE.txt",
+  "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/LICENSE.txt",
+  "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/LICENSE.txt",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--LICENSE.txt",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.491792+00:00",
+  "sha256": "7200000367e0e8b47822d563a5ddd2dd3a97cc05b32bd7dbcc7b4eeb92b76628",
+  "line_count": 202,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6c7f424a6e2f2378b343e438808ca8060a019eff3a42dbee41cae4dca4c7ac90.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.759769+00:00"
+}

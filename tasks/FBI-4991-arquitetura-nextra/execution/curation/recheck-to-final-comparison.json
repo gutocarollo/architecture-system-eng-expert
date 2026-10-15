@@ -1,0 +1,25 @@
+{
+  "observed_utc": "2026-10-15T17:36:19.620548+00:00",
+  "reviewed_matrix_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+  "final_matrix_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+  "mechanism_fingerprints_preserved": 310,
+  "source_content_changes": 0,
+  "source_revision_changes": 0,
+  "semantic_metadata_changes": [
+    "async-await",
+    "cache-aside",
+    "cache-invalidation",
+    "database-decomposition",
+    "decorator",
+    "futures-promises",
+    "observer",
+    "priority-queue",
+    "prototype",
+    "semaphore",
+    "singleton",
+    "thread-pool"
+  ],
+  "semantic_metadata_change_count": 12,
+  "unexpected_changes": [],
+  "license_delta_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/license-metadata-corrections.json"
+}

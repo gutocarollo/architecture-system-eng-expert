@@ -1,0 +1,13 @@
+{
+  "repo": "keycloak/keycloak",
+  "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+  "path": "services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+  "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+  "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--services--managers--AuthenticationManager.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.077450+00:00",
+  "sha256": "ee8fb1b97a33eb85ecf17e2c4d9eb8370a475185e760d60e7b28b8f67305be58",
+  "line_count": 1840,
+  "source": "raw_primary"
+}

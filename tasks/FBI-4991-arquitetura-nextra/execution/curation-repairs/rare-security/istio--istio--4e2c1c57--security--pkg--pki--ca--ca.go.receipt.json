@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/pki/ca/ca.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--ca--ca.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.314545+00:00",
+  "sha256": "e16a1502be628ba6e0d4cc699f1fb5e2b9a1979fa7f9c88372a589d11576fbfe",
+  "line_count": 531,
+  "source": "raw_primary"
+}

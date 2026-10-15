@@ -1,0 +1,335 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.nifi.controller.tasks;
+
+import org.apache.nifi.components.state.StateManager;
+import org.apache.nifi.connectable.Connectable;
+import org.apache.nifi.connectable.ConnectableType;
+import org.apache.nifi.connectable.Connection;
+import org.apache.nifi.controller.FlowController;
+import org.apache.nifi.controller.ProcessorNode;
+import org.apache.nifi.controller.ScheduledState;
+import org.apache.nifi.controller.lifecycle.TaskTerminationAwareStateManager;
+import org.apache.nifi.controller.metrics.ProcessSessionEvent;
+import org.apache.nifi.controller.repository.ActiveProcessSessionFactory;
+import org.apache.nifi.controller.repository.BatchingSessionFactory;
+import org.apache.nifi.controller.repository.RepositoryContext;
+import org.apache.nifi.controller.repository.StandardProcessSession;
+import org.apache.nifi.controller.repository.StandardProcessSessionFactory;
+import org.apache.nifi.controller.repository.WeakHashMapProcessSessionFactory;
+import org.apache.nifi.controller.repository.metrics.tracking.StandardStatsTracker;
+import org.apache.nifi.controller.repository.metrics.tracking.StatsTracker;
+import org.apache.nifi.controller.repository.metrics.tracking.TrackedStats;
+import org.apache.nifi.controller.repository.scheduling.ConnectableProcessContext;
+import org.apache.nifi.controller.scheduling.LifecycleState;
+import org.apache.nifi.controller.scheduling.RepositoryContextFactory;
+import org.apache.nifi.controller.scheduling.SchedulingAgent;
+import org.apache.nifi.logging.ComponentLog;
+import org.apache.nifi.logging.StandardLoggingContext;
+import org.apache.nifi.nar.NarCloseable;
+import org.apache.nifi.processor.ProcessContext;
+import org.apache.nifi.processor.ProcessSessionFactory;
+import org.apache.nifi.processor.Processor;
+import org.apache.nifi.processor.StandardComponentLog;
+import org.apache.nifi.processor.StandardProcessContext;
+import org.apache.nifi.processor.exception.ProcessException;
+import org.apache.nifi.processor.exception.TerminatedTaskException;
+import org.apache.nifi.scheduling.SchedulingStrategy;
+import org.apache.nifi.util.Connectables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BooleanSupplier;
+
+/**
+ * Continually runs a <code>{@link Connectable}</code> component as long as the component has work to do.
+ * {@link #invoke()} ()} will return <code>{@link InvocationResult}</code> telling if the component should be yielded.
+ */
+public class ConnectableTask {
+
+    private static final Logger logger = LoggerFactory.getLogger(ConnectableTask.class);
+    private static final BooleanSupplier SCHEDULING_GENERATION_ALWAYS_ACTIVE = () -> true;
+    private static final InvocationResult NOT_PRIMARY_NODE_YIELD_RESULT = InvocationResult.yield("This node is not the primary node");
+    private static final InvocationResult NO_WORK_YIELD_RESULT = InvocationResult.yield("No work to do");
+    private static final InvocationResult BACKPRESSURE_YIELD_RESULT = InvocationResult.yield("Backpressure Applied");
+
+    private final SchedulingAgent schedulingAgent;
+    private final Connectable connectable;
+    private final RepositoryContext repositoryContext;
+    private final LifecycleState lifecycleState;
+    private final ProcessContext processContext;
+    private final FlowController flowController;
+    private final int numRelationships;
+    private final StatsTracker statsTracker;
+    private final BooleanSupplier schedulingGenerationActive;
+
+    public ConnectableTask(final SchedulingAgent schedulingAgent, final Connectable connectable, final FlowController flowController,
+                           final RepositoryContextFactory contextFactory, final LifecycleState lifecycleState) {
+        this(schedulingAgent, connectable, flowController, contextFactory, lifecycleState, SCHEDULING_GENERATION_ALWAYS_ACTIVE);
+    }
+
+    public ConnectableTask(final SchedulingAgent schedulingAgent, final Connectable connectable, final FlowController flowController,
+                           final RepositoryContextFactory contextFactory, final LifecycleState lifecycleState, final BooleanSupplier schedulingGenerationActive) {
+
+        this.schedulingAgent = schedulingAgent;
+        this.connectable = connectable;
+        this.lifecycleState = lifecycleState;
+        this.schedulingGenerationActive = schedulingGenerationActive;
+        this.numRelationships = connectable.getRelationships().size();
+        this.flowController = flowController;
+
+        final StateManager baseStateManager;
+        if (connectable instanceof final ProcessorNode processorNode) {
+            final Processor processor = processorNode.getProcessor();
+            final Class<?> componentClass = processor == null ? null : processor.getClass();
+            baseStateManager = flowController.getStateManagerProvider().getStateManager(connectable.getIdentifier(), componentClass);
+        } else {
+            baseStateManager = flowController.getStateManagerProvider().getStateManager(connectable.getIdentifier());
+        }
+        final StateManager stateManager = new TaskTerminationAwareStateManager(baseStateManager, lifecycleState::isTerminated);
+        if (connectable instanceof final ProcessorNode processorNode) {
+            processContext = new StandardProcessContext(
+                    processorNode, flowController.getControllerServiceProvider(), stateManager, lifecycleState::isTerminated, flowController);
+        } else {
+            processContext = new ConnectableProcessContext(connectable, stateManager);
+        }
+
+        repositoryContext = contextFactory.newProcessContext(connectable, new AtomicLong(0L));
+
+        statsTracker = new StandardStatsTracker(flowController.getGarbageCollectionLog()::getTotalGarbageCollectionMillis,
+            flowController.getPerformanceTrackingPercentage());
+    }
+
+    public Connectable getConnectable() {
+        return connectable;
+    }
+
+    private boolean isRunOnCluster(final FlowController flowController) {
+        return !connectable.isIsolated() || !flowController.isConfiguredForClustering() || flowController.isPrimary();
+    }
+
+    private boolean isYielded() {
+        // Equality means that the yield has expired.
+        final long yieldExpiration = connectable.getYieldExpiration();
+        return yieldExpiration > 0L && yieldExpiration > System.currentTimeMillis();
+    }
+
+    /**
+     * Make sure processor has work to do. This means that it meets one of these criteria:
+     * <ol>
+     * <li>It is a Funnel and has incoming FlowFiles from other components, and and at least one outgoing connection.</li>
+     * <li>It is a 'source' component, meaning:<ul>
+     *   <li>It is annotated with @TriggerWhenEmpty</li>
+     *   <li>It has no incoming connections</li>
+     *   <li>All incoming connections are self-loops</li>
+     * </ul></li>
+     * <li>It has data in incoming connections to process</li>
+     * </ol>
+     * @return true if there is work to do, otherwise false
+     */
+    private boolean isWorkToDo() {
+        if (connectable.getConnectableType() == ConnectableType.FUNNEL) {
+            // Handle Funnel as a special case because it will never be a 'source' component,
+            // and also its outgoing connections can not be terminated.
+            // Incoming FlowFiles from other components, and at least one outgoing connection are required.
+            return connectable.hasIncomingConnection()
+                    && !connectable.getConnections().isEmpty()
+                    && Connectables.hasNonLoopConnection(connectable)
+                    && Connectables.flowFilesQueued(connectable);
+        }
+
+        if (connectable.isTriggerWhenEmpty() || !connectable.hasIncomingConnection()) {
+            return true;
+        }
+
+        return !Connectables.hasNonLoopConnection(connectable) || Connectables.flowFilesQueued(connectable);
+    }
+
+    private boolean isBackPressureEngaged() {
+        for (final Connection connection : connectable.getIncomingConnections()) {
+            if (connection.getSource() == connectable && connection.getFlowFileQueue().isFull()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public InvocationResult invoke() {
+        if (lifecycleState.isTerminated()) {
+            logger.debug("Will not trigger {} because task is terminated", connectable);
+            return InvocationResult.DO_NOT_YIELD;
+        }
+
+        // make sure processor is not yielded
+        if (isYielded()) {
+            logger.debug("Will not trigger {} because component is yielded", connectable);
+            return InvocationResult.DO_NOT_YIELD;
+        }
+
+        // make sure that either we're not clustered or this processor runs on all nodes or that this is the primary node
+        if (!isRunOnCluster(flowController)) {
+            // Diagnostic: a cron-driven primary-node-only component triggers comparatively rarely, so log at INFO to
+            // make a skipped scheduled fire visible (e.g. a component that stops firing on its schedule after a
+            // primary-node change). Timer-driven components trigger frequently, so keep those at DEBUG to avoid noise.
+            if (connectable.getSchedulingStrategy() == SchedulingStrategy.CRON_DRIVEN) {
+                logger.info("Will not trigger {} because this is not the primary node; the cron-scheduled fire is being skipped", connectable);
+            } else {
+                logger.debug("Will not trigger {} because this is not the primary node", connectable);
+            }
+            return NOT_PRIMARY_NODE_YIELD_RESULT;
+        }
+
+        // Make sure processor has work to do.
+        if (!isWorkToDo()) {
+            logger.debug("Yielding {} because it has no work to do", connectable);
+            return NO_WORK_YIELD_RESULT;
+        }
+
+        if (numRelationships > 0) {
+            final int requiredNumberOfAvailableRelationships = connectable.isTriggerWhenAnyDestinationAvailable() ? 1 : numRelationships;
+            if (!repositoryContext.isRelationshipAvailabilitySatisfied(requiredNumberOfAvailableRelationships)) {
+                logger.debug("Yielding {} because Backpressure is Applied", connectable);
+                return BACKPRESSURE_YIELD_RESULT;
+            }
+        }
+
+        logger.debug("Triggering {}", connectable);
+        final TrackedStats stats = statsTracker.startTracking();
+
+        final long batchNanos = connectable.getRunDuration(TimeUnit.NANOSECONDS);
+        final ProcessSessionFactory sessionFactory;
+        final StandardProcessSession rawSession;
+        final boolean batch;
+        if (connectable.isSessionBatchingSupported() && batchNanos > 0L) {
+            rawSession = new StandardProcessSession(repositoryContext, lifecycleState::isTerminated, stats.getPerformanceTracker());
+            sessionFactory = new BatchingSessionFactory(rawSession);
+            batch = true;
+        } else {
+            rawSession = null;
+            sessionFactory = new StandardProcessSessionFactory(repositoryContext, lifecycleState::isTerminated, stats.getPerformanceTracker());
+            batch = false;
+        }
+
+        final ActiveProcessSessionFactory activeSessionFactory = new WeakHashMapProcessSessionFactory(sessionFactory);
+        final boolean activeThreadCountIncremented;
+        synchronized (lifecycleState) {
+            activeThreadCountIncremented = schedulingGenerationActive.getAsBoolean() && lifecycleState.tryIncrementActiveThreadCount(activeSessionFactory);
+        }
+        if (!activeThreadCountIncremented) {
+            logger.debug("Will not trigger {} because it is no longer scheduled", connectable);
+            return InvocationResult.DO_NOT_YIELD;
+        }
+
+        final long startNanos = System.nanoTime();
+        final long finishIfBackpressureEngaged = startNanos + (batchNanos / 25L);
+        final long finishNanos = startNanos + batchNanos;
+        int invocationCount = 0;
+
+        final String originalThreadName = Thread.currentThread().getName();
+        try {
+            try (final AutoCloseable ignored = NarCloseable.withComponentNarLoader(flowController.getExtensionManager(), connectable.getRunnableComponent().getClass(), connectable.getIdentifier())) {
+                boolean shouldRun = connectable.getScheduledState() == ScheduledState.RUNNING || connectable.getScheduledState() == ScheduledState.RUN_ONCE;
+                while (shouldRun) {
+                    invocationCount++;
+                    connectable.onTrigger(processContext, activeSessionFactory);
+
+                    if (!batch) {
+                        return InvocationResult.DO_NOT_YIELD;
+                    }
+
+                    final long nanoTime = System.nanoTime();
+                    if (nanoTime > finishNanos) {
+                        return InvocationResult.DO_NOT_YIELD;
+                    }
+
+                    if (nanoTime > finishIfBackpressureEngaged && isBackPressureEngaged()) {
+                        return InvocationResult.DO_NOT_YIELD;
+                    }
+
+                    if (connectable.getScheduledState() != ScheduledState.RUNNING) {
+                        break;
+                    }
+
+                    if (!isWorkToDo()) {
+                        break;
+                    }
+                    if (isYielded()) {
+                        break;
+                    }
+
+                    if (numRelationships > 0) {
+                        final int requiredNumberOfAvailableRelationships = connectable.isTriggerWhenAnyDestinationAvailable() ? 1 : numRelationships;
+                        shouldRun = repositoryContext.isRelationshipAvailabilitySatisfied(requiredNumberOfAvailableRelationships);
+                    }
+                }
+            } catch (final TerminatedTaskException e) {
+                final ComponentLog componentLog = getComponentLog();
+                componentLog.info("Processing terminated", e);
+            } catch (final ProcessException e) {
+                final ComponentLog componentLog = getComponentLog();
+                componentLog.error("Processing failed", e);
+            } catch (final Throwable e) {
+                final ComponentLog componentLog = getComponentLog();
+                componentLog.error("Processing halted: yielding [{}]", schedulingAgent.getAdministrativeYieldDuration(), e);
+                logger.warn("Processing halted: uncaught exception in Component [{}]", connectable.getRunnableComponent(), e);
+                connectable.yield(schedulingAgent.getAdministrativeYieldDuration(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
+            }
+        } finally {
+            try {
+                if (batch) {
+                    final ComponentLog procLog = new StandardComponentLog(connectable.getIdentifier(), connectable.getRunnableComponent(), new StandardLoggingContext(connectable));
+
+                    try {
+                        rawSession.commitAsync(null, t -> {
+                            procLog.error("Failed to commit session {}; rolling back", rawSession, t);
+                        });
+                    } catch (final TerminatedTaskException tte) {
+                        procLog.debug("Cannot commit Batch Process Session because the Task was forcefully terminated", tte);
+                    }
+                }
+
+                try {
+                    updateEventRepo(stats, invocationCount);
+                } catch (final IOException e) {
+                    logger.error("Unable to update FlowFileEvent Repository for {}; statistics may be inaccurate.", connectable.getRunnableComponent(), e);
+                }
+            } finally {
+                lifecycleState.decrementActiveThreadCount();
+                Thread.currentThread().setName(originalThreadName);
+            }
+        }
+
+        return InvocationResult.DO_NOT_YIELD;
+    }
+
+    private void updateEventRepo(final TrackedStats stats, final int invocationCount) throws IOException {
+        final ProcessSessionEvent flowFileEvent = stats.end(repositoryContext.getComponentMetricContext())
+                .invocations(invocationCount)
+                .build();
+        repositoryContext.getFlowFileEventRepository().updateRepository(flowFileEvent);
+        repositoryContext.recordProcessSessionEvent(flowFileEvent);
+    }
+
+    private ComponentLog getComponentLog() {
+        return new StandardComponentLog(connectable.getIdentifier(), connectable.getRunnableComponent(), new StandardLoggingContext(connectable));
+    }
+
+}

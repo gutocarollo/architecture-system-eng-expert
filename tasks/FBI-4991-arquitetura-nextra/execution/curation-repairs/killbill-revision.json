@@ -1,0 +1,14 @@
+{
+  "repo": "killbill/killbill",
+  "revision": "20e15525d1d9e56219c4f5651e06850fe793f5e0",
+  "branch": "master",
+  "license_api": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "stars": 5796,
+  "observed_utc": "2026-10-15T03:25:42.765612+00:00"
+}

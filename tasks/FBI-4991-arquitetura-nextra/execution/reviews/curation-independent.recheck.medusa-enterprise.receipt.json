@@ -1,0 +1,8 @@
+{
+  "observed_utc": "2026-10-15T17:26:01.256096+00:00",
+  "url": "https://raw.githubusercontent.com/medusajs/medusa/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/ENTERPRISE-LICENSE.md",
+  "http_status": 200,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.medusa-enterprise.txt",
+  "sha256": "2e0b6e1a06fc2fbc9d4f6bb57cf61ea707bb470711f8c068acc42b85fd30b5d4",
+  "revision": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15"
+}

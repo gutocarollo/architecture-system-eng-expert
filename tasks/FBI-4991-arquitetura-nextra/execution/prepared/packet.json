@@ -1,7 +1,7 @@
 {
   "packet_version": 2,
   "project_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
-  "created_at": "2026-10-15T02:40:54.932640Z",
+  "created_at": "2026-10-15T17:44:38.231920Z",
   "status": "PARTIAL",
   "scope": "Executar e revisar as pendências da FBI-4991: conectar a totalidade dos conceitos em jornadas Diátaxis, executar antes/depois históricos e práticas financeiras, fechar curadoria por conceito, investigar histórico com evidência causal, registrar catálogo, versionar e publicar com revisão independente e read-back.",
   "inventory": [
@@ -319,8 +319,8 @@
   "sources": [
     {
       "id": "project",
-      "revision": "23d5d158d3a964dceba296296368ec14bcd8970b+working-tree-hashes",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "revision": "32b80d5fc8eda42e2aa9b496d82c30b574120e68+working-tree-hashes",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "state": "AVAILABLE",
       "reason": "The documents and evidence below bind the working-tree bytes; the base SHA is not a claim that changes are committed."
     },
@@ -920,7 +920,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"policy\": \"Fixed fixture contracts for each probe; runners never regenerate these expected values.\",\n  \"probes\": {\n    \"provider-contract\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": {\n        \"booked\": false\n      },\n      \"after\": {\n        \"booked\": true,\n        \"amount\": 100.0\n      },\n      \"invariant\": \"The adapter translates an external language at one boundary.\"\n    },\n    \"replace-policy\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": [\n        10.0,\n        10.0\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "contract"
     },
     {
@@ -931,7 +931,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"scope\": \"310 concepts individually adjudicated; only relevant bounded observations carry an executable command, and missing specific practices remain PENDING\",\n  \"concepts\": [\n    {\n      \"concept_id\": \"a-b-deployment\",\n      \"canonical_name\": \"A/B Deployment\",\n      \"corpus_entry_id\": \"g12-e009\",\n      \"groups\": [\n        12\n      ],\n      \"case_id\": \"safe-release\",\n      \"mechanism\": \"O desenho expõe grupos a variantes para comparar uma hipótese de comportamento ou resultado.\",\n      \"exercise_action\": \"Distribua quatro usuários entre A e B; confira que os dois grupos recebem respostas visíveis diferentes e mantêm sua associação ao usuário.\",\n      \"probe\": \"ab-cohorts\",\n      \"command\": \"python3 labs/architecture/financial.py safe-release --probe ab-cohorts\",\n      \"coverage_level\": \"EXECUTABLE_PRINCIPLE_COMPARISON\",\n      \"destinations\": {\n        \"journey\": \"/jornadas/safe-release/\",\n        \"explanation\": \"/explicacoes/casos/safe-release/\",\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "contract"
     },
     {
@@ -942,29 +942,40 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"grain\": {\n    \"path\": \"backend/app/repositories/account.py\",\n    \"function\": \"get_family_revenue_by_period\",\n    \"before\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n    \"after\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n    \"sources\": {\n      \"before\": {\n        \"sha\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n        \"file_sha256\": \"788284c5d78ec62e218e90db9f154d5c9be946530ee01c5a380112ad17e9deeb\",\n        \"function_lines\": [\n          2234,\n          2301\n        ],\n        \"template_sha256\": \"5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8\",\n        \"template\": \"grain-before.sql.template\"\n      },\n      \"after\": {\n        \"sha\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n        \"file_sha256\": \"cc552670e7637f39b56382eb75ff80e7671143c1a6ec8263bf1e2f940f0ff6ec\",\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "kind": "code"
+    },
+    {
+      "id": "airflow-source",
+      "source_id": "project",
+      "path": "labs/airflow-lock-retry/manifest.json",
+      "sha256": "0379d1dc7b6cb0a5ee437e6e0b7bc6043aa56419acca6d4bb8559c95621356f4",
+      "line_start": 1,
+      "line_end": 20,
+      "quote": "{\n  \"case_id\": \"airflow-lock-retry\",\n  \"repository\": \"fazcapital/airflow\",\n  \"path\": \"dags/inflow__xp__stg_to_fct.py\",\n  \"function\": \"task_run_60_days_rule_hs\",\n  \"before\": \"febaf1be978aad59c29f38d1bd74f357f8e942b5\",\n  \"after\": \"55dfe8acb362e6854d1af4e7dd7d17e6497af9bd\",\n  \"snapshots\": {\n    \"before\": {\n      \"sha256\": \"3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753\",\n      \"source_file_sha256\": \"87b745c73fedb2065756e18114421b1bfb2d90f1838a6ca354af2264f984d3a4\",\n      \"source_blob\": \"5f6641421f6adbf6b7206d4bb3dca0261a84c00b\",\n      \"start_line\": 226,\n      \"end_line\": 270,\n      \"normalization\": \"Dedent the selected nested function; preserve its body and historical comments verbatim.\"\n    },\n    \"after\": {\n      \"sha256\": \"3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731\",\n      \"source_file_sha256\": \"e9ecd6338d6c22af7f55b4017b610e7a705ab3268864b5a770ac52220a1735f5\",\n      \"source_blob\": \"2fa3dd686111f73b3148674454c203015269f1bd\",\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "code"
     },
     {
       "id": "pg-runtime",
       "source_id": "project",
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/full-run.json",
-      "sha256": "6a1e8b53f8df6715cbb89d7757f47631117cac168f2835fa1da12190fe8b374b",
+      "sha256": "c4632e64e252de5aa85daf3dd8c99abeb2d10d95fa44000f3fc763cd478a6d33",
       "line_start": 1,
       "line_end": 20,
-      "quote": "{\n  \"observed_at\": \"2026-10-15T02:29:32.067810+00:00\",\n  \"scope\": \"ISOLATED_SYNTHETIC_POSTGRESQL\",\n  \"production_execution\": false,\n  \"postgres_version\": \"postgres (PostgreSQL) 16.15 (Homebrew)\",\n  \"isolation_verified\": true,\n  \"grain\": {\n    \"before\": {\n      \"rows\": 2,\n      \"commission_sum\": 200,\n      \"results\": [\n        {\n          \"month\": \"2026-01-01\",\n          \"account_code\": 101,\n          \"name\": \"SYNTHETIC-FAMILY\",\n          \"cluster\": \"SYNTHETIC-CLUSTER\",\n          \"commission\": 100,\n          \"monthly_roa\": 0.01\n        },\n        {\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "quote": "{\n  \"observed_at\": \"2026-10-15T03:11:09.634806+00:00\",\n  \"scope\": \"ISOLATED_SYNTHETIC_POSTGRESQL\",\n  \"production_execution\": false,\n  \"postgres_version\": \"postgres (PostgreSQL) 16.15 (Homebrew)\",\n  \"isolation_verified\": true,\n  \"grain\": {\n    \"before\": {\n      \"rows\": 2,\n      \"commission_sum\": 200,\n      \"results\": [\n        {\n          \"month\": \"2026-01-01\",\n          \"account_code\": 101,\n          \"name\": \"SYNTHETIC-FAMILY\",\n          \"cluster\": \"SYNTHETIC-CLUSTER\",\n          \"commission\": 100,\n          \"monthly_roa\": 0.01\n        },\n        {\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "runtime"
     },
     {
       "id": "pg-challenges",
       "source_id": "project",
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/challenges.json",
-      "sha256": "23c9ab57bc7b19ee390a3201a1d2e68ca4536c83768882fcd860a4372d476928",
+      "sha256": "d7a468125b10b9f83a6765e45f501b44c40d7ef6e0d20ba9488f0a43f02a137f",
       "line_start": 1,
       "line_end": 20,
-      "quote": "{\n  \"verdict\": \"PASS\",\n  \"receipts\": [\n    {\n      \"case\": \"grain\",\n      \"observed_at\": \"2026-10-15T02:23:09.978868+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 147, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 95, in main\\n    assert grain['after']['rows'] == 1 and grain['after']['commission_sum'] == 100, grain['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'rows': 2, 'commission_sum': 200, 'results': [{'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}, {'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}]}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n    },\n    {\n      \"case\": \"revision\",\n      \"observed_at\": \"2026-10-15T02:23:12.045701+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 147, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 128, in main\\n    assert revision['after'] == dict(stale_writer_rejected=True, azure_id='AZURE-CONFIRMED', current_rows=1), revision['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'stale_writer_rejected': False, 'azure_id': 'AZURE-OLD', 'current_rows': 1}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "quote": "{\n  \"verdict\": \"PASS\",\n  \"receipts\": [\n    {\n      \"case\": \"grain\",\n      \"observed_at\": \"2026-10-15T03:11:07.507516+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 94, in main\\n    assert grain['after']['rows'] == 1 and grain['after']['commission_sum'] == 100, grain['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'rows': 2, 'commission_sum': 200, 'results': [{'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}, {'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}]}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n    },\n    {\n      \"case\": \"revision\",\n      \"observed_at\": \"2026-10-15T03:11:09.579248+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 127, in main\\n    assert revision['after'] == dict(stale_writer_rejected=True, azure_id='AZURE-CONFIRMED', current_rows=1), revision['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'stale_writer_rejected': False, 'azure_id': 'AZURE-OLD', 'current_rows': 1}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "runtime"
     },
     {
@@ -975,30 +986,52 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "import { Footer, Layout, Navbar } from 'nextra-theme-docs'\nimport { Head } from 'nextra/components'\nimport { getPageMap } from 'nextra/page-map'\nimport 'nextra-theme-docs/style.css'\n\nexport const metadata = {\n  title: {\n    default: 'Arquitetura na prática — Faz Capital',\n    template: '%s — Arquitetura na prática'\n  },\n  description: 'Aprenda arquitetura com problemas, código e dados do MakersHub e do Airflow.'\n}\n\nexport default async function RootLayout({ children }) {\n  return (\n    <html lang=\"pt-BR\" dir=\"ltr\" suppressHydrationWarning>\n      <Head />\n      <body>\n        <Layout\n          navbar={<Navbar logo={<b>Arquitetura na prática</b>} />}\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "code"
     },
     {
       "id": "course-validation",
       "source_id": "project",
       "path": "tasks/architecture-course-2026-10-14/artifacts/fbi4991-execution-validation.json",
-      "sha256": "bfa728e4ead51902f96893f9025a26f38feb0f2ad69b02fc284de18c59cf8797",
+      "sha256": "43567c853ece7054c5d3a21a095bee0506a5b91fdcbcf09cd61ddbb80cb2ee32",
       "line_start": 1,
       "line_end": 20,
-      "quote": "{\n  \"schema_version\": 1,\n  \"status\": \"FAIL\",\n  \"assessment_limit\": \"Structural checks locate dedicated prose sections and content links. Meaning, pedagogical quality, framework suitability, evidence scope, remote URL availability, runtime behavior, Mermaid rendering, and diagram semantics remain for human review.\",\n  \"link_validation_scope\": \"Markdown links, Markdown reference links, and literal JSX href attributes in .md/.mdx pages. Internal routes and anchors are checked locally; dynamic JSX hrefs and external URLs remain unverified.\",\n  \"checker_analysis\": {\n    \"role\": \"Checker diagnosis only; this report does not independently accept authored documentation.\",\n    \"repaired_behaviors\": [\n      \"Normalize Nextra routes with or without a trailing slash.\",\n      \"Resolve relative Markdown links against the source content file before checking route targets.\",\n      \"Locate priority sections by explanation_anchor, canonical headings, safe aliases, title segments, and JSX id attributes.\",\n      \"Use true heading boundaries across the MDX AST; do not require ten fixed subheadings per priority.\"\n    ],\n    \"jsx_id_support\": \"Literal id attributes on MDX JSX flow and text elements, including span and anchor elements, are indexed and associated with nearby heading sections. Local fragment validation still requires an exact rendered id.\",\n    \"priority_part_policy\": \"Mermaid fences and actual link candidates are reported structurally. Definition, story, benefit, cost, limits, evidence scope, and reference suitability remain UNVERIFIABLE for human review.\",\n    \"external_link_policy\": \"HTTP(S) targets are recorded as unverified; no remote request was made.\",\n    \"observations\": {\n      \"invalid_local_links\": 25,\n      \"external_links_unverified\": 3472,\n      \"source_relative_local_links\": 2,\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "quote": "{\n  \"schema_version\": 1,\n  \"status\": \"REVIEW_REQUIRED\",\n  \"assessment_limit\": \"Structural checks locate dedicated prose sections and content links. Meaning, pedagogical quality, framework suitability, evidence scope, remote URL availability, runtime behavior, Mermaid rendering, and diagram semantics remain for human review.\",\n  \"link_validation_scope\": \"Markdown links, Markdown reference links, and literal JSX href attributes in .md/.mdx pages. Internal routes and anchors are checked locally; dynamic JSX hrefs and external URLs remain unverified.\",\n  \"checker_analysis\": {\n    \"role\": \"Checker diagnosis only; this report does not independently accept authored documentation.\",\n    \"repaired_behaviors\": [\n      \"Normalize Nextra routes with or without a trailing slash.\",\n      \"Resolve relative Markdown links against the source content file before checking route targets.\",\n      \"Locate priority sections by explanation_anchor, canonical headings, safe aliases, title segments, and JSX id attributes.\",\n      \"Use true heading boundaries across the MDX AST; do not require ten fixed subheadings per priority.\"\n    ],\n    \"jsx_id_support\": \"Literal id attributes on MDX JSX flow and text elements, including span and anchor elements, are indexed and associated with nearby heading sections. Local fragment validation still requires an exact rendered id.\",\n    \"priority_part_policy\": \"Mermaid fences and actual link candidates are reported structurally. Definition, story, benefit, cost, limits, evidence scope, and reference suitability remain UNVERIFIABLE for human review.\",\n    \"external_link_policy\": \"HTTP(S) targets are recorded as unverified; no remote request was made.\",\n    \"observations\": {\n      \"invalid_local_links\": 0,\n      \"external_links_unverified\": 4309,\n      \"source_relative_local_links\": 0,\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "runtime"
     },
     {
       "id": "catalog-barrier",
       "source_id": "project",
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/catalog/registration-proposal.json",
-      "sha256": "d2b2bba981faefbfb423c4c8b0b0906c952eefd28328217c5a1c6714598b18a0",
+      "sha256": "7b6569dd0860ca5e0ad13e8fdd91badf105fb969551d7c9d8484d72e7b4b2311",
       "line_start": 1,
-      "line_end": 14,
-      "quote": "{\n  \"repository\": \"gutocarollo/architecture-system-eng-expert\",\n  \"repository_mutation_performed\": false,\n  \"reason\": \"Active catalog whitelist rejects the material course repository. Jira admin permission exists, but changing only the Jira option does not change the catalog authority.\",\n  \"required_contract_change\": {\n    \"file\": \"/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json\",\n    \"field\": \"dimensions.repositories.allowedValues\",\n    \"add\": \"gutocarollo/architecture-system-eng-expert\"\n  },\n  \"asset_proposed_uri\": \"asset:https://github.com/gutocarollo/architecture-system-eng-expert\",\n  \"asset_state\": \"not_registered\",\n  \"permission_receipt\": \"permissions.json\",\n  \"decision_state\": \"Needs explicit scope for changing the global catalog contract, rather than bypassing validation.\"\n}\n",
-      "observed_at": "2026-10-15T02:40:54.932640Z",
+      "line_end": 17,
+      "quote": "{\n  \"repository\": \"gutocarollo/architecture-system-eng-expert\",\n  \"repository_mutation_performed\": false,\n  \"reason\": \"Active catalog whitelist rejects the material course repository. Jira admin permission exists, but changing only the Jira option does not change the catalog authority.\",\n  \"required_contract_change\": {\n    \"file\": \"/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json\",\n    \"field\": \"dimensions.repositories.allowedValues\",\n    \"add\": \"gutocarollo/architecture-system-eng-expert\",\n    \"state\": \"NOT_APPLY_READY: the declared Repository authority and projection were not located in the audited source paths; adding only a literal whitelist value is insufficient.\"\n  },\n  \"asset_state\": \"not_registered\",\n  \"permission_receipt\": \"permissions.json\",\n  \"decision_state\": \"Document registration has a tested existing-kind proposal outside this documentation repository. Repository registration remains blocked by the exact authority gap recorded in the audit.\",\n  \"affected_asset_id_proposed\": \"doc:architecture/architecture-system-eng-expert\",\n  \"asset_registration_proposal\": \"asset-document-registration.patch\",\n  \"repository_authority_audit\": \"registration-authority-audit.md\"\n}\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
       "kind": "scope"
+    },
+    {
+      "id": "history-adjudication",
+      "source_id": "project",
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/history/history-causal-completion-summary.json",
+      "sha256": "c179866566f39f85b79c23ea348d3ac2848798ac34306e206e6db02795e48431",
+      "line_start": 1,
+      "line_end": 20,
+      "quote": "{\n  \"measured_at\": \"2026-10-15T02:54:53.943830+00:00\",\n  \"fbi_issues\": 595,\n  \"new_source_judgments\": 587,\n  \"classification_counts\": {\n    \"CAUSE_REPORTED_AND_CODE_SUPPORTED\": 7,\n    \"MISSING_CAUSE_EVIDENCE\": 35,\n    \"REPORTED_ONLY\": 290,\n    \"NOT_APPLICABLE_CHANGE\": 263\n  },\n  \"issue_classification_complete\": true,\n  \"all_causes_confirmed\": false,\n  \"commit_matrix_records\": 12697,\n  \"unresolved_evidence_keys\": [\n    \"FBI-3061\",\n    \"FBI-4803\",\n    \"FBI-4802\",\n    \"FBI-3662\",\n    \"FBI-4807\",\n    \"FBI-4806\",\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "kind": "contract"
+    },
+    {
+      "id": "current-data",
+      "source_id": "project",
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/live-data-0301.json",
+      "sha256": "221a1f0d24d50a1c98929cbfbdf0edbc72fa22b7b88bf5bcea07a203914c2d31",
+      "line_start": 1,
+      "line_end": 20,
+      "quote": "{\n  \"sql\": \"SELECT inet_server_addr()::text AS server_address, inet_server_port() AS server_port, current_database() AS database_name, current_user AS role_name, COUNT(*) AS row_count, COUNT(DISTINCT movement_adjusted_sk) AS distinct_movement_keys, MAX(movement_date) AS latest_movement_date, COUNT(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_movement_count, ROUND(SUM(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01')::numeric, 2) AS october_signed_brl_amount, clock_timestamp() AS observed_at FROM public.rpt_inflow__movement_adjusted;\",\n  \"result\": {\n    \"rows\": [\n      {\n        \"server_address\": \"192.168.254.137/32\",\n        \"server_port\": 5432,\n        \"database_name\": \"faz_capital\",\n        \"role_name\": \"augusto_carollo\",\n        \"row_count\": 557731,\n        \"distinct_movement_keys\": 557731,\n        \"latest_movement_date\": \"2026-10-08\",\n        \"october_movement_count\": 3380,\n        \"october_signed_brl_amount\": \"18742122.16\",\n        \"observed_at\": \"2026-10-15 00:01:35.715697-03:00\"\n      }\n    ],\n    \"row_count\": 1,\n    \"returned_row_count\": 1,\n    \"truncated\": false,\n",
+      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "kind": "runtime"
     }
   ],
   "coverage": {
@@ -1311,6 +1344,17 @@
       "relation_ids": []
     },
     {
+      "id": "explicacoes/casos/airflow-lock-retry/index",
+      "path": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "sha256": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+      "author_id": "/root",
+      "inventory_ids": [
+        "retry",
+        "timeout"
+      ],
+      "relation_ids": []
+    },
+    {
       "id": "explicacoes/casos/cache-policy/index",
       "path": "content/explicacoes/casos/cache-policy/index.mdx",
       "sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
@@ -1421,7 +1465,7 @@
     {
       "id": "explicacoes/casos/index",
       "path": "content/explicacoes/casos/index.mdx",
-      "sha256": "d21b439d4aeb7d2169f726b16ff74ae2ba95940cc77239ad416be51d2e934dc9",
+      "sha256": "4d5f09e0514e99cfe01e91c99d5345c508f09b5b652ddc9d7c06c7ff5a768da0",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [],
       "relation_ids": []
@@ -1585,12 +1629,7 @@
       "path": "content/explicacoes/casos/query-grain-postgres/index.mdx",
       "sha256": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
       "author_id": "/root",
-      "inventory_ids": [
-        "materialized-view",
-        "indexing",
-        "precomputation",
-        "cqrs"
-      ],
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
@@ -2134,6 +2173,17 @@
       "relation_ids": []
     },
     {
+      "id": "guias/casos/airflow-lock-retry/index",
+      "path": "content/guias/casos/airflow-lock-retry/index.mdx",
+      "sha256": "30ef753fec3cd9040b207a23039398e6df11fcff964a2d1efa512e3ea2d60c2a",
+      "author_id": "/root",
+      "inventory_ids": [
+        "retry",
+        "timeout"
+      ],
+      "relation_ids": []
+    },
+    {
       "id": "guias/casos/cache-policy/index",
       "path": "content/guias/casos/cache-policy/index.mdx",
       "sha256": "b4058d6af946e1e50a0a41275c0fcfcbbc36a24d41df3793527524419e9a6e47",
@@ -2244,7 +2294,7 @@
     {
       "id": "guias/casos/index",
       "path": "content/guias/casos/index.mdx",
-      "sha256": "8925f466ddcd826362ecd6df47be22ee4052165195a7b3a3f31cb72f099e227a",
+      "sha256": "820579b42f088ffe25fb05f5b39ed09dfe20184d46eac4b7c42ac16ee90472be",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [],
       "relation_ids": []
@@ -2408,12 +2458,7 @@
       "path": "content/guias/casos/query-grain-postgres/index.mdx",
       "sha256": "f8987275e32ae54525200e63481dfb618f62a2a8e1865d0f06e1bc7d58bcc0fb",
       "author_id": "/root",
-      "inventory_ids": [
-        "materialized-view",
-        "indexing",
-        "precomputation",
-        "cqrs"
-      ],
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
@@ -2612,7 +2657,7 @@
     {
       "id": "index",
       "path": "content/index.mdx",
-      "sha256": "dfac1671dd2fdcc7f44e614379285635f06bd9749bd786dda584240d8c958a83",
+      "sha256": "1d6e6728e34d302fe8ffe1ee459f580e8a00f02ed8b8504cfc0729acde3415ad",
       "author_id": "/root",
       "inventory_ids": [],
       "relation_ids": []
@@ -2664,6 +2709,17 @@
         "short-lived-credentials",
         "token-exchange",
         "zero-trust"
+      ],
+      "relation_ids": []
+    },
+    {
+      "id": "jornadas/airflow-lock-retry/index",
+      "path": "content/jornadas/airflow-lock-retry/index.mdx",
+      "sha256": "1121ebb6d491f0440062e8a5f802edba9f08aeb1b9ef72302d21a853c7fb0f3a",
+      "author_id": "/root",
+      "inventory_ids": [
+        "retry",
+        "timeout"
       ],
       "relation_ids": []
     },
@@ -2886,7 +2942,7 @@
     {
       "id": "jornadas/index",
       "path": "content/jornadas/index.mdx",
-      "sha256": "bbca38c5c7c46b5780541cb1ab347e28a971a3e29bdd178fe1cd2bfb76fc8084",
+      "sha256": "16458cddf6f590d78f8c6ca40a1a5fc24c9333ebd5d1f9cb5902dc77bf310561",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [],
       "relation_ids": []
@@ -3210,14 +3266,9 @@
     {
       "id": "jornadas/query-grain-postgres/index",
       "path": "content/jornadas/query-grain-postgres/index.mdx",
-      "sha256": "d0e46deb84425560ba0cd8332f8da4bafd59d949346d3b816d1ce59a6b3cfdab",
+      "sha256": "3ecc0263baf7cd97edc771c5096633d43ea9091d3a0a6eb458e0dd8cef9979dd",
       "author_id": "/root",
-      "inventory_ids": [
-        "materialized-view",
-        "indexing",
-        "precomputation",
-        "cqrs"
-      ],
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
@@ -3409,7 +3460,7 @@
     {
       "id": "jornadas/revision-cas-postgres/index",
       "path": "content/jornadas/revision-cas-postgres/index.mdx",
-      "sha256": "60dfbe8266071ef54310e67916c5624c8d17c39407752b4558cdbf7d1c6da4e1",
+      "sha256": "c8403a52c09d6a4d1d9b24aa7533c969d52f6b6034ba93a9faae38d2907a4d05",
       "author_id": "/root",
       "inventory_ids": [
         "optimistic-concurrency-control",
@@ -3573,6 +3624,17 @@
       "relation_ids": []
     },
     {
+      "id": "referencia/casos/airflow-lock-retry/index",
+      "path": "content/referencia/casos/airflow-lock-retry/index.mdx",
+      "sha256": "3cdff5eb231d601c862e1bac9d0919eb70e12e54df14947531da75eb7d871469",
+      "author_id": "/root",
+      "inventory_ids": [
+        "retry",
+        "timeout"
+      ],
+      "relation_ids": []
+    },
+    {
       "id": "referencia/casos/cache-policy/index",
       "path": "content/referencia/casos/cache-policy/index.mdx",
       "sha256": "c5c0560fe4540041c7c66b0582ce7f03a9e2884a5b37751de19d5281d4155aaa",
@@ -3678,6 +3740,14 @@
       "inventory_ids": [
         "refresh-ahead"
       ],
+      "relation_ids": []
+    },
+    {
+      "id": "referencia/casos/index",
+      "path": "content/referencia/casos/index.mdx",
+      "sha256": "0bbc6360ccb88b39e11f0170de9f7589cad4bf8b7e52d697ae2eed5efc9e75c5",
+      "author_id": "/root/curation_complete",
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
@@ -3839,12 +3909,7 @@
       "path": "content/referencia/casos/query-grain-postgres/index.mdx",
       "sha256": "370bbd06632519aaa2536ab4b45922bf66177b22646204bfc970aeacf6796e6a",
       "author_id": "/root",
-      "inventory_ids": [
-        "materialized-view",
-        "indexing",
-        "precomputation",
-        "cqrs"
-      ],
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
@@ -4019,7 +4084,7 @@
     {
       "id": "referencia/catalogo/01-arquiteturas-de-aplicacao",
       "path": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
-      "sha256": "bef49c8b2fd3a0f3d4b6e67cbf9b61cf7e7d66ec4d890c1769c8b08de059e447",
+      "sha256": "2cb483d556683bedc96477783f6cb20ca055e765340dca39f4342931e10ff010",
       "author_id": "/root/s2_application_architecture",
       "inventory_ids": [
         "actor-model",
@@ -4050,7 +4115,7 @@
     {
       "id": "referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
       "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
-      "sha256": "31f7c71cddd92c071c98867d50bf85f40652eb23b9f9acedc1c8f95085766625",
+      "sha256": "03a077bbe1c7513faf3eb1bdb93a2e0d371ed73b9f75dfe56cd04fef57e9472c",
       "author_id": "/root/s4_consistency_data",
       "inventory_ids": [
         "at-least-once-delivery",
@@ -4097,7 +4162,7 @@
     {
       "id": "referencia/catalogo/03-event-driven-messaging",
       "path": "content/referencia/catalogo/03-event-driven-messaging.mdx",
-      "sha256": "70f11bce55452388b8336feb9da707fab309a7cdf8586006b5f334646cfb181e",
+      "sha256": "fc5fa85e90c4698f701aa217a2a2b5e326f5e9a324537dd0ffe91175115aa45b",
       "author_id": "/root/s4_consistency_data",
       "inventory_ids": [
         "aggregator",
@@ -4131,7 +4196,7 @@
     {
       "id": "referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura",
       "path": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
-      "sha256": "e78f0062cd624be9232cbd49a168eb95fbc2fbabbf3928e1b6966c223de49a6f",
+      "sha256": "adf81a0a5d84a13349c0a352541406ee986e80188ca5cc086a593a188c843650",
       "author_id": "/root/s4_consistency_data",
       "inventory_ids": [
         "command-handler",
@@ -4154,7 +4219,7 @@
     {
       "id": "referencia/catalogo/05-banco-de-dados-e-armazenamento",
       "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
-      "sha256": "7a1b0ab4b2c6d6c92dcb417b87d927eded00417be45052662462b957ab718d12",
+      "sha256": "869d146f32190c9d0cbdc2578e8c0f68dcf7f7444b7d81e96f43185671c4cfec",
       "author_id": "/root/s4_consistency_data",
       "inventory_ids": [
         "active-active",
@@ -4191,7 +4256,7 @@
     {
       "id": "referencia/catalogo/06-cache",
       "path": "content/referencia/catalogo/06-cache.mdx",
-      "sha256": "9fe451b92984d4ccde8a9c8c402b38ac345dea2d223c1ab48b316095ac766707",
+      "sha256": "da2a7bb5ca7f63a6d5b83c3533a49535602bd9c1b0052a432aac02005d5fe173",
       "author_id": "/root/s5_operational_patterns",
       "inventory_ids": [
         "cache-aside",
@@ -4214,7 +4279,7 @@
     {
       "id": "referencia/catalogo/07-resiliencia",
       "path": "content/referencia/catalogo/07-resiliencia.mdx",
-      "sha256": "d0f172ed9fcbbfcc11a5ecd5ae4b8beda01925c4a8558f8176be0a33e02822f0",
+      "sha256": "c74b29cc35c8111bc966075c5278823c55fcaefe27adae92ba5bca6b03c6c01f",
       "author_id": "/root/s5_operational_patterns",
       "inventory_ids": [
         "backpressure",
@@ -4242,7 +4307,7 @@
     {
       "id": "referencia/catalogo/08-concorrencia",
       "path": "content/referencia/catalogo/08-concorrencia.mdx",
-      "sha256": "74352a0a8596912c9f28f854c056f039cea0a0a960b7fc459950bce6192e4665",
+      "sha256": "4d05aadfee88512db670fe632a9f177676feebe23cf0d89318a24a84c32e957f",
       "author_id": "/root/s5_operational_patterns",
       "inventory_ids": [
         "actor-model",
@@ -4273,7 +4338,7 @@
     {
       "id": "referencia/catalogo/09-apis-e-integracao",
       "path": "content/referencia/catalogo/09-apis-e-integracao.mdx",
-      "sha256": "ca5b9544200e552fa75b32e3dd84620ab709726b76e5fdbc6a031560c760d6cc",
+      "sha256": "6745932e92e48e5e59bcaefb933d49b25060b84b4dbee1e03dbd6041be1be71e",
       "author_id": "/root/s5_operational_patterns",
       "inventory_ids": [
         "adapter",
@@ -4305,7 +4370,7 @@
     {
       "id": "referencia/catalogo/10-ddd-domain-driven-design",
       "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
-      "sha256": "c0a23012114f5d9169959853498fb2148b5116c5d928e4d1e635c2f190932633",
+      "sha256": "21792731583d43b26825be9cc45957ffad46636841489d129844c6ad6876f033",
       "author_id": "/root/s2_application_architecture",
       "inventory_ids": [
         "aggregate",
@@ -4336,7 +4401,7 @@
     {
       "id": "referencia/catalogo/11-padroes-para-decompor-sistemas",
       "path": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
-      "sha256": "60245767c4ea6659deb33e1ecb8be25dca48bfc70aec3a15546b2e345db1b7cf",
+      "sha256": "d9c057d7c90ced20f64c76b3ce9def1d08f322f4191097f69496e0c15d0f797e",
       "author_id": "/root/s6_platform_delivery",
       "inventory_ids": [
         "branch-by-abstraction",
@@ -4358,7 +4423,7 @@
     {
       "id": "referencia/catalogo/12-deploy-e-releases",
       "path": "content/referencia/catalogo/12-deploy-e-releases.mdx",
-      "sha256": "3f279fbf7555b85c6893d48586c391a073bcce0dec1aaed2e9fb51387fe45722",
+      "sha256": "f7a65931bb9056a48f9fb3fee50a5b672481d38d2f36c9ffcc2940d7c386b763",
       "author_id": "/root/s6_platform_delivery",
       "inventory_ids": [
         "a-b-deployment",
@@ -4379,7 +4444,7 @@
     {
       "id": "referencia/catalogo/13-alta-disponibilidade",
       "path": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
-      "sha256": "36127277b02007a4f942f2ac372d4107410e1cfdbdf3d4fc248b4e0bfbe5f76f",
+      "sha256": "5764d953aa4bbad2b7e82dc4250b1db506ef6c5892d8069877ad523f8c459740",
       "author_id": "/root/s6_platform_delivery",
       "inventory_ids": [
         "active-active",
@@ -4405,7 +4470,7 @@
     {
       "id": "referencia/catalogo/14-seguranca",
       "path": "content/referencia/catalogo/14-seguranca.mdx",
-      "sha256": "a73c8d07ac55cdffa91b99f6fd9c1d5030890be2cacaa6b127432224a9787c0a",
+      "sha256": "2603d2c069f96dd7c2e6810184483baeceebd635c16b3bb7223ce996ea92917a",
       "author_id": "/root/s6_platform_delivery",
       "inventory_ids": [
         "abac",
@@ -4431,7 +4496,7 @@
     {
       "id": "referencia/catalogo/15-observabilidade",
       "path": "content/referencia/catalogo/15-observabilidade.mdx",
-      "sha256": "bf31bad89daa71589e69a12e173e95e58a24d3922e3ae91903cb85327cfc7f5e",
+      "sha256": "cb5b73b412737066257f5f0884b85c56799832472756890ca4aad9fadfb33298",
       "author_id": "/root/s5_operational_patterns",
       "inventory_ids": [
         "centralized-logging",
@@ -4452,7 +4517,7 @@
     {
       "id": "referencia/catalogo/16-workflow-e-processamento",
       "path": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
-      "sha256": "6f809d63281eb97af6de0776f635cf72a4aa0edc38657e78b2f6949cbe4c6494",
+      "sha256": "f0e9183c0245d552be01a691ef69bd7363f7c50e88f5b5511ba50d9da7b40679",
       "author_id": "/root/s3_airflow_workflows",
       "inventory_ids": [
         "batch-processing",
@@ -4477,7 +4542,7 @@
     {
       "id": "referencia/catalogo/17-padroes-classicos-gof",
       "path": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
-      "sha256": "c66ad891424d7e0475a7457f9c4567f092c8218d12fe421ed694bf513b0649b7",
+      "sha256": "efb2b527bbcf5f373ea322cae55f02fa170d8b894dd07c25a97792b3242caa5e",
       "author_id": "/root/s2_application_architecture",
       "inventory_ids": [
         "abstract-factory",
@@ -4517,7 +4582,7 @@
     {
       "id": "referencia/curadoria/01-arquiteturas-de-aplicacao",
       "path": "content/referencia/curadoria/01-arquiteturas-de-aplicacao.mdx",
-      "sha256": "2e9495332f3e7faefb50712d2c90bcd1fdddc01cc26d44974e5afabf3bc5fb54",
+      "sha256": "9f146fc66abef78fab8269e8387f68a6e196a96a917742d2420e9544c848ce1d",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "actor-model",
@@ -4548,7 +4613,7 @@
     {
       "id": "referencia/curadoria/02-sistemas-distribuidos-e-consistencia",
       "path": "content/referencia/curadoria/02-sistemas-distribuidos-e-consistencia.mdx",
-      "sha256": "d3451b18991ee36ca656307095d2e121faf808c8be4df9d292caffec8210e3be",
+      "sha256": "a1712443c78a284b4a0603e843bd02ea41b87a316d8931d2939149c2bbc8c0c5",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "at-least-once-delivery",
@@ -4595,7 +4660,7 @@
     {
       "id": "referencia/curadoria/03-event-driven-messaging",
       "path": "content/referencia/curadoria/03-event-driven-messaging.mdx",
-      "sha256": "d14e81dad33199dddbd29dcb515e1926aba9e7067f81750c20786da6be55c9cf",
+      "sha256": "c7839614e76afe23a8e6b3b7edb348fc111245bf3b24c791aa861a58a6a15745",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "aggregator",
@@ -4629,7 +4694,7 @@
     {
       "id": "referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura",
       "path": "content/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
-      "sha256": "1c152203aad3f0b39fd8631befdf03ad787890a4cc9f1b10e3734f251b27683c",
+      "sha256": "9aec2074e65bc6e1c4aa8d89f36bb01335454cbc1ba6c8bddeedae04d93f9745",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "command-handler",
@@ -4649,7 +4714,7 @@
     {
       "id": "referencia/curadoria/05-banco-de-dados-e-armazenamento",
       "path": "content/referencia/curadoria/05-banco-de-dados-e-armazenamento.mdx",
-      "sha256": "982c1f5d696db2b0242c2213da096dc52508fc8829346e6b06300785adc88e40",
+      "sha256": "f68e3fc2edb6ebadc570fa480fa11c253c06c8020400d3b39fe21b3534991578",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "active-active",
@@ -4686,7 +4751,7 @@
     {
       "id": "referencia/curadoria/06-cache",
       "path": "content/referencia/curadoria/06-cache.mdx",
-      "sha256": "eee1a4c00e2607ea38bc91a0525b6cb8e29b9c68706bf3614cf754a74c71f6c4",
+      "sha256": "7f200581fe1d66b887281210ee54eb60dd59b065542f022d0425d73716c3528d",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "cache-aside",
@@ -4709,7 +4774,7 @@
     {
       "id": "referencia/curadoria/07-resiliencia",
       "path": "content/referencia/curadoria/07-resiliencia.mdx",
-      "sha256": "371452944377d034a2622549cc3a68d5cf831854c9adee366525a6af8082d0a7",
+      "sha256": "bd320dc5b080c6e56cfdd9ca725d2b708a529610d3c9b13f5654e1d7eb9bc3c0",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "backpressure",
@@ -4737,7 +4802,7 @@
     {
       "id": "referencia/curadoria/08-concorrencia",
       "path": "content/referencia/curadoria/08-concorrencia.mdx",
-      "sha256": "db6a5dab8946da5a3d6e2b041d69ee99d1e2f17ee22d045122bb24b6ebba5466",
+      "sha256": "7041d6af9b0e83f17072f5b1622426733700b5b1a0b122881b974c1e6be337d9",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "actor-model",
@@ -4768,7 +4833,7 @@
     {
       "id": "referencia/curadoria/09-apis-e-integracao",
       "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
-      "sha256": "74020cf812dd4d68ca4b264d604ea698c46adbfb6fb38ccd48b6dd2f4b65cec6",
+      "sha256": "1ed46b4f76f9a4db6b36b58150d81aad7246ea6cd63643de9621cc84cf926ff8",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "adapter",
@@ -4800,7 +4865,7 @@
     {
       "id": "referencia/curadoria/10-ddd-domain-driven-design",
       "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
-      "sha256": "c4730ce3ebd204d33c72c67d8b537b18058434c7469e3f7c4b5340c045436099",
+      "sha256": "2a8d22100748bb06e7e2453757a5ab62afe4ab528f819a5cc1085ffaf5cad58a",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "aggregate",
@@ -4831,7 +4896,7 @@
     {
       "id": "referencia/curadoria/11-padroes-para-decompor-sistemas",
       "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
-      "sha256": "52ce349ade7c636bda647727aeb1c84531b1d6dde7c6be0ace8a096d7925f729",
+      "sha256": "13e9b0d05bb0dc35908e4e0a1fd372962fdfb085c2b3c8d3ef13197cf11fd429",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "branch-by-abstraction",
@@ -4853,7 +4918,7 @@
     {
       "id": "referencia/curadoria/12-deploy-e-releases",
       "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
-      "sha256": "825770fdf95e46bdc170209bd65891f28e0f5ddbf614d4b91bcf410d378b52c3",
+      "sha256": "86a81ff74433bc7faa47192146e6eb0e2f6728c0c2a88ee2d3923cbd9789cf1f",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "a-b-deployment",
@@ -4874,7 +4939,7 @@
     {
       "id": "referencia/curadoria/13-alta-disponibilidade",
       "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
-      "sha256": "f91965bc223070a38e63fbfaa72713a0c97d7c2162bb6c00d2d7f630f4e67ebf",
+      "sha256": "b720bbc8d270351dcbbcc0d3e059cf8d7da9bbfda5d314221969f169395d2b89",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "active-active",
@@ -4900,7 +4965,7 @@
     {
       "id": "referencia/curadoria/14-seguranca",
       "path": "content/referencia/curadoria/14-seguranca.mdx",
-      "sha256": "f42a591f01437587e3f5f85d780d4b1a5010881805f4d548c6698ab4039e5a60",
+      "sha256": "3f6aa3ad0f848a4905c95c032583123e0ee38991b0ef9092d48c7057600b2b05",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "abac",
@@ -4926,7 +4991,7 @@
     {
       "id": "referencia/curadoria/15-observabilidade",
       "path": "content/referencia/curadoria/15-observabilidade.mdx",
-      "sha256": "36615041c4ddc830a74a00cc0bbd2495c8f3bba66ae542cc6440bf75da718f43",
+      "sha256": "4cf1f9b030dcc4bc79e68172ff6e62a27e28a9a3ccf3a44f6c6cb964264032bb",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "centralized-logging",
@@ -4947,7 +5012,7 @@
     {
       "id": "referencia/curadoria/16-workflow-e-processamento",
       "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
-      "sha256": "849e21413f602d5e492e9efb8d6d120be8ce23c0ea0add56bbd0de68725d4dde",
+      "sha256": "bd16a86611830682685e017087d8329c1d79b8a2c3f74641373e4b77c3daf362",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "batch-processing",
@@ -4972,7 +5037,7 @@
     {
       "id": "referencia/curadoria/17-padroes-classicos-gof",
       "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
-      "sha256": "ef5619ca34289b3c8cc13ec2620eb55bef082e0d9a892e044f1ca3a7589f25fa",
+      "sha256": "7d5ebd0138fb7c48f43bf2e8b1853deb0da8427f3dc8f2d758d93cae21ca0a86",
       "author_id": "/root/curation_complete",
       "inventory_ids": [
         "abstract-factory",
@@ -5004,7 +5069,7 @@
     {
       "id": "referencia/curadoria/index",
       "path": "content/referencia/curadoria/index.mdx",
-      "sha256": "3e6f5c0998678c7316472063f225e3e0eb1a85156fcd99a9803b4bc032f60434",
+      "sha256": "daf75feceb67432b72ec954a8833d5cbbe84f217d70062890693faf9f1457232",
       "author_id": "/root/curation_complete",
       "inventory_ids": [],
       "relation_ids": []
@@ -5012,7 +5077,7 @@
     {
       "id": "referencia/evidencias",
       "path": "content/referencia/evidencias.mdx",
-      "sha256": "ecd5bdc11168ced2a6d8aee533ac2d7b0cb0ffad141a2c7ef529e22c8a9d3c7f",
+      "sha256": "27c4abe67c866c60cd231e3637243af4ddbdd63407f7b5410fab1eabb3a5b7bc",
       "author_id": "/root",
       "inventory_ids": [],
       "relation_ids": []
@@ -5028,7 +5093,7 @@
     {
       "id": "referencia/prioritarios",
       "path": "content/referencia/prioritarios.mdx",
-      "sha256": "6d9e8d01bfb49c84a0f1302caed196d60200fe7abffd8a182d23090366a70220",
+      "sha256": "508e95f816b4df1363870f113b696dfa8c1e034d2a3452942d66584af9c6443f",
       "author_id": "/root",
       "inventory_ids": [
         "anti-corruption-layer",
@@ -5083,7 +5148,7 @@
     {
       "id": "referencia/skills-e-projetos",
       "path": "content/referencia/skills-e-projetos.mdx",
-      "sha256": "3002b16f68849e709072ffe8624b50ad813c2703ec4a62214589728a822ddc2c",
+      "sha256": "96008bba7d7a3dfd94c919e794d848eb520034394d6253173d994cc23fb4446f",
       "author_id": "/root",
       "inventory_ids": [],
       "relation_ids": []
@@ -5091,7 +5156,7 @@
     {
       "id": "tutoriais/casos/access-policy/index",
       "path": "content/tutoriais/casos/access-policy/index.mdx",
-      "sha256": "ad3ee41d17e7a0f5f370669b0077ad7605a74ce6baf2ed5aac14731bc681071b",
+      "sha256": "96ee77fb3cd8939dca8dd83cd8cab9f8185b1a06ef380a2ca7e5db1a2f373de1",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "abac",
@@ -5114,9 +5179,20 @@
       "relation_ids": []
     },
     {
+      "id": "tutoriais/casos/airflow-lock-retry/index",
+      "path": "content/tutoriais/casos/airflow-lock-retry/index.mdx",
+      "sha256": "e96eab7a00a1a42ad8c45dcab0a005aae7c21d28c238110b5f1497fc2fee5e4d",
+      "author_id": "/root",
+      "inventory_ids": [
+        "retry",
+        "timeout"
+      ],
+      "relation_ids": []
+    },
+    {
       "id": "tutoriais/casos/cache-policy/index",
       "path": "content/tutoriais/casos/cache-policy/index.mdx",
-      "sha256": "f75948c182e5a0408d492a453034584660cc4df5873255324c2325b01de188d7",
+      "sha256": "bd524dc7e6fda49994fdf8c1bf6249258c4d479fa4dc63f1598006797d8ee65e",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "cache-aside",
@@ -5136,7 +5212,7 @@
     {
       "id": "tutoriais/casos/consensus/index",
       "path": "content/tutoriais/casos/consensus/index.mdx",
-      "sha256": "d021b89ad11b97c5f197e0a9f87bfa51c01baa8888295a51333da85fdfbdca69",
+      "sha256": "07013cbc8130c766e31351159600481da965294c0c6848090c4d054f569f336a",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "active-active",
@@ -5183,7 +5259,7 @@
     {
       "id": "tutoriais/casos/date-only/index",
       "path": "content/tutoriais/casos/date-only/index.mdx",
-      "sha256": "897fe446a4a0f9b46fc974b43906673304d26f6d39674e659e7c815d0cae60c0",
+      "sha256": "05ab5f02a3ba1b40a0ce450951585b9914576136184688e57c7670537f46658d",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "published-language"
@@ -5193,7 +5269,7 @@
     {
       "id": "tutoriais/casos/diagnostics/index",
       "path": "content/tutoriais/casos/diagnostics/index.mdx",
-      "sha256": "83f1e9c6f856685d626471cebf9271086b33c445fe0b5bd7aa2627079fd9d921",
+      "sha256": "98a0e5488d0c4a24f08db051f349217c9a84f8e646fb1f6b66d3821abe789982",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "centralized-logging",
@@ -5214,7 +5290,7 @@
     {
       "id": "tutoriais/casos/early-refresh/index",
       "path": "content/tutoriais/casos/early-refresh/index.mdx",
-      "sha256": "271008aae51871a5c1b341eb8258ddacb56d39d6a052273f5fb8856adad37d09",
+      "sha256": "2df595f0fc2a897d9646a366a2445ae3b09f5c56666d0f3679080492df3eb0d4",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "refresh-ahead"
@@ -5224,7 +5300,7 @@
     {
       "id": "tutoriais/casos/index",
       "path": "content/tutoriais/casos/index.mdx",
-      "sha256": "6deb675c1f3acdde24b421351c79f4cf95de3985d62ad34260f1e2517510c1af",
+      "sha256": "84a5be14ef2897043622d670da9589650ba66a5a5487ca51d9a262c6d389c548",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [],
       "relation_ids": []
@@ -5232,7 +5308,7 @@
     {
       "id": "tutoriais/casos/ledger-projection/index",
       "path": "content/tutoriais/casos/ledger-projection/index.mdx",
-      "sha256": "235bd98d3158899a130826763a98c57c3bf09c2f28d75dd8645b5e429df1ef81",
+      "sha256": "968112a95b46e781cfb92703ad8cd1447342147a55d07c715a1496f4e1f48933",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "append-only-log",
@@ -5255,7 +5331,7 @@
     {
       "id": "tutoriais/casos/opportunity-entry/index",
       "path": "content/tutoriais/casos/opportunity-entry/index.mdx",
-      "sha256": "51b8d4c553852f6d53fa89bc0ac2b954ab70d6d5a76bf0c44531a42903a2daa3",
+      "sha256": "2a12d41b9a8eb36a1483019c3e4ebb128e58ff6f7d760b20292fb54dbbcaa96c",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "domain-policy",
@@ -5267,7 +5343,7 @@
     {
       "id": "tutoriais/casos/order-boundaries/index",
       "path": "content/tutoriais/casos/order-boundaries/index.mdx",
-      "sha256": "32ced3a6918d759c154e53299621ef412ec0285e01a066547b1a0d624694e657",
+      "sha256": "722c89a708cf70e97456e0c410043dc3c1df69fbb12311ea26029b47bace8e87",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "abstract-factory",
@@ -5361,7 +5437,7 @@
     {
       "id": "tutoriais/casos/order-delivery/index",
       "path": "content/tutoriais/casos/order-delivery/index.mdx",
-      "sha256": "99dea04b23692688a69218a3fabf2619d70b39450fae7571e3dae10e7f657082",
+      "sha256": "4bcc5952e3661ac1a9e68b9d7a6319ce0012bffb6673b00b3b18cddc22771eb7",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "at-least-once-delivery",
@@ -5388,18 +5464,13 @@
       "path": "content/tutoriais/casos/query-grain-postgres/index.mdx",
       "sha256": "86ee57bc963a944b0c06b58240250665c70bc2ea48ed19c517294a9001010a54",
       "author_id": "/root",
-      "inventory_ids": [
-        "materialized-view",
-        "indexing",
-        "precomputation",
-        "cqrs"
-      ],
+      "inventory_ids": [],
       "relation_ids": []
     },
     {
       "id": "tutoriais/casos/queue-workflow/index",
       "path": "content/tutoriais/casos/queue-workflow/index.mdx",
-      "sha256": "b7dde8cda0dcc4453db7ff2cc96bf4d93fe002e9501d66000e997aead29286b5",
+      "sha256": "02ffe72ca8bec25eb14e0dec7b968ab20e5c57e3ffda13ab0a8f580aa247a542",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "aggregator",
@@ -5463,7 +5534,7 @@
     {
       "id": "tutoriais/casos/reservation/index",
       "path": "content/tutoriais/casos/reservation/index.mdx",
-      "sha256": "0a40c645bd550a6419fc7fa5ebc22708c81264365e463f87318357b999605f71",
+      "sha256": "686c2d18ca455964c43cb7b14b848ea14d185813aa8f8e95b914cd23d81dbc75",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "compare-and-swap-cas",
@@ -5503,7 +5574,7 @@
     {
       "id": "tutoriais/casos/safe-release/index",
       "path": "content/tutoriais/casos/safe-release/index.mdx",
-      "sha256": "9320caee03e2e482fd1b011504001b93015bfd04efef00cea9f82f84a04ed016",
+      "sha256": "14b2102dcc4667e54dea4b108f5c6ff776d0a39357f622d040d6077fe0799797",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "a-b-deployment",
@@ -5533,7 +5604,7 @@
     {
       "id": "tutoriais/casos/single-flight-cancel/index",
       "path": "content/tutoriais/casos/single-flight-cancel/index.mdx",
-      "sha256": "42335e50cf2f54af8985c8276cc64c54989112b9f1a2e796ef1cc71cda927613",
+      "sha256": "1878d01d0bed9d8a8ca17966d2fd5c31abce585e32e7ec9b83f0fd193710c6ce",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "async-await",
@@ -5547,7 +5618,7 @@
     {
       "id": "tutoriais/casos/storage-partitions/index",
       "path": "content/tutoriais/casos/storage-partitions/index.mdx",
-      "sha256": "ba5e79cb1182c7119845db1770a37493af1365e4dc5fb7f1f09d51fd9103262b",
+      "sha256": "429a9be933b48e0b6561b658d2b72651cc30ea926d5c35815407b26284e1503b",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "consistent-hashing",
@@ -6124,6 +6195,27 @@
     },
     {
       "id": "diagram-24",
+      "document_id": "explicacoes/casos/airflow-lock-retry/index",
+      "fence_index": 1,
+      "relation_ids": [],
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-airflow-retry/fc01d0e06b14-1.png",
+        "artifact_sha256": "34dd2124c80bf0a8940691f297f7fa9578e7f40b0bca503b22e8ce35d74fb99a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "id": "diagram-25",
       "document_id": "explicacoes/casos/cache-policy/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6144,7 +6236,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-25",
+      "id": "diagram-26",
       "document_id": "explicacoes/casos/consensus/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6165,7 +6257,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-26",
+      "id": "diagram-27",
       "document_id": "explicacoes/casos/date-only/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6186,7 +6278,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-27",
+      "id": "diagram-28",
       "document_id": "explicacoes/casos/diagnostics/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6207,7 +6299,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-28",
+      "id": "diagram-29",
       "document_id": "explicacoes/casos/early-refresh/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6228,7 +6320,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-29",
+      "id": "diagram-30",
       "document_id": "explicacoes/casos/ledger-projection/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6249,7 +6341,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-30",
+      "id": "diagram-31",
       "document_id": "explicacoes/casos/opportunity-entry/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6270,7 +6362,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-31",
+      "id": "diagram-32",
       "document_id": "explicacoes/casos/order-boundaries/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6291,7 +6383,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-32",
+      "id": "diagram-33",
       "document_id": "explicacoes/casos/order-delivery/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6312,7 +6404,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-33",
+      "id": "diagram-34",
       "document_id": "explicacoes/casos/query-grain-postgres/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6333,7 +6425,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-34",
+      "id": "diagram-35",
       "document_id": "explicacoes/casos/queue-workflow/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6354,7 +6446,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-35",
+      "id": "diagram-36",
       "document_id": "explicacoes/casos/reservation/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6375,7 +6467,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-36",
+      "id": "diagram-37",
       "document_id": "explicacoes/casos/revision-cas-postgres/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6396,7 +6488,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-37",
+      "id": "diagram-38",
       "document_id": "explicacoes/casos/safe-release/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6417,7 +6509,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-38",
+      "id": "diagram-39",
       "document_id": "explicacoes/casos/single-flight-cancel/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6438,7 +6530,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-39",
+      "id": "diagram-40",
       "document_id": "explicacoes/casos/storage-partitions/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6459,7 +6551,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-40",
+      "id": "diagram-41",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 1,
       "relation_ids": [
@@ -6483,7 +6575,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-41",
+      "id": "diagram-42",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 2,
       "relation_ids": [
@@ -6507,7 +6599,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-42",
+      "id": "diagram-43",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 3,
       "relation_ids": [
@@ -6531,7 +6623,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-43",
+      "id": "diagram-44",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 4,
       "relation_ids": [
@@ -6555,7 +6647,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-44",
+      "id": "diagram-45",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 5,
       "relation_ids": [
@@ -6579,7 +6671,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-45",
+      "id": "diagram-46",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 6,
       "relation_ids": [
@@ -6603,7 +6695,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-46",
+      "id": "diagram-47",
       "document_id": "explicacoes/code-boundaries/index",
       "fence_index": 7,
       "relation_ids": [
@@ -6627,7 +6719,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-47",
+      "id": "diagram-48",
       "document_id": "explicacoes/code-patterns/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6648,7 +6740,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-48",
+      "id": "diagram-49",
       "document_id": "explicacoes/code-patterns/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6669,7 +6761,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-49",
+      "id": "diagram-50",
       "document_id": "explicacoes/code-patterns/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -6690,7 +6782,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-50",
+      "id": "diagram-51",
       "document_id": "explicacoes/concurrency/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6711,7 +6803,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-51",
+      "id": "diagram-52",
       "document_id": "explicacoes/concurrency/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6732,7 +6824,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-52",
+      "id": "diagram-53",
       "document_id": "explicacoes/data-distribution/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6753,7 +6845,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-53",
+      "id": "diagram-54",
       "document_id": "explicacoes/data-distribution/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6774,7 +6866,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-54",
+      "id": "diagram-55",
       "document_id": "explicacoes/data-distribution/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -6795,7 +6887,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-55",
+      "id": "diagram-56",
       "document_id": "explicacoes/data-distribution/index",
       "fence_index": 4,
       "relation_ids": [],
@@ -6816,7 +6908,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-56",
+      "id": "diagram-57",
       "document_id": "explicacoes/data-durability/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6837,7 +6929,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-57",
+      "id": "diagram-58",
       "document_id": "explicacoes/data-durability/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6858,7 +6950,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-58",
+      "id": "diagram-59",
       "document_id": "explicacoes/data-durability/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -6879,7 +6971,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-59",
+      "id": "diagram-60",
       "document_id": "explicacoes/data-durability/index",
       "fence_index": 4,
       "relation_ids": [],
@@ -6900,7 +6992,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-60",
+      "id": "diagram-61",
       "document_id": "explicacoes/distributed-work/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6921,7 +7013,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-61",
+      "id": "diagram-62",
       "document_id": "explicacoes/distributed-work/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6942,7 +7034,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-62",
+      "id": "diagram-63",
       "document_id": "explicacoes/messages/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -6963,7 +7055,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-63",
+      "id": "diagram-64",
       "document_id": "explicacoes/messages/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -6984,7 +7076,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-64",
+      "id": "diagram-65",
       "document_id": "explicacoes/messages/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -7005,7 +7097,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-65",
+      "id": "diagram-66",
       "document_id": "explicacoes/messages/index",
       "fence_index": 4,
       "relation_ids": [],
@@ -7026,7 +7118,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-66",
+      "id": "diagram-67",
       "document_id": "explicacoes/messages/index",
       "fence_index": 5,
       "relation_ids": [],
@@ -7047,7 +7139,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-67",
+      "id": "diagram-68",
       "document_id": "explicacoes/observability/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -7068,7 +7160,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-68",
+      "id": "diagram-69",
       "document_id": "explicacoes/observability/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -7089,7 +7181,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-69",
+      "id": "diagram-70",
       "document_id": "explicacoes/read-models/index",
       "fence_index": 1,
       "relation_ids": [
@@ -7113,7 +7205,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-70",
+      "id": "diagram-71",
       "document_id": "explicacoes/read-models/index",
       "fence_index": 2,
       "relation_ids": [
@@ -7137,7 +7229,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-71",
+      "id": "diagram-72",
       "document_id": "explicacoes/read-models/index",
       "fence_index": 3,
       "relation_ids": [
@@ -7161,7 +7253,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-72",
+      "id": "diagram-73",
       "document_id": "explicacoes/read-models/index",
       "fence_index": 4,
       "relation_ids": [
@@ -7185,7 +7277,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-73",
+      "id": "diagram-74",
       "document_id": "explicacoes/reliable-integration/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -7206,7 +7298,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-74",
+      "id": "diagram-75",
       "document_id": "explicacoes/reliable-integration/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -7227,7 +7319,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-75",
+      "id": "diagram-76",
       "document_id": "explicacoes/reliable-integration/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -7248,7 +7340,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-76",
+      "id": "diagram-77",
       "document_id": "explicacoes/reliable-integration/index",
       "fence_index": 4,
       "relation_ids": [],
@@ -7269,7 +7361,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-77",
+      "id": "diagram-78",
       "document_id": "explicacoes/safe-change/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -7290,7 +7382,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-78",
+      "id": "diagram-79",
       "document_id": "explicacoes/safe-change/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -7311,7 +7403,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-79",
+      "id": "diagram-80",
       "document_id": "explicacoes/safe-change/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -7332,7 +7424,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-80",
+      "id": "diagram-81",
       "document_id": "explicacoes/safe-change/index",
       "fence_index": 4,
       "relation_ids": [],
@@ -7353,7 +7445,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-81",
+      "id": "diagram-82",
       "document_id": "explicacoes/safe-change/index",
       "fence_index": 5,
       "relation_ids": [],
@@ -7374,7 +7466,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-82",
+      "id": "diagram-83",
       "document_id": "explicacoes/security/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -7395,7 +7487,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-83",
+      "id": "diagram-84",
       "document_id": "explicacoes/security/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -7416,7 +7508,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-84",
+      "id": "diagram-85",
       "document_id": "explicacoes/workflow/index",
       "fence_index": 1,
       "relation_ids": [],
@@ -7437,7 +7529,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-85",
+      "id": "diagram-86",
       "document_id": "explicacoes/workflow/index",
       "fence_index": 2,
       "relation_ids": [],
@@ -7458,7 +7550,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-86",
+      "id": "diagram-87",
       "document_id": "explicacoes/workflow/index",
       "fence_index": 3,
       "relation_ids": [],
@@ -7479,7 +7571,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-87",
+      "id": "diagram-88",
       "document_id": "guias/investigar-impacto",
       "fence_index": 1,
       "relation_ids": [],
@@ -7500,7 +7592,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-88",
+      "id": "diagram-89",
       "document_id": "tutoriais/idempotency",
       "fence_index": 1,
       "relation_ids": [],
@@ -7521,7 +7613,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-89",
+      "id": "diagram-90",
       "document_id": "tutoriais/optimistic-concurrency",
       "fence_index": 1,
       "relation_ids": [],
@@ -7542,7 +7634,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-90",
+      "id": "diagram-91",
       "document_id": "tutoriais/outbox",
       "fence_index": 1,
       "relation_ids": [],
@@ -7563,7 +7655,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-91",
+      "id": "diagram-92",
       "document_id": "tutoriais/read-projection",
       "fence_index": 1,
       "relation_ids": [
@@ -7587,7 +7679,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-92",
+      "id": "diagram-93",
       "document_id": "tutoriais/single-flight",
       "fence_index": 1,
       "relation_ids": [],
@@ -7608,7 +7700,7 @@
       "semantic_review": "NOT_RUN"
     },
     {
-      "id": "diagram-93",
+      "id": "diagram-94",
       "document_id": "tutoriais/state-machine",
       "fence_index": 1,
       "relation_ids": [],
@@ -7639,11 +7731,11 @@
       "description": "The exact repository and asset remain outside the approved catalog contract; the concrete proposal is preserved without bypassing validation."
     },
     {
-      "id": "curation-gaps",
+      "id": "history-causal-proof",
       "kind": "source",
       "critical": true,
       "source_id": "project",
-      "description": "27 concepts still have author-declared curatorship gaps."
+      "description": "Individual classification is complete for 595 FBI issues, with 35 explicitly missing causal evidence and 290 reported-only classifications. Full causal confirmation is not established by patch indexing or source triage."
     },
     {
       "id": "independent-final-review",

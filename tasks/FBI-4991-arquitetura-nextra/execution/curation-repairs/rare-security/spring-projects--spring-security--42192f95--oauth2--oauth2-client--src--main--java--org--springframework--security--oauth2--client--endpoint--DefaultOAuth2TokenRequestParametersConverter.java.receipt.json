@@ -1,0 +1,13 @@
+{
+  "repo": "spring-projects/spring-security",
+  "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+  "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+  "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+  "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--DefaultOAuth2TokenRequestParametersConverter.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.035682+00:00",
+  "sha256": "fa66a92a0888dd8229dc699ce265c8db2a6451a1e737842e4706b78d9174efc8",
+  "line_count": 107,
+  "source": "raw_primary"
+}

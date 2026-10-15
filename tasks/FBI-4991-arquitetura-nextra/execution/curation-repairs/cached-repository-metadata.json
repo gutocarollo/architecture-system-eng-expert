@@ -1,0 +1,41 @@
+{
+  "home-assistant/core": {
+    "repository": "home-assistant/core",
+    "url": "https://github.com/home-assistant/core",
+    "stars": 91500,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "dev",
+    "pushed_at": "2026-10-15T01:25:16Z",
+    "observed_utc": "2026-10-15T01:27:51.441622Z",
+    "api_url": "https://api.github.com/repos/home-assistant/core",
+    "http_status": 200
+  },
+  "aio-libs/aiohttp": {
+    "repository": "aio-libs/aiohttp",
+    "url": "https://github.com/aio-libs/aiohttp",
+    "stars": 16574,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T17:38:00Z",
+    "observed_utc": "2026-10-15T01:27:51.409600Z",
+    "api_url": "https://api.github.com/repos/aio-libs/aiohttp",
+    "http_status": 200
+  },
+  "apache/pulsar": {
+    "repository": "apache/pulsar",
+    "url": "https://github.com/apache/pulsar",
+    "stars": 15343,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T22:22:07Z",
+    "observed_utc": "2026-10-15T01:22:29.929211Z",
+    "api_url": "https://api.github.com/repos/apache/pulsar",
+    "http_status": 200
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "verdict": "PASS",
+  "receipts": [
+    {
+      "case": "grain",
+      "observed_at": "2026-10-15T04:18:29.297449+00:00",
+      "before_exit": 1,
+      "before_error": "Traceback (most recent call last):\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\", line 146, in <module>\n    main()\n    ~~~~^^\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\", line 94, in main\n    assert grain['after']['rows'] == 1 and grain['after']['commission_sum'] == 100, grain['after']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'rows': 2, 'commission_sum': 200, 'results': [{'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}, {'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}]}\n",
+      "patch_exit": 0,
+      "after_exit": 0,
+      "after_output": "grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\n"
+    },
+    {
+      "case": "revision",
+      "observed_at": "2026-10-15T04:18:31.038749+00:00",
+      "before_exit": 1,
+      "before_error": "Traceback (most recent call last):\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\", line 146, in <module>\n    main()\n    ~~~~^^\n  File \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\", line 127, in main\n    assert revision['after'] == dict(stale_writer_rejected=True, azure_id='AZURE-CONFIRMED', current_rows=1), revision['after']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'stale_writer_rejected': False, 'azure_id': 'AZURE-OLD', 'current_rows': 1}\n",
+      "patch_exit": 0,
+      "after_exit": 0,
+      "after_output": "revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\n"
+    }
+  ]
+}

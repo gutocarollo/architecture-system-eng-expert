@@ -180,3 +180,27 @@ EXIT_EVIDENCE: Actual mechanism, exact source/consumer, primary license and boun
 WARM_REUSE /root/base_reference_repairs: gpt-6.1-sol/xhigh, DEEP_EXPLORE, same five-concept base lane. Wave three owns database-decomposition, expand-contract, parallel-run, service-extraction, transitional-architecture. Reuses source caches and prior proposals; preserves frozen corpus.
 
 WARM_REUSE /root/rare_oss_sources: gpt-6.1-sol/xhigh, DEEP_EXPLORE, same Istio runtime source lane. Final delta service-mesh, discovery/policy through xDS and proxy configuration. Ownership transferred from curator; other 27 stay with curator.
+
+## WARM_REUSE root-owned three cases — 2026-10-15T04:15:20.023630+00:00
+
+Agent /root/story_requirements_review remains default/gpt-6.1-sol/xhigh, REVIEW. New scope: PostgreSQL grain/CAS and historical Airflow retry plus eighteen-case navigation delta. Previous fifteen-case approval preserved. Independent of root authorship. Round gate in reviews/round-gate-root-cases.json.
+
+## WARM_REUSE curation HIGH-only recheck — 2026-10-15T17:15:35.780512+00:00
+
+Reusing /root/curation_independent and /root/curation_second, both default/gpt-6.1-sol/xhigh REVIEW. Matrix fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0; twenty and31 repaired HIGHs respectively;259 unchanged fingerprints preserved. No new role/model/lane. Round gate reviews/round-gate-curation-warm.json.
+
+## SUBAGENT_ROUTE hosting compatibility — 2026-10-15T17:16:12.708958+00:00
+
+TASK: Determine supported password boundary for statically exported Nextra in Sites. LANE: DEEP_EXPLORE. MODEL: gpt-6.1-sol. EFFORT: xhigh. FORK_TURNS: none. Native default with read-only exploration contract. Existing warm agents own source curation, history or reviews; their scope is unrelated to Sites runtime, so a fresh bounded explorer avoids contamination. Exit: primary local-tool contract plus feasible auth/asset path or exact blocker. Allowed writes only execution/hosting-compatibility.
+
+## SUBAGENT_ROUTE Sites password Worker — 2026-10-15T17:21:41.377235+00:00
+
+TASK: Implement approved option B, password-protected R2-backed Nextra delivery. LANE: INTEGRATE. MODEL: gpt-6.1-sol. EFFORT: xhigh. FORK_TURNS: none. New default child because previous hosting child was read-only EXPLORE and lane changes require new thread. Ownership sites/architecture-course/worker and server build helpers only; native Sites registration, secrets, upload and publication remain root. Exit: fail-closed Worker plus local invariant checks and documented route/security contracts.
+
+## WARM_REUSE deterministic curation closure — 2026-10-15T17:26:46.386152+00:00
+
+/Root/curation_complete remains default/gpt-6.1-sol/xhigh INTEGRATE. After51 bounded approvals, apply only CPython/GitLab documentation license label corrections and import real independent decisions. Reviewers explicitly classify metadata corrections as non-semantic. Preserve source mechanism fingerprints, record final delta, regenerate one freeze. No new source research or review cycle.
+
+## SUBAGENT_ROUTE terminal delivery — 2026-10-15T17:47:05.933789+00:00
+
+TASK: Cold integration/security gate on frozen course, source-correspondence receipts, downloadable labs and Sites Worker. LANE: TERMINAL. MODEL: gpt-6.1-sol. EFFORT: xhigh. FORK_TURNS: none. Native default with independent adversarial contract. New context deliberately breaks author/reviewer anchoring. Prior HIGH reviewers are retired from approved scopes. Planned task /root/terminal_delivery; actual dispatch follows candidate commit. Round gate reviews/round-gate-terminal.json. Seven actual planners and four reviewers preserve planners>reviewers.

@@ -1,0 +1,18 @@
+[
+  {
+    "repo": "prometheus-community/helm-charts",
+    "path": "charts/prometheus/values.yaml"
+  },
+  {
+    "repo": "prometheus-community/helm-charts",
+    "path": "charts/prometheus/templates/deploy.yaml"
+  },
+  {
+    "repo": "bolshakov/stoplight",
+    "path": "lib/stoplight/light.rb"
+  },
+  {
+    "repo": "bolshakov/stoplight",
+    "path": "lib/stoplight/traffic_control.rb"
+  }
+]

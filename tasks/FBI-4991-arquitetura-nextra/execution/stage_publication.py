@@ -20,7 +20,7 @@ if airflow_manifest.exists():
         path=airflow_manifest.parent/entry['path']
         if hashlib.sha256(path.read_bytes()).hexdigest()!=entry['sha256']: raise ValueError('Airflow sanitized export changed: '+str(path))
         history_allow.add(str(path.relative_to(ROOT)))
-roots=['app','content','docs','scripts','labs','patches','tasks/architecture-course-2026-10-14','tasks/architecture-story-2026-10-14','tasks/FBI-4991-arquitetura-nextra']
+roots=['app','content','public/downloads','docs','scripts','labs','patches','tasks/architecture-course-2026-10-14','tasks/architecture-story-2026-10-14','tasks/FBI-4991-arquitetura-nextra']
 root_files=['.gitignore','README.md','mdx-components.jsx','next.config.mjs','package.json','package-lock.json','jsconfig.json','tsconfig.json','next-env.d.ts']
 candidates={ROOT/name for name in root_files if (ROOT/name).is_file()}
 for name in roots:

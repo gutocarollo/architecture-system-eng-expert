@@ -1,0 +1,13 @@
+{
+  "repo": "spring-projects/spring-security",
+  "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+  "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+  "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+  "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--AbstractRestClientOAuth2AccessTokenResponseClient.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:59:52.049839+00:00",
+  "sha256": "f7aa08fb026f8d7373940958eb91252a93db311418d8e7684a764d59c26976f5",
+  "line_count": 261,
+  "source": "raw_primary"
+}

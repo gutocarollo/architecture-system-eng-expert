@@ -1,0 +1,49 @@
+[
+  {
+    "repo": "minio/minio",
+    "path": "helm/minio/values.yaml"
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "config/initializers/stoplight.rb"
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/services/concerns/search_stoplight.rb"
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/services/tag_search_service.rb"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/dataobj/dataobj.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/dataobj/decoder.go"
+  },
+  {
+    "repo": "medusajs/medusa",
+    "path": "packages/modules/order/src/models/line-item.ts"
+  },
+  {
+    "repo": "rails/rails",
+    "path": "actionpack/lib/action_controller/metal/implicit_render.rb",
+    "ref": "v8.1.4"
+  },
+  {
+    "repo": "rails/rails",
+    "path": "actionpack/lib/action_controller/metal/renderers.rb",
+    "ref": "v8.1.4"
+  },
+  {
+    "repo": "google/guava",
+    "path": "guava/src/com/google/common/cache/CacheLoader.java"
+  },
+  {
+    "repo": "grafana/dskit",
+    "path": "ring/ring.go",
+    "ref": "b6a53f6bee29"
+  }
+]

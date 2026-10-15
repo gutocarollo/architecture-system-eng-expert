@@ -1,0 +1,3705 @@
+import {
+  buildASTSchema,
+  type ConstDirectiveNode,
+  type ConstObjectValueNode,
+  type DefinitionNode,
+  type DirectiveDefinitionNode,
+  type DocumentNode,
+  type GraphQLSchema,
+  Kind,
+  type ListTypeNode,
+  type NamedTypeNode,
+  type NonNullTypeNode,
+  type StringValueNode,
+  type TypeNode,
+} from 'graphql';
+import {
+  getMutableTypeNode,
+  type MutableDefinitionNode,
+  type MutableEnumValueNode,
+  type MutableFieldNode,
+  type MutableInputValueNode,
+  type MutableIntermediateTypeNode,
+  type MutableTypeNode,
+} from '../../schema-building/ast';
+import { isKindAbstract, stringToNamedTypeNode, stringToNameNode } from '../../ast/utils';
+import {
+  allChildDefinitionsAreInaccessibleError,
+  allExternalFieldInstancesError,
+  configureDescriptionPropagationError,
+  requiredContextArgumentError,
+  inaccessibleQueryRootTypeError,
+  inaccessibleRequiredInputValueError,
+  incompatibleFederatedFieldNamedTypeError,
+  incompatibleMergedTypesError,
+  incompatibleParentKindFatalError,
+  incompatibleParentTypeMergeError,
+  incompatibleSharedEnumError,
+  intersectingExcludeAndIncludeContractTagsError,
+  invalidFieldShareabilityError,
+  invalidImplementedTypeError,
+  invalidInputFieldTypeErrorMessage,
+  invalidInterfaceImplementationError,
+  invalidInterfaceObjectImplementationDefinitionsError,
+  invalidReferencesOfInaccessibleTypeError,
+  invalidRequiredInputValueError,
+  invalidSubscriptionFieldConditionFieldPathErrorMessage,
+  invalidSubscriptionFieldConditionFieldPathFieldErrorMessage,
+  invalidSubscriptionFieldConditionFieldPathParentErrorMessage,
+  invalidSubscriptionFilterDirectiveError,
+  maximumTypeNestingExceededError,
+  minimumSubgraphRequirementError,
+  noBaseDefinitionForExtensionError,
+  nonLeafSubscriptionFieldConditionFieldPathFinalFieldErrorMessage,
+  noQueryRootTypeError,
+  oneOfRequiredFieldsError,
+  orScopesLimitError,
+  semanticNonNullInconsistentLevelsError,
+  subscriptionFieldConditionEmptyValuesArrayErrorMessage,
+  subscriptionFieldConditionInvalidInputFieldError,
+  subscriptionFieldConditionInvalidValuesArrayErrorMessage,
+  subscriptionFilterArrayConditionInvalidItemTypeErrorMessage,
+  subscriptionFilterArrayConditionInvalidLengthError,
+  subscriptionFilterConditionDepthExceededError,
+  subscriptionFilterConditionInvalidInputFieldError,
+  subscriptionFilterConditionInvalidInputFieldNumberError,
+  subscriptionFilterConditionInvalidInputFieldTypeError,
+  subscriptionFilterInterfaceImplementationInvalidError,
+  subscriptionFilterNamedTypeError,
+  subscriptionFilterNoAccessibleConcreteTypesError,
+  subscriptionFilterUnionMemberInvalidError,
+  subscriptionFilterUnsupportedNamedTypeKindError,
+  undefinedEntityInterfaceImplementationsError,
+  undefinedSubscriptionFieldConditionFieldPathFieldErrorMessage,
+  undefinedTypeError,
+  unexpectedNonCompositeOutputTypeError,
+  unknownFieldDataError,
+  unknownFieldSubgraphNameError,
+  unknownNamedTypeError,
+} from '../../errors/errors';
+import { type ExecutionMultiResult } from '../../types/results';
+import {
+  type ChildTagData,
+  getDescriptionFromString,
+  type InterfaceImplementationData,
+  type InterfaceObjectForInternalGraphOptions,
+  newChildTagData,
+  newParentTagData,
+  type ParentTagData,
+  type SubscriptionFilterData,
+  validateImplicitFieldSets,
+} from './utils';
+import {
+  CLIENT_FEDERATED_DIRECTIVE_NAMES,
+  DEPENDENCIES_BY_DIRECTIVE_NAME,
+  IGNORED_FEDERATED_TYPE_NAMES,
+  SUBSCRIPTION_FILTER_INPUT_NAMES,
+  SUBSCRIPTION_FILTER_LIST_INPUT_NAMES,
+} from '../constants/strings';
+import {
+  isNodeLeaf,
+  isObjectDefinitionData,
+  mapToArrayOfValues,
+  mergeRequiredScopesByAND,
+  newAuthorizationData,
+  newEntityInterfaceFederationData,
+  newFieldAuthorizationData,
+  upsertAuthorizationConfiguration,
+  upsertEntityInterfaceFederationData,
+  upsertFieldAuthorizationData,
+} from '../utils/utils';
+import { printTypeNode } from '@graphql-tools/merge';
+import {
+  type FieldConfiguration,
+  type RequiredFieldConfiguration,
+  type SubscriptionCondition,
+  type SubscriptionFieldCondition,
+  type SubscriptionFilterValue,
+} from '../../router-configuration/types';
+import { BASE_SCALARS, DIRECTIVE_DEFINITION_BY_NAME, MAX_OR_SCOPES } from '../constants/constants';
+import { FEDERATED_DIRECTIVE_DATAS, isNodeQuery } from '../normalization/utils';
+import {
+  type AuthorizationData,
+  type ChildData,
+  type CompositeOutputData,
+  type EntityData,
+  type EntityInterfaceFederationData,
+  type EnumDefinitionData,
+  type EnumValueData,
+  ExtensionType,
+  type FederatedDirectivesData,
+  type FieldData,
+  type InputObjectDefinitionData,
+  type InputValueData,
+  type InterfaceDefinitionData,
+  type NodeData,
+  type ObjectDefinitionData,
+  type ParentDefinitionData,
+  type ScalarDefinitionData,
+  type UnionDefinitionData,
+} from '../../schema-building/types/types';
+import {
+  areKindsEqual,
+  compareAndValidateInputDefaultValues,
+  getClientFederatedDirectiveNodes,
+  getClientSchemaFieldNodeByFieldData,
+  getDefinitionDataCoords,
+  getInitialFederatedDescription,
+  getSubscriptionFilterValue,
+  doesArgumentDefineFromContext,
+  isLeafKind,
+  isNodeDataInaccessible,
+  isParentDataCompositeOutputType,
+  isParentDataRootType,
+  isTypeRequired,
+  isTypeValidImplementation,
+  MergeMethod,
+  newFederatedDirectivesData,
+  newInvalidFieldNames,
+  propagateAuthDirectives,
+  propagateDirectiveDefinitionNodeFromData,
+  propagateFieldAuthDirectives,
+  routerSchemaFieldNodeFromData,
+  routerSchemaInputValueNodeFromData,
+  routerSchemaNodeFromData,
+  setLongestDescription,
+  setParentDataExtensionType,
+  upsertDeprecatedDirective,
+  upsertTagDirectives,
+  validateExternalAndShareable,
+} from '../../schema-building/utils';
+
+import { renameRootTypes } from './walkers';
+import { cloneDeep } from 'lodash';
+import {
+  DivergentType,
+  type FederateTypeParams,
+  type FederateTypeResult,
+  getMostRestrictiveMergedTypeNode,
+} from '../schema-building/type-merging';
+import { type Graph } from '../../resolvability-graph/graph';
+import { type GraphNode } from '../../resolvability-graph/graph-nodes';
+import { type InternalSubgraph, type SubgraphConfig } from '../../subgraph/types';
+import { type Warning } from '../../warnings/types';
+import {
+  type ContractTagOptions,
+  type FederationResult,
+  type FederationResultWithContracts,
+  type MutualParentDefinitionData,
+} from '../../federation/types/types';
+import { type SubscriptionFilterTargetResult } from '../../federation/types/results';
+import {
+  AND_UPPER,
+  AUTHORIZATION_DIRECTIVES,
+  CONDITION,
+  DEPRECATED,
+  ENUM_VALUE,
+  FIELD,
+  FIELD_PATH,
+  IN_UPPER,
+  INACCESSIBLE,
+  INPUT_OBJECT,
+  LEFT_PARENTHESIS,
+  LIST,
+  LITERAL_NEW_LINE,
+  LITERAL_PERIOD,
+  NON_REPEATABLE_FEDERATED_DIRECTIVES,
+  NOT_UPPER,
+  OBJECT,
+  ONE_OF,
+  OR_UPPER,
+  PARENT_DEFINITION_DATA,
+  QUERY,
+  STRING,
+  SUBSCRIPTION_FILTER,
+  TAG,
+  UNION,
+  VALUES,
+} from '../../utils/string-constants';
+import { MAX_SUBSCRIPTION_FILTER_DEPTH, MAXIMUM_TYPE_NESTING } from '../../utils/integer-constants';
+import {
+  addIterableToSet,
+  addMapEntries,
+  addNewObjectValueMapEntries,
+  copyArrayValueMap,
+  copyObjectValueMap,
+  generateSimpleDirective,
+  getEntriesNotInHashSet,
+  getFirstEntry,
+  getOrThrowError,
+  getValueOrDefault,
+  kindToNodeType,
+} from '../../utils/utils';
+import type {
+  GraphFieldData,
+  ImplementationErrors,
+  InvalidEntityInterface,
+  InvalidFieldImplementation,
+  InvalidRequiredInputValueData,
+} from '../../utils/types';
+import {
+  type ArgumentName,
+  type ContractName,
+  type DirectiveLocation,
+  type DirectiveName,
+  type FieldCoords,
+  type FieldName,
+  type InterfaceTypeName,
+  type SubgraphName,
+  type TypeName,
+} from '../../types/types';
+import { singleFederatedInputFieldOneOfWarning } from '../warnings/warnings';
+import {
+  type ExtractFederatedDirectivesParams,
+  type FederateSubgraphsContractV1Params,
+  type FederateSubgraphsWithContractsV1Params,
+  type FederationFactoryParams,
+  type FederationParams,
+  type MergeSubscriptionFilterTargetResultParams,
+  type UpsertDirectiveArgumentDataParams,
+  type ValidateOneOfDirectiveParams,
+  type ValidateSubscriptionFilterAndGenerateConfigurationParams,
+} from './types/params';
+import { INACCESSIBLE_DEFINITION } from '../constants/directive-definitions';
+import type { CompositionOptions } from '../../types/params';
+import { BatchNormalizer } from '../normalization/batch-normalization/batch-normalizer';
+import { type DirectiveArgumentData, type DirectiveDefinitionData } from '../../directive-definition-data/types/types';
+
+export class FederationFactory {
+  authorizationDataByParentTypeName: Map<TypeName, AuthorizationData>;
+  coordsByNamedTypeName = new Map<TypeName, Set<string>>();
+  directiveDefinitionByName = new Map<DirectiveName, DirectiveDefinitionNode>();
+  clientDefinitions: Array<MutableDefinitionNode | DefinitionNode> = [];
+  currentSubgraphName = '';
+  concreteTypeNamesByAbstractTypeName: Map<TypeName, Set<TypeName>>;
+  subgraphNamesByNamedTypeNameByFieldCoords = new Map<string, Map<TypeName, Set<SubgraphName>>>();
+  entityDataByTypeName: Map<TypeName, EntityData>;
+  entityInterfaceFederationDataByTypeName: Map<string, EntityInterfaceFederationData>;
+  executableDirectiveDatasByName: Map<DirectiveName, Array<DirectiveDefinitionData>>;
+  errors: Array<Error> = [];
+  federatedDirectiveDataByName: Map<DirectiveName, DirectiveDefinitionData>;
+  fieldConfigurationByFieldCoords = new Map<string, FieldConfiguration>();
+  fieldCoordsByNamedTypeName: Map<TypeName, Set<FieldCoords>>;
+  inaccessibleCoords = new Set<string>();
+  inaccessibleRequiredInputValueErrorByCoords = new Map<string, Error>();
+  interfaceImplementationTypeNamesByInterfaceTypeName: Map<InterfaceTypeName, Set<InterfaceTypeName>>;
+  internalGraph: Graph;
+  internalSubgraphBySubgraphName: Map<SubgraphName, InternalSubgraph>;
+  invalidORScopesCoords = new Set<string>();
+  isMaxDepth = false;
+  isVersionTwo = false;
+  namedInputValueTypeNames = new Set<TypeName>();
+  namedOutputTypeNames = new Set<TypeName>();
+  options: CompositionOptions;
+  parentDefinitionDataByTypeName = new Map<TypeName, ParentDefinitionData>();
+  parentTagDataByTypeName = new Map<TypeName, ParentTagData>();
+  referencedFederatedDirectiveNames = new Set<DirectiveName>();
+  routerDefinitions: Array<MutableDefinitionNode | DefinitionNode> = [];
+  subscriptionFilterDataByFieldPath = new Map<string, SubscriptionFilterData>();
+  tagNamesByCoords = new Map<string, Set<string>>();
+  warnings: Array<Warning>;
+
+  constructor({
+    authorizationDataByParentTypeName,
+    concreteTypeNamesByAbstractTypeName,
+    entityDataByTypeName,
+    entityInterfaceFederationDataByTypeName,
+    executableDirectiveDatasByName,
+    federatedDirectiveDataByName,
+    fieldCoordsByNamedTypeName,
+    interfaceImplementationTypeNamesByInterfaceTypeName,
+    internalGraph,
+    internalSubgraphBySubgraphName,
+    options,
+    warnings,
+  }: FederationFactoryParams) {
+    this.authorizationDataByParentTypeName = authorizationDataByParentTypeName;
+    this.options = options ?? {};
+    this.concreteTypeNamesByAbstractTypeName = concreteTypeNamesByAbstractTypeName;
+    this.executableDirectiveDatasByName = executableDirectiveDatasByName;
+    this.entityDataByTypeName = entityDataByTypeName;
+    this.entityInterfaceFederationDataByTypeName = entityInterfaceFederationDataByTypeName;
+    this.federatedDirectiveDataByName = federatedDirectiveDataByName;
+    for (const data of FEDERATED_DIRECTIVE_DATAS) {
+      this.federatedDirectiveDataByName.set(data.name, data);
+    }
+    this.fieldCoordsByNamedTypeName = fieldCoordsByNamedTypeName;
+    this.interfaceImplementationTypeNamesByInterfaceTypeName = interfaceImplementationTypeNamesByInterfaceTypeName;
+    this.internalGraph = internalGraph;
+    this.internalSubgraphBySubgraphName = internalSubgraphBySubgraphName;
+    this.warnings = warnings;
+  }
+
+  extractFederatedDirectives({ data, directivesByName }: ExtractFederatedDirectivesParams): FederatedDirectivesData {
+    for (const [directiveName, directiveNodes] of directivesByName) {
+      const federatedData = this.federatedDirectiveDataByName.get(directiveName);
+      if (!federatedData) {
+        continue;
+      }
+
+      this.referencedFederatedDirectiveNames.add(directiveName);
+      // @authenticated and @requiresScopes are handled differently
+      if (AUTHORIZATION_DIRECTIVES.has(directiveName) || directiveNodes.length < 1) {
+        continue;
+      }
+      switch (directiveName) {
+        case DEPRECATED: {
+          data.isDeprecated = true;
+          upsertDeprecatedDirective(data, directiveNodes[0]);
+          break;
+        }
+        case TAG: {
+          upsertTagDirectives(data, directiveNodes);
+          break;
+        }
+        default: {
+          const existingDirectives = data.directivesByName.get(directiveName);
+          if (!existingDirectives) {
+            data.directivesByName.set(directiveName, [...directiveNodes]);
+            break;
+          }
+          // Only add one instance of certain directives.
+          if (NON_REPEATABLE_FEDERATED_DIRECTIVES.has(directiveName)) {
+            break;
+          }
+          existingDirectives.push(...directiveNodes);
+        }
+      }
+    }
+    return data;
+  }
+
+  getValidImplementedInterfaces(data: CompositeOutputData): NamedTypeNode[] {
+    const interfaces: NamedTypeNode[] = [];
+    if (data.implementedInterfaceTypeNames.size < 1) {
+      return interfaces;
+    }
+    const isParentInaccessible = isNodeDataInaccessible(data);
+    const implementationErrorsByInterfaceName = new Map<string, ImplementationErrors>();
+    const invalidImplementationTypeStringByTypeName = new Map<string, string>();
+    for (const interfaceName of data.implementedInterfaceTypeNames) {
+      interfaces.push(stringToNamedTypeNode(interfaceName));
+      const implementationData = getOrThrowError(
+        this.parentDefinitionDataByTypeName,
+        interfaceName,
+        PARENT_DEFINITION_DATA,
+      );
+      if (implementationData.kind !== Kind.INTERFACE_TYPE_DEFINITION) {
+        invalidImplementationTypeStringByTypeName.set(implementationData.name, kindToNodeType(implementationData.kind));
+        continue;
+      }
+      const implementationErrors: ImplementationErrors = {
+        invalidFieldImplementations: new Map<string, InvalidFieldImplementation>(),
+        unimplementedFields: [],
+      };
+      let hasErrors = false;
+      for (const [fieldName, interfaceField] of implementationData.fieldDataByName) {
+        let hasNestedErrors = false;
+        const fieldData = data.fieldDataByName.get(fieldName);
+        if (!fieldData) {
+          hasErrors = true;
+          implementationErrors.unimplementedFields.push(fieldName);
+          continue;
+        }
+        const invalidFieldImplementation: InvalidFieldImplementation = {
+          implementationContextCoords: new Set<string>(),
+          interfaceContextCoords: new Set<string>(),
+          invalidAdditionalArguments: new Set<string>(),
+          invalidImplementedArguments: [],
+          isInaccessible: false,
+          originalResponseType: printTypeNode(interfaceField.node.type),
+          unimplementedArguments: new Set<ArgumentName>(),
+        };
+        // The implemented field type must be equally or more restrictive than the original interface field type
+        if (
+          !isTypeValidImplementation({
+            concreteTypeNamesByAbstractTypeName: this.concreteTypeNamesByAbstractTypeName,
+            implementationType: fieldData.node.type,
+            interfaceImplementationTypeNamesByInterfaceTypeName:
+              this.interfaceImplementationTypeNamesByInterfaceTypeName,
+            originalType: interfaceField.node.type,
+          })
+        ) {
+          hasErrors = true;
+          hasNestedErrors = true;
+          invalidFieldImplementation.implementedResponseType = printTypeNode(fieldData.node.type);
+        }
+        const handledArguments = new Set<string>();
+        for (const [argumentName, inputValueData] of interfaceField.argumentDataByName) {
+          const interfaceArgument = inputValueData.node;
+          handledArguments.add(argumentName);
+          const implementationArgumentData = fieldData.argumentDataByName.get(argumentName);
+          // The type implementing the interface must include all arguments with no variation for that argument
+          if (!implementationArgumentData) {
+            hasErrors = true;
+            hasNestedErrors = true;
+            invalidFieldImplementation.unimplementedArguments.add(argumentName);
+            continue;
+          }
+          // @fromContext cannot be defined on an interface field
+          if (doesArgumentDefineFromContext(inputValueData)) {
+            hasErrors = true;
+            hasNestedErrors = true;
+            invalidFieldImplementation.interfaceContextCoords.add(inputValueData.federatedCoords);
+          }
+          // @fromContext cannot be defined on the implementation of an interface field
+          if (doesArgumentDefineFromContext(implementationArgumentData)) {
+            hasErrors = true;
+            hasNestedErrors = true;
+            invalidFieldImplementation.implementationContextCoords.add(implementationArgumentData.federatedCoords);
+          }
+          // Implemented arguments should be the exact same type
+          const actualType = printTypeNode(implementationArgumentData.node.type);
+          const expectedType = printTypeNode(interfaceArgument.type);
+          if (expectedType !== actualType) {
+            hasErrors = true;
+            hasNestedErrors = true;
+            invalidFieldImplementation.invalidImplementedArguments.push({ actualType, argumentName, expectedType });
+          }
+        }
+        // Additional arguments must be optional (nullable)
+        for (const [argumentName, inputValueContainer] of fieldData.argumentDataByName) {
+          const argumentNode = inputValueContainer.node;
+          if (handledArguments.has(argumentName)) {
+            continue;
+          }
+          if (argumentNode.type.kind !== Kind.NON_NULL_TYPE) {
+            continue;
+          }
+          hasErrors = true;
+          hasNestedErrors = true;
+          invalidFieldImplementation.invalidAdditionalArguments.add(argumentName);
+        }
+        if (!isParentInaccessible && fieldData.isInaccessible && !interfaceField.isInaccessible) {
+          hasErrors = true;
+          hasNestedErrors = true;
+          invalidFieldImplementation.isInaccessible = true;
+        }
+        if (hasNestedErrors) {
+          implementationErrors.invalidFieldImplementations.set(fieldName, invalidFieldImplementation);
+        }
+      }
+      if (hasErrors) {
+        implementationErrorsByInterfaceName.set(interfaceName, implementationErrors);
+      }
+    }
+    if (invalidImplementationTypeStringByTypeName.size > 0) {
+      this.errors.push(invalidImplementedTypeError(data.name, invalidImplementationTypeStringByTypeName));
+    }
+    if (implementationErrorsByInterfaceName.size > 0) {
+      this.errors.push(
+        invalidInterfaceImplementationError(
+          data.node.name.value,
+          kindToNodeType(data.kind),
+          implementationErrorsByInterfaceName,
+        ),
+      );
+    }
+    return interfaces;
+  }
+
+  addValidPrimaryKeyTargetsToEntityData(typeName: string) {
+    const entityData = this.entityDataByTypeName.get(typeName);
+    if (!entityData) {
+      return;
+    }
+    const internalSubgraph = getOrThrowError(
+      this.internalSubgraphBySubgraphName,
+      this.currentSubgraphName,
+      'internalSubgraphBySubgraphName',
+    );
+    const parentDefinitionDataByTypeName = internalSubgraph.parentDefinitionDataByTypeName;
+    const objectData = parentDefinitionDataByTypeName.get(entityData.typeName);
+    if (!objectData || objectData.kind !== Kind.OBJECT_TYPE_DEFINITION) {
+      throw incompatibleParentKindFatalError(
+        entityData.typeName,
+        Kind.OBJECT_TYPE_DEFINITION,
+        objectData?.kind || Kind.NULL,
+      );
+    }
+    const configurationData = internalSubgraph.configurationDataByTypeName.get(entityData.typeName);
+    // If all fields are overridden, there will be no configuration data.
+    if (!configurationData) {
+      return;
+    }
+    const implicitKeys: RequiredFieldConfiguration[] = [];
+    const graphNode = this.internalGraph.nodeByNodeName.get(`${this.currentSubgraphName}.${entityData.typeName}`);
+    // Any errors in the field sets would be caught when evaluating the explicit entities, so they are ignored here
+    validateImplicitFieldSets({
+      conditionalFieldDataByCoords: internalSubgraph.conditionalFieldDataByCoords,
+      currentSubgraphName: this.currentSubgraphName,
+      entityData,
+      implicitKeys,
+      objectData,
+      parentDefinitionDataByTypeName,
+      graphNode,
+    });
+    for (const [typeName, entityInterfaceFederationData] of this.entityInterfaceFederationDataByTypeName) {
+      if (!entityInterfaceFederationData.concreteTypeNames?.has(entityData.typeName)) {
+        continue;
+      }
+      const interfaceObjectEntityData = this.entityDataByTypeName.get(typeName);
+      if (!interfaceObjectEntityData) {
+        continue;
+      }
+      validateImplicitFieldSets({
+        conditionalFieldDataByCoords: internalSubgraph.conditionalFieldDataByCoords,
+        currentSubgraphName: this.currentSubgraphName,
+        entityData: interfaceObjectEntityData,
+        implicitKeys,
+        objectData,
+        parentDefinitionDataByTypeName,
+        graphNode,
+      });
+    }
+    if (implicitKeys.length < 1) {
+      return;
+    }
+    if (!configurationData.keys || configurationData.keys.length < 1) {
+      configurationData.isRootNode = true;
+      configurationData.keys = implicitKeys;
+      return;
+    }
+    const existingKeys = new Set<string>(configurationData.keys.map((key) => key.selectionSet));
+    for (const implicitKey of implicitKeys) {
+      if (existingKeys.has(implicitKey.selectionSet)) {
+        continue;
+      }
+      configurationData.keys.push(implicitKey);
+      existingKeys.add(implicitKey.selectionSet);
+    }
+  }
+
+  addValidPrimaryKeyTargetsFromInterfaceObject(
+    internalSubgraph: InternalSubgraph,
+    interfaceObjectTypeName: string,
+    entityData: EntityData,
+    graphNode: GraphNode,
+  ) {
+    const parentDefinitionDataByTypeName = internalSubgraph.parentDefinitionDataByTypeName;
+    const interfaceObjectData = parentDefinitionDataByTypeName.get(interfaceObjectTypeName);
+    if (!interfaceObjectData || !isParentDataCompositeOutputType(interfaceObjectData)) {
+      throw incompatibleParentKindFatalError(
+        interfaceObjectTypeName,
+        Kind.INTERFACE_TYPE_DEFINITION,
+        interfaceObjectData?.kind || Kind.NULL,
+      );
+    }
+    const configurationData = getOrThrowError(
+      internalSubgraph.configurationDataByTypeName,
+      entityData.typeName,
+      'internalSubgraph.configurationDataByTypeName',
+    );
+    const implicitKeys: RequiredFieldConfiguration[] = [];
+    // Any errors in the field sets would be caught when evaluating the explicit entities, so they are ignored here
+    validateImplicitFieldSets({
+      conditionalFieldDataByCoords: internalSubgraph.conditionalFieldDataByCoords,
+      currentSubgraphName: internalSubgraph.name,
+      entityData,
+      implicitKeys,
+      objectData: interfaceObjectData,
+      parentDefinitionDataByTypeName,
+      graphNode,
+    });
+    if (implicitKeys.length < 1) {
+      return;
+    }
+    if (!configurationData.keys || configurationData.keys.length < 1) {
+      configurationData.isRootNode = true;
+      configurationData.keys = implicitKeys;
+      return;
+    }
+    const existingKeys = new Set<string>(configurationData.keys.map((key) => key.selectionSet));
+    for (const implicitKey of implicitKeys) {
+      if (existingKeys.has(implicitKey.selectionSet)) {
+        continue;
+      }
+      configurationData.keys.push(implicitKey);
+      existingKeys.add(implicitKey.selectionSet);
+    }
+  }
+
+  getEnumValueMergeMethod(enumTypeName: string): MergeMethod {
+    if (this.namedInputValueTypeNames.has(enumTypeName)) {
+      if (this.namedOutputTypeNames.has(enumTypeName)) {
+        return MergeMethod.CONSISTENT;
+      }
+      return MergeMethod.INTERSECTION;
+    }
+    return MergeMethod.UNION;
+  }
+
+  generateTagData() {
+    for (const [path, tagNames] of this.tagNamesByCoords) {
+      const paths = path.split(LITERAL_PERIOD);
+      if (paths.length < 1) {
+        continue;
+      }
+      const parentTagData = getValueOrDefault(this.parentTagDataByTypeName, paths[0], () => newParentTagData(paths[0]));
+      switch (paths.length) {
+        // parent type
+        case 1:
+          for (const tagName of tagNames) {
+            parentTagData.tagNames.add(tagName);
+          }
+          break;
+        // child type
+        case 2:
+          const childTagData = getValueOrDefault(parentTagData.childTagDataByChildName, paths[1], () =>
+            newChildTagData(paths[1]),
+          );
+          for (const tagName of tagNames) {
+            childTagData.tagNames.add(tagName);
+          }
+          break;
+        // field argument
+        case 3:
+          const fieldTagData = getValueOrDefault(parentTagData.childTagDataByChildName, paths[1], () =>
+            newChildTagData(paths[1]),
+          );
+          const argumentTagData = getValueOrDefault(
+            fieldTagData.tagNamesByArgumentName,
+            paths[2],
+            () => new Set<string>(),
+          );
+          for (const tagName of tagNames) {
+            argumentTagData.add(tagName);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  upsertEnumValueData(
+    enumValueDataByName: Map<string, EnumValueData>,
+    incomingData: EnumValueData,
+    isParentInaccessible: boolean,
+  ) {
+    const existingData = enumValueDataByName.get(incomingData.name);
+    const targetData = existingData || this.copyEnumValueData(incomingData);
+    this.extractFederatedDirectives({
+      data: targetData.federatedDirectivesData,
+      directivesByName: incomingData.directivesByName,
+    });
+    const isValueInaccessible = isNodeDataInaccessible(incomingData);
+    if (isParentInaccessible || isValueInaccessible) {
+      this.inaccessibleCoords.add(targetData.federatedCoords);
+    }
+    this.recordTagNamesByCoords(targetData, targetData.federatedCoords);
+    if (!existingData) {
+      enumValueDataByName.set(targetData.name, targetData);
+      return;
+    }
+    targetData.appearances += 1;
+    addNewObjectValueMapEntries(
+      incomingData.configureDescriptionDataBySubgraphName,
+      targetData.configureDescriptionDataBySubgraphName,
+    );
+    setLongestDescription(targetData, incomingData);
+    addIterableToSet({
+      source: incomingData.subgraphNames,
+      target: targetData.subgraphNames,
+    });
+  }
+
+  upsertDirectiveArgumentData({ argumentDataByName, incomingData }: UpsertDirectiveArgumentDataParams): void {
+    const existingData = argumentDataByName.get(incomingData.name);
+    const targetData = existingData || this.copyDirectiveArgumentData(incomingData);
+    this.extractFederatedDirectives({
+      data: targetData.federatedDirectivesData,
+      directivesByName: incomingData.directivesByName,
+    });
+    if (!existingData) {
+      this.namedInputValueTypeNames.add(targetData.namedTypeName);
+      argumentDataByName.set(targetData.name, targetData);
+      return;
+    }
+    if (!incomingData.defaultValue) {
+      existingData.includeDefaultValue = false;
+    }
+    addNewObjectValueMapEntries(
+      incomingData.configureDescriptionDataBySubgraphName,
+      targetData.configureDescriptionDataBySubgraphName,
+    );
+    setLongestDescription(targetData, incomingData);
+    addIterableToSet({
+      source: incomingData.subgraphNames,
+      target: targetData.subgraphNames,
+    });
+    addIterableToSet({
+      source: incomingData.requiredSubgraphNames,
+      target: targetData.requiredSubgraphNames,
+    });
+    // TODO refactor type merging
+    const mergeResult = getMostRestrictiveMergedTypeNode(
+      targetData.type,
+      incomingData.type,
+      incomingData.federatedCoords,
+      this.errors,
+    );
+    if (mergeResult.success) {
+      targetData.type = mergeResult.typeNode;
+    } else {
+      this.errors.push(
+        incompatibleMergedTypesError({
+          actualType: mergeResult.actualType,
+          isArgument: true,
+          coords: incomingData.federatedCoords,
+          expectedType: mergeResult.expectedType,
+        }),
+      );
+    }
+    const validationResult = compareAndValidateInputDefaultValues({ existingData, incomingData });
+    if (!validationResult.success) {
+      this.errors.push(validationResult.error);
+    }
+  }
+
+  // To facilitate the splitting of tag paths, field arguments do not use the renamedPath property for tagNamesByPath
+  upsertInputValueData(
+    inputValueDataByValueName: Map<string, InputValueData>,
+    incomingData: InputValueData,
+    parentCoords: string,
+    isParentInaccessible: boolean,
+  ): void {
+    const existingData = inputValueDataByValueName.get(incomingData.name);
+    const targetData = existingData || this.copyInputValueData(incomingData);
+    this.extractFederatedDirectives({
+      data: targetData.federatedDirectivesData,
+      directivesByName: incomingData.directivesByName,
+    });
+    this.recordTagNamesByCoords(targetData, `${parentCoords}.${targetData.name}`);
+    getValueOrDefault(this.coordsByNamedTypeName, targetData.namedTypeName, () => new Set<string>()).add(
+      targetData.federatedCoords,
+    );
+    if (!existingData) {
+      this.namedInputValueTypeNames.add(targetData.namedTypeName);
+      inputValueDataByValueName.set(targetData.name, targetData);
+      return;
+    }
+    addNewObjectValueMapEntries(
+      incomingData.configureDescriptionDataBySubgraphName,
+      targetData.configureDescriptionDataBySubgraphName,
+    );
+    setLongestDescription(targetData, incomingData);
+    addIterableToSet({
+      source: incomingData.fromContextSubgraphNames,
+      target: targetData.fromContextSubgraphNames,
+    });
+    addIterableToSet({
+      source: incomingData.requiredSubgraphNames,
+      target: targetData.requiredSubgraphNames,
+    });
+    addIterableToSet({
+      source: incomingData.subgraphNames,
+      target: targetData.subgraphNames,
+    });
+    this.handleInputValueInaccessibility(isParentInaccessible, targetData, parentCoords);
+    // TODO refactor type merging
+    const mergeResult = getMostRestrictiveMergedTypeNode(
+      targetData.type,
+      incomingData.type,
+      targetData.originalCoords,
+      this.errors,
+    );
+    if (mergeResult.success) {
+      targetData.type = mergeResult.typeNode;
+    } else {
+      this.errors.push(
+        incompatibleMergedTypesError({
+          actualType: mergeResult.actualType,
+          isArgument: existingData.isArgument,
+          coords: existingData.federatedCoords,
+          expectedType: mergeResult.expectedType,
+        }),
+      );
+    }
+    const validationResult = compareAndValidateInputDefaultValues({ existingData, incomingData });
+    if (!validationResult.success) {
+      this.errors.push(validationResult.error);
+    }
+  }
+
+  handleInputValueInaccessibility(isParentInaccessible: boolean, inputValueData: InputValueData, parentCoords: string) {
+    /* If an ancestor (Input Object for field; Composite type or field for argument) of the input value is
+     * @inaccessible, nullability is not considered.
+     * However, if only the input value (field or argument) itself is @inaccessible, an error is returned.
+     */
+    if (isParentInaccessible) {
+      this.inaccessibleRequiredInputValueErrorByCoords.delete(inputValueData.federatedCoords);
+      this.inaccessibleCoords.add(inputValueData.federatedCoords);
+      return;
+    }
+    if (!isNodeDataInaccessible(inputValueData)) {
+      return;
+    }
+    if (isTypeRequired(inputValueData.type)) {
+      this.inaccessibleRequiredInputValueErrorByCoords.set(
+        inputValueData.federatedCoords,
+        inaccessibleRequiredInputValueError(inputValueData, parentCoords),
+      );
+      return;
+    }
+    this.inaccessibleCoords.add(inputValueData.federatedCoords);
+  }
+
+  handleSubscriptionFilterDirective(incomingData: FieldData, targetData?: FieldData) {
+    const subscriptionFilters = incomingData.directivesByName.get(SUBSCRIPTION_FILTER);
+    if (!subscriptionFilters) {
+      return;
+    }
+    // There should only be a single entry in the set
+    const subgraphName = getFirstEntry(incomingData.subgraphNames);
+    if (subgraphName === undefined) {
+      this.errors.push(unknownFieldSubgraphNameError(incomingData.federatedCoords));
+      return;
+    }
+    // @openfed__subscriptionFilter is non-repeatable
+    this.subscriptionFilterDataByFieldPath.set(incomingData.federatedCoords, {
+      directive: subscriptionFilters[0],
+      fieldData: targetData || incomingData,
+      directiveSubgraphName: subgraphName,
+    });
+  }
+
+  federateOutputType({ current, other, coords, mostRestrictive }: FederateTypeParams): FederateTypeResult {
+    other = getMutableTypeNode(other, coords, this.errors); // current is already a deep copy
+    // The first type of the pair to diverge in restriction takes precedence in all future differences.
+    // If the other type of the pair also diverges, it's an error.
+    // To keep the output link intact, it is not possible to spread assign "lastTypeNode".
+    const federatedTypeNode: MutableIntermediateTypeNode = { kind: current.kind };
+    let divergentType = DivergentType.NONE;
+    let lastTypeNode: MutableIntermediateTypeNode = federatedTypeNode;
+    for (let i = 0; i < MAXIMUM_TYPE_NESTING; i++) {
+      if (current.kind === other.kind) {
+        switch (current.kind) {
+          case Kind.NAMED_TYPE:
+            lastTypeNode.kind = current.kind;
+            lastTypeNode.name = current.name;
+            return { success: true, typeNode: federatedTypeNode as TypeNode };
+          case Kind.LIST_TYPE:
+            lastTypeNode.kind = current.kind;
+            lastTypeNode.type = { kind: current.type.kind };
+            lastTypeNode = lastTypeNode.type;
+            current = current.type;
+            other = (other as ListTypeNode).type;
+            continue;
+          case Kind.NON_NULL_TYPE:
+            lastTypeNode.kind = current.kind;
+            lastTypeNode.type = { kind: current.type.kind };
+            lastTypeNode = lastTypeNode.type;
+            current = current.type;
+            other = (other as NonNullTypeNode).type;
+            continue;
+        }
+      }
+      if (current.kind === Kind.NON_NULL_TYPE) {
+        if (divergentType === DivergentType.OTHER) {
+          this.errors.push(
+            incompatibleMergedTypesError({ actualType: other.kind, coords, expectedType: current.kind }),
+          );
+          return { success: false };
+        } else {
+          divergentType = DivergentType.CURRENT;
+        }
+        if (mostRestrictive) {
+          lastTypeNode.kind = current.kind;
+          lastTypeNode.type = { kind: current.type.kind };
+          lastTypeNode = lastTypeNode.type;
+        }
+        current = current.type;
+        continue;
+      }
+      if (other.kind === Kind.NON_NULL_TYPE) {
+        if (divergentType === DivergentType.CURRENT) {
+          this.errors.push(
+            incompatibleMergedTypesError({ actualType: other.kind, coords, expectedType: current.kind }),
+          );
+          return { success: false };
+        } else {
+          divergentType = DivergentType.OTHER;
+        }
+        if (mostRestrictive) {
+          lastTypeNode.kind = other.kind;
+          lastTypeNode.type = { kind: other.type.kind };
+          lastTypeNode = lastTypeNode.type;
+        }
+        other = other.type;
+        continue;
+      }
+      // At least one of the types must be a non-null wrapper, or the types are inconsistent
+      this.errors.push(incompatibleMergedTypesError({ actualType: other.kind, coords, expectedType: current.kind }));
+      return { success: false };
+    }
+    this.errors.push(maximumTypeNestingExceededError(coords));
+    return { success: false };
+  }
+
+  addSubgraphNameToExistingFieldNamedTypeDisparity(incomingData: FieldData) {
+    const subgraphNamesByNamedTypeName = this.subgraphNamesByNamedTypeNameByFieldCoords.get(
+      incomingData.federatedCoords,
+    );
+    if (!subgraphNamesByNamedTypeName) {
+      return;
+    }
+    addIterableToSet({
+      source: incomingData.subgraphNames,
+      target: getValueOrDefault(subgraphNamesByNamedTypeName, incomingData.namedTypeName, () => new Set<String>()),
+    });
+  }
+
+  upsertFieldData(
+    fieldDataByFieldName: Map<string, FieldData>,
+    incomingData: FieldData,
+    isParentInaccessible: boolean,
+  ) {
+    const existingData = fieldDataByFieldName.get(incomingData.name);
+    const targetData =
+      existingData || this.copyFieldData(incomingData, isParentInaccessible || isNodeDataInaccessible(incomingData));
+    getValueOrDefault(this.coordsByNamedTypeName, incomingData.namedTypeName, () => new Set<string>()).add(
+      targetData.federatedCoords,
+    );
+    this.namedOutputTypeNames.add(incomingData.namedTypeName);
+    this.handleSubscriptionFilterDirective(incomingData, targetData);
+    this.extractFederatedDirectives({
+      data: targetData.federatedDirectivesData,
+      directivesByName: incomingData.directivesByName,
+    });
+    const isFieldInaccessible = isParentInaccessible || isNodeDataInaccessible(targetData);
+    if (isFieldInaccessible) {
+      this.inaccessibleCoords.add(targetData.federatedCoords);
+    }
+    this.recordTagNamesByCoords(targetData, targetData.federatedCoords);
+    if (!existingData) {
+      fieldDataByFieldName.set(targetData.name, targetData);
+      return;
+    }
+    const result = this.federateOutputType({
+      current: targetData.type,
+      other: incomingData.type,
+      coords: targetData.federatedCoords,
+      mostRestrictive: false,
+    });
+    if (result.success) {
+      targetData.type = result.typeNode;
+      if (targetData.namedTypeName !== incomingData.namedTypeName) {
+        const subgraphNamesByNamedTypeName = getValueOrDefault(
+          this.subgraphNamesByNamedTypeNameByFieldCoords,
+          targetData.federatedCoords,
+          () => new Map<string, Set<string>>(),
+        );
+        /* Only propagate the subgraph names of the existing data if it has never been propagated before.
+         * This is to prevent the propagation of subgraph names where that named type is not returned.
+         */
+        const existingSubgraphNames = getValueOrDefault(
+          subgraphNamesByNamedTypeName,
+          targetData.namedTypeName,
+          () => new Set<String>(),
+        );
+        if (existingSubgraphNames.size < 1) {
+          // Add all subgraph names that are not the subgraph name in the incoming data
+          for (const subgraphName of targetData.subgraphNames) {
+            if (!incomingData.subgraphNames.has(subgraphName)) {
+              existingSubgraphNames.add(subgraphName);
+            }
+          }
+        }
+        addIterableToSet({
+          source: incomingData.subgraphNames,
+          target: getValueOrDefault(subgraphNamesByNamedTypeName, incomingData.namedTypeName, () => new Set<String>()),
+        });
+      } else {
+        /* If the named types match but there has already been a disparity in the named type names returned by the
+         * field, add the incoming subgraph name to the existing subgraph name set for that named type name.
+         */
+        this.addSubgraphNameToExistingFieldNamedTypeDisparity(incomingData);
+      }
+    }
+    for (const inputValueData of incomingData.argumentDataByName.values()) {
+      this.upsertInputValueData(
+        targetData.argumentDataByName,
+        inputValueData,
+        targetData.federatedCoords,
+        isFieldInaccessible,
+      );
+    }
+    addNewObjectValueMapEntries(
+      incomingData.configureDescriptionDataBySubgraphName,
+      existingData.configureDescriptionDataBySubgraphName,
+    );
+    setLongestDescription(targetData, incomingData);
+    targetData.isInaccessible ||= incomingData.isInaccessible;
+    addNewObjectValueMapEntries(
+      incomingData.externalFieldDataBySubgraphName,
+      targetData.externalFieldDataBySubgraphName,
+    );
+    addMapEntries({
+      source: incomingData.isShareableBySubgraphName,
+      target: targetData.isShareableBySubgraphName,
+    });
+    addMapEntries({
+      source: incomingData.nullLevelsBySubgraphName,
+      target: targetData.nullLevelsBySubgraphName,
+    });
+    addIterableToSet({
+      source: incomingData.subgraphNames,
+      target: targetData.subgraphNames,
+    });
+  }
+
+  getClientSchemaUnionMembers(unionData: UnionDefinitionData): NamedTypeNode[] {
+    const members: NamedTypeNode[] = [];
+    for (const [memberName, namedTypeNode] of unionData.memberByMemberTypeName) {
+      if (!this.inaccessibleCoords.has(memberName)) {
+        members.push(namedTypeNode);
+      }
+    }
+    return members;
+  }
+
+  recordTagNamesByCoords(data: NodeData, coords?: string) {
+    const path = coords || data.name;
+    if (data.federatedDirectivesData.tagDirectiveByName.size < 1) {
+      return;
+    }
+    const tagNames = getValueOrDefault(this.tagNamesByCoords, path, () => new Set<string>());
+    for (const tagName of data.federatedDirectivesData.tagDirectiveByName.keys()) {
+      tagNames.add(tagName);
+    }
+  }
+
+  copyMutualParentDefinitionData(sourceData: ParentDefinitionData): MutualParentDefinitionData {
+    return {
+      configureDescriptionDataBySubgraphName: copyObjectValueMap(sourceData.configureDescriptionDataBySubgraphName),
+      directivesByName: copyArrayValueMap(sourceData.directivesByName),
+      extensionType: sourceData.extensionType,
+      name: sourceData.name,
+      federatedDirectivesData: this.extractFederatedDirectives({
+        data: newFederatedDirectivesData(),
+        directivesByName: sourceData.directivesByName,
+      }),
+      description: getInitialFederatedDescription(sourceData),
+    };
+  }
+
+  copyDirectiveArgumentData(sourceData: DirectiveArgumentData): DirectiveArgumentData {
+    return {
+      configureDescriptionDataBySubgraphName: copyObjectValueMap(sourceData.configureDescriptionDataBySubgraphName),
+      directivesByName: copyArrayValueMap(sourceData.directivesByName),
+      defaultValue: sourceData.defaultValue,
+      description: getInitialFederatedDescription(sourceData),
+      federatedCoords: sourceData.federatedCoords,
+      federatedDirectivesData: this.extractFederatedDirectives({
+        data: newFederatedDirectivesData(),
+        directivesByName: sourceData.directivesByName,
+      }),
+      includeDefaultValue: sourceData.includeDefaultValue,
+      kind: sourceData.kind,
+      name: sourceData.name,
+      namedTypeKind: sourceData.namedTypeKind,
+      namedTypeName: sourceData.namedTypeName,
+      node: {
+        directives: [],
+        kind: Kind.INPUT_VALUE_DEFINITION,
+        name: stringToNameNode(sourceData.name),
+        type: sourceData.type,
+      },
+      originalCoords: sourceData.originalCoords,
+      requiredSubgraphNames: new Set(sourceData.requiredSubgraphNames),
+      subgraphNames: new Set(sourceData.subgraphNames),
+      type: sourceData.type,
+    };
+  }
+
+  copyEnumValueData(sourceData: EnumValueData): EnumValueData {
+    return {
+      appearances: sourceData.appearances,
+      configureDescriptionDataBySubgraphName: copyObjectValueMap(sourceData.configureDescriptionDataBySubgraphName),
+      federatedCoords: sourceData.federatedCoords,
+      directivesByName: copyArrayValueMap(sourceData.directivesByName),
+      kind: sourceData.kind,
+      name: sourceData.name,
+      node: {
+        directives: [],
+        kind: sourceData.kind,
+        name: stringToNameNode(sourceData.name),
+      },
+      parentTypeName: sourceData.parentTypeName,
+      federatedDirectivesData: this.extractFederatedDirectives({
+        data: newFederatedDirectivesData(),
+        directivesByName: sourceData.directivesByName,
+      }),
+      subgraphNames: new Set(sourceData.subgraphNames),
+      description: getInitialFederatedDescription(sourceData),
+    };
+  }
+
+  copyInputValueData(sourceData: InputValueData): InputValueData {
+    return {
+      configureDescriptionDataBySubgraphName: copyObjectValueMap(sourceData.configureDescriptionDataBySubgraphName),
+      fromContextSubgraphNames: new Set(sourceData.fromContextSubgraphNames),
+      directivesByName: copyArrayValueMap(sourceData.directivesByName),
+      federatedCoords: sourceData.federatedCoords,
+      fieldName: sourceData.fieldName,
+      includeDefaultValue: sourceData.includeDefaultValue,
+      isArgument: sourceData.isArgument,
+      kind: sourceData.kind,
+      name: sourceData.name,
+      namedTypeKind: sourceData.namedTypeKind,
+      namedTypeName: sourceData.namedTypeName,
+      node: {
+        directives: [],
+        kind: Kind.INPUT_VALUE_DEFINITION,
+        name: stringToNameNode(sourceData.name),
+        type: sourceData.type,
+      },
+      originalCoords: sourceData.originalCoords,
+      originalParentTypeName: sourceData.originalParentTypeName,
+      federatedDirectivesData: this.extractFederatedDirectives({
+        data: newFederatedDirectivesData(),
+        directivesByName: sourceData.directivesByName,
+      }),
+      renamedParentTypeName: sourceData.renamedParentTypeName,
+      requiredSubgraphNames: new Set(sourceData.requiredSubgraphNames),
+      subgraphNames: new Set(sourceData.subgraphNames),
+      type: sourceData.type,
+      defaultValue: sourceData.defaultValue,
+      description: getInitialFederatedDescription(sourceData),
+    };
+  }
+
+  copyInputValueDataByValueName(
+    source: Map<string, InputValueData>,
+    isParentInaccessible: boolean,
+    parentCoords: string,
+  ): Map<string, InputValueData> {
+    const inputValueDataByInputValueName = new Map<string, InputValueData>();
+    for (const [inputValueName, sourceData] of source) {
+      const targetData = this.copyInputValueData(sourceData);
+      this.handleInputValueInaccessibility(isParentInaccessible, targetData, parentCoords);
+      getValueOrDefault(this.coordsByNamedTypeName, targetData.namedTypeName, () => new Set<string>()).add(
+        targetData.federatedCoords,
+      );
+      this.namedInputValueTypeNames.add(targetData.namedTypeName);
+      this.recordTagNamesByCoords(targetData, `${parentCoords}.${sourceData.name}`);
+      inputValueDataByInputValueName.set(inputValueName, targetData);
+    }
+    return inputValueDataByInputValueName;
+  }
+
+  copyFieldData(sourceData: FieldData, isInaccessible: boolean): FieldData {
+    return {
+      argumentDataByName: this.copyInputValueDataByValueName(
+        sourceData.argumentDataByName,
+        isInaccessible,
+        sourceData.federatedCoords,
+      ),
+      configureDescriptionDataBySubgraphName: copyObjectValueMap(sourceData.configureDescriptionDataBySubgraphName),
+      directivesByName: copyArrayValueMap(sourceData.directivesByName),
+      externalFieldDataBySubgraphName: copyObjectValueMap(sourceData.externalFieldDataBySubgraphName),
+      federatedCoords: sourceData.federatedCoords,
+      // Intentionally reset; only the subgraph fields involve directive inheritance
+      inheritedDirectiveNames: new Set<DirectiveName>(),
+      isInaccessible: sourceData.isInaccessible,
+      isShareableBySubgraphName: new Map(sourceData.isShareableBySubgraphName),
+      kind: sourceData.kind,
+      name: sourceData.name,
+      namedTypeKind: sourceData.namedTypeKind,
+      namedTypeName: sourceData.namedTypeName,
+      node: {
+        arguments: [],
+        directives: [],
+        kind: sourceData.kind,
+        name: stringToNameNode(sourceData.name),
+        type: sourceData.type,
+      },
+      nullLevelsBySubgraphName: sourceData.nullLevelsBySubgraphName,
+      originalParentTypeName: sourceData.originalParentTypeName,
+      federatedDirectivesData: this.extractFederatedDirectives({
+        data: newFederatedDirectivesData(),
+        directivesByName: sourceData.directivesByName,
+      }),
+      renamedParentTypeName: sourceData.renamedParentTypeName,
+      subgraphNames: new Set(sourceData.subgraphNames),
+      type: sourceData.type,
+      description: getInitialFederatedDescription(sourceData),
+    };
+  }
+
+  copyEnumValueDataByName(
+    source: Map<string, EnumValueData>,
+    isParentInaccessible: boolean,
+  ): Map<string, EnumValueData> {
+    const output = new Map<string, EnumValueData>();
+    for (const [childName, sourceData] of source) {
+      const targetData = this.copyEnumValueData(sourceData);
+      this.recordTagNamesByCoords(targetData, targetData.federatedCoords);
+      if (isParentInaccessible || isNodeDataInaccessible(targetData)) {
+        this.inaccessibleCoords.add(targetData.federatedCoords);
+      }
+      output.set(childName, targetData);
+    }
+    return output;
+  }
+
+  copyFieldDataByName(source: Map<string, FieldData>, isParentInaccessible: boolean): Map<string, FieldData> {
+    const fieldDataByFieldName = new Map<string, FieldData>();
+    for (const [fieldName, sourceData] of source) {
+      const isFieldInaccessible = isParentInaccessible || isNodeDataInaccessible(sourceData);
+      const targetData = this.copyFieldData(sourceData, isFieldInaccessible);
+      this.handleSubscriptionFilterDirective(targetData);
+      getValueOrDefault(this.coordsByNamedTypeName, targetData.namedTypeName, () => new Set<string>()).add(
+        targetData.federatedCoords,
+      );
+      this.namedOutputTypeNames.add(targetData.namedTypeName);
+      this.recordTagNamesByCoords(targetData, targetData.federatedCoords);
+      if (isFieldInaccessible) {
+        this.inaccessibleCoords.add(targetData.federatedCoords);
+      }
+      fieldDataByFieldName.set(fieldName, targetData);
+    }
+    return fieldDataByFieldName;
+  }
+
+  copyParentDefinitionData(sourceData: ParentDefinitionData): ParentDefinitionData {
+    const data = this.copyMutualParentDefinitionData(sourceData);
+    switch (sourceData.kind) {
+      case Kind.ENUM_TYPE_DEFINITION: {
+        return {
+          ...data,
+          appearances: sourceData.appearances,
+          enumValueDataByName: this.copyEnumValueDataByName(sourceData.enumValueDataByName, sourceData.isInaccessible),
+          isInaccessible: sourceData.isInaccessible,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.name),
+          },
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+      case Kind.INPUT_OBJECT_TYPE_DEFINITION: {
+        return {
+          ...data,
+          inputValueDataByName: this.copyInputValueDataByValueName(
+            sourceData.inputValueDataByName,
+            sourceData.isInaccessible,
+            sourceData.name,
+          ),
+          isInaccessible: sourceData.isInaccessible,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.name),
+          },
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+      case Kind.INTERFACE_TYPE_DEFINITION: {
+        return {
+          ...data,
+          fieldDataByName: this.copyFieldDataByName(sourceData.fieldDataByName, sourceData.isInaccessible),
+          implementedInterfaceTypeNames: new Set(sourceData.implementedInterfaceTypeNames),
+          isEntity: sourceData.isEntity,
+          isInaccessible: sourceData.isInaccessible,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.name),
+          },
+          // `requireFetchReasonsFieldNames` is not required for the federated node.
+          requireFetchReasonsFieldNames: new Set<FieldName>(),
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+      case Kind.OBJECT_TYPE_DEFINITION: {
+        return {
+          ...data,
+          fieldDataByName: this.copyFieldDataByName(sourceData.fieldDataByName, sourceData.isInaccessible),
+          implementedInterfaceTypeNames: new Set(sourceData.implementedInterfaceTypeNames),
+          isEntity: sourceData.isEntity,
+          isInaccessible: sourceData.isInaccessible,
+          isRootType: sourceData.isRootType,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.renamedTypeName || sourceData.name),
+          },
+          // `requireFetchReasonsFieldNames` is not required for the federated node.
+          requireFetchReasonsFieldNames: new Set<FieldName>(),
+          renamedTypeName: sourceData.renamedTypeName,
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+      case Kind.SCALAR_TYPE_DEFINITION: {
+        return {
+          ...data,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.name),
+          },
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+      case Kind.UNION_TYPE_DEFINITION: {
+        return {
+          ...data,
+          kind: sourceData.kind,
+          node: {
+            kind: sourceData.kind,
+            name: stringToNameNode(sourceData.name),
+          },
+          memberByMemberTypeName: new Map(sourceData.memberByMemberTypeName),
+          subgraphNames: new Set(sourceData.subgraphNames),
+        };
+      }
+    }
+  }
+
+  getParentTargetData({
+    existingData,
+    incomingData,
+  }: {
+    existingData?: ParentDefinitionData;
+    incomingData: ParentDefinitionData;
+  }): ParentDefinitionData {
+    if (!existingData) {
+      const targetData = this.copyParentDefinitionData(incomingData);
+      if (isParentDataRootType(targetData)) {
+        targetData.extensionType = ExtensionType.NONE;
+      }
+      return targetData;
+    }
+    this.extractFederatedDirectives({
+      data: existingData.federatedDirectivesData,
+      directivesByName: incomingData.directivesByName,
+    });
+    return existingData;
+  }
+
+  upsertParentDefinitionData(incomingData: ParentDefinitionData, subgraphName: SubgraphName) {
+    const entityInterfaceData = this.entityInterfaceFederationDataByTypeName.get(incomingData.name);
+    const existingData = this.parentDefinitionDataByTypeName.get(incomingData.name);
+    const targetData = this.getParentTargetData({ existingData, incomingData });
+    this.recordTagNamesByCoords(targetData);
+    const isParentInaccessible = isNodeDataInaccessible(targetData);
+    if (isParentInaccessible) {
+      this.inaccessibleCoords.add(targetData.name);
+    }
+    if (entityInterfaceData && entityInterfaceData.interfaceObjectSubgraphNames.has(subgraphName)) {
+      if (existingData && existingData.kind !== Kind.INTERFACE_TYPE_DEFINITION) {
+        this.errors.push(
+          incompatibleParentTypeMergeError({
+            existingData,
+            incomingSubgraphName: subgraphName,
+          }),
+        );
+        return;
+      }
+      targetData.kind = Kind.INTERFACE_TYPE_DEFINITION;
+      targetData.node.kind = Kind.INTERFACE_TYPE_DEFINITION;
+    }
+    if (!existingData) {
+      this.parentDefinitionDataByTypeName.set(targetData.name, targetData);
+      return;
+    }
+    if (targetData.kind !== incomingData.kind) {
+      if (
+        !entityInterfaceData ||
+        !entityInterfaceData.interfaceObjectSubgraphNames.has(subgraphName) ||
+        targetData.kind !== Kind.INTERFACE_TYPE_DEFINITION ||
+        incomingData.kind !== Kind.OBJECT_TYPE_DEFINITION
+      ) {
+        this.errors.push(
+          incompatibleParentTypeMergeError({
+            existingData: targetData,
+            incomingNodeType: kindToNodeType(incomingData.kind),
+            incomingSubgraphName: subgraphName,
+          }),
+        );
+        return;
+      }
+    }
+    addNewObjectValueMapEntries(
+      incomingData.configureDescriptionDataBySubgraphName,
+      targetData.configureDescriptionDataBySubgraphName,
+    );
+    setLongestDescription(targetData, incomingData);
+    setParentDataExtensionType(targetData, incomingData);
+    switch (targetData.kind) {
+      case Kind.ENUM_TYPE_DEFINITION:
+        if (!areKindsEqual(targetData, incomingData)) {
+          return;
+        }
+        targetData.appearances += 1;
+        targetData.isInaccessible ||= isParentInaccessible;
+        addIterableToSet({
+          source: incomingData.subgraphNames,
+          target: targetData.subgraphNames,
+        });
+        for (const data of incomingData.enumValueDataByName.values()) {
+          this.upsertEnumValueData(targetData.enumValueDataByName, data, isParentInaccessible);
+        }
+        return;
+      case Kind.INPUT_OBJECT_TYPE_DEFINITION:
+        if (!areKindsEqual(targetData, incomingData)) {
+          return;
+        }
+        // targetData.isInaccessible currently yields the previous state not the new one.
+        if (isParentInaccessible && !targetData.isInaccessible) {
+          this.propagateInaccessibilityToExistingChildren(targetData);
+        }
+        targetData.isInaccessible ||= isParentInaccessible;
+        addIterableToSet({
+          source: incomingData.subgraphNames,
+          target: targetData.subgraphNames,
+        });
+        for (const inputValueData of incomingData.inputValueDataByName.values()) {
+          this.upsertInputValueData(
+            targetData.inputValueDataByName,
+            inputValueData,
+            targetData.name,
+            targetData.isInaccessible,
+          );
+        }
+        return;
+      case Kind.INTERFACE_TYPE_DEFINITION:
+      // intentional fallthrough
+      case Kind.OBJECT_TYPE_DEFINITION:
+        // Not a type guard due to entity interfaces
+        const compositeOutputData = incomingData as CompositeOutputData;
+        // targetData.isInaccessible is not yet updated with the newest state
+        if (isParentInaccessible && !targetData.isInaccessible) {
+          this.propagateInaccessibilityToExistingChildren(targetData);
+        }
+        targetData.isInaccessible ||= isParentInaccessible;
+        addIterableToSet({
+          source: compositeOutputData.implementedInterfaceTypeNames,
+          target: targetData.implementedInterfaceTypeNames,
+        });
+        addIterableToSet({
+          source: compositeOutputData.subgraphNames,
+          target: targetData.subgraphNames,
+        });
+        for (const fieldData of compositeOutputData.fieldDataByName.values()) {
+          this.upsertFieldData(targetData.fieldDataByName, fieldData, targetData.isInaccessible);
+        }
+        return;
+      case Kind.UNION_TYPE_DEFINITION:
+        if (!areKindsEqual(targetData, incomingData)) {
+          return;
+        }
+        addMapEntries({
+          source: incomingData.memberByMemberTypeName,
+          target: targetData.memberByMemberTypeName,
+        });
+        addIterableToSet({
+          source: incomingData.subgraphNames,
+          target: targetData.subgraphNames,
+        });
+        return;
+      default:
+        // Scalar
+        addIterableToSet({
+          source: incomingData.subgraphNames,
+          target: targetData.subgraphNames,
+        });
+        return;
+    }
+  }
+
+  propagateInaccessibilityToExistingChildren(
+    data: InputObjectDefinitionData | InterfaceDefinitionData | ObjectDefinitionData,
+  ) {
+    switch (data.kind) {
+      case Kind.INPUT_OBJECT_TYPE_DEFINITION:
+        for (const inputFieldData of data.inputValueDataByName.values()) {
+          this.inaccessibleCoords.add(inputFieldData.federatedCoords);
+        }
+        break;
+      default:
+        for (const fieldData of data.fieldDataByName.values()) {
+          this.inaccessibleCoords.add(fieldData.federatedCoords);
+          for (const inputValueData of fieldData.argumentDataByName.values()) {
+            this.inaccessibleCoords.add(inputValueData.federatedCoords);
+          }
+        }
+    }
+  }
+
+  shouldUpdateFederatedFieldAbstractNamedType(abstractTypeName: string, objectTypeNames: Set<string>): boolean {
+    if (!abstractTypeName) {
+      return false;
+    }
+    const concreteTypeNames = this.concreteTypeNamesByAbstractTypeName.get(abstractTypeName);
+    if (!concreteTypeNames || concreteTypeNames.size < 1) {
+      return false;
+    }
+    for (const objectTypeName of objectTypeNames) {
+      if (!concreteTypeNames.has(objectTypeName)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  updateTypeNodeNamedType(typeNode: MutableTypeNode, namedTypeName: string) {
+    let lastTypeNode = typeNode;
+    for (let i = 0; i < MAXIMUM_TYPE_NESTING; i++) {
+      if (lastTypeNode.kind === Kind.NAMED_TYPE) {
+        lastTypeNode.name = stringToNameNode(namedTypeName);
+        return;
+      }
+      lastTypeNode = lastTypeNode.type;
+    }
+  }
+
+  handleDisparateFieldNamedTypes() {
+    for (const [fieldCoordinates, subgraphNamesByNamedTypeName] of this.subgraphNamesByNamedTypeNameByFieldCoords) {
+      const coordinates = fieldCoordinates.split(LITERAL_PERIOD);
+      if (coordinates.length !== 2) {
+        continue;
+      }
+      const compositeOutputData = this.parentDefinitionDataByTypeName.get(coordinates[0]);
+      if (!compositeOutputData) {
+        this.errors.push(undefinedTypeError(coordinates[0]));
+        continue;
+      }
+      // This error should never happen
+      if (
+        compositeOutputData.kind !== Kind.INTERFACE_TYPE_DEFINITION &&
+        compositeOutputData.kind !== Kind.OBJECT_TYPE_DEFINITION
+      ) {
+        this.errors.push(
+          unexpectedNonCompositeOutputTypeError(coordinates[0], kindToNodeType(compositeOutputData.kind)),
+        );
+        continue;
+      }
+      const fieldData = compositeOutputData.fieldDataByName.get(coordinates[1]);
+      // This error should never happen
+      if (!fieldData) {
+        this.errors.push(unknownFieldDataError(fieldCoordinates));
+        continue;
+      }
+      const interfaceDataByTypeName = new Map<string, InterfaceDefinitionData>();
+      const objectTypeNames = new Set<string>();
+      let unionTypeName = '';
+      for (const namedTypeName of subgraphNamesByNamedTypeName.keys()) {
+        if (BASE_SCALARS.has(namedTypeName)) {
+          this.errors.push(incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName));
+          break;
+        }
+        const namedTypeData = this.parentDefinitionDataByTypeName.get(namedTypeName);
+        // This error should never happen
+        if (!namedTypeData) {
+          this.errors.push(unknownNamedTypeError(fieldCoordinates, namedTypeName));
+          break;
+        }
+        switch (namedTypeData.kind) {
+          case Kind.INTERFACE_TYPE_DEFINITION: {
+            interfaceDataByTypeName.set(namedTypeData.name, namedTypeData);
+            break;
+          }
+          case Kind.OBJECT_TYPE_DEFINITION: {
+            objectTypeNames.add(namedTypeData.name);
+            /* Multiple shared Field instances can explicitly return the same Object named type across subgraphs.
+             * However, the Field is invalid if *any* of the other shared Field instances return a different Object named
+             * type, even if each of those Objects named types could be coerced into the same mutual abstract type.
+             * This is because it would be impossible to return identical data from each subgraph if one shared Field
+             * instance explicitly returns a different Object named type to another shared Field instance.
+             */
+            if (objectTypeNames.size > 1) {
+              this.errors.push(
+                incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName),
+              );
+              continue;
+            }
+            break;
+          }
+          case Kind.UNION_TYPE_DEFINITION: {
+            if (unionTypeName) {
+              this.errors.push(
+                incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName),
+              );
+              continue;
+            }
+            unionTypeName = namedTypeName;
+            break;
+          }
+          default: {
+            this.errors.push(incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName));
+            break;
+          }
+        }
+      }
+      if (interfaceDataByTypeName.size < 1 && !unionTypeName) {
+        this.errors.push(incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName));
+        continue;
+      }
+      /* Default to the Union type name.
+       * If more than one type of abstract type is returned, an error will be propagated.
+       */
+      let abstractTypeName = unionTypeName;
+      if (interfaceDataByTypeName.size > 0) {
+        if (unionTypeName) {
+          this.errors.push(incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName));
+          continue;
+        }
+        /* If there is more than one Interface, there must be an origin Interface.
+         * This is the "mutual Interface" that all the other Interfaces implement.
+         */
+        for (const interfaceTypeName of interfaceDataByTypeName.keys()) {
+          abstractTypeName = interfaceTypeName;
+          for (const [comparisonTypeName, comparisonData] of interfaceDataByTypeName) {
+            if (interfaceTypeName === comparisonTypeName) {
+              continue;
+            }
+            if (!comparisonData.implementedInterfaceTypeNames.has(interfaceTypeName)) {
+              abstractTypeName = '';
+              break;
+            }
+          }
+          if (abstractTypeName) {
+            break;
+          }
+        }
+      }
+      /* If the abstract type is:
+       * 1. An Interface: each returned Object types must implement that origin Interface.
+       * 2. A Union: all returned Object types must be Member of that Union.
+       * 3. Invalid (empty string): return an error
+       */
+      if (!this.shouldUpdateFederatedFieldAbstractNamedType(abstractTypeName, objectTypeNames)) {
+        this.errors.push(incompatibleFederatedFieldNamedTypeError(fieldCoordinates, subgraphNamesByNamedTypeName));
+        continue;
+      }
+      fieldData.namedTypeName = abstractTypeName;
+      this.updateTypeNodeNamedType(fieldData.type, abstractTypeName);
+    }
+  }
+  upsertExecutableDirectiveDatas() {
+    for (const [directiveName, definitionDatas] of this.executableDirectiveDatasByName) {
+      for (const data of definitionDatas) {
+        const existingData = this.federatedDirectiveDataByName.get(directiveName);
+        if (!existingData) {
+          const argumentDataByName = new Map<ArgumentName, DirectiveArgumentData>();
+          for (const argumentData of data.argumentDataByName.values()) {
+            this.upsertDirectiveArgumentData({
+              argumentDataByName,
+              incomingData: argumentData,
+            });
+          }
+          // Shared set between locations and executable locations because type-system locations are removed.
+          const locations = new Set<DirectiveLocation>(data.executableLocations);
+          this.federatedDirectiveDataByName.set(directiveName, {
+            argumentDataByName,
+            isComposed: false,
+            isRepeatable: data.isRepeatable,
+            isReferenced: data.isReferenced,
+            executableLocations: locations,
+            locations,
+            majorVersion: -1,
+            minorVersion: -1,
+            name: directiveName,
+            description: data.description,
+            node: data.node,
+            optionalArgumentNames: new Set(data.optionalArgumentNames),
+            requiredArgumentNames: new Set(data.requiredArgumentNames),
+            subgraphNames: new Set(data.subgraphNames),
+          });
+          continue;
+        }
+        for (const argumentData of data.argumentDataByName.values()) {
+          this.upsertDirectiveArgumentData({
+            argumentDataByName: existingData.argumentDataByName,
+            incomingData: argumentData,
+          });
+        }
+        for (const executableLocation of existingData.executableLocations) {
+          if (!data.executableLocations.has(executableLocation)) {
+            existingData.executableLocations.delete(executableLocation);
+          }
+        }
+        if (existingData.executableLocations.size < 1) {
+          this.federatedDirectiveDataByName.delete(directiveName);
+          break;
+        }
+        setLongestDescription(existingData, data);
+        addIterableToSet({ source: data.subgraphNames, target: existingData.subgraphNames });
+        existingData.isRepeatable &&= data.isRepeatable;
+      }
+    }
+  }
+
+  /* federateInternalSubgraphData is responsible for merging each subgraph TypeScript representation of a GraphQL type
+   * into a single representation.
+   * This method is always necessary, regardless of whether federating a source graph or contract graph.
+   * */
+  federateInternalSubgraphData() {
+    this.upsertExecutableDirectiveDatas();
+    for (const internalSubgraph of this.internalSubgraphBySubgraphName.values()) {
+      this.currentSubgraphName = internalSubgraph.name;
+      this.isVersionTwo ||= internalSubgraph.isVersionTwo;
+      renameRootTypes(this, internalSubgraph);
+      for (const parentDefinitionData of internalSubgraph.parentDefinitionDataByTypeName.values()) {
+        this.upsertParentDefinitionData(parentDefinitionData, internalSubgraph.name);
+      }
+    }
+    this.handleDisparateFieldNamedTypes();
+  }
+
+  handleInterfaceObjectForInternalGraph({
+    entityData,
+    internalSubgraph,
+    interfaceObjectData,
+    interfaceObjectNode,
+    resolvableKeyFieldSets,
+    subgraphName,
+  }: InterfaceObjectForInternalGraphOptions) {
+    const entityGraphNode = this.internalGraph.addOrUpdateNode(entityData.typeName);
+    const entityDataNode = this.internalGraph.addEntityDataNode(entityData.typeName);
+    for (const satisfiedFieldSet of interfaceObjectNode.satisfiedFieldSets) {
+      entityGraphNode.satisfiedFieldSets.add(satisfiedFieldSet);
+      if (resolvableKeyFieldSets.has(satisfiedFieldSet)) {
+        entityDataNode.addTargetSubgraphByFieldSet(satisfiedFieldSet, subgraphName);
+      }
+    }
+    const fieldDatas = interfaceObjectData.fieldDatasBySubgraphName.get(subgraphName);
+    for (const { name, namedTypeName } of fieldDatas || []) {
+      this.internalGraph.addEdge(entityGraphNode, this.internalGraph.addOrUpdateNode(namedTypeName), name);
+    }
+    this.internalGraph.addEdge(interfaceObjectNode, entityGraphNode, entityData.typeName, true);
+    this.addValidPrimaryKeyTargetsFromInterfaceObject(
+      internalSubgraph,
+      interfaceObjectNode.typeName,
+      entityData,
+      entityGraphNode,
+    );
+  }
+
+  handleEntityInterfaces() {
+    for (const [entityInterfaceTypeName, entityInterfaceData] of this.entityInterfaceFederationDataByTypeName) {
+      const entityInterfaceFederationData = getOrThrowError(
+        this.parentDefinitionDataByTypeName,
+        entityInterfaceTypeName,
+        PARENT_DEFINITION_DATA,
+      );
+      if (entityInterfaceFederationData.kind !== Kind.INTERFACE_TYPE_DEFINITION) {
+        // TODO error
+        continue;
+      }
+      for (const subgraphName of entityInterfaceData.interfaceObjectSubgraphNames) {
+        const internalSubgraph = getOrThrowError(
+          this.internalSubgraphBySubgraphName,
+          subgraphName,
+          'internalSubgraphBySubgraphName',
+        );
+        const configurationDataByTypeName = internalSubgraph.configurationDataByTypeName;
+        const concreteTypeNames = this.concreteTypeNamesByAbstractTypeName.get(entityInterfaceTypeName);
+        if (!concreteTypeNames) {
+          continue;
+        }
+        const interfaceObjectConfiguration = getOrThrowError(
+          configurationDataByTypeName,
+          entityInterfaceTypeName,
+          'configurationDataByTypeName',
+        );
+        const keys = interfaceObjectConfiguration.keys;
+        if (!keys) {
+          // TODO no keys error
+          continue;
+        }
+        interfaceObjectConfiguration.entityInterfaceConcreteTypeNames = new Set<TypeName>(
+          entityInterfaceData.concreteTypeNames,
+        );
+        this.internalGraph.setSubgraphName(subgraphName);
+        const interfaceObjectNode = this.internalGraph.addOrUpdateNode(entityInterfaceTypeName, { isAbstract: true });
+        for (const concreteTypeName of concreteTypeNames) {
+          const concreteTypeData = getOrThrowError(
+            this.parentDefinitionDataByTypeName,
+            concreteTypeName,
+            PARENT_DEFINITION_DATA,
+          );
+          if (!isObjectDefinitionData(concreteTypeData)) {
+            continue;
+          }
+          // The subgraph locations of the Interface Object must be added to the concrete types that implement it
+          const entityData = getOrThrowError(this.entityDataByTypeName, concreteTypeName, 'entityDataByTypeName');
+          entityData.subgraphNames.add(subgraphName);
+          const configurationData = configurationDataByTypeName.get(concreteTypeName);
+          if (configurationData) {
+            addIterableToSet({
+              source: interfaceObjectConfiguration.fieldNames,
+              target: configurationData.fieldNames,
+            });
+            if (!configurationData.keys) {
+              configurationData.keys = [...keys];
+            } else {
+              parentLoop: for (const key of keys) {
+                for (const { selectionSet } of configurationData.keys) {
+                  if (key.selectionSet === selectionSet) {
+                    continue parentLoop;
+                  }
+                }
+                configurationData.keys.push(key);
+              }
+            }
+          } else {
+            configurationDataByTypeName.set(concreteTypeName, {
+              fieldNames: new Set<string>(interfaceObjectConfiguration.fieldNames),
+              isRootNode: true,
+              keys: [...keys],
+              typeName: concreteTypeName,
+            });
+          }
+          const resolvableKeyFieldSets = new Set<string>();
+          for (const key of keys.filter((k) => !k.disableEntityResolver)) {
+            resolvableKeyFieldSets.add(key.selectionSet);
+          }
+          const interfaceAuthData = this.authorizationDataByParentTypeName.get(entityInterfaceTypeName);
+          const entityInterfaceSubgraphData = getOrThrowError(
+            internalSubgraph.parentDefinitionDataByTypeName,
+            entityInterfaceTypeName,
+            'internalSubgraph.parentDefinitionDataByTypeName',
+          );
+          if (!isObjectDefinitionData(entityInterfaceSubgraphData)) {
+            continue;
+          }
+          for (const [fieldName, fieldData] of entityInterfaceSubgraphData.fieldDataByName) {
+            const fieldCoords = `${concreteTypeName}.${fieldName}`;
+            getValueOrDefault(
+              this.fieldCoordsByNamedTypeName,
+              fieldData.namedTypeName,
+              () => new Set<FieldCoords>(),
+            ).add(fieldCoords);
+            const interfaceFieldAuthData = interfaceAuthData?.fieldAuthDataByFieldName.get(fieldName);
+            if (interfaceFieldAuthData) {
+              const concreteAuthData = getValueOrDefault(this.authorizationDataByParentTypeName, concreteTypeName, () =>
+                newAuthorizationData(concreteTypeName),
+              );
+              if (!upsertFieldAuthorizationData(concreteAuthData.fieldAuthDataByFieldName, interfaceFieldAuthData)) {
+                this.invalidORScopesCoords.add(fieldCoords);
+              }
+            }
+            const existingFieldData = concreteTypeData.fieldDataByName.get(fieldName);
+            // @shareable and @external need to be propagated (e.g., to satisfy interfaces)
+            if (existingFieldData) {
+              const isShareable = fieldData.isShareableBySubgraphName.get(subgraphName) ?? false;
+              existingFieldData.isShareableBySubgraphName.set(subgraphName, isShareable);
+              existingFieldData.subgraphNames.add(subgraphName);
+              const externalData = fieldData.externalFieldDataBySubgraphName.get(subgraphName);
+              if (!externalData) {
+                continue;
+              }
+              existingFieldData.externalFieldDataBySubgraphName.set(subgraphName, { ...externalData });
+              continue;
+            }
+            const isInaccessible =
+              entityInterfaceFederationData.isInaccessible ||
+              concreteTypeData.isInaccessible ||
+              fieldData.isInaccessible;
+            concreteTypeData.fieldDataByName.set(fieldName, this.copyFieldData(fieldData, isInaccessible));
+          }
+          this.handleInterfaceObjectForInternalGraph({
+            internalSubgraph,
+            subgraphName,
+            interfaceObjectData: entityInterfaceData,
+            interfaceObjectNode,
+            resolvableKeyFieldSets,
+            entityData,
+          });
+        }
+      }
+    }
+  }
+
+  fieldDataToGraphFieldData(fieldData: FieldData): GraphFieldData {
+    return {
+      externalSubgraphNames: new Set<SubgraphName>(),
+      name: fieldData.name,
+      namedTypeName: fieldData.namedTypeName,
+      isLeaf: isNodeLeaf(this.parentDefinitionDataByTypeName.get(fieldData.namedTypeName)?.kind),
+      subgraphNames: fieldData.subgraphNames,
+    };
+  }
+
+  getFederatedGraphNodeDescription(data: NodeData): StringValueNode | undefined {
+    if (data.configureDescriptionDataBySubgraphName.size < 1) {
+      return data.description;
+    }
+    const subgraphNames: Array<SubgraphName> = [];
+    let descriptionToPropagate = '';
+    for (const [subgraphName, { propagate, description }] of data.configureDescriptionDataBySubgraphName) {
+      if (!propagate) {
+        continue;
+      }
+      subgraphNames.push(subgraphName);
+      descriptionToPropagate = description;
+    }
+    if (subgraphNames.length === 1) {
+      return getDescriptionFromString(descriptionToPropagate);
+    }
+    // If no instances define the configureDescription directive, return the longest description
+    if (subgraphNames.length < 1) {
+      return data.description;
+    }
+    this.errors.push(configureDescriptionPropagationError(getDefinitionDataCoords(data, true), subgraphNames));
+  }
+
+  getValidFieldArgumentNodes(fieldData: FieldData): MutableInputValueNode[] {
+    const argumentNodes: Array<MutableInputValueNode> = [];
+    const argumentNames: Array<string> = [];
+    const invalidRequiredArguments: InvalidRequiredInputValueData[] = [];
+    const fieldCoords = `${fieldData.renamedParentTypeName}.${fieldData.name}`;
+    for (const [argumentName, inputValueData] of fieldData.argumentDataByName) {
+      if (doesArgumentDefineFromContext(inputValueData)) {
+        if (inputValueData.requiredSubgraphNames.size > 0) {
+          this.errors.push(
+            requiredContextArgumentError(
+              inputValueData.federatedCoords,
+              [...inputValueData.fromContextSubgraphNames],
+              [...inputValueData.requiredSubgraphNames],
+            ),
+          );
+        }
+        continue;
+      }
+      if (fieldData.subgraphNames.size === inputValueData.subgraphNames.size) {
+        argumentNames.push(argumentName);
+        const argumentNodeResult = routerSchemaInputValueNodeFromData({
+          data: inputValueData,
+          description: this.getFederatedGraphNodeDescription(inputValueData),
+          federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+          parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+        });
+        if (argumentNodeResult.success) {
+          argumentNodes.push(argumentNodeResult.node);
+          this.warnings.push(...argumentNodeResult.warnings);
+        } else {
+          this.errors.push(...argumentNodeResult.errors);
+        }
+      } else if (isTypeRequired(inputValueData.type)) {
+        invalidRequiredArguments.push({
+          inputValueName: argumentName,
+          missingSubgraphs: getEntriesNotInHashSet(fieldData.subgraphNames, inputValueData.subgraphNames),
+          requiredSubgraphs: [...inputValueData.requiredSubgraphNames],
+        });
+      }
+    }
+    if (invalidRequiredArguments.length > 0) {
+      this.errors.push(invalidRequiredInputValueError(FIELD, fieldCoords, invalidRequiredArguments));
+    } else if (argumentNames.length > 0) {
+      // fieldConfiguration might already exist through subscriptionFilter
+      getValueOrDefault(this.fieldConfigurationByFieldCoords, fieldCoords, () => ({
+        argumentNames,
+        fieldName: fieldData.name,
+        typeName: fieldData.renamedParentTypeName,
+      })).argumentNames = argumentNames;
+    }
+    return argumentNodes;
+  }
+
+  validateSemanticNonNull(data: FieldData) {
+    let comparison: Set<number> | undefined;
+    for (const levels of data.nullLevelsBySubgraphName.values()) {
+      if (!comparison) {
+        comparison = levels;
+        continue;
+      }
+      if (comparison.size !== levels.size) {
+        this.errors.push(semanticNonNullInconsistentLevelsError(data));
+        return;
+      }
+      for (const level of levels) {
+        // IDE complains but `comparison` will always have been initialized.
+        if (!comparison.has(level)) {
+          this.errors.push(semanticNonNullInconsistentLevelsError(data));
+          return;
+        }
+      }
+    }
+  }
+
+  validateOneOfDirective({ data, inputValueNodes, requiredFieldNames }: ValidateOneOfDirectiveParams): boolean {
+    if (!data.directivesByName.has(ONE_OF)) {
+      return true;
+    }
+    if (requiredFieldNames.size > 0) {
+      this.errors.push(
+        oneOfRequiredFieldsError({
+          requiredFieldNames: Array.from(requiredFieldNames),
+          typeName: data.name,
+        }),
+      );
+      return false;
+    }
+    if (inputValueNodes.length === 1) {
+      this.warnings.push(
+        singleFederatedInputFieldOneOfWarning({
+          fieldName: inputValueNodes[0]!.name.value,
+          typeName: data.name,
+        }),
+      );
+    }
+    return true;
+  }
+
+  pushParentDefinitionDataToDocumentDefinitions(interfaceImplementations: InterfaceImplementationData[]) {
+    for (const [parentTypeName, parentDefinitionData] of this.parentDefinitionDataByTypeName) {
+      if (parentDefinitionData.extensionType !== ExtensionType.NONE) {
+        this.errors.push(noBaseDefinitionForExtensionError(kindToNodeType(parentDefinitionData.kind), parentTypeName));
+      }
+      switch (parentDefinitionData.kind) {
+        case Kind.ENUM_TYPE_DEFINITION: {
+          if (IGNORED_FEDERATED_TYPE_NAMES.has(parentTypeName)) {
+            break;
+          }
+          const enumValueNodes: Array<MutableEnumValueNode> = [];
+          const clientEnumValueNodes: Array<MutableEnumValueNode> = [];
+          const mergeMethod = this.getEnumValueMergeMethod(parentTypeName);
+          propagateAuthDirectives(parentDefinitionData, this.authorizationDataByParentTypeName.get(parentTypeName));
+          for (const enumValueData of parentDefinitionData.enumValueDataByName.values()) {
+            const isValueInaccessible = isNodeDataInaccessible(enumValueData);
+            const clientEnumValueNode: MutableEnumValueNode = {
+              ...enumValueData.node,
+              directives: getClientFederatedDirectiveNodes(enumValueData),
+            };
+            const enumValueNodeResult = routerSchemaNodeFromData<EnumValueData>({
+              data: enumValueData,
+              description: this.getFederatedGraphNodeDescription(enumValueData),
+              federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+              parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+            });
+            if (!enumValueNodeResult.success) {
+              this.errors.push(...enumValueNodeResult.errors);
+              continue;
+            }
+            switch (mergeMethod) {
+              case MergeMethod.CONSISTENT:
+                if (!isValueInaccessible && parentDefinitionData.appearances > enumValueData.appearances) {
+                  this.errors.push(incompatibleSharedEnumError(parentTypeName));
+                }
+                enumValueNodes.push(enumValueNodeResult.node);
+                if (!isValueInaccessible) {
+                  clientEnumValueNodes.push(clientEnumValueNode);
+                }
+                break;
+              case MergeMethod.INTERSECTION:
+                if (parentDefinitionData.appearances === enumValueData.appearances) {
+                  enumValueNodes.push(enumValueNodeResult.node);
+                  if (!isValueInaccessible) {
+                    clientEnumValueNodes.push(clientEnumValueNode);
+                  }
+                }
+                break;
+              default:
+                enumValueNodes.push(enumValueNodeResult.node);
+                if (!isValueInaccessible) {
+                  clientEnumValueNodes.push(clientEnumValueNode);
+                }
+                break;
+            }
+          }
+          parentDefinitionData.node.values = enumValueNodes;
+          const nodeResult = routerSchemaNodeFromData<EnumDefinitionData>({
+            data: parentDefinitionData,
+            description: this.getFederatedGraphNodeDescription(parentDefinitionData),
+            federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+            parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+          });
+          if (nodeResult.success) {
+            this.routerDefinitions.push(nodeResult.node);
+          } else {
+            this.errors.push(...nodeResult.errors);
+          }
+          if (isNodeDataInaccessible(parentDefinitionData)) {
+            this.validateReferencesOfInaccessibleType(parentDefinitionData);
+            this.internalGraph.setNodeInaccessible(parentDefinitionData.name);
+            break;
+          }
+          if (clientEnumValueNodes.length < 1) {
+            this.errors.push(
+              allChildDefinitionsAreInaccessibleError(
+                kindToNodeType(parentDefinitionData.kind),
+                parentTypeName,
+                ENUM_VALUE,
+              ),
+            );
+            break;
+          }
+          this.clientDefinitions.push({
+            ...parentDefinitionData.node,
+            directives: getClientFederatedDirectiveNodes(parentDefinitionData),
+            values: clientEnumValueNodes,
+          });
+          break;
+        }
+        case Kind.INPUT_OBJECT_TYPE_DEFINITION: {
+          if (IGNORED_FEDERATED_TYPE_NAMES.has(parentTypeName)) {
+            break;
+          }
+          const invalidRequiredInputs = new Array<InvalidRequiredInputValueData>();
+          const inputValueNodes = new Array<MutableInputValueNode>();
+          const clientInputValueNodes = new Array<MutableInputValueNode>();
+          const requiredFieldNames = new Set<FieldName>();
+          for (const [inputValueName, inputValueData] of parentDefinitionData.inputValueDataByName) {
+            if (isTypeRequired(inputValueData.type)) {
+              requiredFieldNames.add(inputValueName);
+            }
+            if (parentDefinitionData.subgraphNames.size === inputValueData.subgraphNames.size) {
+              const inputValueNodeResult = routerSchemaInputValueNodeFromData({
+                data: inputValueData,
+                description: this.getFederatedGraphNodeDescription(inputValueData),
+                federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+                parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+              });
+              if (inputValueNodeResult.success) {
+                inputValueNodes.push(inputValueNodeResult.node);
+                this.warnings.push(...inputValueNodeResult.warnings);
+              } else {
+                this.errors.push(...inputValueNodeResult.errors);
+              }
+              if (isNodeDataInaccessible(inputValueData)) {
+                continue;
+              }
+              clientInputValueNodes.push({
+                ...inputValueData.node,
+                directives: getClientFederatedDirectiveNodes(inputValueData),
+              });
+            } else if (isTypeRequired(inputValueData.type)) {
+              invalidRequiredInputs.push({
+                inputValueName,
+                missingSubgraphs: getEntriesNotInHashSet(
+                  parentDefinitionData.subgraphNames,
+                  inputValueData.subgraphNames,
+                ),
+                requiredSubgraphs: [...inputValueData.requiredSubgraphNames],
+              });
+            }
+          }
+          if (invalidRequiredInputs.length > 0) {
+            this.errors.push(
+              invalidRequiredInputValueError(INPUT_OBJECT, parentTypeName, invalidRequiredInputs, false),
+            );
+            break;
+          }
+          if (
+            !this.validateOneOfDirective({
+              data: parentDefinitionData,
+              inputValueNodes,
+              requiredFieldNames,
+            })
+          ) {
+            break;
+          }
+          parentDefinitionData.node.fields = inputValueNodes;
+          const inputObjectNodeResult = routerSchemaNodeFromData<InputObjectDefinitionData>({
+            data: parentDefinitionData,
+            description: this.getFederatedGraphNodeDescription(parentDefinitionData),
+            federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+            parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+          });
+          if (inputObjectNodeResult.success) {
+            this.routerDefinitions.push(inputObjectNodeResult.node);
+          } else {
+            this.errors.push(...inputObjectNodeResult.errors);
+          }
+          if (isNodeDataInaccessible(parentDefinitionData)) {
+            this.validateReferencesOfInaccessibleType(parentDefinitionData);
+            break;
+          }
+          if (clientInputValueNodes.length < 1) {
+            this.errors.push(
+              allChildDefinitionsAreInaccessibleError(
+                kindToNodeType(parentDefinitionData.kind),
+                parentTypeName,
+                'Input field',
+              ),
+            );
+            break;
+          }
+          this.clientDefinitions.push({
+            ...parentDefinitionData.node,
+            directives: getClientFederatedDirectiveNodes(parentDefinitionData),
+            fields: clientInputValueNodes,
+          });
+          break;
+        }
+        case Kind.INTERFACE_TYPE_DEFINITION:
+        // intentional fallthrough
+        case Kind.OBJECT_TYPE_DEFINITION: {
+          const fieldNodes: Array<MutableFieldNode> = [];
+          const clientSchemaFieldNodes: Array<MutableFieldNode> = [];
+          const graphFieldDataByFieldName = new Map<FieldName, GraphFieldData>();
+          const invalidFieldNames = newInvalidFieldNames();
+          const isObject = parentDefinitionData.kind === Kind.OBJECT_TYPE_DEFINITION;
+          const authData = this.authorizationDataByParentTypeName.get(parentTypeName);
+          propagateAuthDirectives(parentDefinitionData, authData);
+          for (const [fieldName, fieldData] of parentDefinitionData.fieldDataByName) {
+            propagateFieldAuthDirectives(fieldData, authData);
+            const argumentNodes = this.getValidFieldArgumentNodes(fieldData);
+            if (isObject) {
+              validateExternalAndShareable(fieldData, invalidFieldNames);
+            }
+            this.validateSemanticNonNull(fieldData);
+            const fieldNodeResult = routerSchemaFieldNodeFromData({
+              argumentNodes,
+              data: fieldData,
+              description: this.getFederatedGraphNodeDescription(fieldData),
+              federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+              parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+            });
+            if (!fieldNodeResult.success) {
+              this.errors.push(...fieldNodeResult.errors);
+            } else {
+              fieldNodes.push(fieldNodeResult.node);
+              this.warnings.push(...fieldNodeResult.warnings);
+            }
+            if (isNodeDataInaccessible(fieldData)) {
+              continue;
+            }
+            clientSchemaFieldNodes.push(getClientSchemaFieldNodeByFieldData(fieldData));
+            graphFieldDataByFieldName.set(fieldName, this.fieldDataToGraphFieldData(fieldData));
+          }
+          if (isObject) {
+            if (invalidFieldNames.byShareable.size > 0) {
+              this.errors.push(invalidFieldShareabilityError(parentDefinitionData, invalidFieldNames.byShareable));
+            }
+            if (invalidFieldNames.subgraphNamesByExternalFieldName.size > 0) {
+              this.errors.push(
+                allExternalFieldInstancesError(parentTypeName, invalidFieldNames.subgraphNamesByExternalFieldName),
+              );
+            }
+          }
+          parentDefinitionData.node.fields = fieldNodes;
+          this.internalGraph.initializeNode(parentTypeName, graphFieldDataByFieldName);
+          // Implemented interfaces can only be validated after all fields are merged
+          if (parentDefinitionData.implementedInterfaceTypeNames.size > 0) {
+            interfaceImplementations.push({ data: parentDefinitionData, clientSchemaFieldNodes });
+            break;
+          }
+          const nodeResult = routerSchemaNodeFromData<ObjectDefinitionData>({
+            data: parentDefinitionData,
+            description: this.getFederatedGraphNodeDescription(parentDefinitionData),
+            federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+            parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+          });
+          if (nodeResult.success) {
+            this.routerDefinitions.push(nodeResult.node);
+          } else {
+            this.errors.push(...nodeResult.errors);
+          }
+          const isQuery = isNodeQuery(parentTypeName);
+          if (isNodeDataInaccessible(parentDefinitionData)) {
+            if (isQuery) {
+              this.errors.push(inaccessibleQueryRootTypeError);
+              break;
+            }
+            this.validateReferencesOfInaccessibleType(parentDefinitionData);
+            this.internalGraph.setNodeInaccessible(parentDefinitionData.name);
+            break;
+          }
+          if (clientSchemaFieldNodes.length < 1) {
+            const error = isQuery
+              ? noQueryRootTypeError(false)
+              : allChildDefinitionsAreInaccessibleError(
+                  kindToNodeType(parentDefinitionData.kind),
+                  parentTypeName,
+                  FIELD,
+                );
+            this.errors.push(error);
+            break;
+          }
+          this.clientDefinitions.push({
+            ...parentDefinitionData.node,
+            directives: getClientFederatedDirectiveNodes(parentDefinitionData),
+            fields: clientSchemaFieldNodes,
+          });
+          break;
+        }
+        case Kind.SCALAR_TYPE_DEFINITION: {
+          if (IGNORED_FEDERATED_TYPE_NAMES.has(parentTypeName)) {
+            break;
+          }
+          propagateAuthDirectives(parentDefinitionData, this.authorizationDataByParentTypeName.get(parentTypeName));
+          const nodeResult = routerSchemaNodeFromData<ScalarDefinitionData>({
+            data: parentDefinitionData,
+            description: this.getFederatedGraphNodeDescription(parentDefinitionData),
+            federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+            parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+          });
+          if (nodeResult.success) {
+            this.routerDefinitions.push(nodeResult.node);
+          } else {
+            this.errors.push(...nodeResult.errors);
+          }
+          if (isNodeDataInaccessible(parentDefinitionData)) {
+            this.validateReferencesOfInaccessibleType(parentDefinitionData);
+            this.internalGraph.setNodeInaccessible(parentDefinitionData.name);
+            break;
+          }
+          this.clientDefinitions.push({
+            ...parentDefinitionData.node,
+            directives: getClientFederatedDirectiveNodes(parentDefinitionData),
+          });
+          break;
+        }
+        case Kind.UNION_TYPE_DEFINITION: {
+          parentDefinitionData.node.types = mapToArrayOfValues(parentDefinitionData.memberByMemberTypeName);
+          const nodeResult = routerSchemaNodeFromData<UnionDefinitionData>({
+            data: parentDefinitionData,
+            description: this.getFederatedGraphNodeDescription(parentDefinitionData),
+            federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+            parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+          });
+          if (nodeResult.success) {
+            this.routerDefinitions.push(nodeResult.node);
+          } else {
+            this.errors.push(...nodeResult.errors);
+          }
+          if (isNodeDataInaccessible(parentDefinitionData)) {
+            this.validateReferencesOfInaccessibleType(parentDefinitionData);
+            this.internalGraph.setNodeInaccessible(parentDefinitionData.name);
+            break;
+          }
+          const clientMembers = this.getClientSchemaUnionMembers(parentDefinitionData);
+          if (clientMembers.length < 1) {
+            this.errors.push(allChildDefinitionsAreInaccessibleError(UNION, parentTypeName, 'union member type'));
+            break;
+          }
+          this.clientDefinitions.push({
+            ...parentDefinitionData.node,
+            directives: getClientFederatedDirectiveNodes(parentDefinitionData),
+            types: clientMembers,
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  pushNamedTypeAuthDataToFields() {
+    for (const [typeName, namedTypeAuthData] of this.authorizationDataByParentTypeName) {
+      if (!namedTypeAuthData.requiresAuthentication && namedTypeAuthData.requiredScopes.length < 1) {
+        continue;
+      }
+      const fieldCoords = this.fieldCoordsByNamedTypeName.get(typeName);
+      if (!fieldCoords) {
+        continue;
+      }
+      for (const coords of fieldCoords) {
+        // The coords should all be exactly <parentTypeName>.<fieldName>
+        const segments = coords.split(LITERAL_PERIOD);
+        switch (segments.length) {
+          case 2: {
+            const parentAuthData = getValueOrDefault(this.authorizationDataByParentTypeName, segments[0], () =>
+              newAuthorizationData(segments[0]),
+            );
+            const fieldAuthData = getValueOrDefault(parentAuthData.fieldAuthDataByFieldName, segments[1], () =>
+              newFieldAuthorizationData(segments[1]),
+            );
+            fieldAuthData.inheritedData.requiresAuthentication ||= namedTypeAuthData.requiresAuthentication;
+            if (
+              fieldAuthData.inheritedData.requiredScopes.length * namedTypeAuthData.requiredScopes.length >
+              MAX_OR_SCOPES
+            ) {
+              this.invalidORScopesCoords.add(coords);
+            } else {
+              fieldAuthData.inheritedData.requiredScopesByOR = mergeRequiredScopesByAND(
+                fieldAuthData.inheritedData.requiredScopesByOR,
+                namedTypeAuthData.requiredScopesByOR,
+              );
+              fieldAuthData.inheritedData.requiredScopes = mergeRequiredScopesByAND(
+                fieldAuthData.inheritedData.requiredScopes,
+                namedTypeAuthData.requiredScopes,
+              );
+            }
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  federateSubgraphData() {
+    this.federateInternalSubgraphData();
+    this.handleEntityInterfaces();
+    // generate the map of tag data that is used by contracts
+    this.generateTagData();
+    this.#addDirectiveDefinitionsAndDepsToRouterAndClientSchemas();
+    // The named type auth data can only be pushed to the field once it has all been consolidated
+    this.pushNamedTypeAuthDataToFields();
+  }
+
+  validateInterfaceImplementationsAndPushToDocumentDefinitions(
+    interfaceImplementations: InterfaceImplementationData[],
+  ) {
+    for (const { data, clientSchemaFieldNodes } of interfaceImplementations) {
+      data.node.interfaces = this.getValidImplementedInterfaces(data);
+      const nodeResult = routerSchemaNodeFromData<CompositeOutputData>({
+        data,
+        description: this.getFederatedGraphNodeDescription(data),
+        federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+        parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+      });
+      if (nodeResult.success) {
+        this.routerDefinitions.push(nodeResult.node);
+      } else {
+        this.errors.push(...nodeResult.errors);
+      }
+      if (isNodeDataInaccessible(data)) {
+        this.validateReferencesOfInaccessibleType(data);
+        this.internalGraph.setNodeInaccessible(data.name);
+        continue;
+      }
+      const clientInterfaces: NamedTypeNode[] = [];
+      for (const interfaceTypeName of data.implementedInterfaceTypeNames) {
+        if (!this.inaccessibleCoords.has(interfaceTypeName)) {
+          clientInterfaces.push(stringToNamedTypeNode(interfaceTypeName));
+        }
+      }
+
+      /* It is not possible for clientSchemaFieldNodes to be empty.
+       * If all interface fields were declared @inaccessible, the error would be caught above.
+       * */
+      this.clientDefinitions.push({
+        ...data.node,
+        directives: getClientFederatedDirectiveNodes(data),
+        fields: clientSchemaFieldNodes,
+        interfaces: clientInterfaces,
+      });
+    }
+  }
+
+  #addDirectiveDefinitionsAndDepsToRouterAndClientSchemas() {
+    const clientDependencies = new Set<DefinitionNode>();
+    const routerDependencies = new Set<DefinitionNode>();
+    for (const directiveName of this.referencedFederatedDirectiveNames) {
+      const definition = DIRECTIVE_DEFINITION_BY_NAME.get(directiveName);
+      if (!definition) {
+        continue;
+      }
+      const dependencies = DEPENDENCIES_BY_DIRECTIVE_NAME.get(directiveName) ?? [];
+      this.directiveDefinitionByName.set(directiveName, definition);
+      if (CLIENT_FEDERATED_DIRECTIVE_NAMES.has(directiveName)) {
+        this.clientDefinitions.push(definition);
+        addIterableToSet({
+          source: dependencies,
+          target: clientDependencies,
+        });
+      }
+      this.routerDefinitions.push(definition);
+      addIterableToSet({
+        source: dependencies,
+        target: routerDependencies,
+      });
+    }
+    this.clientDefinitions.push(...clientDependencies);
+    this.routerDefinitions.push(...routerDependencies);
+  }
+
+  validatePathSegmentInaccessibility(path: string): boolean {
+    if (!path) {
+      return false;
+    }
+    const coordinates = path.split(LEFT_PARENTHESIS)[0];
+    const segments = coordinates.split(LITERAL_PERIOD);
+    let segment = segments[0];
+    for (let i = 0; i < segments.length; i++) {
+      if (this.inaccessibleCoords.has(segment)) {
+        return true;
+      }
+      segment += `.${segments[i + 1]}`;
+    }
+    return false;
+  }
+
+  validateReferencesOfInaccessibleType(data: ParentDefinitionData) {
+    const allCoords = this.coordsByNamedTypeName.get(data.name);
+    if (!allCoords || allCoords.size < 1) {
+      return;
+    }
+    const invalidCoords: Array<string> = [];
+    for (const coords of allCoords) {
+      if (this.inaccessibleCoords.has(coords)) {
+        continue;
+      }
+      if (!this.validatePathSegmentInaccessibility(coords)) {
+        invalidCoords.push(coords);
+      }
+    }
+    if (invalidCoords.length > 0) {
+      this.errors.push(invalidReferencesOfInaccessibleTypeError(kindToNodeType(data.kind), data.name, invalidCoords));
+    }
+  }
+
+  validateQueryRootType() {
+    const query = this.parentDefinitionDataByTypeName.get(QUERY);
+    if (!query || query.kind !== Kind.OBJECT_TYPE_DEFINITION || query.fieldDataByName.size < 1) {
+      this.errors.push(noQueryRootTypeError());
+      return;
+    }
+    for (const fieldData of query.fieldDataByName.values()) {
+      if (!isNodeDataInaccessible(fieldData)) {
+        return;
+      }
+    }
+    this.errors.push(noQueryRootTypeError());
+  }
+
+  validateSubscriptionFieldConditionFieldPath(
+    conditionFieldPath: string,
+    objectData: ObjectDefinitionData,
+    inputFieldPath: string,
+    directiveSubgraphName: string,
+    fieldErrorMessages: Array<string>,
+  ): string[] {
+    const paths = conditionFieldPath.split(LITERAL_PERIOD);
+    if (paths.length < 1) {
+      fieldErrorMessages.push(
+        invalidSubscriptionFieldConditionFieldPathErrorMessage(inputFieldPath, conditionFieldPath),
+      );
+      return [];
+    }
+    let lastData: ParentDefinitionData = objectData;
+    let partialConditionFieldPath = '';
+    for (let i = 0; i < paths.length; i++) {
+      const fieldName = paths[i];
+      partialConditionFieldPath += partialConditionFieldPath.length > 0 ? `.${fieldName}` : fieldName;
+      if (lastData.kind !== Kind.OBJECT_TYPE_DEFINITION) {
+        fieldErrorMessages.push(
+          invalidSubscriptionFieldConditionFieldPathParentErrorMessage(
+            inputFieldPath,
+            conditionFieldPath,
+            partialConditionFieldPath,
+          ),
+        );
+        return [];
+      }
+      const fieldData: FieldData | undefined = lastData.fieldDataByName.get(fieldName);
+      if (!fieldData) {
+        fieldErrorMessages.push(
+          undefinedSubscriptionFieldConditionFieldPathFieldErrorMessage(
+            inputFieldPath,
+            conditionFieldPath,
+            partialConditionFieldPath,
+            fieldName,
+            lastData.renamedTypeName,
+          ),
+        );
+        return [];
+      }
+      const fieldPath = `${lastData.renamedTypeName}.${fieldName}`;
+      if (!fieldData.subgraphNames.has(directiveSubgraphName)) {
+        fieldErrorMessages.push(
+          invalidSubscriptionFieldConditionFieldPathFieldErrorMessage(
+            inputFieldPath,
+            conditionFieldPath,
+            partialConditionFieldPath,
+            fieldPath,
+            directiveSubgraphName,
+          ),
+        );
+        return [];
+      }
+      if (BASE_SCALARS.has(fieldData.namedTypeName)) {
+        lastData = { kind: Kind.SCALAR_TYPE_DEFINITION, name: fieldData.namedTypeName } as ScalarDefinitionData;
+        continue;
+      }
+      lastData = getOrThrowError(this.parentDefinitionDataByTypeName, fieldData.namedTypeName, PARENT_DEFINITION_DATA);
+    }
+    if (!isLeafKind(lastData.kind)) {
+      fieldErrorMessages.push(
+        nonLeafSubscriptionFieldConditionFieldPathFinalFieldErrorMessage(
+          inputFieldPath,
+          conditionFieldPath,
+          paths[paths.length - 1],
+          kindToNodeType(lastData.kind),
+          lastData.name,
+        ),
+      );
+      return [];
+    }
+    return paths;
+  }
+
+  validateSubscriptionFieldCondition(
+    objectValueNode: ConstObjectValueNode,
+    condition: SubscriptionFieldCondition,
+    objectData: ObjectDefinitionData,
+    depth: number,
+    inputPath: string,
+    directiveSubgraphName: string,
+  ): ExecutionMultiResult {
+    if (depth > MAX_SUBSCRIPTION_FILTER_DEPTH || this.isMaxDepth) {
+      this.isMaxDepth = true;
+      return { success: false, errors: [subscriptionFilterConditionDepthExceededError(inputPath)] };
+    }
+    let hasErrors = false;
+    const validFieldNames = new Set<string>([FIELD_PATH, VALUES]);
+    const duplicatedFieldNames = new Set<string>();
+    const invalidFieldNames = new Set<string>();
+    const fieldErrorMessages: string[] = [];
+    for (const objectFieldNode of objectValueNode.fields) {
+      const inputFieldName = objectFieldNode.name.value;
+      const inputFieldPath = inputPath + `.${inputFieldName}`;
+      switch (inputFieldName) {
+        case FIELD_PATH: {
+          if (validFieldNames.has(FIELD_PATH)) {
+            validFieldNames.delete(FIELD_PATH);
+          } else {
+            hasErrors = true;
+            duplicatedFieldNames.add(FIELD_PATH);
+            break;
+          }
+          if (objectFieldNode.value.kind !== Kind.STRING) {
+            fieldErrorMessages.push(
+              invalidInputFieldTypeErrorMessage(inputFieldPath, STRING, kindToNodeType(objectFieldNode.value.kind)),
+            );
+            hasErrors = true;
+            break;
+          }
+          const fieldPath = this.validateSubscriptionFieldConditionFieldPath(
+            objectFieldNode.value.value,
+            objectData,
+            inputFieldPath,
+            directiveSubgraphName,
+            fieldErrorMessages,
+          );
+          if (fieldPath.length < 1) {
+            hasErrors = true;
+            break;
+          }
+          condition.fieldPath = fieldPath;
+          break;
+        }
+        case VALUES: {
+          if (validFieldNames.has(VALUES)) {
+            validFieldNames.delete(VALUES);
+          } else {
+            hasErrors = true;
+            duplicatedFieldNames.add(VALUES);
+            break;
+          }
+          const objectFieldValueKind = objectFieldNode.value.kind;
+          if (objectFieldValueKind == Kind.NULL || objectFieldValueKind == Kind.OBJECT) {
+            fieldErrorMessages.push(
+              invalidInputFieldTypeErrorMessage(inputFieldPath, LIST, kindToNodeType(objectFieldNode.value.kind)),
+            );
+            hasErrors = true;
+            break;
+          }
+          // Coerce scalars into a list
+          if (objectFieldValueKind !== Kind.LIST) {
+            condition.values = [getSubscriptionFilterValue(objectFieldNode.value)];
+            break;
+          }
+          // Prevent duplicate values
+          const values = new Set<SubscriptionFilterValue>();
+          const invalidIndices: number[] = [];
+          for (let i = 0; i < objectFieldNode.value.values.length; i++) {
+            const valueNode = objectFieldNode.value.values[i];
+            if (valueNode.kind === Kind.OBJECT || valueNode.kind === Kind.LIST) {
+              hasErrors = true;
+              invalidIndices.push(i);
+              continue;
+            }
+            values.add(getSubscriptionFilterValue(valueNode));
+          }
+          if (invalidIndices.length > 0) {
+            fieldErrorMessages.push(
+              subscriptionFieldConditionInvalidValuesArrayErrorMessage(inputFieldPath, invalidIndices),
+            );
+            continue;
+          }
+          if (values.size < 1) {
+            hasErrors = true;
+            fieldErrorMessages.push(subscriptionFieldConditionEmptyValuesArrayErrorMessage(inputFieldPath));
+            continue;
+          }
+          condition.values = [...values];
+          break;
+        }
+        default: {
+          hasErrors = true;
+          invalidFieldNames.add(inputFieldName);
+        }
+      }
+    }
+    if (!hasErrors) {
+      return { success: true };
+    }
+    return {
+      success: false,
+      errors: [
+        subscriptionFieldConditionInvalidInputFieldError(
+          inputPath,
+          [...validFieldNames],
+          [...duplicatedFieldNames],
+          [...invalidFieldNames],
+          fieldErrorMessages,
+        ),
+      ],
+    };
+  }
+
+  validateSubscriptionFilterCondition(
+    objectValueNode: ConstObjectValueNode,
+    configuration: SubscriptionCondition,
+    objectData: ObjectDefinitionData,
+    depth: number,
+    inputPath: string,
+    directiveSubgraphName: string,
+  ): ExecutionMultiResult {
+    if (depth > MAX_SUBSCRIPTION_FILTER_DEPTH || this.isMaxDepth) {
+      this.isMaxDepth = true;
+      return { success: false, errors: [subscriptionFilterConditionDepthExceededError(inputPath)] };
+    }
+    depth += 1;
+    if (objectValueNode.fields.length !== 1) {
+      return {
+        success: false,
+        errors: [subscriptionFilterConditionInvalidInputFieldNumberError(inputPath, objectValueNode.fields.length)],
+      };
+    }
+    const objectFieldNode = objectValueNode.fields[0];
+    const fieldName = objectFieldNode.name.value;
+    if (!SUBSCRIPTION_FILTER_INPUT_NAMES.has(fieldName)) {
+      return {
+        success: false,
+        errors: [subscriptionFilterConditionInvalidInputFieldError(inputPath, fieldName)],
+      };
+    }
+    const inputFieldPath = inputPath + `.${fieldName}`;
+    switch (objectFieldNode.value.kind) {
+      case Kind.OBJECT: {
+        switch (fieldName) {
+          case IN_UPPER: {
+            configuration.in = { fieldPath: [], values: [] };
+            return this.validateSubscriptionFieldCondition(
+              objectFieldNode.value,
+              configuration.in,
+              objectData,
+              depth,
+              inputPath + `.IN`,
+              directiveSubgraphName,
+            );
+          }
+          case NOT_UPPER: {
+            configuration.not = {};
+            return this.validateSubscriptionFilterCondition(
+              objectFieldNode.value,
+              configuration.not,
+              objectData,
+              depth,
+              inputPath + `.NOT`,
+              directiveSubgraphName,
+            );
+          }
+          default:
+            // The field is guaranteed to be an AND or an OR
+            return {
+              success: false,
+              errors: [subscriptionFilterConditionInvalidInputFieldTypeError(inputFieldPath, LIST, OBJECT)],
+            };
+        }
+      }
+      case Kind.LIST: {
+        const listConfigurations: SubscriptionCondition[] = [];
+        switch (fieldName) {
+          case AND_UPPER: {
+            configuration.and = listConfigurations;
+            break;
+          }
+          case OR_UPPER: {
+            configuration.or = listConfigurations;
+            break;
+          }
+          default:
+            // The field is guaranteed to be an IN or a NOT
+            return {
+              success: false,
+              errors: [subscriptionFilterConditionInvalidInputFieldTypeError(inputFieldPath, OBJECT, LIST)],
+            };
+        }
+        const listLength = objectFieldNode.value.values.length;
+        if (listLength < 1 || listLength > 5) {
+          return {
+            success: false,
+            errors: [subscriptionFilterArrayConditionInvalidLengthError(inputFieldPath, listLength)],
+          };
+        }
+        let isValid = true;
+        const aggregatedErrors: Array<Error> = [];
+        const invalidIndices: number[] = [];
+        for (let i = 0; i < objectFieldNode.value.values.length; i++) {
+          const arrayIndexPath = inputFieldPath + `[${i}]`;
+          const listValueNode = objectFieldNode.value.values[i];
+          if (listValueNode.kind !== Kind.OBJECT) {
+            invalidIndices.push(i);
+            continue;
+          }
+          /* Preserve original short-circuit behaviour (`isValid &&= ...`): once any earlier
+           * item failed, do not recurse into subsequent items so error output stays focused
+           * on the first failing branch.
+           */
+          if (!isValid) {
+            continue;
+          }
+          const listConfiguration: SubscriptionCondition = {};
+          const itemResult = this.validateSubscriptionFilterCondition(
+            listValueNode,
+            listConfiguration,
+            objectData,
+            depth,
+            arrayIndexPath,
+            directiveSubgraphName,
+          );
+          if (!itemResult.success) {
+            isValid = false;
+            aggregatedErrors.push(...itemResult.errors);
+            continue;
+          }
+          listConfigurations.push(listConfiguration);
+        }
+        if (invalidIndices.length > 0) {
+          aggregatedErrors.push(
+            subscriptionFilterArrayConditionInvalidItemTypeErrorMessage(inputFieldPath, invalidIndices),
+          );
+          return { success: false, errors: aggregatedErrors };
+        }
+        return isValid ? { success: true } : { success: false, errors: aggregatedErrors };
+      }
+      default: {
+        const expectedTypeString = SUBSCRIPTION_FILTER_LIST_INPUT_NAMES.has(fieldName) ? LIST : OBJECT;
+        return {
+          success: false,
+          errors: [
+            subscriptionFilterConditionInvalidInputFieldTypeError(
+              inputFieldPath,
+              expectedTypeString,
+              kindToNodeType(objectFieldNode.value.kind),
+            ),
+          ],
+        };
+      }
+    }
+  }
+
+  validateSubscriptionFilterForTarget(
+    directiveNode: ConstDirectiveNode,
+    target: ObjectDefinitionData,
+    directiveSubgraphName: string,
+  ): SubscriptionFilterTargetResult {
+    // directive validation occurs elsewhere; an empty errors array signals "skip silently".
+    if (!directiveNode.arguments || directiveNode.arguments.length !== 1) {
+      return { success: false, errors: [] };
+    }
+    const argumentNode = directiveNode.arguments[0];
+    if (argumentNode.value.kind !== Kind.OBJECT) {
+      return {
+        success: false,
+        errors: [
+          subscriptionFilterConditionInvalidInputFieldTypeError(
+            CONDITION,
+            OBJECT,
+            kindToNodeType(argumentNode.value.kind),
+          ),
+        ],
+      };
+    }
+    const condition = {} as SubscriptionCondition;
+    // Reset depth state so each target validation starts fresh.
+    this.isMaxDepth = false;
+    const result = this.validateSubscriptionFilterCondition(
+      argumentNode.value,
+      condition,
+      target,
+      0,
+      CONDITION,
+      directiveSubgraphName,
+    );
+    if (!result.success) {
+      return result;
+    }
+    return { success: true, condition };
+  }
+
+  validateSubscriptionFilterAndGenerateConfiguration({
+    directiveNode,
+    objectData,
+    fieldPath,
+    fieldName,
+    parentTypeName,
+    directiveSubgraphName,
+  }: ValidateSubscriptionFilterAndGenerateConfigurationParams): void {
+    const result = this.validateSubscriptionFilterForTarget(directiveNode, objectData, directiveSubgraphName);
+    if (!result.success) {
+      if (result.errors.length > 0) {
+        this.errors.push(invalidSubscriptionFilterDirectiveError(fieldPath, result.errors));
+      }
+      return;
+    }
+    getValueOrDefault(this.fieldConfigurationByFieldCoords, fieldPath, () => ({
+      argumentNames: [],
+      fieldName,
+      typeName: parentTypeName,
+    })).subscriptionFilterCondition = result.condition;
+  }
+
+  collectSubscriptionFilterConcreteTargets(abstractTypeName: string): Array<ObjectDefinitionData> {
+    const concreteNames = this.concreteTypeNamesByAbstractTypeName.get(abstractTypeName);
+    if (!concreteNames) {
+      return [];
+    }
+    const out: Array<ObjectDefinitionData> = [];
+    for (const concreteName of concreteNames) {
+      const data = this.parentDefinitionDataByTypeName.get(concreteName);
+      if (data && data.kind === Kind.OBJECT_TYPE_DEFINITION && !isNodeDataInaccessible(data)) {
+        out.push(data);
+      }
+    }
+    return out;
+  }
+
+  validateSubscriptionFiltersAndGenerateConfiguration() {
+    for (const [fieldPath, data] of this.subscriptionFilterDataByFieldPath) {
+      if (this.inaccessibleCoords.has(fieldPath)) {
+        continue;
+      }
+
+      const namedTypeData = this.parentDefinitionDataByTypeName.get(data.fieldData.namedTypeName);
+
+      /* An undefined namedTypeData should be impossible.
+       * If the type were unknown, it would have resulted in an earlier normalization error.
+       */
+      if (!namedTypeData) {
+        this.errors.push(
+          invalidSubscriptionFilterDirectiveError(fieldPath, [
+            subscriptionFilterNamedTypeError(data.fieldData.namedTypeName),
+          ]),
+        );
+        continue;
+      }
+
+      if (isNodeDataInaccessible(namedTypeData)) {
+        // @inaccessible error are caught elsewhere
+        continue;
+      }
+
+      if (namedTypeData.kind === Kind.OBJECT_TYPE_DEFINITION) {
+        this.validateSubscriptionFilterAndGenerateConfiguration({
+          directiveNode: data.directive,
+          objectData: namedTypeData,
+          fieldPath,
+          fieldName: data.fieldData.name,
+          parentTypeName: data.fieldData.renamedParentTypeName,
+          directiveSubgraphName: data.directiveSubgraphName,
+        });
+        continue;
+      }
+
+      if (!isKindAbstract(namedTypeData.kind)) {
+        /* Other kinds (Enum/Input/Scalar) should be caught at normalization time.
+         * Emit an explicit composition error so the directive cannot be silently dropped here again.
+         */
+        this.errors.push(
+          invalidSubscriptionFilterDirectiveError(fieldPath, [
+            subscriptionFilterUnsupportedNamedTypeKindError(namedTypeData.name, namedTypeData.kind),
+          ]),
+        );
+        continue;
+      }
+
+      const targets = this.collectSubscriptionFilterConcreteTargets(namedTypeData.name);
+      if (targets.length === 0) {
+        const kindLabel = kindToNodeType(namedTypeData.kind);
+        this.errors.push(
+          invalidSubscriptionFilterDirectiveError(fieldPath, [
+            subscriptionFilterNoAccessibleConcreteTypesError(namedTypeData.name, kindLabel),
+          ]),
+        );
+        continue;
+      }
+
+      const result = this.mergeSubscriptionFilterTargetResults({
+        directiveNode: data.directive,
+        abstractTypeData: namedTypeData,
+        targets,
+        directiveSubgraphName: data.directiveSubgraphName,
+      });
+      if (!result.success) {
+        this.errors.push(invalidSubscriptionFilterDirectiveError(fieldPath, result.errors));
+        continue;
+      }
+
+      getValueOrDefault(this.fieldConfigurationByFieldCoords, fieldPath, () => ({
+        argumentNames: [],
+        fieldName: data.fieldData.name,
+        typeName: data.fieldData.renamedParentTypeName,
+      })).subscriptionFilterCondition = result.condition;
+    }
+  }
+
+  mergeSubscriptionFilterTargetResults({
+    abstractTypeData,
+    directiveNode,
+    directiveSubgraphName,
+    targets,
+  }: MergeSubscriptionFilterTargetResultParams): SubscriptionFilterTargetResult {
+    const aggregatedErrors: Array<Error> = [];
+    let firstCondition: SubscriptionCondition | null = null;
+    for (const target of targets) {
+      const result = this.validateSubscriptionFilterForTarget(directiveNode, target, directiveSubgraphName);
+      if (result.success) {
+        firstCondition ??= result.condition;
+        continue;
+      }
+      if (result.errors.length === 0) {
+        // The directive is malformed — that error is reported elsewhere; skip silently.
+        continue;
+      }
+      const wrapped =
+        abstractTypeData.kind === Kind.UNION_TYPE_DEFINITION
+          ? subscriptionFilterUnionMemberInvalidError(
+              abstractTypeData.name,
+              target.name,
+              result.errors.map((error) => error.message).join(LITERAL_NEW_LINE),
+            )
+          : subscriptionFilterInterfaceImplementationInvalidError(
+              abstractTypeData.name,
+              target.name,
+              result.errors.map((error) => error.message).join(LITERAL_NEW_LINE),
+            );
+      aggregatedErrors.push(wrapped);
+    }
+    if (firstCondition === null || aggregatedErrors.length > 0) {
+      return { errors: aggregatedErrors, success: false };
+    }
+    return { condition: firstCondition, success: true };
+  }
+
+  buildFederationResult(): FederationResult {
+    if (this.subscriptionFilterDataByFieldPath.size > 0) {
+      this.validateSubscriptionFiltersAndGenerateConfiguration();
+    }
+    if (this.invalidORScopesCoords.size > 0) {
+      this.errors.push(orScopesLimitError(MAX_OR_SCOPES, [...this.invalidORScopesCoords]));
+    }
+    this.handleCustomDirectiveDefinitionNodes();
+    const definitionsWithInterfaces: Array<InterfaceImplementationData> = [];
+    this.pushParentDefinitionDataToDocumentDefinitions(definitionsWithInterfaces);
+    this.validateInterfaceImplementationsAndPushToDocumentDefinitions(definitionsWithInterfaces);
+    this.validateQueryRootType();
+    /*
+     * If an input value (field or argument) is declared @inaccessible but its parent is not, it is an error.
+     * However, this state can only be known after all subgraphs have been federated.
+     */
+    for (const err of this.inaccessibleRequiredInputValueErrorByCoords.values()) {
+      this.errors.push(err);
+    }
+    // Return any composition errors before checking whether all fields are resolvable
+    if (this.errors.length > 0) {
+      return { errors: this.errors, success: false, warnings: this.warnings };
+    }
+    /* Resolvability evaluations are not necessary for contracts because the source graph resolvability evaluations
+     * must have already completed without error.
+     * Resolvability evaluations are also unnecessary for a single subgraph.
+     *
+     * These checks can be disabled by setting `disableResolvabilityValidation` to true.
+     * This should only be done for troubleshooting purposes.
+     * */
+    if (!this.options.disableResolvabilityValidation && this.internalSubgraphBySubgraphName.size > 1) {
+      const validationResult = this.internalGraph.validate();
+      if (!validationResult.success) {
+        return { errors: validationResult.errors, success: false, warnings: this.warnings };
+      }
+    }
+    const newRouterAST: DocumentNode = {
+      kind: Kind.DOCUMENT,
+      definitions: this.routerDefinitions,
+    };
+    const newClientSchema: GraphQLSchema = buildASTSchema(
+      {
+        kind: Kind.DOCUMENT,
+        definitions: this.clientDefinitions,
+      },
+      { assumeValid: true, assumeValidSDL: true },
+    );
+    const subgraphConfigBySubgraphName = new Map<SubgraphName, SubgraphConfig>();
+    for (const {
+      configurationDataByTypeName,
+      costs,
+      directiveDefinitionByName,
+      isVersionTwo,
+      name,
+      parentDefinitionDataByTypeName,
+      schema,
+      schemaNode,
+    } of this.internalSubgraphBySubgraphName.values()) {
+      subgraphConfigBySubgraphName.set(name, {
+        configurationDataByTypeName,
+        costs,
+        directiveDefinitionByName,
+        isVersionTwo,
+        parentDefinitionDataByTypeName,
+        schema,
+        schemaNode,
+      });
+    }
+    for (const authorizationData of this.authorizationDataByParentTypeName.values()) {
+      upsertAuthorizationConfiguration(this.fieldConfigurationByFieldCoords, authorizationData);
+    }
+    return {
+      directiveDefinitionByName: this.directiveDefinitionByName,
+      fieldConfigurations: Array.from(this.fieldConfigurationByFieldCoords.values()),
+      federatedGraphAST: newRouterAST,
+      federatedGraphSchema: buildASTSchema(newRouterAST, { assumeValid: true, assumeValidSDL: true }),
+      federatedGraphClientSchema: newClientSchema,
+      parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+      subgraphConfigBySubgraphName,
+      success: true,
+      warnings: this.warnings,
+      ...this.getClientSchemaObjectBoolean(),
+    };
+  }
+
+  getClientSchemaObjectBoolean() {
+    // If the schema does not implement @tag nor @inaccessible, an empty object will be spread
+    if (this.inaccessibleCoords.size < 1 && this.tagNamesByCoords.size < 1) {
+      return {};
+    }
+    // otherwise, the object is spread in as true
+    return { shouldIncludeClientSchema: true };
+  }
+
+  handleChildTagExclusions(
+    parentDefinitionData: ParentDefinitionData,
+    children: Map<string, ChildData>,
+    childTagDataByChildName: Map<string, ChildTagData>,
+    tagNames: Set<string>,
+  ) {
+    let accessibleChildren = children.size;
+    for (const [childName, childTagData] of childTagDataByChildName) {
+      const childData = getOrThrowError(children, childName, `${parentDefinitionData.name}.childDataByChildName`);
+      if (isNodeDataInaccessible(childData)) {
+        accessibleChildren -= 1;
+        continue;
+      }
+      if (!tagNames.isDisjointFrom(childTagData.tagNames)) {
+        getValueOrDefault(childData.federatedDirectivesData.directivesByName, INACCESSIBLE, () => [
+          generateSimpleDirective(INACCESSIBLE),
+        ]);
+        this.inaccessibleCoords.add(`${parentDefinitionData.name}.${childName}`);
+        accessibleChildren -= 1;
+      }
+    }
+    if (accessibleChildren < 1) {
+      parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+        generateSimpleDirective(INACCESSIBLE),
+      ]);
+      this.inaccessibleCoords.add(parentDefinitionData.name);
+    }
+  }
+
+  handleChildTagInclusions(
+    parentDefinitionData: ParentDefinitionData,
+    children: Map<string, ChildData>,
+    childTagDataByChildName: Map<string, ChildTagData>,
+    tagNames: Set<string>,
+  ) {
+    let accessibleChildren = children.size;
+    for (const [childName, childData] of children) {
+      if (isNodeDataInaccessible(childData)) {
+        accessibleChildren -= 1;
+        continue;
+      }
+      const childTagData = childTagDataByChildName.get(childName);
+      if (!childTagData || tagNames.isDisjointFrom(childTagData.tagNames)) {
+        getValueOrDefault(childData.federatedDirectivesData.directivesByName, INACCESSIBLE, () => [
+          generateSimpleDirective(INACCESSIBLE),
+        ]);
+        this.inaccessibleCoords.add(`${parentDefinitionData.name}.${childName}`);
+        accessibleChildren -= 1;
+      }
+    }
+    if (accessibleChildren < 1) {
+      parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+        generateSimpleDirective(INACCESSIBLE),
+      ]);
+      this.inaccessibleCoords.add(parentDefinitionData.name);
+    }
+  }
+
+  handleCustomDirectiveDefinitionNodes() {
+    for (const data of this.federatedDirectiveDataByName.values()) {
+      if (!data.isComposed && data.executableLocations.size < 1) {
+        continue;
+      }
+      const directiveNodeResult = propagateDirectiveDefinitionNodeFromData({
+        data,
+        federatedDirectiveDataByName: this.federatedDirectiveDataByName,
+        parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+      });
+      if (!directiveNodeResult.success) {
+        this.errors.push(...directiveNodeResult.errors);
+        continue;
+      }
+
+      this.routerDefinitions.push(data.node);
+
+      if (!data.isComposed && data.executableLocations.size > 0) {
+        this.clientDefinitions.push(data.node);
+      }
+    }
+  }
+
+  buildFederationContractResult(contractTagOptions: ContractTagOptions): FederationResult {
+    if (!this.referencedFederatedDirectiveNames.has(INACCESSIBLE)) {
+      // Even if all the subgraphs are version one, the @inaccessible directive needs to be defined.
+      this.routerDefinitions.push(INACCESSIBLE_DEFINITION);
+    }
+    const tagIntersection = contractTagOptions.tagNamesToExclude.intersection(contractTagOptions.tagNamesToInclude);
+    if (tagIntersection.size > 0) {
+      return {
+        errors: [intersectingExcludeAndIncludeContractTagsError([...tagIntersection])],
+        success: false,
+        warnings: this.warnings,
+      };
+    }
+    if (contractTagOptions.tagNamesToInclude.size > 0) {
+      for (const [parentTypeName, parentDefinitionData] of this.parentDefinitionDataByTypeName) {
+        if (isNodeDataInaccessible(parentDefinitionData)) {
+          continue;
+        }
+
+        const parentTagData = this.parentTagDataByTypeName.get(parentTypeName);
+        if (!parentTagData) {
+          parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+            generateSimpleDirective(INACCESSIBLE),
+          ]);
+          this.inaccessibleCoords.add(parentTypeName);
+          // If the parent is inaccessible, there is no need to assess further
+          continue;
+        }
+        if (!contractTagOptions.tagNamesToInclude.isDisjointFrom(parentTagData.tagNames)) {
+          continue;
+        }
+        if (parentTagData.childTagDataByChildName.size < 1) {
+          parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+            generateSimpleDirective(INACCESSIBLE),
+          ]);
+          this.inaccessibleCoords.add(parentTypeName);
+          // If the parent is inaccessible, there is no need to assess further
+          continue;
+        }
+        switch (parentDefinitionData.kind) {
+          case Kind.SCALAR_TYPE_DEFINITION:
+          // intentional fallthrough
+          case Kind.UNION_TYPE_DEFINITION:
+            continue;
+          case Kind.ENUM_TYPE_DEFINITION:
+            this.handleChildTagInclusions(
+              parentDefinitionData,
+              parentDefinitionData.enumValueDataByName,
+              parentTagData.childTagDataByChildName,
+              contractTagOptions.tagNamesToInclude,
+            );
+            break;
+          case Kind.INPUT_OBJECT_TYPE_DEFINITION:
+            this.handleChildTagInclusions(
+              parentDefinitionData,
+              parentDefinitionData.inputValueDataByName,
+              parentTagData.childTagDataByChildName,
+              contractTagOptions.tagNamesToInclude,
+            );
+            break;
+          default:
+            let accessibleFields = parentDefinitionData.fieldDataByName.size;
+            for (const [fieldName, fieldData] of parentDefinitionData.fieldDataByName) {
+              if (isNodeDataInaccessible(fieldData)) {
+                accessibleFields -= 1;
+                continue;
+              }
+              const childTagData = parentTagData.childTagDataByChildName.get(fieldName);
+              if (!childTagData || contractTagOptions.tagNamesToInclude.isDisjointFrom(childTagData.tagNames)) {
+                getValueOrDefault(fieldData.federatedDirectivesData.directivesByName, INACCESSIBLE, () => [
+                  generateSimpleDirective(INACCESSIBLE),
+                ]);
+                this.inaccessibleCoords.add(fieldData.federatedCoords);
+                accessibleFields -= 1;
+              }
+            }
+            if (accessibleFields < 1) {
+              parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+                generateSimpleDirective(INACCESSIBLE),
+              ]);
+              this.inaccessibleCoords.add(parentTypeName);
+            }
+        }
+      }
+    }
+    if (contractTagOptions.tagNamesToExclude.size > 0) {
+      for (const [parentTypeName, parentTagData] of this.parentTagDataByTypeName) {
+        const parentDefinitionData = getOrThrowError(
+          this.parentDefinitionDataByTypeName,
+          parentTypeName,
+          PARENT_DEFINITION_DATA,
+        );
+        if (isNodeDataInaccessible(parentDefinitionData)) {
+          continue;
+        }
+        if (!contractTagOptions.tagNamesToExclude.isDisjointFrom(parentTagData.tagNames)) {
+          parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+            generateSimpleDirective(INACCESSIBLE),
+          ]);
+          this.inaccessibleCoords.add(parentTypeName);
+          // If the parent is inaccessible, there is no need to assess further
+          continue;
+        }
+        if (parentTagData.childTagDataByChildName.size < 1) {
+          continue;
+        }
+        switch (parentDefinitionData.kind) {
+          case Kind.SCALAR_TYPE_DEFINITION:
+          // intentional fallthrough
+          case Kind.UNION_TYPE_DEFINITION: {
+            break;
+          }
+          case Kind.ENUM_TYPE_DEFINITION: {
+            this.handleChildTagExclusions(
+              parentDefinitionData,
+              parentDefinitionData.enumValueDataByName,
+              parentTagData.childTagDataByChildName,
+              contractTagOptions.tagNamesToExclude,
+            );
+            break;
+          }
+          case Kind.INPUT_OBJECT_TYPE_DEFINITION: {
+            this.handleChildTagExclusions(
+              parentDefinitionData,
+              parentDefinitionData.inputValueDataByName,
+              parentTagData.childTagDataByChildName,
+              contractTagOptions.tagNamesToExclude,
+            );
+            break;
+          }
+          default: {
+            let accessibleFields = parentDefinitionData.fieldDataByName.size;
+            for (const [fieldName, childTagData] of parentTagData.childTagDataByChildName) {
+              const fieldData = getOrThrowError(
+                parentDefinitionData.fieldDataByName,
+                fieldName,
+                `${parentTypeName}.fieldDataByFieldName`,
+              );
+              if (isNodeDataInaccessible(fieldData)) {
+                accessibleFields -= 1;
+                continue;
+              }
+              if (!contractTagOptions.tagNamesToExclude.isDisjointFrom(childTagData.tagNames)) {
+                getValueOrDefault(fieldData.federatedDirectivesData.directivesByName, INACCESSIBLE, () => [
+                  generateSimpleDirective(INACCESSIBLE),
+                ]);
+                this.inaccessibleCoords.add(fieldData.federatedCoords);
+                accessibleFields -= 1;
+                continue;
+              }
+              for (const [argumentName, argTagNames] of childTagData.tagNamesByArgumentName) {
+                const inputValueData = getOrThrowError(
+                  fieldData.argumentDataByName,
+                  argumentName,
+                  `${fieldName}.argumentDataByArgumentName`,
+                );
+                if (isNodeDataInaccessible(inputValueData)) {
+                  continue;
+                }
+                if (!contractTagOptions.tagNamesToExclude.isDisjointFrom(argTagNames)) {
+                  getValueOrDefault(inputValueData.federatedDirectivesData.directivesByName, INACCESSIBLE, () => [
+                    generateSimpleDirective(INACCESSIBLE),
+                  ]);
+                  this.inaccessibleCoords.add(inputValueData.federatedCoords);
+                }
+              }
+            }
+            if (accessibleFields < 1) {
+              parentDefinitionData.federatedDirectivesData.directivesByName.set(INACCESSIBLE, [
+                generateSimpleDirective(INACCESSIBLE),
+              ]);
+              this.inaccessibleCoords.add(parentTypeName);
+            }
+          }
+        }
+      }
+    }
+    if (this.subscriptionFilterDataByFieldPath.size > 0) {
+      this.validateSubscriptionFiltersAndGenerateConfiguration();
+    }
+    this.handleCustomDirectiveDefinitionNodes();
+    const interfaceImplementations: InterfaceImplementationData[] = [];
+    this.pushParentDefinitionDataToDocumentDefinitions(interfaceImplementations);
+    this.validateInterfaceImplementationsAndPushToDocumentDefinitions(interfaceImplementations);
+    this.validateQueryRootType();
+    if (this.errors.length > 0) {
+      return { errors: this.errors, success: false, warnings: this.warnings };
+    }
+    const newRouterAST: DocumentNode = {
+      kind: Kind.DOCUMENT,
+      definitions: this.routerDefinitions,
+    };
+    const newClientSchema: GraphQLSchema = buildASTSchema(
+      {
+        kind: Kind.DOCUMENT,
+        definitions: this.clientDefinitions,
+      },
+      { assumeValid: true, assumeValidSDL: true },
+    );
+    const subgraphConfigBySubgraphName = new Map<SubgraphName, SubgraphConfig>();
+    for (const {
+      configurationDataByTypeName,
+      costs,
+      directiveDefinitionByName,
+      isVersionTwo,
+      name,
+      parentDefinitionDataByTypeName,
+      schema,
+      schemaNode,
+    } of this.internalSubgraphBySubgraphName.values()) {
+      subgraphConfigBySubgraphName.set(name, {
+        configurationDataByTypeName,
+        costs,
+        directiveDefinitionByName,
+        isVersionTwo,
+        parentDefinitionDataByTypeName,
+        schema,
+        schemaNode,
+      });
+    }
+    for (const authorizationData of this.authorizationDataByParentTypeName.values()) {
+      upsertAuthorizationConfiguration(this.fieldConfigurationByFieldCoords, authorizationData);
+    }
+    return {
+      directiveDefinitionByName: this.directiveDefinitionByName,
+      fieldConfigurations: Array.from(this.fieldConfigurationByFieldCoords.values()),
+      federatedGraphAST: newRouterAST,
+      federatedGraphSchema: buildASTSchema(newRouterAST, { assumeValid: true, assumeValidSDL: true }),
+      federatedGraphClientSchema: newClientSchema,
+      parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,
+      subgraphConfigBySubgraphName,
+      success: true,
+      warnings: this.warnings,
+      ...this.getClientSchemaObjectBoolean(),
+    };
+  }
+
+  federateSubgraphsInternal(): FederationResult {
+    this.federateSubgraphData();
+    return this.buildFederationResult();
+  }
+}
+
+type FederationFactoryResultSuccess = {
+  federationFactory: FederationFactory;
+  success: true;
+  warnings: Array<Warning>;
+};
+
+type FederationFactoryResultFailure = {
+  errors: Array<Error>;
+  success: false;
+  warnings: Array<Warning>;
+};
+
+type FederationFactoryResult = FederationFactoryResultFailure | FederationFactoryResultSuccess;
+
+function initializeFederationFactory({ options, subgraphs }: FederationParams): FederationFactoryResult {
+  if (subgraphs.length < 1) {
+    return { errors: [minimumSubgraphRequirementError], success: false, warnings: [] };
+  }
+  const result = new BatchNormalizer({ subgraphs, options }).batchNormalize();
+  if (!result.success) {
+    return { errors: result.errors, success: false, warnings: result.warnings };
+  }
+  const entityInterfaceFederationDataByTypeName = new Map<TypeName, EntityInterfaceFederationData>();
+  const invalidEntityInterfacesByTypeName = new Map<TypeName, Array<InvalidEntityInterface>>();
+  for (const [subgraphName, internalSubgraph] of result.internalSubgraphByName) {
+    for (const [typeName, entityInterfaceData] of internalSubgraph.entityInterfaceSubgraphDataByTypeName) {
+      const existingData = entityInterfaceFederationDataByTypeName.get(typeName);
+      if (!existingData) {
+        entityInterfaceFederationDataByTypeName.set(
+          typeName,
+          newEntityInterfaceFederationData(entityInterfaceData, subgraphName),
+        );
+        continue;
+      }
+      upsertEntityInterfaceFederationData(existingData, entityInterfaceData, subgraphName);
+    }
+  }
+  const entityInterfaceErrors = new Array<Error>();
+  const definedConcreteTypeNamesBySubgraphName = new Map<SubgraphName, Set<TypeName>>();
+  for (const [typeName, entityInterfaceData] of entityInterfaceFederationDataByTypeName) {
+    const implementations = entityInterfaceData.concreteTypeNames.size;
+    for (const [subgraphName, subgraphData] of entityInterfaceData.subgraphDataByTypeName) {
+      const definedConcreteTypeNames = getValueOrDefault(
+        definedConcreteTypeNamesBySubgraphName,
+        subgraphName,
+        () => new Set<TypeName>(),
+      );
+      addIterableToSet({
+        source: subgraphData.concreteTypeNames,
+        target: definedConcreteTypeNames,
+      });
+      if (!subgraphData.isInterfaceObject) {
+        if (subgraphData.resolvable && subgraphData.concreteTypeNames.size !== implementations) {
+          getValueOrDefault(
+            invalidEntityInterfacesByTypeName,
+            typeName,
+            () => new Array<InvalidEntityInterface>(),
+          ).push({
+            subgraphName,
+            definedConcreteTypeNames: new Set<TypeName>(subgraphData.concreteTypeNames),
+            requiredConcreteTypeNames: new Set<TypeName>(entityInterfaceData.concreteTypeNames),
+          });
+        }
+        continue;
+      }
+      addIterableToSet({
+        source: entityInterfaceData.concreteTypeNames,
+        target: definedConcreteTypeNames,
+      });
+      const { parentDefinitionDataByTypeName } = getOrThrowError(
+        result.internalSubgraphByName,
+        subgraphName,
+        'internalSubgraphBySubgraphName',
+      );
+      const invalidTypeNames: Array<string> = [];
+      for (const concreteTypeName of entityInterfaceData.concreteTypeNames) {
+        if (parentDefinitionDataByTypeName.has(concreteTypeName)) {
+          invalidTypeNames.push(concreteTypeName);
+        }
+      }
+      if (invalidTypeNames.length > 0) {
+        entityInterfaceErrors.push(
+          invalidInterfaceObjectImplementationDefinitionsError(typeName, subgraphName, invalidTypeNames),
+        );
+      }
+    }
+  }
+  for (const [typeName, invalidInterfaces] of invalidEntityInterfacesByTypeName) {
+    const checkedInvalidInterfaces = new Array<InvalidEntityInterface>();
+    for (const invalidInterface of invalidInterfaces) {
+      const validTypeNames = definedConcreteTypeNamesBySubgraphName.get(invalidInterface.subgraphName);
+      if (!validTypeNames) {
+        checkedInvalidInterfaces.push(invalidInterface);
+        continue;
+      }
+      const definedTypeNames = invalidInterface.requiredConcreteTypeNames.intersection(validTypeNames);
+      if (invalidInterface.requiredConcreteTypeNames.size !== definedTypeNames.size) {
+        invalidInterface.definedConcreteTypeNames = definedTypeNames;
+        checkedInvalidInterfaces.push(invalidInterface);
+      }
+    }
+    if (checkedInvalidInterfaces.length > 0) {
+      invalidEntityInterfacesByTypeName.set(typeName, checkedInvalidInterfaces);
+      continue;
+    }
+    invalidEntityInterfacesByTypeName.delete(typeName);
+  }
+  if (invalidEntityInterfacesByTypeName.size > 0) {
+    entityInterfaceErrors.push(
+      undefinedEntityInterfaceImplementationsError(
+        invalidEntityInterfacesByTypeName,
+        entityInterfaceFederationDataByTypeName,
+      ),
+    );
+  }
+  if (entityInterfaceErrors.length > 0) {
+    return {
+      errors: entityInterfaceErrors,
+      success: false,
+      warnings: result.warnings,
+    };
+  }
+  return {
+    federationFactory: new FederationFactory({
+      authorizationDataByParentTypeName: result.authorizationDataByParentTypeName,
+      concreteTypeNamesByAbstractTypeName: result.concreteTypeNamesByAbstractTypeName,
+      entityDataByTypeName: result.entityDataByTypeName,
+      entityInterfaceFederationDataByTypeName,
+      executableDirectiveDatasByName: result.executableDirectiveDatasByName,
+      federatedDirectiveDataByName: result.federatedDirectiveDataByName,
+      fieldCoordsByNamedTypeName: result.fieldCoordsByNamedTypeName,
+      interfaceImplementationTypeNamesByInterfaceTypeName: result.interfaceImplementationTypeNamesByInterfaceTypeName,
+      internalSubgraphBySubgraphName: result.internalSubgraphByName,
+      internalGraph: result.internalGraph,
+      options,
+      warnings: result.warnings,
+    }),
+    success: true,
+    warnings: result.warnings,
+  };
+}
+
+export function federateSubgraphs({ options, subgraphs }: FederationParams): FederationResult {
+  const federationFactoryResult = initializeFederationFactory({ options, subgraphs });
+  if (!federationFactoryResult.success) {
+    return { errors: federationFactoryResult.errors, success: false, warnings: federationFactoryResult.warnings };
+  }
+  return federationFactoryResult.federationFactory.federateSubgraphsInternal();
+}
+
+// the flow when publishing a subgraph that also has contracts
+export function federateSubgraphsWithContracts({
+  options,
+  subgraphs,
+  tagOptionsByContractName,
+}: FederateSubgraphsWithContractsV1Params): FederationResultWithContracts {
+  const factoryResult = initializeFederationFactory({ options, subgraphs });
+  if (!factoryResult.success) {
+    return {
+      errors: factoryResult.errors,
+      success: false,
+      warnings: factoryResult.warnings,
+    };
+  }
+  factoryResult.federationFactory.federateSubgraphData();
+  const federationFactories = [cloneDeep(factoryResult.federationFactory)];
+  const federationResult = factoryResult.federationFactory.buildFederationResult();
+  // if the base graph fails composition, no contracts will be attempted
+  if (!federationResult.success) {
+    return { errors: federationResult.errors, success: false, warnings: federationResult.warnings };
+  }
+  const lastContractIndex = tagOptionsByContractName.size - 1;
+  const federationResultByContractName = new Map<ContractName, FederationResult>();
+  let i = 0;
+  for (const [contractName, tagOptions] of tagOptionsByContractName) {
+    // deep copy the current FederationFactory before it is mutated if it is not the last one required
+    if (i !== lastContractIndex) {
+      federationFactories.push(cloneDeep(federationFactories[i]));
+    }
+    // note that any one contract could have its own errors
+    const contractResult = federationFactories[i].buildFederationContractResult(tagOptions);
+    federationResultByContractName.set(contractName, contractResult);
+    i++;
+  }
+  return { ...federationResult, federationResultByContractName };
+}
+
+// the flow when adding a completely new contract
+export function federateSubgraphsContract({
+  contractTagOptions,
+  options,
+  subgraphs,
+}: FederateSubgraphsContractV1Params): FederationResult {
+  const result = initializeFederationFactory({ options, subgraphs });
+  if (!result.success) {
+    return { errors: result.errors, success: false, warnings: result.warnings };
+  }
+  result.federationFactory.federateSubgraphData();
+  return result.federationFactory.buildFederationContractResult(contractTagOptions);
+}

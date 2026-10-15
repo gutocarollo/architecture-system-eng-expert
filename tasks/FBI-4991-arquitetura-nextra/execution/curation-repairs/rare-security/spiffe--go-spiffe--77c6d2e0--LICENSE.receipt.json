@@ -1,0 +1,13 @@
+{
+  "repo": "spiffe/go-spiffe",
+  "revision": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+  "path": "LICENSE",
+  "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/spiffe/go-spiffe/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.506403+00:00",
+  "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "line_count": 201,
+  "source": "raw_primary"
+}

@@ -1,0 +1,39 @@
+{
+  "observed_utc": "2026-10-15T17:51:24.491461+00:00",
+  "document_path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+  "historical_document_path": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/historical-mdx/09-apis-e-integracao-fa8e01.mdx",
+  "recomputed_sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1",
+  "expected_review_sha256": "9180eb34de65056692f08afe4c6d0fefb50047de4e5c3b8a2b279f28927ca5c1",
+  "match": true,
+  "bytes": 75124,
+  "renderer": {
+    "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/historical-fa8e01-family-renderer.py",
+    "sha256": "124ee0e553539401ccee18901a6ff5eb797f8c2901fd00daa80f913334dafc80",
+    "basis": "Pure family renderer, with the two final review-status strings restored to the fa8e01 wording.",
+    "historical_status_substitutions": 2,
+    "extracted_from": "tasks/FBI-4991-arquitetura-nextra/execution/curation/build_matrix.py",
+    "extracted_from_sha256": "185650a27ad903ef888ff1d1487a7285c160bb83a80980a9b06bbf00085cfdbe",
+    "python": "3.14.8"
+  },
+  "reproducer": {
+    "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/reconstruct_historical_mdx.py",
+    "sha256": "0acd3522a5d45e5a2c82af0191bbdc72b1727b46b2476d160b40dd475953e423"
+  },
+  "input": {
+    "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rechecked-matrix-fa8e01.json.gz",
+    "archive_sha256": "8c7017605762dc5ef42ece7cb78a1acd518e7ee5520853606229e72d7bca3c26",
+    "contents_sha256": "fa8e01dcc2bd0126ac085eed97452dff6d193448f588c9a078201fab259ddde0",
+    "coverage_sha256": "b11a8acba81e325bfbb9a26ab8c9b2510c4f1b7ce977d762a5bc8ff0ff6391e8",
+    "heading_slugs_sha256": "ccc7832cf4f4c8a7558b39faaecde7b60f89dfd0074df494435dc8d56a507ef1"
+  },
+  "review": {
+    "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-independent.recheck.json",
+    "sha256": "54e5e2d374d19bc8150ad961b126f8ad3b29f66a22d7fbfff251562d85751bdc",
+    "value_location": "bound_file_sha256[document_path]"
+  },
+  "final_matrix_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+  "protected_final_files_checked": 67,
+  "protected_final_files_unchanged": true,
+  "proof_scope": "Recomputed historical document bytes only; no new semantic approval or change to final sources.",
+  "limit": "The renderer is a compatible reconstruction of the historical family block, not a claim that the original entire generator file was recovered byte for byte."
+}

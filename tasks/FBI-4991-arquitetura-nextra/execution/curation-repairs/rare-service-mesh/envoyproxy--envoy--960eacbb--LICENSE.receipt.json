@@ -1,0 +1,13 @@
+{
+  "repo": "envoyproxy/envoy",
+  "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+  "path": "LICENSE",
+  "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/envoyproxy/envoy/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:09:57.902433+00:00",
+  "source": "raw_primary",
+  "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "line_count": 202
+}

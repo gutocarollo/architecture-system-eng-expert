@@ -2,6 +2,7 @@
 """Read license files at the exact revisions used by the curation."""
 import concurrent.futures,datetime,hashlib,json,subprocess,urllib.request
 from pathlib import Path
+from license_classification import python_compound_license
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parents[3]
 source=json.loads((BASE/'sources.json').read_text())
@@ -24,7 +25,8 @@ def collect(target):
  artifact=BASE/'raw'/('license-'+hashlib.sha256(key.encode()).hexdigest()+'.txt');artifact.write_bytes(content)
  spdx=(d.get('license') or {}).get('spdx_id')
  if not spdx or spdx=='NOASSERTION':
-  if 'Permission to use, copy, modify, and distribute this software' in text:spdx='PostgreSQL'
+  if python_compound_license(repo,text):spdx='Python-2.0'
+  elif repo=='postgres/postgres' and 'Permission to use, copy, modify, and distribute this software' in text:spdx='PostgreSQL'
   elif 'Mozilla Public License' in text and ('2.0' in text or 'Version 2' in text):spdx='MPL-2.0'
   elif 'Apache License' in text and '2.0' in text:spdx='Apache-2.0'
   elif 'GNU GENERAL PUBLIC LICENSE' in text and 'Version 2' in text:spdx='GPL-2.0'

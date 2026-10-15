@@ -1,0 +1,15 @@
+{
+  "repo": "gravitational/teleport",
+  "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+  "path": "LICENSE",
+  "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.143771+00:00",
+  "sha256": "88a722879257e3ddf202789119d13f77da8718d03a4ee936ce5c12f0ce6f6ecf",
+  "line_count": 662,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-ad327ccebbc136f441687cec9b0dc24ff2cec8bbbdcaf770559e4c75abedc574.txt",
+  "upstream_observed_utc": "2026-10-15T01:28:27.451899Z"
+}

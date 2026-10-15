@@ -1,0 +1,13 @@
+{
+  "repo": "wundergraph/cosmo",
+  "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+  "path": "router/core/operation_processor.go",
+  "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_processor.go",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_processor.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--router--core--operation_processor.go",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.334650+00:00",
+  "sha256": "90d32546b43e51bafe27489414962a2501ce0e56bebed1164b3c3a032b1aab65",
+  "line_count": 1857
+}

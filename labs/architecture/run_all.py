@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import platform
+import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,7 +42,9 @@ def main():
         print(f'case={case} exit={result.returncode} stdout_lines={len(result.stdout.splitlines())}')
     hashes={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest()
             for path in LAB_ROOT.rglob('*') if path.is_file() and '__pycache__' not in str(path) and '.venv' not in path.parts}
-    data=dict(schema_version=1,workspace=str(ROOT),base_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+    revision=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True) if shutil.which('git') else None
+    source_revision=revision.stdout.strip() if revision is not None and revision.returncode==0 else None
+    data=dict(schema_version=1,workspace=str(ROOT),base_sha=source_revision,source_revision_kind='GIT_HEAD' if source_revision else 'UNVERSIONED_SOURCE_SNAPSHOT',
               receipts=receipts,source_sha256=hashes,
               verdict='PASS' if all(r['exit_code']==0 for r in receipts) else 'FAIL',
               independent_review='PENDING',production_execution=False)

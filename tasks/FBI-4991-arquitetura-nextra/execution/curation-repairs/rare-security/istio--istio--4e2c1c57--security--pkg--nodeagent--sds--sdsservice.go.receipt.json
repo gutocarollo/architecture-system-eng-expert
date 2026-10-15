@@ -1,0 +1,13 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "security/pkg/nodeagent/sds/sdsservice.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--sds--sdsservice.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.515510+00:00",
+  "sha256": "96545f981eec308d1eda6c163dc915231599cde061ecb2f4ac79eda6b4af0bfb",
+  "line_count": 414,
+  "source": "raw_primary"
+}

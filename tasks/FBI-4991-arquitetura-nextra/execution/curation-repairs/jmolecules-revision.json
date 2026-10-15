@@ -1,0 +1,14 @@
+{
+  "repo": "xmolecules/jmolecules",
+  "revision": "20d2636beba2e3cb8f0a9b62c07e3606c49da84f",
+  "branch": "main",
+  "license_api": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "stars": 1569,
+  "observed_utc": "2026-10-15T03:30:39.322551+00:00"
+}

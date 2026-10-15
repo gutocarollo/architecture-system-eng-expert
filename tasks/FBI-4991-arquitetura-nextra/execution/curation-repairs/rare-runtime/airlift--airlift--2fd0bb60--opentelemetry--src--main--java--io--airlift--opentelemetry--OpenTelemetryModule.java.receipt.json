@@ -1,0 +1,12 @@
+{
+  "repo": "airlift/airlift",
+  "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+  "path": "opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+  "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+  "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--opentelemetry--src--main--java--io--airlift--opentelemetry--OpenTelemetryModule.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.723072+00:00",
+  "sha256": "be83195f471f2602362704314d90613671f5e3ea1fcea26417bb4a6a1b74b80f",
+  "line_count": 250
+}

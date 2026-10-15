@@ -1,0 +1,13 @@
+{
+  "repo": "envoyproxy/envoy",
+  "revision": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+  "path": "source/common/upstream/cds_api_impl.cc",
+  "url": "https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc",
+  "raw_url": "https://raw.githubusercontent.com/envoyproxy/envoy/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/upstream/cds_api_impl.cc",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-service-mesh/envoyproxy--envoy--960eacbb--source--common--upstream--cds_api_impl.cc",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T04:09:57.914379+00:00",
+  "source": "raw_primary",
+  "sha256": "789b6fa98bd9e01f3ea1e02f0bdcf64fd911698256e95d18fb8591f1ef0ab965",
+  "line_count": 136
+}

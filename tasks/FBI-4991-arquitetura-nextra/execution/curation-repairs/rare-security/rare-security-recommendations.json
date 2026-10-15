@@ -1,0 +1,1763 @@
+{
+  "schema_version": "rare-security-repairs/v1",
+  "author_lane": {
+    "agent": "/root/rare_oss_sources",
+    "native_type": "default",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "xhigh",
+    "routing": "WARM_REUSE",
+    "role": "DEEP_EXPLORE primary-source curation; not an independent review"
+  },
+  "observed_utc": "2026-10-15T04:04:22.912571+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "review_input": {
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-second.concepts.json",
+    "sha256": "1b767d48cfa0d4e6b0e664480fbd596ae0c4e07045a3b6c0608b1ae3579ac074",
+    "matrix_sha256_from_review": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "write_scope": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/**",
+  "delivery_limits": [
+    "O pacote é uma recomendação autoral. Integração e rechecagem independente pertencem ao curador e ao reviewer.",
+    "As gravações desta lane se limitam a rare-security. Fontes globais, matriz congelada, MDX, Jira, configuração e produção não foram editados por esta lane.",
+    "A captura reutilizou primeiro os caches de curation e curation-repairs, conferindo os hashes. Os novos paths foram buscados em fontes primárias fixadas no mesmo SHA.",
+    "Os antigos paths Spring DefaultTokenExchangeTokenResponseClient e TokenExchangeGrantRequestEntityConverter retornaram 404 no levantamento anterior. O pacote usa os paths atuais confirmados do RestClient e do conversor genérico, que responderam 200.",
+    "Não houve teste de produto, build ou fluxo de autenticação executado. A prova é estática, de código primário e documentação oficial."
+  ],
+  "licenses": {
+    "gravitational/teleport@1283425b60ec5f60d509ba4c791183d452923ff7": {
+      "repo": "gravitational/teleport",
+      "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+      "path": "LICENSE",
+      "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:58:41.143771+00:00",
+      "sha256": "88a722879257e3ddf202789119d13f77da8718d03a4ee936ce5c12f0ce6f6ecf",
+      "line_count": 662,
+      "source": "reused_cache",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-ad327ccebbc136f441687cec9b0dc24ff2cec8bbbdcaf770559e4c75abedc574.txt",
+      "upstream_observed_utc": "2026-10-15T01:28:27.451899Z",
+      "license_spdx": "AGPL-3.0-or-later",
+      "license_basis": "O LICENSE contém AGPL versão 3. Os headers dos arquivos lib/srv/authhandlers.go e lib/services/role.go, linhas 5–8, permitem versão 3 ou posterior. A API tem licença própria; não é a superfície selecionada."
+    },
+    "istio/istio@4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631": {
+      "repo": "istio/istio",
+      "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+      "path": "LICENSE",
+      "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:58:41.142842+00:00",
+      "sha256": "9fa6e54dafda853bb3cdc01486b677a55102f0d488282a85ba6e426d9125f8c5",
+      "line_count": 202,
+      "source": "reused_cache",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-4d9034e524b507e809b27da7868d111a42881ba4c90ba7109622e4cea90a49d2.txt",
+      "upstream_observed_utc": "2026-10-15T01:28:28.010994Z",
+      "license_spdx": "Apache-2.0"
+    },
+    "keycloak/keycloak@8a081db466da3ff8de74efab2f3d9844277c18ba": {
+      "repo": "keycloak/keycloak",
+      "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+      "path": "LICENSE.txt",
+      "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt",
+      "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--LICENSE.txt",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:58:41.145491+00:00",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "line_count": 202,
+      "source": "reused_cache",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/license-6c04d3558ce4bd2cef636eeeb97e05c96629b1c9ece481736b7b5f83a9bad784.txt",
+      "upstream_observed_utc": "2026-10-15T01:28:28.124559Z",
+      "license_spdx": "Apache-2.0"
+    },
+    "spring-projects/spring-security@42192f9591763875eb2986bc8fd695a2eebefb02": {
+      "repo": "spring-projects/spring-security",
+      "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+      "path": "LICENSE.txt",
+      "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/LICENSE.txt",
+      "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/LICENSE.txt",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--LICENSE.txt",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:58:41.491792+00:00",
+      "sha256": "7200000367e0e8b47822d563a5ddd2dd3a97cc05b32bd7dbcc7b4eeb92b76628",
+      "line_count": 202,
+      "source": "reused_cache",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/6c7f424a6e2f2378b343e438808ca8060a019eff3a42dbee41cae4dca4c7ac90.txt",
+      "upstream_observed_utc": "2026-10-15T03:49:30.759769+00:00",
+      "license_spdx": "Apache-2.0"
+    },
+    "spiffe/go-spiffe@77c6d2e0c1203e36804e26a02faa8f893d72e7e5": {
+      "repo": "spiffe/go-spiffe",
+      "revision": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+      "path": "LICENSE",
+      "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/spiffe/go-spiffe/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:58:41.506403+00:00",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "line_count": 201,
+      "source": "raw_primary",
+      "license_spdx": "Apache-2.0"
+    },
+    "golang/crypto@cf169cd0986fa0e2e0963ee5f8d234885f869750": {
+      "repo": "golang/crypto",
+      "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+      "path": "LICENSE",
+      "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:59:52.040688+00:00",
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "line_count": 27,
+      "source": "raw_primary",
+      "license_spdx": "BSD-3-Clause"
+    }
+  },
+  "concepts": [
+    {
+      "concept_id": "zero-trust",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "O mecanismo reutilizável de decisão é RoleSet/checkAccess do Teleport, chamado por accessChecker. Go SSH é a base adicional de autenticação de certificado e prova de posse; a autenticação sozinha não sustenta a classificação.",
+      "application_role": "O servidor SSH do Teleport é o produto OSS real. O exemplo é o acesso normal de um usuário a um Node e login de sistema operacional específicos.",
+      "mechanism": "O servidor registra PublicKeyCallback e VerifiedPublicKeyCallback no adaptador SSH. O primeiro decodifica a identidade do certificado e autentica sua autoridade e metadados. Para um Node, ele avalia o servidor alvo e o login solicitado. Essa avaliação obtém papéis e atributos da identidade, cria um accessChecker e chama CheckConditionalAccess com o recurso e NewLoginMatcher. RoleSet verifica primeiro as regras de negação e depois exige que namespace, labels e matchers de uma regra de permissão correspondam. Sem permissão, o callback retorna erro e a autenticação é recusada. Quando a decisão tem pré-condições, a callback posterior à prova de posse verifica quais exigem autenticação adicional antes de prosseguir.",
+      "review_gap_addressed": "A seleção agora liga a identidade autenticada à política por recurso e login, à decisão de negação e ao callback que controla a entrada no servidor; não se limita ao handshake SSH.",
+      "limits": [
+        "A interpretação é um recorte de acesso com Zero Trust: identidade e política são avaliadas para o recurso solicitado. Isso não certifica toda uma organização ou uma implantação como aderente à NIST SP 800-207.",
+        "O caminho escolhido é o login comum em Node. O código possui uma exceção explícita para ingresso em sessão moderada sob condições específicas e caminhos separados para proxy, OpenSSH e identidades scoped; não se afirma que todos executem a mesma função.",
+        "MFA e confiança no dispositivo dependem de política. A seleção mostra a integração das condições, mas não atesta que estejam habilitadas em uma instalação real nem promete revalidação contínua de toda operação durante uma sessão.",
+        "A licença dos arquivos lib selecionados é AGPL-3.0-or-later, conforme seus headers no SHA fixado. Não se aplica a eles a licença Apache da API nem se faz afirmação sobre licenças de binários comerciais."
+      ],
+      "licenses": [
+        "gravitational/teleport@1283425b60ec5f60d509ba4c791183d452923ff7",
+        "golang/crypto@cf169cd0986fa0e2e0963ee5f8d234885f869750"
+      ],
+      "evidence": [
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/services/role.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--role.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.142296+00:00",
+          "sha256": "af0247b7c5f315a29402c8d65c26ff8cca60cd2a5e2b377e5fbc7606821c6f12",
+          "line_count": 4336,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/67ae78e41202a251db9ada0faae5663e461e2c06ba89504593cb3562ea5e0505.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.227823+00:00",
+          "role": "base",
+          "proves": "O avaliador executa deny antes de allow, combina labels do recurso e matchers do login, considera condições de dispositivo e nega quando nenhuma regra permite.",
+          "inspected_ranges": [
+            [
+              3030,
+              3036
+            ],
+            [
+              3087,
+              3123
+            ],
+            [
+              3158,
+              3204
+            ],
+            [
+              3221,
+              3252
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 3030,
+              "end_line": 3036,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go#L3030-L3036",
+              "text": "3030: func (set RoleSet) checkAccess(\n3031: \tr AccessCheckable,\n3032: \tusername string,\n3033: \ttraits wrappers.Traits,\n3034: \tstate AccessState,\n3035: \tmatchers ...RoleMatcher,\n3036: ) ([]*decisionpb.Precondition, error) {"
+            },
+            {
+              "start_line": 3087,
+              "end_line": 3123,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go#L3087-L3123",
+              "text": "3087: \t// Check deny rules.\n3088: \tfor _, role := range set {\n3089: \t\tmatchNamespace, namespaceMessage := MatchNamespace(role.GetNamespaces(types.Deny), namespace)\n3090: \t\tif !matchNamespace {\n3091: \t\t\tcontinue\n3092: \t\t}\n3093: \t\tif requiresLabelMatching {\n3094: \t\t\tmatchLabels, labelsMessage, err := checkRoleLabelsMatch(types.Deny, role, username, traits, r, isLoggingEnabled)\n3095: \t\t\tif err != nil {\n3096: \t\t\t\treturn nil, trace.Wrap(err)\n3097: \t\t\t}\n3098: \t\t\tif matchLabels {\n3099: \t\t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource denied, deny rule in role matched\",\n3100: \t\t\t\t\tslog.String(\"role\", role.GetName()),\n3101: \t\t\t\t\tslog.String(\"namespace_message\", namespaceMessage),\n3102: \t\t\t\t\tslog.String(\"label_message\", labelsMessage),\n3103: \t\t\t\t)\n3104: \t\t\t\treturn nil, trace.AccessDenied(\"access to %v denied. User does not have permissions. %v\",\n3105: \t\t\t\t\tr.GetKind(), additionalDeniedMessage)\n3106: \t\t\t}\n3107: \t\t} else {\n3108: \t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Role label matching skipped\")\n3109: \t\t}\n3110: \t\t// Deny rules are greedy on purpose. They will always match if\n3111: \t\t// at least one of the matchers returns true.\n3112: \t\tmatchMatchers, matchersMessage, err := RoleMatchers(matchers).MatchAny(role, types.Deny)\n3113: \t\tif err != nil {\n3114: \t\t\treturn nil, trace.Wrap(err)\n3115: \t\t}\n3116: \t\tif matchMatchers {\n3117: \t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource denied, deny rule in role matched\",\n3118: \t\t\t\tslog.String(\"role\", role.GetName()),\n3119: \t\t\t\tslog.Any(\"matcher_message\", matchersMessage),\n3120: \t\t\t)\n3121: \t\t\treturn nil, trace.AccessDenied(\"access to %v denied. User does not have permissions. %v\",\n3122: \t\t\t\tr.GetKind(), additionalDeniedMessage)\n3123: \t\t}"
+            },
+            {
+              "start_line": 3158,
+              "end_line": 3204,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go#L3158-L3204",
+              "text": "3158: \t\tif requiresLabelMatching {\n3159: \t\t\tmatchLabels, labelsMessage, err := checkRoleLabelsMatch(types.Allow, role, username, traits, r, isLoggingEnabled)\n3160: \t\t\tif err != nil {\n3161: \t\t\t\treturn nil, trace.Wrap(err)\n3162: \t\t\t}\n3163: \n3164: \t\t\tif !matchLabels {\n3165: \t\t\t\tif isLoggingEnabled {\n3166: \t\t\t\t\terrs = append(errs, trace.AccessDenied(\"role=%v, match(%s)\",\n3167: \t\t\t\t\t\trole.GetName(), labelsMessage))\n3168: \t\t\t\t}\n3169: \t\t\t\tcontinue\n3170: \t\t\t}\n3171: \t\t} else {\n3172: \t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Role label matching skipped for resource\")\n3173: \t\t}\n3174: \n3175: \t\t// Allow rules are not greedy. They will match only if all of the\n3176: \t\t// matchers return true.\n3177: \t\tmatchMatchers, err := RoleMatchers(matchers).MatchAll(role, types.Allow)\n3178: \t\tif err != nil {\n3179: \t\t\treturn nil, trace.Wrap(err)\n3180: \t\t}\n3181: \t\tif !matchMatchers {\n3182: \t\t\tif isLoggingEnabled {\n3183: \t\t\t\terrs = append(errs, fmt.Errorf(\"role=%v, match(matchers=%v)\",\n3184: \t\t\t\t\trole.GetName(), matchers))\n3185: \t\t\t}\n3186: \t\t\tcontinue\n3187: \t\t}\n3188: \n3189: \t\t// If we've reached this point, namespace, labels, and matchers all match.\n3190: \t\t//\n3191: \t\t// The following checks remain:\n3192: \t\t// 1. MFA verification (aka require_session_mfa)\n3193: \t\t// 2. Device verification (aka device_trust_mode)\n3194: \t\t//\n3195: \t\t// The more restrictive setting applies, so either the caller passes all\n3196: \t\t// (and gets an early exit) or we need to check every applicable role to\n3197: \t\t// ensure the access is permitted.\n3198: \n3199: \t\tif bypassMFAChecks && deviceTrusted {\n3200: \t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource granted, allow rule in role matched\",\n3201: \n3202: \t\t\t\tslog.String(\"role\", role.GetName()),\n3203: \t\t\t)\n3204: \t\t\treturn deduplicateAndSortPreconditions(preconds), nil"
+            },
+            {
+              "start_line": 3221,
+              "end_line": 3252,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/role.go#L3221-L3252",
+              "text": "3221: \t\t// Device verification.\n3222: \t\tif err := dtauthz.VerifyTrustedDeviceMode(\n3223: \t\t\trole.GetOptions().DeviceTrustMode,\n3224: \t\t\tdtauthz.VerifyTrustedDeviceModeParams{\n3225: \t\t\t\tIsTrustedDevice: deviceTrusted,\n3226: \t\t\t\tIsBot:           state.IsBot,\n3227: \t\t\t\tAllowEmptyMode:  true, // Empty mode on roles is equivalent to \"off\".\n3228: \t\t\t},\n3229: \t\t); err != nil {\n3230: \t\t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource denied, role requires a trusted device\",\n3231: \t\t\t\tslog.String(\"role\", role.GetName()),\n3232: \t\t\t)\n3233: \t\t\treturn nil, trace.Wrap(err)\n3234: \t\t}\n3235: \n3236: \t\t// Current role allows access, but keep looking for a more restrictive\n3237: \t\t// setting.\n3238: \t\tallowed = true\n3239: \t\tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource granted, allow rule in role matched\",\n3240: \t\t\tslog.String(\"role\", role.GetName()),\n3241: \t\t)\n3242: \t}\n3243: \n3244: \tif allowed {\n3245: \t\treturn deduplicateAndSortPreconditions(preconds), nil\n3246: \t}\n3247: \n3248: \tlogger.LogAttrs(ctx, logutils.TraceLevel, \"Access to resource denied, no allow rule matched\",\n3249: \t\tslog.Any(\"errors\", errs),\n3250: \t)\n3251: \treturn nil, trace.AccessDenied(\"access to %v denied. User does not have permissions. %v\",\n3252: \t\tr.GetKind(), additionalDeniedMessage)"
+            }
+          ]
+        },
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/services/access_checker.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/access_checker.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/access_checker.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--services--access_checker.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.068623+00:00",
+          "sha256": "ffa6dc5c6ca607f0879acfb30308c71c1c16a3d86715d0dd7eaf20010caa2770",
+          "line_count": 1726,
+          "source": "raw_primary",
+          "role": "identity_policy_bridge",
+          "proves": "O accessChecker embute RoleSet e passa username e traits da identidade junto com o recurso e estado de acesso ao avaliador.",
+          "inspected_ranges": [
+            [
+              345,
+              353
+            ],
+            [
+              670,
+              705
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 345,
+              "end_line": 353,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/access_checker.go#L345-L353",
+              "text": "345: type accessChecker struct {\n346: \tinfo         *AccessInfo\n347: \tlocalCluster string\n348: \n349: \t// RoleSet is embedded to use the existing implementation for most\n350: \t// AccessChecker methods. Methods which require AllowedResourceAccessIDs (relevant\n351: \t// to search-based access requests) will be implemented by\n352: \t// accessChecker.\n353: \tRoleSet"
+            },
+            {
+              "start_line": 670,
+              "end_line": 705,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/services/access_checker.go#L670-L705",
+              "text": "670: // CheckConditionalAccess checks if the identity for this AccessChecker has conditional access to the given resource.\n671: func (a *accessChecker) CheckConditionalAccess(r AccessCheckable, state AccessState, matchers ...RoleMatcher) ([]*decisionpb.Precondition, error) {\n672: \t// Indicate that we want preconditions to be returned if access is granted rather than an error.\n673: \tstate.ReturnPreconditions = true\n674: \n675: \treturn a.validateAccessConditions(r, state, matchers...)\n676: }\n677: \n678: func (a *accessChecker) validateAccessConditions(r AccessCheckable, state AccessState, matchers ...RoleMatcher) ([]*decisionpb.Precondition, error) {\n679: \t// Enforce AllowedResourceAccessIDs if present; capture match\n680: \tres, err := a.checkAllowedResources(r)\n681: \tif err != nil {\n682: \t\treturn nil, trace.Wrap(err)\n683: \t}\n684: \n685: \tswitch rr := r.(type) {\n686: \tcase types.Resource153UnwrapperT[IdentityCenterAccount]:\n687: \t\tmatchers = append(matchers, NewIdentityCenterAccountMatcher(rr.UnwrapT()))\n688: \tcase types.Resource153UnwrapperT[IdentityCenterAccountAssignment]:\n689: \t\tmatchers = append(matchers, NewIdentityCenterAccountAssignmentMatcher(rr.UnwrapT()))\n690: \t}\n691: \n692: \t// If matched RID has ResourceConstraints, guard any principal-bearing matcher(s)\n693: \tif res.Match != nil && res.Match.GetConstraints() != nil {\n694: \t\tguard := WithConstraints(res.Match.GetConstraints())\n695: \t\tfor i := range matchers {\n696: \t\t\tmatchers[i] = guard(matchers[i])\n697: \t\t}\n698: \t}\n699: \n700: \tpreconds, err := a.checkAccess(r, a.info.Username, a.info.Traits, state, matchers...)\n701: \tif err != nil {\n702: \t\treturn nil, trace.Wrap(err)\n703: \t}\n704: \n705: \treturn preconds, nil"
+            }
+          ]
+        },
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/srv/authhandlers.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--authhandlers.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.143193+00:00",
+          "sha256": "a9eccdc03e5293cbcfbad05b00902b7669b9a596b11589a0518ae93437a06c13",
+          "line_count": 1459,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/10cd532d782a454770abc0183325daa72c5f04b66d4151272a683e688cad816b.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.227652+00:00",
+          "role": "application",
+          "proves": "O callback autentica o certificado e vincula a identidade a servidor alvo e login; falha de RBAC retorna erro ao handshake.",
+          "inspected_ranges": [
+            [
+              388,
+              420
+            ],
+            [
+              521,
+              537
+            ],
+            [
+              618,
+              644
+            ],
+            [
+              1246,
+              1267
+            ],
+            [
+              1270,
+              1298
+            ],
+            [
+              1369,
+              1377
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 388,
+              "end_line": 420,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L388-L420",
+              "text": "388: \tcert, ok := key.(*ssh.Certificate)\n389: \tif !ok {\n390: \t\tlog.DebugContext(ctx, \"rejecting auth attempt, unsupported key type\")\n391: \t\treturn nil, trace.BadParameter(\"unsupported key type: %v\", fingerprint)\n392: \t}\n393: \n394: \tlog.DebugContext(ctx, \"processing auth attempt with key\",\n395: \t\tslog.Group(\"cert\",\n396: \t\t\t\"serial\", cert.Serial,\n397: \t\t\t\"type\", cert.CertType,\n398: \t\t\t\"key_id\", cert.KeyId,\n399: \t\t\t\"valid_principals\", cert.ValidPrincipals,\n400: \t\t\t\"valid_after\", cert.ValidAfter,\n401: \t\t\t\"valid_before\", cert.ValidBefore,\n402: \t\t\t\"critical_options\", cert.CriticalOptions,\n403: \t\t\t\"extensions\", cert.Extensions,\n404: \t\t\t\"reserved\", cert.Reserved,\n405: \t\t),\n406: \t)\n407: \n408: \tif len(cert.ValidPrincipals) == 0 {\n409: \t\tlog.DebugContext(ctx, \"rejecting auth attempt without valid principals\")\n410: \t\treturn nil, trace.BadParameter(\"need a valid principal for key %v\", fingerprint)\n411: \t}\n412: \tif len(cert.KeyId) == 0 {\n413: \t\tlog.DebugContext(ctx, \"rejecting auth attempt without valid key ID\")\n414: \t\treturn nil, trace.BadParameter(\"need a valid key for key %v\", fingerprint)\n415: \t}\n416: \n417: \tident, err := sshca.DecodeIdentity(cert)\n418: \tif err != nil {\n419: \t\tlog.WarnContext(ctx, \"failed to decode ssh identity from cert\", \"error\", err)\n420: \t\treturn nil, trace.BadParameter(\"failed to decode ssh identity from cert: %v\", fingerprint)"
+            },
+            {
+              "start_line": 521,
+              "end_line": 537,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L521-L537",
+              "text": "521: \t// Check that the user certificate uses supported public key algorithms, was\n522: \t// issued by Teleport, and check the certificate metadata (principals,\n523: \t// timestamp, etc). Fallback to keys is not supported.\n524: \tcertChecker := apisshutils.CertChecker{\n525: \t\tCertChecker: ssh.CertChecker{\n526: \t\t\tIsUserAuthority: h.IsUserAuthority,\n527: \t\t\tClock:           h.c.Clock.Now,\n528: \t\t},\n529: \t\tFIPS: h.c.FIPS,\n530: \t}\n531: \n532: \toriginalPermissions, err := certChecker.Authenticate(conn, key)\n533: \tif err != nil {\n534: \t\tcertificateMismatchCount.Inc()\n535: \t\trecordFailedLogin(err)\n536: \t\treturn nil, trace.Wrap(err)\n537: \t}"
+            },
+            {
+              "start_line": 618,
+              "end_line": 644,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L618-L644",
+              "text": "618: \tcase teleport.ComponentNode:\n619: \t\tdiagnosticTracing = true\n620: \t\taccessPermit, err = h.evaluateSSHAccess(ident, ca, clusterName.GetClusterName(), h.c.Server.GetInfo(), conn.User())\n621: \t\tif errors.Is(err, services.ErrScopedIdentity) {\n622: \t\t\taccessPermit, err = h.evaluateScopedSSHAccess(ident, ca, clusterName.GetClusterName(), h.c.Server.GetInfo(), conn.User())\n623: \t\t}\n624: \tdefault:\n625: \t\treturn nil, trace.BadParameter(\"cannot determine appropriate authorization checks for unknown component %q (this is a bug)\", h.c.Component)\n626: \t}\n627: \n628: \tif err != nil {\n629: \t\tlog.ErrorContext(ctx, \"permission denied\",\n630: \t\t\t\"error\", err,\n631: \t\t\t\"local_addr\", logutils.StringerAttr(conn.LocalAddr()),\n632: \t\t\t\"remote_addr\", logutils.StringerAttr(conn.RemoteAddr()),\n633: \t\t\t\"key\", key.Type(),\n634: \t\t\t\"fingerprint\", sshutils.Fingerprint(key),\n635: \t\t\t\"user\", cert.KeyId,\n636: \t\t)\n637: \n638: \t\trecordFailedLogin(err)\n639: \n640: \t\tif h.c.OnRBACFailure != nil {\n641: \t\t\th.c.OnRBACFailure(conn, ident, err)\n642: \t\t}\n643: \n644: \t\treturn nil, trace.Wrap(err)"
+            },
+            {
+              "start_line": 1246,
+              "end_line": 1267,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L1246-L1267",
+              "text": "1246: // evaluateSSHAccess checks the given certificate (supplied by a connected\n1247: // client) to see if this certificate can be allowed to login as user:login\n1248: // pair to requested server and if RBAC rules allow login.\n1249: func (a *ahLoginChecker) evaluateSSHAccess(ident *sshca.Identity, ca types.CertAuthority, clusterName string, target types.Server, osUser string) (*decisionpb.SSHAccessPermit, error) {\n1250: \t// Use the server's shutdown context.\n1251: \tctx := a.c.Server.Context()\n1252: \n1253: \ta.log.DebugContext(ctx, \"checking permissions to login to node with RBAC checks\", \"teleport_user\", ident.Username, \"os_user\", osUser)\n1254: \n1255: \t// get roles assigned to this user\n1256: \taccessInfo, err := fetchAccessInfo(ident, ca, clusterName)\n1257: \tif err != nil {\n1258: \t\treturn nil, trace.Wrap(err)\n1259: \t}\n1260: \taccessChecker, err := services.NewAccessChecker(accessInfo, clusterName, a.c.AccessPoint)\n1261: \tif err != nil {\n1262: \t\treturn nil, trace.Wrap(err)\n1263: \t}\n1264: \n1265: \tstate, err := services.AccessStateFromSSHIdentity(ctx, ident, accessChecker, a.c.AccessPoint)\n1266: \tif err != nil {\n1267: \t\treturn nil, trace.Wrap(err)"
+            },
+            {
+              "start_line": 1270,
+              "end_line": 1298,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L1270-L1298",
+              "text": "1270: \t// Determine if session join can bypass standard node access checks. This is allowed if all are true:\n1271: \t//  1. The requested OS user is the special session join principal (for moderated sessions).\n1272: \t//  2. The user's roles support moderated sessions.\n1273: \t//  3. MFA is NOT required for this session (MFARequiredNever),\n1274: \t//      OR the legacy out-of-band MFA flow is allowed (see below) and MFA has already been verified for this session.\n1275: \t//\n1276: \t// The legacy out-of-band MFA flow is allowed as long as TELEPORT_UNSTABLE_FORCE_IN_BAND_MFA is not set to \"yes\"\n1277: \t// and MFA has already been verified for this session.\n1278: \t//\n1279: \t// TODO(cthach): Remove in v20.0 when the legacy out-of-band MFA flow is removed.\n1280: \tbypassAccessCheck :=\n1281: \t\tosUser == teleport.SSHSessionJoinPrincipal &&\n1282: \t\t\tmoderation.RoleSupportsModeratedSessions(accessChecker.Roles()) &&\n1283: \t\t\t(state.MFARequired == services.MFARequiredNever ||\n1284: \t\t\t\t(os.Getenv(teleport.EnvVarUnstableForceInBandMFA) != \"yes\" && state.MFAVerified))\n1285: \n1286: \t// Collect preconditions that must be met before the session can start.\n1287: \tvar preconds []*decisionpb.Precondition\n1288: \n1289: \t// Perform the primary node access check unless bypass is allowed.\n1290: \tif !bypassAccessCheck {\n1291: \t\tif preconds, err = accessChecker.CheckConditionalAccess(\n1292: \t\t\ttarget,\n1293: \t\t\tstate,\n1294: \t\t\tservices.NewLoginMatcher(osUser),\n1295: \t\t); err != nil {\n1296: \t\t\treturn nil, trace.AccessDenied(\"user %s@%s is not authorized to login as %v@%s: %v\",\n1297: \t\t\t\tident.Username, ca.GetClusterName(), osUser, clusterName, err)\n1298: \t\t}"
+            },
+            {
+              "start_line": 1369,
+              "end_line": 1377,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L1369-L1377",
+              "text": "1369: func fetchAccessInfo(ident *sshca.Identity, ca types.CertAuthority, clusterName string) (*services.AccessInfo, error) {\n1370: \tvar accessInfo *services.AccessInfo\n1371: \tvar err error\n1372: \tif clusterName == ca.GetClusterName() {\n1373: \t\taccessInfo = services.AccessInfoFromLocalSSHIdentity(ident)\n1374: \t} else {\n1375: \t\taccessInfo, err = services.AccessInfoFromRemoteSSHIdentity(ident, ca.CombinedMapping())\n1376: \t}\n1377: \treturn accessInfo, trace.Wrap(err)"
+            }
+          ]
+        },
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/srv/authhandlers.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--authhandlers.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.143193+00:00",
+          "sha256": "a9eccdc03e5293cbcfbad05b00902b7669b9a596b11589a0518ae93437a06c13",
+          "line_count": 1459,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/10cd532d782a454770abc0183325daa72c5f04b66d4151272a683e688cad816b.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.227652+00:00",
+          "role": "conditional_effect",
+          "proves": "O callback após prova de posse trata as pré-condições e encaminha à autenticação adicional quando exigida; condição desconhecida falha fechada.",
+          "inspected_ranges": [
+            [
+              716,
+              738
+            ],
+            [
+              750,
+              783
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 716,
+              "end_line": 738,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L716-L738",
+              "text": "716: func (h *AuthHandlers) VerifiedPublicKeyCallback(\n717: \tconn ssh.ConnMetadata,\n718: \tkey ssh.PublicKey,\n719: \tperms *ssh.Permissions,\n720: \t_ string,\n721: ) (*ssh.Permissions, error) {\n722: \t// Access preconditions are only set in the SSH access permit. For all other permit types, it is expected for this\n723: \t// entry to be unset, so grant access.\n724: \trawPermit, ok := perms.Extensions[utils.ExtIntSSHAccessPermit]\n725: \tif !ok {\n726: \t\treturn perms, nil\n727: \t}\n728: \n729: \tpermit, err := decision.UnmarshalSSHAccessPermit(rawPermit)\n730: \tif err != nil {\n731: \t\treturn nil, trace.Wrap(err)\n732: \t}\n733: \n734: \t// If no preconditions are set, allow the connection to proceed without additional checks.\n735: \tpreconds := permit.GetPreconditions()\n736: \tif len(preconds) == 0 {\n737: \t\treturn perms, nil\n738: \t}"
+            },
+            {
+              "start_line": 750,
+              "end_line": 783,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/authhandlers.go#L750-L783",
+              "text": "750: \t// Determine if keyboard-interactive authentication is required to satisfy any outstanding preconditions.\n751: \trequiresKeyboardInteractive := false\n752: \n753: \tfor _, precond := range preconds {\n754: \t\tswitch precond.GetKind() {\n755: \t\tcase decisionpb.PreconditionKind_PRECONDITION_KIND_IN_BAND_MFA:\n756: \t\t\trequired, err := requiresInBandMFA(id, conn)\n757: \t\t\tif err != nil {\n758: \t\t\t\treturn nil, trace.Wrap(err)\n759: \t\t\t}\n760: \t\t\trequiresKeyboardInteractive = requiresKeyboardInteractive || required\n761: \n762: \t\tcase decisionpb.PreconditionKind_PRECONDITION_KIND_PIN_SOURCE_IP:\n763: \t\t\t// No interactive auth needed.\n764: \n765: \t\tdefault:\n766: \t\t\t// If an unknown or unsupported precondition is provided, fail close to prevent potential auth bypasses.\n767: \t\t\treturn nil, trace.BadParameter(\"unexpected precondition type %q found (this is a bug)\", precond.GetKind())\n768: \t\t}\n769: \t}\n770: \n771: \t// If we have determined that keyboard-interactive authentication is not required to satisfy any outstanding\n772: \t// preconditions, allow the connection to proceed. Otherwise, proceed to the keyboard-interactive callback to\n773: \t// evaluate the remaining preconditions.\n774: \tif !requiresKeyboardInteractive {\n775: \t\treturn perms, nil\n776: \t}\n777: \n778: \treturn h.KeyboardInteractiveAuth(\n779: \t\tcontext.Background(),\n780: \t\tpreconds,\n781: \t\tid,\n782: \t\tperms,\n783: \t)"
+            }
+          ]
+        },
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/srv/regular/sshserver.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--srv--regular--sshserver.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.142430+00:00",
+          "sha256": "04d37924615f6a533e4cc8bc1e29f64534cc60a63284bdacd5a5ede511ed9de0",
+          "line_count": 2717,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/3ef4066919bb77021849fa0ad0b93a5a80666e3e79e2d5967784e246028c94a2.txt",
+          "upstream_observed_utc": "2026-10-15T01:14:11.448782Z",
+          "role": "real_caller",
+          "proves": "O daemon instala os callbacks e recusa um canal quando não consegue construir a identidade autorizada da conexão.",
+          "inspected_ranges": [
+            [
+              1016,
+              1026
+            ],
+            [
+              1533,
+              1538
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1016,
+              "end_line": 1026,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go#L1016-L1026",
+              "text": "1016: \tserver, err := sshutils.NewServer(\n1017: \t\tcomponent,\n1018: \t\taddr, s,\n1019: \t\tgetHostSigners,\n1020: \t\tsshutils.AuthMethods{\n1021: \t\t\tPublicKey:         s.authHandlers.PublicKeyCallback,\n1022: \t\t\tVerifiedPublicKey: s.authHandlers.VerifiedPublicKeyCallback,\n1023: \t\t},\n1024: \t\tsshutils.SetLimiter(s.limiter),\n1025: \t\tsshutils.SetRequestHandler(s),\n1026: \t\tsshutils.SetNewConnHandler(s),"
+            },
+            {
+              "start_line": 1533,
+              "end_line": 1538,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go#L1533-L1538",
+              "text": "1533: // HandleNewChan is called when new channel is opened\n1534: func (s *Server) HandleNewChan(ctx context.Context, ccx *sshutils.ConnectionContext, nch ssh.NewChannel) {\n1535: \tidentityContext, err := s.authHandlers.CreateIdentityContext(ccx.ServerConn)\n1536: \tif err != nil {\n1537: \t\ts.rejectChannel(ctx, nch, ssh.Prohibited, fmt.Sprintf(\"Unable to create identity from connection: %v\", err))\n1538: \t\treturn"
+            }
+          ]
+        },
+        {
+          "repo": "gravitational/teleport",
+          "revision": "1283425b60ec5f60d509ba4c791183d452923ff7",
+          "path": "lib/sshutils/server.go",
+          "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/sshutils/server.go",
+          "raw_url": "https://raw.githubusercontent.com/gravitational/teleport/1283425b60ec5f60d509ba4c791183d452923ff7/lib/sshutils/server.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/gravitational--teleport--1283425b--lib--sshutils--server.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:02:16.745913+00:00",
+          "sha256": "19e0c0eb13eb6f294d841ff82145c1f9c7723b868998d411d414f988de0796ef",
+          "line_count": 860,
+          "source": "raw_primary",
+          "role": "transport_bridge",
+          "proves": "O adaptador instala as callbacks no ssh.ServerConfig e executa ssh.NewServerConn com a configuração.",
+          "inspected_ranges": [
+            [
+              248,
+              249
+            ],
+            [
+              533,
+              540
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 248,
+              "end_line": 249,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/sshutils/server.go#L248-L249",
+              "text": "248: \ts.cfg.PublicKeyCallback = ah.PublicKey\n249: \ts.cfg.VerifiedPublicKeyCallback = ah.VerifiedPublicKey"
+            },
+            {
+              "start_line": 533,
+              "end_line": 540,
+              "url": "https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/sshutils/server.go#L533-L540",
+              "text": "533: \tsconn, chans, reqs, err := ssh.NewServerConn(conn, &cfg)\n534: \tif err != nil {\n535: \t\t// Ignore EOF as these are triggered by loadbalancer health checks\n536: \t\tif !errors.Is(err, io.EOF) {\n537: \t\t\ts.logger.WarnContext(s.closeContext, \"Error occurred in handshake for new SSH conn\",\n538: \t\t\t\t\"error\", err,\n539: \t\t\t\t\"remote_addr\", conn.RemoteAddr(),\n540: \t\t\t)"
+            }
+          ]
+        },
+        {
+          "repo": "golang/crypto",
+          "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+          "path": "ssh/certs.go",
+          "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go",
+          "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--certs.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.073539+00:00",
+          "sha256": "093b1448a7e8a17a5056e31e007bd10cda2e0a67a74b8548cede45068b4b1f2c",
+          "line_count": 653,
+          "source": "raw_primary",
+          "role": "authentication_framework",
+          "proves": "A biblioteca confere autoridade, principal, validade temporal e assinatura do certificado.",
+          "inspected_ranges": [
+            [
+              385,
+              415
+            ],
+            [
+              430,
+              469
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 385,
+              "end_line": 415,
+              "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go#L385-L415",
+              "text": "385: // Authenticate checks a user certificate. Authenticate can be used as a value\n386: // for ServerConfig.PublicKeyCallback. The source-address critical option is\n387: // allowed, as it will be enforced by the server.\n388: func (c *CertChecker) Authenticate(conn ConnMetadata, pubKey PublicKey) (*Permissions, error) {\n389: \tcert, ok := pubKey.(*Certificate)\n390: \tif !ok {\n391: \t\tif c.UserKeyFallback != nil {\n392: \t\t\treturn c.UserKeyFallback(conn, pubKey)\n393: \t\t}\n394: \t\treturn nil, errors.New(\"ssh: normal key pairs not accepted\")\n395: \t}\n396: \n397: \tif cert.CertType != UserCert {\n398: \t\treturn nil, fmt.Errorf(\"ssh: cert has type %d\", cert.CertType)\n399: \t}\n400: \tif c.IsUserAuthority == nil {\n401: \t\treturn nil, errors.New(\"ssh: cannot verify certificate, IsUserAuthority not set\")\n402: \t}\n403: \tif !c.IsUserAuthority(cert.SignatureKey) {\n404: \t\treturn nil, fmt.Errorf(\"ssh: certificate signed by unrecognized authority\")\n405: \t}\n406: \t// The source-address critical option is enforced by serverAuthenticate,\n407: \t// so it is supported regardless of SupportedCriticalOptions\n408: \tcc := *c\n409: \tcc.SupportedCriticalOptions = append(slices.Clip(cc.SupportedCriticalOptions), sourceAddressCriticalOption)\n410: \tif err := cc.CheckCert(conn.User(), cert); err != nil {\n411: \t\treturn nil, err\n412: \t}\n413: \n414: \treturn &cert.Permissions, nil\n415: }"
+            },
+            {
+              "start_line": 430,
+              "end_line": 469,
+              "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/certs.go#L430-L469",
+              "text": "430: \n431: \tif len(cert.ValidPrincipals) > 0 {\n432: \t\t// By default, certs are valid for all users/hosts.\n433: \t\tfound := false\n434: \t\tfor _, p := range cert.ValidPrincipals {\n435: \t\t\tif p == principal {\n436: \t\t\t\tfound = true\n437: \t\t\t\tbreak\n438: \t\t\t}\n439: \t\t}\n440: \t\tif !found {\n441: \t\t\treturn fmt.Errorf(\"ssh: principal %q not in the set of valid principals for given certificate: %q\", principal, cert.ValidPrincipals)\n442: \t\t}\n443: \t}\n444: \n445: \tclock := c.Clock\n446: \tif clock == nil {\n447: \t\tclock = time.Now\n448: \t}\n449: \n450: \tunixNow := clock().Unix()\n451: \tif after := int64(cert.ValidAfter); after < 0 || unixNow < int64(cert.ValidAfter) {\n452: \t\treturn fmt.Errorf(\"ssh: cert is not yet valid\")\n453: \t}\n454: \tif before := int64(cert.ValidBefore); cert.ValidBefore != uint64(CertTimeInfinity) && (unixNow >= before || before < 0) {\n455: \t\treturn fmt.Errorf(\"ssh: cert has expired\")\n456: \t}\n457: \t// Match OpenSSH: the SK user-presence flag is never enforced on a\n458: \t// certificate's CA signature. OpenSSH calls sshkey_verify with\n459: \t// detailsp==NULL in sshkey.c:cert_parse, so the UP/UV flags are\n460: \t// not even extracted. The UP bit on a CA signature reflects the\n461: \t// CA operator's presence at signing time, which has no bearing on\n462: \t// whether the user being authenticated is present now; enforcing\n463: \t// it here would only break interop with certificates issued by\n464: \t// non-interactive SK CAs. skKeyWithoutUP is a no-op for non-SK\n465: \t// keys (the common case).\n466: \tcaKey := skKeyWithoutUP(cert.SignatureKey)\n467: \tif err := caKey.Verify(cert.bytesForSigning(), cert.Signature); err != nil {\n468: \t\treturn fmt.Errorf(\"ssh: certificate signature does not verify\")\n469: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "golang/crypto",
+          "revision": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+          "path": "ssh/server.go",
+          "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go",
+          "raw_url": "https://raw.githubusercontent.com/golang/crypto/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/golang--crypto--cf169cd0--ssh--server.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:51.772567+00:00",
+          "sha256": "a9ff150f87775be31f40685d38f1c6934101a461f9bce82936a35331f6949c82",
+          "line_count": 1117,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/084421eeac212496d4ea4891c036a5342bb1173c7bf9eec59841790fc451cfdc.txt",
+          "upstream_observed_utc": "2026-10-15T01:22:34.844215Z",
+          "role": "proof_of_possession",
+          "proves": "O handshake executa a callback, verifica a assinatura do cliente e chama VerifiedPublicKeyCallback somente após aceitação da chave e prova de posse.",
+          "inspected_ranges": [
+            [
+              809,
+              820
+            ],
+            [
+              878,
+              899
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 809,
+              "end_line": 820,
+              "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go#L809-L820",
+              "text": "809: \t\t\t\tcandidate.perms, candidate.result = authConfig.PublicKeyCallback(s, pubKey)\n810: \t\t\t\t_, isPartialSuccessError := candidate.result.(*PartialSuccessError)\n811: \t\t\t\tif isPartialSuccessError && config.VerifiedPublicKeyCallback != nil {\n812: \t\t\t\t\treturn nil, errors.New(\"ssh: invalid library usage: PublicKeyCallback must not return partial success when VerifiedPublicKeyCallback is defined\")\n813: \t\t\t\t}\n814: \n815: \t\t\t\t// This check is authoritative for the Permissions returned by\n816: \t\t\t\t// PublicKeyCallback: the check at the end of the auth loop sees\n817: \t\t\t\t// the final Permissions, which VerifiedPublicKeyCallback may\n818: \t\t\t\t// have replaced, and is skipped on partial success. It also\n819: \t\t\t\t// makes public key queries fail before the client signs when\n820: \t\t\t\t// PublicKeyCallback supplies the restriction."
+            },
+            {
+              "start_line": 878,
+              "end_line": 899,
+              "url": "https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go#L878-L899",
+              "text": "878: \t\t\t\t// pubKey is reused below for VerifiedPublicKeyCallback and\n879: \t\t\t\t// must remain the key as presented by the client; derive a\n880: \t\t\t\t// separate value for Verify that carries any applicable\n881: \t\t\t\t// no-touch-required opt-out.\n882: \t\t\t\tpubKeyForVerify := pubKey\n883: \t\t\t\tif noTouchAllowed(pubKey, candidate.perms) {\n884: \t\t\t\t\tpubKeyForVerify = skKeyWithoutUP(pubKey)\n885: \t\t\t\t}\n886: \t\t\t\tif err := pubKeyForVerify.Verify(signedData, sig); err != nil {\n887: \t\t\t\t\treturn nil, err\n888: \t\t\t\t}\n889: \n890: \t\t\t\tauthErr = candidate.result\n891: \t\t\t\tperms = candidate.perms\n892: \t\t\t\tif authErr == nil && config.VerifiedPublicKeyCallback != nil {\n893: \t\t\t\t\t// Only call VerifiedPublicKeyCallback after the key has been accepted\n894: \t\t\t\t\t// and successfully verified. If authErr is non-nil, the key is not\n895: \t\t\t\t\t// considered verified and the callback must not run.\n896: \t\t\t\t\tperms, authErr = config.VerifiedPublicKeyCallback(s, pubKey, perms, sig.Format)\n897: \t\t\t\t}\n898: \t\t\t}\n899: \t\tcase \"gssapi-with-mic\":"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://csrc.nist.gov/pubs/sp/800/207/final",
+          "scope": "A definição canônica distingue autenticação de autorização e concentra a decisão no recurso, sem confiança implícita apenas pela localização de rede."
+        },
+        {
+          "url": "https://goteleport.com/docs/zero-trust-access/rbac-get-started/",
+          "scope": "A documentação primária explica que o agente verifica papéis para a conexão a cada recurso e nega a conexão sem permissão."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Teleport sshserver and Go SSH handshake prove authenticated access/proxying, but the row itself concedes that Zero Trust needs policy and proxy-path evaluation. No selected identity-to-resource authorization policy or verification path beyond generic SSH authentication establishes the Zero Trust mechanism. Add explicit per-resource identity authorization/verification code and bound the guarantees; Bastion Host can retain these sources."
+    },
+    {
+      "concept_id": "service-to-service-identity",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "go-spiffe oferece configuração mTLS que valida X509-SVID e autoriza o SPIFFE ID verificado. AuthorizeID permite escolher um ID específico.",
+      "application_role": "Istio é o produto OSS de infraestrutura. O recorte acompanha o agente e a CA na emissão e entrega de identidade de uma carga Kubernetes, mais a geração de configuração de validação e autorização para o proxy.",
+      "mechanism": "A requisição SDS faz o agente pedir um segredo. O cache constrói uma URI SPIFFE a partir de trust domain, namespace e service account e gera um CSR. CitadelClient envia o pedido à CA com credenciais por RPC. A CA autentica o JWT por TokenReview, exige namespace e service account e constrói a identidade SPIFFE desses valores verificados. Ela usa essa identidade como SubjectIDs do certificado; o gerador de SAN codifica o prefixo spiffe:// como URI, em vez de confiar apenas no nome solicitado no CSR. O agente devolve certificado e chave por SDS ao Envoy. No lado consumidor, ISTIO_MUTUAL configura o certificado local, a raiz e o matcher de SAN do par. A política source.principal é convertida em principal autenticado do RBAC; o builder gera o filtro de autorização que o Envoy aplica.",
+      "review_gap_addressed": "A cadeia inclui atestação por JWT, namespace/service account, URI SPIFFE, assinatura com SAN imposto pela CA, SDS e configuração de validação e autorização da identidade do par. Não depende do uso de certificado TLS genérico.",
+      "limits": [
+        "A identidade Kubernetes deste caminho representa a service account dentro do namespace e trust domain. Diferentes pods que usam a mesma service account compartilham essa identidade lógica; não se alega um identificador exclusivo por processo.",
+        "A análise demonstra o caminho Kubernetes em modo sidecar e as configurações geradas para mTLS e políticas de principal. Não demonstra um cluster em execução nem abrange todos os caminhos ambient, VMs ou CAs externas.",
+        "mTLS e autorização dependem da configuração. Istio permite modo permissivo e políticas opcionais; não se deduz que qualquer requisição em toda instalação esteja autenticada e autorizada da mesma forma.",
+        "A CA possui um ramo de impersonation para agentes de nó explicitamente autorizados. A cadeia descrita usa o ramo padrão sem impersonation.",
+        "go-spiffe e Istio são duas implementações do mesmo modelo de identidade. Não se afirma que o código Istio selecionado chame go-spiffe; o caller completo dentro do produto é mostrado separadamente."
+      ],
+      "licenses": [
+        "spiffe/go-spiffe@77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+        "istio/istio@4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631"
+      ],
+      "evidence": [
+        {
+          "repo": "spiffe/go-spiffe",
+          "revision": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+          "path": "spiffetls/tlsconfig/config.go",
+          "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go",
+          "raw_url": "https://raw.githubusercontent.com/spiffe/go-spiffe/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--spiffetls--tlsconfig--config.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.147856+00:00",
+          "sha256": "76923313bef22aa835b765c13a3e533ee4d9c1bdd1e25033ba96cb1e44df4d07",
+          "line_count": 255,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9f8a7fd7c2868c4ccf4c2e37d6ba3ab04eccd35ce7199d74d7f42c9233aaa165.txt",
+          "upstream_observed_utc": "2026-10-15T01:26:26.138209Z",
+          "role": "base",
+          "proves": "A configuração apresenta SVID, valida a cadeia/SPIFFE ID do peer e só então executa o autorizador.",
+          "inspected_ranges": [
+            [
+              58,
+              75
+            ],
+            [
+              110,
+              128
+            ],
+            [
+              171,
+              203
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 58,
+              "end_line": 75,
+              "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go#L58-L75",
+              "text": "58: // MTLSClientConfig returns a TLS configuration which presents an X509-SVID\n59: // to the server and verifies and authorizes the server X509-SVID.\n60: func MTLSClientConfig(svid x509svid.Source, bundle x509bundle.Source, authorizer Authorizer, opts ...Option) *tls.Config {\n61: \tconfig := newTLSConfig()\n62: \tHookMTLSClientConfig(config, svid, bundle, authorizer, opts...)\n63: \treturn config\n64: }\n65: \n66: // HookMTLSClientConfig sets up the TLS configuration to present an X509-SVID\n67: // to the server and verify and authorize the server X509-SVID. If there is an\n68: // existing callback set for VerifyPeerCertificate it will be wrapped by\n69: // this package and invoked after SPIFFE authentication has completed.\n70: func HookMTLSClientConfig(config *tls.Config, svid x509svid.Source, bundle x509bundle.Source, authorizer Authorizer, opts ...Option) {\n71: \tresetAuthFields(config)\n72: \tconfig.GetClientCertificate = GetClientCertificate(svid, opts...)\n73: \tconfig.InsecureSkipVerify = true\n74: \tconfig.VerifyPeerCertificate = WrapVerifyPeerCertificate(config.VerifyPeerCertificate, bundle, authorizer, opts...) //nolint:gosec // G123: VerifyConnection migration handled in a follow-up\n75: }"
+            },
+            {
+              "start_line": 110,
+              "end_line": 128,
+              "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go#L110-L128",
+              "text": "110: // MTLSServerConfig returns a TLS configuration which presents an X509-SVID\n111: // to the client and requires, verifies, and authorizes client X509-SVIDs.\n112: func MTLSServerConfig(svid x509svid.Source, bundle x509bundle.Source, authorizer Authorizer, opts ...Option) *tls.Config {\n113: \tconfig := newTLSConfig()\n114: \tHookMTLSServerConfig(config, svid, bundle, authorizer, opts...)\n115: \treturn config\n116: }\n117: \n118: // HookMTLSServerConfig sets up the TLS configuration to present an X509-SVID\n119: // to the client and require, verify, and authorize the client X509-SVID. If\n120: // there is an existing callback set for VerifyPeerCertificate it will be\n121: // wrapped by this package and invoked after SPIFFE authentication has\n122: // completed.\n123: func HookMTLSServerConfig(config *tls.Config, svid x509svid.Source, bundle x509bundle.Source, authorizer Authorizer, opts ...Option) {\n124: \tresetAuthFields(config)\n125: \tconfig.ClientAuth = tls.RequireAnyClientCert\n126: \tconfig.GetCertificate = GetCertificate(svid, opts...)\n127: \tconfig.VerifyPeerCertificate = WrapVerifyPeerCertificate(config.VerifyPeerCertificate, bundle, authorizer, opts...) //nolint:gosec // G123: VerifyConnection migration handled in a follow-up\n128: }"
+            },
+            {
+              "start_line": 171,
+              "end_line": 203,
+              "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go#L171-L203",
+              "text": "171: // tls.Config. It uses the given bundle source and authorizer to verify and\n172: // authorize X509-SVIDs provided by peers during the TLS handshake.\n173: func VerifyPeerCertificate(bundle x509bundle.Source, authorizer Authorizer, opts ...Option) func([][]byte, [][]*x509.Certificate) error {\n174: \treturn func(raw [][]byte, _ [][]*x509.Certificate) error {\n175: \t\tid, certs, err := x509svid.ParseAndVerify(raw, bundle)\n176: \t\tif err != nil {\n177: \t\t\treturn err\n178: \t\t}\n179: \n180: \t\treturn authorizer(id, certs)\n181: \t}\n182: }\n183: \n184: // WrapVerifyPeerCertificate wraps a VerifyPeerCertificate callback, performing\n185: // SPIFFE authentication against the peer certificates using the given bundle and\n186: // authorizer. The wrapped callback will be passed the verified chains.\n187: // Note: TLS clients must set `InsecureSkipVerify` when doing SPIFFE authentication to disable hostname verification.\n188: func WrapVerifyPeerCertificate(wrapped func([][]byte, [][]*x509.Certificate) error, bundle x509bundle.Source, authorizer Authorizer, opts ...Option) func([][]byte, [][]*x509.Certificate) error {\n189: \tif wrapped == nil {\n190: \t\treturn VerifyPeerCertificate(bundle, authorizer, opts...)\n191: \t}\n192: \n193: \treturn func(raw [][]byte, _ [][]*x509.Certificate) error {\n194: \t\tid, certs, err := x509svid.ParseAndVerify(raw, bundle)\n195: \t\tif err != nil {\n196: \t\t\treturn err\n197: \t\t}\n198: \n199: \t\tif err := authorizer(id, certs); err != nil {\n200: \t\t\treturn err\n201: \t\t}\n202: \n203: \t\treturn wrapped(raw, certs)"
+            }
+          ]
+        },
+        {
+          "repo": "spiffe/go-spiffe",
+          "revision": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+          "path": "spiffetls/tlsconfig/authorizer.go",
+          "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/authorizer.go",
+          "raw_url": "https://raw.githubusercontent.com/spiffe/go-spiffe/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/authorizer.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spiffe--go-spiffe--77c6d2e0--spiffetls--tlsconfig--authorizer.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.512046+00:00",
+          "sha256": "86fa01df88db4002ad2a2c2c43abc65e4a2dee4559ea3e93d2d7d14b818fc2b0",
+          "line_count": 48,
+          "source": "raw_primary",
+          "role": "identity_authorizer",
+          "proves": "AuthorizeID aplica MatchID ao ID real extraído do certificado já verificado.",
+          "inspected_ranges": [
+            [
+              9,
+              22
+            ],
+            [
+              42,
+              47
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 9,
+              "end_line": 22,
+              "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/authorizer.go#L9-L22",
+              "text": "9: // Authorizer authorizes an X509-SVID given the SPIFFE ID and the chain\n10: // of trust. The certificate chain starts with the X509-SVID certificate back\n11: // to an X.509 root for the trust domain.\n12: type Authorizer func(id spiffeid.ID, verifiedChains [][]*x509.Certificate) error\n13: \n14: // AuthorizeAny allows any SPIFFE ID.\n15: func AuthorizeAny() Authorizer {\n16: \treturn AdaptMatcher(spiffeid.MatchAny())\n17: }\n18: \n19: // AuthorizeID allows a specific SPIFFE ID.\n20: func AuthorizeID(allowed spiffeid.ID) Authorizer {\n21: \treturn AdaptMatcher(spiffeid.MatchID(allowed))\n22: }"
+            },
+            {
+              "start_line": 42,
+              "end_line": 47,
+              "url": "https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/authorizer.go#L42-L47",
+              "text": "42: // AdaptMatcher adapts any spiffeid.Matcher for use as an Authorizer which\n43: // only authorizes the SPIFFE ID but otherwise ignores the verified chains.\n44: func AdaptMatcher(matcher spiffeid.Matcher) Authorizer {\n45: \treturn Authorizer(func(actual spiffeid.ID, verifiedChains [][]*x509.Certificate) error {\n46: \t\treturn matcher(actual)\n47: \t})"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/nodeagent/sds/sdsservice.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--sds--sdsservice.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.515510+00:00",
+          "sha256": "96545f981eec308d1eda6c163dc915231599cde061ecb2f4ac79eda6b4af0bfb",
+          "line_count": 414,
+          "source": "raw_primary",
+          "role": "real_caller_and_delivery",
+          "proves": "O servidor SDS atende StreamSecrets, pede GenerateSecret e devolve certificado e chave no segredo TLS do Envoy.",
+          "inspected_ranges": [
+            [
+              129,
+              150
+            ],
+            [
+              270,
+              276
+            ],
+            [
+              380,
+              397
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 129,
+              "end_line": 150,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go#L129-L150",
+              "text": "129: func (s *sdsservice) generate(resourceNames []string) (*discovery.DiscoveryResponse, error) {\n130: \tresources := xds.Resources{}\n131: \tfor _, resourceName := range resourceNames {\n132: \t\tsecret, err := s.st.GenerateSecret(resourceName)\n133: \t\tif err != nil {\n134: \t\t\t// Typically, in Istiod, we do not return an error for a failure to generate a resource\n135: \t\t\t// However, here it makes sense, because we are generally streaming a single resource,\n136: \t\t\t// so sending an error will not cause a single failure to prevent the entire multiplex stream\n137: \t\t\t// of resources, and failures here are generally due to temporary networking issues to the CA\n138: \t\t\t// rather than a result of configuration issues, which trigger updates in Istiod when resolved.\n139: \t\t\t// Instead, we rely on the client to retry (with backoff) on failures.\n140: \t\t\treturn nil, fmt.Errorf(\"failed to generate secret for %v: %v\", resourceName, err)\n141: \t\t}\n142: \n143: \t\tres := protoconv.MessageToAny(toEnvoySecret(secret, s.rootCaPath, s.pkpConf))\n144: \t\tresources = append(resources, &discovery.Resource{\n145: \t\t\tName:     resourceName,\n146: \t\t\tResource: res,\n147: \t\t})\n148: \t}\n149: \treturn &discovery.DiscoveryResponse{\n150: \t\tTypeUrl:     model.SecretType,"
+            },
+            {
+              "start_line": 270,
+              "end_line": 276,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go#L270-L276",
+              "text": "270: // StreamSecrets serves SDS discovery requests and SDS push requests\n271: func (s *sdsservice) StreamSecrets(stream sds.SecretDiscoveryService_StreamSecretsServer) error {\n272: \treturn xds.Stream(&Context{\n273: \t\tBaseConnection: xds.NewConnection(\"\", stream),\n274: \t\ts:              s,\n275: \t\tw:              &Watch{},\n276: \t})"
+            },
+            {
+              "start_line": 380,
+              "end_line": 397,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/sds/sdsservice.go#L380-L397",
+              "text": "380: \t\tdefault:\n381: \t\t\tsecret.Type = &tls.Secret_TlsCertificate{\n382: \t\t\t\tTlsCertificate: &tls.TlsCertificate{\n383: \t\t\t\t\tCertificateChain: &core.DataSource{\n384: \t\t\t\t\t\tSpecifier: &core.DataSource_InlineBytes{\n385: \t\t\t\t\t\t\tInlineBytes: s.CertificateChain,\n386: \t\t\t\t\t\t},\n387: \t\t\t\t\t},\n388: \t\t\t\t\tPrivateKey: &core.DataSource{\n389: \t\t\t\t\t\tSpecifier: &core.DataSource_InlineBytes{\n390: \t\t\t\t\t\t\tInlineBytes: s.PrivateKey,\n391: \t\t\t\t\t\t},\n392: \t\t\t\t\t},\n393: \t\t\t\t},\n394: \t\t\t}\n395: \t\t}\n396: \t}\n397: \treturn secret"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/nodeagent/cache/secretcache.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/cache/secretcache.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/cache/secretcache.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--cache--secretcache.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.145202+00:00",
+          "sha256": "5e1c7c1903efec0989fed61b99fe2600e760d146d8cd762e037bf19d45a14606",
+          "line_count": 1159,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/b359cd8820f70d2130a7c919bdcb5c137990ebe124cc375e5154a8691157a306.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.489149+00:00",
+          "role": "application",
+          "proves": "O agente usa trust domain, namespace e service account para criar a URI do CSR e solicita assinatura à CA.",
+          "inspected_ranges": [
+            [
+              290,
+              304
+            ],
+            [
+              778,
+              815
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 290,
+              "end_line": 304,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/cache/secretcache.go#L290-L304",
+              "text": "290: \t// Now that we got the lock, look at cache again before sending request to avoid overwhelming CA\n291: \tns = sc.getCachedSecret(resourceName)\n292: \tif ns != nil {\n293: \t\treturn ns, nil\n294: \t}\n295: \n296: \tif ts := time.Since(t0); ts > time.Second {\n297: \t\tcacheLog.Warnf(\"slow generate secret lock: %v\", ts)\n298: \t}\n299: \n300: \t// send request to CA to get new workload certificate\n301: \tns, err = sc.generateNewSecret(resourceName)\n302: \tif err != nil {\n303: \t\treturn nil, fmt.Errorf(\"failed to generate workload certificate: %v\", err)\n304: \t}"
+            },
+            {
+              "start_line": 778,
+              "end_line": 815,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/cache/secretcache.go#L778-L815",
+              "text": "778: func (sc *SecretManagerClient) generateNewSecret(resourceName string) (*security.SecretItem, error) {\n779: \ttrustBundlePEM := []string{}\n780: \tvar rootCertPEM []byte\n781: \n782: \tif sc.caClient == nil {\n783: \t\treturn nil, fmt.Errorf(\"attempted to fetch secret, but ca client is nil\")\n784: \t}\n785: \tt0 := time.Now()\n786: \tlogPrefix := cacheLogPrefix(resourceName)\n787: \n788: \tcsrHostName := &spiffe.Identity{\n789: \t\tTrustDomain:    sc.configOptions.TrustDomain,\n790: \t\tNamespace:      sc.configOptions.WorkloadNamespace,\n791: \t\tServiceAccount: sc.configOptions.ServiceAccount,\n792: \t}\n793: \n794: \tcacheLog.Debugf(\"%s constructed host name for CSR: %s\", logPrefix, csrHostName.String())\n795: \toptions := pkiutil.CertOptions{\n796: \t\tHost:       csrHostName.String(),\n797: \t\tRSAKeySize: sc.configOptions.WorkloadRSAKeySize,\n798: \t\tPKCS8Key:   sc.configOptions.Pkcs8Keys,\n799: \t\tECSigAlg:   pkiutil.SupportedECSignatureAlgorithms(sc.configOptions.ECCSigAlg),\n800: \t\tECCCurve:   pkiutil.SupportedEllipticCurves(sc.configOptions.ECCCurve),\n801: \t}\n802: \n803: \t// Generate the cert/key, send CSR to CA.\n804: \tcsrPEM, keyPEM, err := pkiutil.GenCSR(options)\n805: \tif err != nil {\n806: \t\tcacheLog.Errorf(\"%s failed to generate key and certificate for CSR: %v\", logPrefix, err)\n807: \t\treturn nil, err\n808: \t}\n809: \n810: \tnumOutgoingRequests.With(RequestType.Value(monitoring.CSR)).Increment()\n811: \ttimeBeforeCSR := time.Now()\n812: \tcertChainPEM, err := sc.caClient.CSRSign(csrPEM, int64(sc.configOptions.SecretTTL.Seconds()))\n813: \tif err == nil {\n814: \t\ttrustBundlePEM, err = sc.caClient.GetRootCertBundle()\n815: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/nodeagent/caclient/providers/citadel/client.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--nodeagent--caclient--providers--citadel--client.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.036570+00:00",
+          "sha256": "1d3d85d257cac2a9112858262fb05c3623cfaed011db3de7ec991fc056a5266b",
+          "line_count": 174,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/747e419c7877a8facf8d747ae148dd0d35c64119a2fa85c7ab47e19f5c0a3602.txt",
+          "upstream_observed_utc": "2026-10-15T01:22:35.127572Z",
+          "role": "ca_caller_bridge",
+          "proves": "CSRSign chama CreateCertificate e o cliente gRPC inclui o provedor de credenciais por RPC.",
+          "inspected_ranges": [
+            [
+              79,
+              114
+            ],
+            [
+              138,
+              146
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 79,
+              "end_line": 114,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go#L79-L114",
+              "text": "79: // CSRSign calls Citadel to sign a CSR.\n80: func (c *CitadelClient) CSRSign(csrPEM []byte, certValidTTLInSec int64) (res []string, err error) {\n81: \tcrMetaStruct := &structpb.Struct{\n82: \t\tFields: map[string]*structpb.Value{\n83: \t\t\tsecurity.CertSigner: {\n84: \t\t\t\tKind: &structpb.Value_StringValue{StringValue: c.opts.CertSigner},\n85: \t\t\t},\n86: \t\t},\n87: \t}\n88: \treq := &pb.IstioCertificateRequest{\n89: \t\tCsr:              string(csrPEM),\n90: \t\tValidityDuration: certValidTTLInSec,\n91: \t\tMetadata:         crMetaStruct,\n92: \t}\n93: \t// TODO(hzxuzhonghu): notify caclient rebuilding only when root cert is updated.\n94: \t// It can happen when the istiod dns certs is resigned after root cert is updated,\n95: \t// in this case, the ca grpc client can not automatically connect to istiod after the underlying network connection closed.\n96: \t// Because that the grpc client still use the old tls configuration to reconnect to istiod.\n97: \t// So here we need to rebuild the caClient in order to use the new root cert.\n98: \tdefer func() {\n99: \t\tif err != nil {\n100: \t\t\tcitadelClientLog.Errorf(\"failed to sign CSR: %v\", err)\n101: \t\t\tif err := c.reconnect(); err != nil {\n102: \t\t\t\tcitadelClientLog.Errorf(\"failed reconnect: %v\", err)\n103: \t\t\t}\n104: \t\t}\n105: \t}()\n106: \n107: \tctx := metadata.NewOutgoingContext(context.Background(), metadata.Pairs(\"ClusterID\", c.opts.ClusterID))\n108: \tfor k, v := range c.opts.CAHeaders {\n109: \t\tctx = metadata.AppendToOutgoingContext(ctx, k, v)\n110: \t}\n111: \n112: \tresp, err := c.client.CreateCertificate(ctx, req)\n113: \tif err != nil {\n114: \t\treturn nil, fmt.Errorf(\"create certificate: %v\", err)"
+            },
+            {
+              "start_line": 138,
+              "end_line": 146,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go#L138-L146",
+              "text": "138: \ttlsOpts := c.getTLSOptions()\n139: \topts, err := istiogrpc.ClientOptions(nil, tlsOpts)\n140: \tif err != nil {\n141: \t\treturn nil, err\n142: \t}\n143: \topts = append(opts,\n144: \t\tgrpc.WithPerRPCCredentials(c.provider),\n145: \t\tsecurity.CARetryInterceptor(),\n146: \t)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--server--ca--authenticate--kubeauth--kube_jwt.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.143061+00:00",
+          "sha256": "c8219028153a953413f5a9063a878b981926bb057aca19d64b8c5db96e15a21b",
+          "line_count": 184,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/0f2029ef0b239c09cd65dea1d22c659aa1a0c07036642416c9c79a147201049f.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.458543+00:00",
+          "role": "attested_identity",
+          "proves": "A CA valida o JWT pelo Kubernetes e constrói Caller.Identities a partir de namespace e service account confirmados.",
+          "inspected_ranges": [
+            [
+              109,
+              144
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 109,
+              "end_line": 144,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/authenticate/kubeauth/kube_jwt.go#L109-L144",
+              "text": "109: func (a *KubeJWTAuthenticator) authenticateGrpc(ctx context.Context) (*security.Caller, error) {\n110: \ttargetJWT, err := security.ExtractBearerToken(ctx)\n111: \tif err != nil {\n112: \t\treturn nil, fmt.Errorf(\"target JWT extraction error: %v\", err)\n113: \t}\n114: \tclusterID := ExtractClusterID(ctx)\n115: \n116: \treturn a.authenticate(targetJWT, clusterID)\n117: }\n118: \n119: func (a *KubeJWTAuthenticator) authenticate(targetJWT string, clusterID cluster.ID) (*security.Caller, error) {\n120: \tkubeClient := a.getKubeClient(clusterID)\n121: \tif kubeClient == nil {\n122: \t\tvar clusterList []cluster.ID\n123: \t\tif a.remoteKubeClientGetter != nil {\n124: \t\t\tclusterList = a.remoteKubeClientGetter.ListClusters()\n125: \t\t}\n126: \t\treturn nil, fmt.Errorf(\"client claims to be in cluster %q, but we only know about local cluster %q and remote clusters %v\",\n127: \t\t\tclusterID, a.clusterID, clusterList)\n128: \t}\n129: \n130: \tid, err := tokenreview.ValidateK8sJwt(kubeClient, targetJWT, security.TokenAudiences)\n131: \tif err != nil {\n132: \t\treturn nil, fmt.Errorf(\"failed to validate the JWT from cluster %q: %v\", clusterID, err)\n133: \t}\n134: \tif id.PodServiceAccount == \"\" {\n135: \t\treturn nil, fmt.Errorf(\"failed to parse the JWT; service account required\")\n136: \t}\n137: \tif id.PodNamespace == \"\" {\n138: \t\treturn nil, fmt.Errorf(\"failed to parse the JWT; namespace required\")\n139: \t}\n140: \treturn &security.Caller{\n141: \t\tAuthSource:     security.AuthSourceIDToken,\n142: \t\tIdentities:     []string{spiffe.MustGenSpiffeURI(a.meshHolder.Mesh(), id.PodNamespace, id.PodServiceAccount)},\n143: \t\tKubernetesInfo: id,\n144: \t}, nil"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/k8s/tokenreview/k8sauthn.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--k8s--tokenreview--k8sauthn.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.314426+00:00",
+          "sha256": "f8e342391be25a7304337b37b931fbc46f0fc62ebc8da012369da794bb4e9154",
+          "line_count": 121,
+          "source": "raw_primary",
+          "role": "tokenreview",
+          "proves": "O servidor pede TokenReview com audiência e exige autenticação e identidade de service account antes de extrair namespace e conta.",
+          "inspected_ranges": [
+            [
+              41,
+              59
+            ],
+            [
+              87,
+              112
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 41,
+              "end_line": 59,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go#L41-L59",
+              "text": "41: // Return {<namespace>, <serviceaccountname>} in the targetToken when the validation passes.\n42: // Otherwise, return the error.\n43: // targetToken: the JWT of the K8s service account to be reviewed\n44: // aud: list of audiences to check. If empty 1st party tokens will be checked.\n45: func ValidateK8sJwt(kubeClient kubernetes.Interface, targetToken string, aud []string) (security.KubernetesInfo, error) {\n46: \ttokenReview := &k8sauth.TokenReview{\n47: \t\tSpec: k8sauth.TokenReviewSpec{\n48: \t\t\tToken: targetToken,\n49: \t\t},\n50: \t}\n51: \tif aud != nil {\n52: \t\ttokenReview.Spec.Audiences = aud\n53: \t}\n54: \treviewRes, err := kubeClient.AuthenticationV1().TokenReviews().Create(context.TODO(), tokenReview, metav1.CreateOptions{})\n55: \tif err != nil {\n56: \t\treturn security.KubernetesInfo{}, err\n57: \t}\n58: \n59: \treturn getTokenReviewResult(reviewRes)"
+            },
+            {
+              "start_line": 87,
+              "end_line": 112,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/k8s/tokenreview/k8sauthn.go#L87-L112",
+              "text": "87: \tif !tokenReview.Status.Authenticated {\n88: \t\treturn security.KubernetesInfo{}, fmt.Errorf(\"the token is not authenticated\")\n89: \t}\n90: \tinServiceAccountGroup := false\n91: \tfor _, group := range tokenReview.Status.User.Groups {\n92: \t\tif group == \"system:serviceaccounts\" {\n93: \t\t\tinServiceAccountGroup = true\n94: \t\t\tbreak\n95: \t\t}\n96: \t}\n97: \tif !inServiceAccountGroup {\n98: \t\treturn security.KubernetesInfo{}, fmt.Errorf(\"the token is not a service account\")\n99: \t}\n100: \t// \"username\" is in the form of system:serviceaccount:{namespace}:{service account name}\",\n101: \t// e.g., \"username\":\"system:serviceaccount:default:example-pod-sa\"\n102: \tsubStrings := strings.Split(tokenReview.Status.User.Username, \":\")\n103: \tif len(subStrings) != 4 {\n104: \t\treturn security.KubernetesInfo{}, fmt.Errorf(\"invalid username field in the token review result\")\n105: \t}\n106: \n107: \treturn security.KubernetesInfo{\n108: \t\tPodName:           extractExtra(tokenReview, PodNameKey),\n109: \t\tPodNamespace:      subStrings[2],\n110: \t\tPodUID:            extractExtra(tokenReview, PodUIDKey),\n111: \t\tPodServiceAccount: subStrings[3],\n112: \t}, nil"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pkg/spiffe/spiffe.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pkg--spiffe--spiffe.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.142821+00:00",
+          "sha256": "a261b2853229d3f54d763eb0d061d01ee47e1b859c649822b744afadb6616574",
+          "line_count": 354,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/a26b6cdaadb63ba381c54e0656d7f0b4a0a30a209d8532fc6fffaf7dcfbc8005.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.235080+00:00",
+          "role": "spiffe_identifier",
+          "proves": "O formato emitido é spiffe://<trust-domain>/ns/<namespace>/sa/<service-account>.",
+          "inspected_ranges": [
+            [
+              80,
+              81
+            ],
+            [
+              94,
+              110
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 80,
+              "end_line": 81,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go#L80-L81",
+              "text": "80: func (i Identity) String() string {\n81: \treturn URIPrefix + i.TrustDomain + \"/ns/\" + i.Namespace + \"/sa/\" + i.ServiceAccount"
+            },
+            {
+              "start_line": 94,
+              "end_line": 110,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go#L94-L110",
+              "text": "94: // GenSpiffeURI returns the formatted uri(SPIFFE format for now) for the certificate.\n95: func genSpiffeURI(td, ns, serviceAccount string) (string, error) {\n96: \tvar err error\n97: \tif ns == \"\" || serviceAccount == \"\" {\n98: \t\terr = fmt.Errorf(\n99: \t\t\t\"namespace or service account empty for SPIFFE uri ns=%v serviceAccount=%v\", ns, serviceAccount)\n100: \t}\n101: \treturn URIPrefix + sanitizeTrustDomain(td) + \"/ns/\" + ns + \"/sa/\" + serviceAccount, err\n102: }\n103: \n104: // MustGenSpiffeURI returns the formatted uri(SPIFFE format for now) for the certificate and logs if there was an error.\n105: func MustGenSpiffeURI(meshCfg *meshconfig.MeshConfig, ns, serviceAccount string) string {\n106: \turi, err := genSpiffeURI(meshCfg.GetTrustDomain(), ns, serviceAccount)\n107: \tif err != nil {\n108: \t\tspiffeLog.Debug(err.Error())\n109: \t}\n110: \treturn uri"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/server/ca/server.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/server.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/server.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--server--ca--server.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.143161+00:00",
+          "sha256": "3c8c2c9e13af34f0da971f6423310a7776d1bbc556ef1e6d34cc230e849b15a8",
+          "line_count": 218,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/38c5bc2c9f8a229b40fe2e7b3f242167c03c5b6057edc602714e71855bf37285.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.259150+00:00",
+          "role": "issuance_authority",
+          "proves": "A CA autentica o caller e usa suas identidades como SANs. O pedido de impersonation exige autorização específica antes de substituí-las.",
+          "inspected_ranges": [
+            [
+              75,
+              118
+            ],
+            [
+              122,
+              133
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 75,
+              "end_line": 118,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/server.go#L75-L118",
+              "text": "75: func (s *Server) CreateCertificate(ctx context.Context, request *pb.IstioCertificateRequest) (\n76: \t*pb.IstioCertificateResponse, error,\n77: ) {\n78: \ts.monitoring.CSR.Increment()\n79: \tcaller, err := security.Authenticate(ctx, s.Authenticators)\n80: \tif caller == nil || err != nil {\n81: \t\ts.monitoring.AuthnError.Increment()\n82: \t\treturn nil, status.Error(codes.Unauthenticated, \"request authenticate failure\")\n83: \t}\n84: \n85: \tserverCaLog := serverCaLog.WithLabels(\"client\", security.GetConnectionAddress(ctx))\n86: \t// By default, we will use the callers identity for the certificate\n87: \tsans := caller.Identities\n88: \tcrMetadata := request.Metadata.GetFields()\n89: \timpersonatedIdentity := crMetadata[security.ImpersonatedIdentity].GetStringValue()\n90: \tif impersonatedIdentity != \"\" {\n91: \t\tserverCaLog.Debugf(\"impersonated identity: %s\", impersonatedIdentity)\n92: \t\t// If there is an impersonated identity, we will override to use that identity (only single value\n93: \t\t// supported), if the real caller is authorized.\n94: \t\tif s.nodeAuthorizer == nil {\n95: \t\t\ts.monitoring.AuthnError.Increment()\n96: \t\t\t// Return an opaque error (for security purposes) but log the full reason\n97: \t\t\tserverCaLog.Warnf(\"impersonation not allowed, as node authorizer (CA_TRUSTED_NODE_ACCOUNTS) is not configured\")\n98: \t\t\treturn nil, status.Error(codes.Unauthenticated, \"request impersonation authentication failure\")\n99: \n100: \t\t}\n101: \t\tif err := s.nodeAuthorizer.authenticateImpersonation(ctx, caller.KubernetesInfo, impersonatedIdentity); err != nil {\n102: \t\t\ts.monitoring.AuthnError.Increment()\n103: \t\t\t// Return an opaque error (for security purposes) but log the full reason\n104: \t\t\tserverCaLog.Warnf(\"impersonation failed for identity %s, error: %v\", impersonatedIdentity, err)\n105: \t\t\treturn nil, status.Error(codes.Unauthenticated, \"request impersonation authentication failure\")\n106: \t\t}\n107: \t\t// Node is authorized to impersonate; overwrite the SAN to the impersonated identity.\n108: \t\tsans = []string{impersonatedIdentity}\n109: \t}\n110: \tserverCaLog.Debugf(\"generating a certificate, sans: %v, requested ttl: %s\", sans, time.Duration(request.ValidityDuration*int64(time.Second)))\n111: \tcertSigner := crMetadata[security.CertSigner].GetStringValue()\n112: \t_, _, certChainBytes, rootCertBytes := s.ca.GetCAKeyCertBundle().GetAll()\n113: \tcertOpts := ca.CertOpts{\n114: \t\tSubjectIDs: sans,\n115: \t\tTTL:        time.Duration(request.ValidityDuration) * time.Second,\n116: \t\tForCA:      false,\n117: \t\tCertSigner: certSigner,\n118: \t}"
+            },
+            {
+              "start_line": 122,
+              "end_line": 133,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/server/ca/server.go#L122-L133",
+              "text": "122: \tif certSigner == \"\" {\n123: \t\tcert, signErr = s.ca.Sign([]byte(request.Csr), certOpts)\n124: \t} else {\n125: \t\tserverCaLog.Debugf(\"signing CSR with cert chain\")\n126: \t\trespCertChain, signErr = s.ca.SignWithCertChain([]byte(request.Csr), certOpts)\n127: \t}\n128: \tif signErr != nil {\n129: \t\tcaErr := signErr.(*caerror.Error)\n130: \t\tserverCaLog.Errorf(\"CSR signing error: %v\", caErr)\n131: \t\ts.monitoring.GetCertSignError(caErr.ErrorType()).Increment()\n132: \t\treturn nil, status.Error(caErr.HTTPErrorCode(), \"CSR signing error\")\n133: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/pki/ca/ca.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--ca--ca.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.314545+00:00",
+          "sha256": "e16a1502be628ba6e0d4cc699f1fb5e2b9a1979fa7f9c88372a589d11576fbfe",
+          "line_count": 531,
+          "source": "raw_primary",
+          "role": "signer",
+          "proves": "O signer leva SubjectIDs autenticados até GenCertFromCSR.",
+          "inspected_ranges": [
+            [
+              400,
+              410
+            ],
+            [
+              478,
+              508
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 400,
+              "end_line": 410,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go#L400-L410",
+              "text": "400: func (ca *IstioCA) Sign(csrPEM []byte, certOpts CertOpts) (\n401: \t[]byte, error,\n402: ) {\n403: \treturn ca.sign(csrPEM, certOpts.SubjectIDs, certOpts.TTL, true, certOpts.ForCA)\n404: }\n405: \n406: // SignWithCertChain is similar to Sign but returns the leaf cert and the entire cert chain.\n407: func (ca *IstioCA) SignWithCertChain(csrPEM []byte, certOpts CertOpts) (\n408: \t[]string, error,\n409: ) {\n410: \tcert, err := ca.signWithCertChain(csrPEM, certOpts.SubjectIDs, certOpts.TTL, true, certOpts.ForCA)"
+            },
+            {
+              "start_line": 478,
+              "end_line": 508,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/ca/ca.go#L478-L508",
+              "text": "478: func (ca *IstioCA) sign(csrPEM []byte, subjectIDs []string, requestedLifetime time.Duration, checkLifetime, forCA bool) ([]byte, error) {\n479: \tsigningCert, signingKey, _, _ := ca.keyCertBundle.GetAll()\n480: \tif signingCert == nil {\n481: \t\treturn nil, caerror.NewError(caerror.CANotReady, fmt.Errorf(\"Istio CA is not ready\")) // nolint\n482: \t}\n483: \n484: \tcsr, err := util.ParsePemEncodedCSR(csrPEM)\n485: \tif err != nil {\n486: \t\treturn nil, caerror.NewError(caerror.CSRError, err)\n487: \t}\n488: \n489: \tif err := csr.CheckSignature(); err != nil {\n490: \t\treturn nil, caerror.NewError(caerror.CSRError, err)\n491: \t}\n492: \n493: \tlifetime := requestedLifetime\n494: \t// If the requested requestedLifetime is non-positive, apply the default TTL.\n495: \tif requestedLifetime.Seconds() <= 0 {\n496: \t\tlifetime = ca.defaultCertTTL\n497: \t}\n498: \t// If checkLifetime is set and the requested TTL is greater than maxCertTTL, return an error\n499: \tif checkLifetime && requestedLifetime.Seconds() > ca.maxCertTTL.Seconds() {\n500: \t\treturn nil, caerror.NewError(caerror.TTLError, fmt.Errorf(\n501: \t\t\t\"requested TTL %s is greater than the max allowed TTL %s\", requestedLifetime, ca.maxCertTTL))\n502: \t}\n503: \n504: \tcertBytes, err := util.GenCertFromCSR(csr, signingCert, csr.PublicKey, *signingKey, subjectIDs, lifetime, forCA)\n505: \tif err != nil {\n506: \t\treturn nil, caerror.NewError(caerror.CertGenError, err)\n507: \t}\n508: "
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/pki/util/generate_cert.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--util--generate_cert.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:02:16.745571+00:00",
+          "sha256": "58631a26ae2943a4f5719b7b86f5574539eb5ecf437f1a0b5c917ea42fc68a8e",
+          "line_count": 469,
+          "source": "raw_primary",
+          "role": "certificate_construction",
+          "proves": "O certificado é criado com extensão SAN construída dos SubjectIDs recebidos do signer.",
+          "inspected_ranges": [
+            [
+              245,
+              258
+            ],
+            [
+              291,
+              313
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 245,
+              "end_line": 258,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go#L245-L258",
+              "text": "245: func GenCertFromCSR(csr *x509.CertificateRequest, signingCert *x509.Certificate, publicKey any,\n246: \tsigningKey crypto.PrivateKey, subjectIDs []string, ttl time.Duration, isCA bool,\n247: ) (cert []byte, err error) {\n248: \ttmpl, err := genCertTemplateFromCSR(csr, subjectIDs, ttl, isCA, signingCert)\n249: \tif err != nil {\n250: \t\treturn nil, err\n251: \t}\n252: \treturn x509.CreateCertificate(rand.Reader, tmpl, signingCert, publicKey, signingKey)\n253: }\n254: \n255: // LoadSignerCredsFromFiles loads the signer cert&key from the given files.\n256: //\n257: //\tsignerCertFile: cert file name\n258: //\tsignerPrivFile: private key file name"
+            },
+            {
+              "start_line": 291,
+              "end_line": 313,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/generate_cert.go#L291-L313",
+              "text": "291: func genCertTemplateFromCSR(csr *x509.CertificateRequest, subjectIDs []string, ttl time.Duration, isCA bool, signingCert *x509.Certificate) (\n292: \t*x509.Certificate, error,\n293: ) {\n294: \tsubjectIDsInString := strings.Join(subjectIDs, \",\")\n295: \tvar keyUsage x509.KeyUsage\n296: \textKeyUsages := []x509.ExtKeyUsage{}\n297: \tif isCA {\n298: \t\t// If the cert is a CA cert, the private key is allowed to sign other certificates.\n299: \t\tkeyUsage = x509.KeyUsageCertSign\n300: \t} else {\n301: \t\t// Otherwise the private key is allowed for digital signature and key encipherment.\n302: \t\tkeyUsage = x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment\n303: \t\t// For now, we do not differentiate non-CA certs to be used on client auth or server auth.\n304: \t\textKeyUsages = append(extKeyUsages, x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth)\n305: \t}\n306: \n307: \t// Build cert extensions with the subjectIDs.\n308: \text, err := BuildSubjectAltNameExtension(subjectIDsInString)\n309: \tif err != nil {\n310: \t\treturn nil, err\n311: \t}\n312: \texts := []pkix.Extension{*ext}\n313: "
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "security/pkg/pki/util/san.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/san.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/san.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--security--pkg--pki--util--san.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:02:16.746068+00:00",
+          "sha256": "379ff723fa0b0ac3118c4131a5080310b8dbfec84aa654a3eb01721c3b5f67e2",
+          "line_count": 204,
+          "source": "raw_primary",
+          "role": "uri_san_encoding",
+          "proves": "O gerador reconhece spiffe:// e codifica a identidade como TypeURI.",
+          "inspected_ranges": [
+            [
+              70,
+              96
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 70,
+              "end_line": 96,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/pki/util/san.go#L70-L96",
+              "text": "70: type Identity struct {\n71: \tType  IdentityType\n72: \tValue []byte\n73: }\n74: \n75: // BuildSubjectAltNameExtension builds the SAN extension for the certificate.\n76: func BuildSubjectAltNameExtension(hosts string) (*pkix.Extension, error) {\n77: \tids := []Identity{}\n78: \tfor _, host := range strings.Split(hosts, \",\") {\n79: \t\tif ipa, _ := netip.ParseAddr(host); ipa.IsValid() {\n80: \t\t\t// Use the 4-byte representation of the IP address when possible.\n81: \t\t\tip := ipa.AsSlice()\n82: \t\t\tif ipa.Is4In6() {\n83: \t\t\t\teip := ipa.As4()\n84: \t\t\t\tip = eip[:]\n85: \t\t\t}\n86: \t\t\tids = append(ids, Identity{Type: TypeIP, Value: ip})\n87: \t\t} else if strings.HasPrefix(host, spiffe.URIPrefix) {\n88: \t\t\tids = append(ids, Identity{Type: TypeURI, Value: []byte(host)})\n89: \t\t} else {\n90: \t\t\tids = append(ids, Identity{Type: TypeDNS, Value: []byte(host)})\n91: \t\t}\n92: \t}\n93: \n94: \tsan, err := BuildSANExtension(ids)\n95: \tif err != nil {\n96: \t\treturn nil, fmt.Errorf(\"SAN extension building failure (%v)\", err)"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/networking/core/cluster_tls.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--networking--core--cluster_tls.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.531287+00:00",
+          "sha256": "ded0d757f71533f276b72a87a34751606ee5bc578917e406f6eed11108a49e6c",
+          "line_count": 506,
+          "source": "raw_primary",
+          "role": "peer_validation_configuration",
+          "proves": "ISTIO_MUTUAL usa certificado e raiz por SDS e configura matcher de SAN; quando não há SAN explícito usa as service accounts do serviço.",
+          "inspected_ranges": [
+            [
+              142,
+              156
+            ],
+            [
+              453,
+              466
+            ],
+            [
+              498,
+              505
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 142,
+              "end_line": 156,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go#L142-L156",
+              "text": "142: \tcase networking.ClientTLSSettings_ISTIO_MUTUAL:\n143: \t\ttlsContext = &tlsv3.UpstreamTlsContext{\n144: \t\t\tCommonTlsContext: defaultUpstreamCommonTLSContext(),\n145: \t\t\tSni:              tls.Sni,\n146: \t\t}\n147: \n148: \t\ttlsContext.CommonTlsContext.TlsCertificateSdsSecretConfigs = append(tlsContext.CommonTlsContext.TlsCertificateSdsSecretConfigs,\n149: \t\t\tsec_model.ConstructSdsSecretConfig(sec_model.SDSDefaultResourceName))\n150: \n151: \t\ttlsContext.CommonTlsContext.ValidationContextType = &tlsv3.CommonTlsContext_CombinedValidationContext{\n152: \t\t\tCombinedValidationContext: &tlsv3.CommonTlsContext_CombinedCertificateValidationContext{\n153: \t\t\t\tDefaultValidationContext:         &tlsv3.CertificateValidationContext{MatchSubjectAltNames: util.StringToExactMatch(tls.SubjectAltNames)},\n154: \t\t\t\tValidationContextSdsSecretConfig: sec_model.ConstructSdsSecretConfig(sec_model.SDSRootResourceName),\n155: \t\t\t},\n156: \t\t}"
+            },
+            {
+              "start_line": 453,
+              "end_line": 466,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go#L453-L466",
+              "text": "453: \t\t// Update TLS settings for ISTIO_MUTUAL. Use client provided SNI if set. Otherwise,\n454: \t\t// overwrite with the auto generated SNI. User specified SNIs in the istio mtls settings\n455: \t\t// are useful when routing via gateways. Use Service Accounts if Subject Alt names\n456: \t\t// are not specified in TLS settings.\n457: \t\tsniToUse := tls.Sni\n458: \t\tif len(sniToUse) == 0 {\n459: \t\t\tsniToUse = sni\n460: \t\t}\n461: \t\tsubjectAltNamesToUse := tls.SubjectAltNames\n462: \t\tif subjectAltNamesToUse == nil {\n463: \t\t\tsubjectAltNamesToUse = serviceAccounts\n464: \t\t}\n465: \t\t// Preserve InsecureSkipVerify from configured Destination Rule (e.g. for DFP when cert has no DNS SAN).\n466: \t\treturn cb.buildIstioMutualTLS(subjectAltNamesToUse, sniToUse, tls.InsecureSkipVerify), userSupplied"
+            },
+            {
+              "start_line": 498,
+              "end_line": 505,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/cluster_tls.go#L498-L505",
+              "text": "498: // buildIstioMutualTLS returns a `TLSSettings` for ISTIO_MUTUAL mode.\n499: func (cb *ClusterBuilder) buildIstioMutualTLS(san []string, sni string, insecureSkipVerify *wrapperspb.BoolValue) *networking.ClientTLSSettings {\n500: \treturn &networking.ClientTLSSettings{\n501: \t\tMode:               networking.ClientTLSSettings_ISTIO_MUTUAL,\n502: \t\tSubjectAltNames:    san,\n503: \t\tSni:                sni,\n504: \t\tInsecureSkipVerify: insecureSkipVerify,\n505: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/security/authz/model/model.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--model.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.314308+00:00",
+          "sha256": "37ca74e3961f8b7c8e0a18c5798bdce33133ed386e0f51cf556675768f57cdb2",
+          "line_count": 426,
+          "source": "raw_primary",
+          "role": "authorization_policy_bridge",
+          "proves": "A regra source.principals passa ao gerador de principal e é incluída na política RBAC.",
+          "inspected_ranges": [
+            [
+              124,
+              135
+            ],
+            [
+              182,
+              210
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 124,
+              "end_line": 135,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go#L124-L135",
+              "text": "124: \tfor _, from := range r.From {\n125: \t\tmerged := basePrincipal.copy()\n126: \t\tif s := from.Source; s != nil {\n127: \t\t\tmerged.insertFront(srcIPGenerator{}, attrSrcIP, s.IpBlocks, s.NotIpBlocks)\n128: \t\t\tmerged.insertFront(remoteIPGenerator{}, attrRemoteIP, s.RemoteIpBlocks, s.NotRemoteIpBlocks)\n129: \t\t\tmerged.insertFront(srcNamespaceGenerator{}, attrSrcNamespace, s.Namespaces, s.NotNamespaces)\n130: \t\t\tmerged.insertFront(srcTrustDomainGenerator{}, attrSrcTrustDomain, s.TrustDomains, s.NotTrustDomains)\n131: \t\t\tmerged.insertFront(srcServiceAccountGenerator{policyName: policyName}, attrSrcServiceAccount, s.ServiceAccounts, s.NotServiceAccounts)\n132: \t\t\tmerged.insertFrontExtended(requestPrincipalGenerator{}, attrRequestPrincipal, s.RequestPrincipals, s.NotRequestPrincipals)\n133: \t\t\tmerged.insertFront(srcPrincipalGenerator{}, attrSrcPrincipal, s.Principals, s.NotPrincipals)\n134: \t\t}\n135: \t\tm.principals = append(m.principals, merged)"
+            },
+            {
+              "start_line": 182,
+              "end_line": 210,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/model.go#L182-L210",
+              "text": "182: func (m Model) Generate(forTCP bool, useAuthenticated bool, action rbacpb.RBAC_Action) (*rbacpb.Policy, error) {\n183: \tvar permissions []*rbacpb.Permission\n184: \tfor _, rl := range m.permissions {\n185: \t\tpermission, err := generatePermission(rl, forTCP, action)\n186: \t\tif err != nil {\n187: \t\t\treturn nil, err\n188: \t\t}\n189: \t\tpermissions = append(permissions, permission)\n190: \t}\n191: \tif len(permissions) == 0 {\n192: \t\treturn nil, fmt.Errorf(\"must have at least 1 permission\")\n193: \t}\n194: \n195: \tvar principals []*rbacpb.Principal\n196: \tfor _, rl := range m.principals {\n197: \t\tprincipal, err := generatePrincipal(rl, forTCP, useAuthenticated, action)\n198: \t\tif err != nil {\n199: \t\t\treturn nil, err\n200: \t\t}\n201: \t\tprincipals = append(principals, principal)\n202: \t}\n203: \tif len(principals) == 0 {\n204: \t\treturn nil, fmt.Errorf(\"must have at least 1 principal\")\n205: \t}\n206: \n207: \treturn &rbacpb.Policy{\n208: \t\tPermissions: permissions,\n209: \t\tPrincipals:  principals,\n210: \t}, nil"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/security/authz/model/generator.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/generator.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/generator.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--generator.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.512513+00:00",
+          "sha256": "492f4739938451f8f57df892a29e2c84154b6e4138ea85ad589be3e693cbc430",
+          "line_count": 434,
+          "source": "raw_primary",
+          "role": "spiffe_principal_matcher",
+          "proves": "O matcher de source.principal recebe o prefixo URI SPIFFE.",
+          "inspected_ranges": [
+            [
+              244,
+              253
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 244,
+              "end_line": 253,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/generator.go#L244-L253",
+              "text": "244: type srcPrincipalGenerator struct{}\n245: \n246: func (srcPrincipalGenerator) permission(_, _ string, _ bool) (*rbacpb.Permission, error) {\n247: \treturn nil, fmt.Errorf(\"unimplemented\")\n248: }\n249: \n250: func (srcPrincipalGenerator) principal(key, value string, _ bool, useAuthenticated bool) (*rbacpb.Principal, error) {\n251: \tm := matcher.StringMatcherWithPrefix(value, spiffe.URIPrefix)\n252: \treturn principalAuthenticated(m, useAuthenticated), nil\n253: }"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/security/authz/model/principal.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/principal.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/principal.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--model--principal.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.490839+00:00",
+          "sha256": "8dae457acbe3544cf9a0c82e7107cfe665e64fcdf512765179f31c2c85085d66",
+          "line_count": 112,
+          "source": "raw_primary",
+          "role": "authenticated_peer",
+          "proves": "O principal usa identidade autenticada do Envoy ou o estado io.istio.peer_principal, conforme o modo configurado.",
+          "inspected_ranges": [
+            [
+              60,
+              79
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 60,
+              "end_line": 79,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/model/principal.go#L60-L79",
+              "text": "60: func principalAuthenticated(name *matcher.StringMatcher, useAuthenticated bool) *rbacpb.Principal {\n61: \tif useAuthenticated {\n62: \t\treturn &rbacpb.Principal{\n63: \t\t\tIdentifier: &rbacpb.Principal_Authenticated_{\n64: \t\t\t\tAuthenticated: &rbacpb.Principal_Authenticated{\n65: \t\t\t\t\tPrincipalName: name,\n66: \t\t\t\t},\n67: \t\t\t},\n68: \t\t}\n69: \t}\n70: \treturn &rbacpb.Principal{\n71: \t\tIdentifier: &rbacpb.Principal_FilterState{\n72: \t\t\tFilterState: &matcher.FilterStateMatcher{\n73: \t\t\t\tKey: \"io.istio.peer_principal\",\n74: \t\t\t\tMatcher: &matcher.FilterStateMatcher_StringMatch{\n75: \t\t\t\t\tStringMatch: name,\n76: \t\t\t\t},\n77: \t\t\t},\n78: \t\t},\n79: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "istio/istio",
+          "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+          "path": "pilot/pkg/security/authz/builder/builder.go",
+          "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go",
+          "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pilot--pkg--security--authz--builder--builder.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.316589+00:00",
+          "sha256": "cf6f60f502505e73c30ad48d5587ca7c88e2e2acb1b69f959da8a0b3aa03dbf7",
+          "line_count": 632,
+          "source": "raw_primary",
+          "role": "authorization_effect_configuration",
+          "proves": "O builder gera políticas ALLOW/DENY e as coloca em um filtro HTTP RBAC do Envoy, fora do ramo de avaliação apenas em shadow.",
+          "inspected_ranges": [
+            [
+              197,
+              205
+            ],
+            [
+              350,
+              362
+            ],
+            [
+              393,
+              411
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 197,
+              "end_line": 205,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go#L197-L205",
+              "text": "197: \tif configs := b.build(b.denyPolicies, rbacpb.RBAC_DENY, forTCP, logger); configs != nil {\n198: \t\tt := translateFn(configs, logger)\n199: \t\tlogger.AppendDebugf(\"built %d %s filters for DENY action\", len(t), logType)\n200: \t\tfilters = append(filters, t...)\n201: \t}\n202: \tif configs := b.build(b.allowPolicies, rbacpb.RBAC_ALLOW, forTCP, logger); configs != nil {\n203: \t\tt := translateFn(configs, logger)\n204: \t\tlogger.AppendDebugf(\"built %d %s filters for ALLOW action\", len(t), logType)\n205: \t\tfilters = append(filters, t...)"
+            },
+            {
+              "start_line": 350,
+              "end_line": 362,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go#L350-L362",
+              "text": "350: \t\t\t}\n351: \t\t\tm, err := authzmodel.New(policy.NamespacedName(), rule)\n352: \t\t\tif err != nil {\n353: \t\t\t\tlogger.AppendError(multierror.Prefix(err, fmt.Sprintf(\"skipped invalid rule %s:\", name)))\n354: \t\t\t\tcontinue\n355: \t\t\t}\n356: \t\t\tm.MigrateTrustDomain(b.trustDomainBundle)\n357: \t\t\tif len(b.trustDomainBundle.TrustDomains) > 1 {\n358: \t\t\t\tlogger.AppendDebugf(\"patched source principal with trust domain aliases %v\", b.trustDomainBundle.TrustDomains)\n359: \t\t\t}\n360: \t\t\tgenerated, err := m.Generate(forTCP, !b.option.UseFilterState, action)\n361: \t\t\tif err != nil {\n362: \t\t\t\tlogger.AppendDebugf(\"skipped rule %s on TCP filter chain: %v\", name, err)"
+            },
+            {
+              "start_line": 393,
+              "end_line": 411,
+              "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/security/authz/builder/builder.go#L393-L411",
+              "text": "393: func (b Builder) buildHTTP(rule *builtRule, logger *AuthzLogger) []*hcm.HttpFilter {\n394: \trules := rule.rules\n395: \tshadowRules := rule.shadowRules\n396: \tif !b.option.IsCustomBuilder {\n397: \t\trbac := &rbachttp.RBAC{\n398: \t\t\tRules:                 rules,\n399: \t\t\tShadowRules:           shadowRules,\n400: \t\t\tShadowRulesStatPrefix: shadowRuleStatPrefix(shadowRules),\n401: \t\t}\n402: \t\tname := wellknown.HTTPRoleBasedAccessControl\n403: \t\tif b.option.NamedAllowFilter && actionOf(rules, shadowRules) == rbacpb.RBAC_ALLOW {\n404: \t\t\tname = RBACFilterNameAllow\n405: \t\t}\n406: \t\treturn []*hcm.HttpFilter{\n407: \t\t\t{\n408: \t\t\t\tName:       name,\n409: \t\t\t\tConfigType: &hcm.HttpFilter_TypedConfig{TypedConfig: protoconv.MessageToAny(rbac)},\n410: \t\t\t},\n411: \t\t}"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://istio.io/latest/docs/concepts/security/",
+          "scope": "As seções Istio identity, certificate management e secure naming explicam a emissão, SDS, verificação de service account do par e autorização no proxy."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "SPIFFE base defines X509-SVID certificate callbacks, but Istio Citadel client.go 124–145 only passes generic key/cert/root/SAN options to a CA connection. No workload SPIFFE URI/CSR identity construction, issuance mapping or peer identity verification is shown. Add a concrete workload-identity path; generic TLS credentials alone are insufficient."
+    },
+    {
+      "concept_id": "token-exchange",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "Spring Security fornece um cliente RFC 8693 real, com TokenExchangeGrantRequest, conversão de parâmetros e POST ao token endpoint.",
+      "application_role": "Keycloak Server é o produto OSS real. O recorte é o provider StandardTokenExchangeProvider, ligado a TOKEN_EXCHANGE_STANDARD_V2, para troca interna entre clientes do mesmo realm.",
+      "mechanism": "No framework, o provider obtém um subject token, constrói TokenExchangeGrantRequest e chama o cliente HTTP. O conversor envia o grant token-exchange com subject_token, subject_token_type e requested_token_type. No Keycloak, TokenEndpoint autentica o cliente e despacha o grant. TokenExchangeGrantType escolhe o provider compatível e dispara a política do pedido. O provider padrão exige que a funcionalidade esteja habilitada para o cliente e valida o access token de entrada, incluindo assinatura, emissor, validade e revogação pelo verificador. A regra de audiência rejeita cliente público, audiência desabilitada e solicitante ausente da audiência do subject token, salvo troca do próprio token. Depois, ele cria um novo access token com o contexto de escopos, confere as audiências efetivas, aplica políticas da resposta e devolve o novo token codificado com issued_token_type.",
+      "review_gap_addressed": "A base anterior de authorization_code foi substituída por código que envia subject_token em grant RFC 8693. O produto tem caller, autenticação do cliente, verificação do token, autorização por audiência/política e emissão da nova resposta.",
+      "limits": [
+        "O recorte é Standard Token Exchange V2 interno-interno do SHA fixado. Não se atribuem a ele as capacidades do provider legacy V1, como impersonation arbitrária ou troca de tokens externos.",
+        "O código exige habilitação de standard token exchange no cliente. Não se infere configuração de qualquer realm real nem se afirma que o recurso esteja ativo em produção.",
+        "O pedido de audience filtra e valida audiências efetivamente disponíveis; ele não concede automaticamente uma nova audiência. Os escopos e client policies podem produzir comportamento além de downscoping; não se promete que toda troca reduza privilégios.",
+        "Spring e Keycloak são exemplos independentes do protocolo, não uma integração executada. Spring envia subject_token_type=jwt para uma instância Jwt; o provider padrão Keycloak selecionado aceita access_token. Uma composição real precisa escolher o tipo aceito e configurar o cliente.",
+        "Não foi executado um fluxo HTTP de teste. A evidência é a cadeia implementada no código fixado e sua documentação primária."
+      ],
+      "licenses": [
+        "spring-projects/spring-security@42192f9591763875eb2986bc8fd695a2eebefb02",
+        "keycloak/keycloak@8a081db466da3ff8de74efab2f3d9844277c18ba"
+      ],
+      "evidence": [
+        {
+          "repo": "spring-projects/spring-security",
+          "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+          "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+          "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--TokenExchangeGrantRequest.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.777173+00:00",
+          "sha256": "c7cf109f089fd20f47763f66da74eae33519825f7cad181d1b8e63ea9a61706b",
+          "line_count": 119,
+          "source": "raw_primary",
+          "role": "base",
+          "proves": "A requisição exige grant TOKEN_EXCHANGE e subject token e monta os parâmetros RFC 8693, em vez de authorization_code.",
+          "inspected_ranges": [
+            [
+              48,
+              71
+            ],
+            [
+              96,
+              117
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 48,
+              "end_line": 71,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java#L48-L71",
+              "text": "48: public class TokenExchangeGrantRequest extends AbstractOAuth2AuthorizationGrantRequest {\n49: \n50: \tprivate static final String ACCESS_TOKEN_TYPE_VALUE = \"urn:ietf:params:oauth:token-type:access_token\";\n51: \n52: \tprivate static final String JWT_TOKEN_TYPE_VALUE = \"urn:ietf:params:oauth:token-type:jwt\";\n53: \n54: \tprivate final OAuth2Token subjectToken;\n55: \n56: \tprivate final @Nullable OAuth2Token actorToken;\n57: \n58: \t/**\n59: \t * Constructs a {@code TokenExchangeGrantRequest} using the provided parameters.\n60: \t * @param clientRegistration the client registration\n61: \t * @param subjectToken the subject token\n62: \t * @param actorToken the actor token\n63: \t */\n64: \tpublic TokenExchangeGrantRequest(ClientRegistration clientRegistration, OAuth2Token subjectToken,\n65: \t\t\t@Nullable OAuth2Token actorToken) {\n66: \t\tsuper(AuthorizationGrantType.TOKEN_EXCHANGE, clientRegistration);\n67: \t\tAssert.isTrue(AuthorizationGrantType.TOKEN_EXCHANGE.equals(clientRegistration.getAuthorizationGrantType()),\n68: \t\t\t\t\"clientRegistration.authorizationGrantType must be AuthorizationGrantType.TOKEN_EXCHANGE\");\n69: \t\tAssert.notNull(subjectToken, \"subjectToken cannot be null\");\n70: \t\tthis.subjectToken = subjectToken;\n71: \t\tthis.actorToken = actorToken;"
+            },
+            {
+              "start_line": 96,
+              "end_line": 117,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/TokenExchangeGrantRequest.java#L96-L117",
+              "text": "96: \tstatic MultiValueMap<String, String> defaultParameters(TokenExchangeGrantRequest grantRequest) {\n97: \t\tClientRegistration clientRegistration = grantRequest.getClientRegistration();\n98: \t\tMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();\n99: \t\tif (!CollectionUtils.isEmpty(clientRegistration.getScopes())) {\n100: \t\t\tparameters.set(OAuth2ParameterNames.SCOPE,\n101: \t\t\t\t\tStringUtils.collectionToDelimitedString(clientRegistration.getScopes(), \" \"));\n102: \t\t}\n103: \t\tparameters.set(OAuth2ParameterNames.REQUESTED_TOKEN_TYPE, ACCESS_TOKEN_TYPE_VALUE);\n104: \t\tOAuth2Token subjectToken = grantRequest.getSubjectToken();\n105: \t\tparameters.set(OAuth2ParameterNames.SUBJECT_TOKEN, subjectToken.getTokenValue());\n106: \t\tparameters.set(OAuth2ParameterNames.SUBJECT_TOKEN_TYPE, tokenType(subjectToken));\n107: \t\tOAuth2Token actorToken = grantRequest.getActorToken();\n108: \t\tif (actorToken != null) {\n109: \t\t\tparameters.set(OAuth2ParameterNames.ACTOR_TOKEN, actorToken.getTokenValue());\n110: \t\t\tparameters.set(OAuth2ParameterNames.ACTOR_TOKEN_TYPE, tokenType(actorToken));\n111: \t\t}\n112: \t\treturn parameters;\n113: \t}\n114: \n115: \tprivate static String tokenType(OAuth2Token token) {\n116: \t\treturn (token instanceof Jwt) ? JWT_TOKEN_TYPE_VALUE : ACCESS_TOKEN_TYPE_VALUE;\n117: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "spring-projects/spring-security",
+          "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+          "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+          "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--TokenExchangeOAuth2AuthorizedClientProvider.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.779829+00:00",
+          "sha256": "1f33f6970215826778f9147663d14cbf3fa729806d2b393524c1e7ac77ed2189",
+          "line_count": 178,
+          "source": "raw_primary",
+          "role": "framework_caller",
+          "proves": "O provider resolve subject token, cria a requisição e usa a resposta para obter o novo OAuth2AuthorizedClient.",
+          "inspected_ranges": [
+            [
+              45,
+              51
+            ],
+            [
+              70,
+              110
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 45,
+              "end_line": 51,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java#L45-L51",
+              "text": "45: public final class TokenExchangeOAuth2AuthorizedClientProvider implements OAuth2AuthorizedClientProvider {\n46: \n47: \tprivate OAuth2AccessTokenResponseClient<TokenExchangeGrantRequest> accessTokenResponseClient = new RestClientTokenExchangeTokenResponseClient();\n48: \n49: \tprivate Function<OAuth2AuthorizationContext, @Nullable OAuth2Token> subjectTokenResolver = this::resolveSubjectToken;\n50: \n51: \tprivate Function<OAuth2AuthorizationContext, @Nullable OAuth2Token> actorTokenResolver = (context) -> null;"
+            },
+            {
+              "start_line": 70,
+              "end_line": 110,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/TokenExchangeOAuth2AuthorizedClientProvider.java#L70-L110",
+              "text": "70: \tpublic @Nullable OAuth2AuthorizedClient authorize(OAuth2AuthorizationContext context) {\n71: \t\tAssert.notNull(context, \"context cannot be null\");\n72: \t\tClientRegistration clientRegistration = context.getClientRegistration();\n73: \t\tif (!AuthorizationGrantType.TOKEN_EXCHANGE.equals(clientRegistration.getAuthorizationGrantType())) {\n74: \t\t\treturn null;\n75: \t\t}\n76: \t\tOAuth2AuthorizedClient authorizedClient = context.getAuthorizedClient();\n77: \t\tif (authorizedClient != null && !hasTokenExpired(authorizedClient.getAccessToken())) {\n78: \t\t\t// If client is already authorized but access token is NOT expired than no\n79: \t\t\t// need for re-authorization\n80: \t\t\treturn null;\n81: \t\t}\n82: \t\tOAuth2Token subjectToken = this.subjectTokenResolver.apply(context);\n83: \t\tif (subjectToken == null) {\n84: \t\t\treturn null;\n85: \t\t}\n86: \n87: \t\tOAuth2Token actorToken = this.actorTokenResolver.apply(context);\n88: \t\tTokenExchangeGrantRequest grantRequest = new TokenExchangeGrantRequest(clientRegistration, subjectToken,\n89: \t\t\t\tactorToken);\n90: \t\tOAuth2AccessTokenResponse tokenResponse = getTokenResponse(clientRegistration, grantRequest);\n91: \n92: \t\treturn new OAuth2AuthorizedClient(clientRegistration, context.getPrincipal().getName(),\n93: \t\t\t\ttokenResponse.getAccessToken(), tokenResponse.getRefreshToken());\n94: \t}\n95: \n96: \tprivate @Nullable OAuth2Token resolveSubjectToken(OAuth2AuthorizationContext context) {\n97: \t\tif (context.getPrincipal().getPrincipal() instanceof OAuth2Token accessToken) {\n98: \t\t\treturn accessToken;\n99: \t\t}\n100: \t\treturn null;\n101: \t}\n102: \n103: \tprivate OAuth2AccessTokenResponse getTokenResponse(ClientRegistration clientRegistration,\n104: \t\t\tTokenExchangeGrantRequest tokenExchangeGrantRequest) {\n105: \t\ttry {\n106: \t\t\treturn this.accessTokenResponseClient.getTokenResponse(tokenExchangeGrantRequest);\n107: \t\t}\n108: \t\tcatch (OAuth2AuthorizationException ex) {\n109: \t\t\tthrow new ClientAuthorizationException(ex.getError(), clientRegistration.getRegistrationId(), ex);\n110: \t\t}"
+            }
+          ]
+        },
+        {
+          "repo": "spring-projects/spring-security",
+          "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+          "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.java",
+          "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--RestClientTokenExchangeTokenResponseClient.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.777554+00:00",
+          "sha256": "bf89df645f3665889cead4e61ab13e02daf16e145a07b226aa088a674af6094f",
+          "line_count": 39,
+          "source": "raw_primary",
+          "role": "framework_protocol_client",
+          "proves": "O cliente declara e implementa a especialização de resposta de TokenExchangeGrantRequest.",
+          "inspected_ranges": [
+            [
+              21,
+              39
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 21,
+              "end_line": 39,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.java#L21-L39",
+              "text": "21: /**\n22:  * An implementation of {@link OAuth2AccessTokenResponseClient} that &quot;exchanges&quot;\n23:  * a subject token (and optionally an actor token) for an access token at the\n24:  * Authorization Server's Token Endpoint.\n25:  *\n26:  * @author Steve Riesenberg\n27:  * @since 6.4\n28:  * @see OAuth2AccessTokenResponseClient\n29:  * @see TokenExchangeGrantRequest\n30:  * @see OAuth2AccessTokenResponse\n31:  * @see <a target=\"_blank\" href=\"https://tools.ietf.org/html/rfc8693#section-2.1\">Section\n32:  * 2.1 Request</a>\n33:  * @see <a target=\"_blank\" href=\"https://tools.ietf.org/html/rfc8693#section-2.2\">Section\n34:  * 2.2 Response</a>\n35:  */\n36: public final class RestClientTokenExchangeTokenResponseClient\n37: \t\textends AbstractRestClientOAuth2AccessTokenResponseClient<TokenExchangeGrantRequest> {\n38: \n39: }"
+            }
+          ]
+        },
+        {
+          "repo": "spring-projects/spring-security",
+          "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+          "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+          "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--DefaultOAuth2TokenRequestParametersConverter.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.035682+00:00",
+          "sha256": "fa66a92a0888dd8229dc699ce265c8db2a6451a1e737842e4706b78d9174efc8",
+          "line_count": 107,
+          "source": "raw_primary",
+          "role": "protocol_parameters",
+          "proves": "O conversor inclui grant_type e acrescenta os parâmetros específicos da troca de subject token.",
+          "inspected_ranges": [
+            [
+              65,
+              83
+            ],
+            [
+              100,
+              102
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 65,
+              "end_line": 83,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java#L65-L83",
+              "text": "65: \t@Override\n66: \tpublic MultiValueMap<String, String> convert(T grantRequest) {\n67: \t\tClientRegistration clientRegistration = grantRequest.getClientRegistration();\n68: \t\tMultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();\n69: \t\tparameters.set(OAuth2ParameterNames.GRANT_TYPE, grantRequest.getGrantType().getValue());\n70: \t\tif (!ClientAuthenticationMethod.CLIENT_SECRET_BASIC\n71: \t\t\t.equals(clientRegistration.getClientAuthenticationMethod())) {\n72: \t\t\tparameters.set(OAuth2ParameterNames.CLIENT_ID, clientRegistration.getClientId());\n73: \t\t}\n74: \t\tif (ClientAuthenticationMethod.CLIENT_SECRET_POST.equals(clientRegistration.getClientAuthenticationMethod())) {\n75: \t\t\tparameters.set(OAuth2ParameterNames.CLIENT_SECRET, clientRegistration.getClientSecret());\n76: \t\t}\n77: \n78: \t\tMultiValueMap<String, String> defaultParameters = this.defaultParametersConverter.convert(grantRequest);\n79: \t\tif (defaultParameters != null) {\n80: \t\t\tparameters.addAll(defaultParameters);\n81: \t\t}\n82: \n83: \t\treturn parameters;"
+            },
+            {
+              "start_line": 100,
+              "end_line": 102,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/DefaultOAuth2TokenRequestParametersConverter.java#L100-L102",
+              "text": "100: \t\t\telse if (grantRequest instanceof TokenExchangeGrantRequest tokenExchangeGrantRequest) {\n101: \t\t\t\treturn TokenExchangeGrantRequest.defaultParameters(tokenExchangeGrantRequest);\n102: \t\t\t}"
+            }
+          ]
+        },
+        {
+          "repo": "spring-projects/spring-security",
+          "revision": "42192f9591763875eb2986bc8fd695a2eebefb02",
+          "path": "oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+          "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+          "raw_url": "https://raw.githubusercontent.com/spring-projects/spring-security/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/spring-projects--spring-security--42192f95--oauth2--oauth2-client--src--main--java--org--springframework--security--oauth2--client--endpoint--AbstractRestClientOAuth2AccessTokenResponseClient.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.049839+00:00",
+          "sha256": "f7aa08fb026f8d7373940958eb91252a93db311418d8e7684a764d59c26976f5",
+          "line_count": 261,
+          "source": "raw_primary",
+          "role": "http_effect",
+          "proves": "A implementação usa POST no token endpoint e desserializa a nova OAuth2AccessTokenResponse.",
+          "inspected_ranges": [
+            [
+              86,
+              100
+            ],
+            [
+              129,
+              145
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 86,
+              "end_line": 100,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java#L86-L100",
+              "text": "86: \t@Override\n87: \tpublic OAuth2AccessTokenResponse getTokenResponse(T grantRequest) {\n88: \t\tAssert.notNull(grantRequest, \"grantRequest cannot be null\");\n89: \t\ttry {\n90: \t\t\t// @formatter:off\n91: \t\t\tOAuth2AccessTokenResponse accessTokenResponse = this.requestEntityConverter.convert(grantRequest)\n92: \t\t\t\t\t.retrieve()\n93: \t\t\t\t\t.body(OAuth2AccessTokenResponse.class);\n94: \t\t\t// @formatter:on\n95: \t\t\tif (accessTokenResponse == null) {\n96: \t\t\t\tOAuth2Error error = new OAuth2Error(INVALID_TOKEN_RESPONSE_ERROR_CODE,\n97: \t\t\t\t\t\t\"Empty OAuth 2.0 Access Token Response\", null);\n98: \t\t\t\tthrow new OAuth2AuthorizationException(error);\n99: \t\t\t}\n100: \t\t\treturn accessTokenResponse;"
+            },
+            {
+              "start_line": 129,
+              "end_line": 145,
+              "url": "https://github.com/spring-projects/spring-security/blob/42192f9591763875eb2986bc8fd695a2eebefb02/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/AbstractRestClientOAuth2AccessTokenResponseClient.java#L129-L145",
+              "text": "129: \tprivate RequestHeadersSpec<?> populateRequest(T grantRequest) {\n130: \t\tMultiValueMap<String, String> parameters = this.parametersConverter.convert(grantRequest);\n131: \t\tif (parameters == null) {\n132: \t\t\tparameters = new LinkedMultiValueMap<>();\n133: \t\t}\n134: \t\tthis.parametersCustomizer.accept(parameters);\n135: \n136: \t\treturn this.restClient.post()\n137: \t\t\t.uri(grantRequest.getClientRegistration().getProviderDetails().getTokenUri())\n138: \t\t\t.headers((headers) -> {\n139: \t\t\t\tHttpHeaders headersToAdd = this.headersConverter.convert(grantRequest);\n140: \t\t\t\tif (headersToAdd != null) {\n141: \t\t\t\t\theaders.addAll(headersToAdd);\n142: \t\t\t\t}\n143: \t\t\t})\n144: \t\t\t.body(parameters);\n145: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--endpoints--TokenEndpoint.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.515599+00:00",
+          "sha256": "23c8c74cbaeee855b77ae71c855a0e577b61c14e2c0c0a3ba97f66d0b8103ef7",
+          "line_count": 336,
+          "source": "raw_primary",
+          "role": "real_caller",
+          "proves": "O endpoint lê o grant, autentica o cliente e despacha ao provider do grant solicitado.",
+          "inspected_ranges": [
+            [
+              130,
+              163
+            ],
+            [
+              176,
+              180
+            ],
+            [
+              217,
+              221
+            ],
+            [
+              237,
+              245
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 130,
+              "end_line": 163,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java#L130-L163",
+              "text": "130:     public Response processGrantRequest() {\n131:         cors = Cors.builder().auth().allowedMethods(\"POST\").auth().exposedHeaders(Cors.ACCESS_CONTROL_ALLOW_METHODS);\n132: \n133:         formParams = Optional.ofNullable(request.getDecodedFormParameters())\n134:                 .map(this::sanitizeFormParameters)\n135:                 .orElse(new MultivaluedHashMap<>());\n136: \n137:         grantType = formParams.getFirst(OIDCLoginProtocol.GRANT_TYPE_PARAM);\n138: \n139:         // https://tools.ietf.org/html/rfc6749#section-5.1\n140:         // The authorization server MUST include the HTTP \"Cache-Control\" response header field\n141:         // with a value of \"no-store\" as well as the \"Pragma\" response header field with a value of \"no-cache\".\n142:         httpResponse.setHeader(\"Cache-Control\", \"no-store\");\n143:         httpResponse.setHeader(\"Pragma\", \"no-cache\");\n144: \n145:         checkSsl();\n146:         checkRealm();\n147:         checkGrantType();\n148: \n149:         try {\n150:             grant.preProcess(session, formParams);\n151:         } catch (ClientPolicyException cpe) {\n152:             event.detail(REASON, Details.CLIENT_POLICY_ERROR);\n153:             event.detail(Details.CLIENT_POLICY_ERROR, cpe.getError());\n154:             event.detail(Details.CLIENT_POLICY_ERROR_DETAIL, cpe.getErrorDetail());\n155:             event.error(cpe.getError());\n156:             throw new CorsErrorResponseException(cors, cpe.getError(), cpe.getErrorDetail(), cpe.getErrorStatus());\n157:         }\n158: \n159:         // pre-authorized grants are not necessarily used by known clients.\n160:         if (!grantType.equals(UMA_GRANT_TYPE) && !grantType.equals(PRE_AUTH_GRANT_TYPE)) {\n161:             checkClient();\n162:             checkParameterDuplicated();\n163:         }"
+            },
+            {
+              "start_line": 176,
+              "end_line": 180,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java#L176-L180",
+              "text": "176:         OAuth2GrantType.Context context = new OAuth2GrantType.Context(session, clientConfig, clientAuthAttributes,\n177:                                                                       formParams, event, cors, tokenManager);\n178: \n179:         try {\n180:             return grant.process(context);"
+            },
+            {
+              "start_line": 217,
+              "end_line": 221,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java#L217-L221",
+              "text": "217:     private void checkClient() {\n218:         AuthorizeClientUtil.ClientAuthResult clientAuth = AuthorizeClientUtil.authorizeClient(session, event, cors);\n219:         client = clientAuth.getClient();\n220:         clientAuthAttributes = clientAuth.getClientAuthAttributes();\n221:         clientConfig = OIDCAdvancedConfigWrapper.fromClientModel(client);"
+            },
+            {
+              "start_line": 237,
+              "end_line": 245,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java#L237-L245",
+              "text": "237:     private void checkGrantType() {\n238:         if (grantType == null) {\n239:             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, \"Missing form parameter: \" + OIDCLoginProtocol.GRANT_TYPE_PARAM, Response.Status.BAD_REQUEST);\n240:         }\n241: \n242:         grant = session.getProvider(OAuth2GrantType.class, grantType);\n243:         if (grant == null) {\n244:             throw newUnsupportedGrantTypeException();\n245:         }"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--grants--TokenExchangeGrantType.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.145974+00:00",
+          "sha256": "bac109de4f9f4626efc29918292a147642214543200bcce8fc9ba81b6b6526a0",
+          "line_count": 117,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/8f842e5daeed9568d175012ff82f512d833a1dd50ac9fc0e2a8b68e29e0dfcbf.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.499251+00:00",
+          "role": "grant_and_policy_bridge",
+          "proves": "O grant seleciona o provider que suporta o pedido e dispara TokenExchangeRequestContext antes da troca.",
+          "inspected_ranges": [
+            [
+              45,
+              100
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 45,
+              "end_line": 100,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/grants/TokenExchangeGrantType.java#L45-L100",
+              "text": "45: public class TokenExchangeGrantType extends OAuth2GrantTypeBase {\n46: \n47:     private static final Set<String> SUPPORTED_DUPLICATED_PARAMETERS = Set.of(OAuth2Constants.AUDIENCE, OAuth2Constants.RESOURCE);\n48: \n49:     @Override\n50:     public boolean isConfidentialOnlyGrantType() {\n51:         return true;\n52:     }\n53: \n54:     @Override\n55:     public Response process(Context context) {\n56:         setContext(context);\n57: \n58:         event.detail(Details.AUTH_METHOD, \"token_exchange\");\n59:         event.client(client);\n60: \n61:         TokenExchangeContext exchange = new TokenExchangeContext(\n62:                 session,\n63:                 formParams,\n64:                 cors,\n65:                 realm,\n66:                 event,\n67:                 client,\n68:                 clientConnection,\n69:                 headers,\n70:                 tokenManager,\n71:                 clientAuthAttributes);\n72: \n73:         TokenExchangeProvider tokenExchangeProvider = session.getKeycloakSessionFactory()\n74:                 .getProviderFactoriesStream(TokenExchangeProvider.class)\n75:                 .sorted((f1, f2) -> f2.order() - f1.order())\n76:                 .map(f -> session.getProvider(TokenExchangeProvider.class, f.getId()))\n77:                 .filter(p -> p.supports(exchange))\n78:                 .findFirst()\n79:                 .orElseThrow(() -> {\n80:                     if (exchange.getUnsupportedReason() != null) {\n81:                         event.detail(Details.REASON, exchange.getUnsupportedReason());\n82:                         event.error(Errors.INVALID_REQUEST);\n83:                         return new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, exchange.getUnsupportedReason(), Response.Status.BAD_REQUEST);\n84:                     } else {\n85:                         return new InternalServerErrorException(\"No token exchange provider available\");\n86:                     }\n87:                 });\n88: \n89:         try {\n90:             //trigger if there is a supported token exchange provider\n91:             session.clientPolicy().triggerOnEvent(new TokenExchangeRequestContext(exchange));\n92:         } catch (ClientPolicyException cpe) {\n93:             event.detail(Details.REASON, Details.CLIENT_POLICY_ERROR);\n94:             event.detail(Details.CLIENT_POLICY_ERROR, cpe.getError());\n95:             event.detail(Details.CLIENT_POLICY_ERROR_DETAIL, cpe.getErrorDetail());\n96:             event.error(cpe.getError());\n97:             throw new CorsErrorResponseException(cors, cpe.getError(), cpe.getErrorDetail(), cpe.getErrorStatus());\n98:         }\n99: \n100:         return tokenExchangeProvider.exchange(exchange);"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--StandardTokenExchangeProviderFactory.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T04:02:16.746138+00:00",
+          "sha256": "a1c71e09aebadf51413413b8c5f7a054f818b751e321c066b36a1e5e04751d5c",
+          "line_count": 72,
+          "source": "raw_primary",
+          "role": "v2_binding",
+          "proves": "A factory se identifica como standard e exige TOKEN_EXCHANGE_STANDARD_V2, com prioridade maior que V1.",
+          "inspected_ranges": [
+            [
+              30,
+              39
+            ],
+            [
+              57,
+              70
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 30,
+              "end_line": 39,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java#L30-L39",
+              "text": "30: /**\n31:  * Provider factory for internal-internal token exchange, which is compliant with the token exchange specification https://datatracker.ietf.org/doc/html/rfc8693\n32:  *\n33:  * @author <a href=\"mailto:mposolda@redhat.com\">Marek Posolda</a>\n34:  */\n35: public class StandardTokenExchangeProviderFactory implements TokenExchangeProviderFactory, EnvironmentDependentProviderFactory {\n36: \n37:     @Override\n38:     public TokenExchangeProvider create(KeycloakSession session) {\n39:         return new StandardTokenExchangeProvider();"
+            },
+            {
+              "start_line": 57,
+              "end_line": 70,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProviderFactory.java#L57-L70",
+              "text": "57:     @Override\n58:     public String getId() {\n59:         return \"standard\";\n60:     }\n61: \n62:     @Override\n63:     public boolean isSupported(Config.Scope config) {\n64:         return Profile.isFeatureEnabled(Profile.Feature.TOKEN_EXCHANGE_STANDARD_V2);\n65:     }\n66: \n67:     @Override\n68:     public int order() {\n69:         // Bigger priority than V1, so it has preference if both V1 and V2 enabled\n70:         return 10;"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--StandardTokenExchangeProvider.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.147343+00:00",
+          "sha256": "dfac7cfb3a3df09118670583e4200de9c0735bf09edfd83f2667620f27bd1145",
+          "line_count": 458,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/095aa1e694b638f7183b36157df1bbf119eb8c22659e54668ede9f0f36a33315.txt",
+          "upstream_observed_utc": "2026-10-15T01:22:35.331721Z",
+          "role": "application",
+          "proves": "O provider exige habilitação e access subject token, valida-o, aplica autorização por audiência e gera uma nova resposta com tipo de token emitido.",
+          "inspected_ranges": [
+            [
+              95,
+              123
+            ],
+            [
+              126,
+              161
+            ],
+            [
+              232,
+              254
+            ],
+            [
+              349,
+              397
+            ],
+            [
+              415,
+              423
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 95,
+              "end_line": 123,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L95-L123",
+              "text": "95:         if(!OIDCAdvancedConfigWrapper.fromClientModel(context.getClient()).isStandardTokenExchangeEnabled()) {\n96:             context.setUnsupportedReason(\"Standard token exchange is not enabled for the requested client\");\n97:             return false;\n98:         }\n99: \n100:         String subjectToken = context.getParams().getSubjectToken();\n101:         if (subjectToken == null) {\n102:             context.setUnsupportedReason(\"Parameter 'subject_token' required for standard token exchange\");\n103:             return false;\n104:         }\n105: \n106:         String subjectTokenType = context.getParams().getSubjectTokenType();\n107:         if (subjectTokenType == null) {\n108:             context.setUnsupportedReason(\"Parameter 'subject_token_type' required for standard token exchange\");\n109:             return false;\n110:         }\n111: \n112:         if (!subjectTokenType.equals(OAuth2Constants.ACCESS_TOKEN_TYPE)) {\n113:             context.setUnsupportedReason(\"Parameter 'subject_token' supports access tokens only\");\n114:             return false;\n115:         }\n116: \n117:         return true;\n118:     }\n119: \n120:     @Override\n121:     protected Response tokenExchange() {\n122:         AuthenticationManager.AuthResult authResult = processSubjectToken();\n123:         return exchangeClientToClient(authResult.user(), authResult.session(), authResult.token(), true);"
+            },
+            {
+              "start_line": 126,
+              "end_line": 161,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L126-L161",
+              "text": "126:     protected AuthenticationManager.AuthResult processSubjectToken() {\n127:         if (!OAuth2Constants.ACCESS_TOKEN_TYPE.equals(context.getParams().getSubjectTokenType())) {\n128:             event.detail(Details.REASON, \"subject_token_type invalid\");\n129:             event.error(Errors.INVALID_REQUEST);\n130:             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, \"Invalid subject token type\", Response.Status.BAD_REQUEST);\n131:         }\n132: \n133:         String subjectToken = context.getParams().getSubjectToken();\n134: \n135:         event.detail(Details.REQUESTED_TOKEN_TYPE, context.getParams().getRequestedTokenType());\n136: \n137:         AuthenticationManager.AuthResult authResult = AuthenticationManager.verifyIdentityToken(session, realm, session.getContext().getUri(), clientConnection, true, true, null,\n138:                 false, subjectToken, context.getHeaders(), verifier -> {});\n139:         if (authResult == null) {\n140:             event.detail(Details.REASON, \"subject_token validation failure\");\n141:             event.error(Errors.INVALID_TOKEN);\n142:             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, \"Invalid token\", Response.Status.BAD_REQUEST);\n143:         }\n144: \n145:         UserModel tokenUser = authResult.user();\n146:         UserSessionModel tokenSession = authResult.session();\n147:         AccessToken token = authResult.token();\n148: \n149:         validateSenderConstrainedToken(token);\n150:         checkMtlsHoKToken();\n151: \n152:         event.user(tokenUser);\n153:         event.detail(Details.USERNAME, tokenUser.getUsername());\n154:         if (token.getSessionId() != null) {\n155:             event.session(tokenSession);\n156:         }\n157:         event.detail(Details.SUBJECT_TOKEN_CLIENT_ID, token.getIssuedFor());\n158: \n159:         validateSubjectToken(token);\n160: \n161:         return authResult;"
+            },
+            {
+              "start_line": 232,
+              "end_line": 254,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L232-L254",
+              "text": "232:     protected void validateAudience(AccessToken token, boolean disallowOnHolderOfTokenMismatch, List<ClientModel> targetAudienceClients) {\n233:         ClientModel tokenHolder = token == null ? null : realm.getClientByClientId(token.getIssuedFor());\n234: \n235:         if (client.isPublicClient()) {\n236:             String errorMessage = \"Public client is not allowed to exchange token\";\n237:             event.detail(Details.REASON, errorMessage);\n238:             event.error(Errors.INVALID_CLIENT);\n239:             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_CLIENT, errorMessage, Response.Status.BAD_REQUEST);\n240:         }\n241: \n242:         for (ClientModel targetClient : targetAudienceClients) {\n243:             if (!targetClient.isEnabled()) {\n244:                 event.detail(Details.REASON, \"audience client disabled\");\n245:                 event.detail(Details.AUDIENCE, targetClient.getClientId());\n246:                 event.error(Errors.CLIENT_DISABLED);\n247:                 throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_CLIENT, \"Client disabled\", Response.Status.BAD_REQUEST);\n248:             }\n249:         }\n250: \n251:         //reject if the requester-client is not in the audience of the subject token\n252:         if (!client.equals(tokenHolder)) {\n253:             forbiddenIfClientIsNotWithinTokenAudience(token);\n254:         }"
+            },
+            {
+              "start_line": 349,
+              "end_line": 397,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L349-L397",
+              "text": "349:             TokenManager.AccessTokenResponseBuilder responseBuilder = tokenManager.responseBuilder(realm, client, event, session,\n350:                     clientSessionCtx.getClientSession().getUserSession(), clientSessionCtx).generateAccessToken();\n351: \n352:             checkRequestedAudiences(responseBuilder);\n353: \n354:             if (encoder.getTokenContextFromTokenId(responseBuilder.getAccessToken().getId()).getSessionType() == AccessTokenContext.SessionType.TRANSIENT) {\n355:                 responseBuilder.getAccessToken().setSessionId(null);\n356:                 event.session((String) null);\n357:             }\n358: \n359:             if (OAuth2Constants.REFRESH_TOKEN_TYPE.equals(requestedTokenType)) {\n360:                 responseBuilder.generateRefreshToken();\n361:                 bindRefreshTokenWithClientCertificate(responseBuilder);\n362:             }\n363: \n364:             try {\n365:                 session.clientPolicy().triggerOnEvent(new TokenExchangeResponseContext(formParams, clientSessionCtx, responseBuilder));\n366:             } catch (ClientPolicyException cpe) {\n367:                 event.detail(Details.REASON, Details.CLIENT_POLICY_ERROR);\n368:                 event.detail(Details.CLIENT_POLICY_ERROR, cpe.getError());\n369:                 event.detail(Details.CLIENT_POLICY_ERROR_DETAIL, cpe.getErrorDetail());\n370:                 event.error(cpe.getError());\n371:                 throw new CorsErrorResponseException(cors, cpe.getError(), cpe.getErrorDetail(), cpe.getErrorStatus());\n372:             }\n373: \n374:             AccessTokenResponse res;\n375:             if (OAuth2Constants.ID_TOKEN_TYPE.equals(requestedTokenType)) {\n376:                 // Using the id-token inside \"access_token\" parameter as per description of \"access_token\" parameter under https://datatracker.ietf.org/doc/html/rfc8693#name-successful-response\n377:                 res = responseBuilder.generateIDToken().build();\n378:                 res.setToken(res.getIdToken());\n379:                 res.setIdToken(null);\n380:                 res.setTokenType(TokenUtil.TOKEN_TYPE_NA);\n381:             } else {\n382:                 String scopeParam = params.getScope();\n383:                 if (TokenUtil.isOIDCRequest(scopeParam)) {\n384:                     responseBuilder.generateIDToken().generateAccessTokenHash();\n385:                 }\n386:                 res = responseBuilder.build();\n387:             }\n388: \n389:             res.setOtherClaims(OAuth2Constants.ISSUED_TOKEN_TYPE, requestedTokenType);\n390: \n391:             if (responseBuilder.getAccessToken().getAudience() != null) {\n392:                 event.detail(Details.AUDIENCE, CollectionUtil.join(List.of(responseBuilder.getAccessToken().getAudience()), \" \"));\n393:             }\n394: \n395:             event.success();\n396: \n397:             return cors.add(Response.ok(res, MediaType.APPLICATION_JSON_TYPE));"
+            },
+            {
+              "start_line": 415,
+              "end_line": 423,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L415-L423",
+              "text": "415:     protected void checkRequestedAudiences(TokenManager.AccessTokenResponseBuilder responseBuilder) {\n416:         Set<String> missingAudience = TokenUtils.checkRequestedAudiences(responseBuilder.getAccessToken(), params.getAudience());\n417:         if (!missingAudience.isEmpty()) {\n418:             final String missingAudienceString = CollectionUtil.join(missingAudience);\n419:             event.detail(Details.REASON, \"Requested audience not available: \" + missingAudienceString);\n420:             event.error(Errors.INVALID_REQUEST);\n421:             throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST,\n422:                     \"Requested audience not available: \" + missingAudienceString, Response.Status.BAD_REQUEST);\n423:         }"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--services--managers--AuthenticationManager.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.077450+00:00",
+          "sha256": "ee8fb1b97a33eb85ecf17e2c4d9eb8370a475185e760d60e7b28b8f67305be58",
+          "line_count": 1840,
+          "source": "raw_primary",
+          "role": "subject_token_authentication",
+          "proves": "O verificador usa emissor do realm, validade, revogação e um SignatureVerifierContext antes de aceitar o token.",
+          "inspected_ranges": [
+            [
+              1555,
+              1593
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1555,
+              "end_line": 1593,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/services/managers/AuthenticationManager.java#L1555-L1593",
+              "text": "1555:     public static AuthResult verifyIdentityToken(KeycloakSession session, RealmModel realm, UriInfo uriInfo, ClientConnection connection, boolean checkActive, boolean checkTokenType,\n1556:                                                  String checkAudience, boolean isCookie, String tokenString, HttpHeaders headers, Consumer<TokenVerifier<AccessToken>> verifierConsumer) {\n1557:         try {\n1558:             TokenVerifier<AccessToken> verifier = TokenVerifier.create(tokenString, AccessToken.class)\n1559:               .withDefaultChecks()\n1560:               .realmUrl(Urls.realmIssuer(uriInfo.getBaseUri(), realm.getName()))\n1561:               .checkActive(checkActive)\n1562:               .checkTokenType(checkTokenType);\n1563: \n1564:             verifierConsumer.accept(verifier);\n1565: \n1566:             if (checkAudience != null) {\n1567:                 verifier.audience(checkAudience);\n1568:             }\n1569: \n1570:             // Check token revocation and additional verifiers in case of access token\n1571:             if (checkTokenType) {\n1572:                 verifier.withChecks(new TokenManager.TokenRevocationCheck(session));\n1573: \n1574:                 TokenVerifierProvider.TokenVerifierProviderContext ctx = new TokenVerifierProvider.TokenVerifierProviderContext(verifier, session, realm, uriInfo);\n1575:                 new TokenVerifierProviderManager().additionalAccessTokenVerifications(ctx);\n1576:             }\n1577: \n1578:             String kid = verifier.getHeader().getKeyId();\n1579:             String algorithm = verifier.getHeader().getAlgorithm().name();\n1580: \n1581:             SignatureProvider signatureProvider = session.getProvider(SignatureProvider.class, algorithm);\n1582:             if (signatureProvider == null) {\n1583:                 logger.debugf(\"Invalid algorithm '%s' in the access token\", algorithm);\n1584:                 return null;\n1585:             }\n1586: \n1587:             SignatureVerifierContext signatureVerifier = signatureProvider.verifier(kid);\n1588:             verifier.verifierContext(signatureVerifier);\n1589: \n1590:             AccessToken token = verifier.verify().getToken();\n1591:             if (checkActive && (!token.isActive() || token.getIat() < realm.getNotBefore())) {\n1592:                 logger.debugf(\"Identity cookie expired. Token expiration: %d, Current Time: %d. token issued at: %d, realm not before: %d\", token.getExp(), Time.currentTime(), token.getIat(), realm.getNotBefore());\n1593:                 return null;"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--tokenexchange--AbstractTokenExchangeProvider.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:58:41.146003+00:00",
+          "sha256": "e9bb19049343a2e336bb5618ac31ac475eb831f66b8842a1ee21ce6014b8474b",
+          "line_count": 472,
+          "source": "reused_cache",
+          "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/4938cf820621756f29b509b5387eacec33810935e08d855f0aaa5a759a8f946c.txt",
+          "upstream_observed_utc": "2026-10-15T03:49:30.489415+00:00",
+          "role": "audience_dispatch",
+          "proves": "A base verifica a audiência antes de escolher o contexto e emitir o token, e rejeita o solicitante fora de aud.",
+          "inspected_ranges": [
+            [
+              219,
+              248
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 219,
+              "end_line": 248,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/AbstractTokenExchangeProvider.java#L219-L248",
+              "text": "219:     protected abstract void validateAudience(AccessToken token, boolean disallowOnHolderOfTokenMismatch, List<ClientModel> targetAudienceClients);\n220: \n221:     protected Response exchangeClientToClient(UserModel targetUser, UserSessionModel targetUserSession,\n222:             AccessToken token, boolean disallowOnHolderOfTokenMismatch) {\n223: \n224:         String requestedTokenType = getRequestedTokenType();\n225:         event.detail(Details.REQUESTED_TOKEN_TYPE, requestedTokenType);\n226:         List<ClientModel> targetAudienceClients = getTargetAudienceClients();\n227:         validateAudience(token, disallowOnHolderOfTokenMismatch, targetAudienceClients);\n228:         String scope = getRequestedScope(token, targetAudienceClients);\n229: \n230:         try {\n231:             setClientToContext(targetAudienceClients);\n232:             if (getSupportedOAuthResponseTokenTypes().contains(requestedTokenType))\n233:                 return exchangeClientToOIDCClient(targetUser, targetUserSession, requestedTokenType, targetAudienceClients, scope, token);\n234:             else if (OAuth2Constants.SAML2_TOKEN_TYPE.equals(requestedTokenType)) {\n235:                 return exchangeClientToSAML2Client(targetUser, targetUserSession, requestedTokenType, targetAudienceClients);\n236:             }\n237:         } finally {\n238:             session.getContext().setClient(client);\n239:         }\n240: \n241:         throw new CorsErrorResponseException(cors, OAuthErrorException.INVALID_REQUEST, \"requested_token_type unsupported\", Response.Status.BAD_REQUEST);\n242:     }\n243: \n244:     protected void forbiddenIfClientIsNotWithinTokenAudience(AccessToken token) {\n245:         if (token != null && !token.hasAudience(client.getClientId())) {\n246:             event.detail(Details.REASON, \"client is not within the token audience\");\n247:             event.error(Errors.NOT_ALLOWED);\n248:             throw new CorsErrorResponseException(cors, OAuthErrorException.ACCESS_DENIED, \"Client is not within the token audience\", Response.Status.FORBIDDEN);"
+            }
+          ]
+        },
+        {
+          "repo": "keycloak/keycloak",
+          "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+          "path": "services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java",
+          "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java",
+          "raw_url": "https://raw.githubusercontent.com/keycloak/keycloak/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/keycloak--keycloak--8a081db4--services--src--main--java--org--keycloak--protocol--oidc--TokenManager.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:59:52.068034+00:00",
+          "sha256": "4f55098516cad8a56d189baa3173b382ef8410936a6aedd0f114dceecfb61aab",
+          "line_count": 1769,
+          "source": "raw_primary",
+          "role": "token_issuance_effect",
+          "proves": "O builder cria um access token a partir do contexto de cliente e o codifica em uma nova AccessTokenResponse.",
+          "inspected_ranges": [
+            [
+              1295,
+              1299
+            ],
+            [
+              1471,
+              1499
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1295,
+              "end_line": 1299,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java#L1295-L1299",
+              "text": "1295:         public AccessTokenResponseBuilder generateAccessToken() {\n1296:             UserModel user = userSession.getUser();\n1297:             accessToken = tokenManager.createClientAccessToken(session, realm, client, user, userSession, clientSessionCtx, clientSessionCtx.isOfflineTokenRequested());\n1298:             responseTokenType = tokenManager.formatTokenType(client, accessToken);\n1299:             return this;"
+            },
+            {
+              "start_line": 1471,
+              "end_line": 1499,
+              "url": "https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/TokenManager.java#L1471-L1499",
+              "text": "1471:         public AccessTokenResponse build() {\n1472:             invokeTokenPostProcessors();\n1473: \n1474:             if (response != null) return response;\n1475: \n1476:             if (accessToken != null) {\n1477:                 event.detail(Details.TOKEN_ID, accessToken.getId());\n1478:             }\n1479: \n1480:             if (refreshToken != null) {\n1481:                 if (event.getEvent().getDetails().containsKey(Details.REFRESH_TOKEN_ID)) {\n1482:                     event.detail(Details.UPDATED_REFRESH_TOKEN_ID, refreshToken.getId());\n1483:                 } else {\n1484:                     event.detail(Details.REFRESH_TOKEN_ID, refreshToken.getId());\n1485:                 }\n1486:                 event.detail(Details.REFRESH_TOKEN_TYPE, refreshToken.getType());\n1487:             }\n1488: \n1489:             AccessTokenResponse res = new AccessTokenResponse();\n1490: \n1491:             if (accessToken != null) {\n1492:                 String encodedToken = session.tokens().encode(accessToken);\n1493:                 res.setToken(encodedToken);\n1494:                 res.setTokenType(responseTokenType);\n1495:                 res.setSessionState(accessToken.getSessionState());\n1496:                 if (accessToken.getExp() != 0) {\n1497:                     res.setExpiresIn(accessToken.getExp() - Time.currentTime());\n1498:                 }\n1499:             }"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://www.keycloak.org/securing-apps/token-exchange",
+          "scope": "A documentação separa Standard V2 de Legacy V1, descreve os parâmetros e as regras de audiência. As capacidades do exemplo são limitadas pelo código no SHA, pois a URL pública pode evoluir."
+        },
+        {
+          "url": "https://docs.spring.io/spring-security/reference/7.0/api/java/org/springframework/security/oauth2/client/endpoint/RestClientTokenExchangeTokenResponseClient.html",
+          "scope": "A API oficial identifica a troca de subject token implementada pelo cliente de framework."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Keycloak StandardTokenExchangeProvider implements subject-token/requested-token authorization and output checks. Selected base keycloak-js shows ordinary authorization-code to access-token exchange (1256–1259), not RFC token exchange of a subject token. Replace this semantic substitution with the token-exchange SPI/base implementation; retain the real Keycloak provider."
+    }
+  ]
+}

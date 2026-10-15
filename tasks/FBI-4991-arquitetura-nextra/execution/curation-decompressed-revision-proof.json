@@ -1,0 +1,70 @@
+{
+  "observed_at": "2026-10-15T04:13:53.534487+00:00",
+  "source": "GitHub public commit endpoint via human gh authentication; no credential included",
+  "results": [
+    {
+      "repo": "keycloak/keycloak",
+      "revision": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+      "returned_sha": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "knative/serving",
+      "revision": "2e9262972905a5572c9831905ef9193057e0fc95",
+      "returned_sha": "2e9262972905a5572c9831905ef9193057e0fc95",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "kubernetes/client-go",
+      "revision": "7aade4e921f65cb51c990ab0557a5556fd67a1be",
+      "returned_sha": "7aade4e921f65cb51c990ab0557a5556fd67a1be",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "kubernetes/kubernetes",
+      "revision": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f",
+      "returned_sha": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "libp2p/go-libp2p",
+      "revision": "3c2c902122cb6fae3897f729a3dbb9d4665ae90d",
+      "returned_sha": "3c2c902122cb6fae3897f729a3dbb9d4665ae90d",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "n8n-io/n8n",
+      "revision": "e2529a849432bdb3082615c04b1702df61cb91d5",
+      "returned_sha": "e2529a849432bdb3082615c04b1702df61cb91d5",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "ncats/blackboard",
+      "revision": "b06a98b26e807e9ea3eab9a107ec24d2393f5040",
+      "returned_sha": "b06a98b26e807e9ea3eab9a107ec24d2393f5040",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "openfga/openfga",
+      "revision": "526995eb202464e2cace266fb5be56c212af9ecf",
+      "returned_sha": "526995eb202464e2cace266fb5be56c212af9ecf",
+      "exit_code": 0,
+      "match": true
+    },
+    {
+      "repo": "playframework/playframework",
+      "revision": "01bc6d08bacb80835edd4e45fe3ce706151e35c0",
+      "returned_sha": "01bc6d08bacb80835edd4e45fe3ce706151e35c0",
+      "exit_code": 0,
+      "match": true
+    }
+  ],
+  "all_verified": true
+}

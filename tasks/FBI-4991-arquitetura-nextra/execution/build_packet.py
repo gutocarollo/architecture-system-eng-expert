@@ -67,8 +67,8 @@ for path in sorted((ROOT/'content').rglob('*.mdx')):
             group=int(path.stem[:2]) if path.stem[:2].isdigit() else None
             ids=[c['concept_id'] for c in concepts if group in c['groups']] if group else []
         author='/root/curation_complete' if relative.startswith('content/referencia/') else '/root/applied_learning_build'
-        if 'airflow-lock-retry' in relative: author='/root';ids=['retry','timeout','pessimistic-locking']
-        if 'query-grain-postgres' in relative: author='/root';ids=['materialized-view','indexing','precomputation','cqrs']
+        if 'airflow-lock-retry' in relative: author='/root';ids=['retry','timeout']
+        if 'query-grain-postgres' in relative: author='/root';ids=[]
         if 'revision-cas-postgres' in relative: author='/root';ids=['optimistic-concurrency-control','compare-and-swap-cas']
         item=dict(id=relative.removeprefix('content/').removesuffix('.mdx'),path=relative,
                   sha256=hashlib.sha256(path.read_bytes()).hexdigest(),author_id=author,

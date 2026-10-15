@@ -1,0 +1,15 @@
+{
+  "repo": "istio/istio",
+  "revision": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+  "path": "pkg/spiffe/spiffe.go",
+  "url": "https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go",
+  "raw_url": "https://raw.githubusercontent.com/istio/istio/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pkg/spiffe/spiffe.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-security/istio--istio--4e2c1c57--pkg--spiffe--spiffe.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:58:41.142821+00:00",
+  "sha256": "a261b2853229d3f54d763eb0d061d01ee47e1b859c649822b744afadb6616574",
+  "line_count": 354,
+  "source": "reused_cache",
+  "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/raw/a26b6cdaadb63ba381c54e0656d7f0b4a0a30a209d8532fc6fffaf7dcfbc8005.txt",
+  "upstream_observed_utc": "2026-10-15T03:49:30.235080+00:00"
+}

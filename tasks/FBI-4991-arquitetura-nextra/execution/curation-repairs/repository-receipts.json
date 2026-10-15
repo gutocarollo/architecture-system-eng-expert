@@ -1,0 +1,660 @@
+{
+  "trinodb/trino": {
+    "repository": "trinodb/trino",
+    "url": "https://github.com/trinodb/trino",
+    "stars": 13334,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-15T01:17:49Z",
+    "observed_utc": "2026-10-15T01:18:57.294083Z",
+    "api_url": "https://api.github.com/repos/trinodb/trino",
+    "http_status": 200,
+    "revisions": {
+      "master": "5706548dade9b1dc81144af6850c5dde9a356713"
+    }
+  },
+  "apache/superset": {
+    "repository": "apache/superset",
+    "url": "https://github.com/apache/superset",
+    "stars": 75146,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-15T00:37:19Z",
+    "observed_utc": "2026-10-15T01:13:42.978638Z",
+    "api_url": "https://api.github.com/repos/apache/superset",
+    "http_status": 200,
+    "revisions": {
+      "master": "54d2421ded3572dc2ae328b7d4fd698acec48c11"
+    }
+  },
+  "pallets-eco/cachelib": {
+    "repository": "pallets-eco/cachelib",
+    "default_branch": "main",
+    "stars": 163,
+    "license_spdx": "BSD-3-Clause",
+    "observed_utc": "2026-10-15T03:46:41.126678+00:00",
+    "revisions": {
+      "main": "a282b23357c2f2c15b6849865b6993a3c956f241"
+    }
+  },
+  "apache/nutch": {
+    "repository": "apache/nutch",
+    "url": "https://github.com/apache/nutch",
+    "stars": 3297,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T00:35:05Z",
+    "observed_utc": "2026-10-15T02:40:25.195481Z",
+    "api_url": "https://api.github.com/repos/apache/nutch",
+    "http_status": 200,
+    "revisions": {
+      "master": "a25edb066de95a7f5cc990e2cd5b68a35ce5d521"
+    }
+  },
+  "grafana/loki": {
+    "repository": "grafana/loki",
+    "url": "https://github.com/grafana/loki",
+    "stars": 29022,
+    "license_spdx": "AGPL-3.0",
+    "license_name": "GNU Affero General Public License v3.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-15T00:06:37Z",
+    "observed_utc": "2026-10-15T01:13:45.208504Z",
+    "api_url": "https://api.github.com/repos/grafana/loki",
+    "http_status": 200,
+    "revisions": {
+      "main": "5fcd99aa6dea4bc139097527901f6c25a52baca5"
+    }
+  },
+  "javaparser/javaparser": {
+    "repository": "javaparser/javaparser",
+    "url": "https://github.com/javaparser/javaparser",
+    "stars": 6161,
+    "license_spdx": "NOASSERTION",
+    "license_name": "Other",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-12T01:22:06Z",
+    "observed_utc": "2026-10-15T01:13:46.245615Z",
+    "api_url": "https://api.github.com/repos/javaparser/javaparser",
+    "http_status": 200,
+    "revisions": {
+      "master": "c4fb5365836e8c5a579687c9a78251059d489d47"
+    }
+  },
+  "spring-projects/spring-framework": {
+    "repository": "spring-projects/spring-framework",
+    "url": "https://github.com/spring-projects/spring-framework",
+    "stars": 60287,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T12:38:51Z",
+    "observed_utc": "2026-10-15T01:18:57.199455Z",
+    "api_url": "https://api.github.com/repos/spring-projects/spring-framework",
+    "http_status": 200,
+    "revisions": {
+      "main": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39"
+    }
+  },
+  "rails/rails": {
+    "repository": "rails/rails",
+    "url": "https://github.com/rails/rails",
+    "stars": 58838,
+    "license_spdx": "MIT",
+    "license_name": "MIT License",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T21:16:56Z",
+    "observed_utc": "2026-10-15T01:13:47.843627Z",
+    "api_url": "https://api.github.com/repos/rails/rails",
+    "http_status": 200,
+    "revisions": {
+      "main": "ba3572c874040cfd6d4883f5ca574121968cdf6f",
+      "v8.1.4": "c3466ea00d7121798e3aa3144ffdf7174b81d8cb"
+    }
+  },
+  "github/scientist": {
+    "repository": "github/scientist",
+    "default_branch": "main",
+    "stars": 7769,
+    "license_spdx": "MIT",
+    "observed_utc": "2026-10-15T03:46:42.443264+00:00",
+    "revisions": {
+      "main": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7"
+    }
+  },
+  "flippercloud/flipper": {
+    "repository": "flippercloud/flipper",
+    "url": "https://github.com/flippercloud/flipper",
+    "stars": 3971,
+    "license_spdx": "MIT",
+    "license_name": "MIT License",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-03T22:19:07Z",
+    "observed_utc": "2026-10-15T01:13:45.150390Z",
+    "api_url": "https://api.github.com/repos/flippercloud/flipper",
+    "http_status": 200,
+    "revisions": {
+      "main": "1d49644a2ea8696c7eb9b995f6eab020ad597deb"
+    }
+  },
+  "spring-projects/spring-batch": {
+    "repository": "spring-projects/spring-batch",
+    "default_branch": "main",
+    "stars": 2965,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:46:43.831880+00:00",
+    "revisions": {
+      "v5.2.3": "9e0e39ed8bf17cddd245648b92b0692ccbe8a73d"
+    }
+  },
+  "kubernetes/kubernetes": {
+    "repository": "kubernetes/kubernetes",
+    "url": "https://github.com/kubernetes/kubernetes",
+    "stars": 128225,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T23:40:27Z",
+    "observed_utc": "2026-10-15T01:13:46.844155Z",
+    "api_url": "https://api.github.com/repos/kubernetes/kubernetes",
+    "http_status": 200,
+    "revisions": {
+      "master": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f"
+    }
+  },
+  "apache/airflow": {
+    "repository": "apache/airflow",
+    "url": "https://github.com/apache/airflow",
+    "stars": 47178,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T22:43:42Z",
+    "observed_utc": "2026-10-15T01:13:41.893102Z",
+    "api_url": "https://api.github.com/repos/apache/airflow",
+    "http_status": 200,
+    "revisions": {
+      "main": "42945d62b1f6ecbb8255b306c9becf7c2900dfef"
+    }
+  },
+  "fluent/fluent-bit": {
+    "repository": "fluent/fluent-bit",
+    "default_branch": "master",
+    "stars": 8153,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:46:45.152513+00:00",
+    "revisions": {
+      "master": "54b97f8ff1e69948ee794ca3e01c41d148f4fe36"
+    }
+  },
+  "pyeventsourcing/eventsourcing": {
+    "repository": "pyeventsourcing/eventsourcing",
+    "default_branch": "9.5",
+    "stars": 1690,
+    "license_spdx": "BSD-3-Clause",
+    "observed_utc": "2026-10-15T03:49:22.356727+00:00",
+    "revisions": {
+      "9.5": "bf665955d9243e728aaaa5bb62ac63b9cfe5ec19"
+    }
+  },
+  "encode/django-rest-framework": {
+    "repository": "encode/django-rest-framework",
+    "default_branch": "main",
+    "stars": 30208,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T03:49:23.589263+00:00",
+    "revisions": {
+      "main": "14998d0a735f8ed6abd86751fd6984a9277a1d40"
+    }
+  },
+  "zulip/zulip": {
+    "repository": "zulip/zulip",
+    "url": "https://github.com/zulip/zulip",
+    "stars": 26050,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T22:21:54Z",
+    "observed_utc": "2026-10-15T01:18:57.287573Z",
+    "api_url": "https://api.github.com/repos/zulip/zulip",
+    "http_status": 200,
+    "revisions": {
+      "main": "4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0"
+    }
+  },
+  "apache/nifi": {
+    "repository": "apache/nifi",
+    "url": "https://github.com/apache/nifi",
+    "stars": 6259,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T09:47:31Z",
+    "observed_utc": "2026-10-15T01:13:42.490689Z",
+    "api_url": "https://api.github.com/repos/apache/nifi",
+    "http_status": 200,
+    "revisions": {
+      "main": "9e6c18893f1b1df713dac55d98c2b2944d235844"
+    }
+  },
+  "gravitational/teleport": {
+    "repository": "gravitational/teleport",
+    "url": "https://github.com/gravitational/teleport",
+    "stars": 20994,
+    "license_spdx": "AGPL-3.0",
+    "license_name": "GNU Affero General Public License v3.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-09-17T15:49:47Z",
+    "observed_utc": "2026-10-15T01:13:45.557332Z",
+    "api_url": "https://api.github.com/repos/gravitational/teleport",
+    "http_status": 200,
+    "revisions": {
+      "master": "1283425b60ec5f60d509ba4c791183d452923ff7"
+    }
+  },
+  "istio/istio": {
+    "repository": "istio/istio",
+    "url": "https://github.com/istio/istio",
+    "stars": 38441,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-15T00:31:09Z",
+    "observed_utc": "2026-10-15T01:13:46.109691Z",
+    "api_url": "https://api.github.com/repos/istio/istio",
+    "http_status": 200,
+    "revisions": {
+      "master": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631"
+    }
+  },
+  "keycloak/keycloak": {
+    "repository": "keycloak/keycloak",
+    "url": "https://github.com/keycloak/keycloak",
+    "stars": 37350,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-15T00:51:00Z",
+    "observed_utc": "2026-10-15T01:13:46.250060Z",
+    "api_url": "https://api.github.com/repos/keycloak/keycloak",
+    "http_status": 200,
+    "revisions": {
+      "main": "8a081db466da3ff8de74efab2f3d9844277c18ba"
+    }
+  },
+  "spring-projects/spring-security": {
+    "repository": "spring-projects/spring-security",
+    "default_branch": "main",
+    "stars": 9648,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:49:24.723001+00:00",
+    "revisions": {
+      "main": "42192f9591763875eb2986bc8fd695a2eebefb02"
+    }
+  },
+  "google/guava": {
+    "repository": "google/guava",
+    "url": "https://github.com/google/guava",
+    "stars": 51924,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T19:51:36Z",
+    "observed_utc": "2026-10-15T01:18:56.234696Z",
+    "api_url": "https://api.github.com/repos/google/guava",
+    "http_status": 200,
+    "revisions": {
+      "master": "dea4984457cdce41842d3bec8d04fb469e776981"
+    }
+  },
+  "killbill/killbill": {
+    "repository": "killbill/killbill",
+    "default_branch": "master",
+    "stars": 5796,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:49:26.027709+00:00",
+    "revisions": {
+      "master": "20e15525d1d9e56219c4f5651e06850fe793f5e0"
+    }
+  },
+  "xataio/pgroll": {
+    "repository": "xataio/pgroll",
+    "default_branch": "main",
+    "stars": 6602,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T03:51:31.893256+00:00",
+    "revisions": {
+      "main": "777a5350e09012b29d26b9611122046d8a96fc1c"
+    }
+  },
+  "julien-duponchelle/python-mysql-replication": {
+    "repository": "julien-duponchelle/python-mysql-replication",
+    "default_branch": "main",
+    "stars": 2415,
+    "license_spdx": null,
+    "observed_utc": "2026-10-15T03:51:33.162346+00:00",
+    "revisions": {
+      "main": "d1de0487c4009fda8fa5e51a859614dbea1b8197"
+    },
+    "license_errors": [
+      {
+        "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+        "error": "gh: Not Found (HTTP 404)\n",
+        "observed_utc": "2026-10-15T03:51:34.476231+00:00"
+      }
+    ]
+  },
+  "spring-projects/spring-data-jpa": {
+    "repository": "spring-projects/spring-data-jpa",
+    "url": "https://github.com/spring-projects/spring-data-jpa",
+    "stars": 3289,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T08:08:49Z",
+    "observed_utc": "2026-10-15T01:18:57.177202Z",
+    "api_url": "https://api.github.com/repos/spring-projects/spring-data-jpa",
+    "http_status": 200,
+    "revisions": {
+      "main": "eb55201b2b73e7420a14cd4ccf9fce869dc6839d"
+    }
+  },
+  "LuckyPennySoftware/MediatR": {
+    "repository": "LuckyPennySoftware/MediatR",
+    "url": "https://github.com/LuckyPennySoftware/MediatR",
+    "stars": 11859,
+    "license_spdx": "NOASSERTION",
+    "license_name": "Other",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-07-02T13:51:06Z",
+    "observed_utc": "2026-10-15T01:24:49.092406Z",
+    "api_url": "https://api.github.com/repos/LuckyPennySoftware/MediatR",
+    "http_status": 200,
+    "revisions": {
+      "v12.4.1": "fb309026775ef953a64fb5339d074426c1ad2c37"
+    }
+  },
+  "JasperFx/marten": {
+    "repository": "JasperFx/marten",
+    "url": "https://github.com/JasperFx/marten",
+    "stars": 3465,
+    "license_spdx": "MIT",
+    "license_name": "MIT License",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T22:45:12Z",
+    "observed_utc": "2026-10-15T01:13:41.896311Z",
+    "api_url": "https://api.github.com/repos/JasperFx/marten",
+    "http_status": 200,
+    "revisions": {
+      "master": "4c6762d4ec26d0e335c3fdf69017a442f3604d8f"
+    }
+  },
+  "grpc/grpc-go": {
+    "repository": "grpc/grpc-go",
+    "url": "https://github.com/grpc/grpc-go",
+    "stars": 23092,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T17:40:45Z",
+    "observed_utc": "2026-10-15T01:18:56.665341Z",
+    "api_url": "https://api.github.com/repos/grpc/grpc-go",
+    "http_status": 200,
+    "revisions": {
+      "master": "4d4d42843b7154ede87a6cead454ccf8410baea8"
+    }
+  },
+  "minio/minio": {
+    "repository": "minio/minio",
+    "default_branch": "master",
+    "stars": 61320,
+    "license_spdx": "AGPL-3.0",
+    "observed_utc": "2026-10-15T03:58:53.359531+00:00",
+    "revisions": {
+      "master": "7aac2a2c5b7c882e68c1ce017d8256be2feea27f"
+    }
+  },
+  "redmine/redmine": {
+    "repository": "redmine/redmine",
+    "default_branch": "master",
+    "stars": 6045,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T03:58:54.391824+00:00",
+    "revisions": {
+      "master": "d1f69043e41175cc6a7b241c5e54664d855b2592"
+    }
+  },
+  "postgres/postgres": {
+    "repository": "postgres/postgres",
+    "url": "https://github.com/postgres/postgres",
+    "stars": 22410,
+    "license_spdx": "NOASSERTION",
+    "license_name": "Other",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-14T23:47:30Z",
+    "observed_utc": "2026-10-15T01:13:47.655585Z",
+    "api_url": "https://api.github.com/repos/postgres/postgres",
+    "http_status": 200,
+    "revisions": {
+      "master": "3c6665bf0266a7ae78117c3ed0299bfbd1f1331a"
+    }
+  },
+  "medusajs/medusa": {
+    "repository": "medusajs/medusa",
+    "url": "https://github.com/medusajs/medusa",
+    "stars": 36748,
+    "license_spdx": "NOASSERTION",
+    "license_name": "Other",
+    "archived": false,
+    "default_branch": "develop",
+    "pushed_at": "2026-10-14T11:37:37Z",
+    "observed_utc": "2026-10-15T01:13:46.804374Z",
+    "api_url": "https://api.github.com/repos/medusajs/medusa",
+    "http_status": 200,
+    "revisions": {
+      "develop": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15"
+    }
+  },
+  "mastodon/mastodon": {
+    "repository": "mastodon/mastodon",
+    "url": "https://github.com/mastodon/mastodon",
+    "stars": 50406,
+    "license_spdx": "AGPL-3.0",
+    "license_name": "GNU Affero General Public License v3.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T18:47:31Z",
+    "observed_utc": "2026-10-15T02:20:31.404901Z",
+    "api_url": "https://api.github.com/repos/mastodon/mastodon",
+    "http_status": 200,
+    "revisions": {
+      "main": "d0b3f3263ba59da24c4fa179064a160106b90a81"
+    }
+  },
+  "vitessio/vitess": {
+    "repository": "vitessio/vitess",
+    "url": "https://github.com/vitessio/vitess",
+    "stars": 21384,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-15T00:55:21Z",
+    "observed_utc": "2026-10-15T01:18:57.304359Z",
+    "api_url": "https://api.github.com/repos/vitessio/vitess",
+    "http_status": 200,
+    "revisions": {
+      "main": "a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e"
+    }
+  },
+  "grafana/dskit": {
+    "repository": "grafana/dskit",
+    "default_branch": "main",
+    "stars": 586,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T04:08:16.425436+00:00",
+    "revisions": {
+      "b6a53f6bee29": "b6a53f6bee296a666061189f72aae0c87db2c2ea"
+    }
+  },
+  "prometheus-community/helm-charts": {
+    "repository": "prometheus-community/helm-charts",
+    "default_branch": "main",
+    "stars": 6216,
+    "license_spdx": "Apache-2.0",
+    "observed_utc": "2026-10-15T04:08:57.975749+00:00",
+    "revisions": {
+      "main": "e03ae02f8664ffa7ab88720c1c5542d6f678d293"
+    }
+  },
+  "bolshakov/stoplight": {
+    "repository": "bolshakov/stoplight",
+    "default_branch": "main",
+    "stars": 630,
+    "license_spdx": "MIT",
+    "observed_utc": "2026-10-15T04:08:58.903903+00:00",
+    "revisions": {
+      "main": "c3def58352d2ae6635266ad968f519f9227f4980"
+    }
+  },
+  "pallets-eco/flask-caching": {
+    "repository": "pallets-eco/flask-caching",
+    "default_branch": "main",
+    "stars": 932,
+    "license_spdx": "NOASSERTION",
+    "observed_utc": "2026-10-15T04:09:54.293014+00:00",
+    "revisions": {
+      "main": "0d131e699e978db12dfc22e511b79c4e7e1bfc9a"
+    }
+  },
+  "j-easy/easy-rules": {
+    "repository": "j-easy/easy-rules",
+    "default_branch": "master",
+    "stars": 5260,
+    "license_spdx": "MIT",
+    "observed_utc": "2026-10-15T04:09:55.500750+00:00",
+    "revisions": {
+      "master": "d4450831533e47a5c0cb361edb80dad43db228a4"
+    }
+  },
+  "python/cpython": {
+    "repository": "python/cpython",
+    "url": "https://github.com/python/cpython",
+    "stars": 77554,
+    "license_spdx": "NOASSERTION",
+    "license_name": "Other",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T22:53:16Z",
+    "observed_utc": "2026-10-15T01:18:57.009598Z",
+    "api_url": "https://api.github.com/repos/python/cpython",
+    "http_status": 200,
+    "revisions": {
+      "main": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb"
+    }
+  },
+  "golang/sync": {
+    "repository": "golang/sync",
+    "url": "https://github.com/golang/sync",
+    "stars": 934,
+    "license_spdx": "BSD-3-Clause",
+    "license_name": "BSD 3-Clause \"New\" or \"Revised\" License",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-09T12:02:54Z",
+    "observed_utc": "2026-10-15T01:18:56.215523Z",
+    "api_url": "https://api.github.com/repos/golang/sync",
+    "http_status": 200,
+    "revisions": {
+      "master": "36f2d70ecde9857dc4e363242a1369c7645d6770"
+    }
+  },
+  "resilience4j/resilience4j": {
+    "repository": "resilience4j/resilience4j",
+    "url": "https://github.com/resilience4j/resilience4j",
+    "stars": 10783,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-10-07T12:54:23Z",
+    "observed_utc": "2026-10-15T01:13:48.225324Z",
+    "api_url": "https://api.github.com/repos/resilience4j/resilience4j",
+    "http_status": 200,
+    "revisions": {
+      "master": "b7c0069802e373ed72dff0b817c270fbb6e966ba"
+    }
+  },
+  "apache/camel": {
+    "repository": "apache/camel",
+    "url": "https://github.com/apache/camel",
+    "stars": 6370,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T22:08:16Z",
+    "observed_utc": "2026-10-15T01:13:42.423593Z",
+    "api_url": "https://api.github.com/repos/apache/camel",
+    "http_status": 200,
+    "revisions": {
+      "main": "cd2ce899764e3c482bdebfc1695e971afd2a962c"
+    }
+  },
+  "ThreeDotsLabs/watermill": {
+    "repository": "ThreeDotsLabs/watermill",
+    "url": "https://github.com/ThreeDotsLabs/watermill",
+    "stars": 9915,
+    "license_spdx": "MIT",
+    "license_name": "MIT License",
+    "archived": false,
+    "default_branch": "master",
+    "pushed_at": "2026-08-25T13:50:46Z",
+    "observed_utc": "2026-10-15T01:13:41.896547Z",
+    "api_url": "https://api.github.com/repos/ThreeDotsLabs/watermill",
+    "http_status": 200,
+    "revisions": {
+      "master": "080d4b4e7fe6105ab880d1becd5cf91af0235d8c"
+    }
+  },
+  "temporalio/sdk-java": {
+    "repository": "temporalio/sdk-java",
+    "url": "https://github.com/temporalio/sdk-java",
+    "stars": 436,
+    "license_spdx": "Apache-2.0",
+    "license_name": "Apache License 2.0",
+    "archived": false,
+    "default_branch": "main",
+    "pushed_at": "2026-10-14T22:49:28Z",
+    "observed_utc": "2026-10-15T01:40:50.545093Z",
+    "api_url": "https://api.github.com/repos/temporalio/sdk-java",
+    "http_status": 200,
+    "revisions": {
+      "main": "9b75f1df2768b386b42027f9b6c4073c4752d630"
+    }
+  }
+}

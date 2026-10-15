@@ -1,0 +1,12 @@
+{
+  "repo": "airlift/airlift",
+  "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+  "path": "tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+  "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+  "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--tracing--src--main--java--io--airlift--tracing--SpanSerialization.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.750065+00:00",
+  "sha256": "6ef77c07b98515ce69cee0afbdce716acbad3a4d5215d017cade9ca1688ae93d",
+  "line_count": 93
+}

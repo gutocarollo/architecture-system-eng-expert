@@ -1,0 +1,155 @@
+[
+  {
+    "kind": "FILE",
+    "repo": "open-feature/js-sdk",
+    "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+    "path": "packages/server/src/provider/multi-provider/multi-provider.ts",
+    "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+    "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/multi-provider/multi-provider.ts",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "open-feature/js-sdk",
+    "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+    "path": "packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+    "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+    "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/first-match-strategy.ts",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "open-feature/js-sdk",
+    "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+    "path": "packages/shared/src/provider/multi-provider/strategies/comparison-strategy.ts",
+    "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/comparison-strategy.ts",
+    "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/shared/src/provider/multi-provider/strategies/comparison-strategy.ts",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "open-feature/js-sdk",
+    "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+    "path": "packages/server/src/provider/provider.ts",
+    "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/provider.ts",
+    "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/packages/server/src/provider/provider.ts",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "open-feature/js-sdk",
+    "revision": "a99bb9f2645a85b76ce69f96d31640ff22277aa3",
+    "path": "LICENSE",
+    "url": "https://github.com/open-feature/js-sdk/blob/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+    "raw_url": "https://raw.githubusercontent.com/open-feature/js-sdk/a99bb9f2645a85b76ce69f96d31640ff22277aa3/LICENSE",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "julien-duponchelle/python-mysql-replication",
+    "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+    "path": "pymysqlreplication/binlogstream.py",
+    "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py",
+    "raw_url": "https://raw.githubusercontent.com/julien-duponchelle/python-mysql-replication/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/binlogstream.py",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "julien-duponchelle/python-mysql-replication",
+    "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+    "path": "pymysqlreplication/row_event.py",
+    "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/row_event.py",
+    "raw_url": "https://raw.githubusercontent.com/julien-duponchelle/python-mysql-replication/d1de0487c4009fda8fa5e51a859614dbea1b8197/pymysqlreplication/row_event.py",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "julien-duponchelle/python-mysql-replication",
+    "revision": "d1de0487c4009fda8fa5e51a859614dbea1b8197",
+    "path": "LICENSE",
+    "url": "https://github.com/julien-duponchelle/python-mysql-replication/blob/d1de0487c4009fda8fa5e51a859614dbea1b8197/LICENSE",
+    "raw_url": "https://raw.githubusercontent.com/julien-duponchelle/python-mysql-replication/d1de0487c4009fda8fa5e51a859614dbea1b8197/LICENSE",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "github/scientist",
+    "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+    "path": "lib/scientist/experiment.rb",
+    "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+    "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/experiment.rb",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "github/scientist",
+    "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+    "path": "lib/scientist/observation.rb",
+    "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+    "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/lib/scientist/observation.rb",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "github/scientist",
+    "revision": "2cd5c16210a4f4c938f48395b2860ebe0ccf56e7",
+    "path": "LICENSE",
+    "url": "https://github.com/github/scientist/blob/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE",
+    "raw_url": "https://raw.githubusercontent.com/github/scientist/2cd5c16210a4f4c938f48395b2860ebe0ccf56e7/LICENSE",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "295f7e5b750517b45850ff09d53c83f2d5d6c2cc",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/Repository.java",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "295f7e5b750517b45850ff09d53c83f2d5d6c2cc",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/AbstractRepository.java",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "295f7e5b750517b45850ff09d53c83f2d5d6c2cc",
+    "path": "modelling/src/main/java/org/axonframework/modelling/command/AggregateLifecycle.java",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/AggregateLifecycle.java",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/modelling/src/main/java/org/axonframework/modelling/command/AggregateLifecycle.java",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "AxonFramework/AxonFramework",
+    "revision": "295f7e5b750517b45850ff09d53c83f2d5d6c2cc",
+    "path": "LICENSE.txt",
+    "url": "https://github.com/AxonFramework/AxonFramework/blob/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/LICENSE.txt",
+    "raw_url": "https://raw.githubusercontent.com/AxonFramework/AxonFramework/295f7e5b750517b45850ff09d53c83f2d5d6c2cc/LICENSE.txt",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "the4thdoctor/pg_chameleon",
+    "revision": "5458575165565b4593d33af912e7fdbeb4db49f8",
+    "path": "setup.py",
+    "url": "https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py",
+    "raw_url": "https://raw.githubusercontent.com/the4thdoctor/pg_chameleon/5458575165565b4593d33af912e7fdbeb4db49f8/setup.py",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  },
+  {
+    "kind": "FILE",
+    "repo": "apache/fineract",
+    "revision": "d4ef4069547fba99400871877ceefadb62ad585b",
+    "path": "fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssembler.java",
+    "url": "https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssembler.java",
+    "raw_url": "https://raw.githubusercontent.com/apache/fineract/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanAssembler.java",
+    "query": "Pinned primary mechanism implementation and license capture for five assigned HIGH repairs."
+  }
+]

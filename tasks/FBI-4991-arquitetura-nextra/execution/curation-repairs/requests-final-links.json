@@ -1,0 +1,30 @@
+[
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/ingester/ingester.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/ingester/instance.go"
+  },
+  {
+    "repo": "grafana/loki",
+    "path": "pkg/querier/querier.go"
+  },
+  {
+    "repo": "vitessio/vitess",
+    "path": "go/vt/vtgate/engine/routing.go"
+  },
+  {
+    "repo": "bolshakov/stoplight",
+    "path": "lib/stoplight/domain/light.rb"
+  },
+  {
+    "repo": "zulip/zulip",
+    "path": "zerver/views/message_edit.py"
+  },
+  {
+    "repo": "redmine/redmine",
+    "path": "doc/COPYING"
+  }
+]

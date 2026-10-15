@@ -1,0 +1,250 @@
+package io.airlift.opentelemetry;
+
+import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import io.airlift.node.NodeInfo;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.MeterProvider;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.TracerProvider;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.context.propagation.TextMapPropagator;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.logs.LogRecordProcessor;
+import io.opentelemetry.sdk.logs.SdkLoggerProvider;
+import io.opentelemetry.sdk.logs.SdkLoggerProviderBuilder;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.SdkMeterProviderBuilder;
+import io.opentelemetry.sdk.metrics.export.MetricProducer;
+import io.opentelemetry.sdk.metrics.export.MetricReader;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import io.opentelemetry.sdk.trace.SpanLimits;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.semconv.DeploymentAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.incubating.HostIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.OsIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.base.StandardSystemProperty.JAVA_VM_NAME;
+import static com.google.common.base.StandardSystemProperty.JAVA_VM_VENDOR;
+import static com.google.common.base.StandardSystemProperty.JAVA_VM_VERSION;
+import static com.google.common.base.StandardSystemProperty.OS_ARCH;
+import static com.google.common.base.StandardSystemProperty.OS_NAME;
+import static com.google.common.base.StandardSystemProperty.OS_VERSION;
+import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static com.google.inject.multibindings.OptionalBinder.newOptionalBinder;
+import static io.airlift.configuration.ConfigBinder.configBinder;
+import static io.opentelemetry.sdk.trace.samplers.Sampler.alwaysOn;
+import static io.opentelemetry.sdk.trace.samplers.Sampler.parentBased;
+import static io.opentelemetry.sdk.trace.samplers.Sampler.traceIdRatioBased;
+import static java.util.Objects.requireNonNull;
+
+public class OpenTelemetryModule
+        implements Module
+{
+    private static final String NODE_ANNOTATION_PREFIX = "io.airlift.node";
+    private final String serviceName;
+    private final String serviceVersion;
+
+    public OpenTelemetryModule(String serviceName, String serviceVersion)
+    {
+        this.serviceName = requireNonNull(serviceName, "serviceName is null");
+        this.serviceVersion = requireNonNull(serviceVersion, "serviceVersion is null");
+    }
+
+    @Override
+    public void configure(Binder binder)
+    {
+        newSetBinder(binder, SpanProcessor.class);
+        newSetBinder(binder, MetricReader.class);
+        newSetBinder(binder, MetricProducer.class);
+        newSetBinder(binder, LogRecordProcessor.class);
+        newOptionalBinder(binder, LogRecordProcessor.class);
+        newOptionalBinder(binder, OpenTelemetryLogHandler.class);
+        // SdkLoggerProvider may be created during logging bootstrap in the OpenTelemetryLoggingModule
+        newOptionalBinder(binder, SdkLoggerProvider.class)
+                .setDefault()
+                .toProvider(new DefaultLoggerProviderProvider());
+        configBinder(binder).bindConfig(OpenTelemetryConfig.class);
+        configBinder(binder).bindConfig(BaggageConfig.class);
+    }
+
+    @Provides
+    @Singleton
+    public OpenTelemetry createOpenTelemetry(
+            Set<SpanProcessor> spanProcessors,
+            Set<MetricReader> metricReaders,
+            Set<MetricProducer> metricProducers,
+            Set<LogRecordProcessor> logRecordProcessors,
+            Optional<Provider<LogRecordProcessor>> exporterLogRecordProcessor,
+            Optional<OpenTelemetryLogHandler> logHandler,
+            SdkTracerProvider tracerProvider,
+            SdkMeterProvider meterProvider,
+            SdkLoggerProvider loggerProvider,
+            BaggageConfig baggageConfig)
+    {
+        logHandler.ifPresent(handler -> handler.addLogRecordProcessors(logRecordProcessors));
+        if (spanProcessors.isEmpty() && metricReaders.isEmpty() && metricProducers.isEmpty() && logRecordProcessors.isEmpty() && exporterLogRecordProcessor.isEmpty() && logHandler.isEmpty()) {
+            return OpenTelemetry.noop();
+        }
+
+        return OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .setMeterProvider(meterProvider)
+                .setLoggerProvider(loggerProvider)
+                .setPropagators(ContextPropagators.create(TextMapPropagator.composite(
+                        W3CTraceContextPropagator.getInstance(),
+                        new AllowlistBaggagePropagator(baggageConfig))))
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public Resource createResource(NodeInfo nodeInfo)
+    {
+        return createResource(serviceName, serviceVersion, nodeInfo);
+    }
+
+    static Resource createResource(String serviceName, String serviceVersion, NodeInfo nodeInfo)
+    {
+        AttributesBuilder attributes = Attributes.builder()
+                .put(ServiceAttributes.SERVICE_NAME, serviceName)
+                .put(ServiceAttributes.SERVICE_VERSION, serviceVersion)
+                .put(ServiceAttributes.SERVICE_INSTANCE_ID, nodeInfo.getNodeId())
+                .put(DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME, nodeInfo.getEnvironment())
+                .put(ProcessIncubatingAttributes.PROCESS_RUNTIME_NAME, System.getProperty("java.runtime.name"))
+                .put(ProcessIncubatingAttributes.PROCESS_RUNTIME_VERSION, System.getProperty("java.runtime.version"))
+                .put(ProcessIncubatingAttributes.PROCESS_RUNTIME_DESCRIPTION, processRuntime())
+                .put(OsIncubatingAttributes.OS_TYPE, osType())
+                .put(OsIncubatingAttributes.OS_NAME, OS_NAME.value())
+                .put(OsIncubatingAttributes.OS_VERSION, OS_VERSION.value())
+                .put(HostIncubatingAttributes.HOST_ARCH, hostArch());
+        nodeInfo.getAnnotations().forEach((key, value) -> attributes.put("%s.%s".formatted(NODE_ANNOTATION_PREFIX, key), value));
+
+        return Resource.getDefault().merge(Resource.create(attributes.build()));
+    }
+
+    @Provides
+    @Singleton
+    public SdkTracerProvider createTracerProvider(Resource resource, Set<SpanProcessor> spanProcessors, OpenTelemetryConfig config)
+    {
+        SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
+                .setSampler(parentBased(config.getSamplingRatio() == 1.0 ? alwaysOn() : traceIdRatioBased(config.getSamplingRatio())))
+                .addSpanProcessor(SpanProcessor.composite(spanProcessors))
+                .setResource(resource);
+        config.getMaxAttributeValueLength().ifPresent(maxLength ->
+                builder.setSpanLimits(SpanLimits.builder()
+                        .setMaxAttributeValueLength(maxLength)
+                        .build()));
+        return builder.build();
+    }
+
+    @Provides
+    @Singleton
+    public Tracer createTracer(Set<SpanProcessor> spanProcessors, SdkTracerProvider tracerProvider)
+    {
+        if (spanProcessors.isEmpty()) {
+            return TracerProvider.noop().get("noop");
+        }
+        return tracerProvider.get(serviceName);
+    }
+
+    @Provides
+    @Singleton
+    public SdkMeterProvider createMeterProvider(Resource resource, Set<MetricReader> metricReaders, Set<MetricProducer> metricProducers)
+    {
+        SdkMeterProviderBuilder builder = SdkMeterProvider.builder()
+                .setResource(resource);
+        metricReaders.forEach(builder::registerMetricReader);
+        metricProducers.forEach(builder::registerMetricProducer);
+        return builder.build();
+    }
+
+    @Provides
+    @Singleton
+    public Meter createMeter(Set<MetricReader> metricReaders, Set<MetricProducer> metricProducers, SdkMeterProvider meterProvider)
+    {
+        if (metricReaders.isEmpty() && metricProducers.isEmpty()) {
+            return MeterProvider.noop().get("noop");
+        }
+        return meterProvider.get(serviceName);
+    }
+
+    private static String processRuntime()
+    {
+        String vendor = JAVA_VM_VENDOR.value();
+        String name = JAVA_VM_NAME.value();
+        String version = JAVA_VM_VERSION.value();
+        if ((vendor == null) && (name == null) && (version == null)) {
+            return null;
+        }
+        return "%s %s %s".formatted(vendor, name, version);
+    }
+
+    private static String osType()
+    {
+        return switch (nullToEmpty(OS_NAME.value())) {
+            case "Linux" -> "linux";
+            case "Mac OS X" -> "darwin";
+            default -> null;
+        };
+    }
+
+    private static String hostArch()
+    {
+        return switch (nullToEmpty(OS_ARCH.value())) {
+            case "amd64", "x86_64" -> "amd64";
+            case "aarch64" -> "arm64";
+            case "ppc64le" -> "ppc64";
+            default -> null;
+        };
+    }
+
+    private static class DefaultLoggerProviderProvider
+            implements Provider<SdkLoggerProvider>
+    {
+        private Provider<Resource> resource;
+        private Provider<Optional<LogRecordProcessor>> exporterLogRecordProcessor;
+        private Provider<Set<LogRecordProcessor>> logRecordProcessors;
+        private SdkLoggerProvider loggerProvider;
+
+        @Inject
+        public void setDependencies(
+                Provider<Resource> resource,
+                Provider<Optional<LogRecordProcessor>> exporterLogRecordProcessor,
+                Provider<Set<LogRecordProcessor>> logRecordProcessors)
+        {
+            this.resource = requireNonNull(resource, "resource is null");
+            this.exporterLogRecordProcessor = requireNonNull(exporterLogRecordProcessor, "exporterLogRecordProcessor is null");
+            this.logRecordProcessors = requireNonNull(logRecordProcessors, "logRecordProcessors is null");
+        }
+
+        @Override
+        public synchronized SdkLoggerProvider get()
+        {
+            if (loggerProvider == null) {
+                SdkLoggerProviderBuilder builder = SdkLoggerProvider.builder()
+                        .setResource(resource.get());
+                exporterLogRecordProcessor.get().ifPresent(builder::addLogRecordProcessor);
+                logRecordProcessors.get().forEach(builder::addLogRecordProcessor);
+                loggerProvider = builder.build();
+            }
+            return loggerProvider;
+        }
+    }
+}

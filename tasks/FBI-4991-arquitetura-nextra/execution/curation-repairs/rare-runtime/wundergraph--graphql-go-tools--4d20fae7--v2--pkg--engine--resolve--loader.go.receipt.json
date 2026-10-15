@@ -1,0 +1,12 @@
+{
+  "repo": "wundergraph/graphql-go-tools",
+  "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+  "path": "v2/pkg/engine/resolve/loader.go",
+  "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--resolve--loader.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:13.280079+00:00",
+  "sha256": "41cb51332e46a8cf2486da6a7880db5aa7e4e8ed7a155f3cbf4139f0871028e5",
+  "line_count": 2459
+}

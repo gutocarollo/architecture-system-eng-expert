@@ -1,0 +1,12 @@
+{
+  "repo": "trinodb/trino",
+  "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+  "path": "core/trino-main/src/main/java/io/trino/server/TaskUpdateRequest.java",
+  "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskUpdateRequest.java",
+  "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskUpdateRequest.java",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--core--trino-main--src--main--java--io--trino--server--TaskUpdateRequest.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:12.487542+00:00",
+  "sha256": "36fa95c15b9ef9afabd5277c90175dcde8a03b0d793c00dc38eccc810e79cc8a",
+  "line_count": 78
+}

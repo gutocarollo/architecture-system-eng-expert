@@ -1,0 +1,13 @@
+{
+  "repo": "airlift/airlift",
+  "revision": "4f2d1e75477e05ec3e3f5f9f22ab862781223863",
+  "path": "LICENSE",
+  "url": "https://github.com/airlift/airlift/blob/4f2d1e75477e05ec3e3f5f9f22ab862781223863/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/airlift/airlift/4f2d1e75477e05ec3e3f5f9f22ab862781223863/LICENSE",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--LICENSE",
+  "source": "raw_primary",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:48:05.405493+00:00",
+  "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+  "line_count": 177
+}

@@ -1,0 +1,18 @@
+{
+  "recorded_utc": "2026-10-15T04:22:03.526490+00:00",
+  "concepts": 51,
+  "unique_concepts": 51,
+  "high_coverage": 51,
+  "source_role_counts": {
+    "base": 105,
+    "application": 215
+  },
+  "unique_artifacts": 337,
+  "artifact_hash_errors": 0,
+  "errors_count": 0,
+  "errors": [],
+  "context_only_sources_omitted": 4,
+  "matrix_frozen_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "consolidated_sha256": "3de457f9f69860dcacd7a66a01307aae6a55675db6c5457c417714597a37ba19",
+  "independent_review": "PENDING"
+}

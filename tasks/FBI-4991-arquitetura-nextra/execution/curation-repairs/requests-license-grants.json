@@ -1,0 +1,14 @@
+[
+  {
+    "repo": "javaparser/javaparser",
+    "path": "LICENSE.APACHE",
+    "kind": "LICENSE",
+    "license_spdx": "Apache-2.0"
+  },
+  {
+    "repo": "redmine/redmine",
+    "path": "doc/COPYING",
+    "kind": "LICENSE",
+    "license_spdx": "GPL-2.0-or-later"
+  }
+]

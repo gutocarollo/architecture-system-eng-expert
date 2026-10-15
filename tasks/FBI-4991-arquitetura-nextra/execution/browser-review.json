@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-10-15T03:00:46.336Z",
+  "observedAt": "2026-10-15T04:10:35.916Z",
   "base": "http://127.0.0.1:59142",
   "routeResults": [
     {
@@ -24,6 +24,10 @@
     },
     {
       "route": "/explicacoes/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/explicacoes/casos/airflow-lock-retry",
       "status": 200
     },
     {
@@ -155,6 +159,10 @@
       "status": 200
     },
     {
+      "route": "/guias/casos/airflow-lock-retry",
+      "status": 200
+    },
+    {
       "route": "/guias/casos/cache-policy",
       "status": 200
     },
@@ -244,6 +252,10 @@
     },
     {
       "route": "/jornadas/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/jornadas/airflow-lock-retry",
       "status": 200
     },
     {
@@ -376,6 +388,10 @@
     },
     {
       "route": "/referencia/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/referencia/casos/airflow-lock-retry",
       "status": 200
     },
     {
@@ -608,6 +624,10 @@
     },
     {
       "route": "/tutoriais/casos/access-policy",
+      "status": 200
+    },
+    {
+      "route": "/tutoriais/casos/airflow-lock-retry",
       "status": 200
     },
     {
@@ -1302,6 +1322,41 @@
           "missingSiblingLinks": []
         }
       ]
+    },
+    {
+      "caseId": "airflow-lock-retry",
+      "destinations": [
+        {
+          "kind": "journey",
+          "route": "/jornadas/airflow-lock-retry/",
+          "heading": "Uma falha de lock derruba a tarefa do Airflow",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "explanation",
+          "route": "/explicacoes/casos/airflow-lock-retry/",
+          "heading": "Por que repetir somente a falha elegível",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "tutorial",
+          "route": "/tutoriais/casos/airflow-lock-retry/",
+          "heading": "Experimente: repita o erro de lock com uma cota",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "how_to",
+          "route": "/guias/casos/airflow-lock-retry/",
+          "heading": "Como conferir se uma falha pode ser repetida",
+          "missingSiblingLinks": []
+        },
+        {
+          "kind": "reference",
+          "route": "/referencia/casos/airflow-lock-retry/",
+          "heading": "Contrato do retry histórico do Airflow",
+          "missingSiblingLinks": []
+        }
+      ]
     }
   ],
   "pageErrors": [],
@@ -1466,6 +1521,14 @@
       "text": "5. Feche a decisão com seu limiteeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Quando sua mudança exigir uma garantia que o modelo não mede,"
     },
     {
+      "href": "/tutoriais",
+      "text": "Aprenda fazendouma política de atualização. Compartilhe uma recomputação e preserve sua tarefa. Você verá como o cancelamento de um cliente afeta os demais. Recuse uma transição inválida. Você verá estados, eventos"
+    },
+    {
+      "href": "/#comece-por-uma-dor-e-acompanhe-a-mudan%C3%A7a",
+      "text": "Comece por uma dor e acompanhe a mudançaqual garantia você adquiriu. Uma pessoa cancela a busca e os colegas perdem o resultado. Compare a espera compartilhada antes e depois da proteção contra cancelamento. A lista demora porque"
+    },
+    {
       "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#choreography-saga",
       "text": "Choreography Sagapor coreografia é distinta do sample orquestrado. Em OrderEventConsumer, pedido criado aciona reserveCredit e pedido cancelado aciona releaseCredit. CustomerEventConsumer aprova ou rejeita o pedido conforme o resultado do crédito. O"
     },
@@ -1482,14 +1545,6 @@
       "text": "LeaseA expiração da lease altera o contrato do serviço; não mata automaticamente um executor nem cancela um pagamento externo. No MakersHub lido, a lease de idempotência é outro mecanismo, limitado"
     },
     {
-      "href": "/tutoriais",
-      "text": "Aprenda fazendouma política de atualização. Compartilhe uma recomputação e preserve sua tarefa. Você verá como o cancelamento de um cliente afeta os demais. Recuse uma transição inválida. Você verá estados, eventos"
-    },
-    {
-      "href": "/#comece-por-uma-dor-e-acompanhe-a-mudan%C3%A7a",
-      "text": "Comece por uma dor e acompanhe a mudançaqual garantia você adquiriu. Uma pessoa cancela a busca e os colegas perdem o resultado. Compare a espera compartilhada antes e depois da proteção contra cancelamento. A lista demora porque"
-    },
-    {
       "href": "/explicacoes/distributed-work#reservar-antes-de-confirmar",
       "text": "Reservar antes de confirmaro autor do pipeline deve adivinhar. O padrão TCC — Try/Confirm/Cancel organiza participantes que oferecem três ações: tentar e reservar; confirmar; cancelar a reserva. Cada ação precisa tolerar a repetição"
     },
@@ -1500,6 +1555,10 @@
     {
       "href": "/jornadas/order-delivery/conceitos#tcc--tryconfirmcancel",
       "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. Try valida e reserva; Confirm finaliza; Cancel libera a reserva. No caso desta família, faça a seguinte observação: Reserve dinheiro e unidade na fase Try. Siga uma cópia"
+    },
+    {
+      "href": "/referencia/casos#contratos-dos-percursos",
+      "text": "Contratos dos percursosContratos dos percursos. CasoContrato para consulta Cancelamento de uma busca compartilhada. Entradas, garantias e limites. A lista continua disponível durante a renovação. Entradas, garantias e limites. A emissão continua no"
     },
     {
       "href": "/tutoriais/casos",
@@ -1522,14 +1581,6 @@
       "text": "Reservar, preparar ou compensar são escolhas distintasReservar, preparar ou compensar são escolhas distintas. No protocolo Try/Confirm/Cancel (TCC), Try valida e reserva; Confirm finaliza; Cancel libera a reserva. Cada chamada precisa tolerar repetição. Uma reserva de R$"
     },
     {
-      "href": "/referencia/catalogo/07-resiliencia#deadline-propagation",
-      "text": "Deadline Propagationde dez segundos deixa sete para o restante. O limite inclui trabalho que continua após cancelamento e relógios; timeouts por fase não comprovam esse contrato. A skill de apoio é"
-    },
-    {
-      "href": "/referencia/catalogo/07-resiliencia#chaos-engineering",
-      "text": "Chaos EngineeringChaos Engineering. Aplica uma falha controlada para investigar uma hipótese sobre o sistema e observar recuperação. Um laboratório proposto cancela um leitor de uma task compartilhada. O limite é ter"
-    },
-    {
       "href": "/jornadas/cache-policy#o-resultado-que-conecta-a-jornada",
       "text": "O resultado que conecta a jornadaeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Quando terminar a prática e consultar seus contratos, continue em A"
     },
@@ -1550,12 +1601,12 @@
       "text": "4. Avalie a garantia adquiridae a ordem negativa não gera escrita. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
     },
     {
-      "href": "/guias/casos/access-policy#4-avalie-a-garantia-adquirida",
-      "text": "4. Avalie a garantia adquiridae ledger não pertence às ligações permitidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
-    },
-    {
       "href": "/guias/casos/safe-release#4-avalie-a-garantia-adquirida",
       "text": "4. Avalie a garantia adquiridae 1.000 antes de trocar a saída. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/access-policy#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridae ledger não pertence às ligações permitidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
     },
     {
       "href": "/guias/casos/reservation#4-avalie-a-garantia-adquirida",
@@ -1574,12 +1625,12 @@
       "text": "4. Avalie a garantia adquirida04/10/26, pois o instante não foi alterado. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
     },
     {
-      "href": "/guias/casos/ledger-projection#4-avalie-a-garantia-adquirida",
-      "text": "4. Avalie a garantia adquiridajournal_mode=wal e conserva 100.000 centavos após rollback. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
-    },
-    {
       "href": "/guias/casos/storage-partitions#4-avalie-a-garantia-adquirida",
       "text": "4. Avalie a garantia adquiridade SCAN para SEARCH com COVERING INDEX. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
+    },
+    {
+      "href": "/guias/casos/ledger-projection#4-avalie-a-garantia-adquirida",
+      "text": "4. Avalie a garantia adquiridajournal_mode=wal e conserva 100.000 centavos após rollback. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa."
     },
     {
       "href": "/guias/casos/consensus#4-avalie-a-garantia-adquirida",
@@ -1598,6 +1649,14 @@
       "text": "Todos os conceitos e seus casosexemplo, ajuda a discutir Raft, mas não executa Raft. CasoConceitosDestinos que conservam o mesmo problema Cancelamento de uma busca compartilhada. 5. Explicação, tutorial, guia e referência. A lista continua disponível"
     },
     {
+      "href": "/referencia/catalogo/07-resiliencia#deadline-propagation",
+      "text": "Deadline Propagationde dez segundos deixa sete para o restante. O limite inclui trabalho que continua após cancelamento e relógios; timeouts por fase não comprovam esse contrato. A skill de apoio é"
+    },
+    {
+      "href": "/referencia/catalogo/07-resiliencia#chaos-engineering",
+      "text": "Chaos EngineeringChaos Engineering. Aplica uma falha controlada para investigar uma hipótese sobre o sistema e observar recuperação. Um laboratório proposto cancela um leitor de uma task compartilhada. O limite é ter"
+    },
+    {
       "href": "/tutoriais/casos/cache-policy#7-reinicie-e-conclua",
       "text": "7. Reinicie e concluaeviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação. Você já observou a diferença. Continue o mesmo caso: volte ao"
     },
@@ -1614,22 +1673,6 @@
       "text": "Executar mais trabalho não significa compartilhar mais memóriareferência dos 22 conceitos de concorrência distingue cada garantia, aplicação e limite. O caso de single-flight e cancelamento está em cache, e as tasks entre executores estão em trabalho distribuído."
     },
     {
-      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#choreography-saga",
-      "text": "Choreography Sagasaga coreografada para o fluxo federado Follow, com desfazimento de estado local por rejeição ou cancelamento. Ela não afirma atomicidade entre instâncias, confirmação de entrega global, rollback de notificações já"
-    },
-    {
-      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#tcc--tryconfirmcancel",
-      "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. O identificador canônico é tcc-try-confirm-cancel. A curadoria deste item permanece pendente. Seata implementa o coordenador e o recurso TCC. Falta uma aplicação consumidora OSS real com reserva, confirmação"
-    },
-    {
-      "href": "/referencia/catalogo/06-cache#single-flight",
-      "text": "Single Flightcom shield. O limite é que essa coordenação pertence ao processo e precisa tratar erro, cancelamento e limpeza. A skill é backend-caching. A base é task compartilhada e asyncio.shield ."
-    },
-    {
-      "href": "/referencia/catalogo/08-concorrencia#futurespromises",
-      "text": "Futures/PromisesFutures/Promises. Representam uma conclusão futura com resultado ou erro. Os leitores do single-flight aguardam a mesma task; o ciclo de vida dessa conclusão é separado do leitor que cancelou. O"
-    },
-    {
       "href": "/explicacoes/messages#o-alcance-da-confirma%C3%A7%C3%A3o",
       "text": "O alcance da confirmaçãodo consumidor informa que ele concluiu a etapa definida. Um timeout em Request/Reply não prova cancelamento do comando. Por isso a recuperação precisa conhecer identidade e estado, além de repetir"
     },
@@ -1638,12 +1681,28 @@
       "text": "Timeout e prazo totalpropagado. A documentação HTTPX detalha as fases, e gRPC deadlines fornece a base de propagação. Cancelar a espera do chamador não desfaz automaticamente um efeito externo já realizado."
     },
     {
+      "href": "/referencia/catalogo/06-cache#single-flight",
+      "text": "Single Flightcom shield. O limite é que essa coordenação pertence ao processo e precisa tratar erro, cancelamento e limpeza. A skill é backend-caching. A base é task compartilhada e asyncio.shield ."
+    },
+    {
       "href": "/referencia/curadoria/07-resiliencia#deadline-propagation",
       "text": "Deadline Propagationcontexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento. A base de estudo é grpc/grpc-go / clientconn.go @ 4d4d4284 ; licença Apache-2.0 ."
     },
     {
       "href": "/referencia/curadoria/07-resiliencia#timeout",
       "text": "Timeoutcontexto com timeout para a consulta; chamadas que recebem o contexto compartilham o prazo de cancelamento. A base de estudo é grpc/grpc-go / clientconn.go @ 4d4d4284 ; licença Apache-2.0 ."
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#choreography-saga",
+      "text": "Choreography Sagao pedido já gravado em A e pode desfazer uma relação já consolidada. Se A cancela, ela remove seu pedido ou relação e envia Undo; B remove sua cópia correspondente."
+    },
+    {
+      "href": "/referencia/curadoria/02-sistemas-distribuidos-e-consistencia#tcc--tryconfirmcancel",
+      "text": "TCC — Try/Confirm/Cancel— Try/Confirm/Cancel. O identificador canônico é tcc-try-confirm-cancel. Há uma correspondência autoral com fontes primárias. A revisão independente precisa conferir esta versão. No Try, o Nova mantém os recursos da origem"
+    },
+    {
+      "href": "/referencia/catalogo/08-concorrencia#futurespromises",
+      "text": "Futures/PromisesFutures/Promises. Representam uma conclusão futura com resultado ou erro. Os leitores do single-flight aguardam a mesma task; o ciclo de vida dessa conclusão é separado do leitor que cancelou. O"
     },
     {
       "href": "/referencia/catalogo/03-event-driven-messaging#requestreply",
@@ -1748,8 +1807,38 @@
           "title": "Uma única versão atual ainda pode perder uma alteração"
         }
       ]
+    },
+    {
+      "caseId": "airflow-lock-retry",
+      "steps": [
+        {
+          "destination": "explanation",
+          "url": "http://127.0.0.1:59142/explicacoes/casos/airflow-lock-retry",
+          "title": "Por que repetir somente a falha elegível"
+        },
+        {
+          "destination": "tutorial",
+          "url": "http://127.0.0.1:59142/tutoriais/casos/airflow-lock-retry",
+          "title": "Experimente: repita o erro de lock com uma cota"
+        },
+        {
+          "destination": "how_to",
+          "url": "http://127.0.0.1:59142/guias/casos/airflow-lock-retry",
+          "title": "Como conferir se uma falha pode ser repetida"
+        },
+        {
+          "destination": "reference",
+          "url": "http://127.0.0.1:59142/referencia/casos/airflow-lock-retry",
+          "title": "Contrato do retry histórico do Airflow"
+        },
+        {
+          "destination": "journey",
+          "url": "http://127.0.0.1:59142/jornadas/airflow-lock-retry",
+          "title": "Uma falha de lock derruba a tarefa do Airflow"
+        }
+      ]
     }
   ],
-  "completedAt": "2026-10-15T03:02:15.579Z",
+  "completedAt": "2026-10-15T04:12:14.524Z",
   "verdict": "PASS"
 }

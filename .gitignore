@@ -61,3 +61,6 @@
 /tasks/FBI-4991-arquitetura-nextra/execution/curation/*-tree.json.gz
 
 /tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-saga-definition.html
+
+# Sites owns this generated source checkout and its deployment history.
+sites/architecture-course/

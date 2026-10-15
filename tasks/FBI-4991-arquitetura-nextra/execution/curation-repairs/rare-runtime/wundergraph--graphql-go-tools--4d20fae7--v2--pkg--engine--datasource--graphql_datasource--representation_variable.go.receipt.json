@@ -1,0 +1,12 @@
+{
+  "repo": "wundergraph/graphql-go-tools",
+  "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+  "path": "v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+  "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+  "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--datasource--graphql_datasource--representation_variable.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:49:13.031464+00:00",
+  "sha256": "9a55450e82fc667fd7ef4eddfe7cddc81bb8e1b461facc6dc4222425bb1f61ab",
+  "line_count": 387
+}

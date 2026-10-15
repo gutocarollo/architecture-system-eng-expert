@@ -3,8 +3,8 @@
   "source": "sources.json",
   "archive": "sources.json.gz",
   "encoding": "gzip",
-  "contents_sha256": "51638c494e7cbbac9c6d7389ea4f3ab2b40239c6930501a791bafc6796ad3209",
-  "archive_sha256": "87f2616ba1db8fd855b1e7bfde505db425e6f82167640eed0ca119c4115b7586",
-  "source_bytes": 2313023,
-  "archive_bytes": 499251
+  "contents_sha256": "1cac764cd16b3d03dbfe658a96870dd0f6160cd2b81e2389eb0f7e226f40ec6f",
+  "archive_sha256": "82cc3da725838de9f0edc48a43cb29ace960a463623312f9dcf69ae235ad33f3",
+  "source_bytes": 3122988,
+  "archive_bytes": 619226
 }

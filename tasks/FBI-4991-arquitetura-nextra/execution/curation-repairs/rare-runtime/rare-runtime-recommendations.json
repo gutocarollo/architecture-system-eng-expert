@@ -1,0 +1,2087 @@
+{
+  "schema_version": "rare-runtime-repairs/v1",
+  "author_lane": {
+    "agent": "/root/rare_oss_sources",
+    "native_type": "default",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "xhigh",
+    "routing": "WARM_REUSE",
+    "role": "DEEP_EXPLORE primary-source curation; not an independent review"
+  },
+  "observed_utc": "2026-10-15T03:54:46.010834+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "review_input": {
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/curation-second.concepts.json",
+    "sha256": "1b767d48cfa0d4e6b0e664480fbd596ae0c4e07045a3b6c0608b1ae3579ac074",
+    "matrix_sha256_from_review": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e"
+  },
+  "write_scope": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/**",
+  "delivery_limits": [
+    "Somente evidência autoral foi produzida. Nenhuma classificação congelada, fonte global, MDX, build, produção, teste ou Jira foi alterado por esta lane.",
+    "A integração e a rechecagem independente pertencem ao curador e ao reviewer; os cinco itens continuam recomendações até esses gates.",
+    "Context7 respondeu que a cota mensal estava esgotada. Foram usados caches locais e código/documentação primários oficiais. A pesquisa GitHub Search não foi necessária: árvores já capturadas e a API de árvore do repositório orientaram os paths.",
+    "O primeiro palpite router/pkg/execution_config/execution_config.go retornou 404; a árvore primária indicou routerconfig.go, que foi capturado com sucesso. Nenhuma conclusão usa o path inexistente."
+  ],
+  "licenses": {
+    "temporalio/temporal@10791698da3708020fe52db8af1b4bef89db3177": {
+      "status": "READ",
+      "repo": "temporalio/temporal",
+      "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+      "path": "LICENSE",
+      "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE",
+      "license_spdx": "MIT",
+      "api_license_spdx": "MIT",
+      "observed_utc": "2026-10-15T01:28:31.452082Z",
+      "http_status": 200,
+      "sha256": "6aab9afd99ceb1dcaf6a0d91386b46baef9bce17ae4006044e0f231e31430b69",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--license-cache.txt",
+      "excerpt": "The MIT License\n\nCopyright (c) 2025 Temporal Technologies Inc.  All rights reserved.\n\nCopyright (c) 2020 Uber Technologies, Inc.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Softwa",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-9948a3cbd3ae8bfe69c997d64cba629d823b7ef87dd02dbe1f9917417b33b15c.txt",
+      "reuse": "Existing pinned license bytes were copied after checking their SHA-256."
+    },
+    "apache/hadoop@6f3d71bc35f5eaab0487283533e6057c58038ae4": {
+      "status": "READ",
+      "repo": "apache/hadoop",
+      "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+      "path": "LICENSE.txt",
+      "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt",
+      "license_spdx": "Apache-2.0",
+      "api_license_spdx": "Apache-2.0",
+      "observed_utc": "2026-10-15T01:28:23.859339Z",
+      "http_status": 200,
+      "sha256": "1cd7319cd139fe0e28c4393ae431b6c8b583472cef1189bd1139a4b13c4be997",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--license-cache.txt",
+      "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-074befbe80ba890a76b4232564e08529c6ca3e106e85c2d611a7ba31a7285327.txt",
+      "reuse": "Existing pinned license bytes were copied after checking their SHA-256."
+    },
+    "trinodb/trino@5706548dade9b1dc81144af6850c5dde9a356713": {
+      "status": "READ",
+      "repo": "trinodb/trino",
+      "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+      "path": "LICENSE",
+      "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE",
+      "license_spdx": "Apache-2.0",
+      "api_license_spdx": "Apache-2.0",
+      "observed_utc": "2026-10-15T01:28:31.711421Z",
+      "http_status": 200,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--license-cache.txt",
+      "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i",
+      "cache_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-cdf91bc53dab45d12bc49fd7046104487e358aaac921bf8ca2edd7e7ad3f2ca2.txt",
+      "reuse": "Existing pinned license bytes were copied after checking their SHA-256."
+    },
+    "airlift/airlift@2fd0bb60d560a511403957d79931f5915adced44": {
+      "repo": "airlift/airlift",
+      "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+      "path": "LICENSE",
+      "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:49:12.481128+00:00",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "line_count": 177,
+      "license_spdx": "Apache-2.0",
+      "scope": "Root license covers selected non-demo paths; the complete pinned tree has no nearer license in their ancestor directories."
+    },
+    "wundergraph/cosmo@4879bb547802dae3b1e35f71e6a8af2165c01009": {
+      "repo": "wundergraph/cosmo",
+      "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+      "path": "LICENSE",
+      "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--LICENSE",
+      "source": "raw_primary",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:48:05.300390+00:00",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "line_count": 201,
+      "license_spdx": "Apache-2.0",
+      "scope": "Root license covers selected non-demo paths; the complete pinned tree has no nearer license in their ancestor directories."
+    },
+    "wundergraph/graphql-go-tools@4d20fae7080021bc08cd2d4602747ad600326ead": {
+      "repo": "wundergraph/graphql-go-tools",
+      "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+      "path": "v2/LICENSE",
+      "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE",
+      "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/LICENSE",
+      "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--LICENSE",
+      "http_status": 200,
+      "observed_utc": "2026-10-15T03:54:31.893701+00:00",
+      "sha256": "a37034638bff6772710b179744c2d3605c8d493dbc41dcfb31d6e6d217ce9a02",
+      "line_count": 21,
+      "license_spdx": "MIT",
+      "scope": "The selected v2 files are covered by their nearest v2/LICENSE (MIT)."
+    }
+  },
+  "concepts": [
+    {
+      "concept_id": "finite-state-machine",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "Temporal HSM é a infraestrutura genérica de transições dentro do servidor.",
+      "application_role": "Temporal Server é o produto OSS real; a aplicação escolhida é a máquina de uma operação Nexus, e não todo o motor de workflows.",
+      "mechanism": "Uma operação Nexus nasce no estado UNSPECIFIED. O comando de agendamento aplica uma transição para SCHEDULED. Se a chamada falha de forma recuperável, o executor muda o controle para BACKING_OFF; o timer de retry pode devolvê-lo a SCHEDULED. Uma resposta assíncrona muda o controle para STARTED, e um evento de conclusão permite SUCCEEDED. Cada transição declara suas origens aceitas. A base testa o estado atual e devolve ErrInvalidTransition quando a origem não está na lista.",
+      "review_gap_addressed": "A nova seleção mostra enum finito, origens e destino, guarda, mutação e callers reais de comandos, eventos e executor.",
+      "limits": [
+        "A finitude demonstrada é a dos oito estados de controle. Payload, tentativas e timestamps são dados adicionais; não se afirma que todo o espaço de configuração do serviço seja finito.",
+        "A base genérica aceita S comparable e, sozinha, não exige um conjunto finito. O enum Nexus e suas transições fornecem esse recorte.",
+        "Não se deduz GoF State desse enum. Também não se afirma atomicidade de persistência a partir de Apply: a função troca o estado antes de chamar o callback, que pode retornar erro."
+      ],
+      "licenses": [
+        "temporalio/temporal@10791698da3708020fe52db8af1b4bef89db3177"
+      ],
+      "evidence": [
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/sm.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--sm.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.757488+00:00",
+          "sha256": "4ea7b8d16c0b215fad3f1a0b02e91b3d12be07994a1c152f25dd2c44e92904e9",
+          "line_count": 66,
+          "role": "base",
+          "proves": "A base genérica registra origens, destino e evento; Possible verifica o estado atual e Apply rejeita uma transição inválida antes de trocar o estado.",
+          "inspected_ranges": [
+            [
+              18,
+              24
+            ],
+            [
+              31,
+              66
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 18,
+              "end_line": 24,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go#L18-L24",
+              "text": "18: // A StateMachine is anything that can get and set a comparable state S and re-generate tasks based on current state.\n19: // It is meant to be used with [Transition] objects to safely transition their state on a given event.\n20: type StateMachine[S comparable] interface {\n21: \tTaskRegenerator\n22: \tState() S\n23: \tSetState(S)\n24: }"
+            },
+            {
+              "start_line": 31,
+              "end_line": 66,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go#L31-L66",
+              "text": "31: // Transition represents a state machine transition for a machine of type SM with state S and event E.\n32: type Transition[S comparable, SM StateMachine[S], E any] struct {\n33: \t// Source states that are valid for this transition.\n34: \tSources []S\n35: \t// Destination state to transition to.\n36: \tDestination S\n37: \t// Function to apply the transition. Mutate the state machine object here and return tasks.\n38: \tapply func(SM, E) (TransitionOutput, error)\n39: }\n40: \n41: // NewTransition creates a new [Transition] from the given source states to a destination state for a given event.\n42: // The apply function is called after verifying the transition is possible and setting the destination state.\n43: func NewTransition[S comparable, SM StateMachine[S], E any](src []S, dst S, apply func(SM, E) (TransitionOutput, error)) Transition[S, SM, E] {\n44: \treturn Transition[S, SM, E]{\n45: \t\tSources:     src,\n46: \t\tDestination: dst,\n47: \t\tapply:       apply,\n48: \t}\n49: }\n50: \n51: // Possible returns a boolean indicating whether the transition is possible for the current state.\n52: func (t Transition[S, SM, E]) Possible(sm SM) bool {\n53: \treturn slices.Contains(t.Sources, sm.State())\n54: }\n55: \n56: // Apply applies a transition event to the given state machine changing the state machine's state to the transition's\n57: // Destination on success.\n58: func (t Transition[S, SM, E]) Apply(sm SM, event E) (TransitionOutput, error) {\n59: \tprevState := sm.State()\n60: \tif !t.Possible(sm) {\n61: \t\treturn TransitionOutput{}, fmt.Errorf(\"%w from %v: %v\", ErrInvalidTransition, prevState, event)\n62: \t}\n63: \n64: \tsm.SetState(t.Destination)\n65: \treturn t.apply(sm, event)\n66: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--proto--internal--temporal--server--api--enums--v1--nexus.proto",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.484435+00:00",
+          "sha256": "c50acc450b6bd27fb60ad98fe1f5894b087950a252b345a582186fc889362c39",
+          "line_count": 27,
+          "role": "finite_control_states",
+          "proves": "O enum da operação Nexus tem oito estados de controle, incluindo UNSPECIFIED e quatro estados terminais.",
+          "inspected_ranges": [
+            [
+              7,
+              27
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 7,
+              "end_line": 27,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto#L7-L27",
+              "text": "7: enum NexusOperationState {\n8:   // Default value, unspecified state.\n9:   NEXUS_OPERATION_STATE_UNSPECIFIED = 0;\n10:   // Operation is in the queue waiting to be executed or is currently executing.\n11:   NEXUS_OPERATION_STATE_SCHEDULED = 1;\n12:   // Operation has failed with a retryable error and is backing off before the next attempt.\n13:   NEXUS_OPERATION_STATE_BACKING_OFF = 2;\n14:   // Operation was started and will complete asynchronously.\n15:   NEXUS_OPERATION_STATE_STARTED = 3;\n16:   // Operation succeeded.\n17:   // This may happen either as a response to a start request or as reported via callback.\n18:   NEXUS_OPERATION_STATE_SUCCEEDED = 4;\n19:   // Operation failed either when a start request encounters a non-retryable error or as reported via callback.\n20:   NEXUS_OPERATION_STATE_FAILED = 5;\n21:   // Operation completed as canceled (may have not ever been delivered).\n22:   // This may happen either as a response to a start request or as reported via callback.\n23:   NEXUS_OPERATION_STATE_CANCELED = 6;\n24:   // Operation timed out - exceeded the user supplied schedule-to-close timeout.\n25:   // Any attempts to complete the operation in this state will be ignored.\n26:   NEXUS_OPERATION_STATE_TIMED_OUT = 7;\n27: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/statemachine.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--statemachine.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.788660+00:00",
+          "sha256": "45488e995b3fcadd2c184d8ed9fb5c053bbbdc2463dcae53d31116ad47dc0873",
+          "line_count": 685,
+          "role": "application",
+          "proves": "A operação do servidor instancia a base: UNSPECIFIED vai a SCHEDULED, uma falha recuperável vai a BACKING_OFF, o retry volta a SCHEDULED e o início assíncrono vai a STARTED.",
+          "inspected_ranges": [
+            [
+              45,
+              89
+            ],
+            [
+              245,
+              289
+            ],
+            [
+              298,
+              332
+            ],
+            [
+              364,
+              367
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 45,
+              "end_line": 89,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L45-L89",
+              "text": "45: // AddChild adds a new operation child machine to the given node and transitions it to the SCHEDULED state.\n46: func AddChild(node *hsm.Node, id string, event *historypb.HistoryEvent, eventToken []byte) (*hsm.Node, error) {\n47: \tattrs := event.GetNexusOperationScheduledEventAttributes()\n48: \n49: \tnode, err := node.AddChild(hsm.Key{Type: OperationMachineType, ID: id}, Operation{\n50: \t\t&persistencespb.NexusOperationInfo{\n51: \t\t\tEndpointId:             attrs.EndpointId,\n52: \t\t\tEndpoint:               attrs.Endpoint,\n53: \t\t\tService:                attrs.Service,\n54: \t\t\tOperation:              attrs.Operation,\n55: \t\t\tScheduledTime:          event.EventTime,\n56: \t\t\tScheduleToCloseTimeout: attrs.ScheduleToCloseTimeout,\n57: \t\t\tScheduleToStartTimeout: attrs.ScheduleToStartTimeout,\n58: \t\t\tStartToCloseTimeout:    attrs.StartToCloseTimeout,\n59: \t\t\tRequestId:              attrs.RequestId,\n60: \t\t\tState:                  enumsspb.NEXUS_OPERATION_STATE_UNSPECIFIED,\n61: \t\t\tScheduledEventToken:    eventToken,\n62: \t\t},\n63: \t})\n64: \n65: \tif err != nil {\n66: \t\treturn nil, err\n67: \t}\n68: \n69: \treturn node, hsm.MachineTransition(node, func(op Operation) (hsm.TransitionOutput, error) {\n70: \t\toutput, err := TransitionScheduled.Apply(op, EventScheduled{Node: node})\n71: \t\tif err != nil {\n72: \t\t\treturn output, err\n73: \t\t}\n74: \t\tcreationTasks, err := op.creationTasks()\n75: \t\tif err != nil {\n76: \t\t\treturn output, err\n77: \t\t}\n78: \t\toutput.Tasks = append(output.Tasks, creationTasks...)\n79: \t\treturn output, err\n80: \t})\n81: }\n82: \n83: func (o Operation) State() enumsspb.NexusOperationState {\n84: \treturn o.NexusOperationInfo.State\n85: }\n86: \n87: func (o Operation) SetState(state enumsspb.NexusOperationState) {\n88: \to.NexusOperationInfo.State = state\n89: }"
+            },
+            {
+              "start_line": 245,
+              "end_line": 289,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L245-L289",
+              "text": "245: var TransitionScheduled = hsm.NewTransition(\n246: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_UNSPECIFIED},\n247: \tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n248: \tfunc(op Operation, event EventScheduled) (hsm.TransitionOutput, error) {\n249: \t\treturn op.output()\n250: \t},\n251: )\n252: \n253: // EventRescheduled is triggered when the operation is meant to be rescheduled after backing off from a previous\n254: // attempt.\n255: type EventRescheduled struct {\n256: \tNode *hsm.Node\n257: }\n258: \n259: var TransitionRescheduled = hsm.NewTransition(\n260: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_BACKING_OFF},\n261: \tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n262: \tfunc(op Operation, event EventRescheduled) (hsm.TransitionOutput, error) {\n263: \t\top.NextAttemptScheduleTime = nil\n264: \t\treturn op.output()\n265: \t},\n266: )\n267: \n268: // EventAttemptFailed is triggered when an invocation attempt is failed with a retryable error.\n269: type EventAttemptFailed struct {\n270: \tTime        time.Time\n271: \tFailure     *failurepb.Failure\n272: \tNode        *hsm.Node\n273: \tRetryPolicy backoff.RetryPolicy\n274: }\n275: \n276: var TransitionAttemptFailed = hsm.NewTransition(\n277: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_SCHEDULED},\n278: \tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n279: \tfunc(op Operation, event EventAttemptFailed) (hsm.TransitionOutput, error) {\n280: \t\top.recordAttempt(event.Time)\n281: \t\t// Use 0 for elapsed time as we don't limit the retry by time (for now).\n282: \t\t// The last argument (error) is ignored.\n283: \t\tnextDelay := event.RetryPolicy.ComputeNextDelay(0, int(op.Attempt), nil)\n284: \t\tnextAttemptScheduleTime := event.Time.Add(nextDelay)\n285: \t\top.NextAttemptScheduleTime = timestamppb.New(nextAttemptScheduleTime)\n286: \t\top.LastAttemptFailure = event.Failure\n287: \t\treturn op.output()\n288: \t},\n289: )"
+            },
+            {
+              "start_line": 298,
+              "end_line": 332,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L298-L332",
+              "text": "298: var TransitionFailed = hsm.NewTransition(\n299: \t[]enumsspb.NexusOperationState{\n300: \t\tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n301: \t\tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n302: \t\tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n303: \t},\n304: \tenumsspb.NEXUS_OPERATION_STATE_FAILED,\n305: \tfunc(op Operation, event EventFailed) (hsm.TransitionOutput, error) {\n306: \t\t// Not recording the last attempt information here since the state machine will be deleted immediately after this transition.\n307: \t\t// If we ever use this code for a standalone state machine implementation we will want to record the last\n308: \t\t// attempt information in case the completion is a result of a synchronous operation.\n309: \t\treturn op.output()\n310: \t},\n311: )\n312: \n313: // EventSucceeded is triggered when an invocation attempt succeeds.\n314: type EventSucceeded struct {\n315: \t// Only set if the operation completed synchronously, as a response to a StartOperation RPC.\n316: \tTime time.Time\n317: \tNode *hsm.Node\n318: }\n319: \n320: var TransitionSucceeded = hsm.NewTransition(\n321: \t[]enumsspb.NexusOperationState{\n322: \t\tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n323: \t\tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n324: \t\tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n325: \t},\n326: \tenumsspb.NEXUS_OPERATION_STATE_SUCCEEDED,\n327: \tfunc(op Operation, event EventSucceeded) (hsm.TransitionOutput, error) {\n328: \t\t// Not recording the last attempt information here since the state machine will be deleted immediately after this transition.\n329: \t\t// If we ever use this code for a standalone state machine implementation we will want to record the last\n330: \t\t// attempt information in case the completion is a result of a synchronous operation.\n331: \t\treturn op.output()\n332: \t},"
+            },
+            {
+              "start_line": 364,
+              "end_line": 367,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L364-L367",
+              "text": "364: var TransitionStarted = hsm.NewTransition(\n365: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_SCHEDULED, enumsspb.NEXUS_OPERATION_STATE_BACKING_OFF},\n366: \tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n367: \tfunc(op Operation, event EventStarted) (hsm.TransitionOutput, error) {"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/workflow/commands.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--workflow--commands.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.760221+00:00",
+          "sha256": "5c3ea40fce16558c5b0de051a25c80d9ce8705f980433102cb622d5e8f58bd18",
+          "line_count": 397,
+          "role": "real_command_bridge",
+          "proves": "O handler do comando ScheduleNexusOperation registra o evento e aplica ScheduledEventDefinition à HSM do workflow.",
+          "inspected_ranges": [
+            [
+              238,
+              258
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 238,
+              "end_line": 258,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go#L238-L258",
+              "text": "238: \tevent := ms.AddHistoryEvent(enumspb.EVENT_TYPE_NEXUS_OPERATION_SCHEDULED, func(he *historypb.HistoryEvent) {\n239: \t\the.Attributes = &historypb.HistoryEvent_NexusOperationScheduledEventAttributes{\n240: \t\t\tNexusOperationScheduledEventAttributes: &historypb.NexusOperationScheduledEventAttributes{\n241: \t\t\t\tEndpoint:                     attrs.Endpoint,\n242: \t\t\t\tEndpointId:                   endpointID,\n243: \t\t\t\tService:                      attrs.Service,\n244: \t\t\t\tOperation:                    attrs.Operation,\n245: \t\t\t\tInput:                        attrs.Input,\n246: \t\t\t\tScheduleToCloseTimeout:       attrs.ScheduleToCloseTimeout,\n247: \t\t\t\tScheduleToStartTimeout:       attrs.ScheduleToStartTimeout,\n248: \t\t\t\tStartToCloseTimeout:          attrs.StartToCloseTimeout,\n249: \t\t\t\tNexusHeader:                  lowerCaseHeader,\n250: \t\t\t\tRequestId:                    requestID,\n251: \t\t\t\tWorkflowTaskCompletedEventId: workflowTaskCompletedEventID,\n252: \t\t\t},\n253: \t\t}\n254: \t\the.UserMetadata = command.UserMetadata\n255: \t\the.EventGroupMarkers = command.EventGroupMarkers\n256: \t})\n257: \n258: \treturn nexusoperations.ScheduledEventDefinition{}.Apply(root, event)"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/events.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--events.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.790524+00:00",
+          "sha256": "b0cf4ae93144b2248c6dd79a519ea20c8d918f9556ac4322c3a2d7fcaafd11f9",
+          "line_count": 398,
+          "role": "event_dispatch",
+          "proves": "Os eventos de agendamento, início e conclusão aplicam a transição da operação, em vez de apenas reconstruir um snapshot.",
+          "inspected_ranges": [
+            [
+              19,
+              29
+            ],
+            [
+              174,
+              187
+            ],
+            [
+              203,
+              218
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 19,
+              "end_line": 29,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L19-L29",
+              "text": "19: func (d ScheduledEventDefinition) Type() enumspb.EventType {\n20: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_SCHEDULED\n21: }\n22: \n23: func (d ScheduledEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n24: \ttoken, err := root.GenerateEventLoadToken(event)\n25: \tif err != nil {\n26: \t\treturn err\n27: \t}\n28: \t_, err = AddChild(root, strconv.FormatInt(event.EventId, 10), event, token)\n29: \treturn err"
+            },
+            {
+              "start_line": 174,
+              "end_line": 187,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L174-L187",
+              "text": "174: func (d StartedEventDefinition) Type() enumspb.EventType {\n175: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_STARTED\n176: }\n177: \n178: func (d StartedEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n179: \t_, err := transitionOperation(root, event, func(node *hsm.Node, o Operation) (hsm.TransitionOutput, error) {\n180: \t\treturn TransitionStarted.Apply(o, EventStarted{\n181: \t\t\tTime:       event.EventTime.AsTime(),\n182: \t\t\tNode:       node,\n183: \t\t\tAttributes: event.GetNexusOperationStartedEventAttributes(),\n184: \t\t})\n185: \t})\n186: \n187: \treturn err"
+            },
+            {
+              "start_line": 203,
+              "end_line": 218,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L203-L218",
+              "text": "203: func (d CompletedEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n204: \tnode, err := transitionOperation(root, event, func(node *hsm.Node, o Operation) (hsm.TransitionOutput, error) {\n205: \t\treturn TransitionSucceeded.Apply(o, EventSucceeded{\n206: \t\t\tTime: event.EventTime.AsTime(),\n207: \t\t\tNode: node,\n208: \t\t})\n209: \t})\n210: \tif err != nil {\n211: \t\treturn err\n212: \t}\n213: \n214: \treturn node.Parent.DeleteChild(node.Key)\n215: }\n216: \n217: func (d CompletedEventDefinition) Type() enumspb.EventType {\n218: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_COMPLETED"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/executors.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--executors.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.778172+00:00",
+          "sha256": "347222ce9231addcd851e88a4d7b66119fe77f9e35a4ca821c0966cdbae90d4c",
+          "line_count": 1283,
+          "role": "runtime_bridge",
+          "proves": "A resposta pending de uma chamada real a Nexus provoca TransitionStarted; erro recuperável provoca TransitionAttemptFailed e o executor de backoff aplica TransitionRescheduled.",
+          "inspected_ranges": [
+            [
+              421,
+              429
+            ],
+            [
+              452,
+              480
+            ],
+            [
+              568,
+              575
+            ],
+            [
+              606,
+              612
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 421,
+              "end_line": 429,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L421-L429",
+              "text": "421: \t\tswitch {\n422: \t\tcase callErr != nil:\n423: \t\t\terr = e.handleStartOperationError(env, node, operation, callErr)\n424: \t\tcase result.Pending != nil:\n425: \t\t\terr = e.saveStartedResult(env, node, operation, result)\n426: \t\tdefault:\n427: \t\t\t// Operation completed synchronously. Store the result and update the state machine.\n428: \t\t\tlinks := commonnexus.ConvertNexusLinksToProtoLinks(result.Links, e.Logger)\n429: \t\t\terr = handleSuccessfulOperationResult(node, operation, result.Successful, links)"
+            },
+            {
+              "start_line": 452,
+              "end_line": 480,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L452-L480",
+              "text": "452: // saveStartedResult transitions the operation to started in response to an async (pending) start\n453: // response so it can later complete via callback.\n454: func (e taskExecutor) saveStartedResult(env hsm.Environment, node *hsm.Node, operation Operation, result *nexusrpc.ClientStartOperationResponse[*commonpb.Payload]) error {\n455: \teventID, err := hsm.EventIDFromToken(operation.ScheduledEventToken)\n456: \tif err != nil {\n457: \t\treturn err\n458: \t}\n459: \tlinks := commonnexus.ConvertNexusLinksToProtoLinks(result.Links, e.Logger)\n460: \tevent := node.AddHistoryEvent(enumspb.EVENT_TYPE_NEXUS_OPERATION_STARTED, func(e *historypb.HistoryEvent) {\n461: \t\t// nolint:revive // We must mutate here even if the linter doesn't like it.\n462: \t\te.Attributes = &historypb.HistoryEvent_NexusOperationStartedEventAttributes{\n463: \t\t\tNexusOperationStartedEventAttributes: &historypb.NexusOperationStartedEventAttributes{\n464: \t\t\t\tScheduledEventId: eventID,\n465: \t\t\t\tOperationToken:   result.Pending.Token,\n466: \t\t\t\t// TODO(bergundy): Remove this fallback after the 1.27 release.\n467: \t\t\t\tOperationId: result.Pending.Token, //nolint:staticcheck // Retained for compatibility with older servers.\n468: \t\t\t\tRequestId:   operation.RequestId,\n469: \t\t\t},\n470: \t\t}\n471: \t\t// nolint:revive // We must mutate here even if the linter doesn't like it.\n472: \t\te.Links = links\n473: \t})\n474: \treturn hsm.MachineTransition(node, func(operation Operation) (hsm.TransitionOutput, error) {\n475: \t\treturn TransitionStarted.Apply(operation, EventStarted{\n476: \t\t\tTime:       env.Now(),\n477: \t\t\tNode:       node,\n478: \t\t\tAttributes: event.GetNexusOperationStartedEventAttributes(),\n479: \t\t})\n480: \t})"
+            },
+            {
+              "start_line": 568,
+              "end_line": 575,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L568-L575",
+              "text": "568: \treturn hsm.MachineTransition(node, func(operation Operation) (hsm.TransitionOutput, error) {\n569: \t\treturn TransitionAttemptFailed.Apply(operation, EventAttemptFailed{\n570: \t\t\tTime:        env.Now(),\n571: \t\t\tFailure:     failure,\n572: \t\t\tNode:        node,\n573: \t\t\tRetryPolicy: e.Config.RetryPolicy(),\n574: \t\t})\n575: \t})"
+            },
+            {
+              "start_line": 606,
+              "end_line": 612,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L606-L612",
+              "text": "606: func (e taskExecutor) executeBackoffTask(env hsm.Environment, node *hsm.Node, task BackoffTask) error {\n607: \treturn hsm.MachineTransition(node, func(op Operation) (hsm.TransitionOutput, error) {\n608: \t\treturn TransitionRescheduled.Apply(op, EventRescheduled{\n609: \t\t\tNode: node,\n610: \t\t})\n611: \t})\n612: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/fx.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--service--history--hsm--nexusoperations--fx.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:51:58.621263+00:00",
+          "sha256": "c3ed802fe76edfb1d7c233b5f8705bd3caf50af8139d8b25321aab265ea16da1",
+          "line_count": 20,
+          "role": "registration",
+          "proves": "O módulo do servidor registra máquinas, eventos e executor.",
+          "inspected_ranges": [
+            [
+              8,
+              19
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 8,
+              "end_line": 19,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go#L8-L19",
+              "text": "8: var Module = fx.Module(\n9: \t\"component.nexusoperations\",\n10: \tfx.Provide(ConfigProvider),\n11: \tfx.Provide(NewCompletionHandler),\n12: \tfx.Invoke(RegisterStateMachines),\n13: \tfx.Invoke(RegisterTaskSerializers),\n14: \tfx.Invoke(RegisterEventDefinitions),\n15: \tfx.Invoke(RegisterExecutor),\n16: \t// Bridge CHASM ClientProvider to HSM ClientProvider type.\n17: \tfx.Provide(func(cp chasmnexus.ClientProvider) ClientProvider {\n18: \t\treturn ClientProvider(cp)\n19: \t}),"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://docs.temporal.io/nexus/operations",
+          "scope": "Documentação primária do ciclo de vida Nexus; o código fixado acima é a prova do mecanismo."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "MutableState interface lists history events and workflow_rebuilder reconstructs stored workflow state, but selected sources do not expose a finite state set, transition guards or event-to-state transition implementation. Reconstruction alone is not an FSM proof. Add actual workflow status/event transition code or an HSM implementation and bound the machine."
+    },
+    {
+      "concept_id": "state-machine",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "Temporal HSM é a infraestrutura genérica de transições dentro do servidor.",
+      "application_role": "Temporal Server é o produto OSS real; a aplicação escolhida é a máquina de uma operação Nexus, e não todo o motor de workflows.",
+      "mechanism": "Uma operação Nexus nasce no estado UNSPECIFIED. O comando de agendamento aplica uma transição para SCHEDULED. Se a chamada falha de forma recuperável, o executor muda o controle para BACKING_OFF; o timer de retry pode devolvê-lo a SCHEDULED. Uma resposta assíncrona muda o controle para STARTED, e um evento de conclusão permite SUCCEEDED. Cada transição declara suas origens aceitas. A base testa o estado atual e devolve ErrInvalidTransition quando a origem não está na lista.",
+      "review_gap_addressed": "A nova seleção mostra enum finito, origens e destino, guarda, mutação e callers reais de comandos, eventos e executor.",
+      "limits": [
+        "A finitude demonstrada é a dos oito estados de controle. Payload, tentativas e timestamps são dados adicionais; não se afirma que todo o espaço de configuração do serviço seja finito.",
+        "A base genérica aceita S comparable e, sozinha, não exige um conjunto finito. O enum Nexus e suas transições fornecem esse recorte.",
+        "Não se deduz GoF State desse enum. Também não se afirma atomicidade de persistência a partir de Apply: a função troca o estado antes de chamar o callback, que pode retornar erro."
+      ],
+      "licenses": [
+        "temporalio/temporal@10791698da3708020fe52db8af1b4bef89db3177"
+      ],
+      "evidence": [
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/sm.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--sm.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.757488+00:00",
+          "sha256": "4ea7b8d16c0b215fad3f1a0b02e91b3d12be07994a1c152f25dd2c44e92904e9",
+          "line_count": 66,
+          "role": "base",
+          "proves": "A base genérica registra origens, destino e evento; Possible verifica o estado atual e Apply rejeita uma transição inválida antes de trocar o estado.",
+          "inspected_ranges": [
+            [
+              18,
+              24
+            ],
+            [
+              31,
+              66
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 18,
+              "end_line": 24,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go#L18-L24",
+              "text": "18: // A StateMachine is anything that can get and set a comparable state S and re-generate tasks based on current state.\n19: // It is meant to be used with [Transition] objects to safely transition their state on a given event.\n20: type StateMachine[S comparable] interface {\n21: \tTaskRegenerator\n22: \tState() S\n23: \tSetState(S)\n24: }"
+            },
+            {
+              "start_line": 31,
+              "end_line": 66,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/sm.go#L31-L66",
+              "text": "31: // Transition represents a state machine transition for a machine of type SM with state S and event E.\n32: type Transition[S comparable, SM StateMachine[S], E any] struct {\n33: \t// Source states that are valid for this transition.\n34: \tSources []S\n35: \t// Destination state to transition to.\n36: \tDestination S\n37: \t// Function to apply the transition. Mutate the state machine object here and return tasks.\n38: \tapply func(SM, E) (TransitionOutput, error)\n39: }\n40: \n41: // NewTransition creates a new [Transition] from the given source states to a destination state for a given event.\n42: // The apply function is called after verifying the transition is possible and setting the destination state.\n43: func NewTransition[S comparable, SM StateMachine[S], E any](src []S, dst S, apply func(SM, E) (TransitionOutput, error)) Transition[S, SM, E] {\n44: \treturn Transition[S, SM, E]{\n45: \t\tSources:     src,\n46: \t\tDestination: dst,\n47: \t\tapply:       apply,\n48: \t}\n49: }\n50: \n51: // Possible returns a boolean indicating whether the transition is possible for the current state.\n52: func (t Transition[S, SM, E]) Possible(sm SM) bool {\n53: \treturn slices.Contains(t.Sources, sm.State())\n54: }\n55: \n56: // Apply applies a transition event to the given state machine changing the state machine's state to the transition's\n57: // Destination on success.\n58: func (t Transition[S, SM, E]) Apply(sm SM, event E) (TransitionOutput, error) {\n59: \tprevState := sm.State()\n60: \tif !t.Possible(sm) {\n61: \t\treturn TransitionOutput{}, fmt.Errorf(\"%w from %v: %v\", ErrInvalidTransition, prevState, event)\n62: \t}\n63: \n64: \tsm.SetState(t.Destination)\n65: \treturn t.apply(sm, event)\n66: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--proto--internal--temporal--server--api--enums--v1--nexus.proto",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.484435+00:00",
+          "sha256": "c50acc450b6bd27fb60ad98fe1f5894b087950a252b345a582186fc889362c39",
+          "line_count": 27,
+          "role": "finite_control_states",
+          "proves": "O enum da operação Nexus tem oito estados de controle, incluindo UNSPECIFIED e quatro estados terminais.",
+          "inspected_ranges": [
+            [
+              7,
+              27
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 7,
+              "end_line": 27,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/proto/internal/temporal/server/api/enums/v1/nexus.proto#L7-L27",
+              "text": "7: enum NexusOperationState {\n8:   // Default value, unspecified state.\n9:   NEXUS_OPERATION_STATE_UNSPECIFIED = 0;\n10:   // Operation is in the queue waiting to be executed or is currently executing.\n11:   NEXUS_OPERATION_STATE_SCHEDULED = 1;\n12:   // Operation has failed with a retryable error and is backing off before the next attempt.\n13:   NEXUS_OPERATION_STATE_BACKING_OFF = 2;\n14:   // Operation was started and will complete asynchronously.\n15:   NEXUS_OPERATION_STATE_STARTED = 3;\n16:   // Operation succeeded.\n17:   // This may happen either as a response to a start request or as reported via callback.\n18:   NEXUS_OPERATION_STATE_SUCCEEDED = 4;\n19:   // Operation failed either when a start request encounters a non-retryable error or as reported via callback.\n20:   NEXUS_OPERATION_STATE_FAILED = 5;\n21:   // Operation completed as canceled (may have not ever been delivered).\n22:   // This may happen either as a response to a start request or as reported via callback.\n23:   NEXUS_OPERATION_STATE_CANCELED = 6;\n24:   // Operation timed out - exceeded the user supplied schedule-to-close timeout.\n25:   // Any attempts to complete the operation in this state will be ignored.\n26:   NEXUS_OPERATION_STATE_TIMED_OUT = 7;\n27: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/statemachine.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--statemachine.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.788660+00:00",
+          "sha256": "45488e995b3fcadd2c184d8ed9fb5c053bbbdc2463dcae53d31116ad47dc0873",
+          "line_count": 685,
+          "role": "application",
+          "proves": "A operação do servidor instancia a base: UNSPECIFIED vai a SCHEDULED, uma falha recuperável vai a BACKING_OFF, o retry volta a SCHEDULED e o início assíncrono vai a STARTED.",
+          "inspected_ranges": [
+            [
+              45,
+              89
+            ],
+            [
+              245,
+              289
+            ],
+            [
+              298,
+              332
+            ],
+            [
+              364,
+              367
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 45,
+              "end_line": 89,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L45-L89",
+              "text": "45: // AddChild adds a new operation child machine to the given node and transitions it to the SCHEDULED state.\n46: func AddChild(node *hsm.Node, id string, event *historypb.HistoryEvent, eventToken []byte) (*hsm.Node, error) {\n47: \tattrs := event.GetNexusOperationScheduledEventAttributes()\n48: \n49: \tnode, err := node.AddChild(hsm.Key{Type: OperationMachineType, ID: id}, Operation{\n50: \t\t&persistencespb.NexusOperationInfo{\n51: \t\t\tEndpointId:             attrs.EndpointId,\n52: \t\t\tEndpoint:               attrs.Endpoint,\n53: \t\t\tService:                attrs.Service,\n54: \t\t\tOperation:              attrs.Operation,\n55: \t\t\tScheduledTime:          event.EventTime,\n56: \t\t\tScheduleToCloseTimeout: attrs.ScheduleToCloseTimeout,\n57: \t\t\tScheduleToStartTimeout: attrs.ScheduleToStartTimeout,\n58: \t\t\tStartToCloseTimeout:    attrs.StartToCloseTimeout,\n59: \t\t\tRequestId:              attrs.RequestId,\n60: \t\t\tState:                  enumsspb.NEXUS_OPERATION_STATE_UNSPECIFIED,\n61: \t\t\tScheduledEventToken:    eventToken,\n62: \t\t},\n63: \t})\n64: \n65: \tif err != nil {\n66: \t\treturn nil, err\n67: \t}\n68: \n69: \treturn node, hsm.MachineTransition(node, func(op Operation) (hsm.TransitionOutput, error) {\n70: \t\toutput, err := TransitionScheduled.Apply(op, EventScheduled{Node: node})\n71: \t\tif err != nil {\n72: \t\t\treturn output, err\n73: \t\t}\n74: \t\tcreationTasks, err := op.creationTasks()\n75: \t\tif err != nil {\n76: \t\t\treturn output, err\n77: \t\t}\n78: \t\toutput.Tasks = append(output.Tasks, creationTasks...)\n79: \t\treturn output, err\n80: \t})\n81: }\n82: \n83: func (o Operation) State() enumsspb.NexusOperationState {\n84: \treturn o.NexusOperationInfo.State\n85: }\n86: \n87: func (o Operation) SetState(state enumsspb.NexusOperationState) {\n88: \to.NexusOperationInfo.State = state\n89: }"
+            },
+            {
+              "start_line": 245,
+              "end_line": 289,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L245-L289",
+              "text": "245: var TransitionScheduled = hsm.NewTransition(\n246: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_UNSPECIFIED},\n247: \tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n248: \tfunc(op Operation, event EventScheduled) (hsm.TransitionOutput, error) {\n249: \t\treturn op.output()\n250: \t},\n251: )\n252: \n253: // EventRescheduled is triggered when the operation is meant to be rescheduled after backing off from a previous\n254: // attempt.\n255: type EventRescheduled struct {\n256: \tNode *hsm.Node\n257: }\n258: \n259: var TransitionRescheduled = hsm.NewTransition(\n260: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_BACKING_OFF},\n261: \tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n262: \tfunc(op Operation, event EventRescheduled) (hsm.TransitionOutput, error) {\n263: \t\top.NextAttemptScheduleTime = nil\n264: \t\treturn op.output()\n265: \t},\n266: )\n267: \n268: // EventAttemptFailed is triggered when an invocation attempt is failed with a retryable error.\n269: type EventAttemptFailed struct {\n270: \tTime        time.Time\n271: \tFailure     *failurepb.Failure\n272: \tNode        *hsm.Node\n273: \tRetryPolicy backoff.RetryPolicy\n274: }\n275: \n276: var TransitionAttemptFailed = hsm.NewTransition(\n277: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_SCHEDULED},\n278: \tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n279: \tfunc(op Operation, event EventAttemptFailed) (hsm.TransitionOutput, error) {\n280: \t\top.recordAttempt(event.Time)\n281: \t\t// Use 0 for elapsed time as we don't limit the retry by time (for now).\n282: \t\t// The last argument (error) is ignored.\n283: \t\tnextDelay := event.RetryPolicy.ComputeNextDelay(0, int(op.Attempt), nil)\n284: \t\tnextAttemptScheduleTime := event.Time.Add(nextDelay)\n285: \t\top.NextAttemptScheduleTime = timestamppb.New(nextAttemptScheduleTime)\n286: \t\top.LastAttemptFailure = event.Failure\n287: \t\treturn op.output()\n288: \t},\n289: )"
+            },
+            {
+              "start_line": 298,
+              "end_line": 332,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L298-L332",
+              "text": "298: var TransitionFailed = hsm.NewTransition(\n299: \t[]enumsspb.NexusOperationState{\n300: \t\tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n301: \t\tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n302: \t\tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n303: \t},\n304: \tenumsspb.NEXUS_OPERATION_STATE_FAILED,\n305: \tfunc(op Operation, event EventFailed) (hsm.TransitionOutput, error) {\n306: \t\t// Not recording the last attempt information here since the state machine will be deleted immediately after this transition.\n307: \t\t// If we ever use this code for a standalone state machine implementation we will want to record the last\n308: \t\t// attempt information in case the completion is a result of a synchronous operation.\n309: \t\treturn op.output()\n310: \t},\n311: )\n312: \n313: // EventSucceeded is triggered when an invocation attempt succeeds.\n314: type EventSucceeded struct {\n315: \t// Only set if the operation completed synchronously, as a response to a StartOperation RPC.\n316: \tTime time.Time\n317: \tNode *hsm.Node\n318: }\n319: \n320: var TransitionSucceeded = hsm.NewTransition(\n321: \t[]enumsspb.NexusOperationState{\n322: \t\tenumsspb.NEXUS_OPERATION_STATE_SCHEDULED,\n323: \t\tenumsspb.NEXUS_OPERATION_STATE_BACKING_OFF,\n324: \t\tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n325: \t},\n326: \tenumsspb.NEXUS_OPERATION_STATE_SUCCEEDED,\n327: \tfunc(op Operation, event EventSucceeded) (hsm.TransitionOutput, error) {\n328: \t\t// Not recording the last attempt information here since the state machine will be deleted immediately after this transition.\n329: \t\t// If we ever use this code for a standalone state machine implementation we will want to record the last\n330: \t\t// attempt information in case the completion is a result of a synchronous operation.\n331: \t\treturn op.output()\n332: \t},"
+            },
+            {
+              "start_line": 364,
+              "end_line": 367,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/statemachine.go#L364-L367",
+              "text": "364: var TransitionStarted = hsm.NewTransition(\n365: \t[]enumsspb.NexusOperationState{enumsspb.NEXUS_OPERATION_STATE_SCHEDULED, enumsspb.NEXUS_OPERATION_STATE_BACKING_OFF},\n366: \tenumsspb.NEXUS_OPERATION_STATE_STARTED,\n367: \tfunc(op Operation, event EventStarted) (hsm.TransitionOutput, error) {"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/workflow/commands.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--workflow--commands.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.760221+00:00",
+          "sha256": "5c3ea40fce16558c5b0de051a25c80d9ce8705f980433102cb622d5e8f58bd18",
+          "line_count": 397,
+          "role": "real_command_bridge",
+          "proves": "O handler do comando ScheduleNexusOperation registra o evento e aplica ScheduledEventDefinition à HSM do workflow.",
+          "inspected_ranges": [
+            [
+              238,
+              258
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 238,
+              "end_line": 258,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/workflow/commands.go#L238-L258",
+              "text": "238: \tevent := ms.AddHistoryEvent(enumspb.EVENT_TYPE_NEXUS_OPERATION_SCHEDULED, func(he *historypb.HistoryEvent) {\n239: \t\the.Attributes = &historypb.HistoryEvent_NexusOperationScheduledEventAttributes{\n240: \t\t\tNexusOperationScheduledEventAttributes: &historypb.NexusOperationScheduledEventAttributes{\n241: \t\t\t\tEndpoint:                     attrs.Endpoint,\n242: \t\t\t\tEndpointId:                   endpointID,\n243: \t\t\t\tService:                      attrs.Service,\n244: \t\t\t\tOperation:                    attrs.Operation,\n245: \t\t\t\tInput:                        attrs.Input,\n246: \t\t\t\tScheduleToCloseTimeout:       attrs.ScheduleToCloseTimeout,\n247: \t\t\t\tScheduleToStartTimeout:       attrs.ScheduleToStartTimeout,\n248: \t\t\t\tStartToCloseTimeout:          attrs.StartToCloseTimeout,\n249: \t\t\t\tNexusHeader:                  lowerCaseHeader,\n250: \t\t\t\tRequestId:                    requestID,\n251: \t\t\t\tWorkflowTaskCompletedEventId: workflowTaskCompletedEventID,\n252: \t\t\t},\n253: \t\t}\n254: \t\the.UserMetadata = command.UserMetadata\n255: \t\the.EventGroupMarkers = command.EventGroupMarkers\n256: \t})\n257: \n258: \treturn nexusoperations.ScheduledEventDefinition{}.Apply(root, event)"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/events.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--events.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.790524+00:00",
+          "sha256": "b0cf4ae93144b2248c6dd79a519ea20c8d918f9556ac4322c3a2d7fcaafd11f9",
+          "line_count": 398,
+          "role": "event_dispatch",
+          "proves": "Os eventos de agendamento, início e conclusão aplicam a transição da operação, em vez de apenas reconstruir um snapshot.",
+          "inspected_ranges": [
+            [
+              19,
+              29
+            ],
+            [
+              174,
+              187
+            ],
+            [
+              203,
+              218
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 19,
+              "end_line": 29,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L19-L29",
+              "text": "19: func (d ScheduledEventDefinition) Type() enumspb.EventType {\n20: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_SCHEDULED\n21: }\n22: \n23: func (d ScheduledEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n24: \ttoken, err := root.GenerateEventLoadToken(event)\n25: \tif err != nil {\n26: \t\treturn err\n27: \t}\n28: \t_, err = AddChild(root, strconv.FormatInt(event.EventId, 10), event, token)\n29: \treturn err"
+            },
+            {
+              "start_line": 174,
+              "end_line": 187,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L174-L187",
+              "text": "174: func (d StartedEventDefinition) Type() enumspb.EventType {\n175: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_STARTED\n176: }\n177: \n178: func (d StartedEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n179: \t_, err := transitionOperation(root, event, func(node *hsm.Node, o Operation) (hsm.TransitionOutput, error) {\n180: \t\treturn TransitionStarted.Apply(o, EventStarted{\n181: \t\t\tTime:       event.EventTime.AsTime(),\n182: \t\t\tNode:       node,\n183: \t\t\tAttributes: event.GetNexusOperationStartedEventAttributes(),\n184: \t\t})\n185: \t})\n186: \n187: \treturn err"
+            },
+            {
+              "start_line": 203,
+              "end_line": 218,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/events.go#L203-L218",
+              "text": "203: func (d CompletedEventDefinition) Apply(root *hsm.Node, event *historypb.HistoryEvent) error {\n204: \tnode, err := transitionOperation(root, event, func(node *hsm.Node, o Operation) (hsm.TransitionOutput, error) {\n205: \t\treturn TransitionSucceeded.Apply(o, EventSucceeded{\n206: \t\t\tTime: event.EventTime.AsTime(),\n207: \t\t\tNode: node,\n208: \t\t})\n209: \t})\n210: \tif err != nil {\n211: \t\treturn err\n212: \t}\n213: \n214: \treturn node.Parent.DeleteChild(node.Key)\n215: }\n216: \n217: func (d CompletedEventDefinition) Type() enumspb.EventType {\n218: \treturn enumspb.EVENT_TYPE_NEXUS_OPERATION_COMPLETED"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/executors.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--service--history--hsm--nexusoperations--executors.go",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.778172+00:00",
+          "sha256": "347222ce9231addcd851e88a4d7b66119fe77f9e35a4ca821c0966cdbae90d4c",
+          "line_count": 1283,
+          "role": "runtime_bridge",
+          "proves": "A resposta pending de uma chamada real a Nexus provoca TransitionStarted; erro recuperável provoca TransitionAttemptFailed e o executor de backoff aplica TransitionRescheduled.",
+          "inspected_ranges": [
+            [
+              421,
+              429
+            ],
+            [
+              452,
+              480
+            ],
+            [
+              568,
+              575
+            ],
+            [
+              606,
+              612
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 421,
+              "end_line": 429,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L421-L429",
+              "text": "421: \t\tswitch {\n422: \t\tcase callErr != nil:\n423: \t\t\terr = e.handleStartOperationError(env, node, operation, callErr)\n424: \t\tcase result.Pending != nil:\n425: \t\t\terr = e.saveStartedResult(env, node, operation, result)\n426: \t\tdefault:\n427: \t\t\t// Operation completed synchronously. Store the result and update the state machine.\n428: \t\t\tlinks := commonnexus.ConvertNexusLinksToProtoLinks(result.Links, e.Logger)\n429: \t\t\terr = handleSuccessfulOperationResult(node, operation, result.Successful, links)"
+            },
+            {
+              "start_line": 452,
+              "end_line": 480,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L452-L480",
+              "text": "452: // saveStartedResult transitions the operation to started in response to an async (pending) start\n453: // response so it can later complete via callback.\n454: func (e taskExecutor) saveStartedResult(env hsm.Environment, node *hsm.Node, operation Operation, result *nexusrpc.ClientStartOperationResponse[*commonpb.Payload]) error {\n455: \teventID, err := hsm.EventIDFromToken(operation.ScheduledEventToken)\n456: \tif err != nil {\n457: \t\treturn err\n458: \t}\n459: \tlinks := commonnexus.ConvertNexusLinksToProtoLinks(result.Links, e.Logger)\n460: \tevent := node.AddHistoryEvent(enumspb.EVENT_TYPE_NEXUS_OPERATION_STARTED, func(e *historypb.HistoryEvent) {\n461: \t\t// nolint:revive // We must mutate here even if the linter doesn't like it.\n462: \t\te.Attributes = &historypb.HistoryEvent_NexusOperationStartedEventAttributes{\n463: \t\t\tNexusOperationStartedEventAttributes: &historypb.NexusOperationStartedEventAttributes{\n464: \t\t\t\tScheduledEventId: eventID,\n465: \t\t\t\tOperationToken:   result.Pending.Token,\n466: \t\t\t\t// TODO(bergundy): Remove this fallback after the 1.27 release.\n467: \t\t\t\tOperationId: result.Pending.Token, //nolint:staticcheck // Retained for compatibility with older servers.\n468: \t\t\t\tRequestId:   operation.RequestId,\n469: \t\t\t},\n470: \t\t}\n471: \t\t// nolint:revive // We must mutate here even if the linter doesn't like it.\n472: \t\te.Links = links\n473: \t})\n474: \treturn hsm.MachineTransition(node, func(operation Operation) (hsm.TransitionOutput, error) {\n475: \t\treturn TransitionStarted.Apply(operation, EventStarted{\n476: \t\t\tTime:       env.Now(),\n477: \t\t\tNode:       node,\n478: \t\t\tAttributes: event.GetNexusOperationStartedEventAttributes(),\n479: \t\t})\n480: \t})"
+            },
+            {
+              "start_line": 568,
+              "end_line": 575,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L568-L575",
+              "text": "568: \treturn hsm.MachineTransition(node, func(operation Operation) (hsm.TransitionOutput, error) {\n569: \t\treturn TransitionAttemptFailed.Apply(operation, EventAttemptFailed{\n570: \t\t\tTime:        env.Now(),\n571: \t\t\tFailure:     failure,\n572: \t\t\tNode:        node,\n573: \t\t\tRetryPolicy: e.Config.RetryPolicy(),\n574: \t\t})\n575: \t})"
+            },
+            {
+              "start_line": 606,
+              "end_line": 612,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/executors.go#L606-L612",
+              "text": "606: func (e taskExecutor) executeBackoffTask(env hsm.Environment, node *hsm.Node, task BackoffTask) error {\n607: \treturn hsm.MachineTransition(node, func(op Operation) (hsm.TransitionOutput, error) {\n608: \t\treturn TransitionRescheduled.Apply(op, EventRescheduled{\n609: \t\t\tNode: node,\n610: \t\t})\n611: \t})\n612: }"
+            }
+          ]
+        },
+        {
+          "repo": "temporalio/temporal",
+          "revision": "10791698da3708020fe52db8af1b4bef89db3177",
+          "path": "service/history/hsm/nexusoperations/fx.go",
+          "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go",
+          "raw_url": "https://raw.githubusercontent.com/temporalio/temporal/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/temporalio--temporal--10791698--service--history--hsm--nexusoperations--fx.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:51:58.621263+00:00",
+          "sha256": "c3ed802fe76edfb1d7c233b5f8705bd3caf50af8139d8b25321aab265ea16da1",
+          "line_count": 20,
+          "role": "registration",
+          "proves": "O módulo do servidor registra máquinas, eventos e executor.",
+          "inspected_ranges": [
+            [
+              8,
+              19
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 8,
+              "end_line": 19,
+              "url": "https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/hsm/nexusoperations/fx.go#L8-L19",
+              "text": "8: var Module = fx.Module(\n9: \t\"component.nexusoperations\",\n10: \tfx.Provide(ConfigProvider),\n11: \tfx.Provide(NewCompletionHandler),\n12: \tfx.Invoke(RegisterStateMachines),\n13: \tfx.Invoke(RegisterTaskSerializers),\n14: \tfx.Invoke(RegisterEventDefinitions),\n15: \tfx.Invoke(RegisterExecutor),\n16: \t// Bridge CHASM ClientProvider to HSM ClientProvider type.\n17: \tfx.Provide(func(cp chasmnexus.ClientProvider) ClientProvider {\n18: \t\treturn ClientProvider(cp)\n19: \t}),"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://docs.temporal.io/nexus/operations",
+          "scope": "Documentação primária do ciclo de vida Nexus; o código fixado acima é a prova do mecanismo."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Same gap as finite-state-machine: workflow_rebuilder reconstructs a snapshot/history and calls state-building code, but no transition table/guards/current-state change implementation is selected. Add actual accepted-event/state transition code and identify machine states, rather than treating rebuilding as the machine itself."
+    },
+    {
+      "concept_id": "state",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "HAState é a classe abstrata de comportamento por estado usada pelo HDFS; não é um framework GoF separado.",
+      "application_role": "O daemon NameNode do Apache HDFS mantém e troca instâncias concretas de HAState.",
+      "mechanism": "O NameNode guarda um campo HAState que pode conter ActiveState ou StandbyState. O contexto encaminha checkOperation para o objeto atual. ActiveState aceita operações, enquanto StandbyState recusa as operações que não passam pelas condições de leitura permitida. Ao trocar de estado, HAState executa a saída do objeto atual, atualiza o objeto guardado pelo contexto e chama a entrada do próximo objeto. O comportamento muda pela delegação ao mesmo contrato abstrato.",
+      "review_gap_addressed": "Há contexto, objeto atual intercambiável, contrato comum, implementações distintas e transição com enter/exit, satisfazendo a delegação pedida para State.",
+      "limits": [
+        "A interpretação GoF vale para o subsistema de alta disponibilidade do NameNode. As fontes chamam HAState de base para state machine; não se atribui ao projeto uma declaração textual de adesão ao catálogo GoF.",
+        "StandbyState também representa observer mediante uma flag; o exemplo didático deve se limitar a ativo e standby e preservar a exceção de leituras obsoletas permitidas."
+      ],
+      "licenses": [
+        "apache/hadoop@6f3d71bc35f5eaab0487283533e6057c58038ae4"
+      ],
+      "evidence": [
+        {
+          "repo": "apache/hadoop",
+          "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+          "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java",
+          "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--HAState.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.787946+00:00",
+          "sha256": "fa8bf2ee8cc339d481abf81cef19e294b0316ce005bff8e62cbcffb4eeba7db6",
+          "line_count": 163,
+          "role": "base",
+          "proves": "A classe abstrata declara comportamento comum e controla a substituição do estado no contexto com saída e entrada.",
+          "inspected_ranges": [
+            [
+              27,
+              32
+            ],
+            [
+              56,
+              69
+            ],
+            [
+              102,
+              103
+            ],
+            [
+              127,
+              152
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 27,
+              "end_line": 32,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java#L27-L32",
+              "text": "27: /**\n28:  * Namenode base state to implement state machine pattern.\n29:  */\n30: @InterfaceAudience.Private\n31: abstract public class HAState {\n32:   protected final HAServiceState state;"
+            },
+            {
+              "start_line": 56,
+              "end_line": 69,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java#L56-L69",
+              "text": "56:   protected final void setStateInternal(final HAContext context, final HAState s)\n57:       throws ServiceFailedException {\n58:     prepareToExitState(context);\n59:     s.prepareToEnterState(context);\n60:     context.writeLock();\n61:     try {\n62:       exitState(context);\n63:       context.setState(s);\n64:       s.enterState(context);\n65:       s.updateLastHATransitionTime();\n66:     } finally {\n67:       context.writeUnlock();\n68:     }\n69:   }"
+            },
+            {
+              "start_line": 102,
+              "end_line": 103,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java#L102-L103",
+              "text": "102:   public abstract void enterState(final HAContext context)\n103:       throws ServiceFailedException;"
+            },
+            {
+              "start_line": 127,
+              "end_line": 152,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java#L127-L152",
+              "text": "127:   public abstract void exitState(final HAContext context)\n128:       throws ServiceFailedException;\n129: \n130:   /**\n131:    * Move from the existing state to a new state\n132:    * @param context HA context\n133:    * @param s new state\n134:    * @throws ServiceFailedException on failure to transition to new state.\n135:    */\n136:   public void setState(HAContext context, HAState s) throws ServiceFailedException {\n137:     if (this == s) { // Already in the new state\n138:       return;\n139:     }\n140:     throw new ServiceFailedException(\"Transition from state \" + this + \" to \"\n141:         + s + \" is not allowed.\");\n142:   }\n143:   \n144:   /**\n145:    * Check if an operation is supported in a given state.\n146:    * @param context HA context\n147:    * @param op Type of the operation.\n148:    * @throws StandbyException if a given type of operation is not\n149:    *           supported in standby state\n150:    */\n151:   public abstract void checkOperation(final HAContext context, final OperationCategory op)\n152:       throws StandbyException;"
+            }
+          ]
+        },
+        {
+          "repo": "apache/hadoop",
+          "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+          "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java",
+          "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--NameNode.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.170808+00:00",
+          "sha256": "ccffe91f1857f290d3cc6a239df138cf83b76c405448376ad0f769842d7ef464",
+          "line_count": 2836,
+          "role": "application",
+          "proves": "O produto mantém os objetos concretos, delega a troca e encaminha operações ao estado atual.",
+          "inspected_ranges": [
+            [
+              452,
+              464
+            ],
+            [
+              2011,
+              2035
+            ],
+            [
+              2181,
+              2189
+            ],
+            [
+              2257,
+              2262
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 452,
+              "end_line": 464,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java#L452-L464",
+              "text": "452:   public static final HAState ACTIVE_STATE = new ActiveState();\n453:   public static final HAState STANDBY_STATE = new StandbyState();\n454:   public static final HAState OBSERVER_STATE = new StandbyState(true);\n455: \n456:   private static final String NAMENODE_HTRACE_PREFIX = \"namenode.htrace.\";\n457: \n458:   public static final String METRICS_LOG_NAME = \"NameNodeMetricsLog\";\n459: \n460:   protected FSNamesystem namesystem; \n461:   protected final NamenodeRole role;\n462:   private volatile HAState state;\n463:   private final boolean haEnabled;\n464:   private final HAContext haContext;"
+            },
+            {
+              "start_line": 2011,
+              "end_line": 2035,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java#L2011-L2035",
+              "text": "2011:   synchronized void transitionToActive() throws IOException {\n2012:     String operationName = \"transitionToActive\";\n2013:     namesystem.checkSuperuserPrivilege(operationName);\n2014:     if (!haEnabled) {\n2015:       throw new ServiceFailedException(\"HA for namenode is not enabled\");\n2016:     }\n2017:     if (state == OBSERVER_STATE) {\n2018:       throw new ServiceFailedException(\n2019:           \"Cannot transition from '\" + OBSERVER_STATE + \"' to '\" +\n2020:               ACTIVE_STATE + \"'\");\n2021:     }\n2022:     if (notBecomeActiveInSafemode && isInSafeMode()) {\n2023:       throw new ServiceFailedException(getRole() + \" still not leave safemode\");\n2024:     }\n2025:     state.setState(haContext, ACTIVE_STATE);\n2026:   }\n2027: \n2028:   synchronized void transitionToStandby() throws IOException {\n2029:     String operationName = \"transitionToStandby\";\n2030:     namesystem.checkSuperuserPrivilege(operationName);\n2031:     if (!haEnabled) {\n2032:       throw new ServiceFailedException(\"HA for namenode is not enabled\");\n2033:     }\n2034:     state.setState(haContext, STANDBY_STATE);\n2035:   }"
+            },
+            {
+              "start_line": 2181,
+              "end_line": 2189,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java#L2181-L2189",
+              "text": "2181:   protected class NameNodeHAContext implements HAContext {\n2182:     @Override\n2183:     public void setState(HAState s) {\n2184:       state = s;\n2185:     }\n2186: \n2187:     @Override\n2188:     public HAState getState() {\n2189:       return state;"
+            },
+            {
+              "start_line": 2257,
+              "end_line": 2262,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java#L2257-L2262",
+              "text": "2257:     /** Check if an operation of given category is allowed */\n2258:     @Override\n2259:     public void checkOperation(final OperationCategory op)\n2260:         throws StandbyException {\n2261:       state.checkOperation(haContext, op);\n2262:     }"
+            }
+          ]
+        },
+        {
+          "repo": "apache/hadoop",
+          "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+          "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java",
+          "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--ActiveState.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.757426+00:00",
+          "sha256": "c237ae79d6b6a40f100712943c9668bafc06a12e029b02c6665ce2f01577fdf3",
+          "line_count": 76,
+          "role": "concrete_state",
+          "proves": "ActiveState aceita operações e sua entrada inicia serviços ativos; a transição para standby troca o objeto.",
+          "inspected_ranges": [
+            [
+              34,
+              64
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 34,
+              "end_line": 64,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java#L34-L64",
+              "text": "34: public class ActiveState extends HAState {\n35:   public ActiveState() {\n36:     super(HAServiceState.ACTIVE);\n37:   }\n38: \n39:   @Override\n40:   public void checkOperation(HAContext context, OperationCategory op) {\n41:     return; // All operations are allowed in active state\n42:   }\n43:   \n44:   @Override\n45:   public boolean shouldPopulateReplQueues() {\n46:     return true;\n47:   }\n48:   \n49:   @Override\n50:   public void setState(HAContext context, HAState s) throws ServiceFailedException {\n51:     if (s == NameNode.STANDBY_STATE) {\n52:       setStateInternal(context, s);\n53:       return;\n54:     }\n55:     super.setState(context, s);\n56:   }\n57: \n58:   @Override\n59:   public void enterState(HAContext context) throws ServiceFailedException {\n60:     try {\n61:       context.startActiveServices();\n62:     } catch (IOException e) {\n63:       throw new ServiceFailedException(\"Failed to start active services\", e);\n64:     }"
+            }
+          ]
+        },
+        {
+          "repo": "apache/hadoop",
+          "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+          "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+          "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--ha--StandbyState.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:04.788060+00:00",
+          "sha256": "638d63c7821167afaa04ce490c0a5f3bd43d60c0bb99bb6fb658de46870657a4",
+          "line_count": 121,
+          "role": "concrete_state",
+          "proves": "StandbyState possui outra implementação do mesmo contrato e lança StandbyException para operações não permitidas.",
+          "inspected_ranges": [
+            [
+              55,
+              73
+            ],
+            [
+              89,
+              113
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 55,
+              "end_line": 73,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java#L55-L73",
+              "text": "55:   @Override\n56:   public void setState(HAContext context, HAState s) throws ServiceFailedException {\n57:     if (s == NameNode.ACTIVE_STATE ||\n58:         (!isObserver && s == NameNode.OBSERVER_STATE) ||\n59:         (isObserver && s == NameNode.STANDBY_STATE)) {\n60:       setStateInternal(context, s);\n61:       return;\n62:     }\n63:     super.setState(context, s);\n64:   }\n65: \n66:   @Override\n67:   public void enterState(HAContext context) throws ServiceFailedException {\n68:     try {\n69:       context.startStandbyServices();\n70:     } catch (IOException e) {\n71:       throw new ServiceFailedException(\"Failed to start standby services\", e);\n72:     }\n73:   }"
+            },
+            {
+              "start_line": 89,
+              "end_line": 113,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java#L89-L113",
+              "text": "89:   @Override\n90:   public void checkOperation(HAContext context, OperationCategory op)\n91:       throws StandbyException {\n92:     if (op == OperationCategory.UNCHECKED ||\n93:         (op == OperationCategory.READ && context.allowStaleReads())) {\n94:       return;\n95:     }\n96:     String msg = \"Operation category \" + op + \" is not supported in state \"\n97:         + context.getState() + \".\";\n98:     if (op == OperationCategory.WRITE && isObserver) {\n99:       // If observer receives a write call, return active retry\n100:       // exception to inform client to retry on active.\n101:       // A write should never happen on Observer. Except that,\n102:       // if access time is enabled. A open call can transition\n103:       // to a write operation. In this case, Observer\n104:       // should inform the client to retry this open on Active.\n105:       throw new ObserverRetryOnActiveException(msg);\n106:     } else {\n107:       throw new StandbyException(msg);\n108:     }\n109:   }\n110: \n111:   @Override\n112:   public boolean shouldPopulateReplQueues() {\n113:     return false;"
+            }
+          ]
+        },
+        {
+          "repo": "apache/hadoop",
+          "revision": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+          "path": "hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java",
+          "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java",
+          "raw_url": "https://raw.githubusercontent.com/apache/hadoop/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/apache--hadoop--6f3d71bc--hadoop-hdfs-project--hadoop-hdfs--src--main--java--org--apache--hadoop--hdfs--server--namenode--FSNamesystem.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:50:34.004323+00:00",
+          "sha256": "c0a96febf352882c4aad60f791944edbabfac59b18fde573e7cac49224d2dca4",
+          "line_count": 9325,
+          "role": "caller_bridge",
+          "proves": "FSNamesystem efetivamente chama o contrato HAContext para verificar a operação.",
+          "inspected_ranges": [
+            [
+              1676,
+              1680
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1676,
+              "end_line": 1680,
+              "url": "https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java#L1676-L1680",
+              "text": "1676:   public void checkOperation(OperationCategory op) throws StandbyException {\n1677:     if (haContext != null) {\n1678:       // null in some unit tests\n1679:       haContext.checkOperation(op);\n1680:     }"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/build/source/hadoop-hdfs-project/hadoop-hdfs/target/api/org/apache/hadoop/hdfs/server/namenode/ha/HAState.html",
+          "scope": "API oficial documenta a base abstrata e suas subclasses; a classificação GoF é uma interpretação delimitada do código."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Temporal MutableState interface and workflow_rebuilder show mutable execution history and reconstruction, not GoF State delegation to interchangeable state objects/behaviors. The mechanism repeats FSM/event-sourcing prose. Add a concrete state-dependent behavior dispatch implementation (Temporal HSM or another real product) with its transition/context; mutable state alone is not the State pattern."
+    },
+    {
+      "concept_id": "graphql-federation",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "graphql-go-tools v2.28.0 fornece o planejador e a execução federada usados pelo produto.",
+      "application_role": "WunderGraph Cosmo é o produto OSS de infraestrutura. Sua CLI compõe os schemas e seu router atende consultas usando a configuração composta. As provas vêm de código do produto, não de demo ou teste.",
+      "mechanism": "A CLI lê os SDLs dos subgraphs e chama a composição. O resultado fornece schema federado e configuração por subgraph. O builder gera a configuração do router com URLs, keys, requires e provides. O loader do router converte esses dados em datasources e metadados do planejador. O prehandler planeja a consulta contra RouterSchema, e o handler executa o plano com o Resolver. Para uma busca aninhada de entidade, a biblioteca constrói representations com os campos exigidos e gera _entities; o loader executa a árvore de fetches em sequência ou paralelo e combina seus resultados.",
+      "review_gap_addressed": "A cadeia agora inclui composição, consumo da configuração, planejamento federado, fetch em subgraphs e entidade por chave. O go.mod fixa exatamente a versão da biblioteca inspecionada.",
+      "dependency_binding": {
+        "manifest": "router/go.mod:34",
+        "required_version": "v2.28.0",
+        "tag_revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+        "resolution_command": "git ls-remote https://github.com/wundergraph/graphql-go-tools.git refs/tags/v2.28.0",
+        "literal_output": "4d20fae7080021bc08cd2d4602747ad600326ead\trefs/tags/v2.28.0"
+      },
+      "limits": [
+        "O recorte é o próprio router federado e sua ferramenta de composição; não se afirma uma adoção por uma empresa cliente ou um deployment medido.",
+        "O caminho mostrado é GraphQL HTTP com entidades. Os ramos opcionais de gRPC, plugins e pub/sub não são necessários à classificação.",
+        "Cosmo usa Apache-2.0 e a biblioteca selecionada usa MIT. O novo par dispensa Apollo Router e seu enquadramento de licença."
+      ],
+      "licenses": [
+        "wundergraph/cosmo@4879bb547802dae3b1e35f71e6a8af2165c01009",
+        "wundergraph/graphql-go-tools@4d20fae7080021bc08cd2d4602747ad600326ead"
+      ],
+      "evidence": [
+        {
+          "repo": "wundergraph/graphql-go-tools",
+          "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+          "path": "v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go",
+          "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--datasource--graphql_datasource--graphql_datasource.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:13.061452+00:00",
+          "sha256": "a43fbb91811ec67e77362e2f1b4fe71fb701767a287fe0888083464da5ad3e5d",
+          "line_count": 2181,
+          "role": "base",
+          "proves": "A biblioteca monta consultas _entities e representations, configura o fetch HTTP e executa a chamada ao subgraph.",
+          "inspected_ranges": [
+            [
+              383,
+              409
+            ],
+            [
+              463,
+              470
+            ],
+            [
+              945,
+              987
+            ],
+            [
+              2104,
+              2112
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 383,
+              "end_line": 409,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go#L383-L409",
+              "text": "383: \trequiresEntityFetch := p.requiresEntityFetch()\n384: \trequiresEntityBatchFetch := p.requiresEntityBatchFetch()\n385: \n386: \t// When MultiFetch recording is on for an entity fetch, defer input assembly:\n387: \t// the renderSubgraphInputs postprocess stage renders the input from the\n388: \t// structured SubgraphOperation artifact (or the MultiFetch merge builds it\n389: \t// from the same artifact), so the planner leaves FetchConfiguration.Input\n390: \t// empty. recordUpstreamVariables already implies grpc == nil.\n391: \tdeferInput := p.recordUpstreamVariables && (requiresEntityFetch || requiresEntityBatchFetch)\n392: \n393: \tvar input []byte\n394: \tif !deferInput {\n395: \t\tinput = httpclient.AssembleGraphQLRequestInput(variables, operation, header, fetchURL, fetchMethod)\n396: \t}\n397: \n398: \tpostProcessing := DefaultPostProcessingConfiguration\n399: \n400: \tswitch {\n401: \tcase requiresEntityFetch:\n402: \t\tpostProcessing = SingleEntityPostProcessingConfiguration\n403: \tcase requiresEntityBatchFetch:\n404: \t\tpostProcessing = EntitiesPostProcessingConfiguration\n405: \t}\n406: \n407: \tvar dataSource resolve.DataSource\n408: \n409: \tdataSource = &Source{httpClient: p.fetchClient}"
+            },
+            {
+              "start_line": 463,
+              "end_line": 470,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go#L463-L470",
+              "text": "463: \treturn resolve.FetchConfiguration{\n464: \t\tInput:                                 string(input),\n465: \t\tDataSource:                            dataSource,\n466: \t\tVariables:                             p.variables,\n467: \t\tRequiresEntityFetch:                   requiresEntityFetch,\n468: \t\tRequiresEntityBatchFetch:              requiresEntityBatchFetch,\n469: \t\tPostProcessing:                        postProcessing,\n470: \t\tSetTemplateOutputToNullOnVariableNull: requiresEntityFetch || requiresEntityBatchFetch,"
+            },
+            {
+              "start_line": 945,
+              "end_line": 987,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go#L945-L987",
+              "text": "945: func (p *Planner[T]) addRepresentationsVariable() {\n946: \tif !p.hasFederationRoot {\n947: \t\treturn\n948: \t}\n949: \n950: \tif !p.dataSourcePlannerConfig.HasRequiredFields() {\n951: \t\treturn\n952: \t}\n953: \n954: \tvariable, _ := p.variables.AddVariable(p.buildRepresentationsVariable())\n955: \n956: \tp.upstreamVariables, _ = p.setUpstreamVariable(p.upstreamVariables, p.representationsVariableName(), fmt.Appendf(nil, \"[%s]\", variable))\n957: }\n958: \n959: func (p *Planner[T]) buildRepresentationsVariable() resolve.Variable {\n960: \tobjects := make([]*resolve.Object, 0, len(p.dataSourcePlannerConfig.RequiredFields))\n961: \tfor _, cfg := range p.dataSourcePlannerConfig.RequiredFields {\n962: \t\tnode, err := buildRepresentationVariableNode(p.visitor.Definition, cfg, p.dataSourceConfig.FederationConfiguration())\n963: \t\tif err != nil {\n964: \t\t\tp.stopWithError(errors.WithStack(fmt.Errorf(\"buildRepresentationsVariable: failed to build representation variable node: %w\", err)))\n965: \t\t\treturn nil\n966: \t\t}\n967: \n968: \t\tobjects = append(objects, node)\n969: \t}\n970: \n971: \treturn resolve.NewResolvableObjectVariable(\n972: \t\tmergeRepresentationVariableNodes(objects),\n973: \t)\n974: }\n975: \n976: func (p *Planner[T]) addRepresentationsQuery() {\n977: \tisNestedFederationRequest := p.dataSourcePlannerConfig.IsNested && p.config.IsFederationEnabled() && p.dataSourcePlannerConfig.HasRequiredFields()\n978: \n979: \tif !isNestedFederationRequest {\n980: \t\treturn\n981: \t}\n982: \n983: \tp.hasFederationRoot = true\n984: \t// query($representations: [_Any!]!){_entities(representations: $representations){... on Product\n985: \tp.addRepresentationsVariableDefinition() // $representations: [_Any!]!\n986: \tp.addEntitiesSelectionSet()              // {_entities(representations: $representations)\n987: }"
+            },
+            {
+              "start_line": 2104,
+              "end_line": 2112,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/graphql_datasource.go#L2104-L2112",
+              "text": "2104: func (s *Source) LoadWithFiles(ctx context.Context, headers http.Header, input []byte, files []*httpclient.FileUpload) (data []byte, err error) {\n2105: \tinput = s.compactAndUnNullVariables(input)\n2106: \treturn httpclient.DoMultipartForm(s.httpClient, ctx, headers, input, files)\n2107: }\n2108: \n2109: func (s *Source) Load(ctx context.Context, headers http.Header, input []byte) (data []byte, err error) {\n2110: \tinput = s.compactAndUnNullVariables(input)\n2111: \treturn httpclient.Do(s.httpClient, ctx, headers, input)\n2112: }"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/graphql-go-tools",
+          "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+          "path": "v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+          "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--datasource--graphql_datasource--representation_variable.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:13.031464+00:00",
+          "sha256": "9a55450e82fc667fd7ef4eddfe7cddc81bb8e1b461facc6dc4222425bb1f61ab",
+          "line_count": 387,
+          "role": "entity_keys",
+          "proves": "A representação é construída a partir de TypeName e SelectionSet dos campos exigidos, com typename.",
+          "inspected_ranges": [
+            [
+              21,
+              25
+            ],
+            [
+              45,
+              62
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 21,
+              "end_line": 25,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go#L21-L25",
+              "text": "21: func buildRepresentationVariableNode(definition *ast.Document, cfg plan.FederationFieldConfiguration, federationCfg plan.FederationMetaData) (*resolve.Object, error) {\n22: \tkey, report := plan.RequiredFieldsFragment(cfg.TypeName, cfg.SelectionSet, false)\n23: \tif report.HasErrors() {\n24: \t\treturn nil, report\n25: \t}"
+            },
+            {
+              "start_line": 45,
+              "end_line": 62,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/datasource/graphql_datasource/representation_variable.go#L45-L62",
+              "text": "45: \tvisitor := &representationVariableVisitor{\n46: \t\ttypeName:                cfg.TypeName,\n47: \t\tinterfaceObjectTypeName: interfaceObjectTypeName,\n48: \t\tentityInterfaceTypeName: entityInterfaceTypeName,\n49: \t\taddOnType:               true,\n50: \t\taddTypeName:             true,\n51: \t\tremapPaths:              cfg.RemappedPaths,\n52: \t\tWalker:                  walker,\n53: \t}\n54: \twalker.RegisterEnterDocumentVisitor(visitor)\n55: \twalker.RegisterFieldVisitor(visitor)\n56: \n57: \twalker.Walk(key, definition, report)\n58: \tif report.HasErrors() {\n59: \t\treturn nil, report\n60: \t}\n61: \n62: \treturn visitor.rootObject, nil"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/graphql-go-tools",
+          "revision": "4d20fae7080021bc08cd2d4602747ad600326ead",
+          "path": "v2/pkg/engine/resolve/loader.go",
+          "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/graphql-go-tools/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--graphql-go-tools--4d20fae7--v2--pkg--engine--resolve--loader.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:13.280079+00:00",
+          "sha256": "41cb51332e46a8cf2486da6a7880db5aa7e4e8ed7a155f3cbf4139f0871028e5",
+          "line_count": 2459,
+          "role": "multi_subgraph_execution",
+          "proves": "A árvore de fetch possui ramos single, sequence e parallel; o loader chama o datasource e mescla o resultado.",
+          "inspected_ranges": [
+            [
+              391,
+              441
+            ],
+            [
+              522,
+              537
+            ],
+            [
+              2249,
+              2258
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 391,
+              "end_line": 441,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go#L391-L441",
+              "text": "391: func (l *Loader) ResolveFetchNode(node *FetchTreeNode) error {\n392: \treturn l.resolveFetchNodeWithCtx(l.ctx.ctx, node)\n393: }\n394: \n395: func (l *Loader) resolveFetchNodeWithCtx(ctx context.Context, node *FetchTreeNode) error {\n396: \tif node == nil {\n397: \t\treturn nil\n398: \t}\n399: \tswitch node.Kind {\n400: \tcase FetchTreeNodeKindSingle:\n401: \t\treturn l.resolveSingle(ctx, node.Item)\n402: \tcase FetchTreeNodeKindSequence:\n403: \t\treturn l.resolveSerial(ctx, node.ChildNodes)\n404: \tcase FetchTreeNodeKindParallel:\n405: \t\treturn l.resolveParallel(ctx, node.ChildNodes)\n406: \tdefault:\n407: \t\treturn nil\n408: \t}\n409: }\n410: \n411: func (l *Loader) resolveParallel(ctx context.Context, nodes []*FetchTreeNode) error {\n412: \t// Plain errgroup.Group (NOT errgroup.WithContext)\n413: \t// as parallel fetches runs independently\n414: \tvar g errgroup.Group\n415: \tfor i := range nodes {\n416: \t\tnode := nodes[i]\n417: \t\tg.Go(func() error {\n418: \t\t\t// Propagate genuine processing errors (e.g. result merge failures,\n419: \t\t\t// pre-fetch validation errors) so they surface as a top-level error,\n420: \t\t\t// matching the serial execution path. Recoverable subgraph fetch\n421: \t\t\t// errors are recorded into the response during the merge phase and\n422: \t\t\t// return nil, so they never reach here. A plain errgroup.Group (no\n423: \t\t\t// context) does not cancel siblings on error, so returning here does\n424: \t\t\t// not interrupt the rest of the parallel group; they run to completion.\n425: \t\t\treturn l.resolveFetchNodeWithCtx(ctx, node)\n426: \t\t})\n427: \t}\n428: \tif err := g.Wait(); err != nil {\n429: \t\treturn errors.WithStack(err)\n430: \t}\n431: \treturn nil\n432: }\n433: \n434: func (l *Loader) resolveSerial(ctx context.Context, nodes []*FetchTreeNode) error {\n435: \tfor i := range nodes {\n436: \t\terr := l.resolveFetchNodeWithCtx(ctx, nodes[i])\n437: \t\tif err != nil {\n438: \t\t\treturn errors.WithStack(err)\n439: \t\t}\n440: \t}\n441: \treturn nil"
+            },
+            {
+              "start_line": 522,
+              "end_line": 537,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go#L522-L537",
+              "text": "522: func (l *Loader) mergePhase(prepared *preparedFetch) error {\n523: \tl.dataBuffer.Lock()\n524: \tdefer l.dataBuffer.Unlock()\n525: \n526: \tif prepared.multiEntries != nil {\n527: \t\treturn l.mergeMultiEntityResult(prepared)\n528: \t}\n529: \n530: \tif err := l.responseCacheCollect(prepared); err != nil {\n531: \t\tl.reportResponseCacheError(ResponseCacheOperationCollect, prepared.res.ds.Name, fmt.Errorf(\"response cache collect error: %w\", err))\n532: \t}\n533: \tl.responseCacheMergeSurrogateKeys(prepared.res)\n534: \n535: \terr := l.mergeResult(prepared.item, prepared.res, prepared.items)\n536: \tl.callOnFinished(prepared.res)\n537: \treturn err"
+            },
+            {
+              "start_line": 2249,
+              "end_line": 2258,
+              "url": "https://github.com/wundergraph/graphql-go-tools/blob/4d20fae7080021bc08cd2d4602747ad600326ead/v2/pkg/engine/resolve/loader.go#L2249-L2258",
+              "text": "2249: func (l *Loader) loadByContextDirect(ctx context.Context, source DataSource, headers http.Header, input []byte, res *result) error {\n2250: \tif l.ctx.Files != nil {\n2251: \t\tres.out, res.err = source.LoadWithFiles(ctx, headers, input, l.ctx.Files)\n2252: \t} else {\n2253: \t\tres.out, res.err = source.Load(ctx, headers, input)\n2254: \t}\n2255: \tif res.err != nil {\n2256: \t\treturn errors.WithStack(res.err)\n2257: \t}\n2258: \treturn nil"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/core/operation_planner.go",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--operation_planner.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.742082+00:00",
+          "sha256": "5750e078e0f2de23a6c942c6757fe7b826ed4449178db78d1bb2e63a71cc7fcf",
+          "line_count": 230,
+          "role": "application",
+          "proves": "O router instancia plan.NewPlanner com PlanConfig e planeja contra RouterSchema.",
+          "inspected_ranges": [
+            [
+              74,
+              112
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 74,
+              "end_line": 112,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/operation_planner.go#L74-L112",
+              "text": "74: // planOperation performs the core planning work: parse, plan, and postprocess.\n75: func (p *OperationPlanner) planOperation(content string, name string, includeQueryPlan bool) (*planWithMetaData, error) {\n76: \tdoc, report := astparser.ParseGraphqlDocumentString(content)\n77: \tif report.HasErrors() {\n78: \t\treturn nil, &reportError{report: &report}\n79: \t}\n80: \n81: \tplanner, err := plan.NewPlanner(p.executor.PlanConfig)\n82: \tif err != nil {\n83: \t\treturn nil, err\n84: \t}\n85: \n86: \tvar (\n87: \t\tplannerOptions []plan.Opts\n88: \t)\n89: \n90: \tif includeQueryPlan {\n91: \t\tplannerOptions = append(plannerOptions, plan.IncludeQueryPlanInResponse())\n92: \t}\n93: \n94: \t// create the raw query plan\n95: \t// Note: planning uses the router schema as it needs access to all fields (including inaccessible), validation/introspection uses client schema\n96: \tpreparedPlan := planner.Plan(&doc, p.executor.RouterSchema, name, &report, plannerOptions...)\n97: \tif report.HasErrors() {\n98: \t\treturn nil, &reportError{report: &report}\n99: \t}\n100: \n101: \t// postprocess query plan to get its final state\n102: \tpost := postprocess.NewProcessor(append(\n103: \t\tslices.Clone(p.executor.PostprocessorOptions),\n104: \t\tpostprocess.CollectDataSourceInfo(),\n105: \t)...)\n106: \tpost.Process(preparedPlan)\n107: \n108: \treturn &planWithMetaData{\n109: \t\tpreparedPlan:      preparedPlan,\n110: \t\toperationDocument: &doc,\n111: \t\tschemaDocument:    p.executor.RouterSchema,\n112: \t}, nil"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/go.mod",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/go.mod",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/go.mod",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--router--go.mod",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.300330+00:00",
+          "sha256": "34a8729ff273a1e59c45fa8e761d019b104c0fc13e0e679fe4d2bf2bb4377911",
+          "line_count": 181,
+          "role": "dependency",
+          "proves": "O produto depende de graphql-go-tools/v2 v2.28.0.",
+          "inspected_ranges": [
+            [
+              30,
+              36
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 30,
+              "end_line": 36,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/go.mod#L30-L36",
+              "text": "30: \tgithub.com/stretchr/testify v1.12.1\n31: \tgithub.com/tidwall/gjson v1.18.0\n32: \tgithub.com/tidwall/sjson v1.2.5\n33: \tgithub.com/twmb/franz-go v1.16.1\n34: \tgithub.com/wundergraph/graphql-go-tools/v2 v2.28.0\n35: \t// Do not upgrade, it renames attributes we rely on\n36: \tgo.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "cli/src/commands/router/commands/compose.ts",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--cli--src--commands--router--commands--compose.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.764202+00:00",
+          "sha256": "0a84ffe50c84c6f2a2fffe04e7cf9969619e2f12308e81f3f79dd12c89ae6ff9",
+          "line_count": 847,
+          "role": "composition_caller",
+          "proves": "A CLI real compõe SDLs, gera configuração a partir do resultado e a grava em arquivo.",
+          "inspected_ranges": [
+            [
+              312,
+              339
+            ],
+            [
+              373,
+              402
+            ],
+            [
+              198,
+              207
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 312,
+              "end_line": 339,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts#L312-L339",
+              "text": "312:     const subgraphs: SubgraphMetaData[] = [];\n313: \n314:     for (const [index, subgraphConfig] of config.subgraphs.entries()) {\n315:       const metadata = await toSubgraphMetadata(inputFileLocation, index, subgraphConfig, subgraphs);\n316:       subgraphs.push(metadata);\n317:     }\n318: \n319:     const result = composeSubgraphs(\n320:       subgraphs.map((s, index) => {\n321:         if (s.kind === SubgraphKind.Plugin) {\n322:           return {\n323:             name: s.name,\n324:             url: `http://localhost:3000/plugin/${index}`,\n325:             definitions: parse(s.sdl ?? ''),\n326:           };\n327:         }\n328:         return {\n329:           name: s.name,\n330:           url: s.routingUrl,\n331:           definitions: parse(s.sdl),\n332:         };\n333:       }),\n334:       {\n335:         disableResolvabilityValidation: options.disableResolvabilityValidation,\n336:         ignoreExternalKeys: options.ignoreExternalKeys,\n337:       },\n338:       options.disableBaseContract ? undefined : contractTagOptions,\n339:     );"
+            },
+            {
+              "start_line": 373,
+              "end_line": 402,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts#L373-L402",
+              "text": "373:     const federatedClientSDL = result.shouldIncludeClientSchema\n374:       ? printSchemaWithDirectives(result.federatedGraphClientSchema)\n375:       : '';\n376:     const routerConfig = buildRouterConfig({\n377:       federatedClientSDL,\n378:       federatedSDL: printSchemaWithDirectives(result.federatedGraphSchema),\n379:       fieldConfigurations: result.fieldConfigurations,\n380:       // @TODO get router compatibility version programmatically\n381:       routerCompatibilityVersion: ROUTER_COMPATIBILITY_VERSION_ONE,\n382:       schemaVersionId: STATIC_SCHEMA_VERSION_ID,\n383:       subgraphs: subgraphs.map((s, index) => constructRouterSubgraph(result, s, index)),\n384:     });\n385: \n386:     await (options.splitConfigsEnabled\n387:       ? handleSplitRouterConfig({\n388:           config,\n389:           contractTagOptionsByFeatureFlagName,\n390:           inputFileLocation,\n391:           options,\n392:           routerConfig,\n393:           subgraphs,\n394:         })\n395:       : handleEmbeddedRouterConfig({\n396:           config,\n397:           contractTagOptionsByFeatureFlagName,\n398:           inputFileLocation,\n399:           options,\n400:           routerConfig,\n401:           subgraphs,\n402:         }));"
+            },
+            {
+              "start_line": 198,
+              "end_line": 207,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/commands/router/commands/compose.ts#L198-L207",
+              "text": "198:       subgraphs,\n199:       options,\n200:       contractTagOptionsByFeatureFlagName,\n201:     );\n202:   }\n203: \n204:   const routerConfigJson = toJsonString(RouterConfigSchema, routerConfig);\n205:   if (options.out) {\n206:     const output = await getRouterConfigOutputFile(options.out);\n207:     await writeFile(output, routerConfigJson);"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "cli/src/utils.ts",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/utils.ts",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/utils.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--cli--src--utils.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:50:33.909585+00:00",
+          "sha256": "87d8692a43425610276218cafe979801c2f71d9465adf228dd980a6a0ee51249",
+          "line_count": 503,
+          "role": "composition_bridge",
+          "proves": "composeSubgraphs encaminha os subgraphs à API de federação.",
+          "inspected_ranges": [
+            [
+              189,
+              208
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 189,
+              "end_line": 208,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/cli/src/utils.ts#L189-L208",
+              "text": "189: export function composeSubgraphs(\n190:   subgraphs: Subgraph[],\n191:   options?: CompositionOptions,\n192:   contractTagOptions?: ContractTagOptions,\n193: ): FederationResult {\n194:   // @TODO get router compatibility version programmatically\n195:   if (contractTagOptions) {\n196:     return federateSubgraphsContract({\n197:       contractTagOptions,\n198:       options,\n199:       subgraphs,\n200:       version: ROUTER_COMPATIBILITY_VERSION_ONE,\n201:     });\n202:   }\n203: \n204:   return federateSubgraphs({\n205:     options,\n206:     subgraphs,\n207:     version: ROUTER_COMPATIBILITY_VERSION_ONE,\n208:   });"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "composition/src/federation/federation.ts",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/federation/federation.ts",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/federation/federation.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--composition--src--federation--federation.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.751362+00:00",
+          "sha256": "d931748ecdba9603653a2f008455fd928c4c1a0d7faa7a49b8b899d2f7137ee2",
+          "line_count": 51,
+          "role": "composition_dispatch",
+          "proves": "A API pública despacha a implementação de composição correspondente.",
+          "inspected_ranges": [
+            [
+              14,
+              23
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 14,
+              "end_line": 23,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/federation/federation.ts#L14-L23",
+              "text": "14: export function federateSubgraphs({\n15:   options,\n16:   subgraphs,\n17:   version = ROUTER_COMPATIBILITY_VERSION_ONE,\n18: }: FederateSubgraphsParams): FederationResult {\n19:   switch (version) {\n20:     default: {\n21:       return federateSubgraphsV1({ options, subgraphs });\n22:     }\n23:   }"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "composition/src/v1/federation/federation-factory.ts",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--composition--src--v1--federation--federation-factory.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:50:34.038600+00:00",
+          "sha256": "7c97dca90515348188a6c2fff1f50744147509e4a25077fdb5fb084510ce49b9",
+          "line_count": 3705,
+          "role": "composition_implementation",
+          "proves": "A composição normaliza os subgraphs e constrói o schema GraphQL federado e os metadados por subgraph.",
+          "inspected_ranges": [
+            [
+              3486,
+              3503
+            ],
+            [
+              3520,
+              3527
+            ],
+            [
+              3648,
+              3654
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 3486,
+              "end_line": 3503,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts#L3486-L3503",
+              "text": "3486:     return {\n3487:       directiveDefinitionByName: this.directiveDefinitionByName,\n3488:       fieldConfigurations: Array.from(this.fieldConfigurationByFieldCoords.values()),\n3489:       federatedGraphAST: newRouterAST,\n3490:       federatedGraphSchema: buildASTSchema(newRouterAST, { assumeValid: true, assumeValidSDL: true }),\n3491:       federatedGraphClientSchema: newClientSchema,\n3492:       parentDefinitionDataByTypeName: this.parentDefinitionDataByTypeName,\n3493:       subgraphConfigBySubgraphName,\n3494:       success: true,\n3495:       warnings: this.warnings,\n3496:       ...this.getClientSchemaObjectBoolean(),\n3497:     };\n3498:   }\n3499: \n3500:   federateSubgraphsInternal(): FederationResult {\n3501:     this.federateSubgraphData();\n3502:     return this.buildFederationResult();\n3503:   }"
+            },
+            {
+              "start_line": 3520,
+              "end_line": 3527,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts#L3520-L3527",
+              "text": "3520: function initializeFederationFactory({ options, subgraphs }: FederationParams): FederationFactoryResult {\n3521:   if (subgraphs.length < 1) {\n3522:     return { errors: [minimumSubgraphRequirementError], success: false, warnings: [] };\n3523:   }\n3524:   const result = new BatchNormalizer({ subgraphs, options }).batchNormalize();\n3525:   if (!result.success) {\n3526:     return { errors: result.errors, success: false, warnings: result.warnings };\n3527:   }"
+            },
+            {
+              "start_line": 3648,
+              "end_line": 3654,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/composition/src/v1/federation/federation-factory.ts#L3648-L3654",
+              "text": "3648: export function federateSubgraphs({ options, subgraphs }: FederationParams): FederationResult {\n3649:   const federationFactoryResult = initializeFederationFactory({ options, subgraphs });\n3650:   if (!federationFactoryResult.success) {\n3651:     return { errors: federationFactoryResult.errors, success: false, warnings: federationFactoryResult.warnings };\n3652:   }\n3653:   return federationFactoryResult.federationFactory.federateSubgraphsInternal();\n3654: }"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "shared/src/router-config/builder.ts",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--shared--src--router-config--builder.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:50:33.963443+00:00",
+          "sha256": "b95babcb74a97580473dc273a5783d434aeac69bad576849603a95c8a93e64e8",
+          "line_count": 433,
+          "role": "composition_output",
+          "proves": "O builder preserva SDL, keys, requires, provides e URL de fetch em uma configuração de engine única.",
+          "inspected_ranges": [
+            [
+              269,
+              300
+            ],
+            [
+              372,
+              429
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 269,
+              "end_line": 300,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts#L269-L300",
+              "text": "269: export const buildRouterConfig = function (input: Input): RouterConfig {\n270:   if (!ROUTER_COMPATIBILITY_VERSIONS.has(input.routerCompatibilityVersion as SupportedRouterCompatibilityVersion)) {\n271:     throw invalidRouterCompatibilityVersion(input.routerCompatibilityVersion);\n272:   }\n273:   const engineConfig = create(EngineConfigurationSchema, {\n274:     defaultFlushInterval: BigInt(500),\n275:     datasourceConfigurations: [],\n276:     fieldConfigurations: [],\n277:     graphqlSchema: '',\n278:     stringStorage: {},\n279:     typeConfigurations: [],\n280:   });\n281: \n282:   for (const subgraph of input.subgraphs) {\n283:     if (!subgraph.configurationDataByTypeName) {\n284:       throw normalizationFailureError('ConfigurationDataByTypeName');\n285:     }\n286:     if (!subgraph.schema) {\n287:       throw normalizationFailureError('GraphQLSchema');\n288:     }\n289: \n290:     const subscriptionConfig: MessageInitShape<typeof GraphQLSubscriptionConfigurationSchema> = {\n291:       enabled: true,\n292:     };\n293: \n294:     // IMPORTANT NOTE: printSchema and printSchemaWithDirectives promotes extension types to \"full\" types\n295:     const upstreamSchema = internString(\n296:       engineConfig,\n297:       printSchemaWithDirectives(lexicographicSortSchema(subgraph.schema)),\n298:     );\n299:     const { childNodes, entityInterfaces, events, interfaceObjects, keys, provides, requires, rootNodes } =\n300:       configurationDatasToDataSourceConfiguration(subgraph.configurationDataByTypeName);"
+            },
+            {
+              "start_line": 372,
+              "end_line": 429,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/shared/src/router-config/builder.ts#L372-L429",
+              "text": "372:       kind = DataSourceKind.GRAPHQL;\n373:       customGraphql = create(DataSourceCustom_GraphQLSchema, {\n374:         customScalarTypeFields: [],\n375:         federation: {\n376:           enabled: true,\n377:           serviceSdl: subgraph.sdl,\n378:         },\n379:         upstreamSchema,\n380:         grpc: grcpConfig,\n381:         fetch: {\n382:           url: create(ConfigurationVariableSchema, {\n383:             kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,\n384:             staticVariableContent: subgraph.url,\n385:           }),\n386:           method: HTTPMethod.POST,\n387:           header: {},\n388:           body: {},\n389:           baseUrl: {},\n390:           path: {},\n391:         },\n392:         subscription: subscriptionConfig,\n393:       });\n394:     }\n395: \n396:     const datasourceConfig = create(DataSourceConfigurationSchema, {\n397:       // When changing the id, make sure to change it in the router subgraph override also\n398:       // https://github.com/wundergraph/cosmo/blob/main/router/core/router.go#L342\n399:       id: subgraph.id,\n400:       childNodes,\n401:       costConfiguration: costsToCostConfiguration(subgraph.costs),\n402:       customEvents,\n403:       customGraphql,\n404:       directives: [],\n405:       entityInterfaces,\n406:       entityCachingConfiguration: extractEntityCachingConfiguration(subgraph.configurationDataByTypeName),\n407:       interfaceObjects,\n408:       keys,\n409:       kind,\n410:       overrideFieldPathFromAlias: true,\n411:       provides,\n412:       requestTimeoutSeconds: BigInt(10),\n413:       requires,\n414:       rootNodes,\n415:     });\n416:     engineConfig.datasourceConfigurations.push(datasourceConfig);\n417:   }\n418:   engineConfig.fieldConfigurations = generateFieldConfigurations(input.fieldConfigurations);\n419:   engineConfig.graphqlSchema = input.federatedSDL;\n420:   if (input.federatedClientSDL !== '') {\n421:     engineConfig.graphqlClientSchema = input.federatedClientSDL;\n422:   }\n423:   return create(RouterConfigSchema, {\n424:     engineConfig,\n425:     version: input.schemaVersionId,\n426:     subgraphs: input.subgraphs.map((s) => ({\n427:       id: s.id,\n428:       name: s.name,\n429:       routingUrl: s.url,"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/core/factoryresolver.go",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--factoryresolver.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:13.001937+00:00",
+          "sha256": "d115c23d862672c0a29b0fc99bcebe58ca2a1e7ca56f753615fee360697d74e9",
+          "line_count": 889,
+          "role": "runtime_metadata",
+          "proves": "O router monta o datasource federado e copia as chaves e dependências para o planejador da biblioteca.",
+          "inspected_ranges": [
+            [
+              441,
+              449
+            ],
+            [
+              464,
+              500
+            ],
+            [
+              662,
+              682
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 441,
+              "end_line": 449,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go#L441-L449",
+              "text": "441: \t\t\tschemaConfiguration, err := graphql_datasource.NewSchemaConfiguration(\n442: \t\t\t\tgraphqlSchema,\n443: \t\t\t\t&graphql_datasource.FederationConfiguration{\n444: \t\t\t\t\tEnabled:    in.CustomGraphql.Federation.Enabled,\n445: \t\t\t\t\tServiceSDL: in.CustomGraphql.Federation.ServiceSdl,\n446: \t\t\t\t},\n447: \t\t\t)\n448: \t\t\tif err != nil {\n449: \t\t\t\treturn nil, providers, fmt.Errorf(\"error creating schema configuration for data source %s: %w\", in.Id, err)"
+            },
+            {
+              "start_line": 464,
+              "end_line": 500,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go#L464-L500",
+              "text": "464: \t\t\tcustomConfiguration, err := graphql_datasource.NewConfiguration(graphql_datasource.ConfigurationInput{\n465: \t\t\t\tFetch: &graphql_datasource.FetchConfiguration{\n466: \t\t\t\t\tURL:    fetchUrl,\n467: \t\t\t\t\tMethod: in.CustomGraphql.Fetch.Method.String(),\n468: \t\t\t\t\tHeader: header,\n469: \t\t\t\t},\n470: \t\t\t\tSubscription: &graphql_datasource.SubscriptionConfiguration{\n471: \t\t\t\t\tURL:                                     subscriptionUrl,\n472: \t\t\t\t\tUseSSE:                                  subscriptionUseSSE,\n473: \t\t\t\t\tSSEMethodPost:                           subscriptionSSEMethodPost,\n474: \t\t\t\t\tForwardedClientHeaderNames:              forwardedClientHeaders,\n475: \t\t\t\t\tForwardedClientHeaderRegularExpressions: forwardedClientRegexps,\n476: \t\t\t\t\tWsSubProtocol:                           wsSubprotocol,\n477: \t\t\t\t\tStartupHooks:                            subscriptionOnStartFns,\n478: \t\t\t\t},\n479: \t\t\t\tSchemaConfiguration:    schemaConfiguration,\n480: \t\t\t\tCustomScalarTypeFields: customScalarTypeFields,\n481: \t\t\t\tGRPC:                   grpcConfig,\n482: \t\t\t})\n483: \t\t\tif err != nil {\n484: \t\t\t\treturn nil, providers, fmt.Errorf(\"error creating custom configuration for data source %s: %w\", in.Id, err)\n485: \t\t\t}\n486: \n487: \t\t\tdataSourceName := l.subgraphName(subgraphs, in.Id)\n488: \n489: \t\t\tfactory, err := l.resolver.ResolveGraphqlFactory(dataSourceName)\n490: \t\t\tif err != nil {\n491: \t\t\t\treturn nil, providers, err\n492: \t\t\t}\n493: \n494: \t\t\tout, err = plan.NewDataSourceConfigurationWithName[graphql_datasource.Configuration](\n495: \t\t\t\tin.Id,\n496: \t\t\t\tdataSourceName,\n497: \t\t\t\tfactory,\n498: \t\t\t\tl.dataSourceMetaData(in),\n499: \t\t\t\tcustomConfiguration,\n500: \t\t\t)"
+            },
+            {
+              "start_line": 662,
+              "end_line": 682,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/factoryresolver.go#L662-L682",
+              "text": "662: \t\tout.Keys = append(out.Keys, plan.FederationFieldConfiguration{\n663: \t\t\tTypeName:              keyConfiguration.TypeName,\n664: \t\t\tFieldName:             keyConfiguration.FieldName,\n665: \t\t\tSelectionSet:          keyConfiguration.SelectionSet,\n666: \t\t\tDisableEntityResolver: keyConfiguration.DisableEntityResolver,\n667: \t\t\tConditions:            conditions,\n668: \t\t})\n669: \t}\n670: \tfor _, providesConfiguration := range in.Provides {\n671: \t\tout.Provides = append(out.Provides, plan.FederationFieldConfiguration{\n672: \t\t\tTypeName:     providesConfiguration.TypeName,\n673: \t\t\tFieldName:    providesConfiguration.FieldName,\n674: \t\t\tSelectionSet: providesConfiguration.SelectionSet,\n675: \t\t})\n676: \t}\n677: \tfor _, requiresConfiguration := range in.Requires {\n678: \t\tout.Requires = append(out.Requires, plan.FederationFieldConfiguration{\n679: \t\t\tTypeName:     requiresConfiguration.TypeName,\n680: \t\t\tFieldName:    requiresConfiguration.FieldName,\n681: \t\t\tSelectionSet: requiresConfiguration.SelectionSet,\n682: \t\t})"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/core/executor.go",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/executor.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/executor.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--executor.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.763927+00:00",
+          "sha256": "fc8d523da7b0c1a7065c3f27f3f112508ec634fafcf64dfe867c9c770b33f085",
+          "line_count": 283,
+          "role": "caller_bridge",
+          "proves": "A construção do executor usa o loader para transformar EngineConfig e Subgraphs em PlanConfig.",
+          "inspected_ranges": [
+            [
+              234,
+              255
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 234,
+              "end_line": 255,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/executor.go#L234-L255",
+              "text": "234: func (b *ExecutorConfigurationBuilder) buildPlannerConfiguration(ctx context.Context, opts *ExecutorBuildOptions) (*plan.Configuration, []pubsub_datasource.Provider, error) {\n235: \t// this loader is used to take the engine config and create a plan config\n236: \t// the plan config is what the engine uses to turn a GraphQL Request into an execution plan\n237: \t// the plan config is stateful as it carries connection pools and other things\n238: \n239: \tloader := NewLoader(ctx, b.trackUsageInfo, NewDefaultFactoryResolver(\n240: \t\tctx,\n241: \t\tb.transportOptions,\n242: \t\tb.subscriptionClientOptions,\n243: \t\tb.baseTripper,\n244: \t\tb.subgraphTrippers,\n245: \t\tb.pluginHost,\n246: \t\tb.logger,\n247: \t\topts.RouterEngineConfig.Execution.EnableNetPoll,\n248: \t\topts.InstanceData,\n249: \t), b.logger, b.subscriptionHooks)\n250: \n251: \t// this generates the plan config using the data source factories from the config package\n252: \tplanConfig, providers, err := loader.Load(opts.EngineConfig, opts.Subgraphs, opts.RouterEngineConfig, opts.PluginsEnabled)\n253: \tif err != nil {\n254: \t\treturn nil, nil, fmt.Errorf(\"failed to load configuration: %w\", err)\n255: \t}"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/core/graphql_prehandler.go",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_prehandler.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_prehandler.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--graphql_prehandler.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:50:33.978914+00:00",
+          "sha256": "ab70b89adddf1a60082010dacee576b41d6c3dc7a2255680adf55a310227eb6d",
+          "line_count": 1490,
+          "role": "request_bridge",
+          "proves": "Uma consulta HTTP real chama o planejador.",
+          "inspected_ranges": [
+            [
+              1164,
+              1172
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 1164,
+              "end_line": 1172,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_prehandler.go#L1164-L1172",
+              "text": "1164: \tplanOptions := PlanOptions{\n1165: \t\tClientInfo:           requestContext.operation.clientInfo,\n1166: \t\tTraceOptions:         requestContext.operation.traceOptions,\n1167: \t\tExecutionOptions:     requestContext.operation.executionOptions,\n1168: \t\tTrackSchemaUsageInfo: h.trackSchemaUsageInfo,\n1169: \t}\n1170: \n1171: \terr = h.planner.plan(requestContext.operation, planOptions)\n1172: \tif err != nil {"
+            }
+          ]
+        },
+        {
+          "repo": "wundergraph/cosmo",
+          "revision": "4879bb547802dae3b1e35f71e6a8af2165c01009",
+          "path": "router/core/graphql_handler.go",
+          "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go",
+          "raw_url": "https://raw.githubusercontent.com/wundergraph/cosmo/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/wundergraph--cosmo--4879bb54--router--core--graphql_handler.go",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.768343+00:00",
+          "sha256": "26ee207afc7363c365814828619877bcdbf4ea1f9c9d98625ea2f1c7346af109",
+          "line_count": 765,
+          "role": "execution_caller",
+          "proves": "O handler resolve o plano preparado e registra os subgraphs envolvidos.",
+          "inspected_ranges": [
+            [
+              216,
+              238
+            ],
+            [
+              350,
+              355
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 216,
+              "end_line": 238,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go#L216-L238",
+              "text": "216: func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {\n217: \treqCtx := getRequestContext(r.Context())\n218: \n219: \texecutionContext, graphqlExecutionSpan := h.tracer.Start(r.Context(), \"Operation - Execute\",\n220: \t\ttrace.WithSpanKind(trace.SpanKindInternal),\n221: \t\ttrace.WithAttributes(reqCtx.telemetry.traceAttrs...),\n222: \t)\n223: \tdefer graphqlExecutionSpan.End()\n224: \tdefer func() {\n225: \t\tif cacheStatus, ok := reqCtx.responseCacheStatus(); ok {\n226: \t\t\tgraphqlExecutionSpan.SetAttributes(rotel.WgOperationResponseCacheStatus.String(cacheStatus.String()))\n227: \t\t}\n228: \t}()\n229: \n230: \tresolveCtx := resolve.NewContext(executionContext)\n231: \tresolveCtx.Variables = reqCtx.operation.variables\n232: \tresolveCtx.RemapVariables = reqCtx.operation.remapVariables\n233: \tresolveCtx.VariablesHash = reqCtx.operation.variablesHash\n234: \tresolveCtx.Files = reqCtx.operation.files\n235: \tresolveCtx.Request = resolve.Request{\n236: \t\tHeader: r.Header,\n237: \t\tID:     reqCtx.operation.internalHash,\n238: \t}"
+            },
+            {
+              "start_line": 350,
+              "end_line": 355,
+              "url": "https://github.com/wundergraph/cosmo/blob/4879bb547802dae3b1e35f71e6a8af2165c01009/router/core/graphql_handler.go#L350-L355",
+              "text": "350: \t\tinfo, err := h.executor.Resolver.ArenaResolveGraphQLResponse(resolveCtx, p.Response, hpw)\n351: \t\treqCtx.dataSourceNames = getSubgraphNames(p.Response.DataSources)\n352: \t\tif err != nil {\n353: \t\t\ttrackFinalResponseError(resolveCtx.Context(), err)\n354: \t\t\th.WriteError(resolveCtx, err, p.Response, w)\n355: \t\t\treturn"
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://cosmo-docs.wundergraph.com/router/intro",
+          "scope": "A documentação primária identifica o router Apache 2.0 e confirma sua utilização de graphql-go-tools, roteamento federado e agregação."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "Apollo query planner is a plausible Federation base, but Grafbase engine.rs cited hits show generic operation planning/cache warming; the row itself says locators and mechanism still need verification. Add the actual supergraph/subgraph query planning and multi-subgraph execution source, including entity/key representation if used. A generic GraphQL engine entry file does not establish Federation."
+    },
+    {
+      "concept_id": "distributed-tracing",
+      "recommendation": "AUTHOR_SOURCE_MATCH_REPAIR",
+      "independent_review": "PENDING",
+      "base_role": "Airlift 451 fornece a propagação W3C, os carriers HTTP/JSON e o exporter OpenTelemetry usados pelo Trino.",
+      "application_role": "Trino é o motor SQL distribuído real; o recorte liga uma tarefa remota no coordinator ao processamento no worker.",
+      "mechanism": "HttpRemoteTask serializa stageSpan no TaskUpdateRequest e o envia por HTTP ao worker. O TracingModule instalado pelo servidor registra os serializers de Span: a serialização injeta o contexto em um mapa e a desserialização extrai um Span remoto desse mapa. TaskResource recebe o pedido e entrega o stageSpan a SqlTaskManager, que o passa para SqlTask. O worker cria o span task com esse stageSpan como pai. Em paralelo, o cliente HTTP injeta contexto em headers e o filtro do servidor extrai os headers para criar um span SERVER correlacionado. Com tracing habilitado, o mesmo módulo instala BatchSpanProcessor e exporter OTLP.",
+      "review_gap_addressed": "Há carrier enviado ao outro processo, inject/extract, span remoto com pai explícito, instalação pelo produto e caminho de exportação. Isso excede a mera presença de spans locais.",
+      "dependency_binding": {
+        "manifest": "pom.xml:188",
+        "required_version": "451",
+        "tag_revision": "2fd0bb60d560a511403957d79931f5915adced44",
+        "resolution_command": "git ls-remote https://github.com/airlift/airlift.git refs/tags/451 refs/tags/451^{}",
+        "literal_output": "7a861450d9336a49815a8c9f56247e1885c2df91\trefs/tags/451\n2fd0bb60d560a511403957d79931f5915adced44\trefs/tags/451^{}"
+      },
+      "limits": [
+        "Tracing é desabilitado por padrão. A classificação comprova o caminho implementado e configurável; não comprova que algum cluster esteja exportando traces neste momento.",
+        "O span task no worker é filho do stageSpan transportado no JSON. Ele não é apresentado como filho do span HTTP task-update; ambos pertencem à mesma árvore por rotas explícitas diferentes.",
+        "A prova não pressupõe que todos os connectors propaguem contexto. A documentação exige suporte e habilitação nas integrações externas."
+      ],
+      "licenses": [
+        "trinodb/trino@5706548dade9b1dc81144af6850c5dde9a356713",
+        "airlift/airlift@2fd0bb60d560a511403957d79931f5915adced44"
+      ],
+      "evidence": [
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--tracing--src--main--java--io--airlift--tracing--SpanSerialization.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.750065+00:00",
+          "sha256": "6ef77c07b98515ce69cee0afbdce716acbad3a4d5215d017cade9ca1688ae93d",
+          "line_count": 93,
+          "role": "base",
+          "proves": "O serializer injeta contexto no carrier JSON e o deserializer o extrai e recupera Span.fromContext.",
+          "inspected_ranges": [
+            [
+              28,
+              49
+            ],
+            [
+              52,
+              73
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 28,
+              "end_line": 49,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java#L28-L49",
+              "text": "28:     public static class SpanSerializer\n29:             extends StdSerializer<Span>\n30:     {\n31:         private final TextMapPropagator propagator;\n32: \n33:         @Inject\n34:         public SpanSerializer(OpenTelemetry openTelemetry)\n35:         {\n36:             super(Span.class);\n37:             this.propagator = openTelemetry.getPropagators().getTextMapPropagator();\n38:         }\n39: \n40:         @SuppressWarnings(\"DataFlowIssue\")\n41:         @Override\n42:         public void serialize(Span span, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)\n43:                 throws IOException\n44:         {\n45:             Context context = Context.root().with(span);\n46:             Map<String, String> map = new LinkedHashMap<>();\n47:             propagator.inject(context, map, Map::put);\n48:             jsonGenerator.writeObject(map);\n49:         }"
+            },
+            {
+              "start_line": 52,
+              "end_line": 73,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/SpanSerialization.java#L52-L73",
+              "text": "52:     public static class SpanDeserializer\n53:             extends StdDeserializer<Span>\n54:     {\n55:         private final TextMapPropagator propagator;\n56:         private final MapType type;\n57: \n58:         @Inject\n59:         public SpanDeserializer(OpenTelemetry openTelemetry)\n60:         {\n61:             super(Span.class);\n62:             this.type = TypeFactory.defaultInstance().constructMapType(Map.class, String.class, String.class);\n63:             this.propagator = openTelemetry.getPropagators().getTextMapPropagator();\n64:         }\n65: \n66:         @Override\n67:         public Span deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)\n68:                 throws IOException\n69:         {\n70:             Map<String, String> map = deserializationContext.readValue(jsonParser, type);\n71:             Context context = propagator.extract(Context.root(), map, MapTextMapGetter.INSTANCE);\n72:             return Span.fromContext(context);\n73:         }"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--server--remotetask--HttpRemoteTask.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.074130+00:00",
+          "sha256": "6f95126183c30caabdf0945eecd5aa02e4c82d8a5862a5e9f4fab7c1653bb64f",
+          "line_count": 1297,
+          "role": "application",
+          "proves": "O coordinator envia stageSpan no pedido real e cria o span da chamada HTTP com pai explícito.",
+          "inspected_ranges": [
+            [
+              778,
+              789
+            ],
+            [
+              804,
+              815
+            ],
+            [
+              1204,
+              1210
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 778,
+              "end_line": 789,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java#L778-L789",
+              "text": "778:         TaskUpdateRequest updateRequest = new TaskUpdateRequest(\n779:                 session.toSessionRepresentation(),\n780:                 session.getIdentity().getExtraCredentials(),\n781:                 stageSpan,\n782:                 fragment,\n783:                 tableCredentials,\n784:                 splitAssignments,\n785:                 outputBuffers.get(),\n786:                 dynamicFilterDomains.getDynamicFilterDomains(),\n787:                 session.getExchangeEncryptionKey(),\n788:                 speculative.get());\n789:         byte[] taskUpdateRequestJson = taskUpdateRequestCodec.toJsonBytes(updateRequest);"
+            },
+            {
+              "start_line": 804,
+              "end_line": 815,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java#L804-L815",
+              "text": "804:         HttpUriBuilder uriBuilder = getHttpUriBuilder(taskStatus);\n805:         Request request = preparePost()\n806:                 .setUri(uriBuilder.build())\n807:                 .setHeader(CONTENT_TYPE, MediaType.JSON_UTF_8.toString())\n808:                 .setBodyGenerator(createStaticBodyGenerator(taskUpdateRequestJson))\n809:                 .setSpanBuilder(createSpanBuilder(\"task-update\", span))\n810:                 .build();\n811: \n812:         updateErrorTracker.startRequest();\n813: \n814:         ListenableFuture<JsonResponse<TaskInfo>> future = httpClient.executeAsync(request, createFullJsonResponseHandler(taskInfoCodec));\n815:         checkState(currentRequest.getAndSet(future) == null, \"There should be no previous request running\");"
+            },
+            {
+              "start_line": 1204,
+              "end_line": 1210,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/remotetask/HttpRemoteTask.java#L1204-L1210",
+              "text": "1204:     private SpanBuilder createSpanBuilder(String name, Span parent)\n1205:     {\n1206:         return tracer.spanBuilder(name)\n1207:                 .setParent(Context.current().with(parent))\n1208:                 .setAttribute(TrinoAttributes.QUERY_ID, taskId.queryId().toString())\n1209:                 .setAttribute(TrinoAttributes.STAGE_ID, taskId.stageId().toString())\n1210:                 .setAttribute(TrinoAttributes.TASK_ID, taskId.toString());"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "core/trino-main/src/main/java/io/trino/server/TaskResource.java",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskResource.java",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskResource.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--server--TaskResource.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.178918+00:00",
+          "sha256": "52c5bc3b6ac58969b80785210ee7a172d4eb878f3a8b86ba30f6c3f02916cc32",
+          "line_count": 567,
+          "role": "remote_receiver",
+          "proves": "O endpoint no worker recebe TaskUpdateRequest e entrega seu stageSpan ao taskManager.",
+          "inspected_ranges": [
+            [
+              142,
+              172
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 142,
+              "end_line": 172,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/TaskResource.java#L142-L172",
+              "text": "142:     @POST\n143:     @Path(\"{taskId}\")\n144:     @Consumes(MediaType.APPLICATION_JSON)\n145:     @Produces(MediaType.APPLICATION_JSON)\n146:     public void createOrUpdateTask(\n147:             @PathParam(\"taskId\") TaskId taskId,\n148:             TaskUpdateRequest taskUpdateRequest,\n149:             @Context UriInfo uriInfo,\n150:             @Suspended AsyncResponse asyncResponse)\n151:     {\n152:         requireNonNull(taskUpdateRequest, \"taskUpdateRequest is null\");\n153:         if (failRequestIfInvalid(asyncResponse)) {\n154:             return;\n155:         }\n156: \n157:         Session session = taskUpdateRequest.session().toSession(sessionPropertyManager, taskUpdateRequest.extraCredentials(), taskUpdateRequest.exchangeEncryptionKey());\n158: \n159:         if (injectFailure(session.getTraceToken(), taskId, RequestType.CREATE_OR_UPDATE_TASK, asyncResponse)) {\n160:             return;\n161:         }\n162: \n163:         TaskInfo taskInfo = taskManager.updateTask(\n164:                 session,\n165:                 taskId,\n166:                 taskUpdateRequest.stageSpan(),\n167:                 taskUpdateRequest.fragment(),\n168:                 taskUpdateRequest.tableCredentials(),\n169:                 taskUpdateRequest.splitAssignments(),\n170:                 taskUpdateRequest.outputIds(),\n171:                 taskUpdateRequest.dynamicFilterDomains(),\n172:                 taskUpdateRequest.speculative());"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--core--trino-main--src--main--java--io--trino--execution--SqlTaskManager.java",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.140652+00:00",
+          "sha256": "a8b539ad653c40e6262346422b317ccfae1e40771ecc847e4ee17df18d2a4ec8",
+          "line_count": 883,
+          "role": "worker_bridge",
+          "proves": "SqlTaskManager encaminha o span recebido até a atualização de SqlTask.",
+          "inspected_ranges": [
+            [
+              498,
+              507
+            ],
+            [
+              519,
+              529
+            ],
+            [
+              569,
+              569
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 498,
+              "end_line": 507,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java#L498-L507",
+              "text": "498:             Span stageSpan,\n499:             Optional<PlanFragment> fragment,\n500:             Map<PlanNodeId, ConnectorTableCredentials> tableCredentials,\n501:             List<SplitAssignment> splitAssignments,\n502:             OutputBuffers outputBuffers,\n503:             Map<DynamicFilterId, Domain> dynamicFilterDomains,\n504:             boolean speculative)\n505:     {\n506:         try {\n507:             return versionEmbedder.embedVersion(() -> doUpdateTask(session, taskId, stageSpan, fragment, tableCredentials, splitAssignments, outputBuffers, dynamicFilterDomains, speculative)).call();"
+            },
+            {
+              "start_line": 519,
+              "end_line": 529,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java#L519-L529",
+              "text": "519:             Span stageSpan,\n520:             Optional<PlanFragment> fragment,\n521:             Map<PlanNodeId, ConnectorTableCredentials> tableCredentials,\n522:             List<SplitAssignment> splitAssignments,\n523:             OutputBuffers outputBuffers,\n524:             Map<DynamicFilterId, Domain> dynamicFilterDomains,\n525:             boolean speculative)\n526:     {\n527:         requireNonNull(session, \"session is null\");\n528:         requireNonNull(taskId, \"taskId is null\");\n529:         requireNonNull(stageSpan, \"stageSpan is null\");"
+            },
+            {
+              "start_line": 569,
+              "end_line": 569,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTaskManager.java#L569-L569",
+              "text": "569:         return sqlTask.updateTask(session, stageSpan, fragment, tableCredentials, splitAssignments, outputBuffers, dynamicFilterDomains, speculative);"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "core/trino-main/src/main/java/io/trino/execution/SqlTask.java",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--core--trino-main--src--main--java--io--trino--execution--SqlTask.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.457149+00:00",
+          "sha256": "19ae41c737536abf22e7768f175dcedbcb1b2e72158591a18a09d0eca63ed87f",
+          "line_count": 796,
+          "role": "remote_child_span",
+          "proves": "O worker cria task com parent(stageSpan), atributos de query/stage/task, e encerra o span no fim da tarefa.",
+          "inspected_ranges": [
+            [
+              581,
+              591
+            ],
+            [
+              248,
+              248
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 581,
+              "end_line": 591,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java#L581-L591",
+              "text": "581:             taskSpan.set(tracer.spanBuilder(\"task\")\n582:                     .setParent(Context.current().with(stageSpan))\n583:                     .setAttribute(TrinoAttributes.QUERY_ID, taskId.queryId().toString())\n584:                     .setAttribute(TrinoAttributes.STAGE_ID, taskId.stageId().toString())\n585:                     .setAttribute(TrinoAttributes.TASK_ID, taskId.toString())\n586:                     .startSpan());\n587: \n588:             execution = sqlTaskExecutionFactory.create(\n589:                     session,\n590:                     taskSpan.get(),\n591:                     queryContext,"
+            },
+            {
+              "start_line": 248,
+              "end_line": 248,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/execution/SqlTask.java#L248-L248",
+              "text": "248:                 taskSpan.get().end();"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "core/trino-main/src/main/java/io/trino/server/Server.java",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/Server.java",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/Server.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--core--trino-main--src--main--java--io--trino--server--Server.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.462803+00:00",
+          "sha256": "dfb39227f0107b496104424be164dc6d249db1df3dbb3472ede2c1e4d63a90ee",
+          "line_count": 228,
+          "role": "installation",
+          "proves": "O bootstrap real instala JsonModule e TracingModule.",
+          "inspected_ranges": [
+            [
+              106,
+              120
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 106,
+              "end_line": 120,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/server/Server.java#L106-L120",
+              "text": "106:                 .add(new JmxOpenMetricsModule())\n107:                 .add(new JsonModule())\n108:                 .add(new LogJmxModule())\n109:                 .add(new MBeanModule())\n110:                 .add(new NodeManagerModule(trinoVersion))\n111:                 .add(new NodeModule())\n112:                 .add(new NodeStateManagerModule())\n113:                 .add(new PrefixObjectNameGeneratorModule(\"io.trino\"))\n114:                 .add(new ServerMainModule(trinoVersion))\n115:                 .add(new ServerSecurityModule())\n116:                 .add(new TracingModule(\"trino\", trinoVersion))\n117:                 .add(new TransactionManagerModule())\n118:                 .add(new WarningCollectorModule())\n119:                 .addAll(getAdditionalModules())\n120:                 .build();"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "pom.xml",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--pom.xml",
+          "source": "raw_primary",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:48:05.178740+00:00",
+          "sha256": "5518ad1909cd9ce2c29e9aee1c6f950ae2da2446f52f230229a2c2cfe4933b69",
+          "line_count": 2720,
+          "role": "dependency",
+          "proves": "O produto fixa Airlift 451.",
+          "inspected_ranges": [
+            [
+              188,
+              188
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 188,
+              "end_line": 188,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/pom.xml#L188-L188",
+              "text": "188:         <dep.airlift.version>451</dep.airlift.version>"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "tracing/src/main/java/io/airlift/tracing/TracingModule.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/TracingModule.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/TracingModule.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--tracing--src--main--java--io--airlift--tracing--TracingModule.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.722956+00:00",
+          "sha256": "74ad7c97c7418d0a6becb26b7266f75bd31003c6be42a31c7ace2ac11cddc99d",
+          "line_count": 38,
+          "role": "carrier_and_exporter_binding",
+          "proves": "O módulo registra ambos os serializers e instala o exporter quando tracing está habilitado.",
+          "inspected_ranges": [
+            [
+              26,
+              36
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 26,
+              "end_line": 36,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/tracing/src/main/java/io/airlift/tracing/TracingModule.java#L26-L36",
+              "text": "26:     @Override\n27:     protected void setup(Binder binder)\n28:     {\n29:         install(new OpenTelemetryModule(serviceName, serviceVersion));\n30: \n31:         if (buildConfigObject(TracingEnabledConfig.class).isEnabled()) {\n32:             binder.install(new OpenTelemetryExporterModule());\n33:         }\n34: \n35:         jsonBinder(binder).addSerializerBinding(Span.class).to(SpanSerializer.class);\n36:         jsonBinder(binder).addDeserializerBinding(Span.class).to(SpanDeserializer.class);"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-client--src--main--java--io--airlift--http--client--jetty--JettyHttpClient.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.504760+00:00",
+          "sha256": "f66f1018c510ba8f6a1af46a8e1b55b4ffc67b7f564333af7006162d7615097c",
+          "line_count": 1377,
+          "role": "http_injection",
+          "proves": "O cliente cria span CLIENT e injeta o contexto nos headers enviados.",
+          "inspected_ranges": [
+            [
+              954,
+              978
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 954,
+              "end_line": 978,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-client/src/main/java/io/airlift/http/client/jetty/JettyHttpClient.java#L954-L978",
+              "text": "954:     private Span startSpan(Request request)\n955:     {\n956:         int port = normalizePort(request.getUri().getScheme(), request.getUri().getPort());\n957:         return request.getSpanBuilder()\n958:                 .orElseGet(() -> tracer.spanBuilder(name + \" \" + request.getMethod()))\n959:                 .setSpanKind(SpanKind.CLIENT)\n960:                 .setAttribute(CLIENT_NAME, name)\n961:                 .setAttribute(UrlAttributes.URL_FULL, request.getUri().toString())\n962:                 .setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, request.getMethod())\n963:                 .setAttribute(ServerAttributes.SERVER_ADDRESS, request.getUri().getHost())\n964:                 .setAttribute(ServerAttributes.SERVER_PORT, (long) port)\n965:                 .startSpan();\n966:     }\n967: \n968:     @SuppressWarnings(\"DataFlowIssue\")\n969:     private Request injectTracing(Request request, Span span)\n970:     {\n971:         // a propagator that injects no headers (e.g. noop telemetry) does not need the request rebuilt\n972:         if (propagator.fields().isEmpty()) {\n973:             return request;\n974:         }\n975:         Context context = Context.current().with(span);\n976:         Request.Builder builder = Request.Builder.fromRequest(request);\n977:         propagator.inject(context, builder, (carrier, headerName, value) -> carrier.addHeader(HeaderName.of(headerName), value));\n978:         return builder.build();"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-server--src--main--java--io--airlift--http--server--tracing--TracingServletFilter.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.490675+00:00",
+          "sha256": "4817cb689dd96ceb6e4006b555cbbd8e3c15bc32b82ddfc0149a95ef40d27a30",
+          "line_count": 278,
+          "role": "http_extraction",
+          "proves": "O servidor extrai o carrier HTTP e cria span SERVER com o contexto remoto como pai.",
+          "inspected_ranges": [
+            [
+              86,
+              97
+            ],
+            [
+              128,
+              140
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 86,
+              "end_line": 97,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java#L86-L97",
+              "text": "86:         Context parent = propagator.extract(Context.root(), request, ServletTextMapGetter.INSTANCE);\n87:         String method = request.getMethod().toUpperCase(ENGLISH);\n88:         Baggage baggage = Baggage.fromContext(parent);\n89: \n90:         SpanBuilder spanBuilder = tracer.spanBuilder(method + \" \" + request.getRequestURI())\n91:                 .setParent(parent)\n92:                 .setSpanKind(SpanKind.SERVER)\n93:                 .setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, method)\n94:                 .setAttribute(UrlAttributes.URL_SCHEME, request.getScheme())\n95:                 .setAttribute(ServerAttributes.SERVER_ADDRESS, request.getServerName())\n96:                 .setAttribute(ServerAttributes.SERVER_PORT, getPort(request))\n97:                 .setAttribute(ClientAttributes.CLIENT_ADDRESS, request.getRemoteAddr())"
+            },
+            {
+              "start_line": 128,
+              "end_line": 140,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/tracing/TracingServletFilter.java#L128-L140",
+              "text": "128:         Span span = spanBuilder.startSpan();\n129:         // Add to request attributes for TracingFilter to be able to update Span attributes\n130:         request.setAttribute(REQUEST_SPAN, span);\n131: \n132:         // Make the extracted parent context current (not just the span) so that baggage propagated\n133:         // from the caller stays in scope for the request and is visible to handlers and logging.\n134:         try (Scope ignored = Context.current()\n135:                 .with(baggage)\n136:                 .with(span)\n137:                 .makeCurrent()) {\n138:             // a non-recording span drops all attributes, so the response wrapper that exists\n139:             // only to record response attributes is not needed\n140:             chain.doFilter(request, span.isRecording() ? new TracingHttpServletResponse(response, span) : response);"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "http-server/src/main/java/io/airlift/http/server/HttpServerModule.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/HttpServerModule.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/HttpServerModule.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--http-server--src--main--java--io--airlift--http--server--HttpServerModule.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.481842+00:00",
+          "sha256": "eccbaac02c92695e40f2696a1a85b6b1011be72211432ad190b25c30b7af59fa",
+          "line_count": 123,
+          "role": "filter_installation",
+          "proves": "O módulo HTTP liga o filtro de tracing ao servidor.",
+          "inspected_ranges": [
+            [
+              97,
+              100
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 97,
+              "end_line": 100,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/http-server/src/main/java/io/airlift/http/server/HttpServerModule.java#L97-L100",
+              "text": "97:         newSetBinder(binder, qualifiedKey(qualifier, ServerFeature.class));\n98:         newSetBinder(binder, qualifiedKey(qualifier, Filter.class)).addBinding()\n99:                 .to(TracingServletFilter.class)\n100:                 .in(SINGLETON);"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--opentelemetry--src--main--java--io--airlift--opentelemetry--OpenTelemetryModule.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.723072+00:00",
+          "sha256": "be83195f471f2602362704314d90613671f5e3ea1fcea26417bb4a6a1b74b80f",
+          "line_count": 250,
+          "role": "propagation_and_processing",
+          "proves": "A SDK usa W3CTraceContextPropagator, sampler parent-based e o conjunto de SpanProcessors.",
+          "inspected_ranges": [
+            [
+              102,
+              113
+            ],
+            [
+              144,
+              154
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 102,
+              "end_line": 113,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java#L102-L113",
+              "text": "102:         if (spanProcessors.isEmpty() && metricReaders.isEmpty() && metricProducers.isEmpty() && logRecordProcessors.isEmpty() && exporterLogRecordProcessor.isEmpty() && logHandler.isEmpty()) {\n103:             return OpenTelemetry.noop();\n104:         }\n105: \n106:         return OpenTelemetrySdk.builder()\n107:                 .setTracerProvider(tracerProvider)\n108:                 .setMeterProvider(meterProvider)\n109:                 .setLoggerProvider(loggerProvider)\n110:                 .setPropagators(ContextPropagators.create(TextMapPropagator.composite(\n111:                         W3CTraceContextPropagator.getInstance(),\n112:                         new AllowlistBaggagePropagator(baggageConfig))))\n113:                 .build();"
+            },
+            {
+              "start_line": 144,
+              "end_line": 154,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryModule.java#L144-L154",
+              "text": "144:     public SdkTracerProvider createTracerProvider(Resource resource, Set<SpanProcessor> spanProcessors, OpenTelemetryConfig config)\n145:     {\n146:         SdkTracerProviderBuilder builder = SdkTracerProvider.builder()\n147:                 .setSampler(parentBased(config.getSamplingRatio() == 1.0 ? alwaysOn() : traceIdRatioBased(config.getSamplingRatio())))\n148:                 .addSpanProcessor(SpanProcessor.composite(spanProcessors))\n149:                 .setResource(resource);\n150:         config.getMaxAttributeValueLength().ifPresent(maxLength ->\n151:                 builder.setSpanLimits(SpanLimits.builder()\n152:                         .setMaxAttributeValueLength(maxLength)\n153:                         .build()));\n154:         return builder.build();"
+            }
+          ]
+        },
+        {
+          "repo": "airlift/airlift",
+          "revision": "2fd0bb60d560a511403957d79931f5915adced44",
+          "path": "opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java",
+          "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java",
+          "raw_url": "https://raw.githubusercontent.com/airlift/airlift/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/airlift--airlift--2fd0bb60--opentelemetry--src--main--java--io--airlift--opentelemetry--OpenTelemetryExporterModule.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:49:12.753398+00:00",
+          "sha256": "dc7bd865b4aea8b3e544fa80cabc222214a1254b6e894dbd249879633aa79c3c",
+          "line_count": 296,
+          "role": "export",
+          "proves": "O módulo cria BatchSpanProcessor e exporter OTLP gRPC ou HTTP/protobuf com endpoint configurado.",
+          "inspected_ranges": [
+            [
+              72,
+              101
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 72,
+              "end_line": 101,
+              "url": "https://github.com/airlift/airlift/blob/2fd0bb60d560a511403957d79931f5915adced44/opentelemetry/src/main/java/io/airlift/opentelemetry/OpenTelemetryExporterModule.java#L72-L101",
+              "text": "72:     @ProvidesIntoSet\n73:     public static SpanProcessor createSpanProcessor(OpenTelemetryExporterConfig config, SdkMeterProvider meterProvider)\n74:     {\n75:         BatchSpanProcessorBuilder builder = BatchSpanProcessor.builder(createSpanExporter(config))\n76:                 .setMeterProvider(meterProvider);\n77:         config.getSpanMaxExportBatchSize().ifPresent(builder::setMaxExportBatchSize);\n78:         config.getSpanMaxQueueSize().ifPresent(builder::setMaxQueueSize);\n79:         config.getSpanScheduleDelay().ifPresent(delay -> builder.setScheduleDelay(delay.toJavaTime()));\n80:         builder.setInternalTelemetryVersion(InternalTelemetryVersion.LATEST);\n81:         return builder.build();\n82:     }\n83: \n84:     static SpanExporter createSpanExporter(OpenTelemetryExporterConfig config)\n85:     {\n86:         return switch (config.getProtocol()) {\n87:             case GRPC -> configureTls(\n88:                     config,\n89:                     OtlpGrpcSpanExporter.builder()\n90:                             .setEndpoint(config.getEndpoint().toString()),\n91:                     OtlpGrpcSpanExporterBuilder::setTrustedCertificates,\n92:                     OtlpGrpcSpanExporterBuilder::setClientTls)\n93:                     .build();\n94:             case HTTP_PROTOBUF -> configureTls(\n95:                     config,\n96:                     OtlpHttpSpanExporter.builder()\n97:                             .setEndpoint(httpProtobufEndpoint(config.getEndpoint(), TRACES_PATH)),\n98:                     OtlpHttpSpanExporterBuilder::setTrustedCertificates,\n99:                     OtlpHttpSpanExporterBuilder::setClientTls)\n100:                     .build();\n101:         };"
+            }
+          ]
+        },
+        {
+          "repo": "trinodb/trino",
+          "revision": "5706548dade9b1dc81144af6850c5dde9a356713",
+          "path": "docs/src/main/sphinx/admin/opentelemetry.md",
+          "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md",
+          "raw_url": "https://raw.githubusercontent.com/trinodb/trino/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation-repairs/rare-runtime/trinodb--trino--5706548d--docs--src--main--sphinx--admin--opentelemetry.md",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:51:58.618038+00:00",
+          "sha256": "c91959e907c00c455a4610afc53234da4c5b705a869fc300d423e0a3e84fc395",
+          "line_count": 157,
+          "role": "pinned_product_documentation",
+          "proves": "A documentação fixada no mesmo commit explica coordinator/worker, propagação e configuração de exportação desabilitada por padrão.",
+          "inspected_ranges": [
+            [
+              15,
+              29
+            ],
+            [
+              31,
+              48
+            ]
+          ],
+          "excerpts": [
+            {
+              "start_line": 15,
+              "end_line": 29,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md#L15-L29",
+              "text": "15: Trino emits trace information from the coordinator and the workers. Trace\n16: information includes the core system such as the query planner and the\n17: optimizer, and a wide range of connectors and other plugins.\n18: \n19: Trino uses any supplied trace identifiers from client tools across the cluster.\n20: If none are supplied, trace identifiers are created for each query. The\n21: identifiers are propagated to data sources, metastores, and other connected\n22: components. As a result you can use this distributed tracing information to follow\n23: all the processing flow of a query from a client tool, through the\n24: coordinator and all workers to the data sources and other integrations.\n25: \n26: If you want to receive traces from data sources and other integrations, these\n27: tools must also support OpenTelemetry tracing and use the supplied identifiers\n28: from Trino to propagate the context. Tracing must be enabled separately on these\n29: tools."
+            },
+            {
+              "start_line": 31,
+              "end_line": 48,
+              "url": "https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/docs/src/main/sphinx/admin/opentelemetry.md#L31-L48",
+              "text": "31: ## Configuration\n32: \n33: Use tracing with OpenTelemetry by enabling it and configuring the endpoint in\n34: the [config.properties file](config-properties):\n35: \n36: ```properties\n37: tracing.enabled=true\n38: otel.exporter.endpoint=http://observe.example.com:4317\n39: ```\n40: \n41: Tracing is not enabled by default. The exporter endpoint must specify a URL that\n42: is accessible from the coordinator and all workers of the cluster. The preceding\n43: example uses a observability platform deployment available by\n44: HTTP at the host `observe.example.com`, port `4317`.\n45: \n46: Use the `otel.exporter.protocol` property to configure the protocol for exporting traces.\n47: Defaults to the gRPC protocol with the `grpc` value. Set the value to `http/protobuf` for\n48: exporting traces using protocol buffers with HTTP transport."
+            }
+          ]
+        }
+      ],
+      "official_context": [
+        {
+          "url": "https://trino.io/docs/current/admin/opentelemetry.html",
+          "scope": "A documentação pública foi consultada; a versão no commit do produto foi capturada para não depender da URL current."
+        }
+      ],
+      "original_review_state": "REPAIR_HIGH",
+      "original_review_note": "OpenTelemetry API supplies SpanContext and Loki querier.go extracts/starts query spans, but selected application evidence does not show cross-process trace propagation/injection/extraction or a linked remote span. Local spans/context alone do not demonstrate distributed tracing. Add the actual Loki client/server propagation boundary or another real distributed trace path."
+    }
+  ]
+}
