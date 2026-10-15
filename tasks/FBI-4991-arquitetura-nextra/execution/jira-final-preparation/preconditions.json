@@ -21,5 +21,9 @@
     "resolution"
   ],
   "pending_draft_pr_url": false,
-  "pr_section_policy": "No PR section is emitted until root supplies an actual draft URL."
+  "pr_section_policy": "No PR section is emitted until root supplies an actual draft URL.",
+  "preparation_is_historical": true,
+  "external_mutation_performed_by_root": true,
+  "final_readback_receipt": "../publication/jira-readback-receipt.json",
+  "instruction": "The original precondition was checked before writing. The final74-block ADF is already applied; do not replay this historical precondition or the uncondensed draft."
 }

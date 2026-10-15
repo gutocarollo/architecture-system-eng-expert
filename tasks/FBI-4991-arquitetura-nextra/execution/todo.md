@@ -9,8 +9,8 @@
 - [x] A auditoria terminal aprovou a entrega em rascunho e o site protegido. O Worker não mudou desde essa auditoria; as duas correções posteriores têm seus próprios pareceres.
 - [x] A busca global e os quatro destinos de cada jornada foram conferidos no navegador. O curso mantém 181 páginas MDX.
 - [x] Publicar a versão v3 e conferir os 1.397 arquivos autenticados e o bloqueio sem sessão, sem credencial nativa de editor. O resultado funcional e os erros esperados permanecem separados no recibo.
-- [ ] Publicar e reler a branch e o PR em rascunho no GitHub privado correto.
-- [ ] Atualizar e reler o campo Story correto da FBI-4991 com os resultados efetivos.
+- [x] Publicar a branch no GitHub privado correto e reler o PR em rascunho número 1, com fonte 1754607fee752b716a66b597986809649618eb85.
+- [x] Atualizar e reler o campo Story correto da FBI-4991. Os 63 blocos anteriores foram preservados, o ADF final de 74 blocos corresponde ao pedido e o status continua In Progress, sem resolução.
 - [ ] Encerrar o aceite integral somente após resolver o catálogo, a prova histórica faltante e os recibos formais por documento exigidos pelo método.
 
 Os recibos separam autoria, execução, revisão, publicação e produção. A consulta numérica das 03:01 UTC conserva sua data; o FazGraph usado na linhagem conserva o snapshot de 13/10 e seu limite de frescor.

@@ -24,4 +24,4 @@ A classificação de 12.697 commits e 595 cards não confirma a causalidade do h
 
 O método exige recibos formais por documento para o aceite integral das 181 páginas. As aprovações por fonte, laboratório e diagrama não foram convertidas em aprovações fictícias de todos os documentos. O pacote continua `PARTIAL`, e a Story permanece em andamento. Os apontamentos médios e baixos seguem no backlog.
 
-Os recibos deste curso não comprovam mudança ou deploy dos sistemas de produção. A fonte do curso será publicada em PR em rascunho no GitHub privado correto; os identificadores e o read-back ficam em `publication/`.
+Os recibos deste curso não comprovam mudança ou deploy dos sistemas de produção. A fonte do curso está no [PR em rascunho número 1](https://github.com/gutocarollo/architecture-system-eng-expert/pull/1), com commit 1754607fee752b716a66b597986809649618eb85. A atualização da [Story FBI-4991](https://fazcapital.atlassian.net/browse/FBI-4991) foi relida: seus 74 blocos correspondem ao ADF enviado e preservam os 63 blocos anteriores, o status em andamento e a resolução vazia. Os identificadores e recibos ficam em `publication/`.

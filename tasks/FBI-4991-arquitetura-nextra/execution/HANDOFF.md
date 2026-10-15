@@ -25,3 +25,7 @@ O pacote formal continua PARTIAL: os pareceres por fonte, laboratório e diagram
 O destino autorizado é o GitHub privado `gutocarollo/architecture-system-eng-expert`, branch `docs/FBI-4991-arquitetura-aplicada`, com PR em rascunho. O checkout da fonte Sites possui outro remoto e deve ser tratado separadamente.
 
 A Story FBI-4991 usa o campo ADF `customfield_10054`. Preservar os 63 blocos anteriores, o status In Progress e a resolução vazia. Antes da atualização, reler a Story e comparar sua versão e o corpo; depois da escrita, reler e conferir a igualdade do ADF. Os gates executáveis canônicos usam o caminho físico `.agents/skills/jira-fbi/scripts/` e o preview real via stdin.
+
+## Fechamento remoto confirmado
+
+O PR em rascunho número 1 foi aberto no GitHub privado e sua fonte foi relida em 1754607fee752b716a66b597986809649618eb85. A Story recebeu o complemento condensado após a recusa CONTENT_LIMIT_EXCEEDED, preservou os 63 blocos anteriores e retornou os mesmos 74 blocos do pedido. O status e a resolução foram preservados. O próximo commit contém somente estes recibos e os estados de entrega; ele não modifica os bytes publicados no site.

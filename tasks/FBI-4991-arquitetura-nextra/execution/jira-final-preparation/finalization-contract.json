@@ -1,7 +1,7 @@
 {
   "prepared_at_utc": "2026-10-15T18:46:29.339021+00:00",
   "external_mutations_performed": false,
-  "status": "AWAIT_ROOT_FINAL_DELIVERY_VALUES",
+  "status": "SUPERSEDED_BY_FINAL_PUBLICATION",
   "no_literal_placeholders_in_jira_adf": true,
   "fill_before_final_write": {
     "final_course_commit": null,
@@ -118,5 +118,8 @@
       "type": "paragraph",
       "starts_with": "Os recibos desta execução estão em tasks/FBI-4991-arquitetura-nextra/execution/: reviews/terminal.json, review"
     }
-  ]
+  ],
+  "final_readback_receipt": "../publication/jira-readback-receipt.json",
+  "final_adf_blocks": 74,
+  "instruction": "This was a historical preparation contract. Do not replay its old block indices. The root finalized and remotely verified the condensed update."
 }

@@ -1,6 +1,6 @@
 {
   "checkpoint": false,
-  "observed_at": "2026-10-15T18:58:18.183121+00:00",
+  "observed_at": "2026-10-15T19:07:18.697778+00:00",
   "applied": true,
   "selected": [
     {
@@ -1690,8 +1690,8 @@
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/HANDOFF.md",
-      "bytes": 3660,
-      "sha256": "3ba84463575314fdbe57d754f2e82237b8d3c380c0d8c4d57ad41af96f4967fa"
+      "bytes": 4138,
+      "sha256": "8f544c167842250566a2f0d271655504b96c188e0f0ff715d2bbdd313c5da97c"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/author_pages.py",
@@ -13885,8 +13885,8 @@
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/delivery-report.md",
-      "bytes": 3697,
-      "sha256": "b1a11e34bb10367c06e4b5f5cebe6ce9b22c0b2e368423d369034cec507ff44a"
+      "bytes": 4015,
+      "sha256": "66c980fce5ccf6ab21a9a17aa9e32771a3836619a3078cd403e07ed50960fc1c"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams/0413c038a44f-1.mmd",
@@ -16635,8 +16635,8 @@
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/amendment-final.md",
-      "bytes": 7464,
-      "sha256": "bc6bd772ff3bad12cc8b68756e3ec5dfac60c660fa2bd8c2464b6d97766995d0"
+      "bytes": 3550,
+      "sha256": "d3c8c4bd41c566ba5947f116825647e57d6453cbcd2dbbe7b2e73f26b32eee39"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/amendment.md",
@@ -16655,8 +16655,23 @@
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/finalization-contract.json",
-      "bytes": 5273,
-      "sha256": "7607e8fe9377302e86c1e8fa39ae23382abf7d6ee82788c0fe309d805086d4a2"
+      "bytes": 5535,
+      "sha256": "4ea074de957ae270a815d67f3b8a8220be36619cce1220c8189bd7661728c78b"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-content-limit.json",
+      "bytes": 443,
+      "sha256": "66254933166b9fa20b802143668b728e8d0a2022853bac7e78a43eb452e7e2e8"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-gates-before-link-fix.json",
+      "bytes": 743,
+      "sha256": "ae60adcb0112a25045616881fcfe69a81e2ff0fa98e3c6571da28aaa7c687eb1"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-gates-final.json",
+      "bytes": 995,
+      "sha256": "8c12a0d54532da07bee93ee114e372828251efa1ef9b26710eeaf81002d8a722"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-gates-initial.json",
@@ -16684,19 +16699,24 @@
       "sha256": "556964274b49810cb45508f4c16f2b135d5403f059b51efd8e0cf1a1aeb26fa4"
     },
     {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-update-before-size-fix.json",
+      "bytes": 86253,
+      "sha256": "6e80980c54b344d56aad39ebcf20657682f43479743d9fe88b565fc47dc70317"
+    },
+    {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-update-preview.json",
-      "bytes": 89177,
-      "sha256": "b5f53db97111d96abd6ab3291367fb91a173f96bb288ff7d41e1f78220bdb71f"
+      "bytes": 85839,
+      "sha256": "58637f80cdf45b1d5aaa42732127721917e57f0cdf126411b0dd38573c7bcc44"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/jira-update-request.json",
-      "bytes": 84468,
-      "sha256": "e132f465a0cde5cad9eae632a70570c57854b48fa413fdfd0b2cd231f7309d6c"
+      "bytes": 81100,
+      "sha256": "0ea3e5e88f258838ffdb900c9272b9ab01c0be1b8f78fb933b30c2dc5e6ea75d"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/preconditions.json",
-      "bytes": 1313,
-      "sha256": "410cb7e9e2aa161816395406580e3ec31801687e726de42f8e1eb4a68a40d14c"
+      "bytes": 1655,
+      "sha256": "cce680d4b5833c61efaa198071a5f625c8ae7fc635c143aa398ab85ab468c519"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/jira-final-preparation/preparation-summary.json",
@@ -17069,9 +17089,29 @@
       "sha256": "0c1ef909978ead6a782db0e067428966866aa47bf384305c92373a48928c643e"
     },
     {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/publication/github-pr-readback.json",
+      "bytes": 325,
+      "sha256": "cb23cb4836e52df6a84d4e491042541176774ec62b1133522ad85753aa228cdc"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/publication/jira-final-readback.json",
+      "bytes": 86865,
+      "sha256": "34bf9ea55c198bc19315effd3ec465b12beec26a05d194bca4ef1ce2c3b51cf2"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/publication/jira-readback-receipt.json",
+      "bytes": 625,
+      "sha256": "4cb5e83aac4743b5d9044001ee949bc50b835a79b351fe678334fc49b0316544"
+    },
+    {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/publication/pr-body.md",
       "bytes": 2909,
       "sha256": "0d32f68e3d3167764719472d2557be147c4dfe70e6f523b5a7d3f6dd4446b07a"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/publication/source-publication.json",
+      "bytes": 401,
+      "sha256": "d3c97afb6998e424682e71409c5d2c1aed7664a7a87a53b1e7ed600dac8fc678"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/puppeteer.json",
@@ -17636,7 +17676,7 @@
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-current-verified.log",
       "bytes": 174,
-      "sha256": "ab14e7e5cbb738783b109a42a848f7a65484c62c92c3d4aa5e78f03c1372207d"
+      "sha256": "9aa837796f0725fd537f5e1bf78e358b442c2dc2218d2e6ed4167007d0814b45"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-current.json",
@@ -17646,12 +17686,12 @@
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-current.log",
       "bytes": 174,
-      "sha256": "c4465bfa9307b59e75a175ffabafd0360248c2e0868941ee5b531da91dc818ac"
+      "sha256": "fc6300bf1534f21f5b5a29a6909abcdb72dcc2f062b4eda42ab1d891ba9593a9"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-final-summary.json",
       "bytes": 539,
-      "sha256": "53cc45b52ad6c390dcec3228258c6d951178078e444ec92fbe1169ad970314ad"
+      "sha256": "342b10f44dbb70b22d85643981bbb85bc9bb2310578c6b6434422aa79a5fa2b6"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-preflight.json",
@@ -17666,7 +17706,7 @@
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-publication-receipt.json",
       "bytes": 601,
-      "sha256": "a1e555678a03864c10e94048374664b6279579716b537c93f52479698e91bb50"
+      "sha256": "97c2fdb33fe054e2f90d9d48ca28672af3c89ce0935e9b1d8403480de734b438"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/secrets-verified-hash-baseline.json",
@@ -17700,8 +17740,8 @@
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/todo.md",
-      "bytes": 2254,
-      "sha256": "908fee605ec193cf5b81b2ea043b573263641b1a9f2e938b951b71bd5acfc8f6"
+      "bytes": 2427,
+      "sha256": "be1cf74c8b4e05e77eb46ebb26f408ab1b64881044397b004a12065893009e00"
     },
     {
       "path": "tasks/FBI-4991-arquitetura-nextra/execution/verify-browser.mjs",
