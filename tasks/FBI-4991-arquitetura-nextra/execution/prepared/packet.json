@@ -1,7 +1,7 @@
 {
   "packet_version": 2,
   "project_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
-  "created_at": "2026-10-15T17:44:38.231920Z",
+  "created_at": "2026-10-15T17:59:08.323472Z",
   "status": "PARTIAL",
   "scope": "Executar e revisar as pendências da FBI-4991: conectar a totalidade dos conceitos em jornadas Diátaxis, executar antes/depois históricos e práticas financeiras, fechar curadoria por conceito, investigar histórico com evidência causal, registrar catálogo, versionar e publicar com revisão independente e read-back.",
   "inventory": [
@@ -319,8 +319,8 @@
   "sources": [
     {
       "id": "project",
-      "revision": "32b80d5fc8eda42e2aa9b496d82c30b574120e68+working-tree-hashes",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "revision": "2ea8a2c98cca7dd4e028ff323141cfa40e90d656+working-tree-hashes",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "state": "AVAILABLE",
       "reason": "The documents and evidence below bind the working-tree bytes; the base SHA is not a claim that changes are committed."
     },
@@ -920,7 +920,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"policy\": \"Fixed fixture contracts for each probe; runners never regenerate these expected values.\",\n  \"probes\": {\n    \"provider-contract\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": {\n        \"booked\": false\n      },\n      \"after\": {\n        \"booked\": true,\n        \"amount\": 100.0\n      },\n      \"invariant\": \"The adapter translates an external language at one boundary.\"\n    },\n    \"replace-policy\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": [\n        10.0,\n        10.0\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "contract"
     },
     {
@@ -931,7 +931,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"scope\": \"310 concepts individually adjudicated; only relevant bounded observations carry an executable command, and missing specific practices remain PENDING\",\n  \"concepts\": [\n    {\n      \"concept_id\": \"a-b-deployment\",\n      \"canonical_name\": \"A/B Deployment\",\n      \"corpus_entry_id\": \"g12-e009\",\n      \"groups\": [\n        12\n      ],\n      \"case_id\": \"safe-release\",\n      \"mechanism\": \"O desenho expõe grupos a variantes para comparar uma hipótese de comportamento ou resultado.\",\n      \"exercise_action\": \"Distribua quatro usuários entre A e B; confira que os dois grupos recebem respostas visíveis diferentes e mantêm sua associação ao usuário.\",\n      \"probe\": \"ab-cohorts\",\n      \"command\": \"python3 labs/architecture/financial.py safe-release --probe ab-cohorts\",\n      \"coverage_level\": \"EXECUTABLE_PRINCIPLE_COMPARISON\",\n      \"destinations\": {\n        \"journey\": \"/jornadas/safe-release/\",\n        \"explanation\": \"/explicacoes/casos/safe-release/\",\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "contract"
     },
     {
@@ -942,7 +942,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"grain\": {\n    \"path\": \"backend/app/repositories/account.py\",\n    \"function\": \"get_family_revenue_by_period\",\n    \"before\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n    \"after\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n    \"sources\": {\n      \"before\": {\n        \"sha\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n        \"file_sha256\": \"788284c5d78ec62e218e90db9f154d5c9be946530ee01c5a380112ad17e9deeb\",\n        \"function_lines\": [\n          2234,\n          2301\n        ],\n        \"template_sha256\": \"5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8\",\n        \"template\": \"grain-before.sql.template\"\n      },\n      \"after\": {\n        \"sha\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n        \"file_sha256\": \"cc552670e7637f39b56382eb75ff80e7671143c1a6ec8263bf1e2f940f0ff6ec\",\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "code"
     },
     {
@@ -953,7 +953,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"case_id\": \"airflow-lock-retry\",\n  \"repository\": \"fazcapital/airflow\",\n  \"path\": \"dags/inflow__xp__stg_to_fct.py\",\n  \"function\": \"task_run_60_days_rule_hs\",\n  \"before\": \"febaf1be978aad59c29f38d1bd74f357f8e942b5\",\n  \"after\": \"55dfe8acb362e6854d1af4e7dd7d17e6497af9bd\",\n  \"snapshots\": {\n    \"before\": {\n      \"sha256\": \"3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753\",\n      \"source_file_sha256\": \"87b745c73fedb2065756e18114421b1bfb2d90f1838a6ca354af2264f984d3a4\",\n      \"source_blob\": \"5f6641421f6adbf6b7206d4bb3dca0261a84c00b\",\n      \"start_line\": 226,\n      \"end_line\": 270,\n      \"normalization\": \"Dedent the selected nested function; preserve its body and historical comments verbatim.\"\n    },\n    \"after\": {\n      \"sha256\": \"3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731\",\n      \"source_file_sha256\": \"e9ecd6338d6c22af7f55b4017b610e7a705ab3268864b5a770ac52220a1735f5\",\n      \"source_blob\": \"2fa3dd686111f73b3148674454c203015269f1bd\",\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "code"
     },
     {
@@ -964,7 +964,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"observed_at\": \"2026-10-15T03:11:09.634806+00:00\",\n  \"scope\": \"ISOLATED_SYNTHETIC_POSTGRESQL\",\n  \"production_execution\": false,\n  \"postgres_version\": \"postgres (PostgreSQL) 16.15 (Homebrew)\",\n  \"isolation_verified\": true,\n  \"grain\": {\n    \"before\": {\n      \"rows\": 2,\n      \"commission_sum\": 200,\n      \"results\": [\n        {\n          \"month\": \"2026-01-01\",\n          \"account_code\": 101,\n          \"name\": \"SYNTHETIC-FAMILY\",\n          \"cluster\": \"SYNTHETIC-CLUSTER\",\n          \"commission\": 100,\n          \"monthly_roa\": 0.01\n        },\n        {\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "runtime"
     },
     {
@@ -975,7 +975,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"verdict\": \"PASS\",\n  \"receipts\": [\n    {\n      \"case\": \"grain\",\n      \"observed_at\": \"2026-10-15T03:11:07.507516+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 94, in main\\n    assert grain['after']['rows'] == 1 and grain['after']['commission_sum'] == 100, grain['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'rows': 2, 'commission_sum': 200, 'results': [{'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}, {'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}]}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n    },\n    {\n      \"case\": \"revision\",\n      \"observed_at\": \"2026-10-15T03:11:09.579248+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 127, in main\\n    assert revision['after'] == dict(stale_writer_rejected=True, azure_id='AZURE-CONFIRMED', current_rows=1), revision['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'stale_writer_rejected': False, 'azure_id': 'AZURE-OLD', 'current_rows': 1}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "runtime"
     },
     {
@@ -986,7 +986,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "import { Footer, Layout, Navbar } from 'nextra-theme-docs'\nimport { Head } from 'nextra/components'\nimport { getPageMap } from 'nextra/page-map'\nimport 'nextra-theme-docs/style.css'\n\nexport const metadata = {\n  title: {\n    default: 'Arquitetura na prática — Faz Capital',\n    template: '%s — Arquitetura na prática'\n  },\n  description: 'Aprenda arquitetura com problemas, código e dados do MakersHub e do Airflow.'\n}\n\nexport default async function RootLayout({ children }) {\n  return (\n    <html lang=\"pt-BR\" dir=\"ltr\" suppressHydrationWarning>\n      <Head />\n      <body>\n        <Layout\n          navbar={<Navbar logo={<b>Arquitetura na prática</b>} />}\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "code"
     },
     {
@@ -997,7 +997,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"status\": \"REVIEW_REQUIRED\",\n  \"assessment_limit\": \"Structural checks locate dedicated prose sections and content links. Meaning, pedagogical quality, framework suitability, evidence scope, remote URL availability, runtime behavior, Mermaid rendering, and diagram semantics remain for human review.\",\n  \"link_validation_scope\": \"Markdown links, Markdown reference links, and literal JSX href attributes in .md/.mdx pages. Internal routes and anchors are checked locally; dynamic JSX hrefs and external URLs remain unverified.\",\n  \"checker_analysis\": {\n    \"role\": \"Checker diagnosis only; this report does not independently accept authored documentation.\",\n    \"repaired_behaviors\": [\n      \"Normalize Nextra routes with or without a trailing slash.\",\n      \"Resolve relative Markdown links against the source content file before checking route targets.\",\n      \"Locate priority sections by explanation_anchor, canonical headings, safe aliases, title segments, and JSX id attributes.\",\n      \"Use true heading boundaries across the MDX AST; do not require ten fixed subheadings per priority.\"\n    ],\n    \"jsx_id_support\": \"Literal id attributes on MDX JSX flow and text elements, including span and anchor elements, are indexed and associated with nearby heading sections. Local fragment validation still requires an exact rendered id.\",\n    \"priority_part_policy\": \"Mermaid fences and actual link candidates are reported structurally. Definition, story, benefit, cost, limits, evidence scope, and reference suitability remain UNVERIFIABLE for human review.\",\n    \"external_link_policy\": \"HTTP(S) targets are recorded as unverified; no remote request was made.\",\n    \"observations\": {\n      \"invalid_local_links\": 0,\n      \"external_links_unverified\": 4309,\n      \"source_relative_local_links\": 0,\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "runtime"
     },
     {
@@ -1008,7 +1008,7 @@
       "line_start": 1,
       "line_end": 17,
       "quote": "{\n  \"repository\": \"gutocarollo/architecture-system-eng-expert\",\n  \"repository_mutation_performed\": false,\n  \"reason\": \"Active catalog whitelist rejects the material course repository. Jira admin permission exists, but changing only the Jira option does not change the catalog authority.\",\n  \"required_contract_change\": {\n    \"file\": \"/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json\",\n    \"field\": \"dimensions.repositories.allowedValues\",\n    \"add\": \"gutocarollo/architecture-system-eng-expert\",\n    \"state\": \"NOT_APPLY_READY: the declared Repository authority and projection were not located in the audited source paths; adding only a literal whitelist value is insufficient.\"\n  },\n  \"asset_state\": \"not_registered\",\n  \"permission_receipt\": \"permissions.json\",\n  \"decision_state\": \"Document registration has a tested existing-kind proposal outside this documentation repository. Repository registration remains blocked by the exact authority gap recorded in the audit.\",\n  \"affected_asset_id_proposed\": \"doc:architecture/architecture-system-eng-expert\",\n  \"asset_registration_proposal\": \"asset-document-registration.patch\",\n  \"repository_authority_audit\": \"registration-authority-audit.md\"\n}\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "scope"
     },
     {
@@ -1019,7 +1019,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"measured_at\": \"2026-10-15T02:54:53.943830+00:00\",\n  \"fbi_issues\": 595,\n  \"new_source_judgments\": 587,\n  \"classification_counts\": {\n    \"CAUSE_REPORTED_AND_CODE_SUPPORTED\": 7,\n    \"MISSING_CAUSE_EVIDENCE\": 35,\n    \"REPORTED_ONLY\": 290,\n    \"NOT_APPLICABLE_CHANGE\": 263\n  },\n  \"issue_classification_complete\": true,\n  \"all_causes_confirmed\": false,\n  \"commit_matrix_records\": 12697,\n  \"unresolved_evidence_keys\": [\n    \"FBI-3061\",\n    \"FBI-4803\",\n    \"FBI-4802\",\n    \"FBI-3662\",\n    \"FBI-4807\",\n    \"FBI-4806\",\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "contract"
     },
     {
@@ -1030,7 +1030,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"sql\": \"SELECT inet_server_addr()::text AS server_address, inet_server_port() AS server_port, current_database() AS database_name, current_user AS role_name, COUNT(*) AS row_count, COUNT(DISTINCT movement_adjusted_sk) AS distinct_movement_keys, MAX(movement_date) AS latest_movement_date, COUNT(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_movement_count, ROUND(SUM(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01')::numeric, 2) AS october_signed_brl_amount, clock_timestamp() AS observed_at FROM public.rpt_inflow__movement_adjusted;\",\n  \"result\": {\n    \"rows\": [\n      {\n        \"server_address\": \"192.168.254.137/32\",\n        \"server_port\": 5432,\n        \"database_name\": \"faz_capital\",\n        \"role_name\": \"augusto_carollo\",\n        \"row_count\": 557731,\n        \"distinct_movement_keys\": 557731,\n        \"latest_movement_date\": \"2026-10-08\",\n        \"october_movement_count\": 3380,\n        \"october_signed_brl_amount\": \"18742122.16\",\n        \"observed_at\": \"2026-10-15 00:01:35.715697-03:00\"\n      }\n    ],\n    \"row_count\": 1,\n    \"returned_row_count\": 1,\n    \"truncated\": false,\n",
-      "observed_at": "2026-10-15T17:44:38.231920Z",
+      "observed_at": "2026-10-15T17:59:08.323472Z",
       "kind": "runtime"
     }
   ],
