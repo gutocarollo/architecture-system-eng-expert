@@ -1,0 +1,22 @@
+{
+  "sql": "BEGIN TRANSACTION READ ONLY; SET LOCAL statement_timeout = '5s'; SELECT clock_timestamp() AT TIME ZONE 'UTC' AS measured_at_utc, inet_server_addr() AS server_addr, inet_server_port() AS server_port, current_database() AS database_name, count(*) AS metadata_row_count, count(*) FILTER (WHERE audio_file_path IS NULL OR audio_file_path = '') AS missing_path_row_count, max(updated_at) AS latest_metadata_updated_at FROM public.fct_minio__call; COMMIT;",
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "No results"
+      }
+    ],
+    "structuredContent": {
+      "result": [
+        {
+          "type": "text",
+          "text": "No results",
+          "annotations": null,
+          "_meta": null
+        }
+      ]
+    },
+    "isError": false
+  }
+}

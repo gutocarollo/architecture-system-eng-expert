@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant A as Editor A
+    participant B as Editor B
+    participant R as Registro versão 7
+    A->>R: lê versão 7
+    B->>R: lê versão 7
+    A->>R: grava se ainda for versão 7
+    R-->>A: salva versão 8
+    B->>R: grava se ainda for versão 7
+    R-->>B: conflito, versão atual 8

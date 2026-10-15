@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant A as Editor A
+    participant B as Editor B
+    participant Store as Registro hipotético
+    A->>Store: lê R$ 1000 na versão 7
+    B->>Store: lê R$ 1000 na versão 7
+    A->>Store: pede alteração com versão esperada 7
+    Store-->>A: aceita R$ 1100 e versão 8
+    B->>Store: pede alteração com versão esperada 7
+    Store-->>B: conflito de versão
+    B->>Store: relê versão 8
+    Note over B: revalida a intenção e a regra
+    B->>Store: nova alteração com versão esperada 8
+    Store-->>B: aceita quando a regra permite

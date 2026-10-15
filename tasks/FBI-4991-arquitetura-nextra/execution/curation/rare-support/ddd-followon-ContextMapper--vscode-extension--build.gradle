@@ -1,0 +1,170 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "com.github.node-gradle:gradle-node-plugin:${gradleNodePluginVersion}"
+    }
+}
+
+plugins {
+    id 'nebula.release' version '19.0.10'
+    id 'com.github.node-gradle.node' version "${gradleNodePluginVersion}"
+}
+
+group 'org.contextmapper'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+configurations {
+    cmlLSPTar
+}
+
+dependencies {
+    cmlLSPTar "org.contextmapper:context-mapper-lsp:${cmlVersion}@tar"
+}
+
+task npmInstallVsce(type: NpmTask, dependsOn: npmSetup) {
+    ext.destPath = "$rootProject.projectDir/node_modules/vsce"
+    outputs.dir(destPath)
+    group 'Node'
+    description 'Installs the NodeJS package "Visual Studio Code Extension Manager"'
+    args = [ 'install', 'vsce' ]
+}
+
+node {
+    version = nodeVersion
+    download = true
+    npmInstallCommand = 'ci'
+}
+
+def inputFiles = fileTree(
+        dir: projectDir,
+        excludes: [ 'out/**', '.gitignore', '.gradle/**', 'build/**', '*.gradle' ]
+)
+
+npmInstall {
+    inputs.files(inputFiles)
+    outputs.dir('out')
+}
+
+task checkVersion() {
+    doLast {
+        def packageJsonFile = file('package.json')
+        def json = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
+        if(!project.version.toString().equals(json.version))
+            throw new GradleException("The project (Gradle) version and the extension (NPM) version do not match! (${json.version} != ${project.version})")
+    }
+}
+
+task test(dependsOn: [npmInstall,checkVersion], type: NpmTask) {
+    args = ['run', 'test']
+
+    inputs.files fileTree('src')
+    inputs.file 'package.json'
+    inputs.file 'package-lock.json'
+}
+
+task vscodeExtension(dependsOn: [npmInstall, npmInstallVsce, test], type: NodeTask) {
+    ext.destDir = new File(buildDir, 'vscode')
+    ext.archiveName = "${project.name}-${project.version.toString()}.vsix"
+    ext.destPath = "${ext.destDir}/${ext.archiveName}"
+    inputs.with {
+        files inputFiles
+        dir npmInstallVsce.destPath
+    }
+    outputs.dir destDir
+    doFirst {
+        destDir.mkdirs()
+    }
+    script = file("$npmInstallVsce.destPath/vsce")
+    args = [ 'package', '--out', ext.destPath ]
+    execOverrides {
+        workingDir = projectDir
+    }
+}
+
+task clean {
+    doLast {
+        delete vscodeExtension.destDir
+        delete 'out' // output of npmInstall - don't want to delete node_modules
+    }
+
+}
+
+task copyLSPApplication(type: Copy) {
+    from(tarTree(configurations.cmlLSPTar.files.iterator().next())) {
+        eachFile { fcd ->
+            fcd.relativePath = new RelativePath(true, fcd.relativePath.segments.drop(1))
+        }
+    }
+    into 'lsp'
+}
+
+clean {
+    doLast {
+        delete copyLSPApplication.outputs
+    }
+}
+
+npmInstall.dependsOn copyLSPApplication
+
+task installExtension(type: Exec, dependsOn: vscodeExtension) {
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        commandLine 'code.cmd'
+    } else {
+        commandLine 'code'
+    }
+    args '--install-extension', vscodeExtension.destPath
+}
+
+task startCode(type:Exec, dependsOn: installExtension) {
+    if (System.properties['os.name'].toLowerCase().contains('windows')) {
+        commandLine 'code.cmd'
+    } else {
+        commandLine 'code'
+    }
+    args "$rootProject.projectDir/demo/", '--new-window'
+}
+
+task publish(dependsOn: vscodeExtension, type: NodeTask) {
+    script = file("$rootProject.projectDir/node_modules/vsce/vsce")
+    args = [ 'publish', '-p', System.getenv('MS_MARKETPLACE_ACCESS_TOKEN'), "--packagePath", "${project.buildDir}/vscode/vscode-extension-${project.version}.vsix"]
+    execOverrides {
+        workingDir = projectDir
+    }
+}
+
+task publishToOpenVSX(dependsOn: vscodeExtension, type: Exec) {
+    commandLine 'npx', 'ovsx', '--debug', 'publish', "--packagePath", projectDir, '--pat', System.getenv('OPENVSX_ACCESS_TOKEN')
+}
+
+task updateVersion() {
+    doLast {
+        if(!project.hasProperty('newVersion'))
+            throw new GradleException("Please define the 'newVersion' property")
+
+        def newVersion = project.properties["newVersion"]
+
+        def versionPattern = /\d+.\d+.\d+(-SNAPSHOT)?/
+        if(!newVersion.matches(versionPattern))
+            throw new GradleException("Please give a proper version: x.y.z")
+
+        println("Updating version to " + newVersion)
+
+        def filesToUpdate = [
+            new File(project.projectDir, 'package.json')
+        ]
+
+        filesToUpdate.forEach { file ->
+            String text = file.getText("UTF-8")
+            text = text.replaceAll("\"version\": \"$versionPattern\",", "\"version\": \"$newVersion\",")
+            file.setText(text, "UTF-8")
+        }
+    }
+}

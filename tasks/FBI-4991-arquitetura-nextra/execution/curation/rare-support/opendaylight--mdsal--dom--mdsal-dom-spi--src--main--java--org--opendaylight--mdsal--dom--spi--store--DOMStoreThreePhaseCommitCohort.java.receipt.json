@@ -1,0 +1,12 @@
+{
+  "repo": "opendaylight/mdsal",
+  "path": "dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+  "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+  "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/mdsal/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.588284+00:00",
+  "sha256": "d766892d9aaeffaaa17ac0a8e0fce1ccbd12970282b6a4b00edb15fd9ee829c3",
+  "line_count": 64,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--dom--mdsal-dom-spi--src--main--java--org--opendaylight--mdsal--dom--spi--store--DOMStoreThreePhaseCommitCohort.java"
+}

@@ -1,0 +1,12 @@
+flowchart TD
+    M["ORDER-1 repetida após perda de resposta"] --> B["Antes: cada entrega debita"]
+    B --> X["Três entregas: débito 250"]
+    M --> I["financial.py::order_delivery confere inbox"]
+    I --> K{"Identidade da ordem já existe?"}
+    K -->|sim| R["Conserva o efeito já aplicado"]
+    K -->|não| T["Transação SQLite grava ordem e outbox"]
+    T --> C["Queda antes do envio conserva a intenção"]
+    C --> D["Worker proposto pode repetir envio; destino deduplica"]
+    D --> F{"Alocação falhou depois do débito?"}
+    F -->|sim| O["Crédito compensatório recompõe saldo"]
+    F -->|não| E["Operação concluída no modelo"]

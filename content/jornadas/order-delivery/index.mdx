@@ -1,0 +1,36 @@
+---
+title: "A repetição de uma ordem produz um único efeito"
+description: "Você aprenderá a separar a entrega repetida do efeito de negócio e preservar a intenção de integrar depois do commit."
+diataxis: explanation
+---
+
+# A repetição de uma ordem produz um único efeito
+
+Ana envia a ordem fictícia ORDER-1 de R$ 100. A resposta se perde e o cliente a repete. ORDER-2 acrescenta R$ 50. O desenho anterior registra R$ 100 + R$ 100 + R$ 50 = R$ 250. A ordem repetida deveria conservar o mesmo efeito, totalizando R$ 150.
+
+Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## Escolha o que você precisa agora
+
+| Sua necessidade | Destino deste mesmo caso | O que você obterá |
+| --- | --- | --- |
+| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/order-delivery/) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/order-delivery/) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/order-delivery/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/order-delivery/) | Você consulta os localizadores e as garantias de cada probe. |
+
+## Antes de começar
+
+Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial apresenta os comandos completos e usa somente dados de aprendizado. Você aprenderá a separar a entrega repetida do efeito de negócio e preservar a intenção de integrar depois do commit.
+
+## O resultado que conecta a jornada
+
+As três entregas produzem dois efeitos de R$ 150 no total. A queda deixa uma ordem e uma intenção recuperável. A compensação devolve o saldo fictício de R$ 900 para R$ 1.000. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+Quando terminar a prática e consultar seus contratos, continue em [O saldo precisa explicar sua história](/jornadas/ledger-projection/).
+
+## Conceitos deste caso
+
+A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
+
+Este caso reúne 16 conceitos no [mapa de mecanismos e práticas](/jornadas/order-delivery/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.

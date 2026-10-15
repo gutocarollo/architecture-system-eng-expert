@@ -1,0 +1,21 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/messages/index",
+  "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+  "context_sha256": "adf957b98ca6a7a7a8f54fd62838b9cbc5ab87ad0cfa4c679a909a4366313a73",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "competing-claims-code",
+    "idempotency-code",
+    "l4a",
+    "l4b",
+    "original-catalog",
+    "original-request",
+    "s4",
+    "s4-reference-repair"
+  ]
+}

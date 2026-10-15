@@ -1,0 +1,12 @@
+{
+  "repo": "grafana/grafana",
+  "path": "public/app/features/panel/components/PanelRenderer.tsx",
+  "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+  "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/panel/components/PanelRenderer.tsx",
+  "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/panel/components/PanelRenderer.tsx",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:54:10.864752+00:00",
+  "sha256": "7618d743c079ba6410ab1f94abb77259e07151b5c533a5c0603e4523147bbf7c",
+  "line_count": 118,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--panel--components--PanelRenderer.tsx"
+}

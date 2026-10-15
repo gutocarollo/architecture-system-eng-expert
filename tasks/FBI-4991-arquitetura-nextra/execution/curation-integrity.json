@@ -1,0 +1,12 @@
+{
+  "checked": 771,
+  "mismatches": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b2d0e2b9ab419f00583f994129f7acc65e369e87927326b673e032084d7284b5.txt",
+      "expected": "99d3aba8e30832da8b1e8fc57f6049ecba6db11640d569003e1859d208bb7f15",
+      "actual": "30ff6f170d820ef584804fe426a1454c0231b7aa5729bbe35721e0936b5f7e86"
+    }
+  ],
+  "missing": [],
+  "scope": "Artifact-byte integrity only; no semantic approval."
+}

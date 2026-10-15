@@ -1,0 +1,15 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/optimistic-concurrency",
+  "document_sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+  "context_sha256": "5b952485912657e26f441c694662c4977e4291b4b7a3da3d560d0133fac10265",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "l1c"
+  ]
+}

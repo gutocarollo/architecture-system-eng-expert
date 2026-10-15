@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/market-data/latest-price.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/market-data/latest-price.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.584261+00:00",
+  "sha256": "2cd175eaaa1719978b78ccb7dad3f6d2441d4298248b43267da28854ea0df654",
+  "line_count": 73,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--market-data--latest-price.ts"
+}

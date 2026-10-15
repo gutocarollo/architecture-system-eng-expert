@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant API as API NextBilling
+    participant TASK as DAG de áudio
+    participant S3 as Objeto via SDK MinIO
+    participant PG as PostgreSQL
+    TASK->>API: extract_recordings
+    TASK->>PG: enrich_with_salesforce_data
+    TASK->>S3: stat_object da chave esperada
+    alt Objeto não encontrado
+        TASK->>S3: put_object dos bytes do áudio
+    else Objeto encontrado
+        Note over TASK,S3: O código reutiliza sua existência
+    end
+    alt Escrita SQL falha: cenário proposto
+        Note over S3,PG: Objeto pode existir sem a referência no banco
+    else Escrita SQL confirma
+        TASK->>PG: load_metadata com ON CONFLICT(nextbilling_call_id)
+    end

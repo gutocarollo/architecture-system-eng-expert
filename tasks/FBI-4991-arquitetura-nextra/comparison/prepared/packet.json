@@ -1,0 +1,65 @@
+{
+  "packet_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "created_at": "2026-10-15T00:19:59.258243Z",
+  "status": "DRAFT",
+  "scope": "Comparar a jornada Diátaxis do curso de arquitetura com o Nextra do MakersHub em casos delimitados e acrescentar à FBI-4991 critérios verificáveis de ligação entre conceito, caso real, prática antes/depois, Jira, PR, commits e fallback financeiro identificado; preservar os conteúdos auditados.",
+  "inventory": [],
+  "sources": [
+    {
+      "id": "project",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-15T00:19:59.258243Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    },
+    {
+      "id": "makershub-help",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-15T00:19:59.258243Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    },
+    {
+      "id": "workflow-evidence",
+      "revision": "UNPINNED",
+      "observed_at": "2026-10-15T00:19:59.258243Z",
+      "state": "AVAILABLE",
+      "reason": "Preparation verified local path availability only."
+    }
+  ],
+  "evidence": [],
+  "coverage": {
+    "L0": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L1": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L2": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L3": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    },
+    "L4": {
+      "status": "OPEN",
+      "evidence_ids": [],
+      "reason": "Evidence has not been collected."
+    }
+  },
+  "relations": [],
+  "documents": [],
+  "adrs": [],
+  "diagrams": [],
+  "reviews": [],
+  "gaps": []
+}

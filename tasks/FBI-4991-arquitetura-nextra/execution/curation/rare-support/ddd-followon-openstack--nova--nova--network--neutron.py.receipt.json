@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova",
+  "path": "nova/network/neutron.py",
+  "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+  "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/network/neutron.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:19:28.482560+00:00",
+  "sha256": "dd40582cb142f6d1c698486cc003f4d144697e605b94731af903e33204496ada",
+  "line_count": 3989,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova--nova--network--neutron.py"
+}

@@ -1,0 +1,7 @@
+{
+  "url": "https://specs.openstack.org/openstack/neutron-specs/specs/backlog/pike/portbinding_information_for_nova.html",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:34.281036+00:00",
+  "sha256": "9f637ffa20f87aea403622e5fa62f6b2e73eec2a397bf6b39ca59667af475413",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-neutron-proposal.html"
+}

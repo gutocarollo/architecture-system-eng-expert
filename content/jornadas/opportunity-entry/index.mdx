@@ -1,0 +1,36 @@
+---
+title: "A oportunidade existente conserva sua identidade"
+description: "Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação."
+diataxis: explanation
+---
+
+# A oportunidade existente conserva sua identidade
+
+Um SDR entra pelo identificador de uma oportunidade aberta. A evolução FBI-4719 precisa executar o pacote de agendamento nessa mesma oportunidade. Ao chamar a função anterior com a mesma entrada, a reprodução observa uma criação de oportunidade nova; a função posterior conserva o identificador de entrada.
+
+Este caso vem do [card FBI-4719](https://fazcapital.atlassian.net/browse/FBI-4719) e do [PR 594](https://bitbucket.org/fazcapital/makershub/pull-requests/594). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/services/super_r1_service.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/services/super_r1_service.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+## Escolha o que você precisa agora
+
+| Sua necessidade | Destino deste mesmo caso | O que você obterá |
+| --- | --- | --- |
+| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/opportunity-entry/) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/opportunity-entry/) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/opportunity-entry/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/opportunity-entry/) | Você consulta os localizadores e as garantias de cada probe. |
+
+## Antes de começar
+
+Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial apresenta os comandos completos e usa somente dados de aprendizado. Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação.
+
+## O resultado que conecta a jornada
+
+A criação muda de uma chamada para zero. O identificador continua 006SYNTHETICOPEN. O segundo claim recebe 409. As funções históricas também recusam oportunidades ganhas ou perdidas. Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
+
+Quando terminar a prática e consultar seus contratos, continue em [Dois operadores disputam o mesmo recurso](/jornadas/reservation/).
+
+## Conceitos deste caso
+
+A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
+
+Este caso reúne 3 conceitos no [mapa de mecanismos e práticas](/jornadas/opportunity-entry/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.

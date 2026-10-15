@@ -1,0 +1,9 @@
+flowchart LR
+    W[Escrita hipotética W igual a 3] --> A[A]
+    W --> B[B]
+    W --> C[C]
+    R[Leitura hipotética R igual a 3] --> C
+    R --> D[D]
+    R --> E[E]
+    C --> Check[Compara versões e conflitos]
+    Check -->|condições não satisfeitas| Fail[Sem garantia de frescor demonstrada]

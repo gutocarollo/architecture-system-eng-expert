@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant Page as Página de Seguros
+    participant Hook as useAllInsuranceData
+    participant Client as DataManager e ApiClient
+    participant Route as get_kpi_metrics
+    participant Cache as cache_manager
+    participant Service as InsuranceService
+    participant Repo as InsuranceRepository
+    participant DB as PostgreSQL
+    Page->>Hook: solicita dados do período
+    Hook->>Client: getAllInsuranceData
+    Client->>Route: GET kpi-metrics
+    Route->>Cache: get(cache_key)
+    alt Resposta encontrada
+        Cache-->>Route: resultado armazenado
+        Route-->>Client: resultado
+    else Resposta ausente
+        Route->>Service: get_kpi_metrics
+        Service->>Repo: get_kpi_metrics
+        Repo->>DB: executa consulta agregada
+        alt Consulta concluída
+            DB-->>Repo: resultado
+            Repo-->>Service: indicadores
+            Service-->>Route: indicadores
+            Route->>Cache: set com TTL de 300 segundos
+            Route-->>Client: resultado
+        else Consulta falha
+            DB-->>Repo: erro
+            Repo-->>Route: exceção propagada
+            Route-->>Client: erro HTTP
+        end
+    end

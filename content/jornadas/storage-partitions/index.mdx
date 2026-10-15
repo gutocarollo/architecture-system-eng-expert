@@ -1,0 +1,36 @@
+---
+title: "A posição cresce e a consulta precisa encontrar seus dados"
+description: "Você aprenderá a conservar o grão monetário e distinguir localização de dados, índice e remapeamento."
+diataxis: explanation
+---
+
+# A posição cresce e a consulta precisa encontrar seus dados
+
+A corretora hipotética cresce e divide as posições por chave. Ana procura a posição 7. Uma regra de roteamento permite buscar uma das três partições, enquanto uma junção com registros filhos pode multiplicar os valores financeiros. A prática usa doze posições e duas contas para tornar esses efeitos visíveis.
+
+Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## Escolha o que você precisa agora
+
+| Sua necessidade | Destino deste mesmo caso | O que você obterá |
+| --- | --- | --- |
+| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/storage-partitions/) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/storage-partitions/) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/storage-partitions/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/storage-partitions/) | Você consulta os localizadores e as garantias de cada probe. |
+
+## Antes de começar
+
+Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial apresenta os comandos completos e usa somente dados de aprendizado. Você aprenderá a conservar o grão monetário e distinguir localização de dados, índice e remapeamento.
+
+## O resultado que conecta a jornada
+
+A posição 7 é encontrada em uma partição. A soma no grão correto fica em R$ 300. O plano SQLite muda de SCAN para SEARCH com COVERING INDEX. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+Quando terminar a prática e consultar seus contratos, continue em [A versão nova chega a quem ainda usa a antiga](/jornadas/safe-release/).
+
+## Conceitos deste caso
+
+A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
+
+Este caso reúne 12 conceitos no [mapa de mecanismos e práticas](/jornadas/storage-partitions/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.

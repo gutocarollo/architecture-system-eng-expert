@@ -1,0 +1,19 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/12-deploy-e-releases",
+  "document_sha256": "3f279fbf7555b85c6893d48586c391a073bcce0dec1aaed2e9fb51387fe45722",
+  "context_sha256": "983d2a4d17cf6fa20ebcb3eb81b1fe868e7e35b8395c6df3cc40a6523ac67f07",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l6a",
+    "l6c",
+    "original-catalog",
+    "original-request",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

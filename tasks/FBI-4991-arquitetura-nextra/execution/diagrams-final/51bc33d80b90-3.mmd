@@ -1,0 +1,9 @@
+flowchart LR
+    Command[Comando didático] --> Root[Raiz candidata da intenção D1]
+    subgraph LocalBoundary[Fronteira local de consistência a confirmar]
+        Root --> Intent[Dados da intenção]
+        Root --> Invariant[Invariantes locais]
+    end
+    Root -. contrato de integração .-> External[Opportunity no Salesforce]
+    External -. resultado posterior .-> Recovery[Conciliação ou retomada]
+    Recovery -. novo comando validado .-> Root

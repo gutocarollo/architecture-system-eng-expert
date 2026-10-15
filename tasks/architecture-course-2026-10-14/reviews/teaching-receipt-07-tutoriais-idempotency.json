@@ -1,0 +1,15 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/idempotency",
+  "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+  "context_sha256": "d37fc8431dcb382bb92525759f5f7e981172d85049cadb1bc240ea1c9ef24c93",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "l1c"
+  ]
+}

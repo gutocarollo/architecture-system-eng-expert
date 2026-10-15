@@ -1,0 +1,13 @@
+{
+  "repository": "opendaylight/controller",
+  "default_branch": "master",
+  "sha": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "license": {
+    "key": "epl-1.0",
+    "name": "Eclipse Public License 1.0",
+    "spdx_id": "EPL-1.0",
+    "url": "https://api.github.com/licenses/epl-1.0",
+    "node_id": "MDc6TGljZW5zZTc="
+  },
+  "observed_utc": "2026-10-15T01:42:45.234135+00:00"
+}

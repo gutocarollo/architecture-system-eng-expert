@@ -1,0 +1,124 @@
+{
+  "lock_version": 2,
+  "created_at": "2026-10-14T16:12:31.638358Z",
+  "selection_sha256": "c13be19cdc39121d0182fc7a49c5991b5ccfbe7e90b6d44f62c2bf5eb01e1b59",
+  "skills": [
+    {
+      "id": "diataxis",
+      "role": "documentation-method",
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/SKILL.md",
+      "sha256": "5294ec0862c7a4e76bc79b28bf5c3a3c53523d226dc27d3fd0e0b6114e3e974a",
+      "depends_on": []
+    },
+    {
+      "id": "mapping",
+      "role": "mapper",
+      "path": "/Users/augustocarollo/skills/docs-autoagents/skills/mapping-blast-radius-autoagents/SKILL.md",
+      "sha256": "79a355e088a35ed22a358ad5a121b3be3a880f5fc74d35923d096c3da0c9ca1c",
+      "depends_on": []
+    },
+    {
+      "id": "orchestrator",
+      "role": "orchestrator",
+      "path": "/Users/augustocarollo/skills/docs-autoagents/skills/orchestrating-docs-autoagents/SKILL.md",
+      "sha256": "d374bea29aebea4b2e854acce777e4463f57e86e85acb151e17bef8de7ef5066",
+      "depends_on": [
+        "mapping"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/references/complex-hierarchies.md",
+      "sha256": "6f941fb3aaa547050455b7e09fb81942758bea2ae937aba8785049b23e3ae5f1"
+    },
+    {
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/references/explanation.md",
+      "sha256": "1202d70c703c2078f23a9b6685e7ebad6b1fcc3da8b2a0555b1e9a9073249dbf"
+    },
+    {
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/references/how-to-guides.md",
+      "sha256": "17b480ce91c2d9e1c145dcab33ddcfd4498c9846bcdf1123f1aa30d57a95d71e"
+    },
+    {
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/references/reference.md",
+      "sha256": "e7d8663abaf49f08d2050aec0b1c922048e123f614a3a81d33e1535a6fdc3681"
+    },
+    {
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/references/tutorials.md",
+      "sha256": "9167a40a26c808f7964b5879c5deb52a8b705b8b98662a875f93be55be1c96f8"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/CHANGELOG.md",
+      "sha256": "d33dac307c08714c5b0786ed04e5b842313c1f1b5dfd60f9d215df5ef7d22dc1"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/PROVENANCE.md",
+      "sha256": "fac136036af6c0d649898606bf2bd80264c832320014f3a62dbd6a42b915c199"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/README.md",
+      "sha256": "37745025bf0dc9d78a9969cf83aa3e22dc09f5a4aa39ccaab66503cfcee95dc1"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/package-lock.json",
+      "sha256": "dc8b2cd3cb9991776ec92c15fc9d05381005834dfa155c3a828b36515dc0deb1"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/package.json",
+      "sha256": "8a45c70461075f87add66b542000c5c8a5907a81775fb9fd5d7796be76990324"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/references/council-and-authoring.md",
+      "sha256": "5f109739af1019b166747d0cc94ce1856bd410abe18c98ec8404226e011ae449"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/references/mapping-contract.md",
+      "sha256": "c256d973cd334a160b0b3d71385abd39d9012f0e0585dbb468175ba2914eb7e6"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/references/mermaid-and-adrs.md",
+      "sha256": "cec211b9d615755ba5de5e343265cee4fa7c57ce495b936349b95ae8dfc792e5"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/references/profile-and-context.md",
+      "sha256": "fc343888681d6fe6ca141df6de38e16e5a4954b696d8f60e3961e23a9f383196"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/requirements.txt",
+      "sha256": "37caf5bff910fbd7dda44433b92df25fbfd989aea829e9bc4ce37e70df1f1782"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/schemas/council-receipt.schema.json",
+      "sha256": "10cce1ba61ba0a172e261d06a4e6b0e7378f3822593286c454dfa3922503c5a6"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/schemas/domain-preparation-receipt.schema.json",
+      "sha256": "9bcd2d9a6c2e29b925c034cc9dd2294545c77ea884e1108b0bd58d3bdf72c237"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/schemas/lock.schema.json",
+      "sha256": "41c348a57ef0b5070c4b7148cd9600ac546baa2624c3c241055bb557ac019d45"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/schemas/packet.schema.json",
+      "sha256": "a4cd13ffc6dbd636f25e2fd26573db087fa5c145f33d7ef996a551e68e184f6f"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/schemas/profile.schema.json",
+      "sha256": "2b96f4708e65252d6b46eb2524b26d66f047f9da35825d115887c63064702e27"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/scripts/docs_workflow.py",
+      "sha256": "b0860c02e13781fa505be1a18d31ba7e311bb6dc003e907af842c12d4bc76e43"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/scripts/release_check.py",
+      "sha256": "57e4d93fd791f6fc5fc8751c1bff5b7276806f2c57082eaebcdac87d491751b9"
+    },
+    {
+      "path": "/Users/augustocarollo/skills/docs-autoagents/scripts/verify_mermaid.mjs",
+      "sha256": "0a0d6f717272802582b4f26579f72455758a82bf6d9d79362fa2d43fa9f9a1f2"
+    }
+  ]
+}

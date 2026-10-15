@@ -1,0 +1,48 @@
+---
+title: "Verifique a proteção: a regra se espalha pelo produto"
+description: "Você aprenderá a localizar a tradução do provedor, a regra da ordem e a parte substituível do comportamento."
+diataxis: how-to
+---
+
+# Verifique a proteção: a regra se espalha pelo produto
+
+Continue o mesmo caso: [volte ao caso](/jornadas/order-boundaries/); [entenda o mecanismo](/explicacoes/casos/order-boundaries/); [execute a experiência](/tutoriais/casos/order-boundaries/); [consulte contratos e fontes](/referencia/casos/order-boundaries/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: Uma resposta AUTHORISED, 10.000 centavos, uma ordem de R$ 1.000 e uma entrada negativa. Registre a versão anterior, a versão proposta e o localizador `order_boundaries / OrderFactory / EventBus / mechanisms`.
+
+## 2. Confira quem executa a decisão
+
+Um adaptador traduz o status e os centavos. A operação recebe a estratégia de taxa. A validação acontece antes da escrita. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/financial.py order-boundaries
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+A ordem passa a ser reconhecida, R$ 100,00 vêm de 10.000 centavos, as políticas retornam taxas diferentes e a ordem negativa não gera escrita. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `labs/architecture/financial.py::order_boundaries` contém o modelo executável.
+- `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/order-boundaries.json` registra a busca delimitada e seus limites.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/order-boundaries/); [entenda o mecanismo](/explicacoes/casos/order-boundaries/); [execute a experiência](/tutoriais/casos/order-boundaries/); [consulte contratos e fontes](/referencia/casos/order-boundaries/).
+
+O [mapa de conceitos deste caso](/jornadas/order-boundaries/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

@@ -1,0 +1,371 @@
+---
+title: "Curadoria: Arquiteturas de aplicação"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Arquiteturas de aplicação."
+diataxis: reference
+---
+
+# Curadoria: Arquiteturas de aplicação
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Actor Model
+
+O identificador canônico é `actor-model`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Uma fila clássica RabbitMQ usa um processo gen_server2 que recebe mensagens e devolve o próximo estado em callbacks. Esse processo possui a evolução do estado daquela fila, sem compartilhar diretamente a estrutura mutável com os remetentes.
+
+A base de estudo é [erlang/otp / gen_server.erl @ b4b337c3](https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/lib/stdlib/src/gen_server.erl); licença [Apache-2.0](https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/LICENSE.txt). A aplicação ou candidato de aplicação é [rabbitmq/rabbitmq-server / rabbit_amqqueue_process.erl @ 0d529086](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_amqqueue_process.erl); licença [MPL-2.0](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `gen_server2`](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_amqqueue_process.erl#L143-L149). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A propriedade está limitada ao estado da fila nesse processo. Outras filas têm seus próprios processos e o mecanismo não cria uma transação global entre filas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#actor-model). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Blackboard Architecture
+
+O identificador canônico é `blackboard-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Navigation2 monta uma árvore com um Blackboard compartilhado: o nó de planejamento escreve o path, o nó de navegação lê esse path e a árvore controla a ordem e os caminhos de recuperação.
+
+A base de estudo é [BehaviorTree/BehaviorTree.CPP / blackboard.h @ 03ec870a](https://github.com/BehaviorTree/BehaviorTree.CPP/blob/03ec870a07b384f0766bbfe81f77c64a9f994a2b/include/behaviortree_cpp/blackboard.h); licença [MIT](https://github.com/BehaviorTree/BehaviorTree.CPP/blob/03ec870a07b384f0766bbfe81f77c64a9f994a2b/LICENSE). A aplicação ou candidato de aplicação é [ros-navigation/navigation2 / behavior_tree_engine.cpp @ b58a7573](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/src/behavior_tree_engine.cpp); licença [Apache-2.0](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/LICENSE); [ros-navigation/navigation2 / compute_path_to_pose_action.cpp @ b58a7573](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/plugins/action/compute_path_to_pose_action.cpp); licença [Apache-2.0](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/LICENSE); [ros-navigation/navigation2 / follow_path_action.cpp @ b58a7573](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/plugins/action/follow_path_action.cpp); licença [Apache-2.0](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/LICENSE); [ros-navigation/navigation2 / navigate_to_pose_w_replanning_and_recovery.xml @ b58a7573](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml); licença [Apache-2.0](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `blackboard`](https://github.com/ros-navigation/navigation2/blob/b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d/nav2_behavior_tree/src/behavior_tree_engine.cpp#L109-L115). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Este é um Blackboard controlado por árvore de comportamento em robótica. O controle é explícito na árvore, não um escalonador oportunista de hipóteses; não se infere uma arquitetura financeira da XP nem uma política idêntica ao NCATS.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#blackboard-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cell-Based Architecture
+
+O identificador canônico é `cell-based-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Nova Cells v2 mantém banco e transporte de mensagens próprios por célula. O mapa da instância identifica a célula, e target_cell escolhe o contexto de banco e RPC correspondente antes da operação. O plano de API conserva o mapa para encaminhar a população de instâncias ao seu destino.
+
+A base de estudo é [openstack/oslo.db / enginefacade.py @ a91be4f9](https://github.com/openstack/oslo.db/blob/a91be4f9f0fa5eae4626a3a83e5f116b7107eb12/oslo_db/sqlalchemy/enginefacade.py); licença [Apache-2.0](https://github.com/openstack/oslo.db/blob/a91be4f9f0fa5eae4626a3a83e5f116b7107eb12/LICENSE). A aplicação ou candidato de aplicação é [openstack/nova / cells.rst @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/admin/cells.rst); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / context.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/context.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / cell_mapping.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/objects/cell_mapping.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / instance_mapping.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/objects/instance_mapping.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `database_connection`](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/admin/cells.rst#L393-L399). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O limite de isolamento é a célula de computação e sua população de instâncias. API, autenticação e metadados globais continuam sendo componentes compartilhados; não se afirma isolamento absoluto de toda falha ou uma implantação multi-célula na Faz.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#cell-based-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Clean Architecture
+
+O identificador canônico é `clean-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O ADR aceito thndr-mcp conserva o domínio sem dependências externas, as interfaces de repositório no domínio, os casos de uso na aplicação e os adaptadores externos na composição. A consulta de posição recebe os colaboradores por contrato, enquanto o container escolhe a implementação concreta. As regras de importação estão codificadas no teste de arquitetura.
+
+A base de estudo é [sverweij/dependency-cruiser / rules-reference.md @ c580daf6](https://github.com/sverweij/dependency-cruiser/blob/c580daf6477aa5619bacad9c9091c9b7cc81882d/doc/rules-reference.md); licença [MIT](https://github.com/sverweij/dependency-cruiser/blob/c580daf6477aa5619bacad9c9091c9b7cc81882d/LICENSE). A aplicação ou candidato de aplicação é [armaaar/thndr-mcp / 0015-five-layer-clean-architecture-cqs-and-context-map.md @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / README.md @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / get-position.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / repository.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/repository.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / portfolio-repository.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/portfolio-repository.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / container.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/container.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / architecture.test.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `domain`](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L47-L53). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O ADR chama o desenho de Clean Architecture. A comparação com Onion é uma interpretação da mesma direção de dependências e dos contratos no núcleo; não se atribui essa denominação histórica ao autor. A suíte de arquitetura foi lida, não executada nesta curadoria. Dependency Cruiser é uma alternativa de ferramenta para verificar essas regras, não uma dependência afirmada desse aplicativo.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#clean-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Component-Based Architecture
+
+O identificador canônico é `component-based-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset compõe um componente React com propriedades e estado para seleção.
+
+A base de estudo é [facebook/react / ReactClient.js @ 99c106c4](https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/packages/react/src/ReactClient.js); licença [MIT](https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / Select.tsx @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset-frontend/packages/superset-ui-core/src/components/Select/Select.tsx); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `React`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset-frontend/packages/superset-ui-core/src/components/Select/Select.tsx#L28-L34). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#component-based-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Event-Driven Architecture
+
+O identificador canônico é `event-driven-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Fineract recebe eventos do domínio e separa notificações internas da persistência para integração externa.
+
+A base de estudo é [ThreeDotsLabs/watermill / event_bus.go @ 080d4b4e](https://github.com/ThreeDotsLabs/watermill/blob/080d4b4e7fe6105ab880d1becd5cf91af0235d8c/components/cqrs/event_bus.go); licença [MIT](https://github.com/ThreeDotsLabs/watermill/blob/080d4b4e7fe6105ab880d1becd5cf91af0235d8c/LICENSE). A aplicação ou candidato de aplicação é [apache/fineract / BusinessEventNotifierServiceImpl.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `BusinessEvent`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L54-L60). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#event-driven-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="hexagonal-ports-adapters" />
+
+## Hexagonal / Ports & Adapters
+
+O identificador canônico é `hexagonal-ports-adapters`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Immich declara a separação entre repositórios e serviços como uso de Hexagonal e mostra essa separação no código.
+
+A base de estudo é [nestjs/nest / nest-application.ts @ bb3d5720](https://github.com/nestjs/nest/blob/bb3d572080ba5c3a34b65fcc39ca598c324cb32f/packages/core/nest-application.ts); licença [MIT](https://github.com/nestjs/nest/blob/bb3d572080ba5c3a34b65fcc39ca598c324cb32f/LICENSE). A aplicação ou candidato de aplicação é [immich-app/immich / architecture.mdx @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/docs/docs/developer/architecture.mdx); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE); [immich-app/immich / user.repository.ts @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/server/src/repositories/user.repository.ts); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE); [immich-app/immich / user.service.ts @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/server/src/services/user.service.ts); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Hexagonal`](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/docs/docs/developer/architecture.mdx#L58-L64). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O documento declara adoção parcial de Hexagonal. Essa evidência não fecha Clean Architecture, Onion nem uma ACL semântica; esses conceitos exigem limites e tradução adicionais.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#hexagonal-ports-adapters). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="layered-n-tier" />
+
+## Layered / N-Tier
+
+O identificador canônico é `layered-n-tier`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Fineract recebe operações na API e encaminha a tarefa aos serviços e ao domínio; a base Spring mostra despacho de requisições MVC.
+
+A base de estudo é [spring-projects/spring-framework / DispatcherServlet.java @ 4dea36c5](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java); licença [Apache-2.0](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/fineract / LoansApiResource.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Loan`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java#L269-L275). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recurso Fineract usa JAX-RS. A referência Spring MVC é uma comparação de fronteiras; ela não altera o framework usado pelo produto.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#layered-n-tier). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="microkernel-plugin-architecture" />
+
+## Microkernel / Plugin Architecture
+
+O identificador canônico é `microkernel-plugin-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Jellyfin descobre e carrega plugins por seu gestor; AssemblyLoadContext fornece a base de carregamento e isolamento.
+
+A base de estudo é [dotnet/runtime / AssemblyLoadContext.cs @ 34ac16e5](https://github.com/dotnet/runtime/blob/34ac16e58c381af6f6d4991ff5e837e9a9737c86/src/libraries/System.Private.CoreLib/src/System/Runtime/Loader/AssemblyLoadContext.cs); licença [MIT](https://github.com/dotnet/runtime/blob/34ac16e58c381af6f6d4991ff5e837e9a9737c86/LICENSE.TXT). A aplicação ou candidato de aplicação é [jellyfin/jellyfin / PluginManager.cs @ aec42b34](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Emby.Server.Implementations/Plugins/PluginManager.cs); licença [GPL-2.0](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Plugin`](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Emby.Server.Implementations/Plugins/PluginManager.cs#L519-L525). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#microkernel-plugin-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Microservices
+
+O identificador canônico é `microservices`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Immich declara a separação entre repositórios e serviços como uso de Hexagonal e mostra essa separação no código.
+
+A base de estudo é [nestjs/nest / nest-application.ts @ bb3d5720](https://github.com/nestjs/nest/blob/bb3d572080ba5c3a34b65fcc39ca598c324cb32f/packages/core/nest-application.ts); licença [MIT](https://github.com/nestjs/nest/blob/bb3d572080ba5c3a34b65fcc39ca598c324cb32f/LICENSE). A aplicação ou candidato de aplicação é [immich-app/immich / architecture.mdx @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/docs/docs/developer/architecture.mdx); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE); [immich-app/immich / user.repository.ts @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/server/src/repositories/user.repository.ts); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE); [immich-app/immich / user.service.ts @ 2a8f8324](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/server/src/services/user.service.ts); licença [AGPL-3.0](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Hexagonal`](https://github.com/immich-app/immich/blob/2a8f8324e43487f29fd475832107f279da1c39c3/docs/docs/developer/architecture.mdx#L58-L64). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O documento declara adoção parcial de Hexagonal. Essa evidência não fecha Clean Architecture, Onion nem uma ACL semântica; esses conceitos exigem limites e tradução adicionais.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#microservices). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Modular Monolith
+
+O identificador canônico é `modular-monolith`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O backend Medusa carrega módulos de negócio no mesmo aplicativo. Order e Inventory registram serviços próprios; o SDK monta cada módulo em um container e entrega os serviços públicos ao aplicativo. O loader central inicializa os módulos antes de carregar workflows e endpoints. O serviço de pedidos mantém seus modelos e suas operações dentro do módulo de domínio.
+
+A base de estudo é [medusajs/medusa / load-internal.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/modules-sdk/src/loaders/utils/load-internal.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / index.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/medusa/src/loaders/index.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / index.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/index.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / index.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/inventory/src/index.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / load-internal.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/modules-sdk/src/loaders/utils/load-internal.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / medusa-app.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/modules-sdk/src/medusa-app.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / order-module-service.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/services/order-module-service.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / page.mdx @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/www/apps/book/app/learn/fundamentals/modules/isolation/page.mdx); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / page.mdx @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/www/apps/book/app/learn/fundamentals/modules/container/page.mdx); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `MedusaAppLoader`](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/medusa/src/loaders/index.ts#L207-L213). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte é o modo integrado em um backend, com módulos e contratos próprios. Ele não afirma independência total de deployment, ausência de qualquer dependência compartilhada ou isolamento de processo entre módulos. Workflows podem compor vários serviços, e links explícitos preservam relações entre domínios. GitLab permanece como referência complementar de modularização em curso, sem confundir uma proposta com encapsulamento já concluído.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#modular-monolith). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## MVC
+
+O identificador canônico é `mvc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Fineract recebe operações na API e encaminha a tarefa aos serviços e ao domínio; a base Spring mostra despacho de requisições MVC.
+
+A base de estudo é [spring-projects/spring-framework / DispatcherServlet.java @ 4dea36c5](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java); licença [Apache-2.0](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/fineract / LoansApiResource.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Loan`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/api/LoansApiResource.java#L269-L275). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recurso Fineract usa JAX-RS. A referência Spring MVC é uma comparação de fronteiras; ela não altera o framework usado pelo produto.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#mvc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## MVP
+
+O identificador canônico é `mvp`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O presenter de anexos Thunderbird recebe ações, conserva seu modelo e atualiza a interface AttachmentMvpView.
+
+A base de estudo é [androidx/androidx / Presenter.java @ ffadc46c](https://github.com/androidx/androidx/blob/ffadc46c08a3423475e126935917bfa2cf91b9ba/leanback/leanback/src/main/java/androidx/leanback/widget/Presenter.java); licença [Apache-2.0](https://github.com/androidx/androidx/blob/ffadc46c08a3423475e126935917bfa2cf91b9ba/LICENSE.txt). A aplicação ou candidato de aplicação é [thunderbird/thunderbird-android / AttachmentPresenter.java @ 304074fa](https://github.com/thunderbird/thunderbird-android/blob/304074faf48c64bf8dfef35fd58554dc500f044a/legacy/ui/legacy/src/main/java/com/fsck/k9/activity/compose/AttachmentPresenter.java); licença [Apache-2.0](https://github.com/thunderbird/thunderbird-android/blob/304074faf48c64bf8dfef35fd58554dc500f044a/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `AttachmentMvpView`](https://github.com/thunderbird/thunderbird-android/blob/304074faf48c64bf8dfef35fd58554dc500f044a/legacy/ui/legacy/src/main/java/com/fsck/k9/activity/compose/AttachmentPresenter.java#L87-L93). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A fronteira comprovada é o componente de anexos. O material não classifica toda a aplicação Thunderbird como MVP.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#mvp). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## MVVM
+
+O identificador canônico é `mvvm`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Tusky expõe estado e ações da composição pelo ComposeViewModel para a apresentação Android.
+
+A base de estudo é [androidx/androidx / ViewModel.kt @ ffadc46c](https://github.com/androidx/androidx/blob/ffadc46c08a3423475e126935917bfa2cf91b9ba/lifecycle/lifecycle-viewmodel/src/commonMain/kotlin/androidx/lifecycle/ViewModel.kt); licença [Apache-2.0](https://github.com/androidx/androidx/blob/ffadc46c08a3423475e126935917bfa2cf91b9ba/LICENSE.txt). A aplicação ou candidato de aplicação é [Tuskyapp/Tusky / ComposeViewModel.kt @ 43ae0bb4](https://github.com/Tuskyapp/Tusky/blob/43ae0bb4556392393a3d759ce42a93f3a003e83a/app/src/main/java/com/keylesspalace/tusky/components/compose/ComposeViewModel.kt); licença [GPL-3.0](https://github.com/Tuskyapp/Tusky/blob/43ae0bb4556392393a3d759ce42a93f3a003e83a/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/frontend-ui-engineering/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ViewModel`](https://github.com/Tuskyapp/Tusky/blob/43ae0bb4556392393a3d759ce42a93f3a003e83a/app/src/main/java/com/keylesspalace/tusky/components/compose/ComposeViewModel.kt#L86-L92). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A prova é do componente de composição. O padrão de todo o aplicativo exige analisar os demais caminhos de interface.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#mvvm). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Onion Architecture
+
+O identificador canônico é `onion-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O ADR aceito thndr-mcp conserva o domínio sem dependências externas, as interfaces de repositório no domínio, os casos de uso na aplicação e os adaptadores externos na composição. A consulta de posição recebe os colaboradores por contrato, enquanto o container escolhe a implementação concreta. As regras de importação estão codificadas no teste de arquitetura.
+
+A base de estudo é [sverweij/dependency-cruiser / rules-reference.md @ c580daf6](https://github.com/sverweij/dependency-cruiser/blob/c580daf6477aa5619bacad9c9091c9b7cc81882d/doc/rules-reference.md); licença [MIT](https://github.com/sverweij/dependency-cruiser/blob/c580daf6477aa5619bacad9c9091c9b7cc81882d/LICENSE). A aplicação ou candidato de aplicação é [armaaar/thndr-mcp / 0015-five-layer-clean-architecture-cqs-and-context-map.md @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / README.md @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/domains/README.md); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / get-position.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/portfolio/queries/get-position.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / repository.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/repository.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / portfolio-repository.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/portfolio-repository.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / container.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/container.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE); [armaaar/thndr-mcp / architecture.test.ts @ e641dc29](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/__tests__/architecture.test.ts); licença [Apache-2.0](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `domain`](https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0015-five-layer-clean-architecture-cqs-and-context-map.md#L47-L53). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O ADR chama o desenho de Clean Architecture. A comparação com Onion é uma interpretação da mesma direção de dependências e dos contratos no núcleo; não se atribui essa denominação histórica ao autor. A suíte de arquitetura foi lida, não executada nesta curadoria. Dependency Cruiser é uma alternativa de ferramenta para verificar essas regras, não uma dependência afirmada desse aplicativo.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#onion-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## PAC
+
+O identificador canônico é `pac`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O WengoPhone é um cliente de telefonia e mensagens. O controle raiz cria o controle de perfis; este cria o controle de um perfil; o perfil contém o controle da lista de contatos. Cada controle liga seu modelo à sua apresentação. Ao criar um contato, o modelo emite um evento, CContactList recebe o evento e encaminha a atualização à apresentação Qt. Quando a tela pede uma alteração, ela chama o controle, que altera o modelo.
+
+A base de estudo é [quellabs/wakapac / wakapac.js @ 2f074678](https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/wakapac.js); licença [MIT](https://github.com/quellabs/wakapac/blob/2f0746785c42b22f6fcd5d7f30ddc125ee281fe9/LICENSE); [tkrotoff/WengoPhone / Control.h @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/Control.h); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING). A aplicação ou candidato de aplicação é [tkrotoff/WengoPhone / CWengoPhone.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/CWengoPhone.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING); [tkrotoff/WengoPhone / CUserProfileHandler.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfileHandler.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING); [tkrotoff/WengoPhone / CUserProfile.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/profile/CUserProfile.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING); [tkrotoff/WengoPhone / CContactList.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/contactlist/CContactList.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING); [tkrotoff/WengoPhone / QtContactList.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/presentation/qt/contactlist/QtContactList.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING); [tkrotoff/WengoPhone / ContactList.cpp @ f9d7cb3b](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/model/contactlist/ContactList.cpp); licença [GPL-2.0-or-later](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/COPYING).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `createPresentation`](https://github.com/tkrotoff/WengoPhone/blob/f9d7cb3b66331a3693e0fc4f0cd5afc7ecdf4a39/wengophone/src/control/CWengoPhone.cpp#L51-L57). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+É um caso histórico de produto OSS, preservado no repositório do autor Tanguy Krotoff, e não uma recomendação de adoção atual. O WengoPhone usa sua própria infraestrutura PAC e não depende do WakaPAC. Existe um atalho de composição visual: QtContactList.cpp L137-138 obtém a apresentação raiz e registra a lista; portanto não se afirma isolamento formal de toda comunicação entre apresentações. O caminho de dados e a hierarquia de controles citados estão em código.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#pac). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Peer-to-Peer
+
+O identificador canônico é `peer-to-peer`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Kubo monta o nó libp2p para conectividade e troca de conteúdo entre pares.
+
+A base de estudo é [libp2p/go-libp2p / libp2p.go @ 3c2c9021](https://github.com/libp2p/go-libp2p/blob/3c2c902122cb6fae3897f729a3dbb9d4665ae90d/libp2p.go); licença [MIT](https://github.com/libp2p/go-libp2p/blob/3c2c902122cb6fae3897f729a3dbb9d4665ae90d/LICENSE). A aplicação ou candidato de aplicação é [ipfs/kubo / libp2p.go @ 833e04a2](https://github.com/ipfs/kubo/blob/833e04a240d8c533509ddaaa3c202b39b0bb3024/core/node/libp2p/libp2p.go); licença [MIT for the older contributions; MIT OR Apache-2.0 for the contributions identified by the transition notice.](https://github.com/ipfs/kubo/blob/833e04a240d8c533509ddaaa3c202b39b0bb3024/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `libp2p`](https://github.com/ipfs/kubo/blob/833e04a240d8c533509ddaaa3c202b39b0bb3024/core/node/libp2p/libp2p.go#L35-L41). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#peer-to-peer). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Pipe and Filter
+
+O identificador canônico é `pipe-and-filter`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Camel encadeia processadores. NiFi implementa a etapa que recebe o FlowFile e atualiza atributos antes de transferi-lo.
+
+A base de estudo é [apache/camel / Pipeline.java @ cd2ce899](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/core/camel-core-processor/src/main/java/org/apache/camel/processor/Pipeline.java); licença [Apache-2.0](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/nifi / UpdateAttribute.java @ 9e6c1889](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-update-attribute-bundle/nifi-update-attribute-processor/src/main/java/org/apache/nifi/processors/attributes/UpdateAttribute.java); licença [Apache-2.0](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `onTrigger`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-update-attribute-bundle/nifi-update-attribute-processor/src/main/java/org/apache/nifi/processors/attributes/UpdateAttribute.java#L470-L476). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#pipe-and-filter). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Serverless
+
+O identificador canônico é `serverless`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Appwrite recebe a invocação da função, verifica a implantação e escolhe o runtime. O executor recebe imagem, código, ponto de entrada, limites de CPU, memória e tempo. O worker também dispara funções por evento e agenda. O runtime OpenRuntimes carrega o ponto de entrada e entrega a requisição ao código da função.
+
+A base de estudo é [open-runtimes/open-runtimes / server.js @ da714e70](https://github.com/open-runtimes/open-runtimes/blob/da714e707c181e6e8e4ab5f1a5649d2cde8f4260/runtimes/node/versions/latest/src/server.js); licença [MIT](https://github.com/open-runtimes/open-runtimes/blob/da714e707c181e6e8e4ab5f1a5649d2cde8f4260/LICENSE). A aplicação ou candidato de aplicação é [appwrite/appwrite / Create.php @ 939fa5e8](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php); licença [BSD-3-Clause](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/LICENSE); [appwrite/appwrite / Functions.php @ 939fa5e8](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Appwrite/Platform/Workers/Functions.php); licença [BSD-3-Clause](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/LICENSE); [appwrite/appwrite / Executor.php @ 939fa5e8](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Executor/Executor.php); licença [BSD-3-Clause](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `createExecution`](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php#L437-L443). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Serverless descreve o contrato de execução de funções: o autor entrega o código e a plataforma administra o runtime. O recorte não prova cobrança por invocação, escala a zero, execução sem servidores físicos ou qualquer implantação da Faz. Filas e disparos podem repetir; a função continua responsável pela idempotência de efeitos externos.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#serverless). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## SOA
+
+O identificador canônico é `soa`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O serviço GitLab define uma fronteira pública de operações para Gitaly e encaminha chamadas ao serviço.
+
+A base de estudo é [spring-projects/spring-framework / RestTemplate.java @ 4dea36c5](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/client/RestTemplate.java); licença [Apache-2.0](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / operation_service.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Gitaly`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/gitaly_client/operation_service.rb#L27-L33). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Isso demonstra a fronteira do serviço. Não fecha BFF nem agregação de múltiplas APIs para uma apresentação específica.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#soa). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Space-Based Architecture
+
+O identificador canônico é `space-based-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O servidor Geode cria o cache, abre o serviço de rede e pode distribuir e rebalancear buckets. As regiões PARTITION_REDUNDANT mantêm partições de estado e uma cópia adicional em memória entre os membros. No serviço de consultas, DataQueryEngine envia o trabalho aos membros do cluster. QueryDataFunction executa a consulta nos buckets primários locais ou usa a execução por região. O núcleo PartitionedRegion agrupa chaves por bucket e por membro e encaminha a função aos nós que possuem esses dados. Cada servidor reúne dados e processamento; o aumento do número de membros permite distribuir partições e trabalho.
+
+A base de estudo é [apache/geode / RegionShortcut.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/RegionShortcut.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / DataPolicy.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/cache/DataPolicy.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / PartitionedRegionFunctionExecutor.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/execute/PartitionedRegionFunctionExecutor.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE). A aplicação ou candidato de aplicação é [apache/geode / ServerLauncher.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / DefaultServerLauncherCacheProvider.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / DistributedSystemBridge.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DistributedSystemBridge.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / DataQueryEngine.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/DataQueryEngine.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / QueryDataFunction.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/management/internal/beans/QueryDataFunction.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE); [apache/geode / PartitionedRegion.java @ 7190f094](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/internal/cache/PartitionedRegion.java); licença [Apache-2.0](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ServerLauncher`](https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/ServerLauncher.java#L346-L352). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte é uma aplicação de infraestrutura: servidor de dados e consultas administrativas. A classificação descreve esse caminho e não todas as configurações possíveis do Geode. Regiões sem persistência perdem estado se todas as cópias em memória forem perdidas; persistência e redundância são decisões distintas. A leitura de código demonstra mecanismos de distribuição, não uma medição de capacidade, latência ou desempenho na Faz Capital.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#space-based-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Vertical Slice Architecture
+
+O identificador canônico é `vertical-slice-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A classe Create da execução de funções Appwrite reúne o contrato HTTP, as validações dos parâmetros, a checagem da função e da implantação, a invocação e a resposta desse caso de uso. O arquivo vive na pasta Functions/Http/Executions e implementa uma operação completa. A referência ASP.NET oferece outra base para registrar handlers por operação.
+
+A base de estudo é [dotnet/aspnetcore / EndpointRouteBuilderExtensions.cs @ 8192456d](https://github.com/dotnet/aspnetcore/blob/8192456de81ed6bbc6e484404069f59907bd0d6f/src/Http/Routing/src/Builder/EndpointRouteBuilderExtensions.cs); licença [MIT](https://github.com/dotnet/aspnetcore/blob/8192456de81ed6bbc6e484404069f59907bd0d6f/LICENSE.txt). A aplicação ou candidato de aplicação é [appwrite/appwrite / Create.php @ 939fa5e8](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php); licença [BSD-3-Clause](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/architecture-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `createExecution`](https://github.com/appwrite/appwrite/blob/939fa5e8ccc82fede27a4632bf5c60501eb5109e/src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php#L437-L443). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Vertical Slice é aqui uma leitura da organização de um caso de uso concreto. O arquivo usa serviços e contratos compartilhados; não se afirma que todas as operações Appwrite tenham independência física ou que o produto use ASP.NET. A prova não é o nome da pasta sozinho, mas a presença da entrada, decisão, efeito e saída do caso no mesmo módulo.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#vertical-slice-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

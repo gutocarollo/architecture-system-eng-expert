@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/shared-kernel/money.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/money.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.559434+00:00",
+  "sha256": "d69b6a006ed1ac24368256b25fe6b43c24fc2e08e968739229f9ac62f42ecdc3",
+  "line_count": 66,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--money.ts"
+}

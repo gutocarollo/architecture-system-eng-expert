@@ -1,0 +1,21 @@
+[
+  {
+    "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/b2d0e2b9ab419f00583f994129f7acc65e369e87927326b673e032084d7284b5.txt",
+    "classification": "PUBLIC_UPSTREAM_DOCUMENTATION_AUTHORIZATION_EXAMPLES",
+    "original_sha256": "99d3aba8e30832da8b1e8fc57f6049ecba6db11640d569003e1859d208bb7f15",
+    "sanitized_sha256": "30ff6f170d820ef584804fe426a1454c0231b7aa5729bbe35721e0936b5f7e86",
+    "redacted_lines": [],
+    "source_urls": [
+      "https://github.com/apache/apisix/blob/master/docs/en/latest/plugins/limit-count.md"
+    ],
+    "observed_utc": "2026-10-15T03:11:35.450849Z"
+  },
+  {
+    "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/github-trending-monthly-2026-10-15.html",
+    "classification": "PUBLIC_UNAUTHENTICATED_GITHUB_PAGE_HIDDEN_SESSION_DATA",
+    "original_sha256": "bad360f66e202b98d96c9ad005eca04880619f9e496603539876869cf63dab1a",
+    "sanitized_sha256": "b1aafab825dc867788f13508216e561ca756bd6f5338e4378859ff53ecc92939",
+    "retained_repository_cards": 22,
+    "observed_utc": "2026-10-15T03:11:35.464133Z"
+  }
+]

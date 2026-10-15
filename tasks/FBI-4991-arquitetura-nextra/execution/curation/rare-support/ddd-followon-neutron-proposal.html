@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Provide Port Binding Information for Nova Live Migration &#8212; neutron-specs 0.0.1.dev863 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fe63c2af" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=29da98fa" />
+    <script src="../../../_static/documentation_options.js?v=160c3ffb"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Strict minimum bandwidth support (egress)" href="strict-minimum-bandwidth-support.html" />
+    <link rel="prev" title="Upgrade controllers with no API downtime" href="no-downtime-server-upgrade.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Bootstrap CSS -->
+<link href="../../../_static/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Fonts -->
+<link href="../../../_static/css/font-awesome.min.css" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="../../../_static/css/combined.css" rel="stylesheet">
+
+<!-- Search CSS -->
+<link href="../../../_static/css/search.css" rel="stylesheet">
+
+<!-- Pygments CSS -->
+<link href="../../../_static/pygments.css" rel="stylesheet">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DD299CMF7V">
+</script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);} gtag('js', new Date());
+gtag('config', 'G-DD299CMF7V');
+</script>
+
+
+  </head><body>
+
+<!-- SOURCE_FILE: https://opendev.org/openstack/neutron-specs/src/doc/source/specs/backlog/pike/portbinding_information_for_nova.rst -->
+
+<script>
+    (function (window, document) {
+        var loader = function () {
+            var script = document.createElement("script"), tag = document.getElementsByTagName("script")[0];
+            script.src = "https://search.openstack.org/widget/embed.min.js?t="+Date.now();
+            tag.parentNode.insertBefore(script, tag);
+        };
+        window.addEventListener ? window.addEventListener("load", loader, false) : window.attachEvent("onload", loader);
+    })(window, document);
+</script>
+
+<nav class="navbar navbar-default navbar-expand-md" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="brand-wrapper">
+        <a class="navbar-brand" href="https://www.openstack.org/">
+        <img src="../../../_static/images/logo-full.svg" width="135px" height="35px"/>
+        </a>
+      </div>
+      <button class="navbar-toggler" data-bs-target="#navbar-main-1" aria-controls="navbar-main-1" data-bs-toggle="collapse" type="button">
+        <span class="navbar-toggler-icon"></span>
+        <span class="sr-only">Toggle navigation</span>
+      </button>
+      <div class="search-icon show"><i class="fa fa-search"></i> Global Search</div>
+      <div class="collapse navbar-collapse" id="navbar-main-1">
+<div class="search-container tiny">
+    <div class="openstack-search-bar" data-baseUrl="search.openstack.org" data-context="docs-openstack"></div>
+</div>
+      <ul class="nav navbar-nav navbar-main ms-auto mb-2 mb-lg-0 justify-content-end show" role="navigation">
+<li class="search-container-mobile">
+    <div class="openstack-search-bar" data-baseUrl="search.openstack.org" data-context="docs-openstack"></div>
+</li>
+        <li class="nav-item dropdown"> <!--Software -->
+          <a href="https://www.openstack.org/software/" class="nav-link dropdown-toggle" aria-expanded="false">Software</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/">Overview</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/openstack-components">OpenStack Components</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/sdks">SDKs</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/project-navigator/deployment-tools">Deployment Tools</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/assets/software/projectmap/openstack-map.pdf" target="_blank">OpenStack Map</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/software/sample-configs/">Sample Configs</a></li>
+          </ul>
+        </li>
+        <li class="nav-item drop-down"> <!-- Use Cases -->
+          <a href="https://www.openstack.org/use-cases/" class="nav-link dropdown-toggle" role="button">Use Cases</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/">Users in Production</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/bare-metal/">Ironic Bare Metal</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/edge-computing/">Edge Computing</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/telecoms-and-nfv/">Telecom &amp; NFV</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/science/">Science and HPC</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/containers/">Containers</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/use-cases/enterprise/">Enterprise</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/surveys/landing">User Survey</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"> <!-- Events -->
+          <a href="https://openinfra.dev/summit" class="nav-link dropdown-toggle" role="button" id="dropdownMenuEvents">Events</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://openinfra.dev/summit">OpenInfra Summit</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/ptg/">Project Teams Gathering</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/opendev-2020/">OpenDev</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/community-events/">Community Events</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/events/openstackdays">OpenStack &amp; OpenInfra Days</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/videos/">Summit Videos</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"><!-- Community -->
+          <a href="https://www.openstack.org/community/" class="nav-link dropdown-toggle" role="button">Community</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/">Welcome! Start Here</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/tech-committee">OpenStack Technical Committee</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/speakers/">Speakers Bureau</a></li>
+            <li><a class="dropdown-item" href="https://wiki.openstack.org">OpenStack Wiki</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/coa/">Get Certified (COA)</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/jobs/">Jobs</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketing/">Marketing Resources</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/news/">Community News</a></li>
+            <li><a class="dropdown-item" href="https://superuser.openstack.org">Superuser Magazine</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/community/supporting-organizations/">OpenInfra Foundation Supporting Organizations</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev">OpenInfra Foundation</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown"><!-- Marketplace -->
+          <a href="https://www.openstack.org/marketplace/" class="nav-link dropdown-toggle" role="button">Marketplace</a>
+          <ul class="dropdown-menu dropdown-hover">
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/training/">Training</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/distros/">Distros &amp; Appliances</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/public-clouds/">Public Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/hosted-private-clouds/">Hosted Private Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/remotely-managed-private-clouds/">Remotely Managed Private Clouds</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/consulting/">Consulting &amp; Integrators</a></li>
+            <li><a class="dropdown-item" href="https://www.openstack.org/marketplace/drivers/">Drivers</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><!-- Blog -->
+          <a class="nav-link" href="https://www.openstack.org/blog/">Blog</a>
+        </li>
+        <li class="nav-item"><!-- Docs -->
+          <a class="nav-link" href="https://docs.openstack.org/">Docs</a>
+        </li>
+        <li class="nav-item dropdown join-nav-section"> <!-- Join -->
+          <a href="https://openinfra.dev/join/" class="nav-link dropdown-toggle" role="button">Join</a>
+          <ul class="dropdown-menu" style="display: none;">
+            <li><a class="dropdown-item" href="https://openinfra.dev/join/">Sign up for Foundation Membership</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev/join/">Sponsor the Foundation</a></li>
+            <li><a class="dropdown-item" href="https://openinfra.dev">More about the Foundation</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"> <!-- Login -->
+          <a href="https://www.openstack.org/Security/login/?BackURL=/home/" class="sign-in-btn">Log In</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <!-- /.container -->
+</nav>
+
+    <div class="container docs-book-wrapper">
+      <div class="row">
+        <div class="col-lg-9 col-md-8 col-sm-8 col-lg-push-3 col-md-push-4 col-sm-push-4 order-4">
+<div class="row docs-title">
+  <div class="col-lg-8">
+      <h1>Provide Port Binding Information for Nova Live Migration</h1>
+    
+  </div>
+  <div class="docs-actions">
+    
+    <a href="no-downtime-server-upgrade.html"><i class="fa fa-angle-double-left" data-toggle="tooltip" data-placement="top" title="Previous: Upgrade controllers with no API downtime"></i></a>
+    
+    
+    <a href="strict-minimum-bandwidth-support.html"><i class="fa fa-angle-double-right" data-toggle="tooltip" data-placement="top" title="Next: Strict minimum bandwidth support (egress)"></i></a>
+    
+    <a id="logABugLink1" href="" target="_blank" title="Found an error? Report a bug against this page"><i class="fa fa-bug" data-toggle="tooltip" data-placement="top" title="Report a Bug"></i></a>
+    
+  </div>
+</div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="docs-body" role="main">
+
+  <section id="provide-port-binding-information-for-nova-live-migration">
+<h1>Provide Port Binding Information for Nova Live Migration<a class="headerlink" href="#provide-port-binding-information-for-nova-live-migration" title="Link to this heading">¶</a></h1>
+<p><a class="reference external" href="https://bugs.launchpad.net/neutron/+bug/1580880">https://bugs.launchpad.net/neutron/+bug/1580880</a></p>
+<p>Nova Live Migration consists of 3 stages:</p>
+<ul class="simple">
+<li><p>pre_live_migration - executed before migration starts; the migration target
+is already known, but the instance still resides on the source.</p></li>
+<li><p>live_migration_operation - migration itself which consists of 2 substages:</p>
+<ul>
+<li><p>before the VM is running on the migration target compute.</p></li>
+<li><p>after VM is running on the destination compute, but migration is still in
+progress (post copy migration).</p></li>
+</ul>
+</li>
+<li><p>post_live_migration - executed after migration; source VM does not exist
+anymore. Used for finalizing the migration.</p></li>
+</ul>
+<p>Today, port binding occurs on the target compute host during migration,
+considered now in the post_live_migration stage.  This, unfortunately, is
+too late in the process as there are cases where Nova requires this
+information in the pre_live_migration stage.  We simply cannot move the port
+binding to the pre_live_migration stage as the original port binding would be
+deleted, causing issues due to the instance being active still on the original
+host.  Further details are contained in the ‘Alternatives’ section.</p>
+<section id="problem-description">
+<h2>Problem Description<a class="headerlink" href="#problem-description" title="Link to this heading">¶</a></h2>
+<p>For live migration improvements, it is required that Neutron allows port
+binding on the target compute host during the pre_live_migration stage, without
+removing the original port binding on the source compute.</p>
+<p>The proposal is to have a port binding on the source AND target compute hosts
+where only one port binding is active.  After instance migration is complete,
+the target port binding is activated and the source port binding is
+deactivated, but not deleted.  The original port binding on the source compute
+host is kept for a possible move of the instance back to the source, and will
+only be removed during the post_live_migration stage.</p>
+<p>The issues can be divided in 2 categories:</p>
+<p>#1 Keep the source instance running if the port binding on the target fails:</p>
+<ul>
+<li><p>Instance error state when port binding fails:</p>
+<blockquote>
+<div><p>Today, the port binding is triggered in the post_live_migration stage,
+after the migration has completed.  If the port binding fails, the
+instance is then stuck in an error state.</p>
+<p>The solution is to move the port binding to the pre_live_migration stage,
+where there is an opportunity to fail the port binding earlier.  This would
+prevent the instance from being stuck in an errored state after the
+migration is complete and fail the migration at a pre_live_migration stage.</p>
+<p>The issue with moving the port binding to the pre_live_migration stage is
+that some drivers will shutdown the port binding on the source compute
+host, even though the instance is still active.  To achieve a cleaner
+migration solution, Neutron needs to be modified to allow a port binding
+on both the source and target compute hosts in an active/inactive state.</p>
+</div></blockquote>
+</li>
+</ul>
+<p>#2 Handling the differences in port binding details between hosts:</p>
+<ul>
+<li><p>Live migration between hosts running different l2 agents:</p>
+<blockquote>
+<div><p>Another case to consider is the chance that the migration occurs between
+two hosts running different l2 agents.  The requirement here is on Nova
+to update the instance definition before the migration is executed. In the
+case of libvirt, Nova would update the domain.xml with the target
+interface definition.  For more information, refer to <a class="reference external" href="https://blueprints.launchpad.net/nova/+spec/migration-use-target-vif">[3]</a> and <a class="reference external" href="https://review.openstack.org/#/c/301090/">[4]</a>.</p>
+<p>A special case to consider is where a migration occurs between agents
+with differing firewall drivers, i.e. from a host running the ovs
+hybrid-fw driver to a host running the new ovs conntrackd firewall driver.</p>
+<p>Such a migration must only be allowed with source and target binding using
+the same VNIC type.</p>
+</div></blockquote>
+</li>
+<li><p>Live migration with MacVTap agent when different physnet mappings are used:</p>
+<blockquote>
+<div><p>MacVTap today has restrictions with live migration in certain situations
+<a class="reference external" href="https://bugs.launchpad.net/neutron/+bug/1550400">[1]</a> and requires an update to the instance definition (libvirt
+domain.xml) before starting a migration.</p>
+<p>Updating the instance definition occurs during the live_migration_operation
+stage, before the instance is running on the target compute host.  Two port
+bindings, one active at the source and one inactive at the target
+host are required for this operation to succeed.</p>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="proposed-change">
+<h2>Proposed Change<a class="headerlink" href="#proposed-change" title="Link to this heading">¶</a></h2>
+<p>For migration, Nova will require the port binding information from the target
+compute during the pre_live_migration stage.  This can be achieved by allowing
+a compute port to be bound to the migration source and the migration target
+host.</p>
+<p>This can be achieved by the following steps:</p>
+<p>#1 Expand upon existing API entities under port, allowing CRUD bindings.</p>
+<p>#2 Update ML2 to support the changes.</p>
+<p>#3 Update the DB to support the changes.</p>
+<section id="usage-by-nova">
+<h3>Usage by Nova<a class="headerlink" href="#usage-by-nova" title="Link to this heading">¶</a></h3>
+<p>Nova will utilize the expanded API, and the potential flow is as follows:</p>
+<ul class="simple">
+<li><p>pre_live_migration: Create the inactive binding for target host.</p></li>
+<li><p>live_migration_operation: Use information gathered from the inactive
+binding to modify the instance definition.</p></li>
+<li><p>live_migration_operation: Once the instance is active, set the inactive
+binding to active, and the previous active binding to inactive.</p></li>
+<li><p>post_live_migration: Remove the inactive binding on the source
+compute host.</p></li>
+</ul>
+<img alt="../../../_images/nova-live-migration-flow.png" src="../../../_images/nova-live-migration-flow.png" />
+<ul>
+<li><p>If rollback is performed after the instance is active on target: From a
+Neutron standpoint, if the binding is active on the target host, Nova will
+need to set the source binding back to active:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PUT</span> <span class="o">/</span><span class="n">v2</span><span class="mf">.0</span><span class="o">/</span><span class="n">ports</span><span class="o">/</span><span class="p">{</span><span class="n">port_id</span><span class="p">}</span><span class="o">/</span><span class="n">bindings</span><span class="o">/</span><span class="p">{</span><span class="n">host_id</span><span class="p">}</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>For more details on the Nova implementation , see the related Nova
+Blueprint <a class="reference external" href="https://blueprints.launchpad.net/nova/+spec/migration-use-target-vif">[3]</a> and its Spec <a class="reference external" href="https://review.openstack.org/#/c/301090/">[4]</a>.  Neutron will not dictate the implemented
+capabilities of Nova live migration and will support either path, to rollback
+or to not rollback.</p>
+</section>
+<section id="binding-api-extension-for-ports">
+<h3>Binding API Extension for Ports<a class="headerlink" href="#binding-api-extension-for-ports" title="Link to this heading">¶</a></h3>
+<section id="list-bindings">
+<span id="list-binding"></span><h4>List Bindings<a class="headerlink" href="#list-bindings" title="Link to this heading">¶</a></h4>
+<p>GET /v2.0/ports/{port_id}/bindings</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;bindings&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;source-host_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ovs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="s2">&quot;ovs_hybrid_plug&quot;</span><span class="p">:</span> <span class="n">true</span>
+                <span class="p">},</span>
+            <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;bridge&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;inactive&quot;</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default" id="id13">
+<caption><span class="caption-text">Response Parameters</span><a class="headerlink" href="#id13" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Style</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>bindings</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:list</p></td>
+<td><p>A list of <em>binding</em> objects</p></td>
+</tr>
+</tbody>
+</table>
+<p>More parameters see <a class="reference internal" href="#show-binding"><span class="std std-ref">Show Binding</span></a></p>
+<p>Important key features of list bindings:</p>
+<ul class="simple">
+<li><p>Compute bindings will currently be listed and a request for unsupported
+bindings will return ‘NotImplemented’ until the capability is introduced.</p></li>
+<li><p>All bindings will be listed and pagination will be used when many bindings
+are returned.</p></li>
+</ul>
+</section>
+<section id="show-binding">
+<span id="id1"></span><h4>Show Binding<a class="headerlink" href="#show-binding" title="Link to this heading">¶</a></h4>
+<p>GET /v2.0/ports/{port_id}/bindings/{host_id}</p>
+<table class="docutils align-default" id="id14">
+<caption><span class="caption-text">Response Parameters</span><a class="headerlink" href="#id14" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Style</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>binding</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A <em>binding</em> object</p></td>
+</tr>
+<tr class="row-odd"><td><p>host_id</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:string</p></td>
+<td><p>Hostname where the port is allocated.</p></td>
+</tr>
+<tr class="row-even"><td><p>vif_type</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:string</p></td>
+<td><p>The VIF type for this port binding determined during
+portbinding</p></td>
+</tr>
+<tr class="row-odd"><td><p>vif_details</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A dictionary containing additional details for this specific
+binding. The details are set by a mechanism driver.</p></td>
+</tr>
+<tr class="row-even"><td><p>vnic_type</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:string</p></td>
+<td><p>The VNIC type for this port binding.</p></td>
+</tr>
+<tr class="row-odd"><td><p>profile</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A dictionary holding the vif profile.</p></td>
+</tr>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:String</p></td>
+<td><p>Status of the binding <a class="reference internal" href="#binding-status"><span class="std std-ref">Status Usage</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;target-vif-type&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+             <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+             <span class="p">},</span>
+         <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s1">&#39;NORMAL&#39;</span><span class="p">,</span>
+         <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{},</span>
+         <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+     <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Important key features of show binding:</p>
+<ul class="simple">
+<li><p>DVR ports exposed in this resource will show the real vif_type of
+‘distributed’ ports as they are stored in DistributedPortBindings, i.e. ovs.</p></li>
+</ul>
+</section>
+<section id="create-binding">
+<span id="id2"></span><h4>Create Binding<a class="headerlink" href="#create-binding" title="Link to this heading">¶</a></h4>
+<p>POST /v2.0/ports/{port_id}/bindings</p>
+<table class="docutils align-default" id="id15">
+<caption><span class="caption-text">Request Parameters</span><a class="headerlink" href="#id15" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Style</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>binding</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A <em>binding</em> object</p></td>
+</tr>
+<tr class="row-odd"><td><p>host_id (mandatory)</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:string</p></td>
+<td><p>Hostname where the port is allocated.</p></td>
+</tr>
+<tr class="row-even"><td><p>vnic_type (optional, default = ‘normal’)</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:string</p></td>
+<td><p>The VNIC type for this port binding.</p></td>
+</tr>
+<tr class="row-odd"><td><p>profile (optional)</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A dictionary holding the vif profile.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Response parameters</p>
+<p>see <a class="reference internal" href="#list-binding"><span class="std std-ref">List Bindings</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ovs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+            <span class="s2">&quot;ovs_hybrid_plug&quot;</span><span class="p">:</span> <span class="n">true</span>
+            <span class="p">},</span>
+         <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s1">&#39;NORMAL&#39;</span><span class="p">,</span>
+         <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{},</span>
+         <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If the binding fails, a new return code of 4xx or 5xx should be returned. This
+differs from today where a failed binding returns a 2xx response code and the
+vif_type is set to “binding_failed”.</p>
+<p>Important key features of update/create binding:</p>
+<ul class="simple">
+<li><p>By default, the status will be active when creating a port binding.  If
+a binding is created, doesn’t exist already, and an existing binding is
+already active, the binding will default to inactive, requiring the
+operator to activate the new binding.</p></li>
+<li><p>If a binding being added already exists, a 4xx will be returned.</p></li>
+<li><p>A compute port can only have 1 active binding at a time. This is not an
+enforcement by Neutron, but a result of the operation surrounding
+PortBinding. This feature expands the capability of having multiple bindings,
+but will only allow for 1 active binding for compute ports.</p></li>
+<li><p>At this time, creation of a binding will be limited to compute ports.</p></li>
+<li><p>The existing API is not touched, which will return host_id:{host_id} as the
+current active binding.</p></li>
+<li><p>Activating an inactive compute binding will deactivate the current
+active binding.</p></li>
+</ul>
+</section>
+<section id="update-binding">
+<h4>Update Binding<a class="headerlink" href="#update-binding" title="Link to this heading">¶</a></h4>
+<p>PUT /v2.0/ports/{port_id}/bindings/{host_id}</p>
+<table class="docutils align-default" id="id16">
+<caption><span class="caption-text">Request Parameters</span><a class="headerlink" href="#id16" title="Link to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Style</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>binding</p></td>
+<td><p>plain</p></td>
+<td><p>xsd:dict</p></td>
+<td><p>A <em>binding</em> object</p></td>
+</tr>
+</tbody>
+</table>
+<p>All create parameters are valid for update as well. See <a class="reference internal" href="#create-binding"><span class="std std-ref">Create Binding</span></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s1">&#39;NORMAL&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Response parameters</p>
+<p>see <a class="reference internal" href="#show-binding"><span class="std std-ref">Show Binding</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ovs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+            <span class="s2">&quot;ovs_hybrid_plug&quot;</span><span class="p">:</span> <span class="n">true</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s1">&#39;NORMAL&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>On failed binding, a 4xx or 5xx return code should be returned.</p>
+</section>
+<section id="activating-an-inactive-binding">
+<span id="activate-binding"></span><h4>Activating an Inactive Binding<a class="headerlink" href="#activating-an-inactive-binding" title="Link to this heading">¶</a></h4>
+<p>PUT /v2.0/ports/{port_id}/bindings/{host_id}/activate</p>
+<p>Response parameters</p>
+<p>see <a class="reference internal" href="#show-binding"><span class="std std-ref">Show Binding</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;binding&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host_id&quot;</span><span class="p">:</span> <span class="s2">&quot;target-host_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ovs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vif_details&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;port_filter&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+            <span class="s2">&quot;ovs_hybrid_plug&quot;</span><span class="p">:</span> <span class="n">true</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;vnic_type&quot;</span><span class="p">:</span> <span class="s1">&#39;NORMAL&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span><span class="s2">&quot;bar&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;active&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Important key features of activate binding:</p>
+<ul class="simple">
+<li><p>Activating a compute binding that is inactive will deactivate the existing
+active binding, as a compute port can only have 1 binding active at a time.</p></li>
+<li><p>Operation will be limited to compute ports.</p></li>
+<li><p>Attempting to activate an existing active binding will return a 4xx.</p></li>
+<li><p>Returns 5xx if activating the binding fails.</p></li>
+</ul>
+</section>
+<section id="delete-binding">
+<h4>Delete Binding<a class="headerlink" href="#delete-binding" title="Link to this heading">¶</a></h4>
+<p>DELETE /v2.0/ports/{port_id}/bindings/{host_id}</p>
+<p>This operation does not accept a request body and does not return a response
+body.</p>
+<p>Important key features of delete binding:</p>
+<ul class="simple">
+<li><p>Active/Inactive bindings can be removed.</p></li>
+<li><p>Deleting an active compute port binding, where an inactive binding
+exists does not activate the binding.  The operator will be required to
+explicitly activate the binding.</p></li>
+</ul>
+</section>
+<section id="overlap-between-existing-vs-new-apis">
+<h4>Overlap Between Existing vs New APIs<a class="headerlink" href="#overlap-between-existing-vs-new-apis" title="Link to this heading">¶</a></h4>
+<p>All the functionality of the existing API will be covered by the new API as
+well. This section describes the overlap.</p>
+<table class="docutils align-default" id="id17">
+<caption><span class="caption-text">Overlap existing vs. new API</span><a class="headerlink" href="#id17" title="Link to this table">¶</a></caption>
+<tbody>
+<tr class="row-odd"><td><p>Existing API</p></td>
+<td><p>New API</p></td>
+</tr>
+<tr class="row-even"><td><p>Show port with active binding</p></td>
+<td><p>n/a</p></td>
+</tr>
+<tr class="row-odd"><td><p>Create port: directly with an active binding</p></td>
+<td><p>n/a</p></td>
+</tr>
+<tr class="row-even"><td><p>Update port: add host_id (which adds the active binding)</p></td>
+<td><p>Add Binding</p></td>
+</tr>
+<tr class="row-odd"><td><p>Create port: without any binding</p></td>
+<td><p>n/a</p></td>
+</tr>
+<tr class="row-even"><td><p>Update port: change host_id (re-trigger port binding for another host)</p></td>
+<td><p>Update binding</p></td>
+</tr>
+<tr class="row-odd"><td><p>Update port: set host_id to ‘’(remove the active binding)</p></td>
+<td><p>Delete active binding</p></td>
+</tr>
+<tr class="row-even"><td><p>Delete port: Remove port with all its bindings</p></td>
+<td><p>n/a</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="effects-on-existing-apis">
+<h4>Effects on Existing APIs<a class="headerlink" href="#effects-on-existing-apis" title="Link to this heading">¶</a></h4>
+<p>Slight adjustment to existing APIs:</p>
+<ul class="simple">
+<li><p>Show Port will still just show the binding like today. For compute
+ports, it would only show the active binding.</p></li>
+<li><p>Create Port will create an unbound binding as before, but with the status of
+active.</p></li>
+<li><p>Update Port with host_id will still re-trigger port binding for a host.  The
+difference will be <cite>update_port()</cite> will only action on the active binding.</p></li>
+<li><p>vif_type is set to “binding_failed” and http code 2xx is still used
+on failed port binding when binding is triggered via the existing
+port binding extension.</p></li>
+</ul>
+</section>
+<section id="api-visibility">
+<h4>API Visibility<a class="headerlink" href="#api-visibility" title="Link to this heading">¶</a></h4>
+<p>A normal user should not be able to trigger any create/update/delete/activate
+actions. This should only be possible via some special service user or the
+admin role.</p>
+</section>
+</section>
+<section id="sub-resource-extension">
+<h3>Sub Resource Extension<a class="headerlink" href="#sub-resource-extension" title="Link to this heading">¶</a></h3>
+<p>Neutron <cite>ports</cite> will be extended with a sub resource <cite>bindings</cite>, having a
+member name of <cite>port</cite> to preserve portbindings and ports extensions.  The new
+sub resource extension will be <cite>portbindings_extended.py</cite> and have a parent
+resource of <cite>ports</cite>.</p>
+<p>The following methods will be added to the newly created service plugin
+<cite>bindings_plugin.py</cite>:</p>
+<ul class="simple">
+<li><p><cite>get_port_bindings()</cite></p></li>
+<li><p><cite>get_port_binding()</cite></p></li>
+<li><p><cite>create_port_binding()</cite></p></li>
+<li><p><cite>update_port_binding()</cite></p></li>
+<li><p><cite>delete_port_binding()</cite></p></li>
+<li><p><cite>update_port_binding_activate()</cite></p></li>
+</ul>
+</section>
+<section id="ml2-changes">
+<h3>ML2 Changes<a class="headerlink" href="#ml2-changes" title="Link to this heading">¶</a></h3>
+<p>Existing methods <cite>create_port()</cite> and <cite>update_port()</cite> will need to be updated
+to support actioning only on <cite>active</cite> status bindings.  In addition, a new
+status of <cite>inactive</cite> will be introduced to neutron-lib for use in PortBinding.</p>
+<section id="status-usage">
+<span id="binding-status"></span><h4>Status Usage<a class="headerlink" href="#status-usage" title="Link to this heading">¶</a></h4>
+<p>The status column in PortBinding will store an additional state ‘inactive’
+where the current states are ‘active’ and ‘down’.  Neutron-lib will
+only require the addition of PORT_BINDING_STATUS_ACTIVE and
+PORT_BINDING_STATUS_INACTIVE.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">neutron_lib</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">const</span>
+
+<span class="n">const</span><span class="o">.</span><span class="n">PORT_BINDING_STATUS_ACTIVE</span>
+<span class="n">const</span><span class="o">.</span><span class="n">PORT_BINDING_STATUS_INACTIVE</span>
+</pre></div>
+</div>
+</section>
+<section id="create-update-delete-port">
+<h4>Create/Update/Delete Port<a class="headerlink" href="#create-update-delete-port" title="Link to this heading">¶</a></h4>
+<p>New methods will be introduced in support of the new sub resource under ports,
+but the current <cite>create_port()</cite>, <cite>update_port()</cite> and <cite>delete_port()</cite> will be
+modified to only act on <cite>active</cite> bindings in the PortBinding table.</p>
+<p>Today, <cite>create_port()</cite> adds an empty unbound binding in PortBinding and the
+following changes will be made in support of this spec:</p>
+<ul class="simple">
+<li><p>Create an unbound binding with status <cite>active</cite> in the PortBinding table.</p></li>
+</ul>
+<p>In addition, <cite>update_port()</cite> will be adjusted for <cite>active</cite> status with the
+following changes:</p>
+<ul class="simple">
+<li><p>Update will only change binding information on the <cite>active</cite> binding in the
+PortBinding table.</p></li>
+</ul>
+<p>Finally, <cite>delete_port()</cite> will be adjusted for <cite>active</cite> status with the
+following changes:</p>
+<ul class="simple">
+<li><p>Delete will only act on the <cite>active</cite> binding in the PortBinding table.</p></li>
+</ul>
+</section>
+</section>
+<section id="data-model-changes">
+<h3>Data Model Changes<a class="headerlink" href="#data-model-changes" title="Link to this heading">¶</a></h3>
+<p>The PortBinding table will expand the primary key to column <cite>host</cite>, allowing
+selection of the binding based on <cite>port_id</cite> and <cite>host</cite>.</p>
+<p>In addition, a <cite>status</cite> column will be introduced in the expansion where states
+<cite>active</cite>, <cite>down</cite>, and <cite>inactive</cite> will be values.</p>
+<p>Online upgrades, Blueprint <a class="reference external" href="https://blueprints.launchpad.net/neutron/+spec/adopt-oslo-versioned-objects-for-db">[9]</a>, requires the addition of <cite>host</cite> to
+primary_keys and a new field <cite>status</cite> for Port Binding OVO. Version of the
+object should be bumped if push-notifications, under Blueprint <a class="reference external" href="https://review.openstack.org/#/c/225995/">[10]</a>,  will
+be merged first, and PortBinding object will be present on the RPC wire.
+Defining a default value for the <cite>status</cite> field would not require online
+data migration.</p>
+</section>
+<section id="changes-to-mechanism-drivers">
+<h3>Changes to Mechanism Drivers<a class="headerlink" href="#changes-to-mechanism-drivers" title="Link to this heading">¶</a></h3>
+<p>A new mechanism driver method is required to determine if the new way
+of binding things is supported. This must be validated for all binding
+levels and allow fallback to previous methods.  By default, new method will
+return unsupported.</p>
+<p>Besides the in tree mechanism drivers for l2 agents (ovs, lb, sr-iov, macvtap)
+the following drivers need to be considered:</p>
+<ul class="simple">
+<li><p>l2pop (however there are ideas to eliminate l2pop)</p></li>
+<li><p>ironic</p></li>
+<li><p>third party mechanism drivers</p></li>
+</ul>
+<section id="activate-rpc-port-update-delete">
+<h4>Activate RPC Port Update/Delete<a class="headerlink" href="#activate-rpc-port-update-delete" title="Link to this heading">¶</a></h4>
+<p>The existing <cite>port_update</cite> and <cite>port_delete</cite> RPC message will be adjusted to
+send, when the agent retrieves device information with
+<cite>get_devices_details_list_and_failed_devices</cite>, specific binding information
+for the host regardless of binding state. This will allow the addition of
+additional plumbing to occur as follows:</p>
+<ul class="simple">
+<li><p>Activate will result in a <cite>port_update</cite>, which will pass the relative binding
+information for the host and dictate the transition from inactive to active
+in the <cite>get_devices_details_list_and_failed_devices</cite> response. This will
+allow for a GARP to be sent out, updating the topology to a change in status.</p></li>
+<li><p>Activate will result in a <cite>port_delete</cite> rpc call to the source host, removing
+the source VIF.  This will need to be accomplished due to Nova not being able
+to issue a delete port, as the port still exists on a different host.  The
+binding will remain in an <cite>inactive</cite> state where binding information has
+been populated, but the port, from an agent perspective, will not exist.
+In addition, the transition from active to inactive will be indicated in the
+rpc call, influencing the <cite>update_device_list</cite> to not update the port state.</p></li>
+</ul>
+<img alt="../../../_images/rpc-portbinding-flow.png" src="../../../_images/rpc-portbinding-flow.png" />
+<p>In the case where push-notifications are implemented for ports under Blueprint
+<a class="reference external" href="https://review.openstack.org/#/c/225995/">[10]</a> the <cite>get_devices_details_list_and_failed_devices</cite> would not be adjusted
+for transition state.  Instead, the binding transition state would be sent to
+the agent as part of the port object.  The remaining actions are the same.</p>
+</section>
+</section>
+<section id="other-changes">
+<h3>Other changes<a class="headerlink" href="#other-changes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Neutron/Openstack Python Client support.</p></li>
+<li><p>Neutron-Lib support of new constant PORT_STATUS_INACTIVE
+see <a class="reference internal" href="#activate-binding"><span class="std std-ref">Activating an Inactive Binding</span></a>.</p></li>
+</ul>
+</section>
+<section id="command-line-client-impact">
+<h3>Command Line Client Impact<a class="headerlink" href="#command-line-client-impact" title="Link to this heading">¶</a></h3>
+<p>Support for port bindings will be needed in OSC.  The following will be added:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ openstack port binding list {ARGS} &lt;port&gt;
+
+$ openstack port binding show {ARGS} &lt;port&gt; &lt;host&gt;
+
+$ openstack port binding create {ARGS} &lt;port&gt;
+
+$ openstack port binding update {ARGS} &lt;port&gt; &lt;host&gt;
+
+$ openstack port binding delete {ARGS} &lt;port&gt; &lt;host&gt;
+
+$ openstack port binding activate {ARGS} &lt;port&gt; &lt;host&gt;
+</pre></div>
+</div>
+</section>
+<section id="security-impact">
+<h3>Security Impact<a class="headerlink" href="#security-impact" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="notifications-impact">
+<h3>Notifications Impact<a class="headerlink" href="#notifications-impact" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="other-end-user-impact">
+<h3>Other End User Impact<a class="headerlink" href="#other-end-user-impact" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="performance-impact">
+<h3>Performance Impact<a class="headerlink" href="#performance-impact" title="Link to this heading">¶</a></h3>
+<p>There should be no performance impact.</p>
+</section>
+<section id="ipv6-impact">
+<h3>IPv6 Impact<a class="headerlink" href="#ipv6-impact" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="other-deployer-impact">
+<h3>Other Deployer Impact<a class="headerlink" href="#other-deployer-impact" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="developer-impact">
+<h3>Developer Impact<a class="headerlink" href="#developer-impact" title="Link to this heading">¶</a></h3>
+<p>Impact to Nova live migration, and is directly in support of their efforts.</p>
+</section>
+<section id="community-impact">
+<h3>Community Impact<a class="headerlink" href="#community-impact" title="Link to this heading">¶</a></h3>
+<p>Yes.  This change has been discussed on the ML, in Neutron meetings
+(especially ML2), at mid-cycles, and at the design summit.</p>
+</section>
+<section id="alternatives">
+<h3>Alternatives<a class="headerlink" href="#alternatives" title="Link to this heading">¶</a></h3>
+<p>An alternative is to use the current resources under ports to facilitate this
+change to live migration.  The problem is, current dict structures would need
+to be expanded to accommodate the ‘bindings’ key.  This may cause some
+confusion as the user already receives ‘bindings:profile’ and various other
+values.</p>
+</section>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<section id="assignee-s">
+<h3>Assignee(s)<a class="headerlink" href="#assignee-s" title="Link to this heading">¶</a></h3>
+<p>Primary assignee:
+* <a class="reference external" href="https://launchpad.net/~libosvar">Jakub Libosvar</a></p>
+<p>Please add your name here and attend the <a class="reference external" href="https://wiki.openstack.org/wiki/Meetings/Neutron-ML2-Subteam">ML2 Subteam Meeting</a> if you’d
+like to contribute.</p>
+</section>
+</section>
+<section id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h2>
+<p>None.</p>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<section id="tempest-tests">
+<h3>Tempest Tests<a class="headerlink" href="#tempest-tests" title="Link to this heading">¶</a></h3>
+<p>Addition of a scenario test, <cite>test_bindings.py</cite>, to walk through the creation
+of a source migration instance, creation of the inactive binding on a secondary
+host, creation of a secondary target migration instance, activating the
+inactive binding, deactivating the source migration active binding, and then
+validating connectivity is still working.</p>
+</section>
+<section id="functional-tests">
+<h3>Functional Tests<a class="headerlink" href="#functional-tests" title="Link to this heading">¶</a></h3>
+<p>Additional functional tests will be added to <cite>ml2/test_plugin.py</cite> to expand
+on the current port binding tests. This will accommodate for a status check
+in the case of adding an inactive binding.</p>
+</section>
+<section id="api-tests">
+<h3>API Tests<a class="headerlink" href="#api-tests" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Bindings resource (CRUD)</p></li>
+<li><p>Bindings resource (CRUD) and validation of active binding under current
+ports extension.</p></li>
+</ul>
+</section>
+</section>
+<section id="documentation-impact">
+<h2>Documentation Impact<a class="headerlink" href="#documentation-impact" title="Link to this heading">¶</a></h2>
+<p>Yes.</p>
+<section id="user-documentation">
+<h3>User Documentation<a class="headerlink" href="#user-documentation" title="Link to this heading">¶</a></h3>
+<p>None.</p>
+</section>
+<section id="developer-documentation">
+<h3>Developer Documentation<a class="headerlink" href="#developer-documentation" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Create detailed explanation of active/inactive binding operation in
+<cite>devrefml2_port_bindings.rst</cite>.  This should detail changes to ml2, and the
+extended <cite>ports</cite> resource.</p></li>
+</ul>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+              </div>
+            </div>
+          </div>
+          <div class="docs-actions">
+          
+            <a href="no-downtime-server-upgrade.html"><i class="fa fa-angle-double-left" data-toggle="tooltip" data-placement="top" title="Previous: Upgrade controllers with no API downtime"></i></a>
+          
+          
+            <a href="strict-minimum-bandwidth-support.html"><i class="fa fa-angle-double-right" data-toggle="tooltip" data-placement="top" title="Next: Strict minimum bandwidth support (egress)"></i></a>
+          
+            <a id="logABugLink3" href="" target="_blank" title="Found an error? Report a bug against this page"><i class="fa fa-bug" data-toggle="tooltip" data-placement="top" title="Report a Bug"></i></a>
+          
+          </div>
+          <div class="row docs-byline bottom">
+            <div class="docs-updated">this page last updated: 2024-11-20 16:32:12</div>
+          </div>
+          <div class="row">
+            <div class="col-lg-8 col-md-8 col-sm-8 docs-license">
+<a href="https://creativecommons.org/licenses/by/3.0/">
+ <img src="../../../_static/images/docs/license.png" alt="Creative Commons Attribution 3.0 License"/>
+</a>
+<p>
+ Except where otherwise noted, this document is licensed under
+ <a href="https://creativecommons.org/licenses/by/3.0/">Creative Commons
+ Attribution 3.0 License</a>. See all <a href="https://www.openstack.org/legal">
+ OpenStack Legal Documents</a>.
+</p>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 docs-actions-wrapper">
+            <!-- ID buglinkbottom added so that pre-filled doc bugs
+                 are sent to Launchpad projects related to the
+                 document -->
+              <a href="#" id="logABugLink2" class="docs-footer-actions"><i class="fa fa-bug"></i> found an error? report a bug</a>
+            </div>
+          </div>
+        </div>
+<div class="col-lg-3 col-md-4 col-sm-4 col-lg-pull-9 col-md-pull-8 col-sm-pull-8 order-1 docs-sidebar">
+  <div class="btn-group docs-sidebar-releases">
+    <button onclick="location.href='/'" class="btn docs-sidebar-home" data-toggle="tooltip" data-placement="top" title="OpenStack Docs Home"><i class="fa fa-arrow-circle-o-left"></i></button>
+<button type="button" data-bs-toggle="dropdown" class="btn dropdown-toggle docs-sidebar-release-select">OpenStack Documentation</button>
+<ul class="dropdown-menu docs-sidebar-dropdown" role="menu">
+  <li class="dropdown-header">Guides</li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#install-guides">Install Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#user-guides">User Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#configuration-guides">Configuration Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#ops-and-admin-guides">Operations and Administration Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#api-guides">API Guides</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/index.html#contributor-guides">Contributor Guides</a></li>
+  <li class="dropdown-header">Languages</li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/de/">Deutsch (German)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/fr/">Français (French)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/id/">Bahasa Indonesia (Indonesian)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/it/">Italiano (Italian)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/ja/">日本語 (Japanese)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/ko_KR/">한국어 (Korean)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/pt_BR/">Português (Portuguese)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/tr_TR/">Türkçe (Türkiye)</a></li>
+  <li><a class="dropdown-item" href="https://docs.openstack.org/zh_CN/">简体中文 (Simplified Chinese)</a></li>
+</ul>
+  </div>
+  <div class="docs-sidebar-toc">
+    <div class="docs-sidebar-section" id="table-of-contents">
+      <a href="../../../index.html" class="docs-sidebar-section-title"><h4>neutron-specs 0.0.1.dev863</h4></a>
+      <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../2027.1/index.html">2027.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2026.2/index.html">2026.2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2026.1/index.html">2026.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2025.2/index.html">2025.2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2025.1/index.html">2025.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2024.2/index.html">2024.2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2024.1/index.html">2024.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2023.2/index.html">2023.2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2023.1/index.html">2023.1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../zed/index.html">Zed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../yoga/index.html">Yoga</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../xena/index.html">Xena</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wallaby/index.html">Wallaby</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../victoria/index.html">Victoria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ussuri/index.html">Ussuri</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../train/index.html">Train</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stein/index.html">Stein</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rocky/index.html">Rocky</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../queens/index.html">Queens</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pike/index.html">Pike</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ocata/index.html">Ocata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../newton/index.html">Newton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mitaka/index.html">Mitaka</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../liberty/index.html">Liberty</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../kilo/index.html">Kilo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../juno/index.html">Juno</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Backlog</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="common-classification-framework.html">Neutron Common Classification Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagnostics.html">Neutron Resource Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="l2-extension-ovs-flow-management.html">L2 Extension flow management support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="no-downtime-server-upgrade.html">Upgrade controllers with no API downtime</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Provide Port Binding Information for Nova Live Migration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="strict-minimum-bandwidth-support.html">Strict minimum bandwidth support (egress)</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../stadium/index.html">Stadium Health</a></li>
+</ul>
+
+    </div>
+
+  <div class="docs-sidebar-toc">
+    <div class="docs-sidebar-section" id="local-table-of-contents">
+      <h4 class="docs-sidebar-section-title">Page Contents</h4>
+      <ul>
+<li><a class="reference internal" href="#">Provide Port Binding Information for Nova Live Migration</a><ul>
+<li><a class="reference internal" href="#problem-description">Problem Description</a></li>
+<li><a class="reference internal" href="#proposed-change">Proposed Change</a><ul>
+<li><a class="reference internal" href="#usage-by-nova">Usage by Nova</a></li>
+<li><a class="reference internal" href="#binding-api-extension-for-ports">Binding API Extension for Ports</a><ul>
+<li><a class="reference internal" href="#list-bindings">List Bindings</a></li>
+<li><a class="reference internal" href="#show-binding">Show Binding</a></li>
+<li><a class="reference internal" href="#create-binding">Create Binding</a></li>
+<li><a class="reference internal" href="#update-binding">Update Binding</a></li>
+<li><a class="reference internal" href="#activating-an-inactive-binding">Activating an Inactive Binding</a></li>
+<li><a class="reference internal" href="#delete-binding">Delete Binding</a></li>
+<li><a class="reference internal" href="#overlap-between-existing-vs-new-apis">Overlap Between Existing vs New APIs</a></li>
+<li><a class="reference internal" href="#effects-on-existing-apis">Effects on Existing APIs</a></li>
+<li><a class="reference internal" href="#api-visibility">API Visibility</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sub-resource-extension">Sub Resource Extension</a></li>
+<li><a class="reference internal" href="#ml2-changes">ML2 Changes</a><ul>
+<li><a class="reference internal" href="#status-usage">Status Usage</a></li>
+<li><a class="reference internal" href="#create-update-delete-port">Create/Update/Delete Port</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data-model-changes">Data Model Changes</a></li>
+<li><a class="reference internal" href="#changes-to-mechanism-drivers">Changes to Mechanism Drivers</a><ul>
+<li><a class="reference internal" href="#activate-rpc-port-update-delete">Activate RPC Port Update/Delete</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-changes">Other changes</a></li>
+<li><a class="reference internal" href="#command-line-client-impact">Command Line Client Impact</a></li>
+<li><a class="reference internal" href="#security-impact">Security Impact</a></li>
+<li><a class="reference internal" href="#notifications-impact">Notifications Impact</a></li>
+<li><a class="reference internal" href="#other-end-user-impact">Other End User Impact</a></li>
+<li><a class="reference internal" href="#performance-impact">Performance Impact</a></li>
+<li><a class="reference internal" href="#ipv6-impact">IPv6 Impact</a></li>
+<li><a class="reference internal" href="#other-deployer-impact">Other Deployer Impact</a></li>
+<li><a class="reference internal" href="#developer-impact">Developer Impact</a></li>
+<li><a class="reference internal" href="#community-impact">Community Impact</a></li>
+<li><a class="reference internal" href="#alternatives">Alternatives</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li><a class="reference internal" href="#assignee-s">Assignee(s)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#testing">Testing</a><ul>
+<li><a class="reference internal" href="#tempest-tests">Tempest Tests</a></li>
+<li><a class="reference internal" href="#functional-tests">Functional Tests</a></li>
+<li><a class="reference internal" href="#api-tests">API Tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#documentation-impact">Documentation Impact</a><ul>
+<li><a class="reference internal" href="#user-documentation">User Documentation</a></li>
+<li><a class="reference internal" href="#developer-documentation">Developer Documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  </div>
+</div>
+      </div>
+    </div>
+<footer>
+  <div class="container">
+    <div class="row footer-links">
+      <div class="col-lg-2 col-sm-2">
+        <h3>OpenStack</h3>
+        <ul>
+          <li><a href="https://www.openstack.org/software/project-navigator/">Projects</a></li>
+          <li><a href="https://security.openstack.org/">OpenStack Security</a></li>
+          <li><a href="https://openstack.org/blog/">Blog</a></li>
+          <li><a href="https://openstack.org/news/">News</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="https://www.meetup.com/pro/openinfradev/">User Groups</a></li>
+          <li><a href="https://openstack.org/community/events/">Events</a></li>
+          <li><a href="https://openstack.org/community/jobs/">Jobs</a></li>
+          <li><a href="https://openinfra.dev/members/">Companies</a></li>
+          <li><a href="https://docs.openstack.org/contributors">Contribute</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Documentation</h3>
+        <ul>
+          <li><a href="https://docs.openstack.org">OpenStack Manuals</a></li>
+          <li><a href="https://openstack.org/software/start/">Getting Started</a></li>
+          <li><a href="https://developer.openstack.org">API Documentation</a></li>
+          <li><a href="https://wiki.openstack.org">Wiki</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-sm-2">
+        <h3>Branding &amp; Legal</h3>
+        <ul>
+          <li><a href="https://openinfra.dev/legal">Legal Docs</a></li>
+          <li><a href="https://openstack.org/brand/">Logos &amp; Guidelines</a></li>
+          <li><a href="https://openinfra.dev/legal/trademark-policy">Trademark Policy</a></li>
+          <li><a href="https://openinfra.dev/privacy-policy">Privacy Policy</a></li>
+          <li><a href="https://docs.openstack.org/contributors/common/setup-gerrit.html#individual-contributor-license-agreement">OpenInfra CLA</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-sm-4">
+        <h3>Stay In Touch</h3>
+        <a href="https://twitter.com/OpenStack" target="_blank" class="social-icons footer-twitter"></a>
+        <a href="https://www.facebook.com/openinfradev" target="_blank" class="social-icons footer-facebook"></a>
+        <a href="https://www.linkedin.com/company/open-infrastructure-foundation" target="_blank" class="social-icons footer-linkedin"></a>
+        <a href="https://www.youtube.com/user/OpenStackFoundation" target="_blank" class="social-icons footer-youtube"></a>
+        <p class="fine-print">
+          The OpenStack project is provided under the
+          <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>. Docs.openstack.org is powered by
+          <a href="https://rackspace.com" target="_blank">Rackspace Cloud Computing</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- jQuery -->
+<script src="../../../_static/js/jquery-3.2.1.min.js"></script>
+
+<!-- Bootstrap JavaScript -->
+<script src="../../../_static/js/bootstrap.bundle.min.js"></script>
+
+<!-- The rest of the JS -->
+<script src="../../../_static/js/navigation.js"></script>
+
+<!-- Docs JS -->
+<script src="../../../_static/js/docs.js"></script>
+
+<!-- Javascript for page -->
+<script>
+  /* Build a description of this page including SHA, source location on git
+   * repo, build time and the project's launchpad bug tag. Set the HREF of the
+   * bug buttons
+   */
+    var lineFeed = "%0A";
+    var gitURL = "Source: Can't derive source file URL";
+
+    /* there have been cases where "pagename" wasn't set; better check for it */
+    /* "giturl" is the URL of the source file on Git and is auto-generated by
+     * openstackdocstheme.
+     *
+     * "pagename" is a standard sphinx parameter containing the name of
+     * the source file, without extension.
+     */
+
+    var sourceFile = "specs/backlog/pike/portbinding_information_for_nova" + ".rst";
+    gitURL = "Source: https://opendev.org/openstack/neutron-specs/src/doc/source" + "/" + sourceFile;
+
+    /* gitsha, project and bug_tag rely on variables in conf.py */
+    var gitSha = "SHA: 9dbe354683f2420170c694395d40901e6072c8cb";
+    var repositoryName = "openstack/neutron-specs";
+    var bugProject = "neutron";
+    var bugTitle = "Provide Port Binding Information for Nova Live Migration in neutron-specs";
+    var fieldTags = "";
+    var useStoryboard = "";
+
+    /* "last_updated" is the build date and time. It relies on the
+       conf.py variable "html_last_updated_fmt", which should include
+       year/month/day as well as hours and minutes                   */
+    var buildstring = "Release: 0.0.1.dev863 on 2024-11-20 16:32:12";
+
+    var fieldComment = encodeURI(buildstring) +
+                       lineFeed + encodeURI(gitSha) +
+                       lineFeed + encodeURI(gitURL) ;
+
+    logABug(bugTitle, bugProject, fieldComment, fieldTags, repositoryName, useStoryboard);
+</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "observed_utc": "2026-10-15T01:51:36.435439+00:00",
+  "cwd": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/source-recommendations.json",
+  "sha256": "5d0a7298e04eae19e138865de8d0831e9eb9f4f07ca3fb48a67ccdb3507f62f4",
+  "recommendations": 4,
+  "allowed_writes_only": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/"
+}

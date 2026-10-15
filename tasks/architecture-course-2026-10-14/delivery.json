@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-10-14 20:39:24 UTC",
+  "scope": "Local Nextra documentation in architecture-system-eng-expert; no remote publication or production mutation.",
+  "branch": "perfect-citizen-a30f5998",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "documents": 52,
+  "chapters": 18,
+  "concepts": 310,
+  "priorities": 40,
+  "tutorials": 6,
+  "guides": 2,
+  "diagrams": 76,
+  "independent_document_approvals": 52,
+  "build": "PASS",
+  "gate": {
+    "ok": true,
+    "command": "gate",
+    "accepted": true,
+    "documents": 52
+  },
+  "browser_routes": 52,
+  "all_routes_200": true,
+  "page_errors": [],
+  "invalid_local_links": 0,
+  "preview_url": "http://127.0.0.1:59024",
+  "packet_sha256": "4c2ba9aa7595af2df2d0dbe0a0cad13081b891b3919b4dd67b9549eefc9794a2",
+  "agent_routes": {
+    "specialists": "6 gpt-6.1-sol/xhigh",
+    "auxiliaries": "18 gpt-6-luna/max, three per specialist lane",
+    "council": "2 independent gpt-6.1-sol/xhigh and x-ai/grok-4.7 requested xhigh; Opus canceled before any LLM call",
+    "reuse": "Six author threads plus auxiliary/reviewer threads reactivated in the same lanes; Grok recheck reused exact initial message prefix.",
+    "grok_reported_cached_tokens": [
+      1152,
+      1152
+    ],
+    "native_cache_metrics": "Not exposed by the collaboration tool."
+  },
+  "limits": [
+    "Commit metadata census contains12697commits, with selected semantic diffs; not exhaustive causal analysis of every commit.",
+    "Database and graph values are dated snapshots; source/local/configuration/history/proposal scopes are kept distinct.",
+    "Automated link validation covers local routes/anchors. External primary sources were examined in the named evidence packets; no global automated check of all external links is claimed.",
+    "Medium/low editorial observations remain in council reports; zero high findings remain."
+  ]
+}

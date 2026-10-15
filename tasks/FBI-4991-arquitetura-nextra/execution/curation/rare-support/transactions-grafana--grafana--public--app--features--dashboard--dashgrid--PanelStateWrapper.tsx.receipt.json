@@ -1,0 +1,12 @@
+{
+  "repo": "grafana/grafana",
+  "path": "public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+  "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+  "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+  "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:55:26.883831+00:00",
+  "sha256": "c5599c1644c83ee54b12d611f1b18f6c750b42eb72f4931594630965b40b90b9",
+  "line_count": 767,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--dashboard--dashgrid--PanelStateWrapper.tsx"
+}

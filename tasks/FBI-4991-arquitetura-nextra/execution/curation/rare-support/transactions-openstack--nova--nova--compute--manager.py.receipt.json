@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova",
+  "path": "nova/compute/manager.py",
+  "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+  "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:52:33.649289+00:00",
+  "sha256": "4bdd8212073a593447efc35dc75f7181cdc4a4b67d78475a5e9e846dc975e8ff",
+  "line_count": 12137,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-openstack--nova--nova--compute--manager.py"
+}

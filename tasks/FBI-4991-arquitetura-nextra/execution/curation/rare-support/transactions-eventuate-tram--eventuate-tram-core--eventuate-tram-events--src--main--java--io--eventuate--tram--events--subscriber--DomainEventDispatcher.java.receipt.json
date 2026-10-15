@@ -1,0 +1,12 @@
+{
+  "repo": "eventuate-tram/eventuate-tram-core",
+  "path": "eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+  "revision": "e472ed72b8635d0488a95d0892b8901c0158a7d1",
+  "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+  "raw_url": "https://raw.githubusercontent.com/eventuate-tram/eventuate-tram-core/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T03:04:02.645985+00:00",
+  "sha256": "13d41b57cfb30483d9b9d0248856eee26fdf0422dd11b843b8d1073ea4279cfc",
+  "line_count": 66,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-eventuate-tram--eventuate-tram-core--eventuate-tram-events--src--main--java--io--eventuate--tram--events--subscriber--DomainEventDispatcher.java"
+}

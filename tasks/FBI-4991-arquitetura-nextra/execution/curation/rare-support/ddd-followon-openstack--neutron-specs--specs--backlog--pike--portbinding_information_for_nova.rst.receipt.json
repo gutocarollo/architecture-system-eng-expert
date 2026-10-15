@@ -1,0 +1,11 @@
+{
+  "repo": "openstack/neutron-specs",
+  "path": "specs/backlog/pike/portbinding_information_for_nova.rst",
+  "revision": "9dbe354683f2420170c694395d40901e6072c8cb",
+  "url": "https://github.com/openstack/neutron-specs/blob/9dbe354683f2420170c694395d40901e6072c8cb/specs/backlog/pike/portbinding_information_for_nova.rst",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:20:19.403631+00:00",
+  "sha256": "c589c87579fd660862729b134d14ceb4e72679eeb5068dd6b3dbae7771d59615",
+  "line_count": 788,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-specs--specs--backlog--pike--portbinding_information_for_nova.rst"
+}

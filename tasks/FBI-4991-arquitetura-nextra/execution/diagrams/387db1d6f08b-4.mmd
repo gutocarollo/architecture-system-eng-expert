@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant O as Coordenador hipotético
+    participant L as Registro local
+    participant B as Banco externo
+    participant N as Avisos
+    O->>L: Reserva R$ 1.000
+    O->>B: Solicita liquidação com operationId
+    alt Rejeição antes da liquidação
+        B-->>O: Rejeitado
+        O->>L: Compensa liberando a reserva
+    else Banco liquida
+        B-->>O: Aceite definitivo
+        Note over O,B: Pivô, a devolução passa a ser nova operação
+        O->>L: Registra conclusão
+        O->>N: Envia comprovante
+        N--xO: Falha transitória
+        O->>N: Repete o aviso segundo sua política
+    end

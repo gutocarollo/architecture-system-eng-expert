@@ -1,0 +1,12 @@
+{
+  "repo": "fluxcd/flagger",
+  "path": "pkg/router/istio.go",
+  "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+  "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go",
+  "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/pkg/router/istio.go",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:04.374977+00:00",
+  "sha256": "3478c93b9140e23a7cbffc996092ed4b67b83213c2583953841d70bec67202fd",
+  "line_count": 814,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--pkg--router--istio.go"
+}

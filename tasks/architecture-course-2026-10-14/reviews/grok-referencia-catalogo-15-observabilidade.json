@@ -1,0 +1,17 @@
+{
+  "document_id": "referencia/catalogo/15-observabilidade",
+  "document_sha256": "bf31bad89daa71589e69a12e173e95e58a24d3922e3ae91903cb85327cfc7f5e",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5c",
+    "airflow-client-code",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "bba6cf61d8abe4b936f20612e340b3c068f7eed73a69f49d788eced13b34969e"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/neutron-lib",
+  "path": "LICENSE",
+  "revision": "6893d1d8c22bac71813422563beb9374e3b902e0",
+  "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/openstack/neutron-lib/6893d1d8c22bac71813422563beb9374e3b902e0/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.397527+00:00",
+  "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+  "line_count": 176,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-lib--LICENSE"
+}

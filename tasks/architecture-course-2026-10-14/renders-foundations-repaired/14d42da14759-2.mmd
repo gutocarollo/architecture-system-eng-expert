@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant App as Aplicação
+    participant DB as Banco local
+    participant Relay as Executor proposto
+    participant SF as Salesforce
+    App->>DB: Grava owner e intenção na mesma transação
+    DB-->>App: Commit
+    Relay->>DB: Consulta trabalho pendente
+    Relay->>SF: Envia operação com identidade estável
+    alt Destino indisponível
+        SF--xRelay: Falha de rede
+        Note over DB,Relay: A intenção permanece para nova tentativa
+    else Destino aceita
+        SF-->>Relay: Resultado
+        Note over Relay,SF: Queda antes da conclusão local pode repetir o envio
+        Relay->>DB: Registra conclusão segundo o contrato
+    end

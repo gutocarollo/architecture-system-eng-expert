@@ -1,0 +1,12 @@
+{
+  "repo": "mastodon/mastodon",
+  "path": "app/lib/activitypub/activity/create.rb",
+  "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+  "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/create.rb",
+  "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/create.rb",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:09:57.583675+00:00",
+  "sha256": "e859f35398cb736f2b5e1de178c19abac6447175b76e76bc504b0ad908876222",
+  "line_count": 508,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-mastodon--mastodon--app--lib--activitypub--activity--create.rb"
+}

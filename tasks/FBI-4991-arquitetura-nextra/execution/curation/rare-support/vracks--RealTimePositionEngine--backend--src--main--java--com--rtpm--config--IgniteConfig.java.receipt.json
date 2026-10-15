@@ -1,0 +1,12 @@
+{
+  "repo": "vracks/RealTimePositionEngine",
+  "path": "backend/src/main/java/com/rtpm/config/IgniteConfig.java",
+  "revision": "f300c9472382d021e9427a85ca283039ac565627",
+  "url": "https://github.com/vracks/RealTimePositionEngine/blob/f300c9472382d021e9427a85ca283039ac565627/backend/src/main/java/com/rtpm/config/IgniteConfig.java",
+  "raw_url": "https://raw.githubusercontent.com/vracks/RealTimePositionEngine/f300c9472382d021e9427a85ca283039ac565627/backend/src/main/java/com/rtpm/config/IgniteConfig.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.583491+00:00",
+  "sha256": "9a1a453c06bde019ef83f9698d7bf699748c16984b29c7a40a346da71eb332a2",
+  "line_count": 322,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/vracks--RealTimePositionEngine--backend--src--main--java--com--rtpm--config--IgniteConfig.java"
+}

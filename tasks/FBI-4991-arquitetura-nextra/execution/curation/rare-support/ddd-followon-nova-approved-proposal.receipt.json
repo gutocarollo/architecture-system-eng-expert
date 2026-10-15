@@ -1,0 +1,7 @@
+{
+  "url": "https://specs.openstack.org/openstack/nova-specs/specs/queens/approved/neutron-new-port-binding-api.html",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:35.126976+00:00",
+  "sha256": "8fd03059762751069bd82a0977f31dc4a858d7ab584689a67054e9602f013ccf",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-nova-approved-proposal.html"
+}

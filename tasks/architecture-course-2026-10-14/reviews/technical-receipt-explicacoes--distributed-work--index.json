@@ -1,0 +1,24 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/distributed-work/index",
+  "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+  "context_sha256": "1654333c1a01208d1008d58c02b36dfc34e95c3fa78a6e2012839dba2c443f3f",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l3a",
+    "l3b",
+    "l3c",
+    "l4a",
+    "l4c",
+    "original-catalog",
+    "original-request",
+    "s3",
+    "s4",
+    "s4-reference-repair",
+    "s6"
+  ]
+}

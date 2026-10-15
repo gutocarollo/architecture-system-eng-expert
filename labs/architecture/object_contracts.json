@@ -1,0 +1,146 @@
+{
+  "concepts": {
+    "Abstract Factory": {
+      "before": {
+        "accepted": false,
+        "fee": 10.0
+      },
+      "after": {
+        "accepted": true,
+        "fee": 10.0
+      },
+      "invariant": "One product family creates its compatible validator and fee calculator together."
+    },
+    "Adapter": {
+      "before": null,
+      "after": 100.0,
+      "invariant": "The boundary translates cents into the domain amount."
+    },
+    "Bridge": {
+      "before": {
+        "coupled_variant_classes": 4
+      },
+      "after": {
+        "abstraction_types": 2,
+        "transport_types": 2,
+        "deliveries": [
+          "standard:memory:100",
+          "standard:paper:100",
+          "premium:memory:100",
+          "premium:paper:100"
+        ]
+      },
+      "invariant": "The notice abstraction hierarchy and the transport implementation hierarchy vary independently through composition."
+    },
+    "Builder": {
+      "before": 100,
+      "after": 250,
+      "invariant": "Construction accumulates chosen fields before returning an order."
+    },
+    "Chain of Responsibility": {
+      "before": true,
+      "after": false,
+      "invariant": "Each validator can stop a request before the next responsibility."
+    },
+    "Command": {
+      "before": 100,
+      "after": 150,
+      "invariant": "The requested credit is represented as an executable value."
+    },
+    "Composite": {
+      "before": 100,
+      "after": 175,
+      "invariant": "Leaves and groups share a recursive total operation."
+    },
+    "Decorator": {
+      "before": 1.0,
+      "after": 3.0,
+      "invariant": "A wrapper extends behavior while retaining the wrapped order."
+    },
+    "Facade": {
+      "before": "two-separate-calls",
+      "after": {
+        "accepted": true,
+        "fee": 1.0
+      },
+      "invariant": "One entrance coordinates validation and fee calculation."
+    },
+    "Factory Method": {
+      "before": "Order",
+      "after": "PremiumOrder",
+      "invariant": "An overridable creation operation selects the concrete order."
+    },
+    "Flyweight": {
+      "before": 5,
+      "after": 1,
+      "invariant": "Five orders share one immutable-style symbol object; per-order amounts stay separate."
+    },
+    "Interpreter": {
+      "before": false,
+      "after": true,
+      "invariant": "A small explicit grammar is evaluated against the order context; no eval is used."
+    },
+    "Iterator": {
+      "before": [
+        100
+      ],
+      "after": [
+        100,
+        50
+      ],
+      "invariant": "Traversal provides elements without exposing storage indexing."
+    },
+    "Mediator": {
+      "before": 1,
+      "after": 2,
+      "invariant": "A coordinator routes one order event to audit and risk participants."
+    },
+    "Memento": {
+      "before": 200,
+      "after": 100,
+      "invariant": "An explicit saved snapshot restores a previous local state; business reversals still need events."
+    },
+    "Observer": {
+      "before": 0,
+      "after": 1,
+      "invariant": "A registered observer receives the published state change."
+    },
+    "Prototype": {
+      "before": [],
+      "after": [
+        "premium"
+      ],
+      "invariant": "A prototype copy can be customized without mutating the original."
+    },
+    "Proxy": {
+      "before": 100,
+      "after": "denied",
+      "invariant": "A substitute checks permission before delegating to the target."
+    },
+    "Singleton": {
+      "before": 2,
+      "after": 1,
+      "invariant": "The local registry returns one instance for one name within this process."
+    },
+    "State": {
+      "before": "accepted-twice",
+      "after": "second-transition-rejected",
+      "invariant": "Behavior depends on the current state and rejects a transition outside its contract."
+    },
+    "Strategy": {
+      "before": 1.0,
+      "after": 2.0,
+      "invariant": "The caller supplies a fee algorithm without replacing the order operation."
+    },
+    "Template Method": {
+      "before": 101,
+      "after": 100.5,
+      "invariant": "The operation preserves a sequence while a subclass changes the fee step."
+    },
+    "Visitor": {
+      "before": 0,
+      "after": 0.5,
+      "invariant": "A separate visitor performs an operation over an order through its public contract."
+    }
+  }
+}

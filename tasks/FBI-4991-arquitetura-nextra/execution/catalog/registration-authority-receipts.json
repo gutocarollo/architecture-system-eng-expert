@@ -1,0 +1,44 @@
+{
+  "measured_at_utc": "2026-10-15 02:48 UTC",
+  "worktree": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "fazgraph_root": "/Users/augustocarollo/Developer.noindex/fazgraph-canonical-v4",
+  "fazgraph_sha": "8f7dc0e1dd927ed3b5c2437337840b52c466b19e",
+  "codegraph_exists": false,
+  "source_sha256": {
+    "docs/canonical/_ontology/ontology.yaml": "130d1d7b064dfdd71d70df000299cbf615d76953f12512afdbe980579777f7d0",
+    "docs/canonical/_governance/source-refs.yaml": "27858118ab9aa856cef01b0f9ff547e1004931211c4b42a5b453e5f88b5f9cd1",
+    "models.py": "1d5bfe84e3eb250d6ae6c3f2defa3310e899e572df2ce4fb7855542cf58ec277",
+    "parser/canonical_docs.py": "e819846954e3ee4a2b69ac8b79f5504463ca11aacdbd5a41b727c21b4db852ef",
+    "parser/config.py": "569daf6f6b04500957773044a072de374bfb432d00881b828d7ef278b9bad529",
+    "parser/builder.py": "159dad8b3572248f84c9841e2b6e86dd3a10b130a5c5ec65f5d45d010c10c44e",
+    "helpers/ai.py": "dd54bf2a72588d8bdfb67a44d6bfc139a948e9f387bec0040bd994e3db2b0815",
+    "scripts/docs/register_doc.py": "2e277d3f14795e788dd2c63acfaa31243bbd5198918f0e1dd00d2b0fa0173bcf",
+    "scripts/docs/regen_index.py": "a10a21c8c23d11d4b7cdc9f0b9b003721ad5e3f90b1ff61b1510c40e4e512347",
+    "scripts/docs/lint_canonical.py": "930d37957209240f9a23e55d23bae40752c696949aa84d1f365e33daaccc9ab4"
+  },
+  "github_metadata": {
+    "archived": false,
+    "default_branch": "main",
+    "full_name": "gutocarollo/architecture-system-eng-expert",
+    "html_url": "https://github.com/gutocarollo/architecture-system-eng-expert",
+    "id": 1417536174,
+    "node_id": "R_kgDOVH3irg",
+    "private": true
+  },
+  "source_search_scope": [
+    "docs/canonical/_ontology",
+    "parser",
+    "app",
+    "scripts",
+    "models.py",
+    "docs/canonical/_governance"
+  ],
+  "source_search_queries": [
+    "Repository|repository_registry|register_repository|Affected Repositories",
+    "repository registry|register.*repositor|repositori.*registr|repository:|repo:|asset:https|class Repository|class Asset|repositories:"
+  ],
+  "existing_target": false,
+  "model_classes_matching_Repository_Asset": [],
+  "graph_fields_matching_repositories_assets": []
+}

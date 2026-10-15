@@ -1,0 +1,26 @@
+---
+title: "Uma falha de lock derruba a tarefa do Airflow"
+description: "Aprenda quando repetir uma falha transitória e quando propagá-la."
+diataxis: explanation
+---
+
+# Uma falha de lock derruba a tarefa do Airflow
+
+O pipeline de captação chega à regra de sessenta dias. A função chama um binário e recebe uma falha de espera por lock, identificada por 55P03. A versão anterior derruba a tarefa na primeira falha. A mudança selecionada permite repetir somente essa condição, com uma cota definida. Você vai executar as duas funções e corrigir uma cópia sua.
+
+Este caso vem do [Bug FBI-4797](https://fazcapital.atlassian.net/browse/FBI-4797) e do [PR 161 do Airflow](https://bitbucket.org/fazcapital/airflow/pull-requests/161). A investigação leu o campo visível `customfield_10047`, o relato do PR e as [versões anterior](https://bitbucket.org/fazcapital/airflow/src/febaf1be978aad59c29f38d1bd74f357f8e942b5/dags/inflow__xp__stg_to_fct.py) e [selecionada](https://bitbucket.org/fazcapital/airflow/src/55dfe8acb362e6854d1af4e7dd7d17e6497af9bd/dags/inflow__xp__stg_to_fct.py). O relato registra um timeout de lock; o bloqueador original não foi identificado nessa fonte. O código selecionado é histórico. A prática não mede a versão atualmente implantada.
+
+## Escolha seu próximo passo
+
+| Sua necessidade | Destino do mesmo caso | Resultado |
+| --- | --- | --- |
+| Você quer entender a decisão. | [Explicação](/explicacoes/casos/airflow-lock-retry/) | Você distingue falha transitória, limite de tentativas e propagação. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/airflow-lock-retry/) | Você faz a cópia anterior falhar, aplica o patch e repete os contratos. |
+| Você precisa investigar um fluxo semelhante. | [Guia](/guias/casos/airflow-lock-retry/) | Você confere o erro elegível, a cota e as premissas da repetição. |
+| Você quer consultar nomes e garantias. | [Referência](/referencia/casos/airflow-lock-retry/) | Você encontra a função, os SHAs, os fixtures e os limites. |
+
+## O que muda
+
+Com uma falha 55P03 seguida de sucesso, a função anterior faz uma tentativa e falha; a posterior faz duas e conclui. Um erro 23505 e um timeout do próprio processo continuam falhando na primeira tentativa. Quando 55P03 persiste, a função encerra após três tentativas totais e dois pedidos de espera de trinta segundos.
+
+O laboratório executa a função Python histórica com substitutos locais controlados (doubles). Ele não inicia uma DAG, não executa o binário Haskell, não conecta ao PostgreSQL e não faz esperas reais. A atomicidade e a idempotência do motor Haskell são premissas relatadas pelo PR e continuam fora desta prova. O código procura 55P03 no stderr; isso também não identifica qual consulta segurava o lock.

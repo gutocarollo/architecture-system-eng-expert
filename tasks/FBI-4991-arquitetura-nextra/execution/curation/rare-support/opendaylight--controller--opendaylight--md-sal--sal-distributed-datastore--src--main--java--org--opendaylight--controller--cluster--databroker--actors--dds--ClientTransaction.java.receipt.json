@@ -1,0 +1,12 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:45:36.358488+00:00",
+  "sha256": "998ecbb2baefc55736aac9196f217de6cba98985bc3a96ca3864c15c4e0d0f4f",
+  "line_count": 127,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--ClientTransaction.java"
+}

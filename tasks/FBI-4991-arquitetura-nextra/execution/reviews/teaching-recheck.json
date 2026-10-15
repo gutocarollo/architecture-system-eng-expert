@@ -1,0 +1,104 @@
+{
+  "observed_at_utc": "2026-10-15T02:43:52.382557+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "base_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "scope": "One warm HIGH-only recheck of T1, T2 and T3; unrelated new PostgreSQL cases and changing external-reference content excluded",
+  "verdict": "PASS",
+  "remaining_high": 0,
+  "manifest_sha256": "a0781e97ce689e4903bda7b0e562707ecbc711df6a8b1f4938b119aaab905727",
+  "manifest_timestamp": "2026-10-15T02:34:49.328230+00:00",
+  "frozen_files_checked": 165,
+  "manifest_drift": [],
+  "findings": [
+    {
+      "id": "T1",
+      "status": "RESOLVED",
+      "basis": "The former mismatches now execute filtering, splitting, miss/load/store, negative-cache sentinel, visible A/B cohorts, peer dissemination, external session ownership, propagated deadline, range/attribute partitioning and resource-grain signals. Additional route decisions were read against their actual model bodies and their explicit bounded properties."
+    },
+    {
+      "id": "T2",
+      "status": "RESOLVED",
+      "basis": "Observed before/after values are validated against complete separately stored fixture contracts. The exact previous 250-debit corruption is rejected by execution, not only by receipt text.",
+      "independent_mutation_receipt": "teaching-recheck.mutation.json"
+    },
+    {
+      "id": "T3",
+      "status": "RESOLVED",
+      "observed_metrics": {
+        "failed_requests": 1,
+        "max_span_duration_ms": 800,
+        "observation_window_seconds": 1,
+        "operations": 1,
+        "request_error_ratio": 0.5,
+        "request_rate_per_second": 2.0,
+        "requests": 2,
+        "spans": 3
+      },
+      "basis": "The code counts unique request IDs and failed request IDs separately from spans and operation IDs; the published diagnostic tutorial has the corrected ratio."
+    }
+  ],
+  "commands": [
+    {
+      "command": "python3 labs/architecture/run_all.py --out tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching-recheck.runs.json",
+      "exit_code": 0,
+      "receipt": "teaching-recheck.runs.json"
+    },
+    {
+      "command": "runpy.run_path(labs/architecture/check_invariants.py), redirecting only its persistent receipt to teaching-recheck.invariants.json",
+      "exit_code": 0,
+      "receipt": "teaching-recheck.invariants.json"
+    },
+    {
+      "command": "runpy.run_path(labs/architecture/check_matrix.py), redirecting only its persistent receipt to teaching-recheck.matrix.json",
+      "exit_code": 0,
+      "receipt": "teaching-recheck.matrix.json"
+    }
+  ],
+  "counts": {
+    "local_case_commands": 16,
+    "financial_probes": 169,
+    "financial_field_mutations_killed": 629,
+    "object_field_mutations_killed": 31,
+    "matrix_commands": 189,
+    "concepts_with_bounded_observation": 310
+  },
+  "read_source_sha256": {
+    "labs/architecture/financial.py": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+    "labs/architecture/invariants.py": "2e47b0bcd180ba62732ee9b626f22c3d017c1a04d7f88d2364fbe5a349a9938d",
+    "labs/architecture/check_invariants.py": "48b465f116f607dc6a87c93a86a5be4d8807c5b3acd8a8c052106b9100a7fe1a",
+    "labs/architecture/check_matrix.py": "3c8e707c41ff903792345b97245b3843c936915b85509b42497f3ed74a5a6aca",
+    "labs/architecture/run_all.py": "a66bd476372947b2ca9dfc4e33eb79211a44f02481342035927f367af88f4fdc",
+    "labs/architecture/object_patterns.py": "4a1f126e49dc9c5c99e4e5dc12b806d07569a33d92787e2b410b2ac41e40d2b8",
+    "labs/architecture/models_api.py": "f818b57f978b1c8570231fa491d9d0344fffad0a220712c7f2fcdbccf6ed06b6",
+    "labs/architecture/models_architecture.py": "11eef231d3e995f2147d21ae0401d2cf40eecdd0b5919f99d7b37543295dffe4",
+    "labs/architecture/models_concurrency.py": "317cbc953f2f40e4fddee20ce1ae02e3b3aa551bb7da2281d70f33d4c1a60587",
+    "labs/architecture/models_distribution.py": "1c75c77111047bcd9a386087d135311b4186f2f22ff62f3b5edf832337de674b",
+    "labs/architecture/models_domain.py": "d8413c42c6f64ca8d1e7e72ade5dee48e8330e695beb1c8bd6e2cfe8d56d164a",
+    "labs/architecture/models_ops.py": "276366d04c47cf4efffc743c563dce8f7f45907fbe49b26e7b39c4640229db7e",
+    "labs/architecture/models_security.py": "0acc775d560f1a633502d278b3b2e8498a72238353250d04f3e5abee6ecc98dd",
+    "labs/architecture/models_workflow.py": "dc7a47bc1a6c3d0d2eaca84def5a0ad775a22edf5939085d4c39ddf3ece66cfa",
+    "labs/architecture/mapping_decisions.json": "efa53e89e87dafbff5a7367a39006c323419aa36f8e4424c5deb8d9c244964bc",
+    "labs/architecture/map_concepts.py": "e55abf598e558167431742499b8a22b16ff88d8f276d197e7c21b088f50a4aa2",
+    "labs/architecture/otel_probe.py": "1dbee9c0e890b3d7b5c4c2012a220a8dd1948fbfce33f96fe99c86a2c0c283d8",
+    "labs/architecture/setup_labs.py": "73305142deec61c2ae9b1cab8a4ee268f8a377c4a5fa702a79a15004433584d7",
+    "labs/architecture/requirements-lock.txt": "841785a57c311269ea748d6792000931c8f78367fde0e0736c41d5b9545ad66b",
+    "labs/architecture/additional_observations.py": "1f8f4305e639bd6d0e92ef38515be21b9a8210a1297ec95584ce4d0d056661c6",
+    "labs/architecture/merge_observations.py": "4f50c5c1d34b32d8fb21d4c6c500cca324f469a4dfebd8737117f2861509939e",
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json": "1da715cb1097dff8dbfa8f6cfffed1ab1344771d7e78a6672f098ebf6d2b8f5d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/owned-hashes.json": "a0781e97ce689e4903bda7b0e562707ecbc711df6a8b1f4938b119aaab905727"
+  },
+  "external_contracts": {
+    "context7": "Monthly quota reached",
+    "official_fallback": [
+      "https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.export.html",
+      "https://docs.python.org/3/library/ssl.html"
+    ],
+    "sdk_version_measured": "1.45.1"
+  },
+  "limits": [
+    "PASS covers relevant bounded teaching observations and fixed synthetic fixtures, not complete protocol implementations.",
+    "The field corruption controls are not an exhaustive campaign over every source operator.",
+    "No rendered-UI, publication, production, new PostgreSQL-case or whole-history verdict."
+  ]
+}

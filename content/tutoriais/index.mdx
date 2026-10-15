@@ -1,0 +1,18 @@
+---
+title: Aprenda fazendo
+description: Seis experiências locais para reconhecer falhas e garantias de arquitetura.
+diataxis: tutorial
+---
+
+# Aprenda fazendo
+
+Você vai provocar uma falha pequena em um programa local, observar o resultado e mudar o mecanismo. Cada experiência começa por um problema ligado ao MakersHub e termina com uma saída que você pode conferir. Os dados são fictícios e os programas não chamam serviços de produção.
+
+1. [Repita uma operação sem repetir seu efeito](/tutoriais/idempotency). Você verá por que uma chave precisa identificar a mesma intenção.
+2. [Preserve a intenção depois de salvar](/tutoriais/outbox). Você verá o espaço entre o commit local e a entrega ao próximo sistema.
+3. [Recuse uma edição baseada em versão antiga](/tutoriais/optimistic-concurrency). Você verá uma atualização impedir a perda silenciosa de outra.
+4. [Observe uma projeção atrasada](/tutoriais/read-projection). Você verá por que a leitura preparada precisa de uma política de atualização.
+5. [Compartilhe uma recomputação e preserve sua tarefa](/tutoriais/single-flight). Você verá como o cancelamento de um cliente afeta os demais.
+6. [Recuse uma transição inválida](/tutoriais/state-machine). Você verá estados, eventos e condições trabalharem juntos.
+
+Execute os blocos na ordem publicada. Compare a saída esperada antes de mudar o código. Para entender os custos de uma solução de produção, siga o link de explicação ao fim da aula.

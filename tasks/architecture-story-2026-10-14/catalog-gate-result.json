@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/jira-fbi-gate.mjs",
+    "--input=tasks/architecture-story-2026-10-14/catalog-gate-input.example.json"
+  ],
+  "returncode": 0,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"jira-fbi catalog-v4 gate passed\"}}\n",
+  "stderr": ""
+}

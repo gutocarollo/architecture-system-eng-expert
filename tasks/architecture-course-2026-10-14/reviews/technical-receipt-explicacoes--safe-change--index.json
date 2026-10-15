@@ -1,0 +1,20 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/safe-change/index",
+  "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+  "context_sha256": "544a99b86abbd040b42d8e69bb89cb68017faff26a1e23b81c21730c0a19b27d",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l6c",
+    "original-catalog",
+    "original-request",
+    "s2",
+    "s3",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.619549+00:00",
+  "sha256": "6fa797d99d3fd072726a589d19f5a1a71a1020b6be0011473b29069bd94a4ebe",
+  "line_count": 853,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--opendaylight--md-sal--sal-distributed-datastore--src--main--java--org--opendaylight--controller--cluster--databroker--actors--dds--AbstractProxyTransaction.java"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-dsl",
+  "path": "build.gradle",
+  "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+  "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/build.gradle",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/build.gradle",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:19:28.397632+00:00",
+  "sha256": "81b80507a785dc429570a1043970f48f25d5c558db8104297355dc01515d71f9",
+  "line_count": 43,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--build.gradle"
+}

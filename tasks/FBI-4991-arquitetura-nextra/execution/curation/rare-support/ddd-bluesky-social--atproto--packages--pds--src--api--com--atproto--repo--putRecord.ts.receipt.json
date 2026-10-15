@@ -1,0 +1,12 @@
+{
+  "repo": "bluesky-social/atproto",
+  "path": "packages/pds/src/api/com/atproto/repo/putRecord.ts",
+  "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+  "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts",
+  "raw_url": "https://raw.githubusercontent.com/bluesky-social/atproto/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/packages/pds/src/api/com/atproto/repo/putRecord.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:09:57.584137+00:00",
+  "sha256": "fbfd58999ea6478de156d409ce1bbfed598831b1981564f971dfec6eaafe56e2",
+  "line_count": 211,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--packages--pds--src--api--com--atproto--repo--putRecord.ts"
+}

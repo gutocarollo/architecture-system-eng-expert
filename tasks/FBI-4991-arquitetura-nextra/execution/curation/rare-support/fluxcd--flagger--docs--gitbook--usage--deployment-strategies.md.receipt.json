@@ -1,0 +1,12 @@
+{
+  "repo": "fluxcd/flagger",
+  "path": "docs/gitbook/usage/deployment-strategies.md",
+  "revision": "c781cdc199d44cf84e21e90aedd8ff14c1df450e",
+  "url": "https://github.com/fluxcd/flagger/blob/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md",
+  "raw_url": "https://raw.githubusercontent.com/fluxcd/flagger/c781cdc199d44cf84e21e90aedd8ff14c1df450e/docs/gitbook/usage/deployment-strategies.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.588794+00:00",
+  "sha256": "b0dad5a62a2f21b6ec83d58092e272b00ba296c29b937b8f8cd7d205b009fb37",
+  "line_count": 531,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/fluxcd--flagger--docs--gitbook--usage--deployment-strategies.md"
+}

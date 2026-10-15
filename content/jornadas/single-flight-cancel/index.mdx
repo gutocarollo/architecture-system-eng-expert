@@ -1,0 +1,36 @@
+---
+title: "Cancelamento de uma busca compartilhada"
+description: "Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas seu leitor."
+diataxis: explanation
+---
+
+# Cancelamento de uma busca compartilhada
+
+Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a tarefa compartilhada e derrubava os cinco leitores. A reprodução usa cinco participantes fictícios e a mesma classe das duas versões.
+
+Este caso vem do [card FBI-2331](https://fazcapital.atlassian.net/browse/FBI-2331) e do [PR 51](https://bitbucket.org/fazcapital/makershub/pull-requests/51). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/342de122cdbfccbe7659adec0e1fcb842b38fc83/backend/app/utils/single_flight.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/a304a4e56480648bdc60be96c00532c38d18df9f/backend/app/utils/single_flight.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+## Escolha o que você precisa agora
+
+| Sua necessidade | Destino deste mesmo caso | O que você obterá |
+| --- | --- | --- |
+| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/single-flight-cancel/) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/single-flight-cancel/) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/single-flight-cancel/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/single-flight-cancel/) | Você consulta os localizadores e as garantias de cada probe. |
+
+## Antes de começar
+
+Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial apresenta os comandos completos e usa somente dados de aprendizado. Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas seu leitor.
+
+## O resultado que conecta a jornada
+
+O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+Quando terminar a prática e consultar seus contratos, continue em [A lista precisa continuar disponível](/jornadas/early-refresh/).
+
+## Conceitos deste caso
+
+A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
+
+Este caso reúne 5 conceitos no [mapa de mecanismos e práticas](/jornadas/single-flight-cancel/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.

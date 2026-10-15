@@ -1,0 +1,14 @@
+{
+  "repository": "armaaar/thndr-mcp",
+  "default_branch": "main",
+  "sha": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "description": null,
+  "observed_utc": "2026-10-15T02:01:59.912367+00:00"
+}

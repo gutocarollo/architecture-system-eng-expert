@@ -1,0 +1,22 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/13-alta-disponibilidade",
+  "document_sha256": "36127277b02007a4f942f2ac372d4107410e1cfdbdf3d4fc248b4e0bfbe5f76f",
+  "context_sha256": "ef92a216285c265d9763ec051c732b3c56878a7fcc8667dfaea7ab560e797820",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "l4c",
+    "l6a",
+    "l6c",
+    "original-catalog",
+    "original-request",
+    "s4",
+    "s4-reference-repair",
+    "s6",
+    "s6-reference-repair"
+  ]
+}

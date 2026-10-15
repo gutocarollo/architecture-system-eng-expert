@@ -1,0 +1,37 @@
+{
+  "query": "TwoPhaseBusinessAction language:Java -repo:apache/seata -repo:apache/incubator-seata -repo:seata/seata-samples -repo:apache/incubator-seata-samples -path:test -path:examples -path:samples",
+  "observed_utc": "2026-10-15T02:40:24.896769Z",
+  "total_count": 608,
+  "items": [
+    {
+      "repo": "yangfuhai/jboot",
+      "path": "src/main/java/io/jboot/support/seata/tcc/TccActionInterceptor.java",
+      "url": "https://github.com/yangfuhai/jboot/blob/ef80a69752e34b92308000209d4d272d25f8309f/src/main/java/io/jboot/support/seata/tcc/TccActionInterceptor.java"
+    },
+    {
+      "repo": "yangfuhai/jboot",
+      "path": "src/main/java/io/jboot/support/seata/tcc/TccInterceptorBuilder.java",
+      "url": "https://github.com/yangfuhai/jboot/blob/ef80a69752e34b92308000209d4d272d25f8309f/src/main/java/io/jboot/support/seata/tcc/TccInterceptorBuilder.java"
+    },
+    {
+      "repo": "lptnyy/spring-cloud-project",
+      "path": "pro-seata/tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java",
+      "url": "https://github.com/lptnyy/spring-cloud-project/blob/4b7370ea3967814b6356c988ef57ef8023493e84/pro-seata/tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java"
+    },
+    {
+      "repo": "smtcrms/seata",
+      "path": "tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java",
+      "url": "https://github.com/smtcrms/seata/blob/da96029455843dfd8ace1c085e8a170f05ad659a/tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java"
+    },
+    {
+      "repo": "Felix9128/seata",
+      "path": "tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java",
+      "url": "https://github.com/Felix9128/seata/blob/6dbb668b337a59713f39565590a9f6f40c52a62e/tcc/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java"
+    },
+    {
+      "repo": "yangfuhai/jboot",
+      "path": "src/main/java/io/jboot/support/seata/tcc/ActionInterceptorHandler.java",
+      "url": "https://github.com/yangfuhai/jboot/blob/ef80a69752e34b92308000209d4d272d25f8309f/src/main/java/io/jboot/support/seata/tcc/ActionInterceptorHandler.java"
+    }
+  ]
+}

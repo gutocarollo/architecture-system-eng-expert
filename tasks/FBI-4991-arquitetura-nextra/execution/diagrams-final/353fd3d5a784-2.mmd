@@ -1,0 +1,5 @@
+flowchart LR
+    Backup[Backup-base proposto] --> Restore[Restauração isolada]
+    Archive[WAL arquivado sem lacunas até o alvo] --> Restore
+    Restore --> Target[Estado no instante escolhido]
+    Archive -->|segmento necessário ausente| Gap[Alvo não demonstrável por esta cadeia]

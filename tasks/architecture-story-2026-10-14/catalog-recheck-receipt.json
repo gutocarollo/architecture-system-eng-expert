@@ -1,0 +1,31 @@
+{
+  "measured_at_utc": "2026-10-14 23:20 UTC",
+  "pwd": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "branch": "perfect-citizen-a30f5998",
+  "sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "origin": "https://github.com/gutocarollo/architecture-system-eng-expert.git",
+  "export_sha256": "770e1b4e13bad6c9eaf0aba6496976c7a95e1043deba55c76620cd85cb4ab6fb",
+  "canonical_sha256": "8bfdd080b084cd2518b6c118145df7fef7d976ed1d7280971180b52d172d3297",
+  "counts": {
+    "contexts": 14,
+    "capabilities": 16,
+    "relations": 38
+  },
+  "repositories": [
+    "fazcapital/airflow-dags",
+    "fazcapital/faz-database",
+    "fazcapital/makershub",
+    "fazcapital/salesforce",
+    "fazcapital/scraping"
+  ],
+  "resolved_data_paths": [
+    "/Users/augustocarollo/Developer.noindex/fazgraph-canonical-v4/data",
+    "/Users/augustocarollo/Developer.noindex/fazgraph-canonical-v4/data"
+  ],
+  "pagefind_manifest": "pagefind --site .next/server/app --output-path public/_pagefind",
+  "gate": {
+    "returncode": 0,
+    "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"jira-fbi catalog-v4 gate passed\"}}\n",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "observed_utc": "2026-10-15T03:41:20.294862+00:00",
+  "historical_http200_records": 799,
+  "unique_artifacts": 737,
+  "missing": [],
+  "hash_mismatches": [],
+  "oversize_gt_1MB": [],
+  "matrix_sha256": "a4b12f6c6aa8b1883d8f6c1ac7ed1c7f81d829859422f5a0212f7fd1cca6689e",
+  "scope": "All historical HTTP200 source records retained in the frozen source registry; this is integrity, not renewed network freshness or semantic approval."
+}

@@ -1,0 +1,439 @@
+{
+  "measured_at": "2026-10-15T03:16:18.598445+00:00",
+  "host": "airflow-70",
+  "source_path": "/home/fazcapital/airflow/airflow-dags",
+  "historical_cases": [
+    {
+      "case_id": "retry",
+      "sha": "55dfe8acb362e6854d1af4e7dd7d17e6497af9bd",
+      "parent": "febaf1be978aad59c29f38d1bd74f357f8e942b5",
+      "committer_date": "2026-10-06T08:32:50-03:00",
+      "files": [
+        {
+          "path": "dags/inflow__xp__stg_to_fct.py",
+          "before": {
+            "available": true,
+            "blob": "5f6641421f6adbf6b7206d4bb3dca0261a84c00b",
+            "sha256": "87b745c73fedb2065756e18114421b1bfb2d90f1838a6ca354af2264f984d3a4",
+            "excerpts": [
+              {
+                "start_line": 226,
+                "end_line": 270,
+                "text": "    def task_run_60_days_rule_hs():\n        \"\"\"\n        Regra de 60 dias via porta Haskell compilada (SUBSTITUI a versao Python).\n        Escreve dim_account_assignment + dim_advisor_coverage (PROD), atomico.\n        ~13x mais rapido que o Python (16s vs 214s) e corrige periodos invalidos\n        (end<start) e contas multi-current. Mede o pico de RSS (getrusage).\n        Fail-loud: qualquer falha derruba a task (esta no caminho critico).\n        \"\"\"\n        import json\n        import resource\n        import subprocess\n        from urllib.parse import quote\n\n        binary = os.path.join(\n            toolkit_path, 'sixty_days_rule_hs', 'bin', 'sixty-days-rule')\n        if not os.path.exists(binary):\n            raise FileNotFoundError(\n                \"Binario Haskell ausente em %s (rebuild via \"\n                \"toolkit/captable_processing_utils/sixty_days_rule_hs)\" % binary)\n\n        c = get_postgres_hook().get_connection('postgres_prod')\n        uri = \"postgresql://{u}:{p}@{h}:{port}/{db}\".format(\n            u=quote(c.login or '', safe=''),\n            p=quote(c.password or '', safe=''),\n            h=c.host, port=c.port or 5432, db=c.schema)\n\n        env = {**os.environ, 'PG_CONN_STRING': uri}\n        proc = subprocess.run(\n            [binary, '--mode', 'prod', '--json'],\n            env=env, capture_output=True, text=True, timeout=300)\n\n        peak_mb = round(\n            resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024.0, 1)\n\n        if proc.returncode != 0:\n            logger.error(\"[HASKELL 60d PROD] rc=%s stderr=%s\",\n                         proc.returncode, (proc.stderr or '')[-3000:])\n            raise RuntimeError(\n                \"Haskell run_60_days_rule (prod) falhou rc=%s\" % proc.returncode)\n\n        last = (proc.stdout or '').strip().splitlines()[-1:] or ['{}']\n        result = json.loads(last[0])\n        result['peak_rss_mb'] = peak_mb\n        logger.info(\"[HASKELL 60d PROD] %s\", result)\n        return result"
+              }
+            ]
+          },
+          "after": {
+            "available": true,
+            "blob": "2fa3dd686111f73b3148674454c203015269f1bd",
+            "sha256": "e9ecd6338d6c22af7f55b4017b610e7a705ab3268864b5a770ac52220a1735f5",
+            "excerpts": [
+              {
+                "start_line": 226,
+                "end_line": 288,
+                "text": "    def task_run_60_days_rule_hs():\n        \"\"\"\n        Regra de 60 dias via porta Haskell compilada (SUBSTITUI a versao Python).\n        Escreve dim_account_assignment + dim_advisor_coverage (PROD), atomico.\n        ~13x mais rapido que o Python (16s vs 214s) e corrige periodos invalidos\n        (end<start) e contas multi-current. Mede o pico de RSS (getrusage).\n        Fail-loud: qualquer falha derruba a task (esta no caminho critico). Unica\n        excecao: lock timeout do Postgres (55P03), repetido ate 2 vezes (FBI-4797).\n        \"\"\"\n        import json\n        import resource\n        import subprocess\n        import time\n        from urllib.parse import quote\n\n        binary = os.path.join(\n            toolkit_path, 'sixty_days_rule_hs', 'bin', 'sixty-days-rule')\n        if not os.path.exists(binary):\n            raise FileNotFoundError(\n                \"Binario Haskell ausente em %s (rebuild via \"\n                \"toolkit/captable_processing_utils/sixty_days_rule_hs)\" % binary)\n\n        c = get_postgres_hook().get_connection('postgres_prod')\n        uri = \"postgresql://{u}:{p}@{h}:{port}/{db}\".format(\n            u=quote(c.login or '', safe=''),\n            p=quote(c.password or '', safe=''),\n            h=c.host, port=c.port or 5432, db=c.schema)\n\n        env = {**os.environ, 'PG_CONN_STRING': uri}\n        # 55P03 = lock_timeout (60 s) do Postgres: o TRUNCATE de dim_account_assignment e\n        # dim_advisor_coverage espera todo leitor terminar, e uma consulta longa naquelas\n        # tabelas estoura a espera (05/10 22:32 UTC, 1 em 6 runs). A escrita e atomica (uma\n        # transacao, a falha desfaz tudo) e idempotente: repetir e seguro. So esse erro\n        # repete; qualquer outro derruba a task na hora.\n        lock_retries, lock_retry_delay_s = 2, 30\n        attempt = 0\n        while True:\n            proc = subprocess.run(\n                [binary, '--mode', 'prod', '--json'],\n                env=env, capture_output=True, text=True, timeout=300)\n            lock_timeout = proc.returncode != 0 and '55P03' in (proc.stderr or '')\n            if not lock_timeout or attempt >= lock_retries:\n                break\n            attempt += 1\n            logger.warning(\n                \"[HASKELL 60d PROD] lock timeout (55P03) na escrita atomica; \"\n                \"tentativa %s/%s em %ss\", attempt, lock_retries, lock_retry_delay_s)\n            time.sleep(lock_retry_delay_s)\n\n        peak_mb = round(\n            resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024.0, 1)\n\n        if proc.returncode != 0:\n            logger.error(\"[HASKELL 60d PROD] rc=%s stderr=%s\",\n                         proc.returncode, (proc.stderr or '')[-3000:])\n            raise RuntimeError(\n                \"Haskell run_60_days_rule (prod) falhou rc=%s\" % proc.returncode)\n\n        last = (proc.stdout or '').strip().splitlines()[-1:] or ['{}']\n        result = json.loads(last[0])\n        result['peak_rss_mb'] = peak_mb\n        logger.info(\"[HASKELL 60d PROD] %s\", result)\n        return result"
+              }
+            ]
+          },
+          "diff_sha256": "b7394d12aba8fb34b52a24173576b140b053a174cf541dd8868e2ff2a1e16233"
+        }
+      ]
+    },
+    {
+      "case_id": "capacity",
+      "sha": "751009ba9c744e8e6d2be71b100251a59fa339e4",
+      "parent": "d631a0f1e1b835502131ddbd0aed9cdd3c2280c9",
+      "committer_date": "2026-10-02T16:10:16+00:00",
+      "files": [
+        {
+          "path": "config/airflow.cfg",
+          "before": {
+            "available": true,
+            "blob": "26f36850059becedad9b55f512dd664152b39ee9",
+            "sha256": "61e79b49f55c02815454a4145ec4ecfdc1405b17ed41012071782359746fd59a",
+            "excerpts": [
+              {
+                "start_line": 66,
+                "end_line": 70,
+                "text": "#\nparallelism = 32\n\n# The maximum number of task instances allowed to run concurrently in each DAG. To calculate\n# the number of tasks that is running concurrently for a DAG, add up the number of running"
+              },
+              {
+                "start_line": 78,
+                "end_line": 82,
+                "text": "#\nmax_active_tasks_per_dag = 20\n\n# Are DAGs paused by default at creation\n#"
+              }
+            ]
+          },
+          "after": {
+            "available": true,
+            "blob": "c62c0bd438b670a3896ca0d13161e3046e4dec3b",
+            "sha256": "998fb8f455de05b7ce4c92b9287d031d3e17a378cef9fbd4bb2a7246661b8b26",
+            "excerpts": [
+              {
+                "start_line": 66,
+                "end_line": 70,
+                "text": "#\nparallelism = 5\n\n# The maximum number of task instances allowed to run concurrently in each DAG. To calculate\n# the number of tasks that is running concurrently for a DAG, add up the number of running"
+              },
+              {
+                "start_line": 78,
+                "end_line": 82,
+                "text": "#\nmax_active_tasks_per_dag = 5\n\n# Are DAGs paused by default at creation\n#"
+              }
+            ]
+          },
+          "diff_sha256": "4ebf25ffade12aac5ec84485b364df4771ffb2a38f9ca18f07469fdcc7d03f2b"
+        },
+        {
+          "path": "config/dw_capacity.json",
+          "before": {
+            "available": false,
+            "reason": "path_absent_in_revision"
+          },
+          "after": {
+            "available": true,
+            "blob": "5f5111704fdacd834572c2030120b17fd7aca707",
+            "sha256": "a61ca17cc2c405fb6cbe00375a483f7a344cd8b5d3bad4d024444e0d18ddb0e8",
+            "excerpts": [
+              {
+                "start_line": 6,
+                "end_line": 10,
+                "text": "  \"expected_database\": \"faz_capital\",\n  \"role_connection_limit\": 40,\n  \"max_connections_per_task\": 3,\n  \"connection_headroom\": 4,\n  \"max_parallel_tasks\": 5,"
+              },
+              {
+                "start_line": 7,
+                "end_line": 11,
+                "text": "  \"role_connection_limit\": 40,\n  \"max_connections_per_task\": 3,\n  \"connection_headroom\": 4,\n  \"max_parallel_tasks\": 5,\n  \"post_deploy_canary\": {"
+              },
+              {
+                "start_line": 8,
+                "end_line": 12,
+                "text": "  \"max_connections_per_task\": 3,\n  \"connection_headroom\": 4,\n  \"max_parallel_tasks\": 5,\n  \"post_deploy_canary\": {\n    \"status\": \"NOT_EXECUTED\","
+              },
+              {
+                "start_line": 9,
+                "end_line": 13,
+                "text": "  \"connection_headroom\": 4,\n  \"max_parallel_tasks\": 5,\n  \"post_deploy_canary\": {\n    \"status\": \"NOT_EXECUTED\",\n    \"connections\": 15,"
+              },
+              {
+                "start_line": 11,
+                "end_line": 15,
+                "text": "  \"post_deploy_canary\": {\n    \"status\": \"NOT_EXECUTED\",\n    \"connections\": 15,\n    \"command\": \"DW_CAPACITY_DSN=<secret-outside-log> python scripts/canary_dw_capacity.py --confirm\"\n  },"
+              },
+              {
+                "start_line": 16,
+                "end_line": 20,
+                "text": "  \"contract_notes\": {\n    \"role_connection_limit_source\": \"Medido no DW em 2026-10-01 12:10 UTC: rolconnlimit=40 para o role airflow, max_connections=250, superuser_reserved_connections=3. Este contrato acompanha o limite vivo; reduzir o role para 20 exige decisão própria no FBI-3505.\",\n    \"measured_live_role_connection_limit\": 40,\n    \"assumptions\": \"max_connections_per_task=3 e connection_headroom=4 são premissas de modelagem. Não são medição da frota inteira nem reserva física do servidor, e devem ser validadas pelo canário pós-deploy antes de virarem teto real.\"\n  }"
+              },
+              {
+                "start_line": 17,
+                "end_line": 21,
+                "text": "    \"role_connection_limit_source\": \"Medido no DW em 2026-10-01 12:10 UTC: rolconnlimit=40 para o role airflow, max_connections=250, superuser_reserved_connections=3. Este contrato acompanha o limite vivo; reduzir o role para 20 exige decisão própria no FBI-3505.\",\n    \"measured_live_role_connection_limit\": 40,\n    \"assumptions\": \"max_connections_per_task=3 e connection_headroom=4 são premissas de modelagem. Não são medição da frota inteira nem reserva física do servidor, e devem ser validadas pelo canário pós-deploy antes de virarem teto real.\"\n  }\n}"
+              },
+              {
+                "start_line": 18,
+                "end_line": 21,
+                "text": "    \"measured_live_role_connection_limit\": 40,\n    \"assumptions\": \"max_connections_per_task=3 e connection_headroom=4 são premissas de modelagem. Não são medição da frota inteira nem reserva física do servidor, e devem ser validadas pelo canário pós-deploy antes de virarem teto real.\"\n  }\n}"
+              }
+            ]
+          },
+          "diff_sha256": "7c7e8abc4d8a41d17bd2597dfcb6a4b1589a6e9c289dc29ec0400d9bff42733b"
+        }
+      ]
+    },
+    {
+      "case_id": "identity",
+      "sha": "bff72e872644bc256f6a704b49309a263a6ddf93",
+      "parent": "a3f8957edd8189bb906dc60d7b06091324f9d47a",
+      "committer_date": "2026-10-02T17:26:04+00:00",
+      "files": [
+        {
+          "path": "toolkit/lemitvox_dialer/dedupe.py",
+          "before": {
+            "available": true,
+            "blob": "b0c36a6893e0928a8f5b461002b567c5253d9f87",
+            "sha256": "7def8bd00166f1de26d6e960642d44db33f4c77dd602ef69b96ff5b03aa03220",
+            "excerpts": [
+              {
+                "start_line": 39,
+                "end_line": 51,
+                "text": "def drop_identical_rows(rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:\n    \"\"\"Keep the first of each group of rows that are equal in every column, in input order.\"\"\"\n    rows = list(rows)\n    columns = tuple(sorted({column for row in rows for column in row}))\n    seen = set()\n    kept: List[Dict[str, Any]] = []\n    for row in rows:\n        key = _row_key(row, columns)\n        if key in seen:\n            continue\n        seen.add(key)\n        kept.append(row)\n    return kept"
+              }
+            ]
+          },
+          "after": {
+            "available": true,
+            "blob": "05591e485f01efb957bff69a72eec68850beeaae",
+            "sha256": "dcdba67bbe428bcbdd287fab24ddd347013e918ac0c9decbae661c0364f2c06c",
+            "excerpts": [
+              {
+                "start_line": 42,
+                "end_line": 45,
+                "text": "def call_key(row: Dict[str, Any]) -> CallKey:\n    \"\"\"The identity of a call. ``int()`` also turns the numpy integers of a parquet round trip\n    into Python ones, which psycopg2 can adapt.\"\"\"\n    return int(row[\"ref_call_id\"]), _destination(row.get(\"destination\"))"
+              },
+              {
+                "start_line": 65,
+                "end_line": 84,
+                "text": "def drop_repeated_calls(rows: Iterable[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int, int]:\n    \"\"\"Keep the first row of each call, in input order.\n\n    Returns ``(kept, dropped, dropped_that_differed)``. ``dropped_that_differed`` counts the\n    dropped rows that were not identical to the one kept (not seen in the data); the caller\n    logs it so that case never goes unnoticed.\n    \"\"\"\n    kept: List[Dict[str, Any]] = []\n    first_by_key: Dict[CallKey, Dict[str, Any]] = {}\n    dropped = differed = 0\n    for row in rows:\n        key = call_key(row)\n        if key in first_by_key:\n            dropped += 1\n            if not _same_row(first_by_key[key], row):\n                differed += 1\n            continue\n        first_by_key[key] = row\n        kept.append(row)\n    return kept, dropped, differed"
+              },
+              {
+                "start_line": 87,
+                "end_line": 96,
+                "text": "def stored_call_keys(\n    ref_call_ids: Sequence[int],\n    fetch_records: Callable[[str, List[int]], Sequence[Sequence[Any]]],\n) -> Set[CallKey]:\n    \"\"\"The identities, among ``ref_call_ids``, that are already in the table.\"\"\"\n    ids = sorted({int(i) for i in ref_call_ids})\n    if not ids:\n        return set()\n    query = STORED_CALLS_SQL.format(placeholders=\",\".join([\"%s\"] * len(ids)))\n    return {(int(record[0]), _destination(record[1])) for record in fetch_records(query, ids)}"
+              },
+              {
+                "start_line": 99,
+                "end_line": 108,
+                "text": "def drop_stored_calls(\n    rows: Sequence[Dict[str, Any]],\n    fetch_records: Callable[[str, List[int]], Sequence[Sequence[Any]]],\n) -> List[Dict[str, Any]]:\n    \"\"\"Rows whose call is not stored yet. A stored call with the same id but another\n    destination does not hide the row.\"\"\"\n    if not rows:\n        return []\n    stored = stored_call_keys([int(row[\"ref_call_id\"]) for row in rows], fetch_records)\n    return [row for row in rows if call_key(row) not in stored]"
+              }
+            ]
+          },
+          "diff_sha256": "2d86c21b92c45bf30a8a04edbea11b1c2ee2d4accbef77523d222cdfff512b04"
+        }
+      ]
+    },
+    {
+      "case_id": "publication",
+      "sha": "f53d1e8d1e689d90380e7a9a29ab8a0d24a55082",
+      "parent": "64467b8dd0bc3b10d3914b503cfe5f1ef73e25de",
+      "committer_date": "2026-10-10T23:14:36-03:00",
+      "files": [
+        {
+          "path": "toolkit/lead_dashboard/publication.py",
+          "before": {
+            "available": false,
+            "reason": "path_absent_in_revision"
+          },
+          "after": {
+            "available": true,
+            "blob": "3c0b5448019d24de5ba9e4f008c8f02d9cfb5301",
+            "sha256": "7547aeea25b0d0819a09c295a6d483ded55e75e8faf69f467ee6ef8e1b2f7331",
+            "excerpts": [
+              {
+                "start_line": 40,
+                "end_line": 43,
+                "text": "def object_path(name: str) -> str:\n    if name not in ALLOWED_NAMES:\n        raise ValueError(f\"dashboard desconhecido: {name!r}; validos: {ALLOWED_NAMES}\")\n    return f\"{OBJECT_PREFIX}/{name}.json\""
+              },
+              {
+                "start_line": 52,
+                "end_line": 67,
+                "text": "def publish_html(file_path: str, *, manager: Optional[Any] = None, now: Optional[datetime] = None) -> str:\n    \"\"\"Le o HTML gerado em ``file_path`` e o publica no MinIO. Devolve o caminho do objeto.\n\n    Levanta se o arquivo nao existe, esta vazio ou o MinIO recusa: dashboard que nao publicou NAO pode virar sucesso.\n    \"\"\"\n    name = os.path.basename(file_path)\n    path = object_path(name)\n    with open(file_path, encoding=\"utf-8\") as handle:\n        html = handle.read()\n    if not html.strip():\n        raise ValueError(f\"{file_path} esta vazio; nada para publicar\")\n\n    payload = {\"name\": name, \"html\": html, \"generated_at\": (now or datetime.now(timezone.utc)).isoformat()}\n    (manager or _default_manager()).save_data(payload, path, serialization_format=\"json\")\n    logger.info(\"action=publish_lead_dashboard | object=%s | size_bytes=%s | status=published\", path, len(html.encode(\"utf-8\")))\n    return path"
+              },
+              {
+                "start_line": 70,
+                "end_line": 99,
+                "text": "def fetch_html(\n    name: str,\n    *,\n    manager: Optional[Any] = None,\n    ttl: float = CACHE_TTL_SECONDS,\n    clock: Callable[[], float] = time.monotonic,\n) -> Optional[str]:\n    \"\"\"HTML mais recente do dashboard ``name``, ou None se nunca foi publicado.\n\n    Cache de ``ttl`` segundos: a rota e publica e nao deve bater no MinIO a cada requisicao. Se o MinIO falha, devolve\n    a ultima copia conhecida (melhor um dashboard de uma hora atras que uma tela vazia) e registra o erro.\n    \"\"\"\n    path = object_path(name)\n    cached = _CACHE.get(name)\n    if cached and clock() - cached[1] < ttl:\n        return cached[0]\n\n    try:\n        mgr = manager or _default_manager()\n        if not mgr.object_exists(path):\n            return None\n        payload = mgr.load_data(path, serialization_format=\"json\")\n        html = payload[\"html\"] if isinstance(payload, dict) else None\n    except Exception as exc:  # noqa: BLE001 - rota publica: erro de MinIO vira copia antiga ou vazio, nunca 500\n        logger.error(\"action=fetch_lead_dashboard | object=%s | status=failed | error=%s: %s\", path, type(exc).__name__, exc)\n        return cached[0] if cached else None\n\n    if html:\n        _CACHE[name] = (html, clock())\n    return html or None"
+              }
+            ]
+          },
+          "diff_sha256": "ca2931fbeb73243a99da2e3f539d75beb09001b904fc0190987778f8c70c747e"
+        },
+        {
+          "path": "dags/reports__lead_conversion__build__hourly.py",
+          "before": {
+            "available": true,
+            "blob": "e10069bdc535a2769ca5c5ee777e4f8e15e48f11",
+            "sha256": "835696b2c17ab6679c1ac1e1382f2d6248959e4f29ea610b705e9d05309e61b7",
+            "excerpts": [
+              {
+                "start_line": 37,
+                "end_line": 41,
+                "text": "    toolkit_path = '/opt/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/opt/airflow/airflow-dags/plugins/lead_dashboard_static/static'\nelse:\n    toolkit_path = '/home/fazcapital/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/home/fazcapital/airflow/airflow-dags/plugins/lead_dashboard_static/static'"
+              },
+              {
+                "start_line": 40,
+                "end_line": 44,
+                "text": "    toolkit_path = '/home/fazcapital/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/home/fazcapital/airflow/airflow-dags/plugins/lead_dashboard_static/static'\n\nif toolkit_path not in sys.path:\n    sys.path.insert(0, toolkit_path)"
+              },
+              {
+                "start_line": 79,
+                "end_line": 92,
+                "text": "\n                html_file = os.path.join(\n                    output_dir, 'dashboard_conversao_leads.html')\n                if os.path.exists(html_file):\n                    file_size = os.path.getsize(html_file)\n                    logging.info(\n                        f\"file={html_file} | size_bytes={file_size} | status=created\")\n                else:\n                    logging.warning(f\"file={html_file} | status=not_found\")\n\n                return {\n                    \"status\": \"success\",\n                    \"execution_time\": datetime.now().isoformat(),\n                    \"output_file\": html_file,"
+              }
+            ]
+          },
+          "after": {
+            "available": true,
+            "blob": "18cece33ecfc050de9a453de84c30d435a7fc0f8",
+            "sha256": "b7a0d3c6b2883858bfb47f89f35bb0587885436ff5fb2a603cb161bfc889c41a",
+            "excerpts": [
+              {
+                "start_line": 44,
+                "end_line": 48,
+                "text": "# MinIO, de onde o plugin lead_dashboard_plugin o serve (FBI-4852, toolkit/lead_dashboard/publication.py).\noutput_dir = local_output_dir()\n\nif toolkit_path not in sys.path:\n    sys.path.insert(0, toolkit_path)"
+              },
+              {
+                "start_line": 83,
+                "end_line": 96,
+                "text": "\n                html_file = os.path.join(\n                    output_dir, 'dashboard_conversao_leads.html')\n                # O arquivo precisa existir E chegar ao MinIO: dashboard nao publicado nao e sucesso\n                if not os.path.exists(html_file):\n                    raise FileNotFoundError(f\"{html_file} nao foi gerado\")\n                file_size = os.path.getsize(html_file)\n                logging.info(\n                    f\"file={html_file} | size_bytes={file_size} | status=created\")\n                published_path = publish_html(html_file)\n                logging.info(f\"object={published_path} | status=published\")\n\n                return {\n                    \"status\": \"success\","
+              },
+              {
+                "start_line": 91,
+                "end_line": 104,
+                "text": "                    f\"file={html_file} | size_bytes={file_size} | status=created\")\n                published_path = publish_html(html_file)\n                logging.info(f\"object={published_path} | status=published\")\n\n                return {\n                    \"status\": \"success\",\n                    \"execution_time\": datetime.now().isoformat(),\n                    \"output_file\": html_file,\n                    \"published_object\": published_path,\n                    \"message\": \"Dashboard de conversão gerado com sucesso\"\n                }\n            else:\n                raise Exception(\n                    \"Erro na geração do dashboard (código de retorno != 0)\")"
+              }
+            ]
+          },
+          "diff_sha256": "a3540e44a7736417b71d02267c2fb64719fc860cfc15d2a3c10a264352624206"
+        }
+      ]
+    },
+    {
+      "case_id": "run_gate",
+      "sha": "ce08e7025606280ac926442b4d89fe88283ae88d",
+      "parent": "064e8b4102cae9e4947d2088aada8323cef661dd",
+      "committer_date": "2026-10-02T16:48:05+02:00",
+      "files": [
+        {
+          "path": "dags/captable__xp__stg_to_fct.py",
+          "before": {
+            "available": true,
+            "blob": "046280207e6d5302602e4f976a3ec87ceee66ad1",
+            "sha256": "b4cc009e893fbd2caf37b62b51c0fdeef7064c09e5e9651d969d9ec234073ad4",
+            "excerpts": [
+              {
+                "start_line": 41,
+                "end_line": 45,
+                "text": "      FROM control.forex_conversion_runs\n     WHERE procedure_name = 'create_or_replace_fct_xp__movements_international'\n     ORDER BY run_at DESC\n     LIMIT 1;\n"
+              },
+              {
+                "start_line": 617,
+                "end_line": 648,
+                "text": "    def forex_freshness_gate():\n        \"\"\"Derruba o run quando a fonte de cotacao para. Task PROPRIA, de proposito.\n\n        POR QUE NAO DENTRO DO bloco1_procedures. Ele estava la, antes do\n        _run_migrations_hs e do update_rpt_captable, e nesse desenho uma fonte de\n        cambio parada segurava as migrations da HS e o captable inteiro, que nao\n        tem nada com cambio. Pergunta do Tom na revisao do PR #101, e o\n        acoplamento nao era intencional. Aqui a fonte morta falha alto e sozinha.\n\n        POR QUE NAO DENTRO DA PROCEDURE. RAISE EXCEPTION no corpo dela desfaria o\n        proprio INSERT em control.forex_conversion_runs na mesma transacao, e o run\n        que falha e justamente o que precisa ficar registrado. A procedure GRAVA,\n        este passo LE a linha ja commitada e decide.\n\n        DERRUBA PELA IDADE DA FONTE, nao da linha. Linha antiga com defasagem\n        grande pode ser historico legitimo. Fonte parada e o FBI-3186, que passou\n        8 semanas despercebido porque o run seguia verde e as linhas continuavam\n        convertendo com taxa velha, sem virar NULL.\n        \"\"\"\n        hook = get_postgres_hook()\n        conn = hook.get_conn()\n        try:\n            with conn.cursor() as cur:\n                cur.execute(FOREX_FRESHNESS_GATE_SQL)\n            conn.commit()\n            logger.info(\"forex_freshness_gate OK\")\n            return {'status': 'SUCCESS'}\n        except Exception:\n            conn.rollback()\n            raise\n        finally:\n            conn.close()"
+              }
+            ]
+          },
+          "after": {
+            "available": true,
+            "blob": "1ab65d95fb005efc0bbcef155ee2e4db0d8d1051",
+            "sha256": "5eb898a139c9e432f55c13471bbabeee1c64e00548b209b0c8b3051233b0a831",
+            "excerpts": [
+              {
+                "start_line": 45,
+                "end_line": 49,
+                "text": "      FROM control.forex_conversion_runs\n     WHERE procedure_name = 'create_or_replace_fct_xp__movements_international'\n       AND run_at >= current_setting('forex_gate.run_start')::timestamptz\n     ORDER BY run_at DESC\n     LIMIT 1;"
+              },
+              {
+                "start_line": 46,
+                "end_line": 50,
+                "text": "     WHERE procedure_name = 'create_or_replace_fct_xp__movements_international'\n       AND run_at >= current_setting('forex_gate.run_start')::timestamptz\n     ORDER BY run_at DESC\n     LIMIT 1;\n"
+              },
+              {
+                "start_line": 622,
+                "end_line": 666,
+                "text": "    def forex_freshness_gate(**context):\n        \"\"\"Derruba o run quando a fonte de cotacao para. Task PROPRIA, de proposito.\n\n        POR QUE NAO DENTRO DO bloco1_procedures. Ele estava la, antes do\n        _run_migrations_hs e do update_rpt_captable, e nesse desenho uma fonte de\n        cambio parada segurava as migrations da HS e o captable inteiro, que nao\n        tem nada com cambio. Pergunta do Tom na revisao do PR #101, e o\n        acoplamento nao era intencional. Aqui a fonte morta falha alto e sozinha.\n\n        POR QUE NAO DENTRO DA PROCEDURE. RAISE EXCEPTION no corpo dela desfaria o\n        proprio INSERT em control.forex_conversion_runs na mesma transacao, e o run\n        que falha e justamente o que precisa ficar registrado. A procedure GRAVA,\n        este passo LE a linha ja commitada e decide.\n\n        DERRUBA PELA IDADE DA FONTE, nao da linha. Linha antiga com defasagem\n        grande pode ser historico legitimo. Fonte parada e o FBI-3186, que passou\n        8 semanas despercebido porque o run seguia verde e as linhas continuavam\n        convertendo com taxa velha, sem virar NULL.\n\n        AMARRADO AO RUN. So conta a linha gravada depois do dag_run.start_date.\n        Sem isso o gate lia a ultima linha da tabela e passava verde com a linha\n        de um run anterior: procedure velha que nao grava, ou so esta task\n        limpa. Achado do Tom (08/09) e do Augusto (I-003) no PR #101. Janela fixa\n        de 1 hora nao basta: 8 dos 29 intervalos entre runs, de 08/09 a 01/10,\n        foram menores que isso. max_active_runs=1, entao linha posterior ao\n        inicio do run so pode ser deste run.\n        \"\"\"\n        run_start = context['dag_run'].start_date\n        if run_start is None:\n            raise RuntimeError(\"forex_freshness_gate: dag_run sem start_date, nao da para amarrar o gate ao run\")\n        hook = get_postgres_hook()\n        conn = hook.get_conn()\n        try:\n            with conn.cursor() as cur:\n                cur.execute(\"SELECT set_config('forex_gate.run_start', %s::timestamptz::text, true)\",\n                            (run_start,))\n                cur.execute(FOREX_FRESHNESS_GATE_SQL)\n            conn.commit()\n            logger.info(\"forex_freshness_gate OK\")\n            return {'status': 'SUCCESS'}\n        except Exception:\n            conn.rollback()\n            raise\n        finally:\n            conn.close()"
+              }
+            ]
+          },
+          "diff_sha256": "5db5775b5cd59c192385003669a018519aeaee2eba648e94e0c2d03c46e168c9"
+        }
+      ]
+    }
+  ],
+  "disk_receipts": [
+    {
+      "path": "dags/inflow__xp__stg_to_fct.py",
+      "exists": true,
+      "mtime_utc": "2026-10-09T18:04:45.745254+00:00",
+      "sha256": "b07c045ad8869be7ac96fcc2f2157b85d43d8e43d21ece29d79d4f137e0dbda3",
+      "excerpts": [
+        {
+          "start_line": 56,
+          "end_line": 60,
+          "text": "     WHERE procedure_name = 'create_or_replace_fct_xp__movements_international'\n       AND run_at >= current_setting('forex_gate.run_start')::timestamptz\n     ORDER BY run_at DESC\n     LIMIT 1;\n"
+        },
+        {
+          "start_line": 281,
+          "end_line": 285,
+          "text": "        # repete; qualquer outro derruba a task na hora.\n        lock_retries, lock_retry_delay_s = 2, 30\n        attempt = 0\n        while True:\n            proc = subprocess.run("
+        },
+        {
+          "start_line": 293,
+          "end_line": 297,
+          "text": "                \"[HASKELL 60d PROD] lock timeout (55P03) na escrita atomica; \"\n                \"tentativa %s/%s em %ss\", attempt, lock_retries, lock_retry_delay_s)\n            time.sleep(lock_retry_delay_s)\n\n        peak_mb = round("
+        }
+      ]
+    },
+    {
+      "path": "config/airflow.cfg",
+      "exists": true,
+      "mtime_utc": "2026-10-02T17:50:13.656408+00:00",
+      "sha256": "21f60823c00325ec7b82ae19df9a6796780799137d0b7fb3b76c366ba2b00613",
+      "excerpts": [
+        {
+          "start_line": 66,
+          "end_line": 70,
+          "text": "#\nparallelism = 5\n\n# The maximum number of task instances allowed to run concurrently in each DAG. To calculate\n# the number of tasks that is running concurrently for a DAG, add up the number of running"
+        },
+        {
+          "start_line": 78,
+          "end_line": 82,
+          "text": "#\nmax_active_tasks_per_dag = 5\n\n# Are DAGs paused by default at creation\n#"
+        }
+      ]
+    },
+    {
+      "path": "config/dw_capacity.json",
+      "exists": true,
+      "mtime_utc": "2026-10-02T17:50:13.660408+00:00",
+      "sha256": "a61ca17cc2c405fb6cbe00375a483f7a344cd8b5d3bad4d024444e0d18ddb0e8",
+      "excerpts": [
+        {
+          "start_line": 6,
+          "end_line": 10,
+          "text": "  \"expected_database\": \"faz_capital\",\n  \"role_connection_limit\": 40,\n  \"max_connections_per_task\": 3,\n  \"connection_headroom\": 4,\n  \"max_parallel_tasks\": 5,"
+        },
+        {
+          "start_line": 11,
+          "end_line": 15,
+          "text": "  \"post_deploy_canary\": {\n    \"status\": \"NOT_EXECUTED\",\n    \"connections\": 15,\n    \"command\": \"DW_CAPACITY_DSN=<secret-outside-log> python scripts/canary_dw_capacity.py --confirm\"\n  },"
+        },
+        {
+          "start_line": 16,
+          "end_line": 20,
+          "text": "  \"contract_notes\": {\n    \"role_connection_limit_source\": \"Medido no DW em 2026-10-01 12:10 UTC: rolconnlimit=40 para o role airflow, max_connections=250, superuser_reserved_connections=3. Este contrato acompanha o limite vivo; reduzir o role para 20 exige decisão própria no FBI-3505.\",\n    \"measured_live_role_connection_limit\": 40,\n    \"assumptions\": \"max_connections_per_task=3 e connection_headroom=4 são premissas de modelagem. Não são medição da frota inteira nem reserva física do servidor, e devem ser validadas pelo canário pós-deploy antes de virarem teto real.\"\n  }"
+        },
+        {
+          "start_line": 17,
+          "end_line": 21,
+          "text": "    \"role_connection_limit_source\": \"Medido no DW em 2026-10-01 12:10 UTC: rolconnlimit=40 para o role airflow, max_connections=250, superuser_reserved_connections=3. Este contrato acompanha o limite vivo; reduzir o role para 20 exige decisão própria no FBI-3505.\",\n    \"measured_live_role_connection_limit\": 40,\n    \"assumptions\": \"max_connections_per_task=3 e connection_headroom=4 são premissas de modelagem. Não são medição da frota inteira nem reserva física do servidor, e devem ser validadas pelo canário pós-deploy antes de virarem teto real.\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "path": "toolkit/lemitvox_dialer/dedupe.py",
+      "exists": true,
+      "mtime_utc": "2026-10-06T21:38:11.444100+00:00",
+      "sha256": "dcdba67bbe428bcbdd287fab24ddd347013e918ac0c9decbae661c0364f2c06c",
+      "excerpts": [
+        {
+          "start_line": 42,
+          "end_line": 45,
+          "text": "def call_key(row: Dict[str, Any]) -> CallKey:\n    \"\"\"The identity of a call. ``int()`` also turns the numpy integers of a parquet round trip\n    into Python ones, which psycopg2 can adapt.\"\"\"\n    return int(row[\"ref_call_id\"]), _destination(row.get(\"destination\"))"
+        }
+      ]
+    },
+    {
+      "path": "toolkit/lead_dashboard/publication.py",
+      "exists": false
+    },
+    {
+      "path": "dags/reports__lead_conversion__build__hourly.py",
+      "exists": true,
+      "mtime_utc": "2026-10-02T17:50:13.665408+00:00",
+      "sha256": "835696b2c17ab6679c1ac1e1382f2d6248959e4f29ea610b705e9d05309e61b7",
+      "excerpts": [
+        {
+          "start_line": 37,
+          "end_line": 41,
+          "text": "    toolkit_path = '/opt/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/opt/airflow/airflow-dags/plugins/lead_dashboard_static/static'\nelse:\n    toolkit_path = '/home/fazcapital/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/home/fazcapital/airflow/airflow-dags/plugins/lead_dashboard_static/static'"
+        },
+        {
+          "start_line": 40,
+          "end_line": 44,
+          "text": "    toolkit_path = '/home/fazcapital/airflow/airflow-dags/toolkit/lead_conversion_dashboard'\n    output_dir = '/home/fazcapital/airflow/airflow-dags/plugins/lead_dashboard_static/static'\n\nif toolkit_path not in sys.path:\n    sys.path.insert(0, toolkit_path)"
+        }
+      ]
+    }
+  ],
+  "scope": "Historical immutable objects and selected disk text only; no scheduler, cluster, database, DAG run or current-production verification."
+}

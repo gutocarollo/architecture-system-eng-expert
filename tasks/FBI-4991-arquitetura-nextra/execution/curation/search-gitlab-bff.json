@@ -1,0 +1,32 @@
+{
+  "query": "repo:gitlabhq/gitlabhq \"backend-for-frontend\"",
+  "observed_utc": "2026-10-15T02:04:13.676069Z",
+  "total_count": 11,
+  "items": [
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "app/controllers/groups/observability/sessions_controller.rb",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/groups/observability/sessions_controller.rb"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "app/controllers/projects/observability/sessions_controller.rb",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/projects/observability/sessions_controller.rb"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "config/routes/group.rb",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/config/routes/group.rb"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "app/controllers/concerns/observability/session_actions.rb",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/controllers/concerns/observability/session_actions.rb"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "config/routes/project.rb",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/config/routes/project.rb"
+    }
+  ]
+}

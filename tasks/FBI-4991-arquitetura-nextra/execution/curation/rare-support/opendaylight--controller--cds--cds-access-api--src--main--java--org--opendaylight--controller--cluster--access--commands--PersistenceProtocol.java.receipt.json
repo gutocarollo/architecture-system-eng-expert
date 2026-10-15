@@ -1,0 +1,11 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "cds/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/PersistenceProtocol.java",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/cds/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/PersistenceProtocol.java",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/cds/cds-access-api/src/main/java/org/opendaylight/controller/cluster/access/commands/PersistenceProtocol.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:57.886099+00:00",
+  "sha256": "082d8acf636ff6fe144f5549c37cdeb772bbca218d15bfb713cec0e60f91bae7",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--cds--cds-access-api--src--main--java--org--opendaylight--controller--cluster--access--commands--PersistenceProtocol.java"
+}

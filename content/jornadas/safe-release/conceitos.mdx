@@ -1,0 +1,829 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a versão nova chega a quem ainda usa a antiga
+
+Este mapa conecta os conceitos ao mesmo problema. A corretora hipotética troca amount por amount_cents. A interface antiga ainda lê amount. Remover o campo antigo na primeira implantação faz a consulta retornar vazio. A prática conserva os dois campos durante a transição e expõe a versão nova a cinco das cem requisições fictícias.
+
+Comece pela [jornada](/jornadas/safe-release/), execute o [tutorial](/tutoriais/casos/safe-release/) e use a [referência](/referencia/casos/safe-release/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/safe-release/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="a-b-deployment" />
+
+## A/B Deployment
+
+O desenho expõe grupos a variantes para comparar uma hipótese de comportamento ou resultado.
+
+No caso desta família, faça a seguinte observação: Distribua quatro usuários entre A e B; confira que os dois grupos recebem respostas visíveis diferentes e mantêm sua associação ao usuário.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe ab-cohorts
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `ab-cohorts`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "visible_cohorts": [
+      "A"
+    ],
+    "fees": [
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "after": {
+    "visible_cohorts": [
+      "A",
+      "B"
+    ],
+    "fees": [
+      1,
+      2,
+      1,
+      2
+    ],
+    "assignment_stable": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a A/B Deployment; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="blue-green-deployment" />
+
+## Blue/Green Deployment
+
+Dois conjuntos de aplicação ficam disponíveis, com um recebendo o tráfego principal.
+
+No caso desta família, faça a seguinte observação: Mantenha blue e green prontos, altere a rota para green e volte a blue. Confira as versões visíveis e a capacidade antiga que precisou permanecer disponível.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe blue-green-route
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `blue-green-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "visible_version": 1
+  },
+  "after": {
+    "visible_after_switch": 2,
+    "visible_after_rollback": 1,
+    "blue_still_ready": true,
+    "provisioned_environments": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The route switch does not undo incompatible data written by the new environment; no deployment platform is contacted.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="branch-by-abstraction" />
+
+## Branch by Abstraction
+
+Uma interface comum permite substituir uma implementação aos poucos dentro do sistema.
+
+No caso desta família, faça a seguinte observação: Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe strangler-abstraction-route
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `strangler-abstraction-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders_owner": "legacy",
+    "result": 100
+  },
+  "after": {
+    "calls": [
+      [
+        "/orders",
+        "legacy"
+      ],
+      [
+        "/orders",
+        "new"
+      ],
+      [
+        "/positions",
+        "legacy"
+      ]
+    ],
+    "new_order_result": 100,
+    "legacy_position_result": 50,
+    "client_contract_preserved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="canary-release" />
+
+## Canary Release
+
+A versão candidata recebe uma participação delimitada do tráfego, ampliada após critérios de observação.
+
+No caso desta família, faça a seguinte observação: Roteie cinco das cem requisições para a versão nova e examine qual população recebe a mudança e o que desviar tráfego não desfaz.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe progressive-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `progressive-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_version_exposure": 100
+  },
+  "after": {
+    "new_version_exposure": 5,
+    "rollback_route": "old"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Canary Release; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="dark-launch" />
+
+## Dark Launch
+
+Uma capacidade é implantada e exercitada por controles internos antes de ficar disponível às pessoas.
+
+No caso desta família, faça a seguinte observação: Calcule a mesma entrada nas duas funções puras, preserve o resultado primário e detecte a diferença 10/1.000.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe shadow-parity
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shadow-parity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "silent_new_result": 1000
+  },
+  "after": {
+    "visible_primary": 10,
+    "shadow_mismatch": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Dark Launch; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="database-decomposition" />
+
+## Database Decomposition
+
+Decompor o banco distribui propriedade de dados entre fronteiras definidas.
+
+No caso desta família, faça a seguinte observação: Extraia as linhas por dono, altere o armazenamento de ordens e confira que a posição não é reescrita pelo acesso direto à mesma tabela.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe decomposed-data-owners
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `decomposed-data-owners`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_rows": 2,
+    "applications_share_same_mutable_table": true
+  },
+  "after": {
+    "order_value": 150,
+    "position_value": 1000,
+    "separate_stores": true,
+    "owner_count": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="expand-contract" />
+
+## Expand/Contract
+
+A mudança acrescenta um contrato compatível, migra consumidores e retira o contrato antigo após observar que ele deixou de ser necessário.
+
+No caso desta família, faça a seguinte observação: Leia amount com o consumidor antigo depois da mudança e compare a remoção imediata com a convivência de amount e amount_cents.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe expand-contract
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `expand-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "old_reader_value": null
+  },
+  "after": {
+    "old_reader_value": 1000,
+    "new_reader_value": 100000
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="feature-flags" />
+
+## Feature Flags
+
+Uma condição seleciona um comportamento do código.
+
+No caso desta família, faça a seguinte observação: Roteie cinco das cem requisições para a versão nova e examine qual população recebe a mudança e o que desviar tráfego não desfaz.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe progressive-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `progressive-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_version_exposure": 100
+  },
+  "after": {
+    "new_version_exposure": 5,
+    "rollback_route": "old"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Feature Flags; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="gitops" />
+
+## GitOps
+
+Um agente reconcilia continuamente o estado do ambiente com um estado desejado declarativo, versionado e obtido automaticamente.
+
+No caso desta família, faça a seguinte observação: Selecione a revisão 2 da fonte declarativa, calcule o plano e aplique-o. Depois introduza drift manual nas réplicas e reconcilie de novo pela mesma revisão.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe versioned-desired-reconcile
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `versioned-desired-reconcile`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "observed": {
+      "image": "v1",
+      "replicas": 0
+    }
+  },
+  "after": {
+    "planned_fields": [
+      "image",
+      "replicas"
+    ],
+    "selected_revision": "revision-2",
+    "drift_before_reconcile": {
+      "image": "v2",
+      "replicas": 0
+    },
+    "after_reconcile": {
+      "image": "v2",
+      "replicas": 2
+    }
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="immutable-infrastructure" />
+
+## Immutable Infrastructure
+
+Uma mudança substitui uma unidade identificada em vez de alterá-la manualmente em execução.
+
+No caso desta família, faça a seguinte observação: Crie a instância 2 com a imagem nova e altere o destino ativo, preservando a instância 1. Compare isso com editar a imagem do recurso existente.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe immutable-replacement
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `immutable-replacement`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "in_place_image_change_owner": "instance-1"
+  },
+  "after": {
+    "old_instance_unchanged": true,
+    "new_active_id": "instance-2",
+    "new_active_image": "v2",
+    "old_image_retained": "v1"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="infrastructure-as-code" />
+
+## Infrastructure as Code
+
+Configuração versionada descreve recursos de infraestrutura e permite revisar sua mudança.
+
+No caso desta família, faça a seguinte observação: Selecione a revisão 2 da fonte declarativa, calcule o plano e aplique-o. Depois introduza drift manual nas réplicas e reconcilie de novo pela mesma revisão.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe versioned-desired-reconcile
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `versioned-desired-reconcile`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "observed": {
+      "image": "v1",
+      "replicas": 0
+    }
+  },
+  "after": {
+    "planned_fields": [
+      "image",
+      "replicas"
+    ],
+    "selected_revision": "revision-2",
+    "drift_before_reconcile": {
+      "image": "v2",
+      "replicas": 0
+    },
+    "after_reconcile": {
+      "image": "v2",
+      "replicas": 2
+    }
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="modularization" />
+
+## Modularization
+
+Modularizar estabelece responsabilidades e dependências explícitas dentro de um sistema.
+
+No caso desta família, faça a seguinte observação: Extraia as linhas por dono, altere o armazenamento de ordens e confira que a posição não é reescrita pelo acesso direto à mesma tabela.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe decomposed-data-owners
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `decomposed-data-owners`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_rows": 2,
+    "applications_share_same_mutable_table": true
+  },
+  "after": {
+    "order_value": 150,
+    "position_value": 1000,
+    "separate_stores": true,
+    "owner_count": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="parallel-run" />
+
+## Parallel Run
+
+Dois caminhos calculam sobre entradas comparáveis, e a equipe confronta seus resultados antes da troca.
+
+No caso desta família, faça a seguinte observação: Calcule a mesma entrada nas duas funções puras, preserve o resultado primário e detecte a diferença 10/1.000.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe shadow-parity
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shadow-parity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "silent_new_result": 1000
+  },
+  "after": {
+    "visible_primary": 10,
+    "shadow_mismatch": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Parallel Run; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="progressive-delivery" />
+
+## Progressive Delivery
+
+A entrega amplia exposição por etapas e usa critérios para avançar, interromper ou retornar tráfego.
+
+No caso desta família, faça a seguinte observação: Roteie cinco das cem requisições para a versão nova e examine qual população recebe a mudança e o que desviar tráfego não desfaz.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe progressive-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `progressive-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_version_exposure": 100
+  },
+  "after": {
+    "new_version_exposure": 5,
+    "rollback_route": "old"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Progressive Delivery; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="recreate-deployment" />
+
+## Recreate Deployment
+
+A estratégia encerra os pods antigos antes de criar os novos.
+
+No caso desta família, faça a seguinte observação: Troque as duas instâncias encerrando todas antes de criar as novas e depois uma por vez. Conte a menor capacidade pronta de cada sequência.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe rolling-recreate-capacity
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `rolling-recreate-capacity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "recreate_ready_history": [
+      2,
+      0,
+      2
+    ],
+    "minimum_ready": 0
+  },
+  "after": {
+    "rolling_ready_history": [
+      2,
+      1,
+      2,
+      1,
+      2
+    ],
+    "minimum_ready": 1,
+    "new_instances": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="rolling-deployment" />
+
+## Rolling Deployment
+
+A troca substitui réplicas progressivamente sob limites de capacidade e indisponibilidade.
+
+No caso desta família, faça a seguinte observação: Troque as duas instâncias encerrando todas antes de criar as novas e depois uma por vez. Conte a menor capacidade pronta de cada sequência.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe rolling-recreate-capacity
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `rolling-recreate-capacity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "recreate_ready_history": [
+      2,
+      0,
+      2
+    ],
+    "minimum_ready": 0
+  },
+  "after": {
+    "rolling_ready_history": [
+      2,
+      1,
+      2,
+      1,
+      2
+    ],
+    "minimum_ready": 1,
+    "new_instances": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="service-extraction" />
+
+## Service Extraction
+
+Uma responsabilidade delimitada passa a executar e publicar de forma independente.
+
+No caso desta família, faça a seguinte observação: Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe strangler-abstraction-route
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `strangler-abstraction-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders_owner": "legacy",
+    "result": 100
+  },
+  "after": {
+    "calls": [
+      [
+        "/orders",
+        "legacy"
+      ],
+      [
+        "/orders",
+        "new"
+      ],
+      [
+        "/positions",
+        "legacy"
+      ]
+    ],
+    "new_order_result": 100,
+    "legacy_position_result": 50,
+    "client_contract_preserved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="shadow-deployment" />
+
+## Shadow Deployment
+
+Uma implantação candidata recebe entradas para comparação sem fornecer a resposta principal.
+
+No caso desta família, faça a seguinte observação: Calcule a mesma entrada nas duas funções puras, preserve o resultado primário e detecte a diferença 10/1.000.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe shadow-parity
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shadow-parity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "silent_new_result": 1000
+  },
+  "after": {
+    "visible_primary": 10,
+    "shadow_mismatch": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Shadow Deployment; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="shadow-traffic" />
+
+## Shadow Traffic
+
+O sistema copia entradas para um caminho candidato enquanto o caminho atual continua fornecendo a resposta.
+
+No caso desta família, faça a seguinte observação: Calcule a mesma entrada nas duas funções puras, preserve o resultado primário e detecte a diferença 10/1.000.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe shadow-parity
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shadow-parity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "silent_new_result": 1000
+  },
+  "after": {
+    "visible_primary": 10,
+    "shadow_mismatch": true
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="strangler-fig" />
+
+## Strangler Fig
+
+Uma implementação nova assume responsabilidades delimitadas enquanto o caminho anterior continua atendendo.
+
+No caso desta família, faça a seguinte observação: Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe strangler-abstraction-route
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `strangler-abstraction-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders_owner": "legacy",
+    "result": 100
+  },
+  "after": {
+    "calls": [
+      [
+        "/orders",
+        "legacy"
+      ],
+      [
+        "/orders",
+        "new"
+      ],
+      [
+        "/positions",
+        "legacy"
+      ]
+    ],
+    "new_order_result": 100,
+    "legacy_position_result": 50,
+    "client_contract_preserved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+
+<span id="transitional-architecture" />
+
+## Transitional Architecture
+
+Uma arquitetura temporária liga o estado inicial ao destino e recebe um plano explícito de retirada.
+
+No caso desta família, faça a seguinte observação: Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe strangler-abstraction-route
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `strangler-abstraction-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders_owner": "legacy",
+    "result": 100
+  },
+  "after": {
+    "calls": [
+      [
+        "/orders",
+        "legacy"
+      ],
+      [
+        "/orders",
+        "new"
+      ],
+      [
+        "/positions",
+        "legacy"
+      ]
+    ],
+    "new_order_result": 100,
+    "legacy_position_result": 50,
+    "client_contract_preserved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
+

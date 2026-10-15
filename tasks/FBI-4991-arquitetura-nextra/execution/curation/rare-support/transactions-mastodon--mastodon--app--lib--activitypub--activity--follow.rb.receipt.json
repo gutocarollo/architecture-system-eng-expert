@@ -1,0 +1,12 @@
+{
+  "repo": "mastodon/mastodon",
+  "path": "app/lib/activitypub/activity/follow.rb",
+  "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+  "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb",
+  "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:54:10.692000+00:00",
+  "sha256": "199a422f0d3c4683bae0583eda94cfde805f8dfb28d771342e5f47400b9c5451",
+  "line_count": 45,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--lib--activitypub--activity--follow.rb"
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/repositories/thndr/translators/portfolio.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts",
+  "raw_url": "https://raw.githubusercontent.com/armaaar/thndr-mcp/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/repositories/thndr/translators/portfolio.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:08:59.876237+00:00",
+  "sha256": "7c1af028e1842741227e6221fde750f8da0f7bef935c907939072d1bc20403fc",
+  "line_count": 358,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--repositories--thndr--translators--portfolio.ts"
+}

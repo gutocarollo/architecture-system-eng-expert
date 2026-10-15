@@ -1,0 +1,10 @@
+flowchart TD
+    P["Rede divide participantes A/B e C"] --> B["Antes: qualquer grupo se autoriza"]
+    B --> X["Dois líderes podem decidir valores diferentes"]
+    P --> A["financial.py::consensus conta votos"]
+    A --> Q{"Grupo reúne 2 de 3 membros?"}
+    Q -->|sim: A/B| W["Autoriza a escrita no modelo"]
+    Q -->|não: C| S["Minoria recusa escrita e aguarda recuperação"]
+    W --> V["Vetores identificam versões concorrentes"]
+    S --> R["Recuperar comunicação exige reconciliar a decisão"]
+    R --> L["Raft/Paxos completos exigem log e termos ausentes aqui"]

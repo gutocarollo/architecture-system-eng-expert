@@ -1,0 +1,90 @@
+---
+title: "Experimente: um leitor cancela a busca"
+description: "Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas seu leitor."
+diataxis: tutorial
+---
+
+# Experimente: um leitor cancela a busca
+
+Continue o mesmo caso: [volte ao caso](/jornadas/single-flight-cancel/); [entenda o mecanismo](/explicacoes/casos/single-flight-cancel/); [resolva a tarefa](/guias/casos/single-flight-cancel/); [consulte contratos e fontes](/referencia/casos/single-flight-cancel/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas seu leitor. Este caso vem do [card FBI-2331](https://fazcapital.atlassian.net/browse/FBI-2331) e do [PR 51](https://bitbucket.org/fazcapital/makershub/pull-requests/51). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/342de122cdbfccbe7659adec0e1fcb842b38fc83/backend/app/utils/single_flight.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/a304a4e56480648bdc60be96c00532c38d18df9f/backend/app/utils/single_flight.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior e das dependências do curso instaladas com `npm ci`. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+Cinco leitores, uma resposta synthetic-online-call e dois eventos que controlam o início e a liberação do produtor. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+python3 labs/architecture/single-flight-cancel/run.py
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:17.296390+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+before: readers=5 cancelled=5 survivors=0 producer_calls=1
+after: readers=5 cancelled=1 survivors=4 producer_calls=1
+comparison=PASS before_defect_observed=True after_guarantee_observed=True
+```
+
+O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/single-flight-cancel/source.diff` e os snapshots before/after. O runner lê os módulos ou os corpos das funções desses snapshots; a correção estudada já está preservada em after. Identifique a operação descrita na explicação e compare as mesmas entradas. Não é preciso trocar a branch de origem nem alterar o MakersHub.
+
+## 6. Corrija uma cópia sua e repita a condição
+
+Agora você aplicará a mudança em um arquivo descartável. Crie a cópia anterior e execute o contrato corrigido contra ela:
+
+```sh
+learning_candidate_dir=$(mktemp -d)
+cp labs/architecture/single-flight-cancel/before.py "$learning_candidate_dir/candidate.py"
+python3 labs/architecture/single-flight-cancel/run.py --candidate "$learning_candidate_dir/candidate.py"
+```
+
+A última execução deve terminar com código 1. A saída mostra a condição anterior e a verificação recusa o resultado: O cancelamento de um leitor é propagado para o produtor, e os cinco recebem CancelledError. Esse fracasso esperado confirma que a sua cópia ainda não possui a proteção.
+
+Abra a cópia e localize a espera `result = await task`, o `finally` de cada leitor e a escrita do resultado no cache. Leia o patch histórico e aplique-o somente à sua cópia:
+
+```sh
+cat labs/architecture/single-flight-cancel/source.diff
+patch "$learning_candidate_dir/candidate.py" < labs/architecture/single-flight-cancel/source.diff
+python3 labs/architecture/single-flight-cancel/run.py --candidate "$learning_candidate_dir/candidate.py"
+```
+
+Agora a execução deve terminar com código 0. O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. Você alterou a cópia que estava falhando e repetiu a mesma condição. A referência do caso conserva o recibo desta atividade.
+
+A pasta temporária pode ser deixada para inspeção. Para iniciar a atividade novamente, crie outra com `mktemp -d`; nenhuma limpeza de sistema externo é necessária.
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/single-flight-cancel/); [entenda o mecanismo](/explicacoes/casos/single-flight-cancel/); [resolva a tarefa](/guias/casos/single-flight-cancel/); [consulte contratos e fontes](/referencia/casos/single-flight-cancel/).
+
+O [mapa de conceitos deste caso](/jornadas/single-flight-cancel/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

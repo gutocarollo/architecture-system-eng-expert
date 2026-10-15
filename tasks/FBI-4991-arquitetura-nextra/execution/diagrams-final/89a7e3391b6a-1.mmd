@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant A as Aplicação local
+    participant D as Estado local + outbox
+    participant P as Publicador
+    participant C as Consumidor deduplicador
+    A->>D: grava mudança e evento na mesma unidade
+    P->>D: lê evento pendente
+    P->>C: envia event-01
+    C-->>P: aplica uma vez
+    Note over P,D: queda antes de marcar enviado
+    P->>C: reenvia event-01
+    C-->>P: ignora duplicata
+    P->>D: marca enviado

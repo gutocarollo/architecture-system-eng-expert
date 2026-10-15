@@ -1,0 +1,68 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a oportunidade existente conserva sua identidade
+
+Este mapa conecta os conceitos ao mesmo problema. Um SDR entra pelo identificador de uma oportunidade aberta. A evolução FBI-4719 precisa executar o pacote de agendamento nessa mesma oportunidade. Ao chamar a função anterior com a mesma entrada, a reprodução observa uma criação de oportunidade nova; a função posterior conserva o identificador de entrada.
+
+Comece pela [jornada](/jornadas/opportunity-entry/), execute o [tutorial](/tutoriais/casos/opportunity-entry/) e use a [referência](/referencia/casos/opportunity-entry/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/opportunity-entry/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="domain-policy" />
+
+## Domain Policy
+
+O conceito Domain Policy é regra explícita de decisão de domínio, aplicada em contexto e tempo definidos.
+
+No caso desta família, faça a seguinte observação: Use dois atores e duas chaves contra a mesma OPP aberta; observe criação 1→0 e o segundo claim recusado com 409.
+
+```sh
+python3 labs/architecture/opportunity-entry/run.py
+```
+
+O código desta observação está em `labs/architecture/opportunity-entry/run.py`. O identificador do probe é `historical-identity`.
+
+O vínculo é uma transferência semântica a partir do código histórico. O código histórico permite estudar Domain Policy por transferência semântica; ele não foi classificado como uma implementação integral de DDD. Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/opportunity-entry/) permite continuar com o mesmo problema.
+
+<span id="entity" />
+
+## Entity
+
+O conceito Entity é objeto cuja identidade continua a mesma apesar de mudanças nos atributos.
+
+No caso desta família, faça a seguinte observação: Use dois atores e duas chaves contra a mesma OPP aberta; observe criação 1→0 e o segundo claim recusado com 409.
+
+```sh
+python3 labs/architecture/opportunity-entry/run.py
+```
+
+O código desta observação está em `labs/architecture/opportunity-entry/run.py`. O identificador do probe é `historical-identity`.
+
+O vínculo é uma transferência semântica a partir do código histórico. O código histórico permite estudar Entity por transferência semântica; ele não foi classificado como uma implementação integral de DDD. Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/opportunity-entry/) permite continuar com o mesmo problema.
+
+<span id="idempotency-key" />
+
+## Idempotency Key
+
+A chave idempotente identifica uma intenção repetida, com escopo e retenção definidos.
+
+No caso desta família, faça a seguinte observação: Use dois atores e duas chaves contra a mesma OPP aberta; observe criação 1→0 e o segundo claim recusado com 409.
+
+```sh
+python3 labs/architecture/opportunity-entry/run.py
+```
+
+O código desta observação está em `labs/architecture/opportunity-entry/run.py`. O identificador do probe é `historical-identity`.
+
+O vínculo é uma transferência semântica a partir do código histórico. O código histórico permite estudar Idempotency Key por transferência semântica; ele não foi classificado como uma implementação integral de DDD. Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/opportunity-entry/) permite continuar com o mesmo problema.
+

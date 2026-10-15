@@ -1,0 +1,6 @@
+flowchart LR
+    A["etcd .55: votante"] --> Q["Maioria necessária: 2 de 3"]
+    B["etcd .60: votante"] --> Q
+    C["etcd .75: líder, termo 8"] --> Q
+    Q -->|"dois votos comunicando"| Accept["Consenso pode avançar"]
+    Q -->|"restou só um voto"| Wait["Sem maioria para avançar"]

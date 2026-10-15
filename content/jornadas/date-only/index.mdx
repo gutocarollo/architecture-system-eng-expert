@@ -1,0 +1,36 @@
+---
+title: "A emissão continua no mesmo dia em São Paulo"
+description: "Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface."
+diataxis: explanation
+---
+
+# A emissão continua no mesmo dia em São Paulo
+
+A coluna Emissão recebe a string 2026-10-05. O commit FBI-4840 documenta que a interface mostrava o dia 04 em São Paulo. O valor representa um dia do calendário; o construtor anterior o interpretava como meia-noite UTC, que ainda corresponde ao dia 04 no fuso UTC−3.
+
+Este caso vem do [card FBI-4840](https://fazcapital.atlassian.net/browse/FBI-4840) e do [PR 585](https://bitbucket.org/fazcapital/makershub/pull-requests/585). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/eca3f89e0e703316b807018b7947fbbb2043c806/frontend/app/_utils/isoDate.ts) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/7101d3a4babe95081b0b41d35ec305c08bf8a577/frontend/app/_utils/isoDate.ts). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+## Escolha o que você precisa agora
+
+| Sua necessidade | Destino deste mesmo caso | O que você obterá |
+| --- | --- | --- |
+| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/date-only/) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/date-only/) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/date-only/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/date-only/) | Você consulta os localizadores e as garantias de cada probe. |
+
+## Antes de começar
+
+Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial apresenta os comandos completos e usa somente dados de aprendizado. Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface.
+
+## O resultado que conecta a jornada
+
+A data simples aparece como 05/10/26. O timestamp 2026-10-05T00:00:00Z continua aparecendo como 04/10/26, pois o instante não foi alterado. O roteiro executa o helper e o formatter extraído, com Node e Typescript. Ele não consulta Salesforce, não renderiza o card e não prova a versão frontend de produção.
+
+Quando terminar a prática e consultar seus contratos, continue em [A regra se espalha pelo produto](/jornadas/order-boundaries/).
+
+## Conceitos deste caso
+
+A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
+
+Este caso reúne 1 conceitos no [mapa de mecanismos e práticas](/jornadas/date-only/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.

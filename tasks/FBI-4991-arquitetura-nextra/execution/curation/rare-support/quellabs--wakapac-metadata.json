@@ -1,0 +1,13 @@
+{
+  "repository": "quellabs/wakapac",
+  "default_branch": "main",
+  "sha": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+  "license": {
+    "key": "mit",
+    "name": "MIT License",
+    "spdx_id": "MIT",
+    "url": "https://api.github.com/licenses/mit",
+    "node_id": "MDc6TGljZW5zZTEz"
+  },
+  "observed_utc": "2026-10-15T01:46:39.123695+00:00"
+}

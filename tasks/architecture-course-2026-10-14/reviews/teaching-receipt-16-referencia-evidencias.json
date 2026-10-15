@@ -1,0 +1,20 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/evidencias",
+  "document_sha256": "ecd5bdc11168ced2a6d8aee533ac2d7b0cb0ffad141a2c7ef529e22c8a9d3c7f",
+  "context_sha256": "3298b045c1210950dacb6cc5aa7ee340ec18fa01f8356792299a2ee4ab3d3976",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "bootstrap",
+    "inflow-query",
+    "s2",
+    "l2b",
+    "s3",
+    "s6"
+  ]
+}

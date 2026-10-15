@@ -1,0 +1,57 @@
+--- candidate.ts
++++ candidate.ts
+@@ -1,9 +1,45 @@
+-export const formatBrDate = (dateStr: string | null | undefined) => {
+-    if (!dateStr) return '-';
+-    try {
+-      const date = new Date(dateStr);
+-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+-    } catch {
+-      return '-';
+-    }
+-  };
++/**
++ * Ponte entre o `string` ISO `YYYY-MM-DD` consumido pelo backend e datas
++ * locais do navegador. Evita `toISOString()`, que pode deslocar o dia por UTC.
++ */
++
++/** `YYYY-MM-DD` local → `Date` local. Retorna `null` se vazio/inválido. */
++export const parseIsoLocal = (iso: string): Date | null => {
++  if (!iso) return null;
++  const [year, month, day] = iso.split('-').map(Number);
++  if (!year || !month || !day) return null;
++  return new Date(year, month - 1, day);
++};
++
++/** `Date` → `YYYY-MM-DD` no fuso local. */
++export const toIsoLocal = (date: Date): string => date.toLocaleDateString('en-CA');
++
++/**
++ * ISO date/timestamp → `DD/MM/AAAA` (ou `DD/MM/AA`) em pt-BR, sem deslocar o dia.
++ *
++ * Colunas DATE do backend chegam como `YYYY-MM-DD`, e `new Date("2026-10-05")` é
++ * meia-noite UTC; formatada em UTC-3 (America/Sao_Paulo) rende `04/10` — o erro
++ * de um dia visto na coluna Emissão dos Seguros. Data-only é montada pelos
++ * componentes (meia-noite LOCAL), então o dia exibido é o que o backend mandou,
++ * em qualquer fuso. Timestamps com hora/offset são instantes de verdade e seguem
++ * o construtor normal (conversão para o fuso do browser).
++ *
++ * `invalid` é o rótulo devolvido para entrada vazia/ilegível — o chamador decide
++ * entre `-`, `N/A`, etc.
++ */
++export const formatBrDate = (
++  value: string | null | undefined,
++  options?: { year?: '2-digit' | 'numeric'; invalid?: string },
++): string => {
++  const invalid = options?.invalid ?? '-';
++  if (!value) return invalid;
++  // Só é date-only quando a string INTEIRA é "YYYY-MM-DD". Um timestamp com hora
++  // é um instante de verdade e não pode ser reduzido à sua parte de data.
++  const date = /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseIsoLocal(value) : new Date(value);
++  if (!date || Number.isNaN(date.getTime())) return invalid;
++  return date.toLocaleDateString('pt-BR', {
++    day: '2-digit',
++    month: '2-digit',
++    year: options?.year ?? 'numeric',
++  });
++};

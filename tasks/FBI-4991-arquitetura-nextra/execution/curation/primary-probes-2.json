@@ -1,0 +1,90 @@
+[
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/services/follow_service.rb",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/mastodon/mastodon/main/app/services/follow_service.rb",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-mastodon--mastodon--main--app--services--follow_service.rb",
+    "sha256": "10d484bd54ca868e2a1e095f65500bd72005c8d5949e6907f056176e67209c27",
+    "observed_utc": "2026-10-15T02:50:52.073628+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/lib/activitypub/activity/follow.rb",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/mastodon/mastodon/main/app/lib/activitypub/activity/follow.rb",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-mastodon--mastodon--main--app--lib--activitypub--activity--follow.rb",
+    "sha256": "199a422f0d3c4683bae0583eda94cfde805f8dfb28d771342e5f47400b9c5451",
+    "observed_utc": "2026-10-15T02:50:52.074422+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/lib/activitypub/activity/accept.rb",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/mastodon/mastodon/main/app/lib/activitypub/activity/accept.rb",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-mastodon--mastodon--main--app--lib--activitypub--activity--accept.rb",
+    "sha256": "bfa21ef960640e87f187c36e1034121176411cfe0008a3341e2ed62484a16168",
+    "observed_utc": "2026-10-15T02:50:52.109702+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/lib/activitypub/activity/reject.rb",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/mastodon/mastodon/main/app/lib/activitypub/activity/reject.rb",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-mastodon--mastodon--main--app--lib--activitypub--activity--reject.rb",
+    "sha256": "85554a438e827a69edc210e99f2224665770b89de522c26fd0081326b604a4b4",
+    "observed_utc": "2026-10-15T02:50:52.110352+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "mastodon/mastodon",
+    "path": "app/lib/activitypub/activity/undo.rb",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/mastodon/mastodon/main/app/lib/activitypub/activity/undo.rb",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-mastodon--mastodon--main--app--lib--activitypub--activity--undo.rb",
+    "sha256": "ebc1ffa468119e78ac8fda758eb12fdce4179ccdb8eb0793b8099a6dd5289f0b",
+    "observed_utc": "2026-10-15T02:50:52.112747+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "openstack/nova",
+    "path": "nova/compute/manager.py",
+    "ref": "master",
+    "url": "https://raw.githubusercontent.com/openstack/nova/master/nova/compute/manager.py",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-openstack--nova--master--nova--compute--manager.py",
+    "sha256": "4bdd8212073a593447efc35dc75f7181cdc4a4b67d78475a5e9e846dc975e8ff",
+    "observed_utc": "2026-10-15T02:50:52.229405+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "openstack/nova",
+    "path": "nova/compute/api.py",
+    "ref": "master",
+    "url": "https://raw.githubusercontent.com/openstack/nova/master/nova/compute/api.py",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe2-openstack--nova--master--nova--compute--api.py",
+    "sha256": "6da767034bca94470bda343e53bf49cec4630ac3859eb6dd044ac54079a94aa4",
+    "observed_utc": "2026-10-15T02:50:52.201193+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "grafana/grafana",
+    "path": "public/app/features/dashboard/dashgrid/PanelRenderer.tsx",
+    "ref": "v10.4.0",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "repo": "debezium/debezium",
+    "path": "debezium-server/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java",
+    "ref": "v3.0.8.Final",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "repo": "debezium/debezium",
+    "path": "debezium-server/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java",
+    "ref": "v2.7.3.Final",
+    "error": "HTTP Error 404: Not Found"
+  }
+]

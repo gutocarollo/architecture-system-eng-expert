@@ -1,0 +1,12 @@
+{
+  "repo": "grafana/grafana",
+  "path": "package.json",
+  "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+  "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/package.json",
+  "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/package.json",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:55:26.906884+00:00",
+  "sha256": "79385c9d05ec1e72229517c457297a561e2164fef4f92d81b1bd9c76d01fd020",
+  "line_count": 451,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--package.json"
+}

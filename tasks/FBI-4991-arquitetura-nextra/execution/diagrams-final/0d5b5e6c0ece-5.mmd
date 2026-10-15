@@ -1,0 +1,9 @@
+flowchart LR
+    Version["Código novo implantado no blueprint"] --> Auth{"Pessoa tem autorização?"}
+    Auth -->|"não"| Deny["Acesso negado"]
+    Auth -->|"sim"| Flag{"Flag ativa para este grupo?"}
+    Flag -->|"não"| Existing["Comportamento anterior"]
+    Flag -->|"sim"| New["Comportamento novo"]
+    New --> Effect["Efeitos aceitos permanecem registrados"]
+    Off["Desligar flag depois"] --> Existing
+    Off -. "não apaga" .-> Effect

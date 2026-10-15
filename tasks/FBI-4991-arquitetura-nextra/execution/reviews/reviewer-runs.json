@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "base_sha": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "receipts": [
+    {
+      "case_id": "single-flight-cancel",
+      "observed_at_utc": "2026-10-15T01:41:16.734880+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "before: readers=5 cancelled=5 survivors=0 producer_calls=1\nafter: readers=5 cancelled=1 survivors=4 producer_calls=1\ncomparison=PASS before_defect_observed=True after_guarantee_observed=True\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS",
+      "historical_sources": {
+        "case_id": "single-flight-cancel",
+        "source_repository": "/Users/augustocarollo/Developer/makershub",
+        "before_sha": "342de122cdbfccbe7659adec0e1fcb842b38fc83",
+        "after_sha": "a304a4e56480648bdc60be96c00532c38d18df9f",
+        "snapshots": [
+          {
+            "phase": "before",
+            "sha": "342de122cdbfccbe7659adec0e1fcb842b38fc83",
+            "source_path": "backend/app/utils/single_flight.py",
+            "local_path": "labs/architecture/single-flight-cancel/before.py",
+            "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a"
+          },
+          {
+            "phase": "after",
+            "sha": "a304a4e56480648bdc60be96c00532c38d18df9f",
+            "source_path": "backend/app/utils/single_flight.py",
+            "local_path": "labs/architecture/single-flight-cancel/after.py",
+            "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c"
+          }
+        ],
+        "diff_sha256": "a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7",
+        "inputs": "SYNTHETIC",
+        "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+        "runtime_scope": "LOCAL_LEARNING_ONLY",
+        "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+        "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+        "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+      }
+    },
+    {
+      "case_id": "early-refresh",
+      "observed_at_utc": "2026-10-15T01:41:16.804931+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/early-refresh/run.py"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "before: early_started=False boundary_blocked=True result=calls-v2 producer_calls=2\nafter: early_started=True boundary_blocked=False result=calls-v2 producer_calls=2\ncomparison=PASS evolution=True slow_refresh_can_still_block_after_hard_ttl=True\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS",
+      "historical_sources": {
+        "case_id": "early-refresh",
+        "source_repository": "/Users/augustocarollo/Developer/makershub",
+        "before_sha": "f34e4d3d22d9dcdb53074332dcbf7a48c254c221",
+        "after_sha": "a8bb7023f1ad080cb899cccfb73225231b28e235",
+        "snapshots": [
+          {
+            "phase": "before",
+            "sha": "f34e4d3d22d9dcdb53074332dcbf7a48c254c221",
+            "source_path": "backend/app/utils/single_flight.py",
+            "local_path": "labs/architecture/early-refresh/before.py",
+            "sha256": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406"
+          },
+          {
+            "phase": "after",
+            "sha": "a8bb7023f1ad080cb899cccfb73225231b28e235",
+            "source_path": "backend/app/utils/single_flight.py",
+            "local_path": "labs/architecture/early-refresh/after.py",
+            "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7"
+          }
+        ],
+        "diff_sha256": "d84ce17866a9d7581e62effae42271cc214fbba567f19a5d23bd55a71250b5ab",
+        "inputs": "SYNTHETIC",
+        "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+        "runtime_scope": "LOCAL_LEARNING_ONLY",
+        "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+        "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+        "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+      }
+    },
+    {
+      "case_id": "date-only",
+      "observed_at_utc": "2026-10-15T01:41:16.903362+00:00",
+      "command": [
+        "node",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/run.mjs"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=05/10/26\ntimestamp=2026-10-05T00:00:00Z after=04/10/26 preserves_instant=true\ncomparison=PASS date_only_and_instant_are_distinct=True\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS",
+      "historical_sources": {
+        "case_id": "date-only",
+        "source_repository": "/Users/augustocarollo/Developer/makershub",
+        "before_sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+        "after_sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+        "snapshots": [
+          {
+            "phase": "before",
+            "sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+            "source_path": "frontend/app/_utils/isoDate.ts",
+            "local_path": "labs/architecture/date-only/before.ts",
+            "sha256": "926797824e276c2c2d45da6ea48b6feb091decb7d79e7317d1a12ddf8379365d"
+          },
+          {
+            "phase": "after",
+            "sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+            "source_path": "frontend/app/_utils/isoDate.ts",
+            "local_path": "labs/architecture/date-only/after.ts",
+            "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5"
+          },
+          {
+            "phase": "before",
+            "sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+            "source_path": "frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx",
+            "local_path": "labs/architecture/date-only/before-card.tsx",
+            "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d"
+          },
+          {
+            "phase": "after",
+            "sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+            "source_path": "frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx",
+            "local_path": "labs/architecture/date-only/after-card.tsx",
+            "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d"
+          }
+        ],
+        "diff_sha256": "5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59",
+        "inputs": "SYNTHETIC",
+        "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+        "runtime_scope": "LOCAL_LEARNING_ONLY",
+        "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+        "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+        "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+      }
+    },
+    {
+      "case_id": "opportunity-entry",
+      "observed_at_utc": "2026-10-15T01:41:17.090077+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/opportunity-entry/run.py"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "before: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double\nafter: create_calls=0 opportunity_id=006SYNTHETICOPEN downstream=double\nbefore-claim: two_actor_keys_own=2\nafter-claim: shared_opportunity_second_status=409\nafter-policy: stage=Contatado status=0\nafter-policy: stage=Ganha status=409\nafter-policy: stage=Perdida status=409\ncomparison=PASS scope=historical_function_bodies_with_adapter_doubles\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS",
+      "historical_sources": {
+        "case_id": "opportunity-entry",
+        "source_repository": "/Users/augustocarollo/Developer/makershub",
+        "before_sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+        "after_sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+        "snapshots": [
+          {
+            "phase": "before",
+            "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+            "source_path": "backend/app/services/super_r1_service.py",
+            "local_path": "labs/architecture/opportunity-entry/before.py",
+            "sha256": "19d2e9051189fc83b10f922e57504fa5f006f67c8101fe4e27dc15dffd6c588a"
+          },
+          {
+            "phase": "after",
+            "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+            "source_path": "backend/app/services/super_r1_service.py",
+            "local_path": "labs/architecture/opportunity-entry/after.py",
+            "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365"
+          },
+          {
+            "phase": "before",
+            "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+            "source_path": "backend/app/integrations/salesforce_integration.py",
+            "local_path": "labs/architecture/opportunity-entry/before-integration.py",
+            "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38"
+          },
+          {
+            "phase": "after",
+            "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+            "source_path": "backend/app/integrations/salesforce_integration.py",
+            "local_path": "labs/architecture/opportunity-entry/after-integration.py",
+            "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05"
+          },
+          {
+            "phase": "before",
+            "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+            "source_path": "backend/app/services/qualify_service.py",
+            "local_path": "labs/architecture/opportunity-entry/before-qualify.py",
+            "sha256": "9b7942171f29c0aba293241ea52f04d787ef6a6c16e145a3a5186f387e9a7872"
+          },
+          {
+            "phase": "after",
+            "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+            "source_path": "backend/app/services/qualify_service.py",
+            "local_path": "labs/architecture/opportunity-entry/after-qualify.py",
+            "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0"
+          }
+        ],
+        "diff_sha256": "78d961e87d0d26a7a6d67b17a86bbb2fce6cf762e849fd8b2c95426bc52476f7",
+        "inputs": "SYNTHETIC",
+        "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+        "runtime_scope": "LOCAL_LEARNING_ONLY",
+        "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+        "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+        "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+      }
+    },
+    {
+      "case_id": "order-boundaries",
+      "observed_at_utc": "2026-10-15T01:41:17.193512+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "order-boundaries"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"amount\": 100.0, \"booked\": true}, \"before\": {\"booked\": false}, \"guarantee\": \"The adapter translates an external language at one boundary.\", \"limit\": \"No provider is called; network and credentials are absent.\", \"probe\": \"provider-contract\"}\n{\"after\": [10.0, 20.0], \"before\": [10.0, 10.0], \"guarantee\": \"A strategy is supplied to the domain operation; the caller can exchange it.\", \"limit\": \"A callable alone does not prove a full architecture or deployment boundary.\", \"probe\": \"replace-policy\"}\n{\"after\": {\"invalid_writes\": 0}, \"before\": {\"invalid_writes\": 1}, \"guarantee\": \"The command checks an invariant before invoking its write port.\", \"limit\": \"The example checks one invariant; it does not model a financial regulation.\", \"probe\": \"validate-before-side-effect\"}\ncomparison=PASS case=order-boundaries probes=3 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "order-delivery",
+      "observed_at_utc": "2026-10-15T01:41:17.254451+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "order-delivery"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"debit\": 150, \"effects\": 2}, \"before\": {\"debit\": 250, \"effects\": 3}, \"guarantee\": \"Repeated delivery of the same semantic operation has one effect in this store.\", \"limit\": \"The key lifetime, atomic storage and payload conflict policy remain design obligations.\", \"probe\": \"deduplicate\"}\n{\"after\": {\"orders\": 1, \"recoverable_events\": 1}, \"before\": {\"orders\": 1, \"published\": 0}, \"guarantee\": \"One local transaction preserves both an order and its delivery intention.\", \"limit\": \"Delivery and recipient deduplication are still separate; this is SQLite, not PostgreSQL CDC.\", \"probe\": \"commit-intention\"}\n{\"after\": {\"balance_after_failed_allocation\": 1000}, \"before\": {\"balance_after_failed_allocation\": 900}, \"guarantee\": \"A compensating credit offsets the prior debit when allocation fails.\", \"limit\": \"Compensation is a new business action; it does not erase history or undo every external effect.\", \"probe\": \"compensate\"}\ncomparison=PASS case=order-delivery probes=3 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "reservation",
+      "observed_at_utc": "2026-10-15T01:41:17.307936+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "reservation"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance_after_reread\": 900, \"stale_rejected\": true}, \"before\": {\"balance\": 800, \"lost_credit\": 100}, \"guarantee\": \"The stale editor cannot silently overwrite a preceding credit.\", \"limit\": \"The re-read must revalidate business intent; a retry is not always permissible.\", \"probe\": \"version-conflict\"}\n{\"after\": {\"last_writer\": \"B\", \"stale_101_rejected\": true, \"value\": 102}, \"before\": {\"last_writer\": \"expired-A\", \"value\": 101}, \"guarantee\": \"The destination compares an ordered generation, including delayed writers.\", \"limit\": \"A random owner UUID is not an ordered fence; an external destination must perform this check.\", \"probe\": \"fence\"}\n{\"after\": {\"accepted_with_slot_key\": 1}, \"before\": {\"accepted_with_actor_keys\": 2}, \"guarantee\": \"The shared slot, rather than the caller, is the protected identity.\", \"limit\": \"This set is one-process memory; distributed storage must claim atomically and manage expiry.\", \"probe\": \"resource-key\"}\ncomparison=PASS case=reservation probes=3 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "consensus",
+      "observed_at_utc": "2026-10-15T01:41:17.360531+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "consensus"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"leaders\": 1, \"minority_writes\": 0}, \"before\": {\"leaders\": 2}, \"guarantee\": \"Only a partition with two of three members can authorize a new write.\", \"limit\": \"This finite model is not Raft or Paxos: terms, durable logs, elections and message faults are not implemented.\", \"probe\": \"majority-partition\"}\n{\"after\": {\"intersection_lower_bound\": 1}, \"before\": {\"intersection_lower_bound\": -1}, \"guarantee\": \"For three replicas, read two and write two have at least one common member.\", \"limit\": \"Intersection alone does not prove linearizability; version selection and failure assumptions matter.\", \"probe\": \"quorum-overlap\"}\n{\"after\": {\"concurrent_detected\": true, \"merged_vector\": {\"A\": 1, \"B\": 1}}, \"before\": {\"last_write_only\": \"A\", \"lost_branch\": \"B\"}, \"guarantee\": \"A vector exposes concurrent branches before application-specific reconciliation.\", \"limit\": \"The vector does not decide the financial meaning of merging two orders.\", \"probe\": \"causal-versions\"}\n{\"after\": {\"receive_clock\": 9}, \"before\": {\"receive_clock\": 4}, \"guarantee\": \"A receive event advances beyond the causal sender clock.\", \"limit\": \"Lamport order does not prove concurrency; hybrid clocks also need physical-clock policy.\", \"probe\": \"logical-clock\"}\n{\"after\": {\"prepared_then_timeout\": \"wait_for_decision\"}, \"before\": {\"prepared_then_timeout\": \"commit_guessed\"}, \"guarantee\": \"A prepared participant cannot invent the coordinator decision.\", \"limit\": \"This models blocking in atomic commit; it neither implements 2PC/3PC nor proves partition tolerance.\", \"probe\": \"prepared-participant\"}\ncomparison=PASS case=consensus probes=5 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "queue-workflow",
+      "observed_at_utc": "2026-10-15T01:41:17.411787+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "queue-workflow"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"enriched\": 6, \"statement\": 3, \"trade\": 3}, \"before\": {\"one_untyped_batch\": 6}, \"guarantee\": \"A router chooses a destination; an enricher adds context and an aggregator can count each result.\", \"limit\": \"The example does not guarantee distributed ordering or delivery.\", \"probe\": \"route-enrich-aggregate\"}\n{\"after\": {\"dead_letters\": 1, \"delivered\": 1, \"poison_attempts\": 3}, \"before\": {\"dead_letters\": 0, \"poison_attempts\": 6}, \"guarantee\": \"A poison message exhausts three attempts and is retained outside the normal queue.\", \"limit\": \"The six-attempt before trace is a bounded sample of an unbounded retry policy.\", \"probe\": \"retry-dlq\"}\n{\"after\": {\"buffered\": 20, \"rejected\": 100}, \"before\": {\"buffered\": 120, \"rejected\": 0}, \"guarantee\": \"Admission limits queued work before consuming unbounded memory.\", \"limit\": \"A consumer semaphore alone cannot impose this limit on the producer.\", \"probe\": \"admission\"}\n{\"after\": {\"audit_subscription_events\": 2, \"shared_queue_effects\": 2}, \"before\": {\"workers_each_execute_all\": 6}, \"guarantee\": \"Competing consumers divide work while separate subscriptions each receive the facts they need.\", \"limit\": \"Retries still require an inbox; pub/sub is not a shared task queue.\", \"probe\": \"consumer-topology\"}\n{\"after\": {\"final\": \"settled\", \"invalid_first_rejected\": true, \"states\": [\"accepted\", \"reserved\", \"settled\"]}, \"before\": {\"invalid_first\": \"settled\", \"states\": [\"settled\", \"reserved\", \"accepted\"]}, \"guarantee\": \"Sequence metadata enables ordering and a state machine rejects an invalid transition.\", \"limit\": \"A missing earlier message needs timeout/recovery policy; sorting a batch is not a streaming resequencer.\", \"probe\": \"resequence-state\"}\n{\"after\": {\"attempts\": 3, \"delays\": [1, 2, 4], \"final\": \"open-circuit\", \"jittered_delays\": [1.1, 2.2, 4.3]}, \"before\": {\"attempt_times\": [0, 0, 0], \"final\": \"overload\"}, \"guarantee\": \"Budgeted attempts, exponential delay and fixed jitter spread work; the open circuit refuses more calls.\", \"limit\": \"The jitter is deterministic for learning; timeouts, deadlines, rate limits and bulkheads have distinct owners.\", \"probe\": \"retry-budget\"}\n{\"after\": {\"order\": [\"extract\", \"transform\", \"publish\"]}, \"before\": {\"order\": [\"publish\", \"extract\", \"transform\"]}, \"guarantee\": \"A task becomes eligible only after its prerequisites finish.\", \"limit\": \"A DAG describes dependency; the loop does not implement a durable workflow engine or Airflow.\", \"probe\": \"dag-dependencies\"}\ncomparison=PASS case=queue-workflow probes=7 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "cache-policy",
+      "observed_at_utc": "2026-10-15T01:41:17.462941+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "cache-policy"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"tenant_B_reads\": \"tenant-B\"}, \"before\": {\"tenant_B_reads\": \"tenant-A\"}, \"guarantee\": \"Tenant and query scope belong in a key before a cached result is shared.\", \"limit\": \"The tenant label is synthetic; real authorization must precede lookup.\", \"probe\": \"cache-key\"}\n{\"after\": {\"decision\": \"reload\", \"stale_returned\": false}, \"before\": {\"stale_returned\": true}, \"guarantee\": \"TTL creates an explicit validity boundary and expiration returns control to the producer.\", \"limit\": \"TTL does not prove source freshness or invalidate a value immediately after a write.\", \"probe\": \"cache-expiry\"}\n{\"after\": {\"write_through_durable_balance\": 1100}, \"before\": {\"write_behind_crash_durable_balance\": 1000}, \"guarantee\": \"Acknowledging after durable write avoids losing a buffered credit during this crash.\", \"limit\": \"Different ordering has different latency; neither alone gives cross-system atomicity.\", \"probe\": \"write-policy\"}\n{\"after\": {\"worker_A\": 2, \"worker_B\": 2}, \"before\": {\"worker_A\": 1, \"worker_B\": 2}, \"guarantee\": \"Invalidation permits the local level to reload from its shared owner.\", \"limit\": \"Two copies still require freshness, errors, eviction and stampede contracts.\", \"probe\": \"cache-levels\"}\ncomparison=PASS case=cache-policy probes=4 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "ledger-projection",
+      "observed_at_utc": "2026-10-15T01:41:17.515557+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "ledger-projection"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"events\": 3, \"replayed_balance\": 900}, \"before\": {\"mutable_balance_without_history\": 800}, \"guarantee\": \"An append-only record can replay the credits and debit into a read position.\", \"limit\": \"These are business events, not arbitrary row-change logs; audit storage alone is not Event Sourcing.\", \"probe\": \"replay-events\"}\n{\"after\": {\"lag_events\": 0, \"projection\": 900}, \"before\": {\"lag_events\": 2, \"projection\": 1000}, \"guarantee\": \"A projection advances only after consuming its missing events.\", \"limit\": \"The demonstration has no durable checkpoint, broker or read-your-writes API.\", \"probe\": \"projection-checkpoint\"}\n{\"after\": {\"rolled_back_cents\": 100000, \"sqlite_journal_mode\": \"wal\"}, \"before\": {\"partial_update_visible\": 110000}, \"guarantee\": \"A local transaction rolls back an incomplete change while SQLite uses its WAL mode.\", \"limit\": \"This is a SQLite engine check, not a PostgreSQL recovery, replication or fsync proof.\", \"probe\": \"durable-transaction\"}\n{\"after\": {\"balance\": 900, \"events_to_replay\": 1}, \"before\": {\"events_to_replay\": 3}, \"guarantee\": \"A snapshot plus its following events reconstructs the same state with less replay.\", \"limit\": \"A snapshot must match an event position; it does not replace the authoritative event history.\", \"probe\": \"snapshot-replay\"}\ncomparison=PASS case=ledger-projection probes=4 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "storage-partitions",
+      "observed_at_utc": "2026-10-15T01:41:17.568840+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "storage-partitions"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"partitions_scanned\": 1, \"row_7_amount\": 70}, \"before\": {\"partitions_scanned\": 3}, \"guarantee\": \"A stable key and routing rule direct a lookup to its owning shard.\", \"limit\": \"Python modulo is not consistent hashing and reassigns keys when the shard count changes.\", \"probe\": \"shard-route\"}\n{\"after\": {\"sum_at_account_grain\": 300}, \"before\": {\"sum_after_one_to_many_join\": 800}, \"guarantee\": \"Aggregating children at the intended grain avoids multiplying the monetary value.\", \"limit\": \"A unique key before a join does not prove uniqueness afterwards.\", \"probe\": \"grain-join\"}\n{\"after\": {\"modulo_moved_keys\": 76, \"shards\": 4}, \"before\": {\"moved_keys\": 0, \"shards\": 3}, \"guarantee\": \"Adding a modulo shard can move many key owners; a consistent ring aims to limit remapping.\", \"limit\": \"This quantifies the baseline; it does not implement a production ring, virtual nodes or rebalance.\", \"probe\": \"hash-remap\"}\n{\"after\": {\"query_plan\": \"SEARCH position USING COVERING INDEX position_lookup (account_key=?)\"}, \"before\": {\"query_plan\": \"SCAN position\"}, \"guarantee\": \"The lookup changes from scanning to an index that includes the selected value.\", \"limit\": \"SQLite plan wording and index behavior do not establish a PostgreSQL query plan.\", \"probe\": \"covering-index\"}\ncomparison=PASS case=storage-partitions probes=4 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "safe-release",
+      "observed_at_utc": "2026-10-15T01:41:17.622667+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "safe-release"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"new_reader_value\": 100000, \"old_reader_value\": 1000}, \"before\": {\"old_reader_value\": null}, \"guarantee\": \"Expanding first keeps the old field while the new reader learns the new field.\", \"limit\": \"Removing the old field requires evidence that old readers have retired.\", \"probe\": \"expand-contract\"}\n{\"after\": {\"new_version_exposure\": 5, \"rollback_route\": \"old\"}, \"before\": {\"new_version_exposure\": 100}, \"guarantee\": \"A controlled route limits the first new-version population and can redirect it.\", \"limit\": \"Synthetic exposure counts do not prove Kubernetes readiness or rollback of incompatible data.\", \"probe\": \"progressive-route\"}\n{\"after\": {\"shadow_mismatch\": true, \"visible_primary\": 10}, \"before\": {\"silent_new_result\": 1000}, \"guarantee\": \"A shadow computation compares results while the primary owns the user-visible effect.\", \"limit\": \"Both implementations must avoid duplicate writes; this probe uses pure functions.\", \"probe\": \"shadow-parity\"}\n{\"after\": {\"reconciled\": {\"image\": \"v2\", \"replicas\": 2}}, \"before\": {\"actual\": {\"image\": \"v1\", \"replicas\": 1}}, \"guarantee\": \"A reconciler compares declared state with observed state before applying a change.\", \"limit\": \"A dict update is a model of reconciliation, not GitOps, Terraform or immutable infrastructure deployment.\", \"probe\": \"desired-state\"}\ncomparison=PASS case=safe-release probes=4 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "access-policy",
+      "observed_at_utc": "2026-10-15T01:41:17.675395+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "access-policy"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cross_tenant_allowed\": false}, \"before\": {\"cross_tenant_allowed\": true}, \"guarantee\": \"Role, attributes and ownership must be checked against the specific resource.\", \"limit\": \"No live roles, customer records or Faz permission contracts are inferred.\", \"probe\": \"object-authorization\"}\n{\"after\": {\"accepted\": false}, \"before\": {\"expired_token_accepted\": true}, \"guarantee\": \"Expiration and audience constrain where and when a credential is accepted.\", \"limit\": \"Claims are unsigned in this model; it does not implement OAuth2, OIDC, mTLS or key verification.\", \"probe\": \"credential-boundary\"}\n{\"after\": {\"old_key_accepted\": false}, \"before\": {\"old_key_accepted\": true}, \"guarantee\": \"Retiring a key makes a credential issued by that key inadmissible to this verifier.\", \"limit\": \"Real rotation needs verified signatures, overlap windows and dependent-service rollout.\", \"probe\": \"rotate-key\"}\n{\"after\": {\"direct_browser_ledger\": false}, \"before\": {\"direct_browser_ledger\": true}, \"guarantee\": \"Explicit allowed edges reduce paths that bypass the application owner.\", \"limit\": \"A set is a policy model, not a network firewall, bastion or service mesh.\", \"probe\": \"least-network-path\"}\ncomparison=PASS case=access-policy probes=4 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "diagnostics",
+      "observed_at_utc": "2026-10-15T01:41:17.726649+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+        "diagnostics"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"operation_spans\": 3, \"requests\": 2}, \"before\": {\"trace_one_request_spans\": 2}, \"guarantee\": \"An operation identity relates two request attempts without confusing them.\", \"limit\": \"A list of spans is not OpenTelemetry instrumentation or proof of cross-service context propagation.\", \"probe\": \"correlate-retries\"}\n{\"after\": {\"error_ratio\": 0.333, \"errors\": 1, \"max_duration_ms\": 800, \"requests\": 3}, \"before\": {\"looks_healthy_from_average_only\": true}, \"guarantee\": \"Rate, errors and duration expose a slow failed dependency hidden by a vague status.\", \"limit\": \"This sample cannot establish percentiles, an SLO or production capacity.\", \"probe\": \"measure-signals\"}\n{\"after\": {\"health_endpoint\": \"ok\", \"synthetic_order\": \"provider_failed\"}, \"before\": {\"health_endpoint\": \"ok\", \"order_path\": \"unmeasured\"}, \"guarantee\": \"A synthetic business-path check can fail while the process health endpoint stays green.\", \"limit\": \"Only a controlled synthetic path ran; no real order is sent.\", \"probe\": \"probe-business-path\"}\ncomparison=PASS case=diagnostics probes=3 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    },
+    {
+      "case_id": "object-patterns",
+      "observed_at_utc": "2026-10-15T01:41:17.778587+00:00",
+      "command": [
+        "python3",
+        "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/object_patterns.py"
+      ],
+      "environment": {
+        "TZ": "America/Sao_Paulo",
+        "python": "3.14.8",
+        "node": "v26.8.1"
+      },
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Abstract Factory\", \"before\": {\"accepted\": false, \"fee\": 10.0}, \"after\": {\"accepted\": true, \"fee\": 10.0}, \"mechanism\": \"One product family creates its compatible validator and fee calculator together.\"}\n{\"concept\": \"Adapter\", \"before\": null, \"after\": 100.0, \"mechanism\": \"The boundary translates cents into the domain amount.\"}\n{\"concept\": \"Bridge\", \"before\": \"hardcoded-http\", \"after\": \"memory:100\", \"mechanism\": \"The order abstraction delegates its delivery to an interchangeable implementation.\"}\n{\"concept\": \"Builder\", \"before\": 100, \"after\": 250, \"mechanism\": \"Construction accumulates chosen fields before returning an order.\"}\n{\"concept\": \"Chain of Responsibility\", \"before\": true, \"after\": false, \"mechanism\": \"Each validator can stop a request before the next responsibility.\"}\n{\"concept\": \"Command\", \"before\": 100, \"after\": 150, \"mechanism\": \"The requested credit is represented as an executable value.\"}\n{\"concept\": \"Composite\", \"before\": 100, \"after\": 175, \"mechanism\": \"Leaves and groups share a recursive total operation.\"}\n{\"concept\": \"Decorator\", \"before\": 1.0, \"after\": 3.0, \"mechanism\": \"A wrapper extends behavior while retaining the wrapped order.\"}\n{\"concept\": \"Facade\", \"before\": \"two-separate-calls\", \"after\": {\"accepted\": true, \"fee\": 1.0}, \"mechanism\": \"One entrance coordinates validation and fee calculation.\"}\n{\"concept\": \"Factory Method\", \"before\": \"Order\", \"after\": \"PremiumOrder\", \"mechanism\": \"An overridable creation operation selects the concrete order.\"}\n{\"concept\": \"Flyweight\", \"before\": 5, \"after\": 1, \"mechanism\": \"Five orders share one immutable-style symbol object; per-order amounts stay separate.\"}\n{\"concept\": \"Interpreter\", \"before\": false, \"after\": true, \"mechanism\": \"A small explicit grammar is evaluated against the order context; no eval is used.\"}\n{\"concept\": \"Iterator\", \"before\": [100], \"after\": [100, 50], \"mechanism\": \"Traversal provides elements without exposing storage indexing.\"}\n{\"concept\": \"Mediator\", \"before\": 1, \"after\": 2, \"mechanism\": \"A coordinator routes one order event to audit and risk participants.\"}\n{\"concept\": \"Memento\", \"before\": 200, \"after\": 100, \"mechanism\": \"An explicit saved snapshot restores a previous local state; business reversals still need events.\"}\n{\"concept\": \"Observer\", \"before\": 0, \"after\": 1, \"mechanism\": \"A registered observer receives the published state change.\"}\n{\"concept\": \"Prototype\", \"before\": [], \"after\": [\"premium\"], \"mechanism\": \"A prototype copy can be customized without mutating the original.\"}\n{\"concept\": \"Proxy\", \"before\": 100, \"after\": \"denied\", \"mechanism\": \"A substitute checks permission before delegating to the target.\"}\n{\"concept\": \"Singleton\", \"before\": 2, \"after\": 1, \"mechanism\": \"The local registry returns one instance for one name within this process.\"}\n{\"concept\": \"State\", \"before\": \"accepted-twice\", \"after\": \"second-transition-rejected\", \"mechanism\": \"Behavior depends on the current state and rejects a transition outside its contract.\"}\n{\"concept\": \"Strategy\", \"before\": 1.0, \"after\": 2.0, \"mechanism\": \"The caller supplies a fee algorithm without replacing the order operation.\"}\n{\"concept\": \"Template Method\", \"before\": 101, \"after\": 100.5, \"mechanism\": \"The operation preserves a sequence while a subclass changes the fee step.\"}\n{\"concept\": \"Visitor\", \"before\": 0, \"after\": 0.5, \"mechanism\": \"A separate visitor performs an operation over an order through its public contract.\"}\ncomparison=PASS object_mechanisms=23 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "scope": "LOCAL_LEARNING_WITH_SYNTHETIC_INPUTS"
+    }
+  ],
+  "source_sha256": {
+    "labs/architecture/case_diagrams.json": "a9803be68be09f95df3b8520e8f57214e6ea87e3a25c1ac98afaab02b8b69b5b",
+    "labs/architecture/object_patterns.py": "9b2e005909b188f3ddf69f6c1da184550bc77e38066f7cc52883483bee2768e1",
+    "labs/architecture/map_concepts.py": "f99aa328f603a1d0d124ce3c121782885d2471d3e5f48bdaa3d89a9e9f65cbd5",
+    "labs/architecture/check_matrix.py": "b75fec098e64caa09e07478c913f335f09b7bfc814e0946dbd5a053d5572099c",
+    "labs/architecture/financial.py": "f58b9018f22e31f536e7072055b038bfb7cbf0e056a086ebdb30713859641565",
+    "labs/architecture/README.md": "5b7b281810b9de5abc9f176ee46c744d133c5b85a5dec0d636bdcabba1f4f14a",
+    "labs/architecture/author_learning.py": "2617625894f29171e96a9de6d1a78c59a1a841695fbef9c08baaeb7a843f96b1",
+    "labs/architecture/check_challenges.py": "c36057e1a6f106f472e4b0744382c112b6c9bd196d0a92a4fab62daf54eb2a89",
+    "labs/architecture/run_all.py": "3af507632dc274bd8be30fd501deb2f7825848f4b9db69e29f04a69e049f4d4d",
+    "labs/architecture/extract_historical.py": "6ee5dddb995af8d25a542f791c3fe040960d19e84f3372d10183f9494cb33121",
+    "labs/architecture/check_mdx.mjs": "25190454d355ce9b68b46928821bc633983876137c0a10dbe01af8040a4f40b5",
+    "labs/architecture/single-flight-cancel/before.py": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a",
+    "labs/architecture/single-flight-cancel/run.py": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+    "labs/architecture/single-flight-cancel/after.py": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+    "labs/architecture/single-flight-cancel/manifest.json": "27fdcfe9e6cc29cca20d99c44a6a5628ffbe02ccfff6278f3e481604292628bf",
+    "labs/architecture/single-flight-cancel/source.diff": "a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7",
+    "labs/architecture/date-only/before-card.tsx": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d",
+    "labs/architecture/date-only/run.mjs": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3",
+    "labs/architecture/date-only/candidate.patch": "5ec0736ceee01a39260c3cb4ea173b01feccf359db72702729c67e0332cb125e",
+    "labs/architecture/date-only/candidate-before.ts": "4c84f8a6517f98776b5ec2b74ff96dd50e1c201b8813b87f19c6eeaec0930ba0",
+    "labs/architecture/date-only/after.ts": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5",
+    "labs/architecture/date-only/after-card.tsx": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d",
+    "labs/architecture/date-only/manifest.json": "4a30abeb13f0d537c6be9e3ac34f52cf66579207ea9a1194d2fbdcd9138a2334",
+    "labs/architecture/date-only/source.diff": "5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59",
+    "labs/architecture/date-only/before.ts": "926797824e276c2c2d45da6ea48b6feb091decb7d79e7317d1a12ddf8379365d",
+    "labs/architecture/early-refresh/before.py": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406",
+    "labs/architecture/early-refresh/run.py": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3",
+    "labs/architecture/early-refresh/after.py": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+    "labs/architecture/early-refresh/manifest.json": "253a249254008a4bdc20a4a7f619e9d1624735fdbc31f7d191206788b84e1f4e",
+    "labs/architecture/early-refresh/source.diff": "d84ce17866a9d7581e62effae42271cc214fbba567f19a5d23bd55a71250b5ab",
+    "labs/architecture/opportunity-entry/before.py": "19d2e9051189fc83b10f922e57504fa5f006f67c8101fe4e27dc15dffd6c588a",
+    "labs/architecture/opportunity-entry/run.py": "3524d109a5fc7d6bd0728122eea40d78faf17756a8f0cf15c37799116594f7af",
+    "labs/architecture/opportunity-entry/after-integration.py": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05",
+    "labs/architecture/opportunity-entry/before-integration.py": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38",
+    "labs/architecture/opportunity-entry/after.py": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365",
+    "labs/architecture/opportunity-entry/manifest.json": "23e8bb520f93959edf5ac886df89fac4428442087284a435b4b2b1a29ed6fa51",
+    "labs/architecture/opportunity-entry/source.diff": "78d961e87d0d26a7a6d67b17a86bbb2fce6cf762e849fd8b2c95426bc52476f7",
+    "labs/architecture/opportunity-entry/before-qualify.py": "9b7942171f29c0aba293241ea52f04d787ef6a6c16e145a3a5186f387e9a7872",
+    "labs/architecture/opportunity-entry/after-qualify.py": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0"
+  },
+  "verdict": "PASS",
+  "independent_review": "PENDING",
+  "production_execution": false
+}

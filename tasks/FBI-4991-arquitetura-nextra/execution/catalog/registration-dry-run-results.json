@@ -1,0 +1,14 @@
+{
+  "measured_at_utc": "2026-10-15 02:49 UTC",
+  "patch_check": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "existing_global_path_status": " M docs/canonical/INDEX.md\n M docs/canonical/_index/entity-document-map.csv\n M docs/canonical/_index/section-map.csv\n",
+  "source_files_edited": false,
+  "jira_mutation": false,
+  "graph_build_or_publish": false,
+  "candidate_id": "doc:architecture/architecture-system-eng-expert",
+  "repository_projection_still_blocked": true
+}

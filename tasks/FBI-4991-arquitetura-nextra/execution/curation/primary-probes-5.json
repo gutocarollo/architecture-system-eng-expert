@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/medusajs/medusa/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/medusa/src/loaders/index.ts",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe5-medusajs--medusa--packages--medusa--src--loaders--index.ts",
+    "sha256": "b7b324e95a914b96108a7b3489afe2eac77c66d3fd8b456031575b6fccaf560a",
+    "observed_utc": "2026-10-15T02:58:18.433858+00:00"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/medusajs/medusa/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/index.ts",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe5-medusajs--medusa--packages--modules--order--src--index.ts",
+    "sha256": "0adeb3c509e839b1e7ff2014d9b45c6cb733f06284751e38291ff9db50b23bc8",
+    "observed_utc": "2026-10-15T02:58:18.434096+00:00"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/medusajs/medusa/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/inventory/src/index.ts",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe5-medusajs--medusa--packages--modules--inventory--src--index.ts",
+    "sha256": "141bc291cdde543d7db92965445ab35ab7d89f29d9be72f56a52309dcb85661f",
+    "observed_utc": "2026-10-15T02:58:18.442797+00:00"
+  }
+]

@@ -1,0 +1,239 @@
+---
+title: "Curadoria: Cache"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Cache."
+diataxis: reference
+---
+
+# Curadoria: Cache
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Cache Aside
+
+O identificador canônico é `cache-aside`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset tenta obter o resultado no cache e executa a consulta quando precisa produzir um novo valor.
+
+A base de estudo é [python/cpython / functools.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / query_context_processor.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `cache`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py#L125-L131). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#cache-aside). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cache Invalidation
+
+O identificador canônico é `cache-invalidation`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset tenta obter o resultado no cache e executa a consulta quando precisa produzir um novo valor.
+
+A base de estudo é [python/cpython / functools.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / query_context_processor.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `cache`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py#L125-L131). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#cache-invalidation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cache Stampede Protection
+
+O identificador canônico é `cache-stampede-protection`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/single-flight-cancel/) e [consulte a ação e o probe deste conceito](/jornadas/single-flight-cancel/conceitos/#cache-stampede-protection). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cache Warming
+
+O identificador canônico é `cache-warming`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O produto Superset executa tarefas para aquecer consultas. A base Guava demonstra recarga assíncrona sob outra política; o intervalo e o TTL precisam ser comparados.
+
+A base de estudo é [google/guava / LocalCache.java @ dea49844](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/cache/LocalCache.java); licença [Apache-2.0](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / cache.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `cache`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py#L350-L356). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#cache-warming). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Distributed Cache
+
+O identificador canônico é `distributed-cache`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset tenta obter o resultado no cache e executa a consulta quando precisa produzir um novo valor.
+
+A base de estudo é [python/cpython / functools.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / query_context_processor.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `cache`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/common/query_context_processor.py#L125-L131). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#distributed-cache). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Local Cache
+
+O identificador canônico é `local-cache`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#local-cache). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Negative Caching
+
+O identificador canônico é `negative-caching`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#negative-caching). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Read Through
+
+O identificador canônico é `read-through`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#read-through). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Refresh Ahead
+
+O identificador canônico é `refresh-ahead`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O produto Superset executa tarefas para aquecer consultas. A base Guava demonstra recarga assíncrona sob outra política; o intervalo e o TTL precisam ser comparados.
+
+A base de estudo é [google/guava / LocalCache.java @ dea49844](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/cache/LocalCache.java); licença [Apache-2.0](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / cache.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `cache`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/cache.py#L350-L356). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/early-refresh/) e [consulte a ação e o probe deste conceito](/jornadas/early-refresh/conceitos/#refresh-ahead). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Single Flight
+
+O identificador canônico é `single-flight`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/single-flight-cancel/) e [consulte a ação e o probe deste conceito](/jornadas/single-flight-cancel/conceitos/#single-flight). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## TTL Cache
+
+O identificador canônico é `ttl-cache`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+CoreDNS distingue cache de respostas negativas, validade TTL e coordenação de consultas concorrentes para a mesma chave.
+
+A base de estudo é [golang/sync / singleflight.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/singleflight/singleflight.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / handler.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE); [coredns/coredns / singleflight.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/singleflight/singleflight.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ttl`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/cache/handler.go#L224-L230). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Cada termo conserva sua condição: TTL não equivale a frescor autoritativo e single flight só reúne requisições dentro do grupo coordenado.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#ttl-cache). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Two-Level Cache
+
+O identificador canônico é `two-level-cache`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O servidor Infinispan monta o cache e expõe operações Hot Rod. Quando L1 está habilitado, o interceptor consulta a cópia local e busca a entrada do proprietário no cache distribuído quando necessário. RedissonLocalCachedMap fornece uma base alternativa de cópia local mais mapa remoto.
+
+A base de estudo é [redisson/redisson / RedissonLocalCachedMap.java @ 016cf146](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonLocalCachedMap.java); licença [Apache-2.0](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/LICENSE.txt). A aplicação ou candidato de aplicação é [infinispan/infinispan / Server.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/runtime/src/main/java/org/infinispan/server/Server.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / CacheRequestProcessor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/hotrod/src/main/java/org/infinispan/server/hotrod/CacheRequestProcessor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / L1NonTxInterceptor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/interceptors/distribution/L1NonTxInterceptor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / InterceptorChainFactory.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/factories/InterceptorChainFactory.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `DefaultCacheManager`](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/runtime/src/main/java/org/infinispan/server/Server.java#L411-L417). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O caminho está condicionado à configuração L1. Invalidação, tempo de vida e propriedade dos dados precisam ser preservados; a leitura não afirma que essa configuração esteja ativa na Faz.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#two-level-cache). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="write-behind-write-back" />
+
+## Write Behind / Write Back
+
+O identificador canônico é `write-behind-write-back`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O store assíncrono Infinispan recebe modificações, conserva-as em uma fila e as envia em lote ao store delegado. O servidor Hot Rod utiliza o cache configurado com essa camada de persistência.
+
+A base de estudo é [redisson/redisson / MapWriteBehindTask.java @ 016cf146](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/MapWriteBehindTask.java); licença [Apache-2.0](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/LICENSE.txt). A aplicação ou candidato de aplicação é [infinispan/infinispan / Server.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/runtime/src/main/java/org/infinispan/server/Server.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / CacheRequestProcessor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/hotrod/src/main/java/org/infinispan/server/hotrod/CacheRequestProcessor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / AsyncNonBlockingStore.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/persistence/async/AsyncNonBlockingStore.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / CacheWriterInterceptor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/interceptors/impl/CacheWriterInterceptor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `putAsync`](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/hotrod/src/main/java/org/infinispan/server/hotrod/CacheRequestProcessor.java#L264-L270). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O aceite na fila pode anteceder o efeito no store. É necessário avaliar perda da fila em falha, flush, backpressure e encerramento; o modo não oferece a mesma durabilidade do write through.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#write-behind-write-back). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Write Through
+
+O identificador canônico é `write-through`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O endpoint Hot Rod entrega a escrita ao cache Infinispan. O interceptor de persistência incorpora a conclusão da escrita no store à etapa retornada da operação quando o modo síncrono é escolhido.
+
+A base de estudo é [redisson/redisson / RedissonMap.java @ 016cf146](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonMap.java); licença [Apache-2.0](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/LICENSE.txt). A aplicação ou candidato de aplicação é [infinispan/infinispan / Server.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/runtime/src/main/java/org/infinispan/server/Server.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / CacheRequestProcessor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/hotrod/src/main/java/org/infinispan/server/hotrod/CacheRequestProcessor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md); [infinispan/infinispan / CacheWriterInterceptor.java @ 570cc384](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/interceptors/impl/CacheWriterInterceptor.java); licença [Apache-2.0](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/LICENSE.md).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/backend/universal/caching/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `putAsync`](https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/server/hotrod/src/main/java/org/infinispan/server/hotrod/CacheRequestProcessor.java#L264-L270). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O efeito depende do store configurado e da conclusão respeitada pelo chamador. Esse modo não é o mesmo contrato da fila assíncrona de write behind.
+
+No curso, [abra o caso aplicado](/jornadas/cache-policy/) e [consulte a ação e o probe deste conceito](/jornadas/cache-policy/conceitos/#write-through). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

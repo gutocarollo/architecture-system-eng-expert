@@ -1,0 +1,12 @@
+{
+  "repo": "apache/geode",
+  "path": "geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+  "revision": "7190f09450b091a5892761bfcf8018c6918d13b7",
+  "url": "https://github.com/apache/geode/blob/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+  "raw_url": "https://raw.githubusercontent.com/apache/geode/7190f09450b091a5892761bfcf8018c6918d13b7/geode-core/src/main/java/org/apache/geode/distributed/internal/DefaultServerLauncherCacheProvider.java",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:55:57.107141+00:00",
+  "sha256": "88af97bc57676bb81d3ca01e9ae96c2124547c970bf2b9b49c0525bedd769fa3",
+  "line_count": 54,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/apache--geode--geode-core--src--main--java--org--apache--geode--distributed--internal--DefaultServerLauncherCacheProvider.java"
+}

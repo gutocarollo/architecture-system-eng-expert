@@ -1,0 +1,23 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "explicacoes/workflow/index",
+  "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+  "context_sha256": "27a131cb783cafc3be9bd0ebbd881f99060f476e44833d4f3627c9dcb2f1ff30",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "bootstrap",
+    "l3a",
+    "l3b",
+    "l3c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "s3",
+    "s6",
+    "workflow-reference-repair"
+  ]
+}

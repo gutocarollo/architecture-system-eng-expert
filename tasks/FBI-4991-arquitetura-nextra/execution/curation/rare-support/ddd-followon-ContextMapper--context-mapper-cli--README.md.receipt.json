@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-cli",
+  "path": "README.md",
+  "revision": "b819362eed75e7dfb0332fa1acdda56f9029b91d",
+  "url": "https://github.com/ContextMapper/context-mapper-cli/blob/b819362eed75e7dfb0332fa1acdda56f9029b91d/README.md",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-cli/b819362eed75e7dfb0332fa1acdda56f9029b91d/README.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.389926+00:00",
+  "sha256": "af517e18278dfa742424a67bd7a1d1b1e612238c54b83f7dbdc7680014b2c328",
+  "line_count": 109,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-cli--README.md"
+}

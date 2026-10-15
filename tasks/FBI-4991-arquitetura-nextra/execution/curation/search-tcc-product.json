@@ -1,0 +1,32 @@
+{
+  "query": "TwoPhaseBusinessAction language:Java -repo:apache/seata -repo:apache/incubator-seata-samples -repo:seata/seata-samples",
+  "observed_utc": "2026-10-15T02:04:13.863922Z",
+  "total_count": 612,
+  "items": [
+    {
+      "repo": "apache/incubator-seata",
+      "path": "compatible/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java",
+      "url": "https://github.com/apache/incubator-seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/compatible/src/main/java/io/seata/rm/tcc/api/TwoPhaseBusinessAction.java"
+    },
+    {
+      "repo": "apache/incubator-seata",
+      "path": "tcc/src/main/java/org/apache/seata/rm/tcc/api/TwoPhaseBusinessAction.java",
+      "url": "https://github.com/apache/incubator-seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/tcc/src/main/java/org/apache/seata/rm/tcc/api/TwoPhaseBusinessAction.java"
+    },
+    {
+      "repo": "apache/incubator-seata",
+      "path": "tcc/src/main/java/org/apache/seata/rm/tcc/api/LocalTCC.java",
+      "url": "https://github.com/apache/incubator-seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/tcc/src/main/java/org/apache/seata/rm/tcc/api/LocalTCC.java"
+    },
+    {
+      "repo": "apache/incubator-seata",
+      "path": "compatible/src/main/java/io/seata/rm/tcc/interceptor/TccActionInterceptorHandler.java",
+      "url": "https://github.com/apache/incubator-seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/compatible/src/main/java/io/seata/rm/tcc/interceptor/TccActionInterceptorHandler.java"
+    },
+    {
+      "repo": "apache/incubator-seata",
+      "path": "tcc/src/main/java/org/apache/seata/rm/tcc/remoting/parser/LocalTCCRemotingParser.java",
+      "url": "https://github.com/apache/incubator-seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/tcc/src/main/java/org/apache/seata/rm/tcc/remoting/parser/LocalTCCRemotingParser.java"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/vscode-extension",
+  "path": "build.gradle",
+  "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+  "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/build.gradle",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/vscode-extension/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/build.gradle",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.418846+00:00",
+  "sha256": "949ab9f83604f478721c414db6f3dff97c31b60dacd06c3fdff28f70c5e356fd",
+  "line_count": 170,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--build.gradle"
+}

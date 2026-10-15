@@ -1,0 +1,544 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a permissão precisa alcançar o objeto certo
+
+Este mapa conecta os conceitos ao mesmo problema. Ana é uma assessora fictícia do tenant A, ligada à conta SYNTHETIC-1. Uma ordem pertence ao tenant B e à conta SYNTHETIC-2. Conferir apenas o papel advisor permite que Ana a abra. A prática acrescenta a relação com o objeto e ainda mostra como audience, vencimento e retirada de chave alteram uma decisão.
+
+Comece pela [jornada](/jornadas/access-policy/), execute o [tutorial](/tutoriais/casos/access-policy/) e use a [referência](/referencia/casos/access-policy/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/access-policy/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="abac" />
+
+## ABAC
+
+A política decide usando atributos do participante, recurso e pedido.
+
+No caso desta família, faça a seguinte observação: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `object-authorization`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_tenant_allowed": true
+  },
+  "after": {
+    "cross_tenant_allowed": false
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="bastion-host" />
+
+## Bastion Host
+
+Um ponto administrado de acesso permite chegar a recursos internos sob controles e registros definidos.
+
+No caso desta família, faça a seguinte observação: Tente o acesso administrativo direto e depois os dois saltos permitidos via bastion. Repita o primeiro salto com uma pessoa sem papel administrativo.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe bastion-admin-hop
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `bastion-admin-hop`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unrestricted_direct_admin_path": true
+  },
+  "after": {
+    "direct_path_allowed": false,
+    "authorized_two_hops": true,
+    "hops": [
+      [
+        "workstation",
+        "bastion"
+      ],
+      [
+        "bastion",
+        "ledger-admin"
+      ]
+    ],
+    "non_admin_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The graph executes authorization and routing decisions, not SSH, a real bastion host, firewall rules or session recording.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="defense-in-depth" />
+
+## Defense in Depth
+
+Camadas de proteção limitam consequências quando uma delas falha.
+
+No caso desta família, faça a seguinte observação: Tente o caminho browser→ledger e compare-o com as duas ligações explicitamente permitidas.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe least-network-path
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `least-network-path`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "direct_browser_ledger": true
+  },
+  "after": {
+    "direct_browser_ledger": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Defense in Depth; não implementa o padrão completo. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="least-privilege" />
+
+## Least Privilege
+
+Um participante recebe apenas os direitos necessários à função definida.
+
+No caso desta família, faça a seguinte observação: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `object-authorization`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_tenant_allowed": true
+  },
+  "after": {
+    "cross_tenant_allowed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Least Privilege; não implementa o padrão completo. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="mtls" />
+
+## mTLS
+
+Na autenticação TLS mútua, os dois participantes apresentam identidade de certificado conforme o contrato de confiança.
+
+No caso desta família, faça a seguinte observação: Execute três handshakes TLS por socketpair: servidor sem exigir cliente, servidor exigindo cliente ausente e cliente com certificado confiável. Confira a autenticação dos dois pares e a troca de ORDER-1.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe mutual-tls-peer-certs
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `mutual-tls-peer-certs`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "client_without_certificate_accepted": true
+  },
+  "after": {
+    "client_without_certificate_accepted": false,
+    "trusted_client_accepted": true,
+    "client_authenticated_by_server": true,
+    "server_authenticated_by_client": true,
+    "payload_exchange_completed": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Certificates and keys are generated only in a temporary directory and removed. No listening port, external connection, production CA or service configuration is changed.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="network-segmentation" />
+
+## Network Segmentation
+
+O desenho delimita quais participantes podem trocar tráfego e em quais condições.
+
+No caso desta família, faça a seguinte observação: Tente o caminho browser→ledger e compare-o com as duas ligações explicitamente permitidas.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe least-network-path
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `least-network-path`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "direct_browser_ledger": true
+  },
+  "after": {
+    "direct_browser_ledger": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Network Segmentation; não implementa o padrão completo. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="oauth2" />
+
+## OAuth2
+
+OAuth 2.0 define contratos para obter e usar acesso delegado a recursos protegidos.
+
+No caso desta família, faça a seguinte observação: Troque o código por token usando o verificador PKCE e a redirect URI vinculada. Antes da troca válida, tente os dois valores errados; depois tente reutilizar o código.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe oauth-code-pkce
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `oauth-code-pkce`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "code_without_binding_can_be_replayed": true
+  },
+  "after": {
+    "wrong_verifier_rejected": true,
+    "wrong_redirect_rejected": true,
+    "code_reuse_rejected": true,
+    "resource_subject": "SYNTHETIC-USER",
+    "resource_scope": "order:read"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. A teaching model of RFC 6749/7636 message checks; it is not an authorization-server library, browser login, refresh flow or production OAuth security implementation.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="oidc" />
+
+## OIDC
+
+OpenID Connect acrescenta autenticação e identidade sobre OAuth 2.0.
+
+No caso desta família, faça a seguinte observação: Valide o ID token assinado e repita com nonce diferente, audience diferente e assinatura alterada. Confira que conhecer um sub no JSON não basta para aceitar a identidade.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe oidc-id-token-validation
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `oidc-id-token-validation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "claims_read_without_signature_or_client_binding": true
+  },
+  "after": {
+    "verified_subject": "SYNTHETIC-USER",
+    "wrong_nonce_rejected": true,
+    "wrong_audience_rejected": true,
+    "tampered_signature_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The synthetic client uses a preconfigured shared key. Discovery, JWKS, key negotiation, all claim rules and an actual OpenID Provider are not implemented.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="policy-based-access-control" />
+
+## Policy-Based Access Control
+
+Uma política explícita determina o direito de um pedido e a aplicação aplica essa decisão.
+
+No caso desta família, faça a seguinte observação: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `object-authorization`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_tenant_allowed": true
+  },
+  "after": {
+    "cross_tenant_allowed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Policy-Based Access Control; não implementa o padrão completo. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="rbac" />
+
+## RBAC
+
+A autorização relaciona papéis a direitos e participantes.
+
+No caso desta família, faça a seguinte observação: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `object-authorization`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_tenant_allowed": true
+  },
+  "after": {
+    "cross_tenant_allowed": false
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="rebac" />
+
+## ReBAC
+
+A autorização segue relações entre participantes e recursos.
+
+No caso desta família, faça a seguinte observação: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `object-authorization`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_tenant_allowed": true
+  },
+  "after": {
+    "cross_tenant_allowed": false
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="secrets-rotation" />
+
+## Secrets Rotation
+
+Rotação substitui o material de acesso e conduz consumidores ao novo contrato antes de retirar o antigo.
+
+No caso desta família, faça a seguinte observação: Emita tokens com old e new, aceite ambos na janela de sobreposição e retire old do verificador. Confira a validação criptográfica, a recusa do token antigo e a recusa da assinatura alterada.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe signed-key-rotation
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `signed-key-rotation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "old_token_accepted_during_overlap": true
+  },
+  "after": {
+    "new_token_accepted": true,
+    "old_token_rejected_after_retirement": true,
+    "tampered_new_token_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Keys are fixed synthetic HMAC material. Secret storage, asymmetric key distribution and coordinated live-service rotation are outside the experiment.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="service-to-service-identity" />
+
+## Service-to-Service Identity
+
+O serviço se apresenta a outro com uma identidade verificável própria.
+
+No caso desta família, faça a seguinte observação: Autentique o cliente de serviço antes de emitir a credencial e valide sua assinatura no recurso. Compare com aceitar um nome de serviço apenas declarado pelo chamador.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe signed-service-identity
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `signed-service-identity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "self_declared_service_header_accepted": true
+  },
+  "after": {
+    "unauthenticated_client_rejected": true,
+    "authenticated_service_subject": "order-service",
+    "resource_audience": "order-api",
+    "permission_scope": "order:read"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Client secrets and tokens are synthetic; there is no real identity provider, protected key store or live service deployment.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="short-lived-credentials" />
+
+## Short-Lived Credentials
+
+Credenciais têm validade curta e precisam ser renovadas sob um contrato de acesso.
+
+No caso desta família, faça a seguinte observação: Avalie a audience position-api na API order-api e o vencimento 10 no instante 11; separe a decisão de política da prova criptográfica ausente.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe credential-boundary
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `credential-boundary`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "expired_token_accepted": true
+  },
+  "after": {
+    "accepted": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Short-Lived Credentials; não implementa o padrão completo. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="token-exchange" />
+
+## Token Exchange
+
+Um servidor de autorização troca material de identidade ou acesso por um token apropriado ao próximo contexto, conforme política.
+
+No caso desta família, faça a seguinte observação: Valide o token destinado ao gateway e troque-o por uma credencial mais curta para order-api. Confira o usuário preservado, o ator do serviço e a redução de escopo.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe downscoped-token-exchange
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `downscoped-token-exchange`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "original_token_wrong_resource_rejected": true
+  },
+  "after": {
+    "exchanged_audience": "order-api",
+    "exchanged_scope": "order:read",
+    "subject": "SYNTHETIC-USER",
+    "actor": "gateway-service",
+    "expires": 5
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is an RFC 8693-style claim transformation model, without a token-exchange endpoint or a complete delegation authorization policy.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+
+<span id="zero-trust" />
+
+## Zero Trust
+
+O acesso depende de identidade, recurso e contexto verificados sob uma política explícita, inclusive dentro da rede.
+
+No caso desta família, faça a seguinte observação: Marque os dois pedidos como internos. Recuse o serviço rogue mesmo com token assinado válido e aceite somente o principal e a permissão esperados para o recurso.
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe verify-internal-request
+```
+
+O código desta observação está em `labs/architecture/models_security.py`. O identificador do probe é `verify-internal-request`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "internal_origin_alone_grants_access": true
+  },
+  "after": {
+    "internal_rogue_rejected": true,
+    "verified_service_allowed": true,
+    "internal_flag_bypasses_verification": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This demonstrates one zero-trust access property, not an organization-wide zero-trust architecture, device posture or continuous risk engine.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/access-policy/) permite continuar com o mesmo problema.
+

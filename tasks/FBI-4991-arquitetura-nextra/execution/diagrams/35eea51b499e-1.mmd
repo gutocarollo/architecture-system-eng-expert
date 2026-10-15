@@ -1,0 +1,12 @@
+flowchart TD
+    I["120 solicitações fictícias"] --> B["Antes: buffer cresce para 120"]
+    I --> A["financial.py::queue_workflow aplica admissão"]
+    A --> C{"Há vaga nas 20 posições?"}
+    C -->|não| R["100 solicitações recebem recusa explícita"]
+    C -->|sim| Q["Fila roteia trabalho a consumidores"]
+    Q --> F{"Processamento falha?"}
+    F -->|não| E["Resultado e evento para auditoria"]
+    F -->|sim| T{"Já gastou três tentativas?"}
+    T -->|não| D["Retry com orçamento e espera"]
+    D --> Q
+    T -->|sim| X["DLQ conserva poison fora da fila normal"]

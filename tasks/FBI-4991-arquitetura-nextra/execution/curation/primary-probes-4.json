@@ -1,0 +1,48 @@
+[
+  {
+    "repo": "grafana/grafana",
+    "path": "public/app/features/dashboard/dashgrid/PanelChrome.tsx",
+    "ref": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "repo": "grafana/grafana",
+    "path": "public/app/angular/panel/AngularPanelReactWrapper.tsx",
+    "ref": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+    "url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/angular/panel/AngularPanelReactWrapper.tsx",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe4-grafana--grafana--03f502a94d17f7dc4e6c34acdf8428aedd986e4c--public--app--angular--panel--AngularPanelReactWrapper.tsx",
+    "sha256": "7173a77b8e70245998cdc43ad7d2eda0a00d4c427f6498930c54ee8fded029d8",
+    "observed_utc": "2026-10-15T02:53:31.316065+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "grafana/grafana",
+    "path": "public/app/features/plugins/importPanelPlugin.ts",
+    "ref": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+    "url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/plugins/importPanelPlugin.ts",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe4-grafana--grafana--03f502a94d17f7dc4e6c34acdf8428aedd986e4c--public--app--features--plugins--importPanelPlugin.ts",
+    "sha256": "f8aa7502c1586a96be897149b513d087d183db863030f01c938d88d59b91f213",
+    "observed_utc": "2026-10-15T02:53:31.322669+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "risingwavelabs/risingwave",
+    "path": "LICENSE",
+    "ref": "main",
+    "url": "https://raw.githubusercontent.com/risingwavelabs/risingwave/main/LICENSE",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe4-risingwavelabs--risingwave--main--LICENSE",
+    "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+    "observed_utc": "2026-10-15T02:53:31.328348+00:00",
+    "http_status": 200
+  },
+  {
+    "repo": "confluentinc/ksql",
+    "path": "LICENSE",
+    "ref": "master",
+    "url": "https://raw.githubusercontent.com/confluentinc/ksql/master/LICENSE",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe4-confluentinc--ksql--master--LICENSE",
+    "sha256": "6392a9da8e2f4601254574a4990bfa0427d91b88a51139cb59fb789dd747a53d",
+    "observed_utc": "2026-10-15T02:53:31.328920+00:00",
+    "http_status": 200
+  }
+]

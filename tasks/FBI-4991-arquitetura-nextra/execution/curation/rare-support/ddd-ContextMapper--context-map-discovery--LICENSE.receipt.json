@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-map-discovery",
+  "path": "LICENSE",
+  "revision": "623b7ab6bf33d04e470a3ffc6c77882a8d11caf8",
+  "url": "https://github.com/ContextMapper/context-map-discovery/blob/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-map-discovery/623b7ab6bf33d04e470a3ffc6c77882a8d11caf8/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:06:44.651368+00:00",
+  "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "line_count": 201,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-ContextMapper--context-map-discovery--LICENSE"
+}

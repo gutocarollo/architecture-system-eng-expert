@@ -1,0 +1,7 @@
+flowchart TD
+    Read[CacheManager.get recebe a chave] --> Available{Redis disponível?}
+    Available -->|sim| Redis[Consulta Redis]
+    Available -->|não| Shared{shared_only é verdadeiro?}
+    Shared -->|não| Local[Consulta LRU deste processo]
+    Shared -->|sim| Miss[Devolve falta sem usar memória local]
+    Miss --> Caller[Chamador decide consultar a origem]

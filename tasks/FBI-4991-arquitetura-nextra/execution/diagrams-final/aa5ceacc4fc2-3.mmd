@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant A as Leitor A
+    participant B as Leitor B
+    participant Cache as SingleFlight deste processo
+    participant Source as _fetch_online_calls
+    A->>Cache: get da mesma identidade
+    Cache->>Source: inicia a tarefa
+    B->>Cache: get enquanto a tarefa executa
+    Note over B,Cache: B aguarda a tarefa existente
+    A--xCache: cancela sua espera
+    Note over Cache,Source: shield preserva a tarefa compartilhada
+    alt produtor conclui
+        Source-->>Cache: resultado
+        Cache-->>B: resultado
+    else produtor falha
+        Source-->>Cache: erro
+        Cache-->>B: erro e voo liberado
+        B->>Cache: uma leitura posterior pode tentar novamente
+    end

@@ -1,0 +1,73 @@
+---
+title: "Experimente: A comissão de R$ 100 aparece como R$ 200"
+description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
+diataxis: tutorial
+---
+
+# Experimente: A comissão de R$ 100 aparece como R$ 200
+
+[Retorne ao caso](/jornadas/query-grain-postgres/), [entenda o mecanismo](/explicacoes/casos/query-grain-postgres/), [aprenda fazendo](/tutoriais/casos/query-grain-postgres/), [resolva a tarefa](/guias/casos/query-grain-postgres/) ou [consulte o contrato](/referencia/casos/query-grain-postgres/).
+
+Você fará a mesma consulta com uma cópia anterior e uma cópia corrigida. O objetivo desta experiência é verificar: Uma conta e um mês produzem uma linha com comissão total de R$ 100; a junção não pode alterar essa soma.
+
+## 1. Prepare o ambiente
+
+Abra o terminal na raiz deste repositório. Você precisa de Python 3.11 ou posterior, da CLI `patch` e dos programas PostgreSQL 16 ou posterior no PATH. O recibo desta execução usou PostgreSQL 16.15. Os binários precisam pertencer à mesma instalação. Não é necessário ter um servidor iniciado.
+
+```sh
+python3 --version
+postgres --version
+initdb --version
+psql --version
+pg_ctl --version
+```
+
+O runner cria um banco descartável dentro de `.pg-learning`, escuta somente em socket Unix local e confirma o diretório de dados antes de executar as fixtures. Ele não usa credenciais ou endereços de produção. Execute os exercícios sequencialmente.
+
+## 2. Veja as duas condições
+
+```sh
+python3 labs/postgres-lineage/run.py --case grain
+```
+
+Você deve encontrar a saída abaixo. PASS significa que o problema esperado apareceu antes e que o invariante delimitado foi respeitado depois.
+
+```text
+grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100
+comparison=PASS isolation_verified=True temporary_server_stopped=True
+```
+
+A versão anterior retorna duas linhas e soma R$ 200. A versão alterada retorna uma linha e soma R$ 100. A custódia do exemplo continua em R$ 1.000.000.
+
+## 3. Comece com uma cópia que ainda falha
+
+```sh
+mkdir -p .pg-learning/grain-challenge
+cp labs/postgres-lineage/grain-before.sql.template .pg-learning/grain-challenge/candidate.sql
+python3 labs/postgres-lineage/run.py --case grain --candidate-grain .pg-learning/grain-challenge/candidate.sql
+```
+
+A última execução deve terminar com código 1 porque sua cópia ainda produz o efeito incorreto. Leia o erro do invariante. Não interprete essa falha esperada como uma indisponibilidade do banco.
+
+## 4. Examine e aplique a alteração
+
+Localize `roa_per` no arquivo anterior. No patch, acompanhe sua substituição por `custody_per`, a leitura de `rpt_advisor__roa_pj1`, o agrupamento por mês e conta e a seleção de `MAX(r.net_assets_amount)`. A prática executa esse SQL; ela não deduplica a resposta no Python.
+
+```sh
+cat labs/postgres-lineage/grain.patch
+patch -p0 -d .pg-learning/grain-challenge < labs/postgres-lineage/grain.patch
+python3 labs/postgres-lineage/run.py --case grain --candidate-grain .pg-learning/grain-challenge/candidate.sql
+```
+
+Agora a execução deve terminar com código 0. A entrada e a verificação continuam iguais; quem mudou foi a sua cópia da consulta. Abra `candidate.sql` e localize a operação responsável por preservar o invariante.
+
+## 5. Conclua e repita
+
+O runner encerra e remove seu servidor descartável em cada execução. Sua cópia editável permanece em `.pg-learning/grain-challenge`. Para repetir do início, copie novamente o template anterior para ela antes de aplicar o patch.
+
+O uso de MAX depende do contrato deste recorte: a custódia da conta está repetida por assessor. MAX não é uma receita geral para somar patrimônios distintos. O exercício isola a cardinalidade da junção e não valida a fórmula financeira de ROA nem o caminho completo da tela.
+
+Este recorte está ligado ao [card FBI-4604](https://fazcapital.atlassian.net/browse/FBI-4604) e ao [PR 507](https://bitbucket.org/fazcapital/makershub/pull-requests/507). A leitura histórica registrou o PR como **MERGED**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/b1df42295ce42d593ae14f0a8a9092c28d1b410d/backend/app/repositories/account.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/05b2cacdddd59b968641b12d8d124bad1888392f/backend/app/repositories/account.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
+
+[Retorne ao caso](/jornadas/query-grain-postgres/), [entenda o mecanismo](/explicacoes/casos/query-grain-postgres/), [aprenda fazendo](/tutoriais/casos/query-grain-postgres/), [resolva a tarefa](/guias/casos/query-grain-postgres/) ou [consulte o contrato](/referencia/casos/query-grain-postgres/).
+

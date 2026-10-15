@@ -1,0 +1,57 @@
+{
+  "case_id": "opportunity-entry",
+  "source_repository": "/Users/augustocarollo/Developer/makershub",
+  "before_sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+  "after_sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+  "snapshots": [
+    {
+      "phase": "before",
+      "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+      "source_path": "backend/app/services/super_r1_service.py",
+      "local_path": "labs/architecture/opportunity-entry/before.py",
+      "sha256": "19d2e9051189fc83b10f922e57504fa5f006f67c8101fe4e27dc15dffd6c588a"
+    },
+    {
+      "phase": "after",
+      "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+      "source_path": "backend/app/services/super_r1_service.py",
+      "local_path": "labs/architecture/opportunity-entry/after.py",
+      "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365"
+    },
+    {
+      "phase": "before",
+      "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+      "source_path": "backend/app/integrations/salesforce_integration.py",
+      "local_path": "labs/architecture/opportunity-entry/before-integration.py",
+      "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38"
+    },
+    {
+      "phase": "after",
+      "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+      "source_path": "backend/app/integrations/salesforce_integration.py",
+      "local_path": "labs/architecture/opportunity-entry/after-integration.py",
+      "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05"
+    },
+    {
+      "phase": "before",
+      "sha": "3958ac9ee407f6dc2fe1a6905c475befa69cf9cf",
+      "source_path": "backend/app/services/qualify_service.py",
+      "local_path": "labs/architecture/opportunity-entry/before-qualify.py",
+      "sha256": "9b7942171f29c0aba293241ea52f04d787ef6a6c16e145a3a5186f387e9a7872"
+    },
+    {
+      "phase": "after",
+      "sha": "8206752f9b1bc8650d0a4572f4a0d64566260b83",
+      "source_path": "backend/app/services/qualify_service.py",
+      "local_path": "labs/architecture/opportunity-entry/after-qualify.py",
+      "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0"
+    }
+  ],
+  "diff_sha256": "78d961e87d0d26a7a6d67b17a86bbb2fce6cf762e849fd8b2c95426bc52476f7",
+  "inputs": "SYNTHETIC",
+  "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+  "runtime_scope": "LOCAL_LEARNING_ONLY",
+  "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+  "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+  "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+}

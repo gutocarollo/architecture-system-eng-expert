@@ -1,0 +1,13 @@
+{
+  "repository": "erlang/otp",
+  "default_branch": "master",
+  "sha": "b4b337c351e8c5bff4e0c48b58081080bae2a4be",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "observed_utc": "2026-10-15T01:46:38.473592+00:00"
+}

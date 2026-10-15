@@ -1,0 +1,125 @@
+{
+  "source_url": "https://github.com/trending?since=monthly",
+  "observed_utc": "2026-10-15T01:10:58.519745Z",
+  "observation_precision": "File mtime of the curl response body, after an HTTP 200 request; curl timestamp was not independently emitted.",
+  "period_label": "this month; GitHub Trending monthly",
+  "http_status": 200,
+  "universe": "The 22 repository cards returned by the monthly Trending page. This is not the universe of every skill pack or architectural repository.",
+  "raw_artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/github-trending-monthly-2026-10-15.html",
+  "raw_sha256": "bad360f66e202b98d96c9ad005eca04880619f9e496603539876869cf63dab1a",
+  "rows": [
+    {
+      "rank": 1,
+      "repo": "paperclipai/paperclip",
+      "stars_this_month": 21643
+    },
+    {
+      "rank": 2,
+      "repo": "anthropics/financial-services",
+      "stars_this_month": 5122
+    },
+    {
+      "rank": 3,
+      "repo": "alibaba/open-code-review",
+      "stars_this_month": 23047
+    },
+    {
+      "rank": 4,
+      "repo": "vectorize-io/hindsight",
+      "stars_this_month": 26274
+    },
+    {
+      "rank": 5,
+      "repo": "debpalash/VoiceStudio",
+      "stars_this_month": 37181
+    },
+    {
+      "rank": 6,
+      "repo": "heygen-com/hyperframes",
+      "stars_this_month": 13722
+    },
+    {
+      "rank": 7,
+      "repo": "affaan-m/ECC",
+      "stars_this_month": 22689
+    },
+    {
+      "rank": 8,
+      "repo": "anthropics/knowledge-work-plugins",
+      "stars_this_month": 5727
+    },
+    {
+      "rank": 9,
+      "repo": "agent-substrate/substrate",
+      "stars_this_month": 3286
+    },
+    {
+      "rank": 10,
+      "repo": "NVIDIA/OpenShell",
+      "stars_this_month": 7698
+    },
+    {
+      "rank": 11,
+      "repo": "anthropics/claude-code",
+      "stars_this_month": 6685
+    },
+    {
+      "rank": 12,
+      "repo": "TencentCloud/Octop",
+      "stars_this_month": 7717
+    },
+    {
+      "rank": 13,
+      "repo": "Tencent/WeKnora",
+      "stars_this_month": 11112
+    },
+    {
+      "rank": 14,
+      "repo": "tashfeenahmed/freellmapi",
+      "stars_this_month": 9154
+    },
+    {
+      "rank": 15,
+      "repo": "addyosmani/agent-skills",
+      "stars_this_month": 12981
+    },
+    {
+      "rank": 16,
+      "repo": "mksglu/context-mode",
+      "stars_this_month": 6067
+    },
+    {
+      "rank": 17,
+      "repo": "trycua/cua",
+      "stars_this_month": 7248
+    },
+    {
+      "rank": 18,
+      "repo": "NationalSecurityAgency/ghidra",
+      "stars_this_month": 11461
+    },
+    {
+      "rank": 19,
+      "repo": "cursor/plugins",
+      "stars_this_month": 3840
+    },
+    {
+      "rank": 20,
+      "repo": "rohitg00/ai-engineering-from-scratch",
+      "stars_this_month": 14754
+    },
+    {
+      "rank": 21,
+      "repo": "longbridge/gpui-kit",
+      "stars_this_month": 3043
+    },
+    {
+      "rank": 22,
+      "repo": "Gaurav-Gosain/tuios",
+      "stars_this_month": 1670
+    }
+  ],
+  "source_response_artifact_sha256": "bad360f66e202b98d96c9ad005eca04880619f9e496603539876869cf63dab1a",
+  "artifact_sha256": "b1aafab825dc867788f13508216e561ca756bd6f5338e4378859ff53ecc92939",
+  "artifact_sanitization": "Visible repository card text retained; scripts, hidden payloads and session/CSRF attributes removed. raw_sha256 preserves the original HTTP response hash."
+}

@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova",
+  "path": "nova/compute/resource_tracker.py",
+  "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+  "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:52:33.603287+00:00",
+  "sha256": "f51e3a404ce36136ee95ecf2d38a67802f6bd6fcffeadeedb94e7fb08a874bae",
+  "line_count": 2269,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-openstack--nova--nova--compute--resource_tracker.py"
+}

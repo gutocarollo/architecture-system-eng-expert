@@ -1,0 +1,63 @@
+---
+title: Arquitetura na prática
+description: Aprenda a reconhecer problemas de arquitetura no código e nos dados do MakersHub e do Airflow.
+---
+
+# Aprenda a enxergar o problema antes de escolher o padrão
+
+Você salva uma reunião, mas a sincronização com o Salesforce falha. Outra pessoa repete a operação porque não recebeu a resposta. O indicador abre rápido, mas mostra um recorte antigo. Esses problemas parecem diferentes na tela, porém têm estruturas que você pode aprender a reconhecer.
+
+Esta trilha usa caminhos de código do MakersHub, pipelines do Airflow, dados agregados do PostgreSQL e mapas de impacto do FazGraph. Você vai entender como uma escolha altera o trabalho de quem agenda, acompanha uma carteira, processa um arquivo da XP ou mantém os serviços disponíveis.
+
+Ao terminar um capítulo, você deve conseguir explicar a dor, reconhecer o mecanismo no código e dizer qual garantia ele oferece. Também deve conseguir apontar o custo e a situação em que outra escolha seria melhor.
+
+## Comece por uma dor e acompanhe a mudança
+
+As [jornadas por caso](/jornadas) mantêm o mesmo problema enquanto você entende a decisão, faz uma prática, resolve uma tarefa e consulta o contrato. O objetivo é chegar ao resultado e saber qual garantia você adquiriu.
+
+- [Uma pessoa cancela a busca e os colegas perdem o resultado](/jornadas/single-flight-cancel). Compare a espera compartilhada antes e depois da proteção contra cancelamento.
+- [A lista demora porque o cache venceu](/jornadas/early-refresh). Observe a renovação antecipada e o custo de aceitar uma resposta ainda válida.
+- [Uma data de emissão muda de dia em São Paulo](/jornadas/date-only). Separe data de calendário e instante antes de aplicar uma conversão de fuso.
+- [Uma oportunidade existente entra novamente na qualificação](/jornadas/opportunity-entry). Preserve a identidade e confira os limites da regra histórica.
+
+- [Uma comissão de R$ 100 aparece como R$ 200](/jornadas/query-grain-postgres). Execute a junção histórica no PostgreSQL e corrija a granularidade.
+- [Uma única versão atual ainda perde uma alteração](/jornadas/revision-cas-postgres). Compare a revisão lida antes de permitir a escrita atrasada.
+
+- [Uma falha de lock derruba a tarefa do Airflow](/jornadas/airflow-lock-retry). Execute o retry histórico e confira os erros que continuam falhando cedo.
+
+Cada percurso informa se reconstrói uma mudança documentada ou usa um cenário financeiro hipotético. Os passos usam entradas controladas e recursos isolados; a linhagem e os resultados da execução permitem conferir o que o exemplo demonstra.
+
+## Um número que muda a maneira de olhar uma alteração
+
+Na consulta de 15 de outubro de 2026, às 03:01 UTC, a tabela `public.rpt_inflow__movement_adjusted` tinha **557.731 registros** e **557.731 chaves distintas**. Seu último `movement_date` era 8 de outubro. O recorte de outubro tinha **3.380 movimentos**, cuja soma assinada de `brl_amount` era **R$ 18.742.122,16**. Essa soma descreve o recorte consultado; não representa receita nem um mês fechado.
+
+No snapshot de linhagem construído em 13 de outubro, o FazGraph ligava essa tabela a **43 tabelas, 424 cards e 27 endpoints** a jusante. Esses consumidores pertencem ao inventário do grafo; a contagem não demonstra que todos estavam ativos no momento da consulta.
+
+Uma alteração nessa tabela pode atravessar vários indicadores. Aprender granularidade, modelos de leitura, compatibilidade e impacto ajuda você a avaliar a mudança antes de publicar um número que outra pessoa usará para decidir. Os [recibos dos exemplos](/referencia/evidencias) registram as consultas, os horários e os limites.
+
+## Escolha conforme o que você precisa agora
+
+| Sua necessidade | Por onde começar | O que você vai encontrar |
+| --- | --- | --- |
+| Você quer entender por que um problema aparece. | [Explicações](/explicacoes) | Histórias, mecanismos, diagramas e escolhas com seus custos. |
+| Você quer aprender fazendo uma experiência controlada. | [Tutoriais](/tutoriais) | Exercícios locais com passos e resultados esperados. |
+| Você já conhece o assunto e precisa concluir uma tarefa. | [Guias](/guias) | Procedimentos com pré-condições e critérios de conclusão. |
+| Você quer conferir um termo, contrato ou implementação. | [Referência](/referencia) | O catálogo completo, fontes, skills, frameworks e aplicações OSS. |
+
+Essa organização segue o [Diátaxis](https://diataxis.fr/). As quatro entradas respondem a necessidades diferentes. Você pode estudar uma explicação, experimentar um tutorial e voltar à referência durante o trabalho.
+
+## Três percursos para começar
+
+**Se uma integração ficou incompleta**, comece por [salvar sem perder a integração](/explicacoes/reliable-integration). Depois estude [mensagens e recuperação](/explicacoes/messages) e [operações que atravessam sistemas](/explicacoes/distributed-work). Você vai aprender a separar uma transação local, uma intenção durável e uma compensação.
+
+**Se um indicador está lento ou difícil de confiar**, comece por [modelos de leitura](/explicacoes/read-models), siga para [cache](/explicacoes/cache) e consulte [observabilidade](/explicacoes/observability). Você vai distinguir o significado do dado, a versão preparada para a consulta e a validade da resposta guardada.
+
+**Se uma mudança parece arriscada**, comece por [fronteiras do código](/explicacoes/code-boundaries), [mudanças compatíveis](/explicacoes/safe-change) e [disponibilidade](/explicacoes/availability). Você vai aprender a reduzir o número de partes que precisam mudar juntas e a reconhecer o que um rollback realmente recupera.
+
+## Como ler os exemplos
+
+Uma seção identificada como **código verificado** descreve os arquivos e o SHA informados. Uma seção de **configuração medida** descreve o ambiente e o horário do recibo. Um **caso histórico** compara um commit com seu pai; ele não comprova sozinho que aquela versão chegou à produção. Uma **proposta** ou um **caso financeiro hipotético** mostra uma alternativa para estudar.
+
+Os exercícios usam dados fictícios e recursos locais. Os números reais publicados são agregados; os exemplos não expõem nomes, documentos ou contatos de clientes. Quando a fonte não sustenta uma ligação, o texto informa a lacuna.
+
+Continue pelo [mapa dos 18 capítulos](/explicacoes) ou pelo [catálogo dos padrões prioritários](/referencia/prioritarios).

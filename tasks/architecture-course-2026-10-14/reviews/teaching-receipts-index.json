@@ -1,0 +1,118 @@
+{
+  "reviewer_id": "/root/council_teaching_sol",
+  "packet_sha256": "2735ced3d2249a581cedd3aef2c099e1a690ef85f96fc69b623cc8d8f8f3190a",
+  "observed_at": "2026-10-14T20:26:59.383817+00:00",
+  "receipt_count": 22,
+  "receipts": [
+    {
+      "document_id": "index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-01-index.json",
+      "receipt_sha256": "a8d7523df9efa5f718078df5ee811de34954f2f27461e1a39c3b65bc7622d2b8"
+    },
+    {
+      "document_id": "explicacoes/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-02-explicacoes-index.json",
+      "receipt_sha256": "c523b43600f44ebc5103e85c3f22e4aa15cf6a209d6d11eb9760c69be81adfb8"
+    },
+    {
+      "document_id": "explicacoes/business-rules/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-03-explicacoes-business-rules-index.json",
+      "receipt_sha256": "5951d0028af61e9a2cd0e0ad90eab67de72e685ce6f4267c4a4ec7e1005612ca"
+    },
+    {
+      "document_id": "explicacoes/code-boundaries/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-04-explicacoes-code-boundaries-index.json",
+      "receipt_sha256": "3eedd9dd7ab12dc0c704f87c9fbd2cc2469d57867526626e2bafd6f44d590cef"
+    },
+    {
+      "document_id": "explicacoes/code-patterns/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-05-explicacoes-code-patterns-index.json",
+      "receipt_sha256": "a3e007cf4216d177840148158881e35e798ab705932b4688b4f33888d576dab6"
+    },
+    {
+      "document_id": "tutoriais/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-06-tutoriais-index.json",
+      "receipt_sha256": "8a399d3d989f9ba4e4df976cc029df6da59ba6e261160010241015272d4809ac"
+    },
+    {
+      "document_id": "tutoriais/idempotency",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-07-tutoriais-idempotency.json",
+      "receipt_sha256": "b0fbc363981b08bd64c3fc897796121f3f4868e43a604de0ff487e71e796394a"
+    },
+    {
+      "document_id": "tutoriais/outbox",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-08-tutoriais-outbox.json",
+      "receipt_sha256": "b381c4b856a60be30551790414b4993f3bf9869747c0e8c254aa22ff7f90d0bb"
+    },
+    {
+      "document_id": "tutoriais/optimistic-concurrency",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-09-tutoriais-optimistic-concurrency.json",
+      "receipt_sha256": "0e271e7704f0599fe74f6b56671e6173aec604f025e61ae9befef42f646bf43f"
+    },
+    {
+      "document_id": "tutoriais/read-projection",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-10-tutoriais-read-projection.json",
+      "receipt_sha256": "7a2caf949e3681e6f4749340933d83298d0f29089d039db4173e7db5057f7fcc"
+    },
+    {
+      "document_id": "tutoriais/single-flight",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-11-tutoriais-single-flight.json",
+      "receipt_sha256": "8328729f362aa8833c1cdb6664ecb93f9cb831b0af8b5822571f2c332a1d62b6"
+    },
+    {
+      "document_id": "tutoriais/state-machine",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-12-tutoriais-state-machine.json",
+      "receipt_sha256": "b6fbf3a1ac3111202795320cca3c11cd16a460d25b2662a2b95c994e8cbbf1fa"
+    },
+    {
+      "document_id": "guias/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-13-guias-index.json",
+      "receipt_sha256": "6bb814a02d67d162a4f5411b8d8672888972e3b092c164e3b57e73e10b0ee720"
+    },
+    {
+      "document_id": "guias/investigar-impacto",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-14-guias-investigar-impacto.json",
+      "receipt_sha256": "1561b7531994c7de0dfac24225b4f01ccd69da3a796dc02af59f5cca7fdceaab"
+    },
+    {
+      "document_id": "referencia/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-15-referencia-index.json",
+      "receipt_sha256": "1ba13e29860245a3e64809269efa344b880d408e95d7da369aa0fb316860e9c9"
+    },
+    {
+      "document_id": "referencia/evidencias",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-16-referencia-evidencias.json",
+      "receipt_sha256": "7c0bc0ab5f58d02ebe1c0796f52d5c55187c0239141e064e67805ae2f0ebd0d9"
+    },
+    {
+      "document_id": "referencia/skills-e-projetos",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-17-referencia-skills-e-projetos.json",
+      "receipt_sha256": "9a61a5dc73119edd76b6ae029c2bfd468e6cdb076eca4949e211760c9bd6433a"
+    },
+    {
+      "document_id": "referencia/prioritarios",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-18-referencia-prioritarios.json",
+      "receipt_sha256": "395f3547fa74540bb6b891254bb9ae40c1c267478c968a98411b80d8cfc539a9"
+    },
+    {
+      "document_id": "referencia/catalogo/index",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-19-referencia-catalogo-index.json",
+      "receipt_sha256": "da9aaf5ab9c906bfd7b4d9e3a4b94f0b68727100afe2a530b90ad9e36364ed9d"
+    },
+    {
+      "document_id": "referencia/catalogo/01-arquiteturas-de-aplicacao",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-20-referencia-catalogo-01-arquiteturas-de-aplicacao.json",
+      "receipt_sha256": "c5d843dd8efbbafbd9b0fb095f34072bc19ffd47c3816e41eacf592e2204b789"
+    },
+    {
+      "document_id": "referencia/catalogo/10-ddd-domain-driven-design",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-21-referencia-catalogo-10-ddd-domain-driven-design.json",
+      "receipt_sha256": "7dc27226852222d550d1ff3840d3f2cdd14d1140f7265da904ae159c79562ce6"
+    },
+    {
+      "document_id": "referencia/catalogo/17-padroes-classicos-gof",
+      "receipt_path": "tasks/architecture-course-2026-10-14/reviews/teaching-receipt-22-referencia-catalogo-17-padroes-classicos-gof.json",
+      "receipt_sha256": "5bc14e0c4a5f4c20548fe1019f09791ba116e48a4e917841080df1e06e720d15"
+    }
+  ]
+}

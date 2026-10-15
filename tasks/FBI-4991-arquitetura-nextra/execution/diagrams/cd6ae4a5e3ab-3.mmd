@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant C as Navegador
+    participant API as Aplicação que usa claim_or_replay
+    participant DB as _idempotency_key
+    participant SF as Salesforce
+    C->>API: Pedido com chave K e hash H
+    API->>DB: INSERT da identidade ou leitura da existente
+    alt Resultado local já concluído
+        DB-->>API: Resposta persistida
+        API-->>C: Replay
+    else Claim novo
+        API->>SF: Solicitação externa
+        SF-->>API: Sucesso
+        Note over API,DB: Queda antes de finish
+        C->>API: Repete K
+        Note over API,SF: O registro local sozinho não deduplica o efeito externo
+    end

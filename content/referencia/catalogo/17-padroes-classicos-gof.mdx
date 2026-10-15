@@ -1,0 +1,336 @@
+---
+title: "GoF: 23 padrões para compor código"
+description: "Os cinco padrões de criação, sete estruturais e onze comportamentais, com limites e fontes."
+diataxis: reference
+---
+
+# GoF: 23 padrões para compor código
+
+Os padrões GoF descrevem formas de relacionar objetos e responsabilidades no código. Eles ajudam a lidar com variações locais; não definem, sozinhos, implantação, entrega de mensagens ou transações distribuídas. Esta referência conserva os 23 conceitos originais.
+
+O recorte MakersHub é `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026. Cada analogia explicita seu alcance. A implementação OSS **REF** é `iluwatar/java-design-patterns`, fixada em `4cabb204f240240bea319605a5ffa46ded728001`, e demonstra os objetos do padrão em código didático. Uma API listada como base oferece um mecanismo relacionado; ela não prova o GoF no aplicativo local. Os links foram verificados pelo auxiliar em 14/10/2026 e nenhuma estrela foi coletada.
+
+## Singleton
+
+Mantém uma única instância dentro de um escopo definido. Poderia servir a uma configuração imutável compartilhada por serviços de um processo.
+
+O benefício aparece quando a identidade única tem um escopo pequeno e claro, como uma configuração imutável de processo.
+
+**Proposta, sem uso observado:** um singleton de processo não coordena instâncias diferentes do MakersHub. Não o use para estado de cliente, autorização, saldo ou transação. Escopo singleton do Spring é por contêiner, não “um por empresa”.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [Spring: escopos de beans](https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html); [backend-concurrency-mechanics](/referencia/skills-e-projetos); [BillPughImplementation.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/singleton/src/main/java/com/iluwatar/singleton/BillPughImplementation.java).
+
+{/* current-curation:singleton */}
+
+A [curadoria de Singleton](/referencia/curadoria/17-padroes-classicos-gof/#singleton) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Factory Method
+
+Deixa uma implementação concreta decidir qual produto criar por um método definido no contrato. Isso ajuda se vários provedores precisarem criar clientes compatíveis para uma mesma operação.
+
+O consumidor pode trabalhar com o contrato do produto, enquanto criadores concretos concentram sua construção.
+
+**Observado:** `get_call_list_service` em `backend/app/api/v1/call_list.py:43` é uma fábrica simples por DI; não há prova de Factory Method GoF. A referência mostra `Blacksmith` com criadores concretos. Não adote subclasses quando uma função de seleção for suficiente.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `ServiceLoader.Provider`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ServiceLoader.Provider.html) (API de criação; não prova o GoF); [backend-layered-architecture](/referencia/skills-e-projetos); [ElfBlacksmith.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/factory-method/src/main/java/com/iluwatar/factory/method/ElfBlacksmith.java).
+
+{/* current-curation:factory-method */}
+
+A [curadoria de Factory Method](/referencia/curadoria/17-padroes-classicos-gof/#factory-method) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Abstract Factory
+
+Cria uma família de objetos compatíveis. Em uma proposta financeira, uma combinação de produto e canal poderia selecionar junto o validador, o formulário e o documento corretos.
+
+Objetos da mesma família podem ser criados juntos, reduzindo combinações incompatíveis.
+
+**Proposta didática:** validar primeiro com o negócio quais famílias existem. O checkout mostra serviços e repositórios de Seguros, não prova essa fábrica. Cada nova família aumenta o número de contratos.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JAXP `DocumentBuilderFactory`](https://docs.oracle.com/en/java/javase/21/docs/api/java.xml/javax/xml/parsers/DocumentBuilderFactory.html); [design-code-architecture](/referencia/skills-e-projetos); [KingdomFactory.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/abstract-factory/src/main/java/com/iluwatar/abstractfactory/KingdomFactory.java).
+
+{/* current-curation:abstract-factory */}
+
+A [curadoria de Abstract Factory](/referencia/curadoria/17-padroes-classicos-gof/#abstract-factory) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Builder
+
+Monta um objeto complexo em etapas nomeadas. Para Call Sprint, um construtor poderia reunir período, assessor e filtros opcionais antes de executar uma consulta de leitura.
+
+Os passos de construção ficam legíveis e o objeto só é entregue depois de completar as partes necessárias.
+
+**Proposta:** não alterar escrita nem regra de qualificação. O exemplo `Hero.Builder` é GoF; montar um dicionário ou uma query com vários `if`s não basta. Um builder simples pode esconder valores padrão incorretos.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `HttpRequest.Builder`](https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpRequest.Builder.html); [api-and-interface-design](/referencia/skills-e-projetos); [Hero.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/builder/src/main/java/com/iluwatar/builder/Hero.java).
+
+{/* current-curation:builder */}
+
+A [curadoria de Builder](/referencia/curadoria/17-padroes-classicos-gof/#builder) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Prototype
+
+Copia um objeto-base já configurado. Um exercício seguro seria duplicar um modelo vazio de filtros de relatório, preservando configurações sem copiar dados de clientes.
+
+Uma configuração já montada pode ser reaproveitada sem repetir sua construção completa.
+
+**Proposta:** não há exemplo GoF comprovado no recorte S2. `Cloneable` não promete cópia profunda; identidades, listas mutáveis e credenciais exigem tratamento explícito.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Cloneable`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Cloneable.html); [code-simplification](/referencia/skills-e-projetos); [HeroFactoryImpl.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/prototype/src/main/java/com/iluwatar/prototype/HeroFactoryImpl.java) e [Prototype.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/prototype/src/main/java/com/iluwatar/prototype/Prototype.java).
+
+{/* current-curation:prototype */}
+
+A [curadoria de Prototype](/referencia/curadoria/17-padroes-classicos-gof/#prototype) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Adapter
+
+Converte uma interface externa para o contrato que o sistema espera. Poderia traduzir campos e respostas do Salesforce antes de chegar à regra de qualificação.
+
+O consumidor pode conservar seu contrato enquanto uma integração externa apresenta outra interface.
+
+**Proposta:** S2 confirma que o caminho de Salesforce de Super R1 não usa o `ApiClient` compartilhado; isso não prova que já exista Adapter. Tradução não deve esconder campos ausentes nem mudar uma intenção financeira.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [Jakarta `XmlAdapter`](https://jakarta.ee/specifications/xml-binding/4.0/apidocs/jakarta.xml.bind/jakarta/xml/bind/annotation/adapters/xmladapter); [api-and-interface-design](/referencia/skills-e-projetos); [FishingBoatAdapter.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/adapter/src/main/java/com/iluwatar/adapter/FishingBoatAdapter.java).
+
+{/* current-curation:adapter */}
+
+A [curadoria de Adapter](/referencia/curadoria/09-apis-e-integracao/#adapter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Bridge
+
+Separa duas dimensões que variam independentemente. Uma operação de leitura poderia usar fontes diferentes sem duplicar toda a operação para cada fonte.
+
+Duas dimensões podem evoluir sem criar uma classe para cada combinação entre elas.
+
+**Proposta:** o recorte S2 não prova essa estrutura. JDBC oferece um contrato comum com drivers diferentes, uma analogia útil, mas não basta para classificar o código como Bridge. Duas interfaces sem variação real só acrescentam indireção.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `java.sql.Driver`](https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/Driver.html); [backend-layered-architecture](/referencia/skills-e-projetos); [Sword.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/bridge/src/main/java/com/iluwatar/bridge/Sword.java).
+
+{/* current-curation:bridge */}
+
+A [curadoria de Bridge](/referencia/curadoria/17-padroes-classicos-gof/#bridge) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Composite
+
+Permite tratar um item e um grupo de itens pelo mesmo contrato. Um exercício de interface poderia compor grupos de filtros de leitura com `AND` e `OR`.
+
+O chamador pode trabalhar com um grupo e uma folha sem abrir um ramo especial para cada caso.
+
+**Proposta:** não há prova no recorte S2. A árvore deve preservar significado e ordem; não transforme a política de elegibilidade ou uma transação em árvore genérica sem contrato aprovado.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [AWT `Container`](https://docs.oracle.com/en/java/javase/21/docs/api/java.desktop/java/awt/Container.html); [frontend-ui-engineering](/referencia/skills-e-projetos); [LetterComposite.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/composite/src/main/java/com/iluwatar/composite/LetterComposite.java).
+
+{/* current-curation:composite */}
+
+A [curadoria de Composite](/referencia/curadoria/17-padroes-classicos-gof/#composite) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Decorator
+
+Envolve um objeto e acrescenta comportamento, mantendo o mesmo contrato. Uma medição de duração pode cercar uma chamada sem reescrever o serviço.
+
+Comportamentos adicionais podem ser compostos sem criar uma subclasse para cada combinação.
+
+**Observado, com fronteira:** `backend/app/utils/performance.py:62` usa decorator Python para envolver função e preservar seu contrato. Isso é um wrapper funcional comparável; a sintaxe `@` sozinha não prova o Decorator GoF. Evite alterar sem querer erros, ordem ou efeitos.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `FilterInputStream`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/FilterInputStream.html); [code-simplification](/referencia/skills-e-projetos); [ClubbedTroll.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/decorator/src/main/java/com/iluwatar/decorator/ClubbedTroll.java).
+
+{/* current-curation:decorator */}
+
+A [curadoria de Decorator](/referencia/curadoria/17-padroes-classicos-gof/#decorator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Facade
+
+Oferece uma entrada simples para coordenar várias partes. A tela de Seguros poderia chamar uma interface única que organiza as consultas já necessárias à página.
+
+O consumidor passa a conhecer uma entrada menor, enquanto as partes internas continuam com responsabilidades próprias.
+
+**Observado como forma semelhante:** `InsuranceDataManager.getAllInsuranceData`, em `frontend/app/(pages)/insurance/_data/InsuranceDataManager.tsx:406`, coordena 11 chamadas; isso não classifica o sistema inteiro como GoF Facade. A fachada deve manter falhas e origem dos dados visíveis.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [FastAPI: aplicações maiores](https://fastapi.tiangolo.com/tutorial/bigger-applications/); [backend-layered-architecture](/referencia/skills-e-projetos); [DwarvenGoldmineFacade.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/facade/src/main/java/com/iluwatar/facade/DwarvenGoldmineFacade.java).
+
+{/* current-curation:facade */}
+
+A [curadoria de Facade](/referencia/curadoria/09-apis-e-integracao/#facade) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Flyweight
+
+Compartilha dados imutáveis repetidos para economizar memória. Uma tabela grande poderia reutilizar descrições estáticas de status, sem guardar uma cópia por linha.
+
+Dados imutáveis iguais podem ser compartilhados, reduzindo cópias quando a repetição é comprovada.
+
+**Proposta:** não há medição de repetição ou memória no recorte S2. Não compartilhe estado mutável, escopo de acesso, valores de cliente ou dados financeiros entre registros.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `String.intern`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#intern()); [backend-concurrency-mechanics](/referencia/skills-e-projetos); [PotionFactory.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/flyweight/src/main/java/com/iluwatar/flyweight/PotionFactory.java).
+
+{/* current-curation:flyweight */}
+
+A [curadoria de Flyweight](/referencia/curadoria/17-padroes-classicos-gof/#flyweight) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Proxy
+
+Mantém o mesmo contrato de um serviço, mas controla o acesso antes de encaminhar a chamada. Um proxy de leitura poderia aplicar autorização ou cache diante de uma consulta de KPI.
+
+Uma política de acesso ou de carregamento pode cercar uma operação sem mudar o contrato do consumidor.
+
+**Observado apenas como comparação:** a rota de KPI de Seguros consulta cache e aplica TTL de 300 segundos em `backend/app/api/v1/insurance.py:46,67`; cache nessa rota não prova Proxy GoF. Cache não pode contornar autorização nem servir dado vencido como atual.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Proxy`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/reflect/Proxy.html); [api-and-interface-design](/referencia/skills-e-projetos); [WizardTowerProxy.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/proxy/src/main/java/com/iluwatar/proxy/WizardTowerProxy.java).
+
+{/* current-curation:proxy */}
+
+A [curadoria de Proxy](/referencia/curadoria/09-apis-e-integracao/#proxy) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Chain of Responsibility
+
+Passa uma solicitação por verificações independentes até uma aceitar ou recusar. Uma proposta de qualificação pode validar campos obrigatórios, permissão e elegibilidade antes de seguir.
+
+Verificações podem ter responsabilidades pequenas e uma ordem visível, facilitando a localização de uma recusa.
+
+**Proposta:** o dispatcher de Super R1 seleciona ramos em `qualify_service.py:2030`; isso não prova uma cadeia de handlers. A ordem importa, e nenhuma gravação deve começar antes das validações obrigatórias.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [Jakarta `FilterChain`](https://jakarta.ee/specifications/servlet/6.0/apidocs/jakarta.servlet/jakarta/servlet/filterchain); [api-and-interface-design](/referencia/skills-e-projetos); [OrcOfficer.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/chain-of-responsibility/src/main/java/com/iluwatar/chain/OrcOfficer.java).
+
+{/* current-curation:chain-of-responsibility */}
+
+A [curadoria de Chain of Responsibility](/referencia/curadoria/17-padroes-classicos-gof/#chain-of-responsibility) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Command
+
+Empacota uma ação e seus dados para que outro componente possa executá-la. Uma intenção `QualifyLead` poderia separar o pedido HTTP do tratamento do caso de uso.
+
+A intenção fica explícita e pode ser transportada ou registrada separadamente do componente que a executa.
+
+**Proposta:** `post_qualify` encaminha a chamada a `run_qualify`, em `backend/app/api/v1/super_r1.py:405,422`; não prova um objeto Command. O wrapper deve preservar a transação e a idempotência existentes.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Runnable`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html); [backend-layered-architecture](/referencia/skills-e-projetos); [Wizard.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/command/src/main/java/com/iluwatar/command/Wizard.java).
+
+{/* current-curation:command */}
+
+A [curadoria de Command](/referencia/curadoria/17-padroes-classicos-gof/#command) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Interpreter
+
+Representa uma gramática pequena como objetos que avaliam partes de uma expressão. Um exercício de relatório poderia interpretar filtros de leitura aprovados, como `período E assessor`.
+
+Uma gramática pequena pode ter significado e avaliação próprios, com regras de composição identificáveis.
+
+**Proposta:** não há linguagem de regras comprovada no recorte. Não interprete critérios financeiros inventados; uma gramática própria exige validação, limites e proteção contra consultas amplas.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Pattern`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/regex/Pattern.html); [design-code-architecture](/referencia/skills-e-projetos); [PlusExpression.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/interpreter/src/main/java/com/iluwatar/interpreter/PlusExpression.java).
+
+{/* current-curation:interpreter */}
+
+A [curadoria de Interpreter](/referencia/curadoria/17-padroes-classicos-gof/#interpreter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Iterator
+
+Percorre uma coleção sem expor como ela armazena os itens. Uma exportação de Call Sprint poderia ler páginas de resultados sem carregar a lista inteira na memória.
+
+O consumidor pode avançar nos resultados sem conhecer detalhes de armazenamento da coleção.
+
+**Proposta:** a consulta de Call Sprint agrega linhas em `backend/app/repositories/call_list_repo.py:140,211`; isso não prova um iterator GoF. Paginação precisa manter ordenação e lidar com novas linhas durante a leitura.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Iterator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html); [backend-layered-architecture](/referencia/skills-e-projetos); [TreasureChestItemIterator.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/iterator/src/main/java/com/iluwatar/iterator/list/TreasureChestItemIterator.java).
+
+{/* current-curation:iterator */}
+
+A [curadoria de Iterator](/referencia/curadoria/17-padroes-classicos-gof/#iterator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Mediator
+
+Um coordenador recebe ações e organiza a conversa entre componentes que não devem conhecer uns aos outros. Uma tela de Call Sprint poderia coordenar sua janela e o seletor de modo.
+
+A coordenação pode ficar em um lugar definido, reduzindo referências diretas entre os participantes.
+
+**Comparação observada:** `useCallLifecycle` é compartilhado pela página e pela janela (`page.tsx:111`, `window/page.tsx:86`), mas um hook compartilhado não é automaticamente Mediator. Um mediador central pode virar um ponto único difícil de manter.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [React Context](https://react.dev/learn/passing-data-deeply-with-context); [frontend-ui-engineering](/referencia/skills-e-projetos); [PartyImpl.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/mediator/src/main/java/com/iluwatar/mediator/PartyImpl.java).
+
+{/* current-curation:mediator */}
+
+A [curadoria de Mediator](/referencia/curadoria/17-padroes-classicos-gof/#mediator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Memento
+
+Guarda um retrato privado para restaurar um estado depois. Uma tela poderia recuperar filtros ao voltar de um detalhe para a lista.
+
+Uma experiência de interface pode restaurar um estado anterior sem expor todos os detalhes de sua representação.
+
+**Proposta:** não há memento comprovado. Recuperar filtros de interface não cria trilha de auditoria financeira; snapshots podem carregar dados pessoais e precisam de escopo e expiração.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [Swing `UndoManager`](https://docs.oracle.com/en/java/javase/21/docs/api/java.desktop/javax/swing/undo/UndoManager.html); [frontend-ui-engineering](/referencia/skills-e-projetos); [Star.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/memento/src/main/java/com/iluwatar/memento/Star.java).
+
+{/* current-curation:memento */}
+
+A [curadoria de Memento](/referencia/curadoria/17-padroes-classicos-gof/#memento) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Observer
+
+Notifica interessados quando algo muda, sem o produtor chamar cada tela diretamente. Depois de qualificar um lead, telas de leitura podem atualizar suas consultas.
+
+Interessados podem reagir a uma mudança sem que o produtor conheça cada consumidor concreto.
+
+**Observado como comportamento relacionado:** `useLeads.ts:330,340` chama a mutação e invalida cinco famílias React Query. Isso é invalidação de cache reativa, não prova de um objeto Observer GoF. Só notifique após o resultado confirmado.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Flow`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Flow.html); [frontend-ui-engineering](/referencia/skills-e-projetos); [Weather.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/observer/src/main/java/com/iluwatar/observer/Weather.java).
+
+{/* current-curation:observer */}
+
+A [curadoria de Observer](/referencia/curadoria/17-padroes-classicos-gof/#observer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## State
+
+Muda o comportamento conforme um estado explícito. O seletor Manual/Automático pode responder de modo claro quando uma opção já está ativa.
+
+Regras de comportamento podem ficar próximas de cada estado, reduzindo combinações contraditórias.
+
+**Observado:** o hook `useCallLifecycle.ts:76,139` guarda estado e ações; isso não prova classes de estado GoF. O patch histórico `a55d4d4a` protege a escolha do modo ativo, mas pertence a outro commit. Estados redundantes criam transições impossíveis.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [Spring `StateContext`](https://docs.spring.io/spring-statemachine/docs/current/api/org/springframework/statemachine/StateContext.html); [frontend-ui-engineering](/referencia/skills-e-projetos); [Mammoth.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/state/src/main/java/com/iluwatar/state/Mammoth.java).
+
+{/* current-curation:state */}
+
+A [curadoria de State](/referencia/curadoria/17-padroes-classicos-gof/#state) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Strategy
+
+Troca um algoritmo por outro por meio do mesmo contrato. Uma operação poderia escolher uma implementação de roteamento sem misturar os algoritmos no dispatcher.
+
+Algoritmos com o mesmo contrato podem ser comparados ou substituídos sem alterar seu consumidor.
+
+**Comparação observada:** `qualify_service.py:2030,1630` seleciona o ramo D+1; o recorte não prova estratégias intercambiáveis. Extraia Strategy só se as alternativas tiverem contrato e efeitos compatíveis; não esconda regras de elegibilidade.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `Comparator`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Comparator.html); [design-code-architecture](/referencia/skills-e-projetos); [DragonSlayer.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/strategy/src/main/java/com/iluwatar/strategy/DragonSlayer.java).
+
+{/* current-curation:strategy */}
+
+A [curadoria de Strategy](/referencia/curadoria/17-padroes-classicos-gof/#strategy) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Template Method
+
+Define a ordem estável de um processo e deixa etapas específicas para subclasses. Um exercício de exportação poderia fixar validar, buscar, formatar e registrar resultado.
+
+A ordem estável de um processo pode ser preservada enquanto etapas específicas variam.
+
+**Proposta:** S2 não encontra essa sequência abstrata no fluxo de Seguros. Herança pode forçar fontes diferentes ao mesmo processo; composição costuma bastar quando as etapas realmente variam.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JDK `AbstractList`](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/AbstractList.html); [backend-layered-architecture](/referencia/skills-e-projetos); [StealingMethod.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/template-method/src/main/java/com/iluwatar/templatemethod/StealingMethod.java).
+
+{/* current-curation:template-method */}
+
+A [curadoria de Template Method](/referencia/curadoria/17-padroes-classicos-gof/#template-method) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Visitor
+
+Adiciona operações a uma estrutura de tipos estável, deixando cada tipo receber a visita. Uma saída analítica poderia formatar Lead, Account e Opportunity sem pôr a formatação em cada modelo.
+
+Novas operações podem ser aplicadas a uma família estável de tipos sem incluir cada operação em todos os tipos.
+
+**Proposta:** classificar um ID e abrir ramos não é Visitor. S2 descreve esse tratamento como mudança histórica em outro commit, não como prova do checkout. Cada tipo novo exige atualizar os visitantes e pode quebrar uma estrutura aberta.
+
+As fontes de mecanismo, instrução de trabalho e código didático são [JavaParser `GenericVisitorAdapter.java`](https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/javaparser-core/src/main/java/com/github/javaparser/ast/visitor/GenericVisitorAdapter.java); [code-simplification](/referencia/skills-e-projetos); [UnitVisitor.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/visitor/src/main/java/com/iluwatar/visitor/UnitVisitor.java) e [Soldier.java](https://github.com/iluwatar/java-design-patterns/blob/4cabb204f240240bea319605a5ffa46ded728001/visitor/src/main/java/com/iluwatar/visitor/Soldier.java).
+
+A explicação [sobre composição do comportamento](/explicacoes/code-patterns) desenvolve os casos de Call Sprint, Seguros e Super R1, com os limites entre fábrica simples e Factory Method e entre decorator Python e Decorator GoF.
+
+{/* current-curation:visitor */}
+
+A [curadoria de Visitor](/referencia/curadoria/17-padroes-classicos-gof/#visitor) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

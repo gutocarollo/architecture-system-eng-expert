@@ -1,0 +1,621 @@
+{
+  "measured_at_utc": "2026-10-15T01:44:05.519998+00:00",
+  "scope": "Static case identity/link/limit checks; semantic verdict is recorded separately",
+  "cases": [
+    {
+      "case_id": "single-flight-cancel",
+      "kind": "historical-reproduction",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "early-refresh",
+      "kind": "historical-evolution",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "date-only",
+      "kind": "historical-reproduction",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "opportunity-entry",
+      "kind": "historical-evolution",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "order-boundaries",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "order-delivery",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "reservation",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "consensus",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "queue-workflow",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "cache-policy",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "ledger-projection",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "storage-partitions",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "safe-release",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "access-policy",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    },
+    {
+      "case_id": "diagnostics",
+      "kind": "hypothetical-financial",
+      "checks": {
+        "journey": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "explanation": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": true,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "tutorial": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "how_to": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        },
+        "reference": {
+          "exists": true,
+          "links_to_other_destinations": true,
+          "same_case_story": null,
+          "limit_present": true,
+          "markdown_fences_balanced": true
+        }
+      }
+    }
+  ]
+}

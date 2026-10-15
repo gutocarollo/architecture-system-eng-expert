@@ -1,0 +1,147 @@
+    async def update_employee_scd2_without_commit(
+        self,
+        employee_id: int,
+        updated_data: Dict[str, Any],
+        updated_by: str,
+        expected_valid_from: Optional[datetime] = None,
+        preserve_ramal_assignment: bool = False,
+    ) -> Dict[str, Any]:
+        await self._lock_employee_writes()
+        current_employee = await self.get_employee_by_id(employee_id)
+
+        if not current_employee:
+            raise ValueError(f"Funcionário com employee_id={employee_id} não encontrado")
+        updated_data = await self.resolve_sector_assignment(updated_data, current_employee)
+        changes = {}
+        for field, new_value in updated_data.items():
+            if field in current_employee:
+                current_value = current_employee[field]
+                normalized_current = self._normalize_value(current_value)
+                normalized_new = self._normalize_value(new_value)
+                if normalized_current != normalized_new:
+                    changes[field] = {
+                        'old': current_value,
+                        'new': new_value
+                    }
+
+        if not changes:
+            return {
+                'success': True,
+                'message': 'Nenhuma alteração detectada',
+                'employee_id': employee_id,
+                'changes': {}
+            }
+        current_timestamp = datetime.now(timezone.utc)
+        concurrency_predicate = (
+            f"AND {FIELD_VALID_FROM} = :expected_valid_from"
+            if expected_valid_from is not None else ""
+        )
+        update_current_query = text(f"""
+            UPDATE {EMPLOYEE_TABLE}
+            SET {FIELD_IS_CURRENT} = FALSE,
+                {FIELD_VALID_TO} = :current_timestamp
+            WHERE {FIELD_EMPLOYEE_ID} = :{FIELD_EMPLOYEE_ID}
+            AND {FIELD_IS_CURRENT} = TRUE
+            {concurrency_predicate}
+        """)
+
+        update_params = {
+            "current_timestamp": current_timestamp,
+            FIELD_EMPLOYEE_ID: employee_id,
+        }
+        if expected_valid_from is not None:
+            update_params["expected_valid_from"] = expected_valid_from
+        close_result = await self.db.execute(
+            update_current_query,
+            update_params,
+        )
+        if expected_valid_from is not None and close_result.rowcount != 1:
+            raise ConcurrentEmployeeUpdateError(
+                f"Funcionário {employee_id} mudou desde o planejamento"
+            )
+        new_record = current_employee.copy()
+        new_record.pop('employee_sk', None)
+        # Fase 3.3 (2026-07-01): None explícito LIMPA o campo (o service usa
+        # exclude_unset — só chega aqui o que o cliente enviou de propósito).
+        # O filtro antigo `is not None` tornava impossível limpar via API.
+        for field, value in updated_data.items():
+            new_record[field] = value
+        if FIELD_STATUS in changes and changes[FIELD_STATUS]['new'] == False:
+            new_record[FIELD_PHONE_EXTENSION] = None
+
+        if FIELD_STATUS in changes and changes[FIELD_STATUS]['new'] == True:
+            # Reativação (status False -> True): limpar os dados de demissão herdados do
+            # registro anterior via current_employee.copy(). Espelha o scrub inverso de
+            # phone_extension feito na demissão (linha acima). Sem isto, a nova versão
+            # is_current nasce carregando fired_date/reasons/self_fired da versão demitida.
+            new_record['fired_date'] = None
+            new_record['fired_company_reason'] = None
+            new_record['fired_employee_reason'] = None
+            new_record['self_fired'] = False
+
+            from app.integrations.ramal_manager import get_available_ramal, assign_ramal_to_employee
+
+            area = new_record.get(FIELD_AREA)
+            team = new_record.get(FIELD_TEAM)
+            position = new_record.get(FIELD_POSITION)
+            current_ramal = new_record.get(FIELD_PHONE_EXTENSION)
+
+            # R1 (2026-07-01): reativação atribui ramal só p/ call floor —
+            # gate de ramal é mais estreito que o de Partner User.
+            should_get_ramal = should_have_ramal(area, team, position)
+
+            if should_get_ramal and not current_ramal:
+                available_ramal = await get_available_ramal(self.db)
+
+                if available_ramal:
+                    ramal_result = await assign_ramal_to_employee(
+                        db=self.db,
+                        employee_id=employee_id,
+                        device_id=available_ramal['device_id'],
+                        phone_extension=available_ramal['phone_extension'],
+                        updated_by=updated_by
+                    )
+
+                    if ramal_result['success']:
+                        new_record[FIELD_PHONE_EXTENSION] = ramal_result.get(FIELD_PHONE_EXTENSION)
+                    else:
+                        logger.warning(f"Falha ao atribuir ramal: {ramal_result.get('message')}")
+                else:
+                    logger.warning("Nenhum ramal livre disponível")
+            else:
+                if not should_get_ramal:
+                    logger.debug(
+                        f"Colaborador não requer ramal "
+                        f"(area={area}, team={team}, position={position})"
+                    )
+                else:
+                    logger.debug(f"Colaborador já possui ramal: {current_ramal}")
+
+        new_record[FIELD_IS_CURRENT] = True
+        new_record[FIELD_VALID_FROM] = current_timestamp
+        new_record[FIELD_VALID_TO] = SCD2_MAX_DATE
+        new_record[FIELD_UPDATED_BY] = updated_by
+        if new_record.get('sector_sk') is not None:
+            new_record['sector_sk'] = int(new_record['sector_sk'])
+        new_record = _to_db_columns(new_record)
+        columns = list(new_record.keys())
+        placeholders = [f":{col}" for col in columns]
+        insert_query = text(f"""
+            INSERT INTO {EMPLOYEE_TABLE}
+            ({', '.join([f'"{col}"' for col in columns])})
+            VALUES ({', '.join(placeholders)})
+            RETURNING _employee_id AS employee_sk
+        """)
+
+        result = await self.db.execute(insert_query, new_record)
+        row = result.fetchone()
+        new_id = row[0] if row else None
+        return {
+            'success': True,
+            'message': f"Registro atualizado! Campos alterados: {', '.join(changes.keys())}. Integrações processando em background...",
+            FIELD_EMPLOYEE_ID: employee_id,
+            'new_internal_id': new_id,
+            'changes': {k: v['new'] for k, v in changes.items()},
+            'integration_current_employee': current_employee,
+            'integration_changes': changes,
+        }

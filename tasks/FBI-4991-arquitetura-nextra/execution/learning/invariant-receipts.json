@@ -1,0 +1,6973 @@
+{
+  "observed_at_utc": "2026-10-15T02:34:22.191098+00:00",
+  "verdict": "PASS",
+  "probe_count": 169,
+  "field_mutations_killed": 629,
+  "reviewer_debit_250_mutant_rejected": true,
+  "receipts": [
+    {
+      "probe": "provider-contract",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "booked"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "amount"
+          ],
+          "original": 100.0,
+          "mutation": 101.0,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "replace-policy",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            0
+          ],
+          "original": 10.0,
+          "mutation": 11.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            1
+          ],
+          "original": 20.0,
+          "mutation": 21.0,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "validate-before-side-effect",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "invalid_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "value-object",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "equal_values"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "distinct_instances"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "invalid_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "immutable"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "message-translation",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "consumer_has_order_id"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "amount"
+          ],
+          "original": 100.0,
+          "mutation": 101.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "amount_unit"
+          ],
+          "original": "BRL",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "status"
+          ],
+          "original": "accepted",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "mvc-controller-model-view",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "view_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "controller_writes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rendered",
+            0
+          ],
+          "original": "Balance 1100",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "mvp-passive-view",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "view_source_reads"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "presenter_source_reads"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "display"
+          ],
+          "original": "R$ 1100,00",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "mvvm-binding",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "view_after_bound_assignment"
+          ],
+          "original": "1100",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "view_model_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "binding_callbacks"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "pac-agent-controls",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "parent_total"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "parent_display"
+          ],
+          "original": "150",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "controls_visited",
+            0
+          ],
+          "original": "orders",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "controls_visited",
+            1
+          ],
+          "original": "fees",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "controls_visited",
+            2
+          ],
+          "original": "parent",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "inward-ports-and-layers",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "domain_imports_storage_driver"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "saved_per_adapter",
+            "memory-A"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "saved_per_adapter",
+            "memory-B"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "call_order",
+            0
+          ],
+          "original": "presentation",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "call_order",
+            1
+          ],
+          "original": "application",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "call_order",
+            2
+          ],
+          "original": "domain",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "module-public-contract",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "cross_module_internal_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_calls",
+            0
+          ],
+          "original": "orders.public.place",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_calls",
+            1
+          ],
+          "original": "positions.public.project",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "order_feature_parts",
+            0
+          ],
+          "original": "validate",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "order_feature_parts",
+            1
+          ],
+          "original": "place",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "order_feature_parts",
+            2
+          ],
+          "original": "persist",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "single_process"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "microkernel-plugin",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "premium_available"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "fee"
+          ],
+          "original": 5.0,
+          "mutation": 6.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "core_dispatch_branches_added"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "blackboard-specialists",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "allocation"
+          ],
+          "original": "reserved",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "rounds"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "risk_approved"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "actor-mailbox-writer",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "counter"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "mailbox_empty"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "state_writer_count"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "event-driven-handler",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "projection_after_event_dispatch"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "producer_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "producer_direct_projection_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "service-boundaries",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "balance_results",
+            0
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance_results",
+            1
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "read_after_other_service_failure"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_operations",
+            0
+          ],
+          "original": "credit",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_operations",
+            1
+          ],
+          "original": "read",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_operations",
+            2
+          ],
+          "original": "read",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "serverless-invocation",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "invocation_balances",
+            0
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "invocation_balances",
+            1
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "local_counters",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "local_counters",
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "state_owner"
+          ],
+          "original": "external_port",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "space-based-grid",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "grid_partitions"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "processed"
+          ],
+          "original": 12,
+          "mutation": 13,
+          "rejected": true
+        },
+        {
+          "path": [
+            "value_sum"
+          ],
+          "original": 90,
+          "mutation": 91,
+          "rejected": true
+        },
+        {
+          "path": [
+            "per_partition",
+            0
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "per_partition",
+            1
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "per_partition",
+            2
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "external_database_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cell-failure-boundary",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "isolated_cell_successes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "responses",
+            0
+          ],
+          "original": "accepted-B",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "aggregate-root-invariant",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "protected_total"
+          ],
+          "original": 50,
+          "mutation": 51,
+          "rejected": true
+        },
+        {
+          "path": [
+            "second_add_refused"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_children_are_tuple"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "domain-service-transfer",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "source_balance"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        },
+        {
+          "path": [
+            "target_balance"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "conserved_total"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "repository-storage-contract",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "domain_account_type"
+          ],
+          "original": "Account",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "balances_from_each_adapter",
+            0
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balances_from_each_adapter",
+            1
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "application-service-order",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "accepted"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "operations",
+            0
+          ],
+          "original": "load",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "operations",
+            1
+          ],
+          "original": "reject",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "save_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "domain-factory-validity",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "created_amount"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "created_source"
+          ],
+          "original": "A",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "created_target"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "invalid_construction_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "specification-reuse",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "query_candidates",
+            0
+          ],
+          "original": "A",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "validator_candidates",
+            0
+          ],
+          "original": "A",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "same_predicate_result"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "context-contract-change",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "portfolio_available"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "trading_order_900_allowed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "trading_available"
+          ],
+          "original": 800,
+          "mutation": 801,
+          "rejected": true
+        },
+        {
+          "path": [
+            "impacted_consumers",
+            0
+          ],
+          "original": "order-check",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "impacted_consumers",
+            1
+          ],
+          "original": "portfolio-screen",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "impacted_consumers",
+            2
+          ],
+          "original": "trading-adapter",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "broken_after_context_adaptation"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "conformist-contract",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "consumer_uses_upstream_state"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "translation_layer_added"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "separate-ways-change",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "changed_context_fee"
+          ],
+          "original": 2.0,
+          "mutation": 3.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "independent_context_fee"
+          ],
+          "original": 1.0,
+          "mutation": 2.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "integration_edges"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "shared-kernel-impact",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "shared_results",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "shared_results",
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "consumers_affected_by_shared_rule_change"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "changed_results",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "changed_results",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "open-host-service",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "client_balances",
+            0
+          ],
+          "original": 1000.0,
+          "mutation": 1001.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "client_balances",
+            1
+          ],
+          "original": 1000.0,
+          "mutation": 1001.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "public_contract_version"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "internal_field_exposed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "rest-resource-methods",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "GET_status"
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        },
+        {
+          "path": [
+            "GET_amount"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "GET_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "POST_status"
+          ],
+          "original": 201,
+          "mutation": 202,
+          "rejected": true
+        },
+        {
+          "path": [
+            "total_writes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "unsupported_method_status"
+          ],
+          "original": 405,
+          "mutation": 406,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "rpc-operation-contract",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "request_id"
+          ],
+          "original": "REQUEST-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "reply_request_id"
+          ],
+          "original": "REQUEST-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "result",
+            "reserved_amount"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "operation"
+          ],
+          "original": "reserve",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "gateway-route-offload",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "guest_status"
+          ],
+          "original": 403,
+          "mutation": 404,
+          "rejected": true
+        },
+        {
+          "path": [
+            "guest_backend_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "routed_backends",
+            0
+          ],
+          "original": "orders",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "routed_backends",
+            1
+          ],
+          "original": "positions",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "forwarded_method"
+          ],
+          "original": "POST",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "forwarded_amount"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "entry_auth_checks"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "position_status"
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "bff-composed-view",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "frontend_round_trips_per_view"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "mobile",
+            "balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "mobile",
+            "pending_count"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "web_order_count"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "backend_calls_for_two_views"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "federated-entity-key",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "entity_type"
+          ],
+          "original": "Account",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "composed_account",
+            "account_id"
+          ],
+          "original": "SYNTHETIC-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "composed_account",
+            "balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "composed_account",
+            "open_orders"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "subgraph_owners",
+            0
+          ],
+          "original": "portfolio",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "subgraph_owners",
+            1
+          ],
+          "original": "orders",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "hypermedia-affordance",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "representation_state"
+          ],
+          "original": "settled",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "cancel_link"
+          ],
+          "original": null,
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "client_attempts_cancel"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "poll-vs-long-poll",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "long_poll_requests"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "value"
+          ],
+          "original": "position-ready",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "sse-event-resume",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "content_type"
+          ],
+          "original": "text/event-stream",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "resumed_event_ids",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "resumed_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "messages_are_server_to_client"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "websocket-duplex-frames",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "client_to_server"
+          ],
+          "original": "reserve:ORDER-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "server_to_client"
+          ],
+          "original": "position:1100",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "client_frame_masked"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_client_poll_for_server_message"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "signed-webhook-callback",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "callback_status"
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        },
+        {
+          "path": [
+            "repeat_status"
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        },
+        {
+          "path": [
+            "invalid_signature_status"
+          ],
+          "original": 401,
+          "mutation": 402,
+          "rejected": true
+        },
+        {
+          "path": [
+            "effects",
+            0
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "sidecar-outbound-policy",
+      "case_id": "order-boundaries",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "updated_statuses",
+            0
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        },
+        {
+          "path": [
+            "updated_statuses",
+            1
+          ],
+          "original": 200,
+          "mutation": 201,
+          "rejected": true
+        },
+        {
+          "path": [
+            "identities",
+            0
+          ],
+          "original": "order-service",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "identities",
+            1
+          ],
+          "original": "position-service",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "policy_versions",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "policy_versions",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "workload_business_code_changed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "deduplicate",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "debit"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "effects"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "commit-intention",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "orders"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "recoverable_events"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "compensate",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "balance_after_failed_allocation"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "transactional-inbox",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "inbox_rows"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "effects"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "debit"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "tcc-resource-states",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "cancelled_cash"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "cancelled_units"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "confirmed",
+            "cash"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        },
+        {
+          "path": [
+            "confirmed",
+            "units"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "confirmed",
+            "state"
+          ],
+          "original": "confirmed",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "at-most-once-loss",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "ack_lost_effects_without_retry"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delivery_lost_effects_without_retry"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "maximum_attempts"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cdc-committed-change",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "captured_committed_changes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rolled_back_changes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "target_cents"
+          ],
+          "original": 110000,
+          "mutation": 110001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "outbox-cdc-feed",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "captured_outbox_events",
+            0
+          ],
+          "original": "EVENT-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "resume_after_sequence"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "at-least-once-ack-retry",
+      "case_id": "order-delivery",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "acknowledged"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "attempts"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "deliveries"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "unique_event_ids"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "version-conflict",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "stale_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance_after_reread"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "fence",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "last_writer"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "value"
+          ],
+          "original": 102,
+          "mutation": 103,
+          "rejected": true
+        },
+        {
+          "path": [
+            "stale_101_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "resource-key",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "accepted_with_slot_key"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "lease-expiry-owner",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "B_acquired_after_expiry"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "owner"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "old_owner_release_allowed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "expires"
+          ],
+          "original": 11,
+          "mutation": 12,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "shared-arbiter-lock",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "second_connection_allowed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "wrong_owner_deleted_rows"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "held_claims"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "pessimistic-writer-lock",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "second_writer_blocked_before_release"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance_after_serial_writes"
+          ],
+          "original": 115000,
+          "mutation": 115001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "copy-on-write-snapshot",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "reader_original"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "writer_new_copy"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "different_objects"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "semaphore-permits",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "maximum_simultaneous_tasks"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "completed"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "active_at_end"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "reused-thread-workers",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "threads_used"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "tasks_completed"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "partials",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "partials",
+            1
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "partials",
+            2
+          ],
+          "original": 6,
+          "mutation": 7,
+          "rejected": true
+        },
+        {
+          "path": [
+            "partials",
+            3
+          ],
+          "original": 8,
+          "mutation": 9,
+          "rejected": true
+        },
+        {
+          "path": [
+            "joined_total"
+          ],
+          "original": 20,
+          "mutation": 21,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "idle-worker-steal",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "A_completed",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "B_completed",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "unique_completed"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "reader-writer-exclusion",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "simultaneous_readers"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "writer_blocked_during_reads"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "writer_acquired_after_release"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "reader_blocked_during_write"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "spinlock-active-attempts",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "active_attempts"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "acquired_after_scheduled_release"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "blocking_sleep_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cas-system-progress",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "counter"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "A_completed"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "B_completed"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "B_retry_needed"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "bounded-spsc-steps",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "put_results",
+            0
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "put_results",
+            1
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "put_results",
+            2
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "take_values",
+            0
+          ],
+          "original": 10,
+          "mutation": 11,
+          "rejected": true
+        },
+        {
+          "path": [
+            "take_values",
+            1
+          ],
+          "original": 20,
+          "mutation": 21,
+          "rejected": true
+        },
+        {
+          "path": [
+            "take_values",
+            2
+          ],
+          "original": null,
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "maximum_steps"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "reactive-demand-contract",
+      "case_id": "reservation",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "delivered_before_request"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "after_request_two",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "after_request_two",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delivered_after_request_three_and_cancel",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delivered_after_request_three_and_cancel",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delivered_after_request_three_and_cancel",
+            2
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "unconsumed"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "majority-partition",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "leaders"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "minority_writes"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "quorum-overlap",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "intersection_lower_bound"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "causal-versions",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "concurrent_detected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "merged_vector",
+            "A"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "merged_vector",
+            "B"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "logical-clock",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "receive_clock"
+          ],
+          "original": 9,
+          "mutation": 10,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "prepared-participant",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "prepared_then_timeout"
+          ],
+          "original": "wait_for_decision",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "gossip-membership",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "known_members",
+            "A"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "known_members",
+            "B"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "known_members",
+            "C"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_agree"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "stateless-request",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "worker_users",
+            0
+          ],
+          "original": "SYNTHETIC-USER",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_users",
+            1
+          ],
+          "original": "SYNTHETIC-USER",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "local_session_counts",
+            0
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "local_session_counts",
+            1
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "replica-lag",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "replica_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "primary_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "session-read-version",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "read_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "regressed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "paxos-accepted-carry",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "new_round_proposal"
+          ],
+          "original": "ORDER-A",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "accepted_nodes"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ballot"
+          ],
+          "original": 8,
+          "mutation": 9,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "raft-log-prefix",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "mismatched_prefix_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "length_after_rejection"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "retry_accepted"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "matches_leader"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_terms",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_terms",
+            1
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_terms",
+            2
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "election-one-vote",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "A_votes"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "C_votes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "elected_candidates"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "B_voted_for"
+          ],
+          "original": "A",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "three-phase-precommit",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "phases_before_timeout",
+            0
+          ],
+          "original": "canCommit",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "phases_before_timeout",
+            1
+          ],
+          "original": "preCommit",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_precommitted"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "decision_under_synchronous_no_partition_assumption"
+          ],
+          "original": "commit",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "decision_if_partition_possible"
+          ],
+          "original": "wait",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "hybrid-clock-receive",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "hybrid_wall"
+          ],
+          "original": 1010,
+          "mutation": 1011,
+          "rejected": true
+        },
+        {
+          "path": [
+            "hybrid_logical"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "causal_order_preserved"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "synchronous-replica-ack",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "ack_while_replica_behind"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ack_after_replica_applied"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "read_version_after_ack"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cascading-replication",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "A_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "B_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "C_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "C_source"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "multi-writer-reconcile",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "sites_accepting_writes"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "merged_balance"
+          ],
+          "original": 1150,
+          "mutation": 1151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "unique_credits"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "owner-latest-read",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "read_before_write"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "read_after_completed_write"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "latest_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            0,
+            0
+          ],
+          "original": "read",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            0,
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            0,
+            2
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            1,
+            0
+          ],
+          "original": "write",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            1,
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            1,
+            2
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            2,
+            0
+          ],
+          "original": "read",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            2,
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "ordered_history",
+            2,
+            2
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "standby-recovery-work",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "recovery_steps",
+            "cold",
+            0
+          ],
+          "original": "restore",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "cold",
+            1
+          ],
+          "original": "start",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "cold",
+            2
+          ],
+          "original": "catch-up",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "cold",
+            3
+          ],
+          "original": "promote",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "warm",
+            0
+          ],
+          "original": "catch-up",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "warm",
+            1
+          ],
+          "original": "promote",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "recovery_steps",
+            "hot",
+            0
+          ],
+          "original": "promote",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_promoted"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_versions",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_versions",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "all_versions",
+            2
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "automatic-failover-detection",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "heartbeat_stale"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "successor"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "successor_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "old_primary_healthy"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "failure-domain-spread",
+      "case_id": "consensus",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "survivors_after_zone_A_loss"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "survivors_after_region_R1_loss"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "route-enrich-aggregate",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "trade"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "statement"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "enriched"
+          ],
+          "original": 6,
+          "mutation": 7,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "retry-dlq",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "poison_attempts"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "dead_letters"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delivered"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "admission",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "buffered"
+          ],
+          "original": 20,
+          "mutation": 21,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rejected"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "consumer-topology",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "shared_queue_effects"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_effects",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_effects",
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "resequence-state",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "states",
+            0
+          ],
+          "original": "accepted",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "states",
+            1
+          ],
+          "original": "reserved",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "states",
+            2
+          ],
+          "original": "settled",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "final"
+          ],
+          "original": "settled",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "invalid_first_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "retry-budget",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "delays",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delays",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "delays",
+            2
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "jittered_delays",
+            0
+          ],
+          "original": 1.1,
+          "mutation": 2.1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "jittered_delays",
+            1
+          ],
+          "original": 2.2,
+          "mutation": 3.2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "jittered_delays",
+            2
+          ],
+          "original": 4.3,
+          "mutation": 5.3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "attempts"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "final"
+          ],
+          "original": "open-circuit",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "dag-dependencies",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "order",
+            0
+          ],
+          "original": "extract",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "order",
+            1
+          ],
+          "original": "transform",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "order",
+            2
+          ],
+          "original": "publish",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "message-filter",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "accepted"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "invalid_accepted"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "valid_amount"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "message-splitter",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "handler_items"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "individual_orders"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "amount"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "batch_ids",
+            0
+          ],
+          "original": "BATCH-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "priority-queue",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "processing_order",
+            0
+          ],
+          "original": "urgent",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "processing_order",
+            1
+          ],
+          "original": "standard",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "processing_order",
+            2
+          ],
+          "original": "low",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "delayed-queue",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "dispatched_before_due"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "dispatch_time"
+          ],
+          "original": 5,
+          "mutation": 6,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "demand-backpressure",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "maximum_buffer"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "processed"
+          ],
+          "original": 6,
+          "mutation": 7,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rejected"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "rate-window",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "accepted"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rejected"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "per_second_limit"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "timeout-boundary",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "waiting_state"
+          ],
+          "original": "timeout",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "deadline-budget",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "child_budget"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "overruns_parent"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "subscription-fanout",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "audit",
+            0
+          ],
+          "original": "EVENT-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "audit",
+            1
+          ],
+          "original": "EVENT-2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "risk",
+            0
+          ],
+          "original": "EVENT-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "risk",
+            1
+          ],
+          "original": "EVENT-2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "total_deliveries"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "event-payload",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "source_lookups"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "amount"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "status"
+          ],
+          "original": "accepted",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "bulkhead-independent-pools",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "order_allowed_with_separate_pool"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "quote_capacity"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "order_capacity"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "watchdog-restart",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "healthy_after_restart"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "generation"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "fallback-limited-function",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "response",
+            "balance"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "response",
+            "fresh"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "response",
+            "writes_enabled"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "source"
+          ],
+          "original": "last-known-cache",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "chaos-delivery-experiment",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "injected_faults",
+            0
+          ],
+          "original": "delivery_dropped",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "orders"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "effects_after_recovery"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "debit"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "steady_invariant_restored"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "stream-offset-resume",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "resume_offsets",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "resume_offsets",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "position_after_resume"
+          ],
+          "original": 130,
+          "mutation": 131,
+          "rejected": true
+        },
+        {
+          "path": [
+            "last_offset"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "batch-stream-emission",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "incremental_outputs",
+            0
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "incremental_outputs",
+            1
+          ],
+          "original": 80,
+          "mutation": 81,
+          "rejected": true
+        },
+        {
+          "path": [
+            "incremental_outputs",
+            2
+          ],
+          "original": 130,
+          "mutation": 131,
+          "rejected": true
+        },
+        {
+          "path": [
+            "final_position"
+          ],
+          "original": 130,
+          "mutation": 131,
+          "rejected": true
+        },
+        {
+          "path": [
+            "updates_before_last_event"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "mapreduce-grouping",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "grouped_totals",
+            "buy"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "grouped_totals",
+            "sell"
+          ],
+          "original": 20,
+          "mutation": 21,
+          "rejected": true
+        },
+        {
+          "path": [
+            "mapped_records"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "lambda-disjoint-views",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "batch_cutoff_offset"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "batch_value"
+          ],
+          "original": 80,
+          "mutation": 81,
+          "rejected": true
+        },
+        {
+          "path": [
+            "speed_after_cutoff"
+          ],
+          "original": 50,
+          "mutation": 51,
+          "rejected": true
+        },
+        {
+          "path": [
+            "merged_position"
+          ],
+          "original": 130,
+          "mutation": 131,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "kappa-one-log-replay",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "replayed_position"
+          ],
+          "original": 130,
+          "mutation": 131,
+          "rejected": true
+        },
+        {
+          "path": [
+            "position_after_new_event"
+          ],
+          "original": 140,
+          "mutation": 141,
+          "rejected": true
+        },
+        {
+          "path": [
+            "processing_implementations"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_offsets",
+            0
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_offsets",
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_offsets",
+            2
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "log_offsets",
+            3
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "choreographed-compensation",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "final_balance"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "event_trace",
+            0
+          ],
+          "original": "order-placed",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "event_trace",
+            1
+          ],
+          "original": "funds-reserved",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "event_trace",
+            2
+          ],
+          "original": "allocation-failed",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "event_trace",
+            3
+          ],
+          "original": "compensated",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "top_level_step_coordinator"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "fire-forget-return",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "caller_result"
+          ],
+          "original": "accepted",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "trace",
+            0
+          ],
+          "original": "caller-returned",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "trace",
+            1
+          ],
+          "original": "worker-failed",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "caller_completed_before_failure"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "fanin-source-correlation",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "merged_messages"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "source_counts",
+            "orders"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "source_counts",
+            "settlements"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "identities",
+            0
+          ],
+          "original": "ORDER-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "identities",
+            1
+          ],
+          "original": "ORDER-2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "identities",
+            2
+          ],
+          "original": "SETTLEMENT-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "durable-workflow-resume",
+      "case_id": "queue-workflow",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "phase_loaded_after_reopen"
+          ],
+          "original": "credited",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "final_phase"
+          ],
+          "original": "complete",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "effect_keys",
+            0
+          ],
+          "original": "credit:ORDER-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "effect_keys",
+            1
+          ],
+          "original": "notify:ORDER-1",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "credit_effects"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cache-key",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "tenant_B_reads"
+          ],
+          "original": "tenant-B",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cache-expiry",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "stale_returned"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "decision"
+          ],
+          "original": "reload",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "write-policy",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "write_through_durable_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cache-levels",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "worker_A"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_B"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cache-aside",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "source_calls"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            0
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            1
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            2
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "cache_populated"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "negative-cache",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "source_calls"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "results",
+            0
+          ],
+          "original": null,
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "results",
+            1
+          ],
+          "original": null,
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "results",
+            2
+          ],
+          "original": null,
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "absence_cached"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cache-warming",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "request_path_source_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "value"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "read-through",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "caller_source_calls"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "loader_calls"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "cache_api_owns_loading"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            0
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            1
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "values",
+            2
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "distributed-cache-owner",
+      "case_id": "cache-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "shared_owner_source_calls"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_values",
+            0
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "worker_values",
+            1
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "owner_partitions"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "replay-events",
+      "case_id": "ledger-projection",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "replayed_balance"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        },
+        {
+          "path": [
+            "events"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "projection-checkpoint",
+      "case_id": "ledger-projection",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "projection"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        },
+        {
+          "path": [
+            "lag_events"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "durable-transaction",
+      "case_id": "ledger-projection",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "rolled_back_cents"
+          ],
+          "original": 100000,
+          "mutation": 100001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "sqlite_journal_mode"
+          ],
+          "original": "wal",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "snapshot-replay",
+      "case_id": "ledger-projection",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "events_to_replay"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "balance"
+          ],
+          "original": 900,
+          "mutation": 901,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "cqrs-handlers",
+      "case_id": "ledger-projection",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "write_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "query_balance"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "query_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "query_contract"
+          ],
+          "original": "display_balance,position_version",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "shard-route",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "partitions_scanned"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "row_7_amount"
+          ],
+          "original": 70,
+          "mutation": 71,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "grain-join",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "sum_at_account_grain"
+          ],
+          "original": 300,
+          "mutation": 301,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "hash-remap",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "shards"
+          ],
+          "original": 4,
+          "mutation": 5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "modulo_moved_keys"
+          ],
+          "original": 76,
+          "mutation": 77,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "covering-index",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "query_plan"
+          ],
+          "original": "SEARCH position USING COVERING INDEX position_lookup (account_key=?)",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "consistent-ring",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "ring_moved_keys"
+          ],
+          "original": 24,
+          "mutation": 25,
+          "rejected": true
+        },
+        {
+          "path": [
+            "keys"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "existing_owner_kept"
+          ],
+          "original": 76,
+          "mutation": 77,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "directory-shard",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "directory_owner"
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "value"
+          ],
+          "original": 700,
+          "mutation": 701,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "range-boundary",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "half_open_boundary_owners",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "key"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "geographic-owner",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "account_region"
+          ],
+          "original": "BR",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "BR_rows"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "US_rows"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "vertical-attributes",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "position_read_columns",
+            0
+          ],
+          "original": "account_key",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "position_read_columns",
+            1
+          ],
+          "original": "cents",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "contact_columns",
+            0
+          ],
+          "original": "account_key",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "contact_columns",
+            1
+          ],
+          "original": "contact_label",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "rejoin_preserves_row"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "log-structured-latest",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "append_records"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "latest_value"
+          ],
+          "original": 1100,
+          "mutation": 1101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "latest_version"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "coalesced-snapshot-writes",
+      "case_id": "storage-partitions",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "physical_batch_writes"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "latest_snapshot"
+          ],
+          "original": 1009,
+          "mutation": 1010,
+          "rejected": true
+        },
+        {
+          "path": [
+            "updates_in_acknowledged_batch"
+          ],
+          "original": 10,
+          "mutation": 11,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "expand-contract",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "old_reader_value"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_reader_value"
+          ],
+          "original": 100000,
+          "mutation": 100001,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "progressive-route",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "new_version_exposure"
+          ],
+          "original": 5,
+          "mutation": 6,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rollback_route"
+          ],
+          "original": "old",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "shadow-parity",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "visible_primary"
+          ],
+          "original": 10,
+          "mutation": 11,
+          "rejected": true
+        },
+        {
+          "path": [
+            "shadow_mismatch"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "desired-state",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "reconciled",
+            "image"
+          ],
+          "original": "v2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "reconciled",
+            "replicas"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "ab-cohorts",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "visible_cohorts",
+            0
+          ],
+          "original": "A",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "visible_cohorts",
+            1
+          ],
+          "original": "B",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "fees",
+            0
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "fees",
+            1
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "fees",
+            2
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "fees",
+            3
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "assignment_stable"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "rolling-recreate-capacity",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "rolling_ready_history",
+            0
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rolling_ready_history",
+            1
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rolling_ready_history",
+            2
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rolling_ready_history",
+            3
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "rolling_ready_history",
+            4
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "minimum_ready"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_instances"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "blue-green-route",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "visible_after_switch"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "visible_after_rollback"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "blue_still_ready"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "provisioned_environments"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "versioned-desired-reconcile",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "planned_fields",
+            0
+          ],
+          "original": "image",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "planned_fields",
+            1
+          ],
+          "original": "replicas",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "selected_revision"
+          ],
+          "original": "revision-2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "drift_before_reconcile",
+            "image"
+          ],
+          "original": "v2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "drift_before_reconcile",
+            "replicas"
+          ],
+          "original": 0,
+          "mutation": 1,
+          "rejected": true
+        },
+        {
+          "path": [
+            "after_reconcile",
+            "image"
+          ],
+          "original": "v2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "after_reconcile",
+            "replicas"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "immutable-replacement",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "old_instance_unchanged"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_active_id"
+          ],
+          "original": "instance-2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_active_image"
+          ],
+          "original": "v2",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "old_image_retained"
+          ],
+          "original": "v1",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "strangler-abstraction-route",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "calls",
+            0,
+            0
+          ],
+          "original": "/orders",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "calls",
+            0,
+            1
+          ],
+          "original": "legacy",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "calls",
+            1,
+            0
+          ],
+          "original": "/orders",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "calls",
+            1,
+            1
+          ],
+          "original": "new",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "calls",
+            2,
+            0
+          ],
+          "original": "/positions",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "calls",
+            2,
+            1
+          ],
+          "original": "legacy",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "new_order_result"
+          ],
+          "original": 100,
+          "mutation": 101,
+          "rejected": true
+        },
+        {
+          "path": [
+            "legacy_position_result"
+          ],
+          "original": 50,
+          "mutation": 51,
+          "rejected": true
+        },
+        {
+          "path": [
+            "client_contract_preserved"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "decomposed-data-owners",
+      "case_id": "safe-release",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "order_value"
+          ],
+          "original": 150,
+          "mutation": 151,
+          "rejected": true
+        },
+        {
+          "path": [
+            "position_value"
+          ],
+          "original": 1000,
+          "mutation": 1001,
+          "rejected": true
+        },
+        {
+          "path": [
+            "separate_stores"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "owner_count"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "object-authorization",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "cross_tenant_allowed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "credential-boundary",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "accepted"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "rotate-key",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "old_key_accepted"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "least-network-path",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "direct_browser_ledger"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "oauth-code-pkce",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "wrong_verifier_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "wrong_redirect_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "code_reuse_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "resource_subject"
+          ],
+          "original": "SYNTHETIC-USER",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "resource_scope"
+          ],
+          "original": "order:read",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "oidc-id-token-validation",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "verified_subject"
+          ],
+          "original": "SYNTHETIC-USER",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "wrong_nonce_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "wrong_audience_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "tampered_signature_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "signed-key-rotation",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "new_token_accepted"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "old_token_rejected_after_retirement"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "tampered_new_token_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "signed-service-identity",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "unauthenticated_client_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "authenticated_service_subject"
+          ],
+          "original": "order-service",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "resource_audience"
+          ],
+          "original": "order-api",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "permission_scope"
+          ],
+          "original": "order:read",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "downscoped-token-exchange",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "exchanged_audience"
+          ],
+          "original": "order-api",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "exchanged_scope"
+          ],
+          "original": "order:read",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "subject"
+          ],
+          "original": "SYNTHETIC-USER",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "actor"
+          ],
+          "original": "gateway-service",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "expires"
+          ],
+          "original": 5,
+          "mutation": 6,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "verify-internal-request",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "internal_rogue_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "verified_service_allowed"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "internal_flag_bypasses_verification"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "bastion-admin-hop",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "direct_path_allowed"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "authorized_two_hops"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "hops",
+            0,
+            0
+          ],
+          "original": "workstation",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "hops",
+            0,
+            1
+          ],
+          "original": "bastion",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "hops",
+            1,
+            0
+          ],
+          "original": "bastion",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "hops",
+            1,
+            1
+          ],
+          "original": "ledger-admin",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "non_admin_rejected"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "mutual-tls-peer-certs",
+      "case_id": "access-policy",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "client_without_certificate_accepted"
+          ],
+          "original": false,
+          "mutation": true,
+          "rejected": true
+        },
+        {
+          "path": [
+            "trusted_client_accepted"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "client_authenticated_by_server"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "server_authenticated_by_client"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "payload_exchange_completed"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "correlate-retries",
+      "case_id": "diagnostics",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "operation_spans"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "requests"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "measure-signals",
+      "case_id": "diagnostics",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "spans"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "requests"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "operations"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "failed_requests"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "max_span_duration_ms"
+          ],
+          "original": 800,
+          "mutation": 801,
+          "rejected": true
+        },
+        {
+          "path": [
+            "request_error_ratio"
+          ],
+          "original": 0.5,
+          "mutation": 1.5,
+          "rejected": true
+        },
+        {
+          "path": [
+            "observation_window_seconds"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "request_rate_per_second"
+          ],
+          "original": 2.0,
+          "mutation": 3.0,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "probe-business-path",
+      "case_id": "diagnostics",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "health_endpoint"
+          ],
+          "original": "ok",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "synthetic_order"
+          ],
+          "original": "provider_failed",
+          "mutation": "MUTATED",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "golden-use-resource-signals",
+      "case_id": "diagnostics",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "traffic_requests_per_second"
+          ],
+          "original": 2.0,
+          "mutation": 3.0,
+          "rejected": true
+        },
+        {
+          "path": [
+            "maximum_duration_ms"
+          ],
+          "original": 800,
+          "mutation": 801,
+          "rejected": true
+        },
+        {
+          "path": [
+            "failed_requests"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "queued_requests"
+          ],
+          "original": 3,
+          "mutation": 4,
+          "rejected": true
+        },
+        {
+          "path": [
+            "active_slots"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "slot_capacity"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "cpu_utilization"
+          ],
+          "original": 0.8,
+          "mutation": 1.8,
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "probe": "opentelemetry-sdk-export",
+      "case_id": "diagnostics",
+      "live_contract": "PASS",
+      "bypass_protected_result_rejected": true,
+      "live_execution_without_protected_result_rejected": true,
+      "field_mutations": [
+        {
+          "path": [
+            "exported_spans"
+          ],
+          "original": 2,
+          "mutation": 3,
+          "rejected": true
+        },
+        {
+          "path": [
+            "failed_spans"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "parent_matches"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "request_ids"
+          ],
+          "original": 1,
+          "mutation": 2,
+          "rejected": true
+        },
+        {
+          "path": [
+            "same_trace"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        },
+        {
+          "path": [
+            "span_names",
+            0
+          ],
+          "original": "gateway",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "span_names",
+            1
+          ],
+          "original": "provider",
+          "mutation": "MUTATED",
+          "rejected": true
+        },
+        {
+          "path": [
+            "traceparent_propagated"
+          ],
+          "original": true,
+          "mutation": false,
+          "rejected": true
+        }
+      ]
+    }
+  ],
+  "object_receipts": [
+    {
+      "concept": "Abstract Factory",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 2
+    },
+    {
+      "concept": "Adapter",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Bridge",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 6
+    },
+    {
+      "concept": "Builder",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Chain of Responsibility",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Command",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Composite",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Decorator",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Facade",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 2
+    },
+    {
+      "concept": "Factory Method",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Flyweight",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Interpreter",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Iterator",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 2
+    },
+    {
+      "concept": "Mediator",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Memento",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Observer",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Prototype",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Proxy",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Singleton",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "State",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Strategy",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Template Method",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    },
+    {
+      "concept": "Visitor",
+      "live_contract": "PASS",
+      "bypass_rejected": true,
+      "field_mutations_killed": 1
+    }
+  ],
+  "historical_source_mutations": [
+    {
+      "case_id": "single-flight-cancel",
+      "source_file": "after.py",
+      "removed_guard": "return await asyncio.shield(task)",
+      "replacement": "return await task",
+      "exit_code": 1,
+      "stdout": "before: readers=5 cancelled=5 survivors=0 producer_calls=1\nafter: readers=5 cancelled=5 survivors=0 producer_calls=1\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-nt1lmwtv/single-flight-cancel/run.py\", line 50, in <module>\n    asyncio.run(main())\n    ~~~~~~~~~~~^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 205, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 128, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py\", line 720, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-nt1lmwtv/single-flight-cancel/run.py\", line 47, in main\n    await exercise(phase)\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-nt1lmwtv/single-flight-cancel/run.py\", line 36, in exercise\n    assert (cancelled, survivors, calls) == ((5, 0, 1) if phase == 'before' else (1, 4, 1))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "mutant_rejected_by_contract": true
+    },
+    {
+      "case_id": "early-refresh",
+      "source_file": "after.py",
+      "removed_guard": "self._start_background_refresh(producer)",
+      "replacement": "None",
+      "exit_code": 1,
+      "stdout": "before: early_started=False boundary_blocked=True result=calls-v2 producer_calls=2\nafter: early_started=False boundary_blocked=True result=calls-v2 producer_calls=2\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-gz5cgqvf/early-refresh/run.py\", line 54, in <module>\n    asyncio.run(main())\n    ~~~~~~~~~~~^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 205, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 128, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py\", line 720, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-gz5cgqvf/early-refresh/run.py\", line 51, in main\n    await exercise(phase)\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-gz5cgqvf/early-refresh/run.py\", line 47, in exercise\n    assert (early_started, blocked, result, calls) == ((False, True, 'calls-v2', 2) if phase == 'before' else (True, False, 'calls-v2', 2))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "mutant_rejected_by_contract": true
+    },
+    {
+      "case_id": "opportunity-entry",
+      "source_file": "after-integration.py",
+      "removed_guard": "if source_opp_id:\n        try:",
+      "replacement": "if False:\n        try:",
+      "exit_code": 1,
+      "stdout": "before: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double\nafter: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double\n",
+      "stderr": "Traceback (most recent call last):\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-6ynk4bfm/opportunity-entry/run.py\", line 92, in <module>\n    booking(phase)\n    ~~~~~~~^^^^^^^\n  File \"/var/folders/yf/6kvkdn051f127mfv62kf_2680000gq/T/historical-negative-control-6ynk4bfm/opportunity-entry/run.py\", line 45, in booking\n    assert (len(created), result['opportunity_id']) == ((1, '006SYNTHETICNEW1') if phase == 'before' else (0, '006SYNTHETICOPEN'))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "mutant_rejected_by_contract": true
+    }
+  ],
+  "date_source_mutation_receipt": "challenge-receipts.json",
+  "limit": "Each fixture output is checked in full. Field mutation and protected-result bypass are negative controls, not a complete mutation campaign over all source operators."
+}

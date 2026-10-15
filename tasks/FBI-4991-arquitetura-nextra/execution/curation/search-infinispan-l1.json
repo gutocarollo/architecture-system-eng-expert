@@ -1,0 +1,27 @@
+{
+  "query": "repo:infinispan/infinispan L1NonTxInterceptor",
+  "observed_utc": "2026-10-15T02:04:13.683021Z",
+  "total_count": 4,
+  "items": [
+    {
+      "repo": "infinispan/infinispan",
+      "path": "core/src/main/java/org/infinispan/interceptors/distribution/L1NonTxInterceptor.java",
+      "url": "https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/interceptors/distribution/L1NonTxInterceptor.java"
+    },
+    {
+      "repo": "infinispan/infinispan",
+      "path": "core/src/main/java/org/infinispan/interceptors/distribution/L1TxInterceptor.java",
+      "url": "https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/interceptors/distribution/L1TxInterceptor.java"
+    },
+    {
+      "repo": "infinispan/infinispan",
+      "path": "core/src/main/java/org/infinispan/factories/InterceptorChainFactory.java",
+      "url": "https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/main/java/org/infinispan/factories/InterceptorChainFactory.java"
+    },
+    {
+      "repo": "infinispan/infinispan",
+      "path": "core/src/test/java/org/infinispan/distribution/DistSyncL1FuncTest.java",
+      "url": "https://github.com/infinispan/infinispan/blob/570cc38491b1c5cae7136865c6d7e961fa2e980f/core/src/test/java/org/infinispan/distribution/DistSyncL1FuncTest.java"
+    }
+  ]
+}

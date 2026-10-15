@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova-specs",
+  "path": "specs/queens/approved/neutron-new-port-binding-api.rst",
+  "revision": "c4e4a56535d69ab626c3a995707f17fab07d6d75",
+  "url": "https://github.com/openstack/nova-specs/blob/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova-specs/c4e4a56535d69ab626c3a995707f17fab07d6d75/specs/queens/approved/neutron-new-port-binding-api.rst",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.369477+00:00",
+  "sha256": "a78b5ccd35d2ab1e13ba72c87d0a5538ab748ce9405fab10c7a7c8b893198ea2",
+  "line_count": 379,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--nova-specs--specs--queens--approved--neutron-new-port-binding-api.rst"
+}

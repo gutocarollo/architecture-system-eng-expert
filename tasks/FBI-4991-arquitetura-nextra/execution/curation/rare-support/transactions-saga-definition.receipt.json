@@ -1,0 +1,7 @@
+{
+  "url": "https://microservices.io/patterns/data/saga.html",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:58:31.700562+00:00",
+  "sha256": "54805df89f619c8432fd280263a88670ed66fac6cbe0b5429a1ebdc5d4cd1047",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-saga-definition.html"
+}

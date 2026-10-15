@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "docs/adr/0018-analytics-from-thndr-data-only.md",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0018-analytics-from-thndr-data-only.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.905455+00:00",
+  "sha256": "efa90af92052ac14de13ab7694800a5206e4cae8b1d53d4547772117fb59ac15",
+  "line_count": 75,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--adr--0018-analytics-from-thndr-data-only.md"
+}

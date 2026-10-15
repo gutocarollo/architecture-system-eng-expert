@@ -1,0 +1,46 @@
+{
+  "observed_at": "2026-10-15 00:22:50 UTC",
+  "jira": "FBI-4991",
+  "url": "https://fazcapital.atlassian.net/browse/FBI-4991",
+  "updated": "2026-10-14T21:22:36.154-0300",
+  "body_field": "customfield_10054",
+  "body_adf_sha256": "301f8ec836823eecae8416be324fb966556628bad58c2cc2f052ccd663649b36",
+  "body_blocks": 63,
+  "requirements_added": [
+    "R14",
+    "R15",
+    "R16",
+    "R17"
+  ],
+  "acceptance_criteria_added": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "mutation": "Only customfield_10054 edited; ten equivalent coverage rewordings in existing text plus approved amendment.",
+  "catalog_and_status_preserved": true,
+  "adf_match": true,
+  "independent_amendment_review": "Sol6.1xhigh, one necessary correction tocriterion14 and warmrecheckPASS at00:21UTC",
+  "comparison_scope": "Static source comparison: MakersHub threehelp topics versuscourse navigation,six tutorials,two guides,and threefamilies; no productionrendering or exerciseexecution.",
+  "profile_checks": {
+    "check_profile": "PASS",
+    "prepare": "DRAFT generated",
+    "check_lock": "PASS",
+    "check_packet": "PASS for prepared REVIEW structure",
+    "gate": "NOT_ACCEPTED: preparation remains DRAFT; new course obligations have not been executed",
+    "gate_evidence": "workflow-scope-gates.json"
+  },
+  "acceptance_state": "New course obligations are pending execution; approval of criteria is not approval of existing course content.",
+  "artifacts": [
+    "report.md",
+    "makershub-packet.md",
+    "amendment.md",
+    "jira-preflight.md",
+    "jira-gates.json",
+    "jira-readback-verified.json"
+  ]
+}

@@ -1,0 +1,401 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a posição rápida pertence ao outro recorte
+
+Este mapa conecta os conceitos ao mesmo problema. Ana consulta a posição fictícia do tenant A. Depois, Bruno consulta a posição do tenant B. Uma chave que contém apenas position entrega a Bruno o valor de Ana. O mesmo caso permite observar o que acontece quando um valor vence, quando o cache local envelhece e quando uma escrita em memória é perdida numa queda.
+
+Comece pela [jornada](/jornadas/cache-policy/), execute o [tutorial](/tutoriais/casos/cache-policy/) e use a [referência](/referencia/casos/cache-policy/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/cache-policy/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="cache-aside" />
+
+## Cache Aside
+
+A aplicação lê o cache e, na falta, consulta a origem e grava o resultado.
+
+No caso desta família, faça a seguinte observação: Faça três leituras da posição. Observe o primeiro miss carregar e preencher a chave; os dois hits seguintes conservam uma única consulta à fonte.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-aside
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-aside`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "source_calls": 3,
+    "values": [
+      1000,
+      1000,
+      1000
+    ],
+    "cache_populated": true
+  },
+  "after": {
+    "source_calls": 1,
+    "values": [
+      1000,
+      1000,
+      1000
+    ],
+    "cache_populated": true
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="cache-invalidation" />
+
+## Cache Invalidation
+
+Remove ou torna inacessível uma representação que deixou de ser reutilizável.
+
+No caso desta família, faça a seguinte observação: Compare as cópias locais 1 e 2, invalide a cópia antiga e acompanhe a recarga pelo dono compartilhado do modelo.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-levels
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-levels`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "worker_A": 1,
+    "worker_B": 2
+  },
+  "after": {
+    "worker_A": 2,
+    "worker_B": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="cache-warming" />
+
+## Cache Warming
+
+Pré-carrega entradas escolhidas antes de quem as pedirá.
+
+No caso desta família, faça a seguinte observação: Preencha a chave antes da primeira consulta e confira que essa consulta não precisa buscar o valor na fonte.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-warming
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-warming`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "request_path_source_calls": 1,
+    "value": 1000
+  },
+  "after": {
+    "request_path_source_calls": 0,
+    "value": 1000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Cache Warming; não implementa o padrão completo. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="distributed-cache" />
+
+## Distributed Cache
+
+Uma camada compartilhada atende diferentes processos ou máquinas.
+
+No caso desta família, faça a seguinte observação: Faça dois workers lógicos consultarem a mesma posição pelo dono da chave no cache compartilhado. Confira que a segunda leitura não volta à fonte.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe distributed-cache-owner
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `distributed-cache-owner`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_worker_cache_source_calls": 2
+  },
+  "after": {
+    "shared_owner_source_calls": 1,
+    "worker_values": [
+      1000,
+      1000
+    ],
+    "owner_partitions": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The owners are local dictionaries; the experiment isolates shared-owner cache semantics without claiming a networked cache product or cross-machine durability.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="local-cache" />
+
+## Local Cache
+
+A representação pertence à memória de um processo.
+
+No caso desta família, faça a seguinte observação: Compare as cópias locais 1 e 2, invalide a cópia antiga e acompanhe a recarga pelo dono compartilhado do modelo.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-levels
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-levels`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "worker_A": 1,
+    "worker_B": 2
+  },
+  "after": {
+    "worker_A": 2,
+    "worker_B": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="negative-caching" />
+
+## Negative Caching
+
+Armazena a ausência confirmada de um recurso para evitar consultas repetidas.
+
+No caso desta família, faça a seguinte observação: Consulte uma chave inexistente três vezes e compare três consultas à fonte com uma consulta e uma ausência explicitamente armazenada.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe negative-cache
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `negative-cache`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "source_calls": 3,
+    "results": [
+      null,
+      null,
+      null
+    ],
+    "absence_cached": false
+  },
+  "after": {
+    "source_calls": 1,
+    "results": [
+      null,
+      null,
+      null
+    ],
+    "absence_cached": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Negative Caching; não implementa o padrão completo. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="read-through" />
+
+## Read Through
+
+O cache usa um loader para buscar a origem quando a entrada falta.
+
+No caso desta família, faça a seguinte observação: Use somente cache.read nas três chamadas; acompanhe a API do cache invocando seu loader uma vez e guardando a resposta.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe read-through
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `read-through`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "caller_source_calls": 3,
+    "cache_api_owns_loading": false
+  },
+  "after": {
+    "caller_source_calls": 0,
+    "loader_calls": 1,
+    "cache_api_owns_loading": true,
+    "values": [
+      1000,
+      1000,
+      1000
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Read Through; não implementa o padrão completo. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="ttl-cache" />
+
+## TTL Cache
+
+A entrada tem validade temporal.
+
+No caso desta família, faça a seguinte observação: Avance de um valor com vencimento 10 para o instante 11 e examine qual decisão volta ao produtor.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-expiry
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-expiry`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "stale_returned": true
+  },
+  "after": {
+    "stale_returned": false,
+    "decision": "reload"
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="two-level-cache" />
+
+## Two-Level Cache
+
+Uma política consulta uma camada local e outra compartilhada, definindo cargas, validade e invalidação entre elas.
+
+No caso desta família, faça a seguinte observação: Compare as cópias locais 1 e 2, invalide a cópia antiga e acompanhe a recarga pelo dono compartilhado do modelo.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-levels
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cache-levels`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "worker_A": 1,
+    "worker_B": 2
+  },
+  "after": {
+    "worker_A": 2,
+    "worker_B": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="write-behind-write-back" />
+
+## Write Behind / Write Back
+
+A camada aceita a escrita e persiste na origem depois.
+
+No caso desta família, faça a seguinte observação: Aplique o crédito de R$ 100 e interrompa a memória; compare o valor durável quando a confirmação exige ou não a escrita.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe write-policy
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `write-policy`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_behind_crash_durable_balance": 1000
+  },
+  "after": {
+    "write_through_durable_balance": 1100
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+
+<span id="write-through" />
+
+## Write Through
+
+A escrita passa por uma camada que atualiza a origem de forma síncrona conforme seu contrato.
+
+No caso desta família, faça a seguinte observação: Aplique o crédito de R$ 100 e interrompa a memória; compare o valor durável quando a confirmação exige ou não a escrita.
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe write-policy
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `write-policy`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_behind_crash_durable_balance": 1000
+  },
+  "after": {
+    "write_through_durable_balance": 1100
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
+

@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "docs/adr/0003-ddd-hexagonal-architecture.md",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/docs/adr/0003-ddd-hexagonal-architecture.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.905682+00:00",
+  "sha256": "4d5838c98a21f741b9c058d3fb8bcd9a4c111c57eb4f4dbb37fd787d1b24e7aa",
+  "line_count": 42,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--docs--adr--0003-ddd-hexagonal-architecture.md"
+}

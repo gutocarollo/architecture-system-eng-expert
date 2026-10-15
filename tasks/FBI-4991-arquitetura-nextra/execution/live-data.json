@@ -1,0 +1,21 @@
+{
+  "sql": "SELECT COUNT(*) AS row_count, MAX(movement_date) AS latest_movement_date, COUNT(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_movement_count, ROUND(SUM(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01')::numeric, 2) AS october_signed_brl_amount, clock_timestamp() AS observed_at FROM public.rpt_inflow__movement_adjusted;",
+  "result": {
+    "rows": [
+      {
+        "row_count": 557731,
+        "latest_movement_date": "2026-10-08",
+        "october_movement_count": 3380,
+        "october_signed_brl_amount": "18742122.16",
+        "observed_at": "2026-10-14 22:15:24.887336-03:00"
+      }
+    ],
+    "row_count": 1,
+    "returned_row_count": 1,
+    "truncated": false,
+    "max_rows": 1
+  },
+  "source": "MCPpostgres192.168.254.137:5432/faz_capital",
+  "graph_snapshot": "2026-10-13T03:08:04+00:00",
+  "graph_runtime_stale": true
+}

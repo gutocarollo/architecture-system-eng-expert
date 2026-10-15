@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Poll as Poller do Call Sprint
+    participant Cache as SingleFlight.get
+    participant Source as _fetch_online_calls
+    Poll->>Cache: lê durante a janela antecipada
+    Cache-->>Poll: valor ainda utilizável
+    Cache->>Source: inicia refresh compartilhado
+    alt refresh conclui
+        Source-->>Cache: novo resultado e novos prazos
+        Poll->>Cache: lê antes do novo limiar antecipado
+        Cache-->>Poll: novo valor ainda válido
+    else refresh falha
+        Source-->>Cache: erro sem cache de sucesso novo
+        Note over Cache: valor anterior só serve até seu TTL
+        opt TTL anterior venceu sem uma renovação bem-sucedida
+            Poll->>Cache: lê sem valor válido
+            Cache->>Source: inicia e aguarda nova carga
+        end
+    end

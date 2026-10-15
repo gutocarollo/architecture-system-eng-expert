@@ -1,0 +1,261 @@
+---
+title: "Curadoria: Concorrência"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Concorrência."
+diataxis: reference
+---
+
+# Curadoria: Concorrência
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+<span id="async-await" />
+
+## Async/Await
+
+O identificador canônico é `async-await`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A base CPython fornece futures e pool de threads; a aplicação precisa demonstrar o caminho de await e delegação.
+
+A base de estudo é [python/cpython / thread.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / triggerer_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Future`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py#L1212-L1218). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O localizador da aplicação será validado. Caminho ausente permanece lacuna e não é substituído por uma suposição.
+
+No curso, [abra o caso aplicado](/jornadas/single-flight-cancel/) e [consulte a ação e o probe deste conceito](/jornadas/single-flight-cancel/conceitos/#async-await). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="fork-join" />
+
+## Fork/Join
+
+O identificador canônico é `fork-join`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Ao parar ou recarregar um scrape pool, Prometheus inicia operações por goroutine, registra cada participante em WaitGroup e espera wg.Wait antes de continuar.
+
+A base de estudo é [golang/go / waitgroup.go @ 45c2e356](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/src/sync/waitgroup.go); licença [BSD-3-Clause](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/LICENSE). A aplicação ou candidato de aplicação é [prometheus/prometheus / scrape.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `WaitGroup`](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go#L272-L278). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A junção demonstrada é a manutenção desse pool. Ela não prova uma transação atômica entre todas as amostras nem uma política global de paralelismo.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#fork-join). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="futures-promises" />
+
+## Futures/Promises
+
+O identificador canônico é `futures-promises`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A base CPython fornece futures e pool de threads; a aplicação precisa demonstrar o caminho de await e delegação.
+
+A base de estudo é [python/cpython / thread.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / triggerer_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Future`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py#L1212-L1218). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O localizador da aplicação será validado. Caminho ausente permanece lacuna e não é substituído por uma suposição.
+
+No curso, [abra o caso aplicado](/jornadas/single-flight-cancel/) e [consulte a ação e o probe deste conceito](/jornadas/single-flight-cancel/conceitos/#futures-promises). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Immutable Data
+
+O identificador canônico é `immutable-data`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Trino usa representações ImmutableList/ImmutableMap para expor resultados de análise com coleções não modificáveis.
+
+A base de estudo é [google/guava / ImmutableList.java @ dea49844](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/collect/ImmutableList.java); licença [Apache-2.0](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/LICENSE). A aplicação ou candidato de aplicação é [trinodb/trino / Analysis.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/analyzer/Analysis.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ImmutableList`](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/analyzer/Analysis.java#L1324-L1330). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#immutable-data). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Lock-Free
+
+O identificador canônico é `lock-free`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Mixxx troca mensagens com a thread do callback por uma fila de produtor único e consumidor único. MessagePipe escreve com try_push, que retorna false se não houver espaço, e lê por front seguido de pop. A implementação usa índices atômicos e não precisa disputar um mutex nem repetir uma tentativa até que outro participante libere a fila.
+
+A base de estudo é [rigtorp/SPSCQueue / SPSCQueue.h @ 59a6a938](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/include/rigtorp/SPSCQueue.h); licença [MIT](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/LICENSE); [rigtorp/SPSCQueue / README.md @ 59a6a938](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/README.md); licença [MIT](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/LICENSE). A aplicação ou candidato de aplicação é [mixxxdj/mixxx / messagepipe.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/util/messagepipe.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / message.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/message.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / SPSCQueue.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/lib/rigtorp/SPSCQueue/include/rigtorp/SPSCQueue.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / engineeffectsmanager.cpp @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/engineeffectsmanager.cpp); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / engineeffectsmanager.cpp @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/engineeffectsmanager.cpp); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `try_push`](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/util/messagepipe.h#L49-L55). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A garantia wait free vale para as operações delimitadas da fila SPSC com tipos cuja cópia, movimento e destruição respeitam o contrato. Ela não mede o tempo da função de áudio inteira, não torna todo código que chama a fila wait free e não abrange push bloqueante nem múltiplos produtores. O chamador precisa tratar a fila cheia.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#lock-free). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Mutex
+
+O identificador canônico é `mutex`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O cache CoreDNS protege o mapa com RWMutex, permitindo leitores simultâneos e exclusividade na escrita.
+
+A base de estudo é [golang/go / rwmutex.go @ 45c2e356](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/src/sync/rwmutex.go); licença [BSD-3-Clause](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `RWMutex`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/cache/cache.go#L26-L32). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/single-flight-cancel/) e [consulte a ação e o probe deste conceito](/jornadas/single-flight-cancel/conceitos/#mutex). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Reactive Streams
+
+O identificador canônico é `reactive-streams`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O filtro de roteamento do Spring Cloud Gateway compõe publishers Reactor para encaminhar a requisição e o corpo da resposta.
+
+A base de estudo é [reactor/reactor-core / Flux.java @ 0d1a22ce](https://github.com/reactor/reactor-core/blob/0d1a22ce5b31e4f2a4b9d2c6b29f943fcb6f2034/reactor-core/src/main/java/reactor/core/publisher/Flux.java); licença [Apache-2.0](https://github.com/reactor/reactor-core/blob/0d1a22ce5b31e4f2a4b9d2c6b29f943fcb6f2034/LICENSE). A aplicação ou candidato de aplicação é [spring-cloud/spring-cloud-gateway / NettyRoutingFilter.java @ 0185ec96](https://github.com/spring-cloud/spring-cloud-gateway/blob/0185ec967efa368495068490025273754b4a1096/spring-cloud-gateway-server-webflux/src/main/java/org/springframework/cloud/gateway/filter/NettyRoutingFilter.java); licença [Apache-2.0](https://github.com/spring-cloud/spring-cloud-gateway/blob/0185ec967efa368495068490025273754b4a1096/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Flux`](https://github.com/spring-cloud/spring-cloud-gateway/blob/0185ec967efa368495068490025273754b4a1096/spring-cloud-gateway-server-webflux/src/main/java/org/springframework/cloud/gateway/filter/NettyRoutingFilter.java#L210-L216). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A demanda segue o contrato Reactor/Reactive Streams. Bloquear uma etapa ou usar buffers sem limite ainda exige avaliar a capacidade de cada fronteira.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#reactive-streams). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="reader-writer-lock" />
+
+## Reader/Writer Lock
+
+O identificador canônico é `reader-writer-lock`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O cache CoreDNS protege o mapa com RWMutex, permitindo leitores simultâneos e exclusividade na escrita.
+
+A base de estudo é [golang/go / rwmutex.go @ 45c2e356](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/src/sync/rwmutex.go); licença [BSD-3-Clause](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/LICENSE). A aplicação ou candidato de aplicação é [coredns/coredns / cache.go @ 9d1343c5](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/cache/cache.go); licença [Apache-2.0](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `RWMutex`](https://github.com/coredns/coredns/blob/9d1343c54c2526dd6424e46b0f17ca79d9b1a557/plugin/pkg/cache/cache.go#L26-L32). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#reader-writer-lock). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Semaphore
+
+O identificador canônico é `semaphore`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O pool Airflow limita as vagas de execução. A base asyncio fornece o semáforo local para comparar a admissão.
+
+A base de estudo é [python/cpython / locks.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/asyncio/locks.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / pool.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/pool.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `slots`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/models/pool.py#L385-L391). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+As vagas Airflow têm coordenação por banco e não são o mesmo objeto que um Semaphore em um único processo Python.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#semaphore). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Single Writer Principle
+
+O identificador canônico é `single-writer-principle`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Uma fila clássica RabbitMQ usa um processo gen_server2 que recebe mensagens e devolve o próximo estado em callbacks. Esse processo possui a evolução do estado daquela fila, sem compartilhar diretamente a estrutura mutável com os remetentes.
+
+A base de estudo é [erlang/otp / gen_server.erl @ b4b337c3](https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/lib/stdlib/src/gen_server.erl); licença [Apache-2.0](https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/LICENSE.txt). A aplicação ou candidato de aplicação é [rabbitmq/rabbitmq-server / rabbit_amqqueue_process.erl @ 0d529086](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_amqqueue_process.erl); licença [MPL-2.0](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `gen_server2`](https://github.com/rabbitmq/rabbitmq-server/blob/0d5290868729ad42a76e8554cb65617082ee837b/deps/rabbit/src/rabbit_amqqueue_process.erl#L143-L149). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A propriedade está limitada ao estado da fila nesse processo. Outras filas têm seus próprios processos e o mecanismo não cria uma transação global entre filas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#single-writer-principle). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Spinlock
+
+O identificador canônico é `spinlock`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+PostgreSQL implementa espera ativa e backoff para a aquisição de spinlocks usados pelo servidor.
+
+A base de estudo é [postgres/postgres / s_lock.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/storage/lmgr/s_lock.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / s_lock.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/storage/lmgr/s_lock.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `spin`](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/storage/lmgr/s_lock.c#L132-L138). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#spinlock). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Thread Pool
+
+O identificador canônico é `thread-pool`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A base CPython fornece futures e pool de threads; a aplicação precisa demonstrar o caminho de await e delegação.
+
+A base de estudo é [python/cpython / thread.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/concurrent/futures/thread.py); licença [PostgreSQL](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / triggerer_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Future`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/triggerer_job_runner.py#L1212-L1218). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O localizador da aplicação será validado. Caminho ausente permanece lacuna e não é substituído por uma suposição.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#thread-pool). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Wait-Free
+
+O identificador canônico é `wait-free`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Mixxx troca mensagens com a thread do callback por uma fila de produtor único e consumidor único. MessagePipe escreve com try_push, que retorna false se não houver espaço, e lê por front seguido de pop. A implementação usa índices atômicos e não precisa disputar um mutex nem repetir uma tentativa até que outro participante libere a fila.
+
+A base de estudo é [rigtorp/SPSCQueue / SPSCQueue.h @ 59a6a938](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/include/rigtorp/SPSCQueue.h); licença [MIT](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/LICENSE); [rigtorp/SPSCQueue / README.md @ 59a6a938](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/README.md); licença [MIT](https://github.com/rigtorp/SPSCQueue/blob/59a6a938513ea5004817383711ed35d32385d3ee/LICENSE). A aplicação ou candidato de aplicação é [mixxxdj/mixxx / messagepipe.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/util/messagepipe.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / message.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/message.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / SPSCQueue.h @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/lib/rigtorp/SPSCQueue/include/rigtorp/SPSCQueue.h); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / engineeffectsmanager.cpp @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/engineeffectsmanager.cpp); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE); [mixxxdj/mixxx / engineeffectsmanager.cpp @ 0fffd3d0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/engine/effects/engineeffectsmanager.cpp); licença [GPL-2.0](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `try_push`](https://github.com/mixxxdj/mixxx/blob/0fffd3d0d07b755c34c1730f7b87afadd8f2be19/src/util/messagepipe.h#L49-L55). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A garantia wait free vale para as operações delimitadas da fila SPSC com tipos cuja cópia, movimento e destruição respeitam o contrato. Ela não mede o tempo da função de áudio inteira, não torna todo código que chama a fila wait free e não abrange push bloqueante nem múltiplos produtores. O chamador precisa tratar a fila cheia.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#wait-free). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Work Stealing
+
+O identificador canônico é `work-stealing`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O scheduler Go rouba trabalho entre processadores; Prometheus inicia goroutines e coordena loops de scrape. A política de roubo vem do runtime.
+
+A base de estudo é [golang/go / proc.go @ 45c2e356](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/src/runtime/proc.go); licença [BSD-3-Clause](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/LICENSE). A aplicação ou candidato de aplicação é [prometheus/prometheus / scrape.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `go `](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go#L580-L586). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O produto não implementa seu próprio work stealing. Fork/join exige comprovar a junção; a mera criação de goroutines não a demonstra.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#work-stealing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Worker Pool
+
+O identificador canônico é `worker-pool`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset monta a aplicação Celery; workers concorrentes retiram tarefas da fila e executam por um pool.
+
+A base de estudo é [celery/celery / worker.py @ 33868c3d](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/celery/worker/worker.py); licença [BSD-3-Clause](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / celery_app.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Celery`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#worker-pool). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

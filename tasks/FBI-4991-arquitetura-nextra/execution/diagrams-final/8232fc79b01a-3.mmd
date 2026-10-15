@@ -1,0 +1,9 @@
+flowchart LR
+    Requests[Pedidos] --> Kind{Classe de trabalho}
+    Kind -->|interativo| Interactive[Pool reservado para agendamento]
+    Kind -->|relatório| Reports[Pool de relatórios com limite próprio]
+    Reports --> Heavy{Trabalho cabe no limite?}
+    Heavy -->|sim| Execute[Executa relatório]
+    Heavy -->|não| Reject[Recusa ou adia com resultado explícito]
+    Reject --> Retry[Chamador pode repetir sob política]
+    Interactive --> Response[Resposta interativa]

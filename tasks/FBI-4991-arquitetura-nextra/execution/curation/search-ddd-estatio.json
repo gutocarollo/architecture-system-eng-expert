@@ -1,0 +1,6 @@
+{
+  "query": "repo:estatio/estatio \"DomainObject\" \"Lease\"",
+  "observed_utc": "2026-10-15T02:01:51.901738Z",
+  "total_count": 0,
+  "items": []
+}

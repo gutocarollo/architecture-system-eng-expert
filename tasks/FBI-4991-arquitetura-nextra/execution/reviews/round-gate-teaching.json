@@ -1,0 +1,23 @@
+{
+  "round": "2/3",
+  "mission_total": 100,
+  "mission_weight_affected": 50,
+  "mission_weight_source": [
+    "Journey/Diataxis:25",
+    "Executable learning:25"
+  ],
+  "unresolved_high": 3,
+  "decision_this_round_can_change": "repair",
+  "decision_leverage": 5,
+  "material_risk_reduction": 5,
+  "evidence_gap_closure": 5,
+  "blast_radius_irreversibility": 3,
+  "downstream_reuse": 5,
+  "quality_factor_pct": 96,
+  "gross_gain_pct_of_whole": 48,
+  "opportunity_cost_pct_of_whole": 3,
+  "net_gain_pct_of_whole": 45,
+  "expected_loss_if_skipped_pct_of_whole": 30,
+  "round_decision": "DISPATCH_AFTER_AUTHOR_FREEZE",
+  "stop_condition": "One bounded recheck of T1-T3 with direct invariant and mapping checks; no already-approved unrelated scopes reopened"
+}

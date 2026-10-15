@@ -1,0 +1,175 @@
+---
+title: "16. Workflow e processamento"
+description: "Definição, caso, limite e fontes dos 16 conceitos de coordenação e processamento."
+diataxis: reference
+---
+
+# Workflow e processamento
+
+Esta referência reúne os 16 conceitos do grupo 16. **REF** identifica um produto ou exemplo OSS usado para estudar o mecanismo; não implica implantação no ambiente. **PROD** identifica o Airflow medido no Kubernetes em 14/10/2026, entre 16:10 e 16:16 UTC. Esse recibo prova sua configuração, sem provar uma execução recente de cada DAG. As skills vinculadas são apoio de trabalho; sua existência não comprova que um padrão esteja implementado.
+
+O [capítulo de workflows](/explicacoes/workflow/) conta os casos Salesforce, XP e áudio. O [capítulo de operações distribuídas](/explicacoes/distributed-work/) desenvolve estados e recuperação. Os [recibos](/referencia/evidencias/) preservam os ambientes e limites das fontes.
+
+## State Machine
+
+Uma máquina de estados define as situações possíveis de uma operação, os eventos que permitem transições e as condições para aceitar cada transição. No exercício de áudio, distinguir objeto ausente, objeto presente e metadado presente ajuda a escolher o efeito que falta. A máquina persistida desse exercício é proposta; o código observado contém upload e carga SQL, sem esse registro próprio.
+
+O limite é a garantia oferecida pela transição: um desenho não fornece atualização concorrente correta nem transação entre objeto e banco. A base de comparação é [Temporal](https://docs.temporal.io/temporal); a aplicação OSS **REF** [Temporal Server](https://github.com/temporalio/temporal/blob/main/service/history/workflow_rebuilder.go) contém reconstrução de estado de workflow. A skill [workflow-orchestration-patterns](/referencia/skills-e-projetos) apoia o desenho. Este padrão prioritário tem uma [seção desenvolvida](/explicacoes/distributed-work/#saber-o-que-já-aconteceu-state-machine).
+
+{/* current-curation:state-machine */}
+
+A [curadoria de State Machine](/referencia/curadoria/16-workflow-e-processamento/#state-machine) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Finite State Machine
+
+Uma máquina de estados finitos usa um conjunto finito de estados e de transições. Dados como identidade, prazo e tentativa podem acompanhar o estado. No caso de estudo, os estados de uma task tornam possível distinguir espera, execução e término sem criar um estado novo para cada arquivo processado.
+
+O limite é o crescimento das combinações: estados demais dificultam revisão e recuperação. A base é o modelo de tasks [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/tasks.html), aplicação OSS **PROD** no runtime medido. A skill [airflow-dag-patterns](/referencia/skills-e-projetos) apoia esse contrato. Os estados reais de uma tentativa precisam de consulta própria; a configuração do scheduler não os demonstra.
+
+{/* current-curation:finite-state-machine */}
+
+A [curadoria de Finite State Machine](/referencia/curadoria/16-workflow-e-processamento/#finite-state-machine) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Workflow Engine
+
+Um motor de workflow interpreta um contrato de passos e administra sua execução, dependências e progresso. No caminho Salesforce, Airflow executa as tasks da ingestão; a DAG Cosmos, lida em `.70`, traduz a seleção dbt em trabalho executável. No estudo de espera durável, Temporal fornece outra base de comparação.
+
+O limite é o efeito externo: o motor pode repetir uma atividade cuja escrita já ocorreu. A base e aplicação OSS são [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/overview.html), **PROD** no runtime medido; [Temporal](https://docs.temporal.io/temporal) é **REF**, sem implantação confirmada. A skill [workflow-orchestration-patterns](/referencia/skills-e-projetos) apoia a escolha conforme dependências e duração.
+
+{/* current-curation:workflow-engine */}
+
+A [curadoria de Workflow Engine](/referencia/curadoria/16-workflow-e-processamento/#workflow-engine) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## DAG
+
+Um grafo dirigido acíclico representa dependências entre unidades de trabalho e impede ciclos dentro desse grafo. A factory Salesforce encadeia `extract`, `transform`, `validate_columns`, `load`. A ordem permite que a validação receba a saída transformada antes da carga.
+
+O limite é a garantia da aresta: depender do sucesso de outra task não confirma uma transação conjunta nem qualidade de negócio completa. A base é a [DAG do Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/dags.html); a aplicação OSS **PROD** é Apache Airflow, com os arquivos de ingestão reconciliados no cluster. A skill [airflow-dag-patterns](/referencia/skills-e-projetos) orienta composição e agendamento.
+
+{/* current-curation:dag */}
+
+A [curadoria de DAG](/referencia/curadoria/16-workflow-e-processamento/#dag) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Pipeline
+
+Um pipeline leva entradas por etapas até uma saída definida, como extração, transformação, validação e carga. No caso Salesforce, o staging recebe os registros da API e o modelo dbt de calls produz uma representação analítica. O código de Cosmos e do modelo foi lido em `.70`, sem paridade Kubernetes demonstrada.
+
+O limite é o reprocessamento: repetir etapas com efeitos exige identidade estável, regra de atualização e origem identificável. A base é [dbt incremental](https://docs.getdbt.com/docs/build/incremental-models), integrado por Cosmos no código lido; a aplicação OSS **REF** [dbt Core](https://github.com/dbt-labs/dbt-core) fornece o motor de transformação. Sua presença nesta referência não comprova uma execução do modelo no cluster. A skill [airflow-dag-patterns](/referencia/skills-e-projetos) apoia o encadeamento.
+
+{/* current-curation:pipeline */}
+
+A [curadoria de Pipeline](/referencia/curadoria/16-workflow-e-processamento/#pipeline) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Orchestrator
+
+Um coordenador decide quando cada passo pode avançar e acompanha seus resultados. O scheduler Airflow administra as dependências das DAGs e os limites de execução. No XP, receber um Asset de prontidão pode liberar o consumidor conforme seu agendamento.
+
+O limite é a dependência do coordenador e de seu estado: capacidade das tasks não sustenta sozinha o agendamento quando o scheduler está indisponível. A base e aplicação OSS **PROD** são [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/overview.html). O recibo encontrou uma réplica de scheduler e estratégia `Recreate`, sem ensaio de failover. A skill [workflow-orchestration-patterns](/referencia/skills-e-projetos) apoia decisões e responsabilidades.
+
+{/* current-curation:orchestrator */}
+
+A [curadoria de Orchestrator](/referencia/curadoria/16-workflow-e-processamento/#orchestrator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Choreography
+
+Na coreografia, participantes reagem a eventos contratados e publicam os próximos fatos sem um coordenador conhecer cada consequência. O exemplo hipotético de reserva pode emitir um fato aceito pelo participante que prepara o pedido. O Asset XP observado continua sujeito ao scheduler central, portanto não comprova esse desenho distribuído inteiro.
+
+O limite é entender o todo: falhas, duplicatas e ordem atravessam participantes. A base é a composição por handlers; a aplicação OSS **REF** [Watermill](https://github.com/ThreeDotsLabs/watermill/blob/master/message/router.go) implementa router, tratamento e confirmação de mensagens. O router sustenta o estudo das reações, sem provar uma Saga de negócio completa. A skill [workflow-orchestration-patterns](/referencia/skills-e-projetos) apoia a comparação com coordenação central.
+
+{/* current-curation:choreography */}
+
+A [curadoria de Choreography](/referencia/curadoria/16-workflow-e-processamento/#choreography) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Job Queue
+
+Uma fila de trabalho mantém unidades pendentes até que um consumidor possa executá-las. Ela pode separar a chegada de um pedido da disponibilidade de capacidade. No estudo, uma partição sintética de relatório fica pendente enquanto os executores estão ocupados.
+
+O limite depende do contrato de entrega: ordem, confirmação, repetição e prazo precisam de definição própria. A base é a fila de tasks de [Temporal](https://docs.temporal.io/temporal); a aplicação OSS **REF** [Temporal Server](https://github.com/temporalio/temporal/blob/main/service/history/transfer_queue_task_executor_base.go) envia Workflow Tasks ao serviço de matching. Isso não demonstra um broker ou Temporal instalado aqui. A skill [backend-background-jobs](/referencia/skills-e-projetos) apoia execução posterior e recuperação.
+
+{/* current-curation:job-queue */}
+
+A [curadoria de Job Queue](/referencia/curadoria/16-workflow-e-processamento/#job-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Worker Pool
+
+Um conjunto de executores oferece capacidade para processar trabalhos concorrentes. O limite configurado de paralelismo ajuda a controlar admissão, enquanto CPU, memória e chamadas externas limitam a capacidade útil. No exemplo hipotético, 12 tasks e três vagas formam quatro grupos de três sob ocupação uniforme.
+
+O limite é a medição: paralelismo 32 no Kubernetes e 5 no Docker `.70` não contam workers ativos nem garantem duração. A base e aplicação OSS **PROD** são [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/overview.html), com [pools](https://airflow.apache.org/docs/apache-airflow/3.2.2/administration-and-deployment/pools.html) para limitar conjuntos de tasks. A skill [backend-concurrency-mechanics](/referencia/skills-e-projetos) apoia orçamento e admissão. Pool de slots não cria isolamento de memória.
+
+{/* current-curation:worker-pool */}
+
+A [curadoria de Worker Pool](/referencia/curadoria/08-concorrencia/#worker-pool) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Batch Processing
+
+O processamento em lote trabalha sobre uma entrada finita identificada e termina uma execução para esse conjunto. No XP, esperar os relatórios necessários antes de calcular a posição ajuda a produzir uma visão coerente do lote.
+
+O limite é a prontidão e a latência: a data pareada não valida sozinha a completude de cada arquivo, e uma entrada ausente atrasa o lote. A base e aplicação OSS **PROD** são [Apache Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/dag-run.html); o [Asset](https://airflow.apache.org/docs/apache-airflow/3.2.2/authoring-and-scheduling/assets.html) fornece prontidão ao agendamento. A skill [airflow-dag-patterns](/referencia/skills-e-projetos) apoia intervalos, dependências e reprocessamento.
+
+{/* current-curation:batch-processing */}
+
+A [curadoria de Batch Processing](/referencia/curadoria/16-workflow-e-processamento/#batch-processing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Stream Processing
+
+O processamento contínuo recebe eventos ao longo do tempo e constrói resultados com políticas de janela, ordem e atraso. No exercício, um evento ocorrido às 10h03 chega às 10h10 e precisa de uma regra para entrar ou corrigir sua janela.
+
+O limite é o tempo observado: tempo de chegada e tempo do evento podem divergir, e guardar apenas uma data máxima não resolve todos os atrasos. A base e aplicação OSS **REF** são [Apache Beam](https://beam.apache.org/documentation/programming-guide/), com coleções contínuas e janelas; Beam não foi confirmado como implantado. A skill [data-streaming](/referencia/skills-e-projetos) apoia o estudo desses contratos.
+
+{/* current-curation:stream-processing */}
+
+A [curadoria de Stream Processing](/referencia/curadoria/16-workflow-e-processamento/#stream-processing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Lambda Architecture
+
+Esse estilo mantém um caminho batch para reconstrução completa e outro stream para resultados rápidos, reunindo suas visões para consumo. No exercício proposto, uma visão rápida seria corrigida por uma reconstrução periódica do mesmo histórico.
+
+O limite é manter semântica coerente em duas lógicas. Como bases, Apache Hadoop processa lotes e Apache Samza processa streams. A aplicação OSS **PROD de estudo** é a composição RADStack com Apache Druid: o [artigo publicado pelos autores](https://raw.githubusercontent.com/druid-io/druid/master/publications/radstack/radstack.pdf) descreve Kafka, Samza, Hadoop e Druid, com caminhos batch e streaming convergindo na consulta. O [projeto Druid](https://github.com/apache/druid) publica sua implementação. Essa fonte demonstra uma composição externa; não comprova Lambda no MakersHub. A skill [data-streaming](/referencia/skills-e-projetos) apoia a análise.
+
+{/* current-curation:lambda-architecture */}
+
+A [curadoria de Lambda Architecture](/referencia/curadoria/16-workflow-e-processamento/#lambda-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Kappa Architecture
+
+Esse estilo mantém uma lógica de processamento contínuo e busca reconstruir resultados pelo replay de um log de eventos preservado. No exercício proposto, uma nova versão da transformação releia o histórico contratado e produza uma nova visão identificada.
+
+O limite é preservar o histórico e separar reconstrução de efeitos externos. A base é [Kafka Streams](https://github.com/apache/kafka/tree/trunk/streams), e a aplicação OSS **REF** [WordCountDemo](https://github.com/apache/kafka/blob/trunk/streams/examples/src/main/java/org/apache/kafka/streams/examples/wordcount/WordCountDemo.java) lê um tópico, calcula contagens e publica a visão por uma única lógica de stream. A [ferramenta oficial de reset](https://kafka.apache.org/41/streams/developer-guide/app-reset-tool/) explica a reconstrução: parar a aplicação, tratar estado local e offsets e reler os dados retidos. O exemplo torna executável o núcleo de Kappa; essa classificação é uma análise da composição, pois o arquivo se apresenta como WordCount. Replay depende da retenção e do procedimento, sem promessa de recuperação automática. Um bucket ou Asset Airflow não oferece sozinho esse contrato. A skill [data-streaming](/referencia/skills-e-projetos) apoia a análise; Kappa não foi confirmado no ambiente.
+
+{/* current-curation:kappa-architecture */}
+
+A [curadoria de Kappa Architecture](/referencia/curadoria/16-workflow-e-processamento/#kappa-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## MapReduce
+
+O processamento mapeia entradas para pares de chave e valor, reúne valores da mesma chave e aplica uma redução. No exercício, arquivos fictícios produzem valores por `portfolio_code`, e a redução soma cada grupo. O agrupamento entre partições faz parte do mecanismo.
+
+O limite é o custo de movimentar dados e lidar com distribuição desigual de chaves. A base e aplicação OSS **REF** são [Apache Hadoop WordCount](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html), exemplo oficial com map e reduce. Processar um arquivo por task não comprova MapReduce instalado. A skill [data-streaming](/referencia/skills-e-projetos) oferece apoio geral de processamento; não é uma skill específica de operação Hadoop.
+
+{/* current-curation:mapreduce */}
+
+A [curadoria de MapReduce](/referencia/curadoria/16-workflow-e-processamento/#mapreduce) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Scatter/Gather
+
+Um coordenador distribui solicitações a vários destinos e coleta respostas conforme um critério de conclusão. No exercício, três partições sintéticas produzem resultados e uma atrasa. O contrato precisa definir se todas são obrigatórias e como identifica uma resposta parcial.
+
+O limite é o destino lento ou indisponível: esperar todos pode segurar o conjunto inteiro. A skill [async-python-patterns](/referencia/skills-e-projetos) apoia prazo e coleta. [Apache Beam](https://beam.apache.org/documentation/programming-guide/) é base e aplicação OSS **REF** para distribuição e agrupamento de dados; esses operadores ajudam a estudar a coleta, mas não comprovam uma aplicação completa de chamadas RPC Scatter/Gather. Não foi observado esse paralelismo no XP.
+
+{/* current-curation:scatter-gather */}
+
+A [curadoria de Scatter/Gather](/referencia/curadoria/16-workflow-e-processamento/#scatter-gather) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Fork/Join
+
+O fluxo abre ramos de trabalho e os reúne depois que o critério de junção é atendido. No desenho didático XP, arquivar bytes e transformar a cópia local podem ser estudados como ramos independentes. As chamadas do processor lido são sequenciais; paralelismo desses ramos é proposta.
+
+O limite é a independência das partes: ramos que disputam estado ou dependem dos efeitos um do outro precisam de coordenação própria. A base é o grafo de dependências [Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/dags.html), aplicação OSS **PROD** com capacidade de representar ramos e junções. Essa capacidade não afirma que o ramo XP execute assim. A skill [async-python-patterns](/referencia/skills-e-projetos) apoia execução concorrente e coleta.
+
+{/* current-curation:fork-join */}
+
+A [curadoria de Fork/Join](/referencia/curadoria/08-concorrencia/#fork-join) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+## Termos relacionados em outras referências
+
+[Pipe and Filter](/referencia/catalogo/01-arquiteturas-de-aplicacao/#pipe-and-filter) descreve composição de etapas. [Mensagens](/referencia/catalogo/03-event-driven-messaging/) contém Producer/Consumer, Fan-in, Aggregator, tradução, enriquecimento, filtros e Competing Consumers. [Consistência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/) contém Saga, suas duas formas de coordenação, Reservation Pattern, TCC e Compensating Transaction. Esses vínculos permitem aprofundar o contrato que cada workflow usa.

@@ -1,0 +1,1162 @@
+{
+  "keycloak/keycloak@main": {
+    "sha": "8a081db466da3ff8de74efab2f3d9844277c18ba",
+    "observed_utc": "2026-10-15T01:13:49.752408Z",
+    "error": null
+  },
+  "eventuate-tram/eventuate-tram-examples-customers-and-orders@master": {
+    "sha": "e7ec5b7153bdf7d3d941792d9b92ebf13b53452a",
+    "observed_utc": "2026-10-15T01:13:49.793553Z",
+    "error": null
+  },
+  "flippercloud/flipper@main": {
+    "sha": "1d49644a2ea8696c7eb9b995f6eab020ad597deb",
+    "observed_utc": "2026-10-15T01:13:49.826799Z",
+    "error": null
+  },
+  "apache/cassandra@trunk": {
+    "sha": "ec2c276be145bb25085c5c35ac0da69113b676ff",
+    "observed_utc": "2026-10-15T01:13:49.820372Z",
+    "error": null
+  },
+  "gitlabhq/gitlabhq@v16.11.0": {
+    "sha": "0454e1accb3029c1ac3105c84db7bc531a5776de",
+    "observed_utc": "2026-10-15T01:13:49.899134Z",
+    "error": null
+  },
+  "kgrzybek/modular-monolith-with-ddd@master": {
+    "sha": "91c8ef24b4cb6ef558c95d8267fa07d68c7059f8",
+    "observed_utc": "2026-10-15T01:13:49.805422Z",
+    "error": null
+  },
+  "hashicorp/vault@v1.14.0": {
+    "sha": "13a649f860186dffe3f3a4459814d87191efc321",
+    "observed_utc": "2026-10-15T01:13:49.876083Z",
+    "error": null
+  },
+  "hashicorp/serf@master": {
+    "sha": "fe2acb9e90d89e27409a88d086553a2ad429cb8b",
+    "observed_utc": "2026-10-15T01:13:49.842328Z",
+    "error": null
+  },
+  "resilience4j/resilience4j@master": {
+    "sha": "b7c0069802e373ed72dff0b817c270fbb6e966ba",
+    "observed_utc": "2026-10-15T01:13:50.277571Z",
+    "error": null
+  },
+  "esiek/android-architecture@master": {
+    "sha": "892088775e64cc5801bb488af2289e9e2e3a1fea",
+    "observed_utc": "2026-10-15T01:13:50.285063Z",
+    "error": null
+  },
+  "basho/riak_kv@develop": {
+    "sha": "fa9df88ff97c61af77105b3b185bd84e20c62add",
+    "observed_utc": "2026-10-15T01:13:50.326909Z",
+    "error": null
+  },
+  "apache/druid@master": {
+    "sha": "b4b0fe5789d285157fdf2010821ae7bcadf8c2f1",
+    "observed_utc": "2026-10-15T01:13:50.277779Z",
+    "error": null
+  },
+  "ThreeDotsLabs/wild-workouts-go-ddd-example@master": {
+    "sha": "8ecfcdf05b1462c4757bd2dcac9086c78e9f7791",
+    "observed_utc": "2026-10-15T01:13:50.319058Z",
+    "error": null
+  },
+  "hashicorp/terraform-provider-google@main": {
+    "sha": "79b1095740d192eed8561929c13f9e19951f76ef",
+    "observed_utc": "2026-10-15T01:13:50.342208Z",
+    "error": null
+  },
+  "redis/redis-rb@master": {
+    "sha": "8135b2544ee47290fa55aba22e384fc06af349a5",
+    "observed_utc": "2026-10-15T01:13:50.329212Z",
+    "error": null
+  },
+  "openfga/openfga@main": {
+    "sha": "526995eb202464e2cace266fb5be56c212af9ecf",
+    "observed_utc": "2026-10-15T01:13:50.377216Z",
+    "error": null
+  },
+  "chaoran/fast-wait-free-queue@master": {
+    "sha": "d41ec16e5169c864e5fdbe05e1988358bd335fa0",
+    "observed_utc": "2026-10-15T01:13:50.803276Z",
+    "error": null
+  },
+  "tikv/tikv@master": {
+    "sha": "67ffce0c137b7c171405a76df8bc8e9f04a19ce6",
+    "observed_utc": "2026-10-15T01:13:50.823356Z",
+    "error": null
+  },
+  "quellabs/wakapac@main": {
+    "sha": "2f0746785c42b22f6fcd5d7f30ddc125ee281fe9",
+    "observed_utc": "2026-10-15T01:13:50.860194Z",
+    "error": null
+  },
+  "dotnet/orleans@main": {
+    "sha": "4d94a394bce9a04299bd8bde5503f91c056bb024",
+    "observed_utc": "2026-10-15T01:13:50.847413Z",
+    "error": null
+  },
+  "postgres/postgres@master": {
+    "sha": "3c6665bf0266a7ae78117c3ed0299bfbd1f1331a",
+    "observed_utc": "2026-10-15T01:13:50.826775Z",
+    "error": null
+  },
+  "ardalis/Specification@main": {
+    "sha": "d2fcf351a97b4887829bddac424a12d8a3eaf9fe",
+    "observed_utc": "2026-10-15T01:13:50.899681Z",
+    "error": null
+  },
+  "aws-samples/aws-serverless-ecommerce-platform@main": {
+    "sha": "3b9ef36dd3e338c8ab697c2bcb1b672e064e303c",
+    "observed_utc": "2026-10-15T01:13:50.881095Z",
+    "error": null
+  },
+  "mehdihadeli/vertical-slice-api-template@main": {
+    "sha": "be0da196411b5d8174aa2b435b55902f6b4021a7",
+    "observed_utc": "2026-10-15T01:13:50.957765Z",
+    "error": null
+  },
+  "prometheus/node_exporter@master": {
+    "sha": "ec12b97885625a7ade058c60f1419e5cda8f6edc",
+    "observed_utc": "2026-10-15T01:13:51.326233Z",
+    "error": null
+  },
+  "medusajs/medusa@v1.20.10": {
+    "sha": "d09630c558f585d40bcfde6ad8c74507a4ead493",
+    "observed_utc": "2026-10-15T01:13:51.413840Z",
+    "error": null
+  },
+  "spiffe/go-spiffe@main": {
+    "sha": "77c6d2e0c1203e36804e26a02faa8f893d72e7e5",
+    "observed_utc": "2026-10-15T01:13:51.365592Z",
+    "error": null
+  },
+  "rabbitmq/rabbitmq-server@main": {
+    "sha": "0d5290868729ad42a76e8554cb65617082ee837b",
+    "observed_utc": "2026-10-15T01:13:51.326628Z",
+    "error": null
+  },
+  "ipfs/kubo@master": {
+    "sha": "833e04a240d8c533509ddaaa3c202b39b0bb3024",
+    "observed_utc": "2026-10-15T01:13:51.369050Z",
+    "error": null
+  },
+  "apache/ofbiz-framework@trunk": {
+    "sha": "b8b72d556e829d4a0818f8a4fed57e0750efcacb",
+    "observed_utc": "2026-10-15T01:13:51.326500Z",
+    "error": null
+  },
+  "etcd-io/etcd@main": {
+    "sha": "d3c8a155909211c6681f3075802a4aacf11528b4",
+    "observed_utc": "2026-10-15T01:13:51.334066Z",
+    "error": null
+  },
+  "openresty/openresty@master": {
+    "sha": "bc8bf89488f2d02572389158533b3f85ca0ded7f",
+    "observed_utc": "2026-10-15T01:13:51.478661Z",
+    "error": null
+  },
+  "fastapi/full-stack-fastapi-template@master": {
+    "sha": "7257e606cb94eada1dca40173e2b7f99dd549bc6",
+    "observed_utc": "2026-10-15T01:13:51.857446Z",
+    "error": null
+  },
+  "apache/kafka@trunk": {
+    "sha": "e58847b4d46869704e87b071eb2b8b96cffe93a3",
+    "observed_utc": "2026-10-15T01:13:51.854047Z",
+    "error": null
+  },
+  "grpc/grpc@master": {
+    "sha": "abc04be1d94cd4156e7be74d48da80e3babfb11c",
+    "observed_utc": "2026-10-15T01:13:51.857246Z",
+    "error": null
+  },
+  "keycloak/keycloak-js@main": {
+    "sha": "8803e6b54a4ba6f9dc0150d0329c98e7902a9ee8",
+    "observed_utc": "2026-10-15T01:13:51.898276Z",
+    "error": null
+  },
+  "spring-petclinic/spring-petclinic-microservices@main": {
+    "sha": "1d76b00d683e86b62867a6bf59530f8ab301244f",
+    "observed_utc": "2026-10-15T01:13:51.860764Z",
+    "error": null
+  },
+  "talehkarimov/hexagonal-architecture@main": {
+    "sha": "f9eb3344bf3a3e11b9bea758f8cd0c4fbca2153b",
+    "observed_utc": "2026-10-15T01:13:51.943586Z",
+    "error": null
+  },
+  "autofac/Autofac@develop": {
+    "sha": "ae9e1e1129b9c22e7ab111381308dcb02f80a8d2",
+    "observed_utc": "2026-10-15T01:13:51.917022Z",
+    "error": null
+  },
+  "pereiren/dotnet-template-onion@master": {
+    "sha": "9555bdfe773eb0d3f86139aca5c48c87e6d68360",
+    "observed_utc": "2026-10-15T01:13:51.988603Z",
+    "error": null
+  },
+  "ardalis/CleanArchitecture@main": {
+    "sha": "e7c79be54ba0b001a5b332c1efe935f520b9db4b",
+    "observed_utc": "2026-10-15T01:13:52.282520Z",
+    "error": null
+  },
+  "hazelcast/hazelcast@v5.3.8": {
+    "sha": "9755365dacee75e097ed3503209a97f5bdfd5932",
+    "observed_utc": "2026-10-15T01:13:52.452265Z",
+    "error": null
+  },
+  "eventuate-tram/eventuate-tram-core@master": {
+    "sha": "e472ed72b8635d0488a95d0892b8901c0158a7d1",
+    "observed_utc": "2026-10-15T01:13:52.489567Z",
+    "error": null
+  },
+  "argoproj/argo-rollouts@master": {
+    "sha": "ee7e28a1365553a3d2563a2c11ffea5ec0b7644a",
+    "observed_utc": "2026-10-15T01:13:52.373754Z",
+    "error": null
+  },
+  "Krukov/cashews@master": {
+    "sha": "b15577d4dddd06d517536f8fcb6b808d62da8c52",
+    "observed_utc": "2026-10-15T01:13:52.375327Z",
+    "error": null
+  },
+  "etcd-io/website@main": {
+    "sha": "d8c30b769bc6dc107250492483278ea70af6390e",
+    "observed_utc": "2026-10-15T01:13:52.486034Z",
+    "error": null
+  },
+  "etcd-io/raft@main": {
+    "sha": "638f42739b77572b5708eb0d8a776a272ade71ed",
+    "observed_utc": "2026-10-15T01:13:52.443759Z",
+    "error": null
+  },
+  "eventuate-tram/eventuate-tram-sagas@master": {
+    "sha": "a7a99181b6668f3283b5920a5ff3bac415422eeb",
+    "observed_utc": "2026-10-15T01:13:52.485408Z",
+    "error": null
+  },
+  "rails/rails@main": {
+    "sha": "ba3572c874040cfd6d4883f5ca574121968cdf6f",
+    "observed_utc": "2026-10-15T01:13:52.898894Z",
+    "error": null
+  },
+  "argoproj/argo-cd@master": {
+    "sha": "fad45c4b479990d1ace77d54fd67e6f04de412df",
+    "observed_utc": "2026-10-15T01:13:52.955868Z",
+    "error": null
+  },
+  "unjs/httpxy@main": {
+    "sha": "b202844bb59ffdb3a6b84166894bcd6e3b53ffa7",
+    "observed_utc": "2026-10-15T01:13:52.956117Z",
+    "error": null
+  },
+  "apache/superset@master": {
+    "sha": "54d2421ded3572dc2ae328b7d4fd698acec48c11",
+    "observed_utc": "2026-10-15T01:13:53.058955Z",
+    "error": null
+  },
+  "kubernetes-sigs/cluster-api@main": {
+    "sha": "3d286e2c957495174300aa82cc98065ab82653fd",
+    "observed_utc": "2026-10-15T01:13:53.018733Z",
+    "error": null
+  },
+  "vercel/commerce@main": {
+    "sha": "3761e52e60df9c6a316e067dbfd7032e494d3634",
+    "observed_utc": "2026-10-15T01:13:53.118912Z",
+    "error": null
+  },
+  "rabbitmq/rabbitmq-tutorials@main": {
+    "sha": "88b985dd367eba94b47986d0d23cc909dcb7f0a1",
+    "observed_utc": "2026-10-15T01:13:53.157620Z",
+    "error": null
+  },
+  "vercel/next.js@canary": {
+    "sha": "0b3693ddd5fca101fe6d286849a980ddc1bf0650",
+    "observed_utc": "2026-10-15T01:13:53.076817Z",
+    "error": null
+  },
+  "cloudnative-pg/cloudnative-pg@main": {
+    "sha": "0a1b0627e774f5be022e81106eb6ac90dcef7e3a",
+    "observed_utc": "2026-10-15T01:13:53.435852Z",
+    "error": null
+  },
+  "hashicorp/memberlist@master": {
+    "sha": "5cd2c4b0fb09caea5de03aae1adb9c36374ef3e0",
+    "observed_utc": "2026-10-15T01:13:53.446439Z",
+    "error": null
+  },
+  "ben-manes/caffeine@master": {
+    "sha": "92cd6cca5fed23d8343ef7caf338631c977ae9ec",
+    "observed_utc": "2026-10-15T01:13:53.587397Z",
+    "error": null
+  },
+  "oskardudycz/EventSourcing.NetCore@main": {
+    "sha": "bb5e42363677be41a090f7df17c3a149dcbd5f02",
+    "observed_utc": "2026-10-15T01:13:53.533055Z",
+    "error": null
+  },
+  "tornadoweb/tornado@master": {
+    "sha": "8e7594727c88891c7e7b4fb78219daa03d7f9922",
+    "observed_utc": "2026-10-15T01:13:53.500526Z",
+    "error": null
+  },
+  "prometheus/blackbox_exporter@master": {
+    "sha": "d18e9bed33270911c09826234a4e4f500f775087",
+    "observed_utc": "2026-10-15T01:13:53.617607Z",
+    "error": null
+  },
+  "bucardo/bucardo@master": {
+    "sha": "d9919c804d2c84a25e9bd8895908e80932609160",
+    "observed_utc": "2026-10-15T01:13:53.633423Z",
+    "error": null
+  },
+  "facebook/rocksdb@main": {
+    "sha": "df90749560116e2c17d3a55667af6c397854e390",
+    "observed_utc": "2026-10-15T01:13:53.665423Z",
+    "error": null
+  },
+  "debezium/debezium@main": {
+    "sha": "2f84b29c03638d261823172d1d8bfa9ca3a99824",
+    "observed_utc": "2026-10-15T01:13:53.946414Z",
+    "error": null
+  },
+  "ddd-by-examples/library@master": {
+    "sha": "5225ff7a0f0c1e0751b91cdd64f925cd001d7555",
+    "observed_utc": "2026-10-15T01:13:53.969032Z",
+    "error": null
+  },
+  "open-policy-agent/opa@main": {
+    "sha": "89d111ce4b45c3af9b79ac1137efe2e9aab6cc92",
+    "observed_utc": "2026-10-15T01:13:54.086866Z",
+    "error": null
+  },
+  "grafana/loki@main": {
+    "sha": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+    "observed_utc": "2026-10-15T01:13:54.004882Z",
+    "error": null
+  },
+  "temporalio/temporal@main": {
+    "sha": "10791698da3708020fe52db8af1b4bef89db3177",
+    "observed_utc": "2026-10-15T01:13:54.074880Z",
+    "error": null
+  },
+  "ThreeDotsLabs/event-driven-example@master": {
+    "sha": "5361d9ed1672da4ada45aaec4f7c473a76146262",
+    "observed_utc": "2026-10-15T01:13:54.152732Z",
+    "error": null
+  },
+  "kubernetes/kubernetes@master": {
+    "sha": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f",
+    "observed_utc": "2026-10-15T01:13:54.102251Z",
+    "error": null
+  },
+  "JasperFx/marten@master": {
+    "sha": "4c6762d4ec26d0e335c3fdf69017a442f3604d8f",
+    "observed_utc": "2026-10-15T01:13:54.202918Z",
+    "error": null
+  },
+  "kubernetes/client-go@master": {
+    "sha": "7aade4e921f65cb51c990ab0557a5556fd67a1be",
+    "observed_utc": "2026-10-15T01:13:54.472341Z",
+    "error": null
+  },
+  "apache/ignite@master": {
+    "sha": "6f153bf0e09bcc6d4492a7400b4917f578fa0791",
+    "observed_utc": "2026-10-15T01:13:54.487500Z",
+    "error": null
+  },
+  "spring-projects/spring-petclinic@main": {
+    "sha": "500158f732419217507c7656904b8e6aa1bcc0d6",
+    "observed_utc": "2026-10-15T01:13:54.473752Z",
+    "error": null
+  },
+  "apache/apisix@master": {
+    "sha": "2e43b6c605566d383378a45ef1f06f3debf48a42",
+    "observed_utc": "2026-10-15T01:13:54.505070Z",
+    "error": null
+  },
+  "dotnet/eShop@main": {
+    "sha": "dc7ea499cd356924fb6689b3702964a5869dbae9",
+    "observed_utc": "2026-10-15T01:13:54.526432Z",
+    "error": null
+  },
+  "dbt-labs/dbt-core@main": {
+    "sha": "e4553594a226e0cd1a1897ff25521aeec8e06e7f",
+    "observed_utc": "2026-10-15T01:13:54.858240Z",
+    "error": null
+  },
+  "sysid/sse-starlette@main": {
+    "sha": "1705b2d731e1b850aa5e9783c073cfaaf640af8f",
+    "observed_utc": "2026-10-15T01:13:54.582802Z",
+    "error": null
+  },
+  "aws-samples/aws-saas-cell-based-architecture@main": {
+    "sha": "6d78cc0793d5f00664a9fd340e0f42a536faf2da",
+    "observed_utc": "2026-10-15T01:13:55.000358Z",
+    "error": null
+  },
+  "basho/riak_core@develop": {
+    "sha": "25d9a6fa917eb8a2e95795d64eb88d7ad384ed88",
+    "observed_utc": "2026-10-15T01:13:55.098589Z",
+    "error": null
+  },
+  "istio/istio@master": {
+    "sha": "4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631",
+    "observed_utc": "2026-10-15T01:13:55.001599Z",
+    "error": null
+  },
+  "apache/camel@main": {
+    "sha": "cd2ce899764e3c482bdebfc1695e971afd2a962c",
+    "observed_utc": "2026-10-15T01:13:55.024336Z",
+    "error": null
+  },
+  "apache/nifi@main": {
+    "sha": "9e6c18893f1b1df713dac55d98c2b2944d235844",
+    "observed_utc": "2026-10-15T01:13:55.082615Z",
+    "error": null
+  },
+  "systemd/systemd@main": {
+    "sha": "7f073ff56f14e9b6ff7052998b640df88a359358",
+    "observed_utc": "2026-10-15T01:13:54.999661Z",
+    "error": null
+  },
+  "prometheus/prometheus@main": {
+    "sha": "6e69e843b38d22ded60a13e0163f6326136f59fa",
+    "observed_utc": "2026-10-15T01:13:55.005931Z",
+    "error": null
+  },
+  "ThreeDotsLabs/watermill@master": {
+    "sha": "080d4b4e7fe6105ab880d1becd5cf91af0235d8c",
+    "observed_utc": "2026-10-15T01:13:55.418769Z",
+    "error": null
+  },
+  "apache/hadoop@trunk": {
+    "sha": "6f3d71bc35f5eaab0487283533e6057c58038ae4",
+    "observed_utc": "2026-10-15T01:13:55.525246Z",
+    "error": null
+  },
+  "yugabyte/yugabyte-db@master": {
+    "sha": "56b173301ea13d0e90f10cf3ecfdf055c46f9241",
+    "observed_utc": "2026-10-15T01:13:55.530553Z",
+    "error": null
+  },
+  "jet/equinox@master": {
+    "sha": "4ec58b7743990b0f89706390bcbf1ab4ba366207",
+    "observed_utc": "2026-10-15T01:13:55.547730Z",
+    "error": null
+  },
+  "eventuate-tram/eventuate-tram-sagas-examples-customers-and-orders@master": {
+    "sha": "7f0ab8445fea5720d21fa3500d28e7e05d12cb7f",
+    "observed_utc": "2026-10-15T01:13:55.527104Z",
+    "error": null
+  },
+  "envoyproxy/envoy@main": {
+    "sha": "960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1",
+    "observed_utc": "2026-10-15T01:18:57.913345Z",
+    "error": null
+  },
+  "zulip/zulip@main": {
+    "sha": "4dacd6db094d5a8f5bacc4fe4e3f58da358a20b0",
+    "observed_utc": "2026-10-15T01:18:57.889512Z",
+    "error": null
+  },
+  "python/cpython@HEAD": {
+    "sha": "a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb",
+    "observed_utc": "2026-10-15T01:18:57.955339Z",
+    "error": null
+  },
+  "apache/airflow@main": {
+    "sha": "42945d62b1f6ecbb8255b306c9becf7c2900dfef",
+    "observed_utc": "2026-10-15T01:18:58.100895Z",
+    "error": null
+  },
+  "open-telemetry/opentelemetry-collector@main": {
+    "sha": "46a0454806fd024159597fe651a16defb666e672",
+    "observed_utc": "2026-10-15T01:18:58.041200Z",
+    "error": null
+  },
+  "coredns/coredns@HEAD": {
+    "sha": "9d1343c54c2526dd6424e46b0f17ca79d9b1a557",
+    "observed_utc": "2026-10-15T01:18:57.945330Z",
+    "error": null
+  },
+  "jellyfin/jellyfin@master": {
+    "sha": "aec42b345e1a7da25ee5492183f12209338df688",
+    "observed_utc": "2026-10-15T01:18:57.915831Z",
+    "error": null
+  },
+  "trinodb/trino@master": {
+    "sha": "5706548dade9b1dc81144af6850c5dde9a356713",
+    "observed_utc": "2026-10-15T01:18:57.966565Z",
+    "error": null
+  },
+  "facebook/react@main": {
+    "sha": "99c106c43439ad7af05d42f66582d8d05190e9ff",
+    "observed_utc": "2026-10-15T01:18:58.748421Z",
+    "error": null
+  },
+  "apache/camel@HEAD": {
+    "sha": "cd2ce899764e3c482bdebfc1695e971afd2a962c",
+    "observed_utc": "2026-10-15T01:18:58.487843Z",
+    "error": null
+  },
+  "ContextMapper/context-mapper-dsl@master": {
+    "sha": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+    "observed_utc": "2026-10-15T01:18:58.569373Z",
+    "error": null
+  },
+  "apache/fineract@HEAD": {
+    "sha": "d4ef4069547fba99400871877ceefadb62ad585b",
+    "observed_utc": "2026-10-15T01:18:58.438046Z",
+    "error": null
+  },
+  "spring-projects/spring-data-jpa@main": {
+    "sha": "eb55201b2b73e7420a14cd4ccf9fce869dc6839d",
+    "observed_utc": "2026-10-15T01:18:58.490292Z",
+    "error": null
+  },
+  "patroni/patroni@HEAD": {
+    "sha": "dbee9c3523540db23232871479ddc5698a3b9435",
+    "observed_utc": "2026-10-15T01:18:58.478824Z",
+    "error": null
+  },
+  "cenkalti/backoff@HEAD": {
+    "sha": "b1a30d947ca896d37518610255281904b439c619",
+    "observed_utc": "2026-10-15T01:18:58.482540Z",
+    "error": null
+  },
+  "golang/go@HEAD": {
+    "sha": "45c2e356255fba62e03b03d02897e58509ab7ed2",
+    "observed_utc": "2026-10-15T01:18:58.577216Z",
+    "error": null
+  },
+  "prometheus/client_golang@main": {
+    "sha": "2b01b52f0c18088adf4cf7b0206acc1c3e55c7ab",
+    "observed_utc": "2026-10-15T01:18:58.933134Z",
+    "error": null
+  },
+  "kubernetes/kubernetes@HEAD": {
+    "sha": "4f2dd0c8498c5ca4640ba1586ef8627aac738a4f",
+    "observed_utc": "2026-10-15T01:18:58.981308Z",
+    "error": null
+  },
+  "uber-go/zap@master": {
+    "sha": "4892335e05f14bce8a98a69a577fcf3844a42623",
+    "observed_utc": "2026-10-15T01:18:58.961478Z",
+    "error": null
+  },
+  "postgres/postgres@HEAD": {
+    "sha": "3c6665bf0266a7ae78117c3ed0299bfbd1f1331a",
+    "observed_utc": "2026-10-15T01:18:58.955060Z",
+    "error": null
+  },
+  "open-telemetry/opentelemetry-go@main": {
+    "sha": "167d633a0313fb4e6c7566184c94019d1cbb3c8c",
+    "observed_utc": "2026-10-15T01:18:58.984559Z",
+    "error": null
+  },
+  "golang/sync@master": {
+    "sha": "36f2d70ecde9857dc4e363242a1369c7645d6770",
+    "observed_utc": "2026-10-15T01:18:59.099303Z",
+    "error": null
+  },
+  "kubernetes/client-go@HEAD": {
+    "sha": "7aade4e921f65cb51c990ab0557a5556fd67a1be",
+    "observed_utc": "2026-10-15T01:18:59.118722Z",
+    "error": null
+  },
+  "airbytehq/airbyte@master": {
+    "sha": "ca9bcfb6bbaba6ce03d07ab389e52b39859a03ae",
+    "observed_utc": "2026-10-15T01:18:59.211250Z",
+    "error": null
+  },
+  "dotnet/runtime@main": {
+    "sha": "34ac16e58c381af6f6d4991ff5e837e9a9737c86",
+    "observed_utc": "2026-10-15T01:18:59.543209Z",
+    "error": null
+  },
+  "spring-projects/spring-framework@HEAD": {
+    "sha": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+    "observed_utc": "2026-10-15T01:18:59.513911Z",
+    "error": null
+  },
+  "apache/nifi@HEAD": {
+    "sha": "9e6c18893f1b1df713dac55d98c2b2944d235844",
+    "observed_utc": "2026-10-15T01:18:59.520102Z",
+    "error": null
+  },
+  "openresty/lua-nginx-module@master": {
+    "sha": "62d9257fba363e2d2012b36b75fe7c2c7ae65db2",
+    "observed_utc": "2026-10-15T01:18:59.510443Z",
+    "error": null
+  },
+  "redisson/redisson@HEAD": {
+    "sha": "016cf1465277409787216ea07dc5ba40696f2efd",
+    "observed_utc": "2026-10-15T01:18:59.493943Z",
+    "error": null
+  },
+  "JodaOrg/joda-money@main": {
+    "sha": "39d5bbf91c01dcac8234cc2fb3ac167320df670c",
+    "observed_utc": "2026-10-15T01:18:59.637096Z",
+    "error": null
+  },
+  "envoyproxy/ratelimit@main": {
+    "sha": "f4e76690d9ce6590707ffd7d28c33a24b99302da",
+    "observed_utc": "2026-10-15T01:18:59.615129Z",
+    "error": null
+  },
+  "vitessio/vitess@HEAD": {
+    "sha": "a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e",
+    "observed_utc": "2026-10-15T01:18:59.712139Z",
+    "error": null
+  },
+  "gitlabhq/gitlabhq@master": {
+    "sha": "b7a1f67aa40446467440af3751675dbd5140b999",
+    "observed_utc": "2026-10-15T01:19:00.253419Z",
+    "error": null
+  },
+  "google/guava@master": {
+    "sha": "dea4984457cdce41842d3bec8d04fb469e776981",
+    "observed_utc": "2026-10-15T01:19:00.140221Z",
+    "error": null
+  },
+  "grpc/grpc-go@master": {
+    "sha": "4d4d42843b7154ede87a6cead454ccf8410baea8",
+    "observed_utc": "2026-10-15T01:19:00.010528Z",
+    "error": null
+  },
+  "fastapi/fastapi@master": {
+    "sha": "49a09a0d4e876b4e7d6d87fc049710263aaeaa7e",
+    "observed_utc": "2026-10-15T01:19:00.022931Z",
+    "error": null
+  },
+  "apache/pekko@main": {
+    "sha": "a1be5eb3f9cafc1e65a1d5e92c8a98830fe293d9",
+    "observed_utc": "2026-10-15T01:19:00.031128Z",
+    "error": null
+  },
+  "celery/celery@main": {
+    "sha": "33868c3dbe98acd236ac95648ed7f1effb7b2385",
+    "observed_utc": "2026-10-15T01:19:00.068954Z",
+    "error": null
+  },
+  "openjdk/jdk@master": {
+    "sha": "44647eb7568534c7f99231da5e296b54e128280a",
+    "observed_utc": "2026-10-15T01:19:00.064702Z",
+    "error": null
+  },
+  "chaos-mesh/chaos-mesh@master": {
+    "sha": "7ef417fe21122db93d7da513dcd71e483deb3cd6",
+    "observed_utc": "2026-10-15T01:19:00.217187Z",
+    "error": null
+  },
+  "grafana/loki@HEAD": {
+    "sha": "5fcd99aa6dea4bc139097527901f6c25a52baca5",
+    "observed_utc": "2026-10-15T01:19:00.550647Z",
+    "error": null
+  },
+  "gravitational/teleport@master": {
+    "sha": "1283425b60ec5f60d509ba4c791183d452923ff7",
+    "observed_utc": "2026-10-15T01:22:30.963037Z",
+    "error": null
+  },
+  "knative/serving@main": {
+    "sha": "2e9262972905a5572c9831905ef9193057e0fc95",
+    "observed_utc": "2026-10-15T01:22:31.037984Z",
+    "error": null
+  },
+  "apache/flink@master": {
+    "sha": "371ba17ab9fde660097fafbcec4bae3dbc6a7425",
+    "observed_utc": "2026-10-15T01:22:30.996236Z",
+    "error": null
+  },
+  "javaparser/javaparser@master": {
+    "sha": "c4fb5365836e8c5a579687c9a78251059d489d47",
+    "observed_utc": "2026-10-15T01:22:30.966753Z",
+    "error": null
+  },
+  "n8n-io/n8n@master": {
+    "sha": "e2529a849432bdb3082615c04b1702df61cb91d5",
+    "observed_utc": "2026-10-15T01:22:31.017636Z",
+    "error": null
+  },
+  "apache/avro@main": {
+    "sha": "3a207fa6e87c535b95eafca4cf5a6ef524d77df2",
+    "observed_utc": "2026-10-15T01:22:31.012765Z",
+    "error": null
+  },
+  "golang/go@master": {
+    "sha": "45c2e356255fba62e03b03d02897e58509ab7ed2",
+    "observed_utc": "2026-10-15T01:22:30.979999Z",
+    "error": null
+  },
+  "apache/pulsar@master": {
+    "sha": "7ddf52beef98fec691802ef90334d9c5ed375816",
+    "observed_utc": "2026-10-15T01:22:31.058455Z",
+    "error": null
+  },
+  "ncats/blackboard@master": {
+    "sha": "b06a98b26e807e9ea3eab9a107ec24d2393f5040",
+    "observed_utc": "2026-10-15T01:22:31.530016Z",
+    "error": null
+  },
+  "golang/crypto@master": {
+    "sha": "cf169cd0986fa0e2e0963ee5f8d234885f869750",
+    "observed_utc": "2026-10-15T01:22:31.432207Z",
+    "error": null
+  },
+  "redis/redis@7.2.6": {
+    "sha": "ae6a2aa95cd094b032e7a69b8b59f64dd1ed085f",
+    "observed_utc": "2026-10-15T01:22:31.480575Z",
+    "error": null
+  },
+  "cespare/xxhash@main": {
+    "sha": "ab37246c889f9db16b606fda1c232d659df9271d",
+    "observed_utc": "2026-10-15T01:22:31.431959Z",
+    "error": null
+  },
+  "apache/seata@develop": {
+    "sha": "72cfc0903f472d3efe365e250ee885c53022b735",
+    "observed_utc": "2026-10-15T01:22:31.854673Z",
+    "error": null
+  },
+  "slf4j/slf4j@master": {
+    "sha": null,
+    "observed_utc": "2026-10-15T01:24:51.518720Z",
+    "error": "gh: Not Found (HTTP 404)\n"
+  },
+  "libp2p/go-libp2p@master": {
+    "sha": "3c2c902122cb6fae3897f729a3dbb9d4665ae90d",
+    "observed_utc": "2026-10-15T01:22:31.440805Z",
+    "error": null
+  },
+  "casbin/casbin@master": {
+    "sha": "1e19095c5287eff82ae0d5cc07502d87017944f2",
+    "observed_utc": "2026-10-15T01:22:31.771559Z",
+    "error": null
+  },
+  "playframework/playframework@main": {
+    "sha": "01bc6d08bacb80835edd4e45fe3ce706151e35c0",
+    "observed_utc": "2026-10-15T01:22:31.953525Z",
+    "error": null
+  },
+  "grafbase/grafbase@main": {
+    "sha": "b8223903090f38b50d74c6678656d90d4e8dadb7",
+    "observed_utc": "2026-10-15T01:24:50.674836Z",
+    "error": null
+  },
+  "aws/aws-cdk@main": {
+    "sha": "3beecb31a38da1b86ba0c6a52a4a9e3ed4f4282f",
+    "observed_utc": "2026-10-15T01:24:50.624894Z",
+    "error": null
+  },
+  "apache/spark@master": {
+    "sha": "605deea50b574d87d32903936e9fbf5d80c36820",
+    "observed_utc": "2026-10-15T01:24:50.606417Z",
+    "error": null
+  },
+  "nestjs/nest@master": {
+    "sha": "bb3d572080ba5c3a34b65fcc39ca598c324cb32f",
+    "observed_utc": "2026-10-15T01:24:50.593382Z",
+    "error": null
+  },
+  "spring-projects/spring-hateoas@main": {
+    "sha": "722146ca4376a3ba2de2af28bda89fe46b952105",
+    "observed_utc": "2026-10-15T01:24:50.682758Z",
+    "error": null
+  },
+  "vadiminshakov/committer@master": {
+    "sha": "8cdba9f473039ff5541665853274d0525810b5bf",
+    "observed_utc": "2026-10-15T01:24:50.667498Z",
+    "error": null
+  },
+  "apollographql/router@dev": {
+    "sha": "d7292b86e308072dc70e28e1461badd1f2b0563f",
+    "observed_utc": "2026-10-15T01:24:50.643271Z",
+    "error": null
+  },
+  "questdb/questdb@master": {
+    "sha": "ea37707be291b24a353ed2f56411fba297f4fb74",
+    "observed_utc": "2026-10-15T01:24:50.753254Z",
+    "error": null
+  },
+  "kubernetes-sigs/cluster-api-provider-aws@main": {
+    "sha": "5ffa11af3b508eff794fba48a673cda2bbed03d6",
+    "observed_utc": "2026-10-15T01:24:51.112507Z",
+    "error": null
+  },
+  "LuckyPennySoftware/MediatR@v12.4.1": {
+    "sha": "fb309026775ef953a64fb5339d074426c1ad2c37",
+    "observed_utc": "2026-10-15T01:24:51.182054Z",
+    "error": null
+  },
+  "spring-projects/spring-framework@main": {
+    "sha": "4dea36c5872b3ad9ac9357a9cd8a077264f88a39",
+    "observed_utc": "2026-10-15T01:24:51.113897Z",
+    "error": null
+  },
+  "androidx/androidx@androidx-main": {
+    "sha": "ffadc46c08a3423475e126935917bfa2cf91b9ba",
+    "observed_utc": "2026-10-15T01:24:51.116262Z",
+    "error": null
+  },
+  "dotnet/aspnetcore@main": {
+    "sha": "8192456de81ed6bbc6e484404069f59907bd0d6f",
+    "observed_utc": "2026-10-15T01:24:51.149998Z",
+    "error": null
+  },
+  "Tuskyapp/Tusky@develop": {
+    "sha": "43ae0bb4556392393a3d759ce42a93f3a003e83a",
+    "observed_utc": "2026-10-15T01:24:51.178443Z",
+    "error": null
+  },
+  "kubernetes-monitoring/kubernetes-mixin@master": {
+    "sha": "73ea726e63cc53c40e0412da02ea3da474f52686",
+    "observed_utc": "2026-10-15T01:24:51.480812Z",
+    "error": null
+  },
+  "reactive-streams/reactive-streams-jvm@master": {
+    "sha": "a625d3aba756e9842ad1291a5b73f5db280b6168",
+    "observed_utc": "2026-10-15T01:24:51.346742Z",
+    "error": null
+  },
+  "thunderbird/thunderbird-android@main": {
+    "sha": "304074faf48c64bf8dfef35fd58554dc500f044a",
+    "observed_utc": "2026-10-15T01:24:51.723223Z",
+    "error": null
+  },
+  "go-gitea/gitea@main": {
+    "sha": "1c117a9352e4a64cd301028403c33949ab146424",
+    "observed_utc": "2026-10-15T01:24:51.540809Z",
+    "error": null
+  },
+  "ContextMapper/context-mapper-examples@master": {
+    "sha": "3c28b419e965e74aa3bfe616467cf5ebfff261a8",
+    "observed_utc": "2026-10-15T01:24:51.633400Z",
+    "error": null
+  },
+  "immich-app/immich@main": {
+    "sha": "2a8f8324e43487f29fd475832107f279da1c39c3",
+    "observed_utc": "2026-10-15T01:24:51.569860Z",
+    "error": null
+  },
+  "JCTools/JCTools@master": {
+    "sha": "f6883851e88c3c6b5fb8b6aa2d7a04a8c7c6c9dc",
+    "observed_utc": "2026-10-15T01:24:51.645657Z",
+    "error": null
+  },
+  "mattpocock/skills@HEAD": {
+    "sha": "49dd158d1076134a641b33efb035946536778336",
+    "observed_utc": "2026-10-15T01:26:22.705365Z",
+    "error": null
+  },
+  "j4flmao/agent-skills@HEAD": {
+    "sha": "5a19d636db60d2f7e08f036037a5b49c0a4ae8bd",
+    "observed_utc": "2026-10-15T01:26:22.766523Z",
+    "error": null
+  },
+  "obra/superpowers@HEAD": {
+    "sha": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+    "observed_utc": "2026-10-15T01:26:22.871163Z",
+    "error": null
+  },
+  "wondelai/skills@main": {
+    "sha": "c172996495bed0fcd26896a9416b2093fd7073f0",
+    "observed_utc": "2026-10-15T01:26:22.772787Z",
+    "error": null
+  },
+  "mattpocock/skills@main": {
+    "sha": "49dd158d1076134a641b33efb035946536778336",
+    "observed_utc": "2026-10-15T01:26:22.689956Z",
+    "error": null
+  },
+  "qos-ch/slf4j@master": {
+    "sha": "69d28be9fba7a9c0072dfbac8cbee8e40bb965d5",
+    "observed_utc": "2026-10-15T01:26:22.771129Z",
+    "error": null
+  },
+  "mblode/agent-skills@main": {
+    "sha": "872bc83bdb6dd54a9ff456fbf1181beea6db7875",
+    "observed_utc": "2026-10-15T01:26:22.702934Z",
+    "error": null
+  },
+  "diagrid-labs/dapr-skills@HEAD": {
+    "sha": "f93388618e2cc8f3642db85830301e86ee1b0018",
+    "observed_utc": "2026-10-15T01:26:22.940031Z",
+    "error": null
+  },
+  "apache/seata@2.x": {
+    "sha": "8a31b1f41da325f5b498d3fa2853221620388d35",
+    "observed_utc": "2026-10-15T01:26:23.510145Z",
+    "error": null
+  },
+  "redpanda-data/skills@HEAD": {
+    "sha": "a52b948de464ed97f9df005b6430c84265038dc3",
+    "observed_utc": "2026-10-15T01:26:23.387286Z",
+    "error": null
+  },
+  "addyosmani/agent-skills@HEAD": {
+    "sha": "aeac41d4d005999432bb7312f7ff06383a91d59d",
+    "observed_utc": "2026-10-15T01:26:23.174759Z",
+    "error": null
+  },
+  "wshobson/agents@HEAD": {
+    "sha": "46891e7e60da0e52baf1050b7b6391b64e84c6d9",
+    "observed_utc": "2026-10-15T01:26:23.319066Z",
+    "error": null
+  },
+  "obra/superpowers@main": {
+    "sha": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+    "observed_utc": "2026-10-15T01:26:23.331687Z",
+    "error": null
+  },
+  "aio-libs/aiohttp@master": {
+    "sha": "129d1b400d04aab7c7e98b761b279dcc8aac7144",
+    "observed_utc": "2026-10-15T01:27:51.945003Z",
+    "error": null
+  },
+  "home-assistant/core@dev": {
+    "sha": "40881ede942c0135c8ffcc4cb43c807c7177edc1",
+    "observed_utc": "2026-10-15T01:27:51.926040Z",
+    "error": null
+  },
+  "spring-cloud/spring-cloud-gateway@main": {
+    "sha": "0185ec967efa368495068490025273754b4a1096",
+    "observed_utc": "2026-10-15T01:27:51.983509Z",
+    "error": null
+  },
+  "reactor/reactor-core@main": {
+    "sha": "0d1a22ce5b31e4f2a4b9d2c6b29f943fcb6f2034",
+    "observed_utc": "2026-10-15T01:27:52.021805Z",
+    "error": null
+  },
+  "patroni/patroni@master": {
+    "sha": "dbee9c3523540db23232871479ddc5698a3b9435",
+    "observed_utc": "2026-10-15T01:30:06.883577Z",
+    "error": null
+  },
+  "ros-navigation/navigation2@main": {
+    "sha": "b58a7573f44a984fdc5f3eaa80c4b62ac529ab9d",
+    "observed_utc": "2026-10-15T01:31:00.055167Z",
+    "error": null
+  },
+  "BehaviorTree/BehaviorTree.CPP@master": {
+    "sha": "03ec870a07b384f0766bbfe81f77c64a9f994a2b",
+    "observed_utc": "2026-10-15T01:31:00.053647Z",
+    "error": null
+  },
+  "obsproject/obs-studio@master": {
+    "sha": "1ad6110186096e0bef0c269120fd14f7b6d4b183",
+    "observed_utc": "2026-10-15T01:40:51.003016Z",
+    "error": null
+  },
+  "kovidgoyal/calibre@master": {
+    "sha": "4393136bd30b133e95ee07dec674c71d6c57c3a1",
+    "observed_utc": "2026-10-15T01:40:51.028647Z",
+    "error": null
+  },
+  "GoogleChromeLabs/comlink@main": {
+    "sha": "114a4a6448a855a613f1cb9a7c89290606c003cf",
+    "observed_utc": "2026-10-15T01:40:51.116947Z",
+    "error": null
+  },
+  "qt/qtbase@dev": {
+    "sha": "bb0131e59e36bbf02fb4aa5c26cb9702563c5417",
+    "observed_utc": "2026-10-15T01:40:51.071934Z",
+    "error": null
+  },
+  "temporalio/sdk-java@master": {
+    "sha": null,
+    "observed_utc": "2026-10-15T01:40:51.037522Z",
+    "error": "gh: No commit found for SHA: master (HTTP 422)\n"
+  },
+  "sqlalchemy/sqlalchemy@main": {
+    "sha": "f46ead8007f8f814f0639b785c637b29afdaec79",
+    "observed_utc": "2026-10-15T01:40:51.099655Z",
+    "error": null
+  },
+  "antlr/antlr4@master": {
+    "sha": "594cf95e5460435c7521e80618666741e33e4d91",
+    "observed_utc": "2026-10-15T01:40:51.113892Z",
+    "error": null
+  },
+  "coreos/go-oidc@v3": {
+    "sha": "c914bd380327a5a3a81403774d1a5d5b73772ce7",
+    "observed_utc": "2026-10-15T01:40:51.099261Z",
+    "error": null
+  },
+  "statelyai/xstate@main": {
+    "sha": "858273e52d10de3661fa84188b93f6b6e2cf3eab",
+    "observed_utc": "2026-10-15T01:40:51.481230Z",
+    "error": null
+  },
+  "microsoft/vscode@main": {
+    "sha": "5bed87aa91125b32d112d47a5594f500a88916bb",
+    "observed_utc": "2026-10-15T01:40:51.630612Z",
+    "error": null
+  },
+  "medusajs/medusa@develop": {
+    "sha": "0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15",
+    "observed_utc": "2026-10-15T01:40:51.498251Z",
+    "error": null
+  },
+  "temporalio/sdk-java@main": {
+    "sha": "9b75f1df2768b386b42027f9b6c4073c4752d630",
+    "observed_utc": "2026-10-15T01:44:12.138924Z",
+    "error": null
+  },
+  "eclipse-paho/paho.mqtt.python@master": {
+    "sha": "6335e3f2d14bce767f9564a00a3044bce7a12799",
+    "observed_utc": "2026-10-15T01:44:12.088824Z",
+    "error": null
+  },
+  "eclipse-mosquitto/mosquitto@master": {
+    "sha": "83f2620f0b955b89aadce32cceb96a8e81950f5e",
+    "observed_utc": "2026-10-15T01:44:12.086120Z",
+    "error": null
+  },
+  "open-telemetry/opentelemetry-python@main": {
+    "sha": "155ead5140311a98b59c876819b96007001c3fed",
+    "observed_utc": "2026-10-15T01:44:12.079263Z",
+    "error": null
+  },
+  "erlang/otp@master": {
+    "sha": "b4b337c351e8c5bff4e0c48b58081080bae2a4be",
+    "observed_utc": "2026-10-15T01:51:17.556042Z",
+    "error": null
+  },
+  "jlowin/fastmcp@main": {
+    "sha": "e2fcc412001ff7414095c5dc282f94c70299a612",
+    "observed_utc": "2026-10-15T01:55:01.683200Z",
+    "error": null
+  },
+  "protocolbuffers/protobuf@main": {
+    "sha": "9b38c456f3f0c0f934d08230f339772e1f9ff9aa",
+    "observed_utc": "2026-10-15T02:11:14.261704Z",
+    "error": null
+  },
+  "graphql-java/graphql-java@master": {
+    "sha": "4c096208ba7203c92ed6617ddfdc35653c8aca11",
+    "observed_utc": "2026-10-15T02:14:54.401569Z",
+    "error": null
+  },
+  "grafana/grafana@main": {
+    "sha": "ed943820ed6f445b940a0d8d7a9a08deebfae4b6",
+    "observed_utc": "2026-10-15T02:14:54.458086Z",
+    "error": null
+  },
+  "sverweij/dependency-cruiser@main": {
+    "sha": "c580daf6477aa5619bacad9c9091c9b7cc81882d",
+    "observed_utc": "2026-10-15T02:20:31.978376Z",
+    "error": null
+  },
+  "debezium/debezium-server@main": {
+    "sha": "90c48bea4d96d762678553cd1681d8f545081499",
+    "observed_utc": "2026-10-15T02:24:13.605292Z",
+    "error": null
+  },
+  "openstack/nova@master": {
+    "sha": "2ad1f119019437093f480f0c53b8ca3417560078",
+    "observed_utc": "2026-10-15T02:40:25.649334Z",
+    "error": null
+  },
+  "apache/nutch@master": {
+    "sha": "a25edb066de95a7f5cc990e2cd5b68a35ce5d521",
+    "observed_utc": "2026-10-15T02:40:25.815319Z",
+    "error": null
+  },
+  "openstack/oslo.db@master": {
+    "sha": "a91be4f9f0fa5eae4626a3a83e5f116b7107eb12",
+    "observed_utc": "2026-10-15T02:40:25.714220Z",
+    "error": null
+  },
+  "open-runtimes/open-runtimes@main": {
+    "sha": "da714e707c181e6e8e4ab5f1a5649d2cde8f4260",
+    "observed_utc": "2026-10-15T02:46:45.407593Z",
+    "error": null
+  },
+  "rigtorp/SPSCQueue@master": {
+    "sha": "59a6a938513ea5004817383711ed35d32385d3ee",
+    "observed_utc": "2026-10-15T02:46:45.384749Z",
+    "error": null
+  },
+  "mixxxdj/mixxx@main": {
+    "sha": "0fffd3d0d07b755c34c1730f7b87afadd8f2be19",
+    "observed_utc": "2026-10-15T02:46:45.381610Z",
+    "error": null
+  },
+  "appwrite/appwrite@main": {
+    "sha": "939fa5e8ccc82fede27a4632bf5c60501eb5109e",
+    "observed_utc": "2026-10-15T02:46:45.404035Z",
+    "error": null
+  },
+  "elk-zone/elk@main": {
+    "sha": "2f94671ed0a02224033598aef3e237ee2aafae12",
+    "observed_utc": "2026-10-15T02:46:45.381212Z",
+    "error": null
+  },
+  "neet/masto.js@main": {
+    "sha": "49ab1a650c9129bf8370cfb0602ab576404f40cb",
+    "observed_utc": "2026-10-15T02:46:45.454034Z",
+    "error": null
+  },
+  "trailblazer/roar@master": {
+    "sha": "365b28be85b61c43181f2868cb8f452f5945b4cf",
+    "observed_utc": "2026-10-15T02:49:41.689904Z",
+    "error": null
+  },
+  "opf/openproject@dev": {
+    "sha": "739ee9d241f5ee24fd73a731376e2b92979857a6",
+    "observed_utc": "2026-10-15T02:49:41.651867Z",
+    "error": null
+  },
+  "osheroff/mysql-binlog-connector-java@master": {
+    "sha": "64f9a9ac87b87bd052522e728e27912d0ed2825d",
+    "observed_utc": "2026-10-15T02:50:51.884714Z",
+    "error": null
+  },
+  "ClickHouse/ClickHouse@master": {
+    "sha": "16da7cdb08e2115800d033547d5eabacb1b8ed32",
+    "observed_utc": "2026-10-15T02:50:51.902413Z",
+    "error": null
+  },
+  "PostHog/posthog@master": {
+    "sha": "00c70a7bd3e5746ccb02a01b62f47840c233ca18",
+    "observed_utc": "2026-10-15T02:50:51.970839Z",
+    "error": null
+  },
+  "vdukhovni/postfix@master": {
+    "sha": "8e965decf941bba12afdd9ca7938957071ec2ac0",
+    "observed_utc": "2026-10-15T02:50:51.857216Z",
+    "error": null
+  },
+  "mastodon/mastodon@main": {
+    "sha": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+    "observed_utc": "2026-10-15T02:53:03.630338Z",
+    "error": null
+  },
+  "debezium/debezium-server@v2.7.3.Final": {
+    "sha": "a030287988878a7bc516661eaaa6a816be5ee4b1",
+    "observed_utc": "2026-10-15T02:53:03.725589Z",
+    "error": null
+  },
+  "debezium/debezium@v2.7.3.Final": {
+    "sha": "bc0b683ebe84648a96ee2532a7be31d4cc14b6df",
+    "observed_utc": "2026-10-15T02:53:03.745195Z",
+    "error": null
+  },
+  "apache/pinot@master": {
+    "sha": "bf956b3c204680f98982fb7e70733d19594411a5",
+    "observed_utc": "2026-10-15T02:56:06.332553Z",
+    "error": null
+  },
+  "risingwavelabs/risingwave@main": {
+    "sha": "85d3b93386d9285a707c3010aed94251cd1a2d5d",
+    "observed_utc": "2026-10-15T02:56:06.267600Z",
+    "error": null
+  }
+}

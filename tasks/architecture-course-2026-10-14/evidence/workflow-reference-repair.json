@@ -1,0 +1,24 @@
+[
+  {
+    "name": "kappa-readme",
+    "url": "https://raw.githubusercontent.com/blacklabeldata/kappa/master/README.md",
+    "status": 200,
+    "sha256": "8934c2f822931ab41d287b44c2daf9f1db61d3e280970eb3be82c8802f867fb2",
+    "path": "kappa-readme.txt"
+  },
+  {
+    "name": "kappa-code",
+    "url": "https://raw.githubusercontent.com/blacklabeldata/kappa/master/kappa.go",
+    "status": 200,
+    "sha256": "9952d4a26b332e562bdb0c8f15d649c42bdf4f2d4f82bb0acf78093267edeb5b",
+    "path": "kappa-code.txt"
+  },
+  {
+    "name": "lambda-paper",
+    "url": "https://raw.githubusercontent.com/druid-io/druid/master/publications/radstack/radstack.pdf",
+    "status": 200,
+    "sha256": "5e87571bd51906fe128e6738241a7b7b5756f5ba34174417c1760a5f9bafc568",
+    "format": "pdf",
+    "bytes": 976283
+  }
+]

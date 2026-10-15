@@ -1,0 +1,12 @@
+{
+  "repo": "esl/MongooseIM",
+  "path": "src/ejabberd_sm_mnesia.erl",
+  "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl",
+  "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/ejabberd_sm_mnesia.erl",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.782808+00:00",
+  "sha256": "a4982a8675f7d9f9748ec293292c17d67595e410fa228c5389f5efccd86d5649",
+  "line_count": 109,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--src--ejabberd_sm_mnesia.erl"
+}

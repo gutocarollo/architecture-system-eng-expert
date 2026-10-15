@@ -1,0 +1,8 @@
+flowchart LR
+    Person["Pedido da pessoa"] --> Identity["Identidade verificada"]
+    Identity --> Authorization["Ação e recurso autorizados"]
+    Authorization --> Transport["Transporte protegido conforme contrato"]
+    Transport --> Process["Processo com privilégios delimitados"]
+    Process --> Data["Consulta limitada aos dados permitidos"]
+    Authorization -->|"regra nega"| Deny["Interromper antes de ler"]
+    Process -->|"falha de componente"| Recovery["Recuperar sem ampliar permissões"]

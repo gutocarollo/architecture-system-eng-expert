@@ -1,0 +1,9 @@
+{
+  "observed_utc": "2026-10-15T02:15:02.063619+00:00",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-patterns-evidence.json",
+  "sha256": "26eb19aa4b5279cb1e5e5394d645f36e9efaf7aae2176e81e0086c17129b45e1",
+  "recommended_source_matches": 2,
+  "kept_pending_with_primary_evidence": 2
+}

@@ -1,0 +1,76 @@
+---
+title: "Todos os conceitos e seus casos"
+description: "A matriz dos 310 conceitos com quinze casos, quatro destinos e observações delimitadas."
+diataxis: reference
+---
+
+# Todos os conceitos e seus casos
+
+A matriz adjudica os 310 conceitos canônicos do pedido. Cada entrada conserva a família, o caso e os quatro destinos Diátaxis. Somente um vínculo pertinente oferece um comando de prática; os demais identificam a experiência específica que ainda falta. Alguns vínculos mostram um mecanismo local diretamente; outros usam um contraexemplo executável para estudar um requisito do conceito. Um modelo de maioria, por exemplo, ajuda a discutir Raft, mas não executa Raft.
+
+| Caso | Conceitos | Destinos que conservam o mesmo problema |
+| --- | --- | --- |
+| [Cancelamento de uma busca compartilhada](/jornadas/single-flight-cancel/conceitos/) | 5 | [Explicação](/explicacoes/casos/single-flight-cancel/), [tutorial](/tutoriais/casos/single-flight-cancel/), [guia](/guias/casos/single-flight-cancel/) e [referência](/referencia/casos/single-flight-cancel/). |
+| [A lista continua disponível durante a renovação](/jornadas/early-refresh/conceitos/) | 1 | [Explicação](/explicacoes/casos/early-refresh/), [tutorial](/tutoriais/casos/early-refresh/), [guia](/guias/casos/early-refresh/) e [referência](/referencia/casos/early-refresh/). |
+| [A emissão continua no mesmo dia em São Paulo](/jornadas/date-only/conceitos/) | 1 | [Explicação](/explicacoes/casos/date-only/), [tutorial](/tutoriais/casos/date-only/), [guia](/guias/casos/date-only/) e [referência](/referencia/casos/date-only/). |
+| [A oportunidade existente conserva sua identidade](/jornadas/opportunity-entry/conceitos/) | 3 | [Explicação](/explicacoes/casos/opportunity-entry/), [tutorial](/tutoriais/casos/opportunity-entry/), [guia](/guias/casos/opportunity-entry/) e [referência](/referencia/casos/opportunity-entry/). |
+| [Uma ordem atravessa fronteiras sem espalhar regras](/jornadas/order-boundaries/conceitos/) | 85 | [Explicação](/explicacoes/casos/order-boundaries/), [tutorial](/tutoriais/casos/order-boundaries/), [guia](/guias/casos/order-boundaries/) e [referência](/referencia/casos/order-boundaries/). |
+| [A repetição de uma ordem produz um único efeito](/jornadas/order-delivery/conceitos/) | 16 | [Explicação](/explicacoes/casos/order-delivery/), [tutorial](/tutoriais/casos/order-delivery/), [guia](/guias/casos/order-delivery/) e [referência](/referencia/casos/order-delivery/). |
+| [Dois operadores disputam a mesma reserva](/jornadas/reservation/conceitos/) | 20 | [Explicação](/explicacoes/casos/reservation/), [tutorial](/tutoriais/casos/reservation/), [guia](/guias/casos/reservation/) e [referência](/referencia/casos/reservation/). |
+| [Uma partição separa os escritórios da corretora](/jornadas/consensus/conceitos/) | 38 | [Explicação](/explicacoes/casos/consensus/), [tutorial](/tutoriais/casos/consensus/), [guia](/guias/casos/consensus/) e [referência](/referencia/casos/consensus/). |
+| [Uma fila absorve trabalho e recupera falhas](/jornadas/queue-workflow/conceitos/) | 55 | [Explicação](/explicacoes/casos/queue-workflow/), [tutorial](/tutoriais/casos/queue-workflow/), [guia](/guias/casos/queue-workflow/) e [referência](/referencia/casos/queue-workflow/). |
+| [A consulta de posição envelhece de forma controlada](/jornadas/cache-policy/conceitos/) | 11 | [Explicação](/explicacoes/casos/cache-policy/), [tutorial](/tutoriais/casos/cache-policy/), [guia](/guias/casos/cache-policy/) e [referência](/referencia/casos/cache-policy/). |
+| [O histórico reconstrói a posição do cliente](/jornadas/ledger-projection/conceitos/) | 14 | [Explicação](/explicacoes/casos/ledger-projection/), [tutorial](/tutoriais/casos/ledger-projection/), [guia](/guias/casos/ledger-projection/) e [referência](/referencia/casos/ledger-projection/). |
+| [A posição cresce e a consulta precisa encontrar seus dados](/jornadas/storage-partitions/conceitos/) | 12 | [Explicação](/explicacoes/casos/storage-partitions/), [tutorial](/tutoriais/casos/storage-partitions/), [guia](/guias/casos/storage-partitions/) e [referência](/referencia/casos/storage-partitions/). |
+| [A corretora troca uma versão sem perder o contrato](/jornadas/safe-release/conceitos/) | 21 | [Explicação](/explicacoes/casos/safe-release/), [tutorial](/tutoriais/casos/safe-release/), [guia](/guias/casos/safe-release/) e [referência](/referencia/casos/safe-release/). |
+| [A permissão acompanha a ordem e a identidade](/jornadas/access-policy/conceitos/) | 16 | [Explicação](/explicacoes/casos/access-policy/), [tutorial](/tutoriais/casos/access-policy/), [guia](/guias/casos/access-policy/) e [referência](/referencia/casos/access-policy/). |
+| [A equipe descobre onde a ordem parou](/jornadas/diagnostics/conceitos/) | 12 | [Explicação](/explicacoes/casos/diagnostics/), [tutorial](/tutoriais/casos/diagnostics/), [guia](/guias/casos/diagnostics/) e [referência](/referencia/casos/diagnostics/). |
+
+Os 310 conceitos foram adjudicados contra a operação efetivamente executada. Há 310 vínculos com observação pertinente e 0 práticas específicas pendentes. As entradas pendentes não oferecem um comando de outro mecanismo como substituto. Os vínculos pertinentes também conservam os limites do modelo; uma observação de maioria não implementa Raft completo.
+
+## Os quarenta prioritários
+
+Os itens compostos conservam todos os seus conceitos. Cada link chega à entrada aplicada que contém mecanismo, comando e limite.
+
+1. Modular Monolith: [Modular Monolith](/jornadas/order-boundaries/conceitos/#modular-monolith).
+2. Hexagonal Architecture: [Hexagonal / Ports & Adapters](/jornadas/order-boundaries/conceitos/#hexagonal-ports-adapters).
+3. Vertical Slice: [Vertical Slice Architecture](/jornadas/order-boundaries/conceitos/#vertical-slice-architecture).
+4. DDD / Bounded Context: [DDD](/jornadas/order-boundaries/conceitos/#ddd), [Bounded Context](/jornadas/order-boundaries/conceitos/#bounded-context).
+5. Event-Driven Architecture: [Event-Driven Architecture](/jornadas/order-boundaries/conceitos/#event-driven-architecture).
+6. Pub/Sub: [Publish/Subscribe](/jornadas/queue-workflow/conceitos/#publish-subscribe).
+7. Transactional Outbox: [Transactional Outbox](/jornadas/order-delivery/conceitos/#transactional-outbox).
+8. CDC: [Change Data Capture (CDC)](/jornadas/order-delivery/conceitos/#change-data-capture-cdc).
+9. Saga: [Saga](/jornadas/order-delivery/conceitos/#saga).
+10. Idempotency: [Idempotency](/jornadas/order-delivery/conceitos/#idempotency).
+11. CQRS: [CQRS](/jornadas/ledger-projection/conceitos/#cqrs).
+12. Event Sourcing: [Event Sourcing](/jornadas/ledger-projection/conceitos/#event-sourcing).
+13. Materialized Views / Projections: [Materialized View](/jornadas/ledger-projection/conceitos/#materialized-view), [Projection](/jornadas/ledger-projection/conceitos/#projection).
+14. Cache Aside: [Cache Aside](/jornadas/cache-policy/conceitos/#cache-aside).
+15. Refresh Ahead: [Refresh Ahead](/jornadas/early-refresh/conceitos/#refresh-ahead).
+16. Circuit Breaker: [Circuit Breaker](/jornadas/queue-workflow/conceitos/#circuit-breaker).
+17. Retry + Exponential Backoff + Jitter: [Retry](/jornadas/queue-workflow/conceitos/#retry), [Exponential Backoff](/jornadas/queue-workflow/conceitos/#exponential-backoff), [Jitter](/jornadas/queue-workflow/conceitos/#jitter).
+18. Bulkhead: [Bulkhead](/jornadas/queue-workflow/conceitos/#bulkhead).
+19. Backpressure: [Backpressure](/jornadas/queue-workflow/conceitos/#backpressure).
+20. Rate Limiting: [Rate Limiting](/jornadas/queue-workflow/conceitos/#rate-limiting).
+21. API Gateway: [API Gateway](/jornadas/order-boundaries/conceitos/#api-gateway).
+22. BFF: [Backend for Frontend (BFF)](/jornadas/order-boundaries/conceitos/#backend-for-frontend-bff).
+23. Strangler Fig: [Strangler Fig](/jornadas/safe-release/conceitos/#strangler-fig).
+24. Expand/Contract: [Expand/Contract](/jornadas/safe-release/conceitos/#expand-contract).
+25. Blue/Green: [Blue/Green Deployment](/jornadas/safe-release/conceitos/#blue-green-deployment).
+26. Canary: [Canary Release](/jornadas/safe-release/conceitos/#canary-release).
+27. Feature Flags: [Feature Flags](/jornadas/safe-release/conceitos/#feature-flags).
+28. Leader Election: [Leader Election](/jornadas/consensus/conceitos/#leader-election).
+29. Distributed Lock + Lease + Fencing: [Distributed Lock](/jornadas/reservation/conceitos/#distributed-lock), [Lease](/jornadas/reservation/conceitos/#lease), [Fencing Token](/jornadas/reservation/conceitos/#fencing-token).
+30. Replication: [Replication](/jornadas/consensus/conceitos/#replication).
+31. Sharding: [Sharding](/jornadas/storage-partitions/conceitos/#sharding).
+32. Consistent Hashing: [Consistent Hashing](/jornadas/storage-partitions/conceitos/#consistent-hashing).
+33. Optimistic Concurrency: [Optimistic Concurrency Control](/jornadas/reservation/conceitos/#optimistic-concurrency-control).
+34. WAL: [Write-Ahead Log (WAL)](/jornadas/ledger-projection/conceitos/#write-ahead-log-wal).
+35. Sidecar: [Sidecar](/jornadas/order-boundaries/conceitos/#sidecar).
+36. Service Mesh: [Service Mesh](/jornadas/order-boundaries/conceitos/#service-mesh).
+37. Anti-Corruption Layer: [Anti-Corruption Layer](/jornadas/order-boundaries/conceitos/#anti-corruption-layer).
+38. Competing Consumers: [Competing Consumers](/jornadas/queue-workflow/conceitos/#competing-consumers).
+39. Dead Letter Queue: [Dead Letter Queue](/jornadas/queue-workflow/conceitos/#dead-letter-queue).
+40. State Machine: [State Machine](/jornadas/queue-workflow/conceitos/#state-machine).
+
+A versão legível por máquina está em `tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json`. Os recibos locais ficam ao lado dela. A revisão independente avalia os mesmos hashes; a presença de um vínculo não preenche uma revisão pendente.

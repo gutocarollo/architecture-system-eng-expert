@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/portfolio/account-summary.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/portfolio/account-summary.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:07:04.526633+00:00",
+  "sha256": "cd2892455dc19dfafd0010310370da3dda53e131b89f6142e7cd8aa7e817eab2",
+  "line_count": 51,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--portfolio--account-summary.ts"
+}

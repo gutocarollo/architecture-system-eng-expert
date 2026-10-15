@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor User as Operador
+    participant View
+    participant Coordinator as Coordenador proposto
+    participant Model as Modelo de apresentação
+    participant Observer as Apresentação observadora
+    User->>View: escolhe um modo
+    View->>Coordinator: selectMode(mode)
+    Coordinator->>Model: aplica comando
+    alt Entrada reconhecida
+        Model-->>Observer: estado atualizado
+        Observer-->>User: apresenta o modo escolhido
+    else Entrada inválida
+        Model-->>Coordinator: recusa sem alterar o modo
+        Coordinator-->>View: explica a recusa
+    end

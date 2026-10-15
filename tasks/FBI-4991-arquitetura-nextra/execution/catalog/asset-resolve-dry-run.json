@@ -1,0 +1,13 @@
+{
+  "mode": "in-memory-candidate-resolve-not-live",
+  "hits": [
+    {
+      "kind": "canonical_doc",
+      "id": "doc:architecture/architecture-system-eng-expert",
+      "name": "Curso de arquitetura aplicada da Faz Capital",
+      "match": "exact",
+      "detail": "/api/doc/doc:architecture/architecture-system-eng-expert"
+    }
+  ],
+  "served_graph_mutated": false
+}

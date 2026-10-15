@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant Old as Agente A antigo
+    participant Lease as Lease proposta
+    participant New as Agente B
+    participant Target as Destino com geração proposta
+    Old->>Lease: Deixa de renovar durante a pausa
+    New->>Lease: Assume após o prazo do contrato
+    New->>Target: Escreve com geração 43
+    Target-->>New: Aceita e registra geração 43
+    Old->>Target: Retorna e escreve com geração 42
+    Target-->>Old: Rejeita autoridade antiga

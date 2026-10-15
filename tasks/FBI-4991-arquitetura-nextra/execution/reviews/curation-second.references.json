@@ -1,0 +1,1023 @@
+{
+  "observed_utc": "2026-10-15T03:40:07.996509+00:00",
+  "assigned_sections": 127,
+  "errors": [],
+  "receipts": [
+    {
+      "concept_id": "a-b-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "abac",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "abstract-factory",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "adapter",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "aggregate",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "aggregate-root",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "ambassador",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "api-composition",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "api-gateway",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "api-gateway-security",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "application-service",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "automatic-failover",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "backend-for-frontend-bff",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "bastion-host",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "batch-processing",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "blue-green-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "bounded-context",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "branch-by-abstraction",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "bridge",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "builder",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "canary-release",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "cdc-migration",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "centralized-logging",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "chain-of-responsibility",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "choreography",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "cold-standby",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "command",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "composite",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "dag",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "dark-launch",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "database-decomposition",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "decorator",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "defense-in-depth",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "distributed-tracing",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "domain-policy",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "dual-write-migration",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "entity",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "expand-contract",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "facade",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "factory",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "factory-method",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "failover",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "feature-flags",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "finite-state-machine",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "flyweight",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "gateway-aggregation",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "gateway-offloading",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "gateway-routing",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "gitops",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "golden-signals",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "graphql-federation",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "hateoas",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "hot-standby",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "immutable-infrastructure",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "infrastructure-as-code",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "interpreter",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "iterator",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "job-queue",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "kappa-architecture",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "lambda-architecture",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "least-privilege",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "long-polling",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "mapreduce",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "mediator",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "memento",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "metrics",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "modularization",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "mtls",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "multi-az",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "multi-region",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "network-segmentation",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "oauth2",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "observer",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "oidc",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "open-host-service",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "opentelemetry",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "orchestrator",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "parallel-run",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "pipeline",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "policy-based-access-control",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "polling",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "progressive-delivery",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "prototype",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "proxy",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "published-language",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "quorum",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "rbac",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "rebac",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "recreate-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "red-method-rate-errors-duration",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "replication",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "repository",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "request-id",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "rest",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "reverse-proxy",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "rolling-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "rpc",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "secrets-rotation",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "separate-ways",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "server-sent-events",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "service-extraction",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "service-mesh",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "service-to-service-identity",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "shadow-deployment",
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "d7b617b2702bb80283fe9f6682bcc513e297102a798dd7ebbd16311348dde80c",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "shadow-traffic",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "short-lived-credentials",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "sidecar",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "singleton",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "specification",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "split-brain-prevention",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "state",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "state-machine",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "stateless-services",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "strategy",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "stream-processing",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "structured-logging",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "synthetic-monitoring",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "template-method",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "token-exchange",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "transitional-architecture",
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "c9da760676a14b7e0f336e980dabd786d5b5bd2158767ee4f619d99f58f798e4",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "use-method-utilization-saturation-errors",
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "383266fe01a82b698222fde6a01216317341a629459cde16dce916994d42d722",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "value-object",
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "4098b541b5db0ce624ea31697f63cd247b356d6deaa56425e116171b0db682d2",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "visitor",
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7a0a441da15df61058148ddf1c54b6672eb2aee01d4a17fbf4cb206dceb35312",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "warm-standby",
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "c355d870def1c6f8b313a918e7bd761f33ec14535d0ec9849ca9b2bc1d65721e",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "webhook",
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "29d19d298c15a43a297de1eaa7d0b199142257a708a160cffaae6bb6b2a34257",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "workflow-engine",
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "66778307ec631282575fd83407e5d622fe75b45c568fab63d07d795c5d768721",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    },
+    {
+      "concept_id": "zero-trust",
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "9ecbacdd2169f257d55089d4f5cb6c22b07b4cfdba646482c8ca1194e5a2b90a",
+      "exact_mechanism": true,
+      "exact_limits": true,
+      "errors": []
+    }
+  ]
+}

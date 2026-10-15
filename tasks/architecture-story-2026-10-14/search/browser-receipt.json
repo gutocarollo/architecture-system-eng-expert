@@ -1,0 +1,137 @@
+{
+  "measuredAt": "2026-10-14T23:18:44.404Z",
+  "url": "http://127.0.0.1:59024",
+  "browser": "Chrome/155.0.8059.40",
+  "mode": "headless",
+  "errors": [],
+  "indexRequests": [
+    {
+      "url": "http://127.0.0.1:59024/_pagefind/pagefind.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:59024/_pagefind/pagefind.js",
+      "status": 304
+    }
+  ],
+  "homeStatus": 200,
+  "search": {
+    "placeholder": "Search documentation…",
+    "role": "combobox",
+    "lang": "pt-BR",
+    "shortcut": "⌘K",
+    "top": 15,
+    "left": 1160
+  },
+  "slashFocus": true,
+  "commandKFocus": true,
+  "outboxResults": [
+    {
+      "title": "7. Transactional Outbox: guardar a intenção junto da mudança",
+      "href": "/explicacoes/reliable-integration#7-transactional-outbox-guardar-a-inten%C3%A7%C3%A3o-junto-da-mudan%C3%A7a",
+      "excerpt": "7. Transactional Outbox: guardar a intenção junto da mudançaTransactional Outbox: guardar a intenção junto da mudança. A Transactional Outbox registra o estado de negócio e o trabalho que deverá ser publicado ou enviado dentro da mesma transação local."
+    },
+    {
+      "title": "8. CDC: observar mudanças a partir do banco",
+      "href": "/explicacoes/reliable-integration#8-cdc-observar-mudan%C3%A7as-a-partir-do-banco",
+      "excerpt": "8. CDC: observar mudanças a partir do bancotabela de negócio descreve mudanças na representação interna, como uma coluna que mudou. Ler uma outbox permite publicar uma mensagem que a aplicação já definiu como contrato de integração. No"
+    },
+    {
+      "title": "9. Saga: completar passos locais e compensar o que for reversível",
+      "href": "/explicacoes/reliable-integration#9-saga-completar-passos-locais-e-compensar-o-que-for-revers%C3%ADvel",
+      "excerpt": "9. Saga: completar passos locais e compensar o que for reversívelAP no CAP. Reservas, estados pendentes e condições de versão ajudam a proteger invariantes. A outbox é uma opção para entregar mensagens; ela não é uma condição obrigatória de toda"
+    },
+    {
+      "title": "Dual Write",
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#dual-write",
+      "excerpt": "Dual Writeconcreto da fronteira de dual write, não uma recomendação de atomicidade. A skill adjacente é backend-transactional-outbox."
+    },
+    {
+      "title": "Transactional Outbox",
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#transactional-outbox",
+      "excerpt": "Transactional OutboxTransactional Outbox. Estado e intenção de integração são registrados na mesma transação local; um executor entrega o trabalho posteriormente. O _apply lido grava o novo responsável e sf_owner_sync_pending=TRUE no mesmo"
+    },
+    {
+      "title": "Outbox + CDC",
+      "href": "/referencia/catalogo/02-sistemas-distribuidos-e-consistencia#outbox--cdc",
+      "excerpt": "Outbox + CDCOutbox + CDC. A aplicação registra a outbox, e um capturador de mudanças lê essas alterações confirmadas para publicá-las. Um evento proposto de reatribuição pode sair desse registro sem polling"
+    },
+    {
+      "title": "Roteiro por problema",
+      "href": "/referencia/prioritarios#roteiro-por-problema",
+      "excerpt": "Roteiro por problemaconcorrência e estados. Regras do negócio. A operação foi salva, mas a integração ficou incompleta. Outbox, idempotência, retry, Saga e DLQ. Integração confiável. O indicador demora ou tem significado diferente"
+    },
+    {
+      "title": "Os quarenta itens",
+      "href": "/referencia/prioritarios#os-quarenta-itens",
+      "excerpt": "Os quarenta itensDapr Pub/Sub REF publicador e assinante do sample Azure. 7. Transactional Outbox. Estudar. Debezium Outbox Event Router REF Debezium Outbox — OrderService.java grava eventos dentro de @Transactional. 8. CDC. Estudar."
+    },
+    {
+      "title": "Como os mecanismos se combinam",
+      "href": "/referencia/prioritarios#como-os-mecanismos-se-combinam",
+      "excerpt": "Como os mecanismos se combinamComo os mecanismos se combinam. Dual write descreve duas escritas cuja falha parcial precisa ser controlada. Outbox pode preservar a intenção na transação local e ser publicada por polling ou"
+    },
+    {
+      "title": "Como interpretar a curadoria",
+      "href": "/referencia/skills-e-projetos#como-interpretar-a-curadoria",
+      "excerpt": "Como interpretar a curadoriaK-Dense-AI/scientific-agent-skills apareceu naquela página, mas seu foco científico não o torna automaticamente uma escolha para Outbox ou CQRS. Relatos no Reddit e no Hacker News foram usados como sinal de"
+    },
+    {
+      "title": "O contrato de uma skill de padrão",
+      "href": "/referencia/skills-e-projetos#o-contrato-de-uma-skill-de-padr%C3%A3o",
+      "excerpt": "O contrato de uma skill de padrãoa operação que precisa preservar uma intenção após o commit pode carregar a referência de Outbox e idempotência. Uma discussão sobre a apresentação do seletor Manual/Automático pode carregar as referências"
+    },
+    {
+      "title": "De onde veio o exemplo",
+      "href": "/tutoriais/outbox#de-onde-veio-o-exemplo",
+      "excerpt": "De onde veio o exemploDe onde veio o exemplo. O roteiro relacionou a intenção de sincronização a backend/app/services/absence_reassignment_service.py::AbsenceReassignmentService._apply, no checkout MakersHub main@e233fb046ec333982cd1547171b0f0bd8d8d92ee, lido em 14/10/2026. O script propõe uma outbox mínima; ele não descreve"
+    },
+    {
+      "title": "Dual Write Migration",
+      "href": "/referencia/catalogo/11-padroes-para-decompor-sistemas#dual-write-migration",
+      "excerpt": "Dual Write Migrationsequenciais não formam uma transação distribuída. O capítulo de integração confiável compara Outbox e outras alternativas; a skill backend-transactional-outbox apoia o contrato local. Par de base e aplicação. A base"
+    },
+    {
+      "title": "Integration Events",
+      "href": "/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura#integration-events",
+      "excerpt": "Integration Eventso resultado de cada reação; copiar todo o schema interno cria um contrato maior que o necessário. O fluxo MakersHub com broker permanece proposto. As skills são backend-message-queue e backend-transactional-outbox."
+    }
+  ],
+  "outboxPageCount": 7,
+  "navigation": {
+    "clickedHref": "/tutoriais/outbox#de-onde-veio-o-exemplo",
+    "url": "http://127.0.0.1:59024/tutoriais/outbox#de-onde-veio-o-exemplo",
+    "title": "Recupere uma entrega após uma queda simulada"
+  },
+  "refreshResults": [
+    {
+      "title": "Refresh Ahead",
+      "href": "/referencia/catalogo/06-cache#refresh-ahead"
+    },
+    {
+      "title": "Cache Warming",
+      "href": "/referencia/catalogo/06-cache#cache-warming"
+    },
+    {
+      "title": "15. Refresh Ahead: renovar antes da falta",
+      "href": "/explicacoes/cache#15-refresh-ahead-renovar-antes-da-falta"
+    },
+    {
+      "title": "13. Materialized Views / Projections: preparar uma representação consultável",
+      "href": "/explicacoes/read-models#13-materialized-views--projections-preparar-uma-representa%C3%A7%C3%A3o-consult%C3%A1vel"
+    },
+    {
+      "title": "Os quarenta itens",
+      "href": "/referencia/prioritarios#os-quarenta-itens"
+    },
+    {
+      "title": "Materialized View",
+      "href": "/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura#materialized-view"
+    },
+    {
+      "title": "Materialized View",
+      "href": "/referencia/catalogo/05-banco-de-dados-e-armazenamento#materialized-view"
+    }
+  ],
+  "completedAt": "2026-10-14T23:18:47.812Z"
+}

@@ -1,0 +1,222 @@
+{
+  "architecture": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/architecture-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/architecture-patterns/SKILL.md"
+  },
+  "microservices": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/microservices-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/microservices-patterns/SKILL.md"
+  },
+  "saga": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/saga-orchestration/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/saga-orchestration/SKILL.md"
+  },
+  "cqrs": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/cqrs-implementation/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/cqrs-implementation/SKILL.md"
+  },
+  "event-store": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/event-store-design/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/event-store-design/SKILL.md"
+  },
+  "workflow": {
+    "repository": "wshobson/agents",
+    "path": "plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md"
+  },
+  "db": {
+    "repository": "wshobson/agents",
+    "path": "plugins/database-design/skills/postgresql-table-design/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/database-design/skills/postgresql-table-design/SKILL.md"
+  },
+  "sql": {
+    "repository": "wshobson/agents",
+    "path": "plugins/developer-essentials/skills/sql-optimization-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/developer-essentials/skills/sql-optimization-patterns/SKILL.md"
+  },
+  "migration": {
+    "repository": "wshobson/agents",
+    "path": "plugins/framework-migration/skills/database-migration/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/framework-migration/skills/database-migration/SKILL.md"
+  },
+  "gitops": {
+    "repository": "wshobson/agents",
+    "path": "plugins/kubernetes-operations/skills/gitops-workflow/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/kubernetes-operations/skills/gitops-workflow/SKILL.md"
+  },
+  "k8s-security": {
+    "repository": "wshobson/agents",
+    "path": "plugins/kubernetes-operations/skills/k8s-security-policies/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/kubernetes-operations/skills/k8s-security-policies/SKILL.md"
+  },
+  "secrets": {
+    "repository": "wshobson/agents",
+    "path": "plugins/cicd-automation/skills/secrets-management/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/cicd-automation/skills/secrets-management/SKILL.md"
+  },
+  "tracing": {
+    "repository": "wshobson/agents",
+    "path": "plugins/observability-monitoring/skills/distributed-tracing/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/observability-monitoring/skills/distributed-tracing/SKILL.md"
+  },
+  "metrics": {
+    "repository": "wshobson/agents",
+    "path": "plugins/observability-monitoring/skills/prometheus-configuration/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/observability-monitoring/skills/prometheus-configuration/SKILL.md"
+  },
+  "resilience": {
+    "repository": "wshobson/agents",
+    "path": "plugins/python-development/skills/python-resilience/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/python-development/skills/python-resilience/SKILL.md"
+  },
+  "concurrency": {
+    "repository": "wshobson/agents",
+    "path": "plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/systems-programming/skills/go-concurrency-patterns/SKILL.md"
+  },
+  "gof": {
+    "repository": "wshobson/agents",
+    "path": "plugins/python-development/skills/python-design-patterns/SKILL.md",
+    "url": "https://github.com/wshobson/agents/blob/HEAD/plugins/python-development/skills/python-design-patterns/SKILL.md"
+  },
+  "ddd-specific": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/architecture/system-design/domain-driven-design/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/architecture/system-design/domain-driven-design/SKILL.md"
+  },
+  "consensus": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/system-design/distributed-consensus/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/system-design/distributed-consensus/SKILL.md"
+  },
+  "locking": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/distributed-locking/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/distributed-locking/SKILL.md"
+  },
+  "crdt": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/architecture/crdts/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/architecture/crdts/SKILL.md"
+  },
+  "storage": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/architecture/databases/postgresql-internals/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/architecture/databases/postgresql-internals/SKILL.md"
+  },
+  "sharding": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/architecture/databases/scaling-and-sharding/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/architecture/databases/scaling-and-sharding/SKILL.md"
+  },
+  "cache": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/caching/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/caching/SKILL.md"
+  },
+  "event-driven": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/event-driven/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/event-driven/SKILL.md"
+  },
+  "outbox": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/transactional-outbox/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/transactional-outbox/SKILL.md"
+  },
+  "concurrency-specific": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/concurrency/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/concurrency/SKILL.md"
+  },
+  "patterns": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/design-patterns/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/design-patterns/SKILL.md"
+  },
+  "api": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/api-and-interface-design/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/api-and-interface-design/SKILL.md"
+  },
+  "frontend": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/frontend-ui-engineering/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/frontend-ui-engineering/SKILL.md"
+  },
+  "process": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/documentation-and-adrs/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/documentation-and-adrs/SKILL.md"
+  },
+  "security": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/security-and-hardening/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/security-and-hardening/SKILL.md"
+  },
+  "observability": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/observability-and-instrumentation/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/observability-and-instrumentation/SKILL.md"
+  },
+  "release": {
+    "repository": "addyosmani/agent-skills",
+    "path": "skills/ci-cd-and-automation/SKILL.md",
+    "url": "https://github.com/addyosmani/agent-skills/blob/HEAD/skills/ci-cd-and-automation/SKILL.md"
+  },
+  "high-availability": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/enterprise/high-availability/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/enterprise/high-availability/SKILL.md"
+  },
+  "identity": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/cybersecurity/zero-trust-identity/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/cybersecurity/zero-trust-identity/SKILL.md"
+  },
+  "abac": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/security/abac/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/security/abac/SKILL.md"
+  },
+  "rbac": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/security/rbac/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/security/rbac/SKILL.md"
+  },
+  "logging": {
+    "repository": "j4flmao/agent-skills",
+    "path": "skills/backend/universal/structured-logging/SKILL.md",
+    "url": "https://github.com/j4flmao/agent-skills/blob/HEAD/skills/backend/universal/structured-logging/SKILL.md"
+  },
+  "redpanda": {
+    "repository": "redpanda-data/skills",
+    "path": "skills/connect/SKILL.md",
+    "url": "https://github.com/redpanda-data/skills/blob/HEAD/skills/connect/SKILL.md"
+  },
+  "cdc": {
+    "repository": "redpanda-data/skills",
+    "path": "skills/connect-cdc-postgres/SKILL.md",
+    "url": "https://github.com/redpanda-data/skills/blob/HEAD/skills/connect-cdc-postgres/SKILL.md"
+  },
+  "workflow-specific": {
+    "repository": "diagrid-labs/dapr-skills",
+    "path": "skills/create-workflow-python/SKILL.md",
+    "url": "https://github.com/diagrid-labs/dapr-skills/blob/HEAD/skills/create-workflow-python/SKILL.md"
+  },
+  "method": {
+    "repository": "obra/superpowers",
+    "path": "skills/brainstorming/SKILL.md",
+    "url": "https://github.com/obra/superpowers/blob/HEAD/skills/brainstorming/SKILL.md"
+  },
+  "architecture-method": {
+    "repository": "mattpocock/skills",
+    "path": "skills/engineering/improve-codebase-architecture/SKILL.md",
+    "url": "https://github.com/mattpocock/skills/blob/HEAD/skills/engineering/improve-codebase-architecture/SKILL.md"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "http_status": 200,
+  "started_at": "2026-10-14T18:53:33.989096+00:00",
+  "finished_at": "2026-10-14T19:07:02.571524+00:00",
+  "model_requested": "x-ai/grok-4.7",
+  "model_returned": "x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "reasoning_effort_requested": "xhigh",
+  "usage": {
+    "prompt_tokens": 85527,
+    "completion_tokens": 61561,
+    "total_tokens": 147088,
+    "cost": 0.538692,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1152,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.538692,
+      "upstream_inference_prompt_cost": 0.169326,
+      "upstream_inference_completions_cost": 0.369366
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 56274,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "finish_reason": "stop",
+  "input_sha256": "5d1de1ff6483071a4afc662872501121fa9cb6a8d2295e82a4e91bd46a748947",
+  "output_sha256": "50f5abc02b7b02da12d1e0790a40397e35a5cf607824d310b12aaf4eb12a9597",
+  "document_versions": [
+    {
+      "document_id": "explicacoes/api-integration/index",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "context_sha256": "a96a0098373a4f6a23b4c32e59cd71c5d5f6499c598935d725e15be009256e45"
+    },
+    {
+      "document_id": "explicacoes/cache/index",
+      "document_sha256": "c5fe5f3df7d17260fd80143ac2b70e48bb6d7199d73ac9f29a8d63ed28517be7",
+      "context_sha256": "1340a84c6e5a038c0d0ffd528de67bb1adb2646780804d62f65feb0c85718a2f"
+    },
+    {
+      "document_id": "explicacoes/capacity/index",
+      "document_sha256": "b2516379d27b4d79e13675e620afc86ea96a87f5789480dde6f59ad517df0aa1",
+      "context_sha256": "b6433f9ae585bb32b7cbe3bf3ed00b5bee31b20b9711d95842cea5700a33bb4c"
+    },
+    {
+      "document_id": "explicacoes/concurrency/index",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "context_sha256": "51caf73fcd3bf46d6945310e2637c210cf97ee4b8f81014d67318b2fd71167de"
+    },
+    {
+      "document_id": "explicacoes/observability/index",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "context_sha256": "11d3de457904b184c2c1f60f9d62607e33c6fa00f5c10724baf7f2e99a299c76"
+    },
+    {
+      "document_id": "referencia/catalogo/06-cache",
+      "document_sha256": "94188b17bca9c5d82a2ccc2ccb7e746b042a63fe2dc9cbc8018f9b4080bce8cd",
+      "context_sha256": "5666a446f4016698e9969faa8aa14c2e1151d569c64ecdf2d041c315ed1b3888"
+    },
+    {
+      "document_id": "referencia/catalogo/07-resiliencia",
+      "document_sha256": "d0f172ed9fcbbfcc11a5ecd5ae4b8beda01925c4a8558f8176be0a33e02822f0",
+      "context_sha256": "c52c6b2f993a2abe971122a67f7b1a375b0bc2eb7d5695087299c7260d9ac401"
+    },
+    {
+      "document_id": "referencia/catalogo/08-concorrencia",
+      "document_sha256": "74352a0a8596912c9f28f854c056f039cea0a0a960b7fc459950bce6192e4665",
+      "context_sha256": "adfc668c48be626349aa817295619497fdf88509a57611e8b1b38f800cd1e82b"
+    },
+    {
+      "document_id": "referencia/catalogo/09-apis-e-integracao",
+      "document_sha256": "ca5b9544200e552fa75b32e3dd84620ab709726b76e5fdbc6a031560c760d6cc",
+      "context_sha256": "aac20ce905a5ea9b5d61e343153aac71a0ad420e4628f78b99a6901dcded571b"
+    },
+    {
+      "document_id": "referencia/catalogo/15-observabilidade",
+      "document_sha256": "bf31bad89daa71589e69a12e173e95e58a24d3922e3ae91903cb85327cfc7f5e",
+      "context_sha256": "fa36bfcfcdea93ba6bb3c3d712059277373cb93e9fecf6a01682a228734f4756"
+    }
+  ],
+  "evidence_ids": [
+    "original-request",
+    "s5",
+    "l5a",
+    "l5b",
+    "l5c",
+    "bootstrap",
+    "cache-code",
+    "singleflight-code",
+    "nextbilling-code",
+    "task-worker-code",
+    "airflow-client-code",
+    "report-api",
+    "report-service",
+    "report-repository",
+    "insurance-api",
+    "insurance-service",
+    "insurance-repository"
+  ]
+}

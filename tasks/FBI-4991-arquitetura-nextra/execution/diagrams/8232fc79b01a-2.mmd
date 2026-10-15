@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Caller as Chamador
+    participant Client as Cliente HTTP
+    participant Service as Dependência
+    Caller->>Client: inicia uma operação com limite
+    Client->>Service: tentativa 1
+    Service-->>Client: falha repetível
+    Note over Client: espera com backoff e jitter
+    Client->>Service: tentativa 2
+    alt serviço recuperou
+        Service-->>Client: resultado
+        Client-->>Caller: resultado confirmado
+    else resposta HTTP de erro e orçamento esgotado
+        Service-->>Client: status de erro recebido
+        Client-->>Caller: erro da resposta recebida
+        Note over Caller: status recebido não certifica todos os efeitos externos
+    else timeout local sem resposta confirmada
+        Note over Client: a espera local atinge o limite
+        Client-->>Caller: timeout e efeito remoto desconhecido
+        Note over Caller: consulta e reconcilia a operação pela identidade
+    end

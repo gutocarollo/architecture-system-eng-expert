@@ -1,0 +1,7 @@
+flowchart LR
+    External[Registro e estados do sistema externo] --> Adapter[Adaptador de integração]
+    Adapter --> Meaning{Identidade e significado reconhecidos?}
+    Meaning -->|sim| Local[Contrato do contexto local]
+    Local --> Rule[Regra de negócio local]
+    Meaning -->|não| Failure[Erro explícito de mapeamento]
+    Failure --> Investigate[Revisar contrato e origem antes de repetir]

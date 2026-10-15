@@ -1,0 +1,143 @@
+{
+  "observed_at": "2026-10-14T17:37:11.030Z",
+  "parser_self_test": "PASS",
+  "syntax_only": false,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 6,
+  "blocks": [
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/idempotency.mdx",
+      "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+      "fence_index": 1,
+      "line_start": 82,
+      "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/f31798bebb20-1.png",
+        "artifact_sha256": "a5319f79685e9afd0a78da551901aa07a2ac3a433a00cc9d15e168f4617c5db6"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/optimistic-concurrency.mdx",
+      "document_sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+      "fence_index": 1,
+      "line_start": 79,
+      "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/023981ce356b-1.png",
+        "artifact_sha256": "663fb037856279117eb12b83a86b2e24221e8c77d40fe9691adb404c68832902"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/outbox.mdx",
+      "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+      "fence_index": 1,
+      "line_start": 101,
+      "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/244e89695f25-1.png",
+        "artifact_sha256": "09aff14da69183a69cab0c012f4298bf0d7ed64cae60be7b48626927cd82169f"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/read-projection.mdx",
+      "document_sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+      "fence_index": 1,
+      "line_start": 91,
+      "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/24c53c6983ef-1.png",
+        "artifact_sha256": "580533a500f5a365347d18e93a78fd63f218c0ee5214edc5a11ab7faee5a21e5"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/single-flight.mdx",
+      "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+      "fence_index": 1,
+      "line_start": 141,
+      "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/d119a220486b-1.png",
+        "artifact_sha256": "c880b813ee58a12d5efcc411677c8ce0f9e546ca298ad436099b411809e0b996"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/state-machine.mdx",
+      "document_sha256": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
+      "fence_index": 1,
+      "line_start": 86,
+      "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+        "artifact_path": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/renders-tutorials/ad0deba59127-1.png",
+        "artifact_sha256": "19c16b0f84eba15307ee9eaffe594c28ac346ac71d57f1f6d6bdc27a10c38167"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [],
+  "status": "PASS"
+}

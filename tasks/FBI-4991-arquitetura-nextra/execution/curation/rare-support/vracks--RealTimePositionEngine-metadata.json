@@ -1,0 +1,8 @@
+{
+  "repository": "vracks/RealTimePositionEngine",
+  "default_branch": "main",
+  "sha": "f300c9472382d021e9427a85ca283039ac565627",
+  "description": "Intraday position keeping, two-way trade reconciliation and a rules-driven exception engine on one Apache Ignite cluster, with a conflated live dashboard",
+  "license": null,
+  "observed_utc": "2026-10-15T01:43:55.934268+00:00"
+}

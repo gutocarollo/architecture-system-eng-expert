@@ -1,0 +1,13 @@
+{
+  "repository": "istio/api",
+  "default_branch": "master",
+  "sha": "15dd444282ea453178d13f72a6485dcc6da932de",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "observed_utc": "2026-10-15T01:42:44.397301+00:00"
+}

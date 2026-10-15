@@ -1,0 +1,11 @@
+flowchart LR
+    API[Salesforce API] --> EX[SalesforcePipeline.extract]
+    EX --> TR[transform]
+    TR --> VA[validate_columns]
+    VA --> LD[load: COPY ou upsert por Id]
+    LD --> STG[(salesforce_prod.stg_salesforce__task)]
+    STG --> SQL[dbt fct_salesforce__calls.sql: fonte .70]
+    COSMOS[Cosmos DbtDag: fonte .70] -->|executa o modelo selecionado| SQL
+    SQL --> CALLS[(public.fct_salesforce__calls)]
+    API --> DEL[extract_deleted]
+    DEL --> PROCESS[process_deleted]

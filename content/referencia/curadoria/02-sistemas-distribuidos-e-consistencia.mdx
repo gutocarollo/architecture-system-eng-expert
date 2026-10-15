@@ -1,0 +1,637 @@
+---
+title: "Curadoria: Sistemas distribuídos e consistência"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Sistemas distribuídos e consistência."
+diataxis: reference
+---
+
+# Curadoria: Sistemas distribuídos e consistência
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## At-Least-Once Delivery
+
+O identificador canônico é `at-least-once-delivery`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Pulsar acompanha sequências de mensagens e conserva o progresso de deduplicação; Kafka fornece a base comparada de transação e produtor idempotente.
+
+A base de estudo é [apache/kafka / TransactionManager.java @ e58847b4](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/clients/src/main/java/org/apache/kafka/clients/producer/internals/TransactionManager.java); licença [Apache-2.0](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/LICENSE). A aplicação ou candidato de aplicação é [apache/pulsar / MessageDeduplication.java @ 7ddf52be](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java); licença [Apache-2.0](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `sequence`](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java#L279-L285). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Deduplicação do broker não prova inbox transacional nem exactly once sobre efeitos no banco externo. Esses dois conceitos permanecem pendentes até localizar a fronteira transacional do consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#at-least-once-delivery). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## At-Most-Once Delivery
+
+O identificador canônico é `at-most-once-delivery`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Home Assistant publica e assina tópicos MQTT; Mosquitto encaminha uma publicação aos assinantes correspondentes. A opção QoS 0 do cliente delimita o envio sem confirmação de entrega e sem reentrega do protocolo.
+
+A base de estudo é [eclipse-paho/paho.mqtt.python / client.py @ 6335e3f2](https://github.com/eclipse-paho/paho.mqtt.python/blob/6335e3f2d14bce767f9564a00a3044bce7a12799/src/paho/mqtt/client.py); licença [NOASSERTION](https://github.com/eclipse-paho/paho.mqtt.python/blob/6335e3f2d14bce767f9564a00a3044bce7a12799/LICENSE.txt). A aplicação ou candidato de aplicação é [home-assistant/core / client.py @ 40881ede](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py); licença [Apache-2.0](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/LICENSE.md); [eclipse-mosquitto/mosquitto / subs.c @ 83f2620f](https://github.com/eclipse-mosquitto/mosquitto/blob/83f2620f0b955b89aadce32cceb96a8e81950f5e/src/subs.c); licença [EPL-2.0 OR BSD-3-Clause](https://github.com/eclipse-mosquitto/mosquitto/blob/83f2620f0b955b89aadce32cceb96a8e81950f5e/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `async_publish`](https://github.com/home-assistant/core/blob/40881ede942c0135c8ffcc4cb43c807c7177edc1/homeassistant/components/mqtt/client.py#L208-L214). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A semântica at most once está limitada ao QoS 0 escolhido. QoS 1 e 2 têm outros contratos. Aceitar o envio não confirma o efeito de negócio de cada assinante; esse é o limite do envio sem resposta da aplicação.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#at-most-once-delivery). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Change Data Capture (CDC)
+
+O identificador canônico é `change-data-capture-cdc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+NiFi conecta um cliente ao binlog, recebe os eventos de mudança e conserva a posição de captura. Debezium fornece uma base alternativa para capturar o log PostgreSQL.
+
+A base de estudo é [debezium/debezium / PostgresStreamingChangeEventSource.java @ 2f84b29c](https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/nifi / CaptureChangeMySQL.java @ 9e6c1889](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-cdc/nifi-cdc-mysql-bundle/nifi-cdc-mysql-processors/src/main/java/org/apache/nifi/cdc/mysql/processors/CaptureChangeMySQL.java); licença [Apache-2.0](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `BinaryLogClient`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-cdc/nifi-cdc-mysql-bundle/nifi-cdc-mysql-processors/src/main/java/org/apache/nifi/cdc/mysql/processors/CaptureChangeMySQL.java#L1221-L1227). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+As implementações usam protocolos de bancos diferentes. NiFi não é descrito como consumidor desse conector Debezium. Nenhuma implantação ativa na nossa stack foi inferida. Airbyte ficou no arquivo de descoberta, porque a licença ELv2 da revisão examinada não o satisfaz como aplicação OSS.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#change-data-capture-cdc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Choreography Saga
+
+O identificador canônico é `choreography-saga`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A instância A grava um FollowRequest local e envia Follow ao inbox de B. B decide segundo seu estado local: pode gravar e autorizar a relação e responder Accept, ou recusar por uma regra de negócio e responder Reject. Accept faz A consolidar a relação local. Reject compensa o pedido já gravado em A e pode desfazer uma relação já consolidada. Se A cancela, ela remove seu pedido ou relação e envia Undo; B remove sua cópia correspondente. As mensagens são correlacionadas pela URI do Follow. Os participantes reagem às atividades; o caminho não depende de um coordenador de transação global.
+
+A base de estudo é [eventuate-tram/eventuate-tram-core / DomainEventDispatcher.java @ e472ed72](https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java); licença [Apache-2.0](https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md); [rails/rails / transactions.rb @ c3466ea0](https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb); licença [MIT](https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE). A aplicação ou candidato de aplicação é [mastodon/mastodon / Gemfile.lock @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / interactions.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / follow_service.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / follow.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / authorize_follow_service.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/authorize_follow_service.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / accept.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / reject.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/reject.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / follow_request.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / unfollow_service.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / undo.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE); [mastodon/mastodon / delivery_worker.rb @ d0b3f326](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb); licença [AGPL-3.0](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/saga-orchestration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `follow_request`](https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb#L58-L64). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Não se afirma atomicidade de todo handler, entrega exatamente uma vez, outbox transacional ou recuperação garantida de toda falha. A entrega tem retries finitos e estados de falha. Undo Accept por referência não é implementado no recorte, como o próprio código registra; a prova de compensação escolhida usa Reject e Undo Follow.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://docs.joinmastodon.org/spec/activitypub/). A fonte primária delimita a decisão e o fluxo descritos.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://microservices.io/patterns/data/saga.html). A fonte primária delimita a decisão e o fluxo descritos.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#choreography-saga). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="compare-and-swap-cas" />
+
+## Compare-and-Swap / CAS
+
+O identificador canônico é `compare-and-swap-cas`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A API descreve leitura linearizável e comparação transacional; o servidor coordena a leitura antes de responder. As garantias dependem de usar a operação linearizável.
+
+A base de estudo é [etcd-io/etcd / rpc.proto @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/api/etcdserverpb/rpc.proto); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / v3_server.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `linearizable`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go#L137-L143). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Leituras serializable são uma escolha diferente. A mera presença de etcd não assegura essas garantias em todo consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#compare-and-swap-cas). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Compensating Transaction
+
+O identificador canônico é `compensating-transaction`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.
+
+A base de estudo é [temporalio/sdk-java / Saga.java @ 9b75f1df](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java); licença [Apache-2.0](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / create-step.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / create-order.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/saga-orchestration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `compensat`](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L186-L192). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#compensating-transaction). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Consensus
+
+O identificador canônico é `consensus`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O servidor etcd alimenta a máquina Raft, que representa líder, seguidores e decisões por quorum.
+
+A base de estudo é [etcd-io/raft / raft.go @ 638f4273](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go); licença [Apache-2.0](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / raft.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `raft`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go#L124-L130). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#consensus). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Deduplication
+
+O identificador canônico é `deduplication`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Pulsar acompanha sequências de mensagens e conserva o progresso de deduplicação; Kafka fornece a base comparada de transação e produtor idempotente.
+
+A base de estudo é [apache/kafka / TransactionManager.java @ e58847b4](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/clients/src/main/java/org/apache/kafka/clients/producer/internals/TransactionManager.java); licença [Apache-2.0](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/LICENSE). A aplicação ou candidato de aplicação é [apache/pulsar / MessageDeduplication.java @ 7ddf52be](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java); licença [Apache-2.0](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `sequence`](https://github.com/apache/pulsar/blob/7ddf52beef98fec691802ef90334d9c5ed375816/pulsar-broker/src/main/java/org/apache/pulsar/broker/service/persistent/MessageDeduplication.java#L279-L285). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Deduplicação do broker não prova inbox transacional nem exactly once sobre efeitos no banco externo. Esses dois conceitos permanecem pendentes até localizar a fronteira transacional do consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#deduplication). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Distributed Lock
+
+O identificador canônico é `distributed-lock`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Patroni adquire a chave de liderança por comparação de revisão e a associa a uma lease etcd. Os concorrentes não podem adquirir a mesma chave enquanto a propriedade válida estiver registrada.
+
+A base de estudo é [etcd-io/etcd / mutex.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/client/v3/concurrency/mutex.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [patroni/patroni / etcd3.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/dcs/etcd3.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `attempt_to_acquire_leader`](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/dcs/etcd3.py#L1003-L1009). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A trava delimita a propriedade da chave no DCS. O destino de escrita ainda precisa de fencing se um antigo líder puder continuar gravando depois da expiração.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#distributed-lock). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Dual Write
+
+O identificador canônico é `dual-write`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab escreve nas representações primária e secundária durante a migração de Redis e trata divergências no caminho de transição.
+
+A base de estudo é [redis/redis-rb / redis.rb @ 8135b254](https://github.com/redis/redis-rb/blob/8135b2544ee47290fa55aba22e384fc06af349a5/lib/redis.rb); licença [MIT](https://github.com/redis/redis-rb/blob/8135b2544ee47290fa55aba22e384fc06af349a5/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `secondary`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/lib/gitlab/redis/multi_store.rb#L464-L470). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recibo demonstra dual write como técnica de migração delimitada. Ele não torna as duas gravações atomicamente inseparáveis.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#dual-write). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Eventual Consistency
+
+O identificador canônico é `eventual-consistency`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O controlador de Deployment observa cópias locais de objetos mantidas por informers e programa novas reconciliações quando recebe mudanças. A API grava o novo estado antes de cada cache local necessariamente observá-lo. O laço compara a visão recebida com o objetivo e volta a atuar até convergir, enquanto os informers entregam atualizações em ordem por objeto.
+
+A base de estudo é [kubernetes/client-go / shared_informer.go @ 7aade4e9](https://github.com/kubernetes/client-go/blob/7aade4e921f65cb51c990ab0557a5556fd67a1be/tools/cache/shared_informer.go); licença [Apache-2.0](https://github.com/kubernetes/client-go/blob/7aade4e921f65cb51c990ab0557a5556fd67a1be/LICENSE). A aplicação ou candidato de aplicação é [kubernetes/kubernetes / deployment_controller.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/deployment_controller.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE); [kubernetes/kubernetes / sync.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/sync.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE); [kubernetes/kubernetes / rolling.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/rolling.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `deploymentLister`](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/controller/deployment/deployment_controller.go#L79-L85). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A consistência eventual aqui é entre o estado da API e a visão local do controlador. Ela depende da continuidade da observação e das novas tentativas; não promete um prazo fixo de convergência, não converte leituras em linearizáveis e não prova um estado saudável de um cluster da Faz.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#eventual-consistency). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Exactly Once Semantics
+
+O identificador canônico é `exactly-once-semantics`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O runtime Flink coordena snapshots de estado e posições das entradas. O checkpoint só fica completo após os reconhecimentos exigidos; na recuperação, o scheduler restaura a execução a partir de um checkpoint concluído. O contrato EXACTLY_ONCE delimita que os efeitos sobre o estado gerenciado são restaurados de forma consistente mesmo quando registros precisam ser reprocessados.
+
+A base de estudo é [apache/flink / CheckpointingMode.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/api/CheckpointingMode.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE). A aplicação ou candidato de aplicação é [apache/flink / CheckpointCoordinator.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/runtime/checkpoint/CheckpointCoordinator.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE); [apache/flink / PendingCheckpoint.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/runtime/checkpoint/PendingCheckpoint.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE); [apache/flink / SchedulerBase.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/runtime/scheduler/SchedulerBase.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE); [apache/flink / CheckpointBarrierHandler.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/runtime/io/checkpointing/CheckpointBarrierHandler.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE); [apache/flink / fault_tolerance.md @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/docs/content/docs/learn-flink/fault_tolerance.md); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `restoreLatestCheckpointedState`](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/runtime/checkpoint/CheckpointCoordinator.java#L1668-L1674). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A garantia é do estado gerenciado e das posições de fontes compatíveis dentro do job configurado. Registros podem ser processados novamente fisicamente após a falha. Um efeito externo, como um pagamento ou e-mail, só participa da garantia se o sink e o destino fornecerem o protocolo adequado; deduplicação no broker, isoladamente, não demonstraria esse contrato.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#exactly-once-semantics). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Fencing Token
+
+O identificador canônico é `fencing-token`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O journal rejeita uma época de escritor anterior à época prometida, impedindo que um líder antigo continue gravando.
+
+A base de estudo é [apache/hadoop / QuorumJournalManager.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/client/QuorumJournalManager.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/hadoop / Journal.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `epoch`](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java#L284-L290). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#fencing-token). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Gossip Protocol
+
+O identificador canônico é `gossip-protocol`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A montagem Loki cria o serviço KV memberlist e entrega seu acesso às configurações de ring dos componentes. Quando o armazenamento memberlist é escolhido, os participantes mantêm a visão do ring por disseminação entre membros, usando a implementação gossip da base comparada.
+
+A base de estudo é [hashicorp/memberlist / net.go @ 5cd2c4b0](https://github.com/hashicorp/memberlist/blob/5cd2c4b0fb09caea5de03aae1adb9c36374ef3e0/net.go); licença [MPL-2.0](https://github.com/hashicorp/memberlist/blob/5cd2c4b0fb09caea5de03aae1adb9c36374ef3e0/LICENSE). A aplicação ou candidato de aplicação é [grafana/loki / ringmanager.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/util/ring/ringmanager.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / modules.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/loki/modules.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `NewKVInitService`](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/loki/modules.go#L1824-L1830). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A prova é o caminho de montagem e de seleção memberlist para os rings. Não afirma que todo deployment Loki use esse armazenamento, nem que gossip dê ordenação total ou consistência forte ao estado difundido.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#gossip-protocol). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Hybrid Logical Clock
+
+O identificador canônico é `hybrid-logical-clock`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O servidor Yugabyte instala um relógio híbrido que combina componentes física e lógica.
+
+A base de estudo é [yugabyte/yugabyte-db / hybrid_clock.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/server/hybrid_clock.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md). A aplicação ou candidato de aplicação é [yugabyte/yugabyte-db / server_base.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/server/server_base.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `HybridClock`](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/server/server_base.cc#L245-L251). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#hybrid-logical-clock). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Idempotency
+
+O identificador canônico é `idempotency`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A conclusão do carrinho usa chave persistida e fases de recuperação para evitar repetir a mesma operação.
+
+A base de estudo é [medusajs/medusa / idempotency-key.ts @ d09630c5](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/services/idempotency-key.ts); licença [MIT](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / complete-cart.ts @ d09630c5](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/api/routes/store/carts/complete-cart.ts); licença [MIT](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `idempotency`](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/api/routes/store/carts/complete-cart.ts#L99-L105). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Este recibo é histórico em v1.20.10. Não descreve automaticamente a arquitetura atual do Medusa nem torna uma reserva e uma cobrança atomicamente globais.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#idempotency). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Idempotency Key
+
+O identificador canônico é `idempotency-key`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A conclusão do carrinho usa chave persistida e fases de recuperação para evitar repetir a mesma operação.
+
+A base de estudo é [medusajs/medusa / idempotency-key.ts @ d09630c5](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/services/idempotency-key.ts); licença [MIT](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / complete-cart.ts @ d09630c5](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/api/routes/store/carts/complete-cart.ts); licença [MIT](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `idempotency`](https://github.com/medusajs/medusa/blob/d09630c558f585d40bcfde6ad8c74507a4ead493/packages/medusa/src/api/routes/store/carts/complete-cart.ts#L99-L105). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Este recibo é histórico em v1.20.10. Não descreve automaticamente a arquitetura atual do Medusa nem torna uma reserva e uma cobrança atomicamente globais.
+
+No curso, [abra o caso aplicado](/jornadas/opportunity-entry/) e [consulte a ação e o probe deste conceito](/jornadas/opportunity-entry/conceitos/#idempotency-key). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Lamport Clock
+
+O identificador canônico é `lamport-clock`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Serf incrementa e observa o relógio de Lamport para ordenar eventos lógicos.
+
+A base de estudo é [hashicorp/serf / lamport.go @ fe2acb9e](https://github.com/hashicorp/serf/blob/fe2acb9e90d89e27409a88d086553a2ad429cb8b/serf/lamport.go); licença [MPL-2.0](https://github.com/hashicorp/serf/blob/fe2acb9e90d89e27409a88d086553a2ad429cb8b/LICENSE). A aplicação ou candidato de aplicação é [hashicorp/serf / serf.go @ fe2acb9e](https://github.com/hashicorp/serf/blob/fe2acb9e90d89e27409a88d086553a2ad429cb8b/serf/serf.go); licença [MPL-2.0](https://github.com/hashicorp/serf/blob/fe2acb9e90d89e27409a88d086553a2ad429cb8b/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Lamport`](https://github.com/hashicorp/serf/blob/fe2acb9e90d89e27409a88d086553a2ad429cb8b/serf/serf.go#L1281-L1287). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#lamport-clock). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Leader Election
+
+O identificador canônico é `leader-election`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O controller manager usa a biblioteca client-go para adquirir e renovar uma liderança.
+
+A base de estudo é [kubernetes/client-go / leaderelection.go @ 7aade4e9](https://github.com/kubernetes/client-go/blob/7aade4e921f65cb51c990ab0557a5556fd67a1be/tools/leaderelection/leaderelection.go); licença [Apache-2.0](https://github.com/kubernetes/client-go/blob/7aade4e921f65cb51c990ab0557a5556fd67a1be/LICENSE). A aplicação ou candidato de aplicação é [kubernetes/kubernetes / controllermanager.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/cmd/kube-controller-manager/app/controllermanager.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `leaderelection`](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/cmd/kube-controller-manager/app/controllermanager.go#L227-L233). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#leader-election). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Lease
+
+O identificador canônico é `lease`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A API de coordenação associa propriedade e exclusão à duração de uma lease; o servidor mantém expiração e renovação.
+
+A base de estudo é [etcd-io/etcd / mutex.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/client/v3/concurrency/mutex.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / lessor.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/lease/lessor.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `lease`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/lease/lessor.go#L59-L65). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#lease). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Monotonic Reads
+
+O identificador canônico é `monotonic-reads`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A API descreve leitura linearizável e comparação transacional; o servidor coordena a leitura antes de responder. As garantias dependem de usar a operação linearizável.
+
+A base de estudo é [etcd-io/etcd / rpc.proto @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/api/etcdserverpb/rpc.proto); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / v3_server.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `linearizable`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go#L137-L143). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Leituras serializable são uma escolha diferente. A mera presença de etcd não assegura essas garantias em todo consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#monotonic-reads). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Optimistic Concurrency Control
+
+O identificador canônico é `optimistic-concurrency-control`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O banco implementa concorrência de linhas; a conta Fineract conserva versão para detectar alteração concorrente.
+
+A base de estudo é [postgres/postgres / heapam.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/heap/heapam.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [apache/fineract / SavingsAccount.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/domain/SavingsAccount.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Version`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/domain/SavingsAccount.java#L3735-L3741). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A presença de @Version prova a verificação de versão. O trecho sozinho não demonstra o caminho de bloqueio pessimista; essa garantia é pendente.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#optimistic-concurrency-control). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Orchestration Saga
+
+O identificador canônico é `orchestration-saga`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.
+
+A base de estudo é [temporalio/sdk-java / Saga.java @ 9b75f1df](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java); licença [Apache-2.0](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / create-step.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / create-order.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/saga-orchestration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `compensat`](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L186-L192). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#orchestration-saga). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="outbox-cdc" />
+
+## Outbox + CDC
+
+O identificador canônico é `outbox-cdc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O aplicativo Debezium Server monta o engine com a configuração do conector e o sink. O conector PostgreSQL captura o WAL, e a cadeia de transformações aplica o Event Router às alterações da outbox quando essa transformação e o filtro da tabela são configurados. O sink recebe o evento já transformado.
+
+A base de estudo é [debezium/debezium / EventRouter.java @ bc0b683e](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-core/src/main/java/io/debezium/transforms/outbox/EventRouter.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/LICENSE.txt). A aplicação ou candidato de aplicação é [debezium/debezium-server / DebeziumServer.java @ a0302879](https://github.com/debezium/debezium-server/blob/a030287988878a7bc516661eaaa6a816be5ee4b1/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java); licença [Apache-2.0](https://github.com/debezium/debezium-server/blob/a030287988878a7bc516661eaaa6a816be5ee4b1/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java#L1-L15); [debezium/debezium / AsyncEmbeddedEngine.java @ bc0b683e](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-embedded/src/main/java/io/debezium/embedded/async/AsyncEmbeddedEngine.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/LICENSE.txt); [debezium/debezium / Transformations.java @ bc0b683e](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-embedded/src/main/java/io/debezium/embedded/Transformations.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/LICENSE.txt); [debezium/debezium / PostgresStreamingChangeEventSource.java @ bc0b683e](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/debezium-connector-postgres/src/main/java/io/debezium/connector/postgresql/PostgresStreamingChangeEventSource.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/bc0b683ebe84648a96ee2532a7be31d4cc14b6df/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `DebeziumEngine`](https://github.com/debezium/debezium-server/blob/a030287988878a7bc516661eaaa6a816be5ee4b1/debezium-server-core/src/main/java/io/debezium/server/DebeziumServer.java#L132-L138). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A aplicação de referência é o servidor de integração, não o serviço financeiro produtor. O produtor precisa gravar sua mudança e a linha de outbox na mesma transação; o servidor não cria essa atomicidade retroativamente. Os seletores de tabela, o roteador e o sink devem ser configurados e verificados; nenhuma implantação Fineract com Debezium foi inferida. O estudo fixa a versão histórica 2.7.3.Final para conservar a cadeia de montagem do engine; não recomenda essa versão para uma implantação nova.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#outbox-cdc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Paxos
+
+O identificador canônico é `paxos`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Cassandra implementa Paxos e calcula os participantes necessários por nível de consistência.
+
+A base de estudo é [apache/cassandra / Paxos.java @ ec2c276b](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/service/paxos/Paxos.java); licença [Apache-2.0](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/cassandra / ConsistencyLevel.java @ ec2c276b](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/db/ConsistencyLevel.java); licença [Apache-2.0](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `QUORUM`](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/db/ConsistencyLevel.java#L108-L114). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#paxos). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Pessimistic Locking
+
+O identificador canônico é `pessimistic-locking`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O repositório de contas de poupança Fineract declara uma operação de consulta com PESSIMISTIC_WRITE. O banco concede a exclusividade da linha conforme a transação que executa essa consulta.
+
+A base de estudo é [spring-projects/spring-data-jpa / Lock.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/Lock.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/fineract / SavingsAccountRepository.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/domain/SavingsAccountRepository.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `PESSIMISTIC_WRITE`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-savings/src/main/java/org/apache/fineract/portfolio/savings/domain/SavingsAccountRepository.java#L40-L46). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A anotação define o modo solicitado. A duração depende da transação chamadora, do banco e de seus timeouts; ela não protege um recurso que não participa da mesma linha ou transação.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#pessimistic-locking). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="quorum-read-write" />
+
+## Quorum Read/Write
+
+O identificador canônico é `quorum-read-write`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Cassandra implementa Paxos e calcula os participantes necessários por nível de consistência.
+
+A base de estudo é [apache/cassandra / Paxos.java @ ec2c276b](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/service/paxos/Paxos.java); licença [Apache-2.0](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/cassandra / ConsistencyLevel.java @ ec2c276b](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/db/ConsistencyLevel.java); licença [Apache-2.0](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/LICENSE.txt).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `QUORUM`](https://github.com/apache/cassandra/blob/ec2c276be145bb25085c5c35ac0da69113b676ff/src/java/org/apache/cassandra/db/ConsistencyLevel.java#L108-L114). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#quorum-read-write). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Raft
+
+O identificador canônico é `raft`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O servidor etcd alimenta a máquina Raft, que representa líder, seguidores e decisões por quorum.
+
+A base de estudo é [etcd-io/raft / raft.go @ 638f4273](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go); licença [Apache-2.0](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / raft.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/system-design/distributed-consensus/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `raft`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go#L124-L130). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#raft). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Read-your-writes
+
+O identificador canônico é `read-your-writes`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A API descreve leitura linearizável e comparação transacional; o servidor coordena a leitura antes de responder. As garantias dependem de usar a operação linearizável.
+
+A base de estudo é [etcd-io/etcd / rpc.proto @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/api/etcdserverpb/rpc.proto); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / v3_server.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `linearizable`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go#L137-L143). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Leituras serializable são uma escolha diferente. A mera presença de etcd não assegura essas garantias em todo consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#read-your-writes). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Reservation Pattern
+
+O identificador canônico é `reservation-pattern`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A criação de reservas Medusa associa itens, localização e quantidade, e o passo de compensação libera as reservas quando o fluxo precisa desfazê-las. O carrinho invoca essa reserva antes da conclusão da operação.
+
+A base de estudo é [medusajs/medusa / reservation-item.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/inventory/src/models/reservation-item.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / create-reservations.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/reservation/steps/create-reservations.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / delete-reservations.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/reservation/steps/delete-reservations.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / reserve-inventory.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/steps/reserve-inventory.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `reservation`](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/reservation/steps/create-reservations.ts#L34-L40). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A reserva protege o saldo de inventário no módulo escolhido. Ela não torna a cobrança externa e a baixa final uma única transação global.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#reservation-pattern). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Saga
+
+O identificador canônico é `saga`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O fluxo de criação de ordem Medusa compõe etapas e o SDK registra a ação de compensação de cada etapa. A classe Saga Temporal fornece uma implementação alternativa da pilha de compensações.
+
+A base de estudo é [temporalio/sdk-java / Saga.java @ 9b75f1df](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/temporal-sdk/src/main/java/io/temporal/workflow/Saga.java); licença [Apache-2.0](https://github.com/temporalio/sdk-java/blob/9b75f1df2768b386b42027f9b6c4073c4752d630/LICENSE). A aplicação ou candidato de aplicação é [medusajs/medusa / create-step.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / create-order.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/saga-orchestration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `compensat`](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/workflows-sdk/src/utils/composer/create-step.ts#L186-L192). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Os mecanismos são comparados; Medusa usa seu próprio workflows SDK e não é descrito como consumidor de Temporal. A compensação é uma nova ação, sujeita a falha, não o apagamento do histórico.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#saga). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Strong Consistency
+
+O identificador canônico é `strong-consistency`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A API descreve leitura linearizável e comparação transacional; o servidor coordena a leitura antes de responder. As garantias dependem de usar a operação linearizável.
+
+A base de estudo é [etcd-io/etcd / rpc.proto @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/api/etcdserverpb/rpc.proto); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / v3_server.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `linearizable`](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/v3_server.go#L137-L143). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Leituras serializable são uma escolha diferente. A mera presença de etcd não assegura essas garantias em todo consumidor.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#strong-consistency). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="tcc-try-confirm-cancel" />
+
+## TCC — Try/Confirm/Cancel
+
+O identificador canônico é `tcc-try-confirm-cancel`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+No Try, o Nova mantém os recursos da origem sob o consumidor migration e reserva os recursos do destino sob o consumidor instance. A tentativa pode falhar antes da mudança ser aceita. No Confirm, a instância fica no destino e o Nova remove a instância antiga e a reserva da origem. No Cancel, o destino é destruído, seu uso local é liberado e a alocação original volta ao consumidor instance, substituindo a alocação do destino. O contexto de migração guarda as versões antiga e nova necessárias à decisão.
+
+A base de estudo é [apache/seata / TccActionInterceptorHandler.java @ 8a31b1f4](https://github.com/apache/seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/tcc/src/main/java/org/apache/seata/rm/tcc/interceptor/TccActionInterceptorHandler.java); licença [Apache-2.0](https://github.com/apache/seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/LICENSE). A aplicação ou candidato de aplicação é [openstack/nova / resize-and-cold-migrate.rst @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / resource_tracker.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / manager.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE); [openstack/nova / report.py @ 2ad1f119](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py); licença [Apache-2.0](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `confirm_resize`](https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py#L1552-L1558). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte não equivale a uma garantia TCC global sobre todos os recursos de uma nuvem. A documentação distingue alocações Placement dos claims de recursos locais. O código avisa sobre provedores compartilhados no caminho de reversão e admite falhas de limpeza na confirmação. Não foram exercitados recuperação, timeout ou todos os participantes de volumes e redes.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#tcc-try-confirm-cancel). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="three-phase-commit-3pc" />
+
+## Three-Phase Commit / 3PC
+
+O identificador canônico é `three-phase-commit-3pc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O OpenDaylight usa um protocolo de três fases para transações do seu armazenamento distribuído. O contrato MD-SAL separa a votação, o pré-commit e o commit. A coordenação executa as fases nessa ordem e tenta abortar quando uma fase falha. Quando uma transação envolve vários participantes, ClientTransaction.ready cria ClientTransactionCommitCohort, que reúne os votos de todos os proxies e envia pedidos reais de votação, pré-commit e commit aos participantes.
+
+A base de estudo é [opendaylight/mdsal / DOMStoreThreePhaseCommitCohort.java @ c732ddd8](https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java); licença [EPL-1.0](https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java#L1-L7); [opendaylight/mdsal / CommitCoordinationTask.java @ c732ddd8](https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-broker/src/main/java/org/opendaylight/mdsal/dom/broker/CommitCoordinationTask.java); licença [EPL-1.0](https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/dom/mdsal-dom-spi/src/main/java/org/opendaylight/mdsal/dom/spi/store/DOMStoreThreePhaseCommitCohort.java#L1-L7). A aplicação ou candidato de aplicação é [opendaylight/controller / ClientTransaction.java @ a0b6b1d2](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransaction.java); licença [EPL-1.0](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE); [opendaylight/controller / ClientTransactionCommitCohort.java @ a0b6b1d2](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java); licença [EPL-1.0](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE); [opendaylight/controller / AbstractProxyTransaction.java @ a0b6b1d2](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/AbstractProxyTransaction.java); licença [EPL-1.0](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `canCommit`](https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/actors/dds/ClientTransactionCommitCohort.java#L32-L38). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O caso é o armazenamento do controlador de redes OpenDaylight, e não uma demo de carteira. A implementação chama sua coordenação de blocking three-phase commit; as fontes verificadas não provam todas as garantias teóricas do 3PC clássico nem tolerância irrestrita a partições. O código registra que, após pré-commit, o estado foi replicado no backend e será consolidado após timeout. A licença EPL-1.0 dos arquivos MD-SAL foi lida em seus cabeçalhos, pois não havia arquivo raiz de licença na árvore consultada.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#three-phase-commit-3pc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Transactional Inbox
+
+O identificador canônico é `transactional-inbox`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A entrada de comandos Fineract identifica a repetição pela chave e conserva um registro CommandSource. processCommandAndSaveResult executa o handler, marca o resultado e salva o registro dentro do mesmo método transacional. O handler de submissão de empréstimo liga esse caminho ao serviço que grava a solicitação. A marca de conclusão acompanha os efeitos que participam da mesma transação local.
+
+A base de estudo é [eventuate-tram/eventuate-tram-core / SqlTableBasedDuplicateMessageDetector.java @ e472ed72](https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-consumer-jdbc/src/main/java/io/eventuate/tram/consumer/jdbc/SqlTableBasedDuplicateMessageDetector.java); licença [Apache-2.0](https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md). A aplicação ou candidato de aplicação é [apache/fineract / CommandSourceService.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/commands/service/CommandSourceService.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE); [apache/fineract / SynchronousCommandProcessingService.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/commands/service/SynchronousCommandProcessingService.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE); [apache/fineract / CommandSource.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/commands/domain/CommandSource.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE); [apache/fineract / LoanApplicationSubmittalCommandHandler.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-loan/src/main/java/org/apache/fineract/portfolio/loanaccount/handler/LoanApplicationSubmittalCommandHandler.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE); [apache/fineract / LoanApplicationWritePlatformServiceJpaRepositoryImpl.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanApplicationWritePlatformServiceJpaRepositoryImpl.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Transactional`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/commands/service/CommandSourceService.java#L77-L83). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O exemplo é uma inbox de comandos recebidos por API, não uma fila de broker. O registro inicial pode ser criado antes como reserva de idempotência; a prova de atomicidade é a conclusão do comando junto dos efeitos locais na transação. Ela depende de o handler e o efeito participarem dessa transação. Chamadas externas, handlers com transação independente e mensagens não confirmadas por esse contrato não recebem exactly once global.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#transactional-inbox). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Transactional Outbox
+
+O identificador canônico é `transactional-outbox`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Fineract persiste eventos de negócio para publicação posterior; o Event Router do Debezium é a base comparada para transportar uma outbox por CDC.
+
+A base de estudo é [debezium/debezium / EventRouter.java @ 2f84b29c](https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/debezium-connect-plugins/src/main/java/io/debezium/transforms/outbox/EventRouter.java); licença [Apache-2.0](https://github.com/debezium/debezium/blob/2f84b29c03638d261823172d1d8bfa9ca3a99824/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/fineract / BusinessEventNotifierServiceImpl.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE); [apache/fineract / ExternalEventService.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/external/service/ExternalEventService.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ExternalEvent`](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-core/src/main/java/org/apache/fineract/infrastructure/event/business/service/BusinessEventNotifierServiceImpl.java#L126-L132). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#transactional-outbox). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="two-phase-commit-2pc" />
+
+## Two-Phase Commit / 2PC
+
+O identificador canônico é `two-phase-commit-2pc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+PostgreSQL fornece preparação e decisão da transação; Vitess coordena o caminho de commit distribuído em duas fases.
+
+A base de estudo é [postgres/postgres / twophase.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/twophase.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [vitessio/vitess / tx_conn.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/tx_conn.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/microservices-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `PREPARE`](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/tx_conn.go#L303-L309). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#two-phase-commit-2pc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Version Vector
+
+O identificador canônico é `version-vector`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Riak mantém relógios vetoriais nos objetos e compara causalidade entre versões.
+
+A base de estudo é [basho/riak_core / vclock.erl @ 25d9a6fa](https://github.com/basho/riak_core/blob/25d9a6fa917eb8a2e95795d64eb88d7ad384ed88/src/vclock.erl); licença [Apache-2.0](https://github.com/basho/riak_core/blob/25d9a6fa917eb8a2e95795d64eb88d7ad384ed88/LICENSE). A aplicação ou candidato de aplicação é [basho/riak_kv / riak_object.erl @ fa9df88f](https://github.com/basho/riak_kv/blob/fa9df88ff97c61af77105b3b185bd84e20c62add/src/riak_object.erl); licença [Apache-2.0](https://github.com/basho/riak_kv/blob/fa9df88ff97c61af77105b3b185bd84e20c62add/LICENSE).
+
+A orientação pública selecionada é [j4flmao/agent-skills / SKILL.md @ 5a19d636](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/skills/architecture/crdts/SKILL.md); licença [MIT](https://github.com/j4flmao/agent-skills/blob/5a19d636db60d2f7e08f036037a5b49c0a4ae8bd/LICENSE). Seu pack tinha **33 estrelas** na consulta `2026-10-15T01:26:21.770517Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `vclock`](https://github.com/basho/riak_kv/blob/fa9df88ff97c61af77105b3b185bd84e20c62add/src/riak_object.erl#L774-L780). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#version-vector). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

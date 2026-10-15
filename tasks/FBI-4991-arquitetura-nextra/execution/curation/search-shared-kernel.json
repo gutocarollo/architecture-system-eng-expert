@@ -1,0 +1,32 @@
+{
+  "query": "\"shared kernel\" path:adr -repo:ardalis/CleanArchitecture -repo:kgrzybek/modular-monolith-with-ddd",
+  "observed_utc": "2026-10-15T01:59:03.484820Z",
+  "total_count": 15,
+  "items": [
+    {
+      "repo": "Rexy-5097/AdityaNet",
+      "path": "adr/ADR-0005.md",
+      "url": "https://github.com/Rexy-5097/AdityaNet/blob/1a379f0406c20d8e86ef7caf4d1096444b738958/adr/ADR-0005.md"
+    },
+    {
+      "repo": "Rexy-5097/AdityaNet",
+      "path": "adr/ADR-0026.md",
+      "url": "https://github.com/Rexy-5097/AdityaNet/blob/1a379f0406c20d8e86ef7caf4d1096444b738958/adr/ADR-0026.md"
+    },
+    {
+      "repo": "Rexy-5097/AdityaNet",
+      "path": "adr/index.md",
+      "url": "https://github.com/Rexy-5097/AdityaNet/blob/1a379f0406c20d8e86ef7caf4d1096444b738958/adr/index.md"
+    },
+    {
+      "repo": "zhujinxuan/jz-toolshed",
+      "path": "adr/README.md",
+      "url": "https://github.com/zhujinxuan/jz-toolshed/blob/3ee22d6ea9d3cd4cb0bb643bf50861d9cf6bd81a/adr/README.md"
+    },
+    {
+      "repo": "zhujinxuan/jz-toolshed",
+      "path": "adr/adr-0026-turbine-profile-shared-kernel.md",
+      "url": "https://github.com/zhujinxuan/jz-toolshed/blob/3ee22d6ea9d3cd4cb0bb643bf50861d9cf6bd81a/adr/adr-0026-turbine-profile-shared-kernel.md"
+    }
+  ]
+}

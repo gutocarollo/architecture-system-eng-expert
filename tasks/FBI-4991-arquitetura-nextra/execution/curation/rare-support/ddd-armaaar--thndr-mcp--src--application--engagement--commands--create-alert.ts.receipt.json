@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/application/engagement/commands/create-alert.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/application/engagement/commands/create-alert.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:04:19.602164+00:00",
+  "sha256": "820b34ded53b260b227c52c832d709ef4f8b4fa8189c2a0945827100d1194927",
+  "line_count": 56,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--application--engagement--commands--create-alert.ts"
+}

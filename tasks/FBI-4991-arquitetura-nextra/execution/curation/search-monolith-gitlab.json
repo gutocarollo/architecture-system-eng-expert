@@ -1,0 +1,22 @@
+{
+  "query": "repo:gitlabhq/gitlabhq \"modular monolith\"",
+  "observed_utc": "2026-10-15T01:53:22.589416Z",
+  "total_count": 3,
+  "items": [
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "doc/development/software_design.md",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/doc/development/software_design.md"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "doc/development/permissions/custom_roles.md",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/doc/development/permissions/custom_roles.md"
+    },
+    {
+      "repo": "gitlabhq/gitlabhq",
+      "path": "doc/development/testing_guide/best_practices.md",
+      "url": "https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/doc/development/testing_guide/best_practices.md"
+    }
+  ]
+}

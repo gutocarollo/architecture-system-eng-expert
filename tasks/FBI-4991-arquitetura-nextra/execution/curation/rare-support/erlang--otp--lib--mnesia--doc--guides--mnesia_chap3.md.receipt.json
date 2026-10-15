@@ -1,0 +1,12 @@
+{
+  "repo": "erlang/otp",
+  "path": "lib/mnesia/doc/guides/mnesia_chap3.md",
+  "revision": "b4b337c351e8c5bff4e0c48b58081080bae2a4be",
+  "url": "https://github.com/erlang/otp/blob/b4b337c351e8c5bff4e0c48b58081080bae2a4be/lib/mnesia/doc/guides/mnesia_chap3.md",
+  "raw_url": "https://raw.githubusercontent.com/erlang/otp/b4b337c351e8c5bff4e0c48b58081080bae2a4be/lib/mnesia/doc/guides/mnesia_chap3.md",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:56.087652+00:00",
+  "sha256": "691df4e380de12ce74d4aa02a0cbc18755fd2d778cb4fb6522468aeaec1c0649",
+  "line_count": 468,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/erlang--otp--lib--mnesia--doc--guides--mnesia_chap3.md"
+}

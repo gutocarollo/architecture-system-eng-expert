@@ -1,0 +1,32 @@
+{
+  "query": "repo:apache/superset stateless",
+  "observed_utc": "2026-10-15T01:53:22.590056Z",
+  "total_count": 15,
+  "items": [
+    {
+      "repo": "apache/superset",
+      "path": "superset/mcp_service/__main__.py",
+      "url": "https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/__main__.py"
+    },
+    {
+      "repo": "apache/superset",
+      "path": "superset-frontend/src/core/utils.ts",
+      "url": "https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset-frontend/src/core/utils.ts"
+    },
+    {
+      "repo": "apache/superset",
+      "path": "superset/mcp_service/server.py",
+      "url": "https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/server.py"
+    },
+    {
+      "repo": "apache/superset",
+      "path": "superset-websocket/README.md",
+      "url": "https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset-websocket/README.md"
+    },
+    {
+      "repo": "apache/superset",
+      "path": "superset/mcp_service/SECURITY.md",
+      "url": "https://github.com/apache/superset/blob/9659a13ae8e278ff3cfe91f42a1d4c068f114b01/superset/mcp_service/SECURITY.md"
+    }
+  ]
+}

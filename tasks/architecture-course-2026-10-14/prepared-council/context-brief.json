@@ -1,0 +1,60 @@
+{
+  "brief_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "mode": "CREATE",
+  "adapter": "generic",
+  "workspace": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "bounded_anchor": "Criar uma trilha Nextra MDX Diátaxis de todos os conceitos dos 18 grupos e dos 40 padrões prioritários do texto do usuário, com casos MakersHub e Airflow, agregados PostgreSQL, blast radius FazGraph, Mermaid e referências OSS verificadas; distinguir código, runtime, histórico e proposta.",
+  "PROTOCOL_ROOT": null,
+  "method_skill": null,
+  "provided_packet": null,
+  "preparation": {
+    "kind": "metadata",
+    "classification": "METADATA_ONLY",
+    "receipt_path": null,
+    "receipt_sha256": null
+  },
+  "review_contract": null,
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "required": true
+    },
+    {
+      "id": "makershub",
+      "root": "/Users/augustocarollo/Developer/makershub",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "selected_skills": [
+    "diataxis",
+    "mapping",
+    "orchestrator"
+  ],
+  "context_skill_ids": [],
+  "dispatch_owner": "principal",
+  "permissions": {
+    "read_roots": [
+      "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "/Users/augustocarollo/Developer.noindex/makershub",
+      "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence"
+    ],
+    "artifact_write_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/prepared-council",
+    "source_writes": false,
+    "domain_writes": false,
+    "dispatch_children": false
+  },
+  "limitations": [
+    "Preparation does not execute source commands or dispatch agents.",
+    "Runtime evidence must be supplied as a versioned snapshot.",
+    "selected_skills is run-level inventory, not permission to load author or orchestration roles in a context lane.",
+    "The principal applies project protocols and owns all dispatch; delegated context lanes return evidence only."
+  ]
+}

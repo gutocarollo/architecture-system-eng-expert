@@ -1,0 +1,9 @@
+flowchart LR
+    Expand["Oferecer contrato novo e preservar antigo"] --> API["API lê uma única fonte de valor"]
+    API --> Frontend["Migrar frontend por versão"]
+    API --> DAG["Migrar DAG por versão"]
+    Frontend --> Check{"Ainda há leitor antigo?"}
+    DAG --> Check
+    Check -->|"sim ou sem evidência"| Keep["Manter compatibilidade"]
+    Keep --> Check
+    Check -->|"não, após observar uso"| Contract["Retirar alias e contrato antigo"]

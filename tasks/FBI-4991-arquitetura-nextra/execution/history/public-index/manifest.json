@@ -1,0 +1,735 @@
+{
+  "schema_version": 2,
+  "measured_at": "2026-10-15T02:49:52.657689+00:00",
+  "source_local_file": "history-semantic-index.jsonl.gz",
+  "source_sha256": "ca36558f8bb600ac5e2817a8b8be7c85f2a12137969866166508a96b7151e7b2",
+  "source_records": 12697,
+  "source_visibility": "LOCAL_ONLY_IGNORED_ORIGINAL_INDEX",
+  "export_visibility": "SANITIZED_METADATA_ONLY",
+  "shard_records": 12697,
+  "byte_limit_exclusive": 950000,
+  "largest_record_uncompressed_bytes": 4955496,
+  "all_shards_independent_gzip_jsonl": true,
+  "raw_patch_text_exported": false,
+  "raw_jira_or_pr_payload_exported": false,
+  "redaction_counts": {
+    "email": 0,
+    "salesforce_identifier": 0,
+    "phone_shape": 29,
+    "numeric_path_segment": 2762
+  },
+  "redaction_policy": "Whitelist mechanical metadata fields; redact emails, Salesforce identifiers, phone shapes and long numeric path segments. Preserve immutable Git SHAs and patch hashes. No source line text or Jira/PR narrative is included.",
+  "causal_adjudication": "Mechanical candidates only; causal rows have their own artifacts.",
+  "shards": [
+    {
+      "path": "semantic-index-0001.jsonl.gz",
+      "bytes": 474985,
+      "uncompressed_bytes": 5363482,
+      "records": 53,
+      "sha256": "2678fe820009fe5e9a64a4729934a9d7c70eba059c38b1c4c58074569789b84e",
+      "content_sha256": "5e3ca6518efca05c7e090bd3d09957b58b0a32b3e1cd8b62d11cc498241bebd3",
+      "first_commit": "3073b74f02672d62e470289ec5d409523ebb9200",
+      "last_commit": "8063632c77560b97700f6e7d0ceb86e12bc83fd2"
+    },
+    {
+      "path": "semantic-index-0002.jsonl.gz",
+      "bytes": 731250,
+      "uncompressed_bytes": 7853041,
+      "records": 69,
+      "sha256": "dacc0d7df949300a8d888af11b69bb6b4a4d58c8077103d3b1fc04c49bb8464c",
+      "content_sha256": "20645cb1e3742167b2604894e0745c6a5a930e70110b30587a00d56eb562332f",
+      "first_commit": "70884fa7b34e14bd50a95502fe2923b8aba186ed",
+      "last_commit": "8451803a7bee53a9e8d37bb81fb79974ed5942e9"
+    },
+    {
+      "path": "semantic-index-0003.jsonl.gz",
+      "bytes": 453212,
+      "uncompressed_bytes": 4734520,
+      "records": 11,
+      "sha256": "2ae1daa34c0ccd524d32d00cab8e4302ecce6a7eca06bb7dd8ec6495aaed1740",
+      "content_sha256": "256f36568db3d994324ccf78ae39dbb3e33114be08098d502ec09435093b18ba",
+      "first_commit": "7c5d33d7bf8e7a15ef53e3cb35515bdc5968d971",
+      "last_commit": "6754916d25711c378f149a8496802271e89d1535"
+    },
+    {
+      "path": "semantic-index-0004.jsonl.gz",
+      "bytes": 482164,
+      "uncompressed_bytes": 5008407,
+      "records": 20,
+      "sha256": "7634f74ef91c09ef5f84bcc34b2cec204a1999ef6dc742abe48e3ea2baed6842",
+      "content_sha256": "72aaf7dfdd27726ce0327ad51429fcea6c861eb14b59031bac4b0a8256b44695",
+      "first_commit": "3bf2464c6975020f0de6f37c098cb639339186b2",
+      "last_commit": "d0fa3154cd38fb97d9c6b66622eaeea11a68265f"
+    },
+    {
+      "path": "semantic-index-0005.jsonl.gz",
+      "bytes": 539764,
+      "uncompressed_bytes": 5923859,
+      "records": 54,
+      "sha256": "3898c6da070a8d98c5a068aacdd54af3d1d27c1d44993069be77d9c38a300736",
+      "content_sha256": "b09775bfd4166695f0be3bfa6da7ee76da913a2d217878c68c997312be8de329",
+      "first_commit": "78d1d7270c7829ea7821b751ce81d9b7440b4999",
+      "last_commit": "e70dcd93340794a530ebdced0bb8ebf76ba50c34"
+    },
+    {
+      "path": "semantic-index-0006.jsonl.gz",
+      "bytes": 560465,
+      "uncompressed_bytes": 6171357,
+      "records": 26,
+      "sha256": "2655a64d4e83c66cde19b6e744d8a23d7154fbfdb2b7f4e2113f45fa99abdfbd",
+      "content_sha256": "fc20add4dbe3032cd0ad7f1f17fa5d9863c40a1c68eb5e3cb49c8b456b2022b1",
+      "first_commit": "185f260454012185a4fe61c826037351f616c9ab",
+      "last_commit": "5b28d08dc32e2e76428b81ac94ee127a2a252164"
+    },
+    {
+      "path": "semantic-index-0007.jsonl.gz",
+      "bytes": 443320,
+      "uncompressed_bytes": 4651819,
+      "records": 3,
+      "sha256": "b5d951762dd991723f0f1db9deb03be4908f61ccc9dcfce5d3a3f1aaaf61a36c",
+      "content_sha256": "8c3b8615c0e72c6466511a943a5ac5ba5b3fe1280b43f9662f512858f0254d03",
+      "first_commit": "0dc3559423f001f7e8f79022ede1d0f14d855211",
+      "last_commit": "4a6b5e3b9184920da147229073d9b9e4ce0f46bf"
+    },
+    {
+      "path": "semantic-index-0008.jsonl.gz",
+      "bytes": 366697,
+      "uncompressed_bytes": 4035375,
+      "records": 101,
+      "sha256": "7501c592443b3a3b544c0e28e3b592c8005e42b0ca1c4a474da42d07dcc620c0",
+      "content_sha256": "b7ba1794c57f9bcc8bf70f82a92ac36cd53a397853b1312345ddd242357daea6",
+      "first_commit": "161ef535a1d7839c03639f7ea06983b4aeeecdce",
+      "last_commit": "0e897f432d7d8adaeb60793f4198fe75940b535d"
+    },
+    {
+      "path": "semantic-index-0009.jsonl.gz",
+      "bytes": 380198,
+      "uncompressed_bytes": 4343311,
+      "records": 75,
+      "sha256": "b49c5a9f4e8f8ecad8426d8bf64bdf39a8c140de03e16edcecbbaa60fefc570b",
+      "content_sha256": "94048fdc15ff2b0c34fc7d40735cffd48f421015f7d47f9d4eda4be14920473e",
+      "first_commit": "0590f8601aecf27f23b4f5f16308331a5d6581cf",
+      "last_commit": "9c81a7b11be26493418a72345ecb7fb8a5d1ff88"
+    },
+    {
+      "path": "semantic-index-0010.jsonl.gz",
+      "bytes": 342179,
+      "uncompressed_bytes": 4011312,
+      "records": 474,
+      "sha256": "6b849afc6642a6634bb2c0da2d2a2e14ea51e9066e104088ff47935686a7b2ab",
+      "content_sha256": "009bc7744c663d52886792bffb39c773e035e920edf62df1219f6cb4eb0e7c02",
+      "first_commit": "3ad846049c32fedee09d458c8d685fb39b675b82",
+      "last_commit": "418d90da68807a8d17ac7dea74b1d1b3036b9437"
+    },
+    {
+      "path": "semantic-index-0011.jsonl.gz",
+      "bytes": 392170,
+      "uncompressed_bytes": 4082816,
+      "records": 73,
+      "sha256": "cb83e56504d6a59681d0e83fa264fea7f9ff0ca4a17389b8450c4a47c5a34134",
+      "content_sha256": "78326fd9b44f94c111915a6afacc91f097f80b4980cf2a1b0c89c518d163064f",
+      "first_commit": "eea8a19917dc25aaf593bef9af6a5df13b318890",
+      "last_commit": "3f48871ebaa5a4cac15eafb771a3009814de5460"
+    },
+    {
+      "path": "semantic-index-0012.jsonl.gz",
+      "bytes": 379676,
+      "uncompressed_bytes": 4024186,
+      "records": 111,
+      "sha256": "a8f42aca2f73ebf73d5396276c651b57716a10b483e38a1b9203b65c1accc88b",
+      "content_sha256": "93c4fa033a10b870cb94dae26ee8d1f4a594829266bb8cea78aa662fccb346fb",
+      "first_commit": "998e233984fba483cb36712816250fabc201c247",
+      "last_commit": "f71c7293474cc8da2682ef98669dfe8db1b2fe15"
+    },
+    {
+      "path": "semantic-index-0013.jsonl.gz",
+      "bytes": 374302,
+      "uncompressed_bytes": 4003286,
+      "records": 288,
+      "sha256": "6f62c202c470e283f02751fe8d1c344a53fab6fdb80143b629baf6c792f4f040",
+      "content_sha256": "c8a488997dcca8f61435f41a8135d6d03226f909da5e4eca478c33a359840322",
+      "first_commit": "66fe46d2e19f7b13b7a35d512d20651bfb076665",
+      "last_commit": "a895b5bc992bcbbdb69f93cb9952cfb972c44b53"
+    },
+    {
+      "path": "semantic-index-0014.jsonl.gz",
+      "bytes": 366716,
+      "uncompressed_bytes": 4001183,
+      "records": 225,
+      "sha256": "59ff29408516389296278533312a5e201497c0e7f579a696707cb0287093a60b",
+      "content_sha256": "2807cf3eb0598c8cd78c0337deefdf45b424ac7e5f1a502165f3d9381ec07966",
+      "first_commit": "404bda0ae35efd4a9b132c4c7de32107846fe685",
+      "last_commit": "9a61337da6a03aec49de237607eada68fec1863f"
+    },
+    {
+      "path": "semantic-index-0015.jsonl.gz",
+      "bytes": 345803,
+      "uncompressed_bytes": 4021400,
+      "records": 344,
+      "sha256": "e18f3bfa75115e6bd430b0a168cdb8236e24b078bfa243d0f837f70aca1afe36",
+      "content_sha256": "a04d1c19ca714cd1672c89929a594d45cebf2e625b35d6f32cb8becb9912b722",
+      "first_commit": "5dc17316f60779a1e06fa7ca6841c3604ff9d9ca",
+      "last_commit": "3297704b6f05f2ff19998c3c3ddf583779b29a8f"
+    },
+    {
+      "path": "semantic-index-0016.jsonl.gz",
+      "bytes": 312090,
+      "uncompressed_bytes": 4280153,
+      "records": 445,
+      "sha256": "4703ffe8e9e34855764b934b5e105be0d85917f4ffe1b150da8bc791d150a873",
+      "content_sha256": "b18b659420960989ace813fc11ddf97a96eac31ceb8cb4627900f5e35678d8aa",
+      "first_commit": "3f3dbe734e76977a2492860d7a8fe1d9b2ce5bd3",
+      "last_commit": "ae68b937b59b0cbd550272a5ec1fd51c4ad9d5bf"
+    },
+    {
+      "path": "semantic-index-0017.jsonl.gz",
+      "bytes": 389643,
+      "uncompressed_bytes": 4038762,
+      "records": 439,
+      "sha256": "0e4188a421c33f4b39ead80f72bf9031e018511975a460083add802917cd53fd",
+      "content_sha256": "9756e517ad6f3c533d717b0e3b373bc98cf75b04d527036d5d39485f76060f5b",
+      "first_commit": "81597239ef8f609041bdcc14110a75cb19e7083f",
+      "last_commit": "df62dfa4ea9eb768868055b88659c115591bab9d"
+    },
+    {
+      "path": "semantic-index-0018.jsonl.gz",
+      "bytes": 279771,
+      "uncompressed_bytes": 4099309,
+      "records": 105,
+      "sha256": "a71f59e2fdfbdecaf33c2983800fdda61821a0c99a900b0e1146f38331595086",
+      "content_sha256": "ae5ba09c366e74561401976b966539ef939c0b1ce8a2acea6ae20bc805fd344f",
+      "first_commit": "2f26a9e20a03e0b6a19d6c2540889874e418277b",
+      "last_commit": "fc5991d8e259ca49765b4e738011d83d70a8f710"
+    },
+    {
+      "path": "semantic-index-0019.jsonl.gz",
+      "bytes": 307232,
+      "uncompressed_bytes": 4000569,
+      "records": 212,
+      "sha256": "0d6cb8a949a7e99b410ce20823920c10e16d6238b3e93c8ddcc0d0f3198d646d",
+      "content_sha256": "56e64774888d9eceb503d1f108b1dea2660c5fddf42a60a5aa0d441a5b82bf76",
+      "first_commit": "0bce9edcc49cc958c7c33ca2e64b2ae4752e96fc",
+      "last_commit": "a0034158854e5caa9c7fe14909cee88779e63f18"
+    },
+    {
+      "path": "semantic-index-0020.jsonl.gz",
+      "bytes": 383493,
+      "uncompressed_bytes": 4793081,
+      "records": 245,
+      "sha256": "80508f6f02d5be12649a304e8e4051bcfcdcc160ffd84a40e9be06c60482c34a",
+      "content_sha256": "d02087a2f965d2f219c3be91e25eddcb9d01506fc1501f5e4f6c1dd02c565e64",
+      "first_commit": "5fd8fdd509b63b453f9b4ddd243c8667926ef96c",
+      "last_commit": "c35eaa84ffe63d3adf1b6a8c359040d1a2b216b3"
+    },
+    {
+      "path": "semantic-index-0021.jsonl.gz",
+      "bytes": 358896,
+      "uncompressed_bytes": 4011473,
+      "records": 171,
+      "sha256": "5a8535e3254a796856f8364339924b0da532a9352ab44a540428e2f7066b0d19",
+      "content_sha256": "4f5160949d29f03643e3d5421228cfb7746102e7147a29a383cd02f5b7f062dd",
+      "first_commit": "54bee790504e619aeb4b16f5aa1c7341634176cb",
+      "last_commit": "be9f747371d10e8e5dd2ec99c5d1c67fab06f846"
+    },
+    {
+      "path": "semantic-index-0022.jsonl.gz",
+      "bytes": 354364,
+      "uncompressed_bytes": 4107088,
+      "records": 163,
+      "sha256": "f3c6de3a10471fa8ff8908c82d5928848d9abc85591a63ea6c3023de3e6822d5",
+      "content_sha256": "17f853b4333e9942f00cfceee8e6165f15fff1786b654eb72192ed20f7735a04",
+      "first_commit": "293a31664a14f049080386f7b926867645a976b3",
+      "last_commit": "8a21dd93a0fa15427dddf751aad3f93a75231525"
+    },
+    {
+      "path": "semantic-index-0023.jsonl.gz",
+      "bytes": 343167,
+      "uncompressed_bytes": 4210918,
+      "records": 39,
+      "sha256": "d6dd20e22f2e949929c6498b38f8ffef5ffb6fbf0f3e3e48ae1d90b36f61677c",
+      "content_sha256": "8a925323880839f1dbf7043f98b74fc4e6d3db49c5a31255e29110af722d74d5",
+      "first_commit": "31a055918117fb138b8bf8213b6a82b6224b1fe6",
+      "last_commit": "4173d075c8d705376ece70c8f007a48c50b1103e"
+    },
+    {
+      "path": "semantic-index-0024.jsonl.gz",
+      "bytes": 382457,
+      "uncompressed_bytes": 4304646,
+      "records": 147,
+      "sha256": "38d5128e2248533c424cf3ca345d5c9cd071fbd3a5601798629adde37fccacca",
+      "content_sha256": "b97e14726288f3f925ba434eb2506fc49632b4d003f824a02ddcd900ba2666cf",
+      "first_commit": "e96b4ab280a9cf57d43c2412d4ad74fcbbfa1ead",
+      "last_commit": "ecec75b2021886ab32ab105e137a9c0f3620fcbc"
+    },
+    {
+      "path": "semantic-index-0025.jsonl.gz",
+      "bytes": 294995,
+      "uncompressed_bytes": 4002941,
+      "records": 183,
+      "sha256": "c830f23518de7898e94a13af76810af50a9f420bee09445a19f287ea0763d43a",
+      "content_sha256": "7c471d7693f5647c5f32531e22f78e28bf026c528df5cc4574c4defa1d48512d",
+      "first_commit": "bfa7a5f46003afabe199a02f898b857ef23614ad",
+      "last_commit": "0ebf4404d543bae4b249afbf98538e5c01562cb9"
+    },
+    {
+      "path": "semantic-index-0026.jsonl.gz",
+      "bytes": 570655,
+      "uncompressed_bytes": 6428611,
+      "records": 209,
+      "sha256": "35597a060212d5b527e276bf7aae570a7545b4a270f8b34a8caf943a417de229",
+      "content_sha256": "3db6620005a7327b0a4aed20eb811f69c9194a8897722929badf0ae38d2a2bce",
+      "first_commit": "1890d83863c8db46d659fecb3ccfb117d8824195",
+      "last_commit": "4316c391d60a4b0ec62031fdc351564d4291759e"
+    },
+    {
+      "path": "semantic-index-0027.jsonl.gz",
+      "bytes": 642171,
+      "uncompressed_bytes": 6846261,
+      "records": 19,
+      "sha256": "f393f7ae44d4aa70e64060bfd9156daff5e7559e249c571b1bb90b4a787378da",
+      "content_sha256": "d51d12024cb03c03afb24b08796b9ee873300d0763ac40f2bb41f9dcdffc0eb5",
+      "first_commit": "63e0b783a88a7f8480a4ddaf7af240ba54dfa1ab",
+      "last_commit": "418fd77b6bbb38145c4061377d7552867a92e286"
+    },
+    {
+      "path": "semantic-index-0028.jsonl.gz",
+      "bytes": 372356,
+      "uncompressed_bytes": 4053081,
+      "records": 62,
+      "sha256": "051f31dcc6eb4cb9d29529a2b7634fbacbec78b293ab3d9e4fb9c9317b38ac63",
+      "content_sha256": "f2afe248d2eda66ec6bf74508a5890ed0428acad9f76dfc93adc40878bb47d74",
+      "first_commit": "792bcd3f34850f3cf69aacd12a6a93dbaace6df7",
+      "last_commit": "4a088e7d741961d3f413d8e3b969faee16504573"
+    },
+    {
+      "path": "semantic-index-0029.jsonl.gz",
+      "bytes": 264359,
+      "uncompressed_bytes": 4000010,
+      "records": 98,
+      "sha256": "8fd4a9600e928f1d2ddd1d406cb859dcae22e5aa0bd8b801e286415180104f19",
+      "content_sha256": "b681c6994764b40506c5ed6382b36b2a8194e0ed7108f76956c7d9e44f4ec630",
+      "first_commit": "178b8da0e3dd74b50fcb0ef663dc6c631155db3c",
+      "last_commit": "547436fe20df6079f926e2d9e0788bd070d25df0"
+    },
+    {
+      "path": "semantic-index-0030.jsonl.gz",
+      "bytes": 246003,
+      "uncompressed_bytes": 4042339,
+      "records": 142,
+      "sha256": "1e33e52236ba602560d5f3bfe36b7719ef799e06c7cfe099b394568d95c7cef0",
+      "content_sha256": "e05f5a9c665e81085068e929d250e6e54b7905c43586a697c4b81c508e035876",
+      "first_commit": "14f642b9c34180f26834fef2b60aa7f5e0c0bbb6",
+      "last_commit": "89cecb1d4714932c449e1cf13981d76d6c58b8f5"
+    },
+    {
+      "path": "semantic-index-0031.jsonl.gz",
+      "bytes": 291148,
+      "uncompressed_bytes": 4130141,
+      "records": 164,
+      "sha256": "7ac207d8c8810788c9fbe337be4ba5a57d4a1e621804999d62c19dc41dbd3b67",
+      "content_sha256": "fbf8e04e4c8b39b7e2241fe039344c74d59f05e6657d2685ec1bb1321e333af0",
+      "first_commit": "0d9516373dea147de88482ac6608ffb2c749fd24",
+      "last_commit": "dc8d8fac0bd3a95e8aac5032ea196d2c83e1ad4b"
+    },
+    {
+      "path": "semantic-index-0032.jsonl.gz",
+      "bytes": 305765,
+      "uncompressed_bytes": 4018356,
+      "records": 66,
+      "sha256": "3053ef0eaf5262350447bcc6e91d3091cb1b9c177fe8a0b35952bb846be15e6b",
+      "content_sha256": "4f0a5a5c836b3ad0e7fb041e2141f6dd908813a9d735424966cc90906f4ec4aa",
+      "first_commit": "167b8ca5ee46738718dc385ff8fc40ef8af9ab49",
+      "last_commit": "689b6724636fcd0adb361f6fda3e7bbe07f772ea"
+    },
+    {
+      "path": "semantic-index-0033.jsonl.gz",
+      "bytes": 446991,
+      "uncompressed_bytes": 5208332,
+      "records": 241,
+      "sha256": "27f18b0d0a41940c108ffd6fcf7c2be47de1e0866a5232fa1632d264af52e337",
+      "content_sha256": "214d253d310050bd670a7de638186ef1a066d795fe9798d0fd15fa151f2792e9",
+      "first_commit": "a30d89fb20781ec9f638080ac9d1d07765ad85bf",
+      "last_commit": "e4c411378cc39a4d6d590b739567cd06cb263843"
+    },
+    {
+      "path": "semantic-index-0034.jsonl.gz",
+      "bytes": 341743,
+      "uncompressed_bytes": 4492374,
+      "records": 163,
+      "sha256": "df4051cdf13e1604a7c48a55963dc28522af995070b8c90369960ed0111b99fe",
+      "content_sha256": "b41e6f497d700307ae464b935e030c60ebd43684365d9f352bd677fa02535699",
+      "first_commit": "07fd8a1d4afe9dfb717cf2985ceb690e3852296d",
+      "last_commit": "7f99c0684cf17a7a644de6342c0ede0d56889a57"
+    },
+    {
+      "path": "semantic-index-0035.jsonl.gz",
+      "bytes": 401309,
+      "uncompressed_bytes": 4191294,
+      "records": 87,
+      "sha256": "f2e0897d25b2ae4f47329aa4eefc3b19b01c438501d62f4e4bb768383e18715c",
+      "content_sha256": "47b984b0dab8025f79d45ee2bc4c52c6afafe9aa6e284bc094dcce3aa1c55484",
+      "first_commit": "9702493534e286b7bfe77894bdd481b7a5a993b2",
+      "last_commit": "765a88abd216416685342149d26efa17901e13da"
+    },
+    {
+      "path": "semantic-index-0036.jsonl.gz",
+      "bytes": 525810,
+      "uncompressed_bytes": 6030566,
+      "records": 165,
+      "sha256": "3b83344ce7cd1c9bba8b047302a3bdda4d01865aee6a254782b123c293663c45",
+      "content_sha256": "ac5f894e5f442d1be58060d083344ed7e126dc8e23a5098b2aac862a00d0f92d",
+      "first_commit": "8342ae2efbb928453427bb4d67091155a211cf54",
+      "last_commit": "2ff90cad27fb4107b24b49b7d93725c4eea1ebc0"
+    },
+    {
+      "path": "semantic-index-0037.jsonl.gz",
+      "bytes": 465939,
+      "uncompressed_bytes": 4832001,
+      "records": 101,
+      "sha256": "01681fc325c1c5fd4b1fa1e8deb5b5d869df5dac30b1aec1040794f270f201e4",
+      "content_sha256": "3fba4ea036bed542c11f9ec6df4b922d35d8ec61341664581097b4ce4b48f4ae",
+      "first_commit": "0a67b58295223cf9ac9384d37c7cc9b376b97856",
+      "last_commit": "bfe5a2214cd29fb1f672dd7997644536a17064c7"
+    },
+    {
+      "path": "semantic-index-0038.jsonl.gz",
+      "bytes": 339190,
+      "uncompressed_bytes": 4231631,
+      "records": 78,
+      "sha256": "27d64f919984c6049034be438d245dfe161e0079e0aa8b10c9522eef41a7f390",
+      "content_sha256": "f2dda1bac571b9b6ebd8499397adfe904a37ab92ef3b76c315990d6cbf34966f",
+      "first_commit": "8e0877bfbdb85e2554ac163b197ad2e45850204a",
+      "last_commit": "faedb5203fc5d36980415caeb6624c1a0d4503e2"
+    },
+    {
+      "path": "semantic-index-0039.jsonl.gz",
+      "bytes": 355081,
+      "uncompressed_bytes": 4942960,
+      "records": 125,
+      "sha256": "e2764d59f0e966242d17bead9d0e80129f4f80eec87a4a72d8f8c926ad5c8466",
+      "content_sha256": "332a91980194ab13bae1951c090a0e63cdc16a22a3a71242e91b1c90edea518f",
+      "first_commit": "e191f698fb250d28d40f9620d68ad9ecfd9e59b6",
+      "last_commit": "48258c51986881a6f4b37f6911652793102f17ec"
+    },
+    {
+      "path": "semantic-index-0040.jsonl.gz",
+      "bytes": 334343,
+      "uncompressed_bytes": 4017827,
+      "records": 329,
+      "sha256": "21c4f9610b1de85c5979022fd42e70789f8dfd580b9de6142a2ad9c2dd5b2055",
+      "content_sha256": "924ec59ae4181808f1a0e50bb1f4ada24dd567f201727efcef17056fdd9e8984",
+      "first_commit": "6aaf36da6288845f93a2a2fc593ec2ebb009b33c",
+      "last_commit": "cf992a8ef46b484a322675f0d147e79d1ef0eec7"
+    },
+    {
+      "path": "semantic-index-0041.jsonl.gz",
+      "bytes": 318471,
+      "uncompressed_bytes": 4016661,
+      "records": 79,
+      "sha256": "8c0c35aad2a0a487afad3b6d10be3b95107461ccb6007ed26ab960ffb17766ac",
+      "content_sha256": "55d80e6c5260aa96c69a6d280240fbe999528b2639fd147783964cd3510d8fb2",
+      "first_commit": "e09b0f149fab2690180db6557838e6bbddf9bd11",
+      "last_commit": "748bad5b30592417c3b60ed6f99326406babaeeb"
+    },
+    {
+      "path": "semantic-index-0042.jsonl.gz",
+      "bytes": 326632,
+      "uncompressed_bytes": 4042213,
+      "records": 254,
+      "sha256": "081a81a80d730a5ec32e921ac98cefe5f23bef1eb2232d5becee96b79d699f4f",
+      "content_sha256": "0dff1c6ae61dcd3dcda898d27a13a0479ad41f341ad8d4ea8d86ec5a71df1e30",
+      "first_commit": "0fc8eb2478dcb8e6c32ed6d84f23e173232a5bef",
+      "last_commit": "5c80fca97b9ac87e2945cf554f883091446436cf"
+    },
+    {
+      "path": "semantic-index-0043.jsonl.gz",
+      "bytes": 329046,
+      "uncompressed_bytes": 4027418,
+      "records": 137,
+      "sha256": "11a693e2f53dd2920b572bbbefc67a79817a94f3f1a90beb31f1a4fa844a743c",
+      "content_sha256": "ef635a80f1be27200ab817314e2b31415135f231d2a525240328a38b6230f6f8",
+      "first_commit": "448cdf215e84323dea445f4733eea1b8f3adb980",
+      "last_commit": "3273a533e17bef411a5d3cd064ffdec42017f707"
+    },
+    {
+      "path": "semantic-index-0044.jsonl.gz",
+      "bytes": 304389,
+      "uncompressed_bytes": 4167054,
+      "records": 182,
+      "sha256": "95c2b788b4e5fcbc953c8e7d3804225943cae151e7cb9eef077833bddeb5ccd2",
+      "content_sha256": "8141effb1b115ff04b323930dffba1de9e5ef86edf324f52ab5ee197a547f2c7",
+      "first_commit": "bfa47139972d59674a3dd2948c692ca76a66291d",
+      "last_commit": "ba18928e726cf525b243fb19621267d4b4c046eb"
+    },
+    {
+      "path": "semantic-index-0045.jsonl.gz",
+      "bytes": 443541,
+      "uncompressed_bytes": 6006303,
+      "records": 495,
+      "sha256": "6a5217abae08c2f80d0a6c191ece9091712cd3da7f16def4f714ef78f80fb450",
+      "content_sha256": "c146a1948371df6a2f53808d971376b9b684ccc53580e4aef9f829e59b1aeb0e",
+      "first_commit": "60cbe7005caedc89887041c9cac2298b9181f511",
+      "last_commit": "a46db5c6ad00367c1d1eb502a5acaef6de765f7a"
+    },
+    {
+      "path": "semantic-index-0046.jsonl.gz",
+      "bytes": 323168,
+      "uncompressed_bytes": 4152033,
+      "records": 231,
+      "sha256": "4fb3074f7af1192b581fa24499e022ba5f196b94d394689abfcb9884c156e9b7",
+      "content_sha256": "fb6343dfb9eb127524c8b3cd79ef994cb13a89e0143e0ad8c4b9e503894cd7ea",
+      "first_commit": "82e59583b99f5e51307f409673c7e86c007b4220",
+      "last_commit": "85a348c2e5f3a223e73782ceac68bd41b90c0858"
+    },
+    {
+      "path": "semantic-index-0047.jsonl.gz",
+      "bytes": 336975,
+      "uncompressed_bytes": 4001626,
+      "records": 437,
+      "sha256": "d16879d0d679cf7fa5d2d56e57fdd6d3e30d15e9af4aa05510b8ff9041a04393",
+      "content_sha256": "023424b353e5b0859da54a6bca12e918299691e18dfa17607cdc7d4922e8192c",
+      "first_commit": "547b7fe48f81e32e6f618137c8952332af82c608",
+      "last_commit": "e11d0fd263bcd99c9f16d3df802f0dfa14754501"
+    },
+    {
+      "path": "semantic-index-0048.jsonl.gz",
+      "bytes": 385229,
+      "uncompressed_bytes": 5187210,
+      "records": 592,
+      "sha256": "cedcdda5244d4b1fd2e1f97951e8e81bbebb6d252f7b0605c3a5bf2baed39ef7",
+      "content_sha256": "545e16a7ddb9749374403e25407e22c8ffb80221b12486f18d1958566156cfef",
+      "first_commit": "2cc4bb664b022e49b64553f0ef38c83debfd645e",
+      "last_commit": "7b41e4cc9a7ab99e92ddc0339397fce30f661abc"
+    },
+    {
+      "path": "semantic-index-0049.jsonl.gz",
+      "bytes": 339861,
+      "uncompressed_bytes": 4588248,
+      "records": 237,
+      "sha256": "8bfb1444d29fdafe718e40e6eeeb8f4f903f9c94922afb62e775119f45d82ca8",
+      "content_sha256": "3ee21f724abdd041738ad047fc93dd2f543c829ba8c1295279672137146e5032",
+      "first_commit": "355192b4b739d8dcd3122c7ba61c6d99f58c10bd",
+      "last_commit": "712acceb16f35ea02cff5e5de1d027db68bf836a"
+    },
+    {
+      "path": "semantic-index-0050.jsonl.gz",
+      "bytes": 344670,
+      "uncompressed_bytes": 4595743,
+      "records": 159,
+      "sha256": "d076a60c126a166f98da5e7bfcc37c10b79b14804557710e1f3056a6dae9305a",
+      "content_sha256": "4da516975d46cdaa2a32772baba39c321dc8e44197ac94d70c88b80854a9c6d0",
+      "first_commit": "254d1c6f7441cfe048359d8431111af207f937cc",
+      "last_commit": "691f6ae8242209ac83472932ee2f5c43a247934c"
+    },
+    {
+      "path": "semantic-index-0051.jsonl.gz",
+      "bytes": 356353,
+      "uncompressed_bytes": 4003046,
+      "records": 330,
+      "sha256": "3023f6a3469cbc269c875180fb3828db018f49c071d18aed083d23dd7176f2bb",
+      "content_sha256": "1fccf85f30e68518a58899722c9eceb5774eabb2a5b4514e0ea99c0b977c7669",
+      "first_commit": "55aac2c556cc4f34bcfe8fbce1ec5dde4a2816a5",
+      "last_commit": "fa7743ea46d290b36d6faaaa6dcf5856d73f8927"
+    },
+    {
+      "path": "semantic-index-0052.jsonl.gz",
+      "bytes": 366021,
+      "uncompressed_bytes": 4040484,
+      "records": 121,
+      "sha256": "660bf559dc20aa8d4e0e0851d3597e0438b233bc785be6f809942eb6310b258c",
+      "content_sha256": "49e3bc2eff79e2ee0be90339d686f4cb4da4da4d80cc4ac49d0e944fb7f02465",
+      "first_commit": "861d7a3ddbd8818325ac17ab0c9ca2f965dca273",
+      "last_commit": "852596410419d0ed455d42e66cf27cc9aed5755d"
+    },
+    {
+      "path": "semantic-index-0053.jsonl.gz",
+      "bytes": 368604,
+      "uncompressed_bytes": 4425361,
+      "records": 179,
+      "sha256": "000b5ca9cbd5a89133fc9879112b2d5f7b1835c27775352b5409c1bbfa810af6",
+      "content_sha256": "70fd9dc27d22d0b4fd5d5a6cb78cfed9b843e30b514cd5a92d9da4c8feca1c49",
+      "first_commit": "c6fc204cd1bd7f3c12f980a6deb11a81c4877aab",
+      "last_commit": "69e2fe38b0e716cbc78f02d2e4eef18fe5e59986"
+    },
+    {
+      "path": "semantic-index-0054.jsonl.gz",
+      "bytes": 343272,
+      "uncompressed_bytes": 4572115,
+      "records": 254,
+      "sha256": "232a51ff133579e7c470cbf9860ce1d69ffb105c0d61d135a490465ef5a520f1",
+      "content_sha256": "a0c23bee73db7f67f01219b48605a53e7d21a10639db14b53995d8a884b1266f",
+      "first_commit": "5bea6939e37087a3fb0d44b457e43319cbcbd5c2",
+      "last_commit": "d746f2856eaa3007ab26c989aaa3702bc8777364"
+    },
+    {
+      "path": "semantic-index-0055.jsonl.gz",
+      "bytes": 317120,
+      "uncompressed_bytes": 4005528,
+      "records": 185,
+      "sha256": "61897fa2315509f8397f50f1fb61366e550ce487b97ab2aaa5bb0115a19bb1ae",
+      "content_sha256": "d024d4297b24cfac9eaec3fecdfe415c862b6d491e5f9b3949fbb90929b1f28a",
+      "first_commit": "8f16c074530985e69df1f5c4e7c25cb4ac3d1a63",
+      "last_commit": "38b62c596a76ac89419b26a1b2efd9f6dd93cd26"
+    },
+    {
+      "path": "semantic-index-0056.jsonl.gz",
+      "bytes": 340024,
+      "uncompressed_bytes": 4535942,
+      "records": 130,
+      "sha256": "1987bb8a240de3313b1d086700c114084842961ee040d7f52228df1f9fd02174",
+      "content_sha256": "e08321818b110560820874b748cb1fcd9460dadcdb447a2b63f72ae54a92a9d6",
+      "first_commit": "fc1973c11527df45aa22e0752bfa027749855d67",
+      "last_commit": "3dc2015e2c626ab72bbf2cceef648e93acd5fc4e"
+    },
+    {
+      "path": "semantic-index-0057.jsonl.gz",
+      "bytes": 335401,
+      "uncompressed_bytes": 4001566,
+      "records": 205,
+      "sha256": "93793a94c47178cd721d93f7eb337cbf16a97ffb2365d620fe9bcb7a9792a82a",
+      "content_sha256": "90004477dccdff2a296ea8f4c7e64cbf7cf693cd577911315b2a12759555dea0",
+      "first_commit": "9cdba0c829af52149d4864b5c8d22bcf0839b382",
+      "last_commit": "f208b0fd8fff37f9dcd30722ae41e5eb2a1cab80"
+    },
+    {
+      "path": "semantic-index-0058.jsonl.gz",
+      "bytes": 347564,
+      "uncompressed_bytes": 4001908,
+      "records": 294,
+      "sha256": "c10d0a101d7d0236c1df0a7b41c06f417a2799800c8eb779af216030b670cd70",
+      "content_sha256": "ca297eb188f2d08367b66b239bd89e6fe652d6d611a8a816ec0997d16358a845",
+      "first_commit": "3339b6e739e81443837f75cba1a87cb0b44afcc1",
+      "last_commit": "d54fbee57dd9abd608f22e926ded6491edecd551"
+    },
+    {
+      "path": "semantic-index-0059.jsonl.gz",
+      "bytes": 371084,
+      "uncompressed_bytes": 4031771,
+      "records": 232,
+      "sha256": "7af40c538c566f8ddb11166bab3ad4f2594284470b55f1bb9d289e3f4727dd4f",
+      "content_sha256": "b613d36510b6942b1ce8e6c6ef09ed1ee3ebbe640a982bf4d0620db16ce6c6d5",
+      "first_commit": "3d91dd49e3748055a50f71d376cad10c73d5b66d",
+      "last_commit": "6da2614b10d0a80bd6876317a0291a905141fb91"
+    },
+    {
+      "path": "semantic-index-0060.jsonl.gz",
+      "bytes": 344583,
+      "uncompressed_bytes": 4036203,
+      "records": 233,
+      "sha256": "e8db7ffd5bf711019827a1ae966aca562025a296318f48e1a9f457867f05a0db",
+      "content_sha256": "9bf20f9e6755499a80cc610673ac61d67d6f3c922e174c4f0e4f40f327400c88",
+      "first_commit": "9bc78c0e27c92809b0f41d6ded46d02f90118afe",
+      "last_commit": "d66c3cd43b2f8a332034a717e9e550f2e2812576"
+    },
+    {
+      "path": "semantic-index-0061.jsonl.gz",
+      "bytes": 328544,
+      "uncompressed_bytes": 4022449,
+      "records": 149,
+      "sha256": "f1c11b004845d071497fb466f132b72e1528a99da0f3fecb4cdb8704a14418a0",
+      "content_sha256": "715c8e5befd87c8abe0afee08d362da26821f469d70621a556594f546a83679a",
+      "first_commit": "9e3280873f20afd03075ed474fcceefec5619348",
+      "last_commit": "3779bab83edab9925ad8b69d35d78005b14ddfe9"
+    },
+    {
+      "path": "semantic-index-0062.jsonl.gz",
+      "bytes": 326888,
+      "uncompressed_bytes": 4023107,
+      "records": 233,
+      "sha256": "37ee4c3ac6c3705fdd0ceb613ea77f40fca9cfdb6f983f593648834c6165bab3",
+      "content_sha256": "b515e43bdda3d394c253c4f8240b1054567c4a8ee828a83fb2457f722949f6e6",
+      "first_commit": "1e4e1bd66eaa59dcb0113e409cbd8916e15d300c",
+      "last_commit": "e05382c162a7ce28a97fdb34d9944e98874566aa"
+    },
+    {
+      "path": "semantic-index-0063.jsonl.gz",
+      "bytes": 343876,
+      "uncompressed_bytes": 4147671,
+      "records": 138,
+      "sha256": "4a508cd7e2b476c2b50f7f089f0b3418857d8a620d958942bde68d72a9b4cc17",
+      "content_sha256": "3346e957402b98bed83ef713ff5ea7d9346da85ee124d749a8e28d72680aebe6",
+      "first_commit": "ca4ddab57b73ac256eb1fe0dca9050a905797d17",
+      "last_commit": "c6e0455355712c51795a0a58cff8f43136ce5875"
+    },
+    {
+      "path": "semantic-index-0064.jsonl.gz",
+      "bytes": 305596,
+      "uncompressed_bytes": 4000630,
+      "records": 207,
+      "sha256": "9a3b59b61db6a04a060079c61170313489e169d4af704089d5db67c4fbd81378",
+      "content_sha256": "89f61aaf9178aec4c8c44169d75e326dfad2521f04a659b7afc77f75d9119e4a",
+      "first_commit": "3c5d529a38f56fddb6b0878817bbdf36632f07f8",
+      "last_commit": "a44cf4396d41b65226721fb0c7d7f4a2279dc26f"
+    },
+    {
+      "path": "semantic-index-0065.jsonl.gz",
+      "bytes": 337894,
+      "uncompressed_bytes": 4354031,
+      "records": 219,
+      "sha256": "c7d739969a878fc770deef3a3ecdc9f48a71940532714c408c71f11e8b97843b",
+      "content_sha256": "ea825edec246a09da42f8f6477a633e071e24d0d7c40ebd5d6f29e6288542d16",
+      "first_commit": "fa5e9b0c2b0aeecb37188e3763072da8e128fc47",
+      "last_commit": "aaf50eba35301951ac92140512429a442e5013a2"
+    },
+    {
+      "path": "semantic-index-0066.jsonl.gz",
+      "bytes": 365184,
+      "uncompressed_bytes": 4851563,
+      "records": 50,
+      "sha256": "86e3ac31252564b40f589665c38dd701f69ee097f1e17e8c336e48191a641985",
+      "content_sha256": "34892e497bbb9615597f4c267de6bfb0d8f951f7554633f7bf171fde08b267e4",
+      "first_commit": "a53cdad60cb51317516f283d5e6bd1e764a9586a",
+      "last_commit": "f397d8589bb5358f3c13a2159371c21a89271f36"
+    },
+    {
+      "path": "semantic-index-0067.jsonl.gz",
+      "bytes": 317894,
+      "uncompressed_bytes": 4002641,
+      "records": 115,
+      "sha256": "2a077826f97d1de041508ee4db53304b05315040e1d2a0e3203bbe0c77db4bf6",
+      "content_sha256": "15bf63cb58fe428dfed8603ec15e07e81eace563bda1eecd19e6e73e4760a89f",
+      "first_commit": "0330245458163e2f4c3a2cd29e7635a750d521d7",
+      "last_commit": "b9dd034f7b21d19d07e9fdd3fe00b111611a7856"
+    },
+    {
+      "path": "semantic-index-0068.jsonl.gz",
+      "bytes": 308111,
+      "uncompressed_bytes": 4005266,
+      "records": 112,
+      "sha256": "c3603ee91985f47d700745b4b55fdb6e56bb1c5fd8dae7f6428641730210a949",
+      "content_sha256": "ecef8559f3e11da13d3dcc119e82311158b95763afadb4feec3df7c6e4b96495",
+      "first_commit": "8a40b6362275ae3d3552e2368ed71526c4713003",
+      "last_commit": "38c9ab1d0a8a5399bfe642fc9218d9ebd9b2f0b8"
+    },
+    {
+      "path": "semantic-index-0069.jsonl.gz",
+      "bytes": 344080,
+      "uncompressed_bytes": 5128178,
+      "records": 209,
+      "sha256": "3b3062f604ae559960d8cfa9385575bc0641e3db29d66690e92e3b4aa6587ac8",
+      "content_sha256": "63814bc808731002a4d944dfcf76ddacbcc589008161700157a4cb91146ca071",
+      "first_commit": "712240b613cf5e4554d2c725b8f052fed9b09115",
+      "last_commit": "891bd11f5ea88bc54947a9dd0d54a5b748f45856"
+    },
+    {
+      "path": "semantic-index-0070.jsonl.gz",
+      "bytes": 253387,
+      "uncompressed_bytes": 4000645,
+      "records": 93,
+      "sha256": "844628b16a2146a8d60abd6be44705a071ba57e846daac24df2ff20026fc7f67",
+      "content_sha256": "b4a6994a2c0996a0ce79ab9a5a63b9ab90a0d8cdbdca9284b71f1cb41c5ee051",
+      "first_commit": "37a5f9eae0aaedaaba5f0b76c69dc1c6aff9a776",
+      "last_commit": "9026ba25c58e176971581a64991d6e4f5d2b58ea"
+    },
+    {
+      "path": "semantic-index-0071.jsonl.gz",
+      "bytes": 112073,
+      "uncompressed_bytes": 1364443,
+      "records": 81,
+      "sha256": "7e70d4ee59f3f15963c28c8b7cacf2b3dea0643b4339261993f52487791338b3",
+      "content_sha256": "74e831ad38772d081939a063740d32b3fd34a4d875ac37da42291ae58f9c9d37",
+      "first_commit": "dd511ad0915919c23bcdd08069f5d479f06a96a1",
+      "last_commit": "4134a0bcbb522170c582121ff9a27daca8ac2ff8"
+    }
+  ]
+}

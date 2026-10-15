@@ -1,0 +1,60 @@
+{
+  "scope": "BOUNDED_MAKERSHUB_SOURCE_SEARCH_NOT_EXHAUSTIVE",
+  "results": [
+    {
+      "case_id": "order-boundaries",
+      "matching_lines": 1281,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/order-boundaries.json"
+    },
+    {
+      "case_id": "order-delivery",
+      "matching_lines": 376,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/order-delivery.json"
+    },
+    {
+      "case_id": "reservation",
+      "matching_lines": 774,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/reservation.json"
+    },
+    {
+      "case_id": "consensus",
+      "matching_lines": 323,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/consensus.json"
+    },
+    {
+      "case_id": "queue-workflow",
+      "matching_lines": 1233,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/queue-workflow.json"
+    },
+    {
+      "case_id": "cache-policy",
+      "matching_lines": 1956,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/cache-policy.json"
+    },
+    {
+      "case_id": "ledger-projection",
+      "matching_lines": 817,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/ledger-projection.json"
+    },
+    {
+      "case_id": "storage-partitions",
+      "matching_lines": 154,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/storage-partitions.json"
+    },
+    {
+      "case_id": "safe-release",
+      "matching_lines": 453,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/safe-release.json"
+    },
+    {
+      "case_id": "access-policy",
+      "matching_lines": 863,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/access-policy.json"
+    },
+    {
+      "case_id": "diagnostics",
+      "matching_lines": 1869,
+      "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/diagnostics.json"
+    }
+  ]
+}

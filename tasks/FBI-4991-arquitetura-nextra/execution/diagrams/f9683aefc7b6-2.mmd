@@ -1,0 +1,10 @@
+flowchart TD
+    Record[record_request atualiza contadores] --> Snapshot[flush_to_database copia estado sob lock]
+    Snapshot --> Delta[Calcula novo total menos base persistida]
+    Delta --> Io[Persiste a janela sem manter o lock de memória]
+    Io --> Commit{Commit confirmado?}
+    Commit -->|sim| Advance[Avança base até o snapshot]
+    Commit -->|não| Preserve[Não avança a base de confirmação]
+    Preserve --> Retry[Uma tentativa posterior pode persistir a janela]
+    Advance --> Record
+    Retry --> Snapshot

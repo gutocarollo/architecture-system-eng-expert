@@ -1,0 +1,13 @@
+{
+  "measured_at_utc": "2026-10-15T01:43:18.912419+00:00",
+  "scope": "IN_MEMORY_MUTATION_NO_OWNED_SOURCE_WRITES",
+  "source": "labs/architecture/financial.py",
+  "source_sha256": "f58b9018f22e31f536e7072055b038bfb7cbf0e056a086ebdb30713859641565",
+  "mutation": {
+    "from": "'debit':sum(inbox.values())",
+    "to": "'debit':sum(value for _,value in messages)"
+  },
+  "stdout": "{\"after\": {\"debit\": 250, \"effects\": 2}, \"before\": {\"debit\": 250, \"effects\": 3}, \"guarantee\": \"Repeated delivery of the same semantic operation has one effect in this store.\", \"limit\": \"The key lifetime, atomic storage and payload conflict policy remain design obligations.\", \"probe\": \"deduplicate\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+  "verdict": "FALSE_PASS_CONFIRMED",
+  "meaning": "Duplicate amount remained 250 rather than 150 while comparison=PASS was emitted."
+}

@@ -1,0 +1,83 @@
+---
+title: "Experimente: a versão nova chega a quem ainda usa a antiga"
+description: "Você aprenderá a separar a compatibilidade do contrato, a população exposta e a volta para uma versão anterior."
+diataxis: tutorial
+---
+
+# Experimente: a versão nova chega a quem ainda usa a antiga
+
+Continue o mesmo caso: [volte ao caso](/jornadas/safe-release/); [entenda o mecanismo](/explicacoes/casos/safe-release/); [resolva a tarefa](/guias/casos/safe-release/); [consulte contratos e fontes](/referencia/casos/safe-release/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a separar a compatibilidade do contrato, a população exposta e a volta para uma versão anterior. Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior e das dependências do curso instaladas com `npm ci`. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+Objeto antigo amount=1000, objeto novo amount_cents=100000, cem requisições numeradas e duas funções puras. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+python3 labs/architecture/financial.py safe-release
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:19.278509+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+{"after": {"new_reader_value": 100000, "old_reader_value": 1000}, "before": {"old_reader_value": null}, "guarantee": "Expanding first keeps the old field while the new reader learns the new field.", "limit": "Removing the old field requires evidence that old readers have retired.", "probe": "expand-contract"}
+{"after": {"new_version_exposure": 5, "rollback_route": "old"}, "before": {"new_version_exposure": 100}, "guarantee": "A controlled route limits the first new-version population and can redirect it.", "limit": "Synthetic exposure counts do not prove Kubernetes readiness or rollback of incompatible data.", "probe": "progressive-route"}
+{"after": {"shadow_mismatch": true, "visible_primary": 10}, "before": {"silent_new_result": 1000}, "guarantee": "A shadow computation compares results while the primary owns the user-visible effect.", "limit": "Both implementations must avoid duplicate writes; this probe uses pure functions.", "probe": "shadow-parity"}
+{"after": {"reconciled": {"image": "v2", "replicas": 2}}, "before": {"actual": {"image": "v1", "replicas": 1}}, "guarantee": "A reconciler compares declared state with observed state before applying a change.", "limit": "A dict update is a model of reconciliation, not GitOps, Terraform or immutable infrastructure deployment.", "probe": "desired-state"}
+{"after": {"assignment_stable": true, "fees": [1, 2, 1, 2], "visible_cohorts": ["A", "B"]}, "before": {"fees": [1, 1, 1, 1], "visible_cohorts": ["A"]}, "guarantee": "Both A and B are user-visible treatments assigned to distinct stable cohorts.", "limit": "This demonstrates cohort routing; experiment design, significance and rollout controls are not implemented.", "probe": "ab-cohorts"}
+{"after": {"minimum_ready": 1, "new_instances": 2, "rolling_ready_history": [2, 1, 2, 1, 2]}, "before": {"minimum_ready": 0, "recreate_ready_history": [2, 0, 2]}, "guarantee": "Recreate produces a zero-ready interval in this schedule, while a one-at-a-time rolling replacement preserves one ready instance.", "limit": "Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.", "probe": "rolling-recreate-capacity"}
+{"after": {"blue_still_ready": true, "provisioned_environments": 2, "visible_after_rollback": 1, "visible_after_switch": 2}, "before": {"visible_version": 1}, "guarantee": "Traffic changes between two already-provisioned environments and can return to the previous ready environment.", "limit": "The route switch does not undo incompatible data written by the new environment; no deployment platform is contacted.", "probe": "blue-green-route"}
+{"after": {"after_reconcile": {"image": "v2", "replicas": 2}, "drift_before_reconcile": {"image": "v2", "replicas": 0}, "planned_fields": ["image", "replicas"], "selected_revision": "revision-2"}, "before": {"observed": {"image": "v1", "replicas": 0}}, "guarantee": "A versioned desired-state source drives the plan and reconciliation instead of allowing manual runtime drift to become the desired source.", "limit": "The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof.", "probe": "versioned-desired-reconcile"}
+{"after": {"new_active_id": "instance-2", "new_active_image": "v2", "old_image_retained": "v1", "old_instance_unchanged": true}, "before": {"in_place_image_change_owner": "instance-1"}, "guarantee": "The new infrastructure instance is created as a replacement while the prior instance remains unchanged.", "limit": "Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation.", "probe": "immutable-replacement"}
+{"after": {"calls": [["/orders", "legacy"], ["/orders", "new"], ["/positions", "legacy"]], "client_contract_preserved": true, "legacy_position_result": 50, "new_order_result": 100}, "before": {"orders_owner": "legacy", "result": 100}, "guarantee": "An abstraction preserves the caller contract while routing one extracted capability to its new owner, leaving the rest on the legacy path during transition.", "limit": "The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.", "probe": "strangler-abstraction-route"}
+{"after": {"order_value": 150, "owner_count": 2, "position_value": 1000, "separate_stores": true}, "before": {"applications_share_same_mutable_table": true, "shared_rows": 2}, "guarantee": "Data is split into stores with explicit capability owners, exposing the need for an integration contract between the formerly shared consumers.", "limit": "The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed.", "probe": "decomposed-data-owners"}
+comparison=PASS case=safe-release probes=11 inputs=SYNTHETIC runtime=LOCAL
+```
+
+Ambos os leitores encontram o campo que conhecem. A exposição inicial fica em 5/100 = 5%. A comparação shadow detecta a diferença entre 10 e 1.000 antes de trocar a saída.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/financial.py` e procure a função `safe_release`. Localize a decisão que calcula before e a que calcula after. Compare a entrada e o recurso protegido. O modelo anterior e a proteção estão no mesmo arquivo para permitir repetir a comparação com segurança.
+
+Esta família também possui propriedades específicas em `labs/architecture/models_ops.py`. O mapa de conceitos liga cada propriedade ao seu probe, às entradas e ao limite. Você pode abrir a função `observations` do módulo e procurar o identificador mostrado no comando.
+
+Para repetir somente um probe, copie seu nome do campo `probe` e acrescente-o ao comando:
+
+```sh
+python3 labs/architecture/financial.py safe-release --probe expand-contract
+```
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/safe-release/); [entenda o mecanismo](/explicacoes/casos/safe-release/); [resolva a tarefa](/guias/casos/safe-release/); [consulte contratos e fontes](/referencia/casos/safe-release/).
+
+O [mapa de conceitos deste caso](/jornadas/safe-release/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

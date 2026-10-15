@@ -1,0 +1,12 @@
+{
+  "repo": "mastodon/mastodon",
+  "path": "app/workers/activitypub/delivery_worker.rb",
+  "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+  "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb",
+  "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:54:10.859775+00:00",
+  "sha256": "3c8a15c70dc55ff628f3d7df33561a1e90a3709a17fb3fd1fc2d1f3cfbb4adf6",
+  "line_count": 100,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--workers--activitypub--delivery_worker.rb"
+}

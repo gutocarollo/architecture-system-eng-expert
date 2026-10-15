@@ -1,0 +1,12 @@
+{
+  "repo": "grafana/grafana",
+  "path": "public/app/plugins/panel/graph/module.ts",
+  "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+  "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts",
+  "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:54:10.974793+00:00",
+  "sha256": "9ce8892b247e09b63f4d1c5b87a1f4ced35ce9a862d4b0c6f8df6142247a5316",
+  "line_count": 380,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--plugins--panel--graph--module.ts"
+}

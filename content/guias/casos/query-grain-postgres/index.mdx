@@ -1,0 +1,37 @@
+---
+title: "Como investigar: A comissão de R$ 100 aparece como R$ 200"
+description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
+diataxis: how-to
+---
+
+# Como investigar: A comissão de R$ 100 aparece como R$ 200
+
+[Retorne ao caso](/jornadas/query-grain-postgres/), [entenda o mecanismo](/explicacoes/casos/query-grain-postgres/), [aprenda fazendo](/tutoriais/casos/query-grain-postgres/), [resolva a tarefa](/guias/casos/query-grain-postgres/) ou [consulte o contrato](/referencia/casos/query-grain-postgres/).
+
+Use este guia quando você já entende o mecanismo e precisa conferir uma consulta semelhante. Seu resultado procurado é: Uma conta e um mês produzem uma linha com comissão total de R$ 100; a junção não pode alterar essa soma.
+
+## Fixe a fonte e a condição
+
+Registre o SHA, a função e os valores de entrada. Comece pelo kernel `get_family_revenue_by_period` em `backend/app/repositories/account.py`. Reproduza com dados sintéticos em um banco descartável; preserve as descrições de PR e Jira como contexto, separadas da prova de execução.
+
+## Verifique a garantia
+
+```sh
+python3 labs/postgres-lineage/run.py --case grain
+```
+
+Localize `roa_per` no arquivo anterior. No patch, acompanhe sua substituição por `custody_per`, a leitura de `rpt_advisor__roa_pj1`, o agrupamento por mês e conta e a seleção de `MAX(r.net_assets_amount)`. A prática executa esse SQL; ela não deduplica a resposta no Python.
+
+Troque somente a cópia candidata e repita o mesmo invariante. O tutorial apresenta o roteiro editável completo. Para conferir automaticamente os dois desafios, use `python3 labs/postgres-lineage/check_challenges.py`.
+
+## Decida o que pode concluir
+
+A versão anterior retorna duas linhas e soma R$ 200. A versão alterada retorna uma linha e soma R$ 100. A custódia do exemplo continua em R$ 1.000.000.
+
+O uso de MAX depende do contrato deste recorte: a custódia da conta está repetida por assessor. MAX não é uma receita geral para somar patrimônios distintos. O exercício isola a cardinalidade da junção e não valida a fórmula financeira de ROA nem o caminho completo da tela.
+
+Antes de adaptar a mudança a outro fluxo, confirme o contrato dos dados e os chamadores desse fluxo. O resultado local não substitui essa investigação.
+
+Este recorte está ligado ao [card FBI-4604](https://fazcapital.atlassian.net/browse/FBI-4604) e ao [PR 507](https://bitbucket.org/fazcapital/makershub/pull-requests/507). A leitura histórica registrou o PR como **MERGED**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/b1df42295ce42d593ae14f0a8a9092c28d1b410d/backend/app/repositories/account.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/05b2cacdddd59b968641b12d8d124bad1888392f/backend/app/repositories/account.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
+
+[Retorne ao caso](/jornadas/query-grain-postgres/), [entenda o mecanismo](/explicacoes/casos/query-grain-postgres/), [aprenda fazendo](/tutoriais/casos/query-grain-postgres/), [resolva a tarefa](/guias/casos/query-grain-postgres/) ou [consulte o contrato](/referencia/casos/query-grain-postgres/).

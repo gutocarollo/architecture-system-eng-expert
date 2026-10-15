@@ -1,0 +1,167 @@
+
+> fazcapital-architecture-course@1.0.0 build
+> next build --webpack
+
+▲ Next.js 16.4.0 (webpack)
+✓ Running next.config.mjs took 75ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/api-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/availability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/cache/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/capacity/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-patterns/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/concurrency/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/distributed-work/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/observability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/safe-change/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/security/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/investigar-impacto.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/recuperar-pipeline.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/03-event-driven-messaging.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/evidencias.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/prioritarios.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/skills-e-projetos.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/idempotency.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/06-cache.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/07-resiliencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/08-concorrencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/10-ddd-domain-driven-design.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/09-apis-e-integracao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/12-deploy-e-releases.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/13-alta-disponibilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/14-seguranca.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/15-observabilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/16-workflow-e-processamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/17-padroes-classicos-gof.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/outbox.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/optimistic-concurrency.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/read-projection.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/single-flight.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/state-machine.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/cache/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/business-rules/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/availability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/api-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/capacity/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-patterns/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/concurrency/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/code-boundaries/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-distribution/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/data-durability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/messages/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/reliable-integration/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/distributed-work/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/read-models/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/safe-change/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/workflow/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/observability/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/investigar-impacto.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/explicacoes/security/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/recuperar-pipeline.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/guias/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/evidencias.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/prioritarios.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/skills-e-projetos.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/03-event-driven-messaging.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/06-cache.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/07-resiliencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/09-apis-e-integracao.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/10-ddd-domain-driven-design.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/08-concorrencia.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/12-deploy-e-releases.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/14-seguranca.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/13-alta-disponibilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/15-observabilidade.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/16-workflow-e-processamento.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/17-padroes-classicos-gof.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/referencia/catalogo/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/idempotency.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/index.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/optimistic-concurrency.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/outbox.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/read-projection.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/single-flight.mdx
+- [33mwarn[0m [nextra] Failed to get the last modified timestamp from Git for the file ../../../../.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/content/tutoriais/state-machine.mdx
+✓ Compiled successfully in 12.9s
+  Running TypeScript ...
+  Finished TypeScript in 1ms ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/54) ...
+  Generating static pages using 4 workers (13/54) 
+  Generating static pages using 4 workers (26/54) 
+  Generating static pages using 4 workers (40/54) 
+✓ Generating static pages using 4 workers (54/54) in 1037ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /_not-found
+└   /[[...mdxPath]]
+  ├ ● /explicacoes/api-integration
+  ├ ● /explicacoes/availability
+  ├ ● /explicacoes/business-rules
+  └ ● [+49 more paths]
+
+
+○  (Static)  prerendered as static content
+●  (SSG)     prerendered as static HTML (uses generateStaticParams)
+
+
+> fazcapital-architecture-course@1.0.0 postbuild
+> pagefind --site .next/server/app --output-path public/_pagefind
+
+
+Running Pagefind v1.5.2 (Extended)
+Running from: "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998"
+Source:       ".next/server/app"
+Output:       "public/_pagefind"
+
+[Walking source directory]
+Found 54 files matching **/*.{html}
+
+[Parsing files]
+Found a data-pagefind-body element on the site.
+↳ Ignoring pages without this tag.
+
+[Reading languages]
+Discovered 1 language: pt-br
+
+[Building search indexes]
+Total: 
+  Indexed 1 language
+  Indexed 52 pages
+  Indexed 5465 words
+  Indexed 0 filters
+  Indexed 0 sorts
+
+Finished in 0.085 seconds

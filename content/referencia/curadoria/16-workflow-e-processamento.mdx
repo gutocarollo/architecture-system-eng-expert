@@ -1,0 +1,239 @@
+---
+title: "Curadoria: Workflow e processamento"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Workflow e processamento."
+diataxis: reference
+---
+
+# Curadoria: Workflow e processamento
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Batch Processing
+
+O identificador canônico é `batch-processing`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A definição Airflow conserva as relações do DAG; o scheduler escolhe as tarefas elegíveis e entrega sua execução.
+
+A base de estudo é [apache/airflow / dag.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/task-sdk/src/airflow/sdk/definitions/dag.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / scheduler_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `DAG`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py#L205-L211). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#batch-processing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Choreography
+
+O identificador canônico é `choreography`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Jellyfin publica eventos para consumidores especializados sem centralizar todas as respostas no publicador.
+
+A base de estudo é [ThreeDotsLabs/watermill / router.go @ 080d4b4e](https://github.com/ThreeDotsLabs/watermill/blob/080d4b4e7fe6105ab880d1becd5cf91af0235d8c/message/router.go); licença [MIT](https://github.com/ThreeDotsLabs/watermill/blob/080d4b4e7fe6105ab880d1becd5cf91af0235d8c/LICENSE). A aplicação ou candidato de aplicação é [jellyfin/jellyfin / EventManager.cs @ aec42b34](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Jellyfin.Server.Implementations/Events/EventManager.cs); licença [GPL-2.0](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Publish`](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Jellyfin.Server.Implementations/Events/EventManager.cs#L38-L44). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O gerenciador local de eventos demonstra coordenação por reação. Ele não prova uma Saga coreografada entre serviços distribuídos.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#choreography). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## DAG
+
+O identificador canônico é `dag`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A definição Airflow conserva as relações do DAG; o scheduler escolhe as tarefas elegíveis e entrega sua execução.
+
+A base de estudo é [apache/airflow / dag.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/task-sdk/src/airflow/sdk/definitions/dag.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / scheduler_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `DAG`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py#L205-L211). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#dag). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Finite State Machine
+
+O identificador canônico é `finite-state-machine`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
+
+A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/interfaces/mutable_state.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE). A aplicação ou candidato de aplicação é [temporalio/temporal / workflow_rebuilder.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#finite-state-machine). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Job Queue
+
+O identificador canônico é `job-queue`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Superset monta a aplicação Celery; workers concorrentes retiram tarefas da fila e executam por um pool.
+
+A base de estudo é [celery/celery / worker.py @ 33868c3d](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/celery/worker/worker.py); licença [BSD-3-Clause](https://github.com/celery/celery/blob/33868c3dbe98acd236ac95648ed7f1effb7b2385/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / celery_app.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Celery`](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/tasks/celery_app.py#L65-L70). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#job-queue). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Kappa Architecture
+
+O identificador canônico é `kappa-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+RisingWave lê o log Kafka a partir de offsets, aplica um plano incremental e materializa o resultado para consulta. CREATE MATERIALIZED VIEW instala esse plano; a origem recupera posições e volta a ler o mesmo log quando necessário. O recorte usa o caminho de stream para o histórico recuperável e para novos eventos.
+
+A base de estudo é [apache/kafka / KafkaStreams.java @ e58847b4](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/streams/src/main/java/org/apache/kafka/streams/KafkaStreams.java); licença [Apache-2.0](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/LICENSE). A aplicação ou candidato de aplicação é [risingwavelabs/risingwave / reader.rs @ 85d3b933](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/src/connector/src/source/kafka/source/reader.rs); licença [Apache-2.0](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/LICENSE); [risingwavelabs/risingwave / create_mv.rs @ 85d3b933](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/src/frontend/src/handler/create_mv.rs); licença [Apache-2.0](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/LICENSE); [risingwavelabs/risingwave / materialize.rs @ 85d3b933](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/src/stream/src/executor/mview/materialize.rs); licença [Apache-2.0](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/LICENSE); [risingwavelabs/risingwave / source_executor.rs @ 85d3b933](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/src/stream/src/executor/source/source_executor.rs); licença [Apache-2.0](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `offset`](https://github.com/risingwavelabs/risingwave/blob/85d3b93386d9285a707c3010aed94251cd1a2d5d/src/connector/src/source/kafka/source/reader.rs#L121-L127). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A interpretação Kappa cobre esse caminho Kafka até a visão incremental. Não afirma que todo RisingWave exclua batch, snapshots ou backfill. Reprocessar o histórico exige retenção suficiente e configuração de offsets e nova visão. Kafka Streams é uma base comparada, não uma dependência afirmada do motor Rust.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#kappa-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Lambda Architecture
+
+O identificador canônico é `lambda-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O broker Pinot consulta uma tabela híbrida pelos caminhos offline e realtime. Uma fronteira temporal separa o período consolidado do período recente, e o broker reúne as respostas. O gerenciador de fronteira calcula esse ponto a partir dos segmentos offline disponíveis.
+
+A base de estudo é [apache/spark / DAGScheduler.scala @ 605deea5](https://github.com/apache/spark/blob/605deea50b574d87d32903936e9fbf5d80c36820/core/src/main/scala/org/apache/spark/scheduler/DAGScheduler.scala); licença [Apache-2.0](https://github.com/apache/spark/blob/605deea50b574d87d32903936e9fbf5d80c36820/LICENSE). A aplicação ou candidato de aplicação é [apache/pinot / BaseSingleStageBrokerRequestHandler.java @ bf956b3c](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/pinot-broker/src/main/java/org/apache/pinot/broker/requesthandler/BaseSingleStageBrokerRequestHandler.java); licença [Apache-2.0](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/LICENSE); [apache/pinot / TimeBoundaryManager.java @ bf956b3c](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/pinot-broker/src/main/java/org/apache/pinot/broker/routing/timeboundary/TimeBoundaryManager.java); licença [Apache-2.0](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/LICENSE); [apache/pinot / RealtimeSegmentDataManager.java @ bf956b3c](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/pinot-core/src/main/java/org/apache/pinot/core/data/manager/realtime/RealtimeSegmentDataManager.java); licença [Apache-2.0](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/LICENSE); [apache/pinot / SegmentGenerationAndPushTaskExecutor.java @ bf956b3c](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/pinot-plugins/pinot-minion-tasks/pinot-minion-builtin-tasks/src/main/java/org/apache/pinot/plugin/minion/tasks/segmentgenerationandpush/SegmentGenerationAndPushTaskExecutor.java); licença [Apache-2.0](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `TimeBoundary`](https://github.com/apache/pinot/blob/bf956b3c204680f98982fb7e70733d19594411a5/pinot-broker/src/main/java/org/apache/pinot/broker/requesthandler/BaseSingleStageBrokerRequestHandler.java#L671-L677). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A interpretação Lambda é limitada à consulta híbrida e à reconciliação temporal de offline e realtime. Spark é uma base batch comparada, não uma dependência obrigatória afirmada. A configuração precisa preservar a mesma semântica de tempo; duas ingestões isoladas não bastam para demonstrar o desenho.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#lambda-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## MapReduce
+
+O identificador canônico é `mapreduce`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O comando CrawlDb do crawler Nutch monta um job Hadoop com mapper e reducer. O mapper emite os dados de URLs; o reducer reúne os registros da mesma URL para atualizar o estado de rastreamento.
+
+A base de estudo é [apache/hadoop / Mapper.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core/src/main/java/org/apache/hadoop/mapred/Mapper.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/nutch / CrawlDb.java @ a25edb06](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/crawl/CrawlDb.java); licença [Apache-2.0](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/LICENSE.txt); [apache/nutch / CrawlDbFilter.java @ a25edb06](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/crawl/CrawlDbFilter.java); licença [Apache-2.0](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/LICENSE.txt); [apache/nutch / CrawlDbReducer.java @ a25edb06](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/crawl/CrawlDbReducer.java); licença [Apache-2.0](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `CrawlDbFilter`](https://github.com/apache/nutch/blob/a25edb066de95a7f5cc990e2cd5b68a35ce5d521/src/java/org/apache/nutch/crawl/CrawlDb.java#L246-L252). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A aplicação é o crawler real Nutch. O recorte ensina a divisão e reunião por chave no banco de rastreamento; ele não é uma medição do tempo do job nem uma recomendação de trocar uma consulta SQL simples por Hadoop.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#mapreduce). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Orchestrator
+
+O identificador canônico é `orchestrator`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A definição Airflow conserva as relações do DAG; o scheduler escolhe as tarefas elegíveis e entrega sua execução.
+
+A base de estudo é [apache/airflow / dag.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/task-sdk/src/airflow/sdk/definitions/dag.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / scheduler_job_runner.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `DAG`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/jobs/scheduler_job_runner.py#L205-L211). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#orchestrator). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Pipeline
+
+O identificador canônico é `pipeline`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Camel encadeia processadores. NiFi implementa a etapa que recebe o FlowFile e atualiza atributos antes de transferi-lo.
+
+A base de estudo é [apache/camel / Pipeline.java @ cd2ce899](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/core/camel-core-processor/src/main/java/org/apache/camel/processor/Pipeline.java); licença [Apache-2.0](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/nifi / UpdateAttribute.java @ 9e6c1889](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-update-attribute-bundle/nifi-update-attribute-processor/src/main/java/org/apache/nifi/processors/attributes/UpdateAttribute.java); licença [Apache-2.0](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `onTrigger`](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-update-attribute-bundle/nifi-update-attribute-processor/src/main/java/org/apache/nifi/processors/attributes/UpdateAttribute.java#L470-L476). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#pipeline). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="scatter-gather" />
+
+## Scatter/Gather
+
+O identificador canônico é `scatter-gather`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Prometheus executa loops concorrentes para alvos. Errgroup fornece uma base para aguardar e reunir tarefas.
+
+A base de estudo é [golang/sync / errgroup.go @ 36f2d70e](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/errgroup/errgroup.go); licença [BSD-3-Clause](https://github.com/golang/sync/blob/36f2d70ecde9857dc4e363242a1369c7645d6770/LICENSE). A aplicação ou candidato de aplicação é [prometheus/prometheus / scrape.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Wait`](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/scrape/scrape.go#L290-L296). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Scrapes concorrentes não comprovam que uma mesma operação distribui e reúne respostas. O aplicativo é adjacente e o conceito continua pendente.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#scatter-gather). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## State Machine
+
+O identificador canônico é `state-machine`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
+
+A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/interfaces/mutable_state.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE). A aplicação ou candidato de aplicação é [temporalio/temporal / workflow_rebuilder.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#state-machine). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Stream Processing
+
+O identificador canônico é `stream-processing`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Flink executa uma tarefa de stream e coordena checkpoints. Kafka Streams fornece uma base alternativa para processar um log contínuo.
+
+A base de estudo é [apache/kafka / KafkaStreams.java @ e58847b4](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/streams/src/main/java/org/apache/kafka/streams/KafkaStreams.java); licença [Apache-2.0](https://github.com/apache/kafka/blob/e58847b4d46869704e87b071eb2b8b96cffe93a3/LICENSE). A aplicação ou candidato de aplicação é [apache/flink / StreamTask.java @ 371ba17a](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/runtime/tasks/StreamTask.java); licença [Apache-2.0](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `StreamTask`](https://github.com/apache/flink/blob/371ba17ab9fde660097fafbcec4bae3dbc6a7425/flink-runtime/src/main/java/org/apache/flink/streaming/runtime/tasks/StreamTask.java#L222-L228). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Processar continuamente não prova Kappa sozinho: falta comprovar que o mesmo log sustenta reprocessamento sem caminho batch separado.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#stream-processing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Workflow Engine
+
+O identificador canônico é `workflow-engine`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O serviço Temporal reconstrói o estado de uma execução a partir dos eventos do histórico e avança conforme os eventos aceitos.
+
+A base de estudo é [temporalio/temporal / mutable_state.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/interfaces/mutable_state.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE). A aplicação ou candidato de aplicação é [temporalio/temporal / workflow_rebuilder.go @ 10791698](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go); licença [MIT](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/backend-development/skills/workflow-orchestration-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `history`](https://github.com/temporalio/temporal/blob/10791698da3708020fe52db8af1b4bef89db3177/service/history/workflow_rebuilder.go#L146-L152). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A projeção e a reconstrução são internas ao workflow. Isso não prova que o domínio financeiro inteiro use Event Sourcing nem que o produto use XState.
+
+No curso, [abra o caso aplicado](/jornadas/queue-workflow/) e [consulte a ação e o probe deste conceito](/jornadas/queue-workflow/conceitos/#workflow-engine). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

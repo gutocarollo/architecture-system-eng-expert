@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/nova",
+  "path": "doc/source/contributor/resize-and-cold-migrate.rst",
+  "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+  "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst",
+  "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:52:33.563649+00:00",
+  "sha256": "3e457d01ee2cd61ed5c968cc97a0b8ec27adffe52821e89896ac891ed0c606b2",
+  "line_count": 167,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-openstack--nova--doc--source--contributor--resize-and-cold-migrate.rst"
+}

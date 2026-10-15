@@ -1,0 +1,9 @@
+{
+  "observed_at_utc": "2026-10-15T02:43:52.319112+00:00",
+  "source_sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+  "mutation_from": "'debit':sum(inbox.values())",
+  "mutation_to": "'debit':sum(value for _,value in messages)",
+  "rejected": true,
+  "reason": "deduplicate: after violates invariant: Repeated delivery of the same semantic operation has one effect in this store.; observed={'debit': 250, 'effects': 2}",
+  "scope": "IN_MEMORY_ONLY"
+}

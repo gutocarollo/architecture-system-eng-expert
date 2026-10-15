@@ -1,0 +1,232 @@
+---
+title: "8. Concorrência"
+description: "Os vinte e dois labels de concorrência, seus recursos protegidos, exemplos e limites de garantia."
+diataxis: reference
+---
+
+# 8. Concorrência
+
+A [explicação de concorrência](/explicacoes/concurrency/) desenvolve lease, propriedade e versão. Os exemplos propostos não estabelecem contratos de escrita em produção. Código MakersHub corresponde ao snapshot `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026 às 16:16 UTC. Nas entradas abaixo, a skill geral de apoio `backend-concurrency-mechanics` está na [curadoria](/referencia/skills-e-projetos/); ela não certifica garantias de uma biblioteca.
+
+<span id="g08-e001" />
+
+## Mutex
+
+Permite um executante por vez na seção protegida. O single-flight usa `asyncio.Lock` para coordenar sua task local. O limite é o objeto compartilhado: outro processo não participa dessa trava. A skill é `backend-concurrency-mechanics`; a base e **REF didática** são [Lock e exemplo asyncio](https://docs.python.org/3/library/asyncio-sync.html#lock), implementados no OSS CPython. Não são locks distribuídos.
+
+{/* current-curation:mutex */}
+
+A [curadoria de Mutex](/referencia/curadoria/08-concorrencia/#mutex) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e002" />
+
+## Semaphore
+
+Permite um número definido de executantes. O worker lido tem quatro vagas locais. O limite é que a vaga não limita o consumo de memória de cada task nem soma capacidade entre réplicas. A skill é `backend-concurrency-mechanics`; [Semaphore asyncio](https://docs.python.org/3/library/asyncio-sync.html#semaphore) fornece base e **REF**, e o worker MakersHub é o uso local comprovado.
+
+{/* current-curation:semaphore */}
+
+A [curadoria de Semaphore](/referencia/curadoria/08-concorrencia/#semaphore) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e003" />
+
+## Reader/Writer Lock
+
+Permite leitores simultâneos e exige exclusividade para escritor segundo a política. Um dicionário de referência consultado por muitas threads pode usar essa separação. O limite é justiça, espera e duração; leitores podem bloquear escritor conforme a política. A skill é `backend-concurrency-mechanics`; a base [ReentrantReadWriteLock](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/locks/ReentrantReadWriteLock.html) contém a aplicação **REF didática RWDictionary**, sem adoção MakersHub comprovada.
+
+{/* current-curation:reader-writer-lock */}
+
+A [curadoria de Reader/Writer Lock](/referencia/curadoria/08-concorrencia/#reader-writer-lock) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e004" />
+
+## Spinlock
+
+Tenta adquirir uma proteção com repetição ativa, podendo combinar espera conforme a implementação. Num trecho curto de memória compartilhada, evita um caminho de suspensão imediata. O limite é consumo de CPU e contenção; não é uma escolha automática para esperar HTTP. A skill geral é `backend-concurrency-mechanics`; o produto OSS [PostgreSQL s_lock.c](https://github.com/postgres/postgres/blob/master/src/backend/storage/lmgr/s_lock.c) fornece implementação de base com spin e atraso.
+
+{/* current-curation:spinlock */}
+
+A [curadoria de Spinlock](/referencia/curadoria/08-concorrencia/#spinlock) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e005" />
+
+## Optimistic Locking
+
+Confere se a versão usada para decidir continua válida na gravação. Duas edições hipotéticas do mesmo saldo recebem conflito quando uma já mudou a versão. O limite é o recurso: versão do lead não protege um horário disputado por outros leads. A skill é `backend-concurrency-mechanics`; a base é [Marten opt-in de documentos](https://martendb.io/documents/concurrency.html). A aplicação **REF** [Tickets](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/Tickets) usa versão de event stream, outro contrato, com a ressalva v8.22/Rich explicada em [prioritário 33](/explicacoes/concurrency/#pattern-33).
+
+{/* current-curation:optimistic-concurrency-control */}
+
+A [curadoria de Optimistic Concurrency Control](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#optimistic-concurrency-control) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e006" />
+
+## Pessimistic Locking
+
+Obtém proteção antes de alterar e a conserva durante a seção ou transação. Numa reserva proposta, dois executores podem disputar a mesma linha protegida. O limite inclui espera, deadlock e duração; chamadas externas longas ampliam a ocupação. A skill é `backend-concurrency-mechanics`; a base e produto OSS [locks PostgreSQL](https://www.postgresql.org/docs/16/explicit-locking.html) oferecem o contrato, sem inferir um lock por linha em todo fluxo MakersHub.
+
+{/* current-curation:pessimistic-locking */}
+
+A [curadoria de Pessimistic Locking](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#pessimistic-locking) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e007" />
+
+## Lock-Free
+
+Garante progresso do conjunto de operações sob as premissas do algoritmo, sem depender da liberação de uma trava por um participante parado. Uma fila de threads pode empregar esse mecanismo. O limite é que uma thread específica pode repetir ou perder a disputa; lock-free não significa wait-free ou prazo de rede. A skill é `backend-concurrency-mechanics`; [ConcurrentLinkedQueue Java](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html) é implementação OSS de base e **REF** não bloqueante, sem adoção local.
+
+{/* current-curation:lock-free */}
+
+A [curadoria de Lock-Free](/referencia/curadoria/08-concorrencia/#lock-free) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e008" />
+
+## Wait-Free
+
+Cada operação termina em um número limitado de passos sob as premissas do modelo, independentemente do progresso de outros participantes. É uma garantia que poderia importar num algoritmo de comunicação de memória com requisito por operação. O limite é que o modelo não cobre automaticamente agendamento, alocação ou rede.
+
+A skill geral é `backend-concurrency-mechanics`. O projeto OSS [Fast Wait Free Queue](https://github.com/chaoran/fast-wait-free-queue) fornece base de pesquisa e aplicação **REF** de benchmark comparando filas, incluindo `wfqueue`. O [código enqueue](https://github.com/chaoran/fast-wait-free-queue/blob/master/wfqueue.c) combina caminho rápido limitado e caminho com ajuda. A classificação é apresentada pelo projeto; não foi feita uma prova formal ou execução do benchmark nesta autoria, e ela não se estende à rede ou ao sistema inteiro.
+
+{/* current-curation:wait-free */}
+
+A [curadoria de Wait-Free](/referencia/curadoria/08-concorrencia/#wait-free) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e009" />
+
+## Compare-and-Swap
+
+Compara um valor esperado e altera somente se ele coincidir. Num contador hipotético, a operação refaz a decisão quando outra thread mudou o valor. O limite é a identidade e o estado observado; uma comparação isolada não preserva todos os invariantes de uma transação. A skill é `backend-concurrency-mechanics`; a base [java.util.concurrent.atomic](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/atomic/package-summary.html) documenta operações condicionais e exemplos **REF** do OSS OpenJDK.
+
+{/* current-curation:compare-and-swap-cas */}
+
+A [curadoria de Compare-and-Swap / CAS](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#compare-and-swap-cas) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e010" />
+
+## Actor Model
+
+Participantes encapsulam estado e comportamento e interagem por mensagens. Num agendador proposto, mensagens de uma identidade poderiam ser tratadas por seu ator responsável. O limite é que mailbox, falhas, distribuição e ordem precisam de contrato; um método async não comprova um ator. A skill geral é `backend-concurrency-mechanics`; a base e aplicação **REF didática** são [tutorial Apache Pekko](https://pekko.apache.org/docs/pekko/current/typed/guide/tutorial_1.html).
+
+{/* current-curation:actor-model */}
+
+A [curadoria de Actor Model](/referencia/curadoria/01-arquiteturas-de-aplicacao/#actor-model) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e011" />
+
+## Thread Pool
+
+Reutiliza threads para executar unidades de trabalho. Um processamento proposto de arquivos pode usar executores sem criar uma thread a cada arquivo. O limite inclui fila, número de threads e bloqueios; pool não implica fila limitada. A skill é `backend-concurrency-mechanics`; a base [ThreadPoolExecutor](https://docs.python.org/3/library/concurrent.futures.html#threadpoolexecutor) contém um exemplo **REF didática** de execução no OSS CPython.
+
+{/* current-curation:thread-pool */}
+
+A [curadoria de Thread Pool](/referencia/curadoria/08-concorrencia/#thread-pool) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e012" />
+
+## Worker Pool
+
+Reutiliza executantes para tasks, possivelmente em processos ou máquinas diferentes. O worker Redis MakersHub e os executores Airflow fornecem contextos distintos. O limite é que adicionar workers não compartilha memória nem protege o metadata DB. A skill adjacente é `backend-background-jobs`; base e produto OSS de comparação são [Airflow](https://airflow.apache.org/docs/apache-airflow/3.2.2/core-concepts/executor/index.html), com runtime delimitado no capítulo [trabalho distribuído](/explicacoes/distributed-work/).
+
+{/* current-curation:worker-pool */}
+
+A [curadoria de Worker Pool](/referencia/curadoria/08-concorrencia/#worker-pool) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e013" />
+
+## Producer/Consumer
+
+Separa quem oferece trabalho de quem o executa. `enqueue_task` escreve na fila e o worker retira entradas no código. O limite é a política de capacidade e recuperação: essa separação não comprova admissão limitada ou garantia de entrega. A skill adjacente é `backend-background-jobs`; a base [asyncio.Queue](https://docs.python.org/3/library/asyncio-queue.html) tem exemplo **REF** de produtor e workers, além do uso local Redis delimitado.
+
+{/* current-curation:producer-consumer */}
+
+A [curadoria de Producer/Consumer](/referencia/curadoria/03-event-driven-messaging/#producer-consumer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e014" />
+
+## Work Stealing
+
+Um executor ocioso retira trabalho elegível de outra fila. Uma computação proposta com partições de duração desigual pode aproveitar esse arranjo. O limite é a elegibilidade e o custo de transferência; não comprova roteamento entre VMs. A skill é `backend-concurrency-mechanics`; a base e implementação OSS [ForkJoinPool Java](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ForkJoinPool.html) fornecem **REF** de distribuição entre executores.
+
+{/* current-curation:work-stealing */}
+
+A [curadoria de Work Stealing](/referencia/curadoria/08-concorrencia/#work-stealing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e015" />
+
+## Fork/Join
+
+Divide uma computação em subtarefas e combina suas saídas. Num total proposto de arquivos, cada partição calcula uma parte antes da combinação. O limite é dependência, partição lenta e custo de divisão; um Promise.all isolado não prova todo modelo. A skill é `backend-concurrency-mechanics`; a base e implementação OSS [ForkJoinPool](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/ForkJoinPool.html) são **REF**. O processamento e fan-in estão em [workflow](/explicacoes/workflow/).
+
+{/* current-curation:fork-join */}
+
+A [curadoria de Fork/Join](/referencia/curadoria/08-concorrencia/#fork-join) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e016" />
+
+## Futures/Promises
+
+Representam uma conclusão futura com resultado ou erro. Os leitores do single-flight aguardam a mesma task; o ciclo de vida dessa conclusão é separado do leitor que cancelou. O limite é que um future não define idempotência ou durabilidade. A skill é `backend-concurrency-mechanics`; a base [Future de concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#future-objects) fornece API OSS e exemplos **REF**, enquanto MakersHub fornece a task compartilhada local.
+
+{/* current-curation:futures-promises */}
+
+A [curadoria de Futures/Promises](/referencia/curadoria/08-concorrencia/#futures-promises) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e017" />
+
+## Async/Await
+
+Organiza a suspensão e retomada de trabalho assíncrono. A espera de HTTP permite que outras tasks progridam no loop, se o código suspender de fato. O limite é que cálculo pesado síncrono pode bloquear o loop; async não cria capacidade de CPU ilimitada. A skill é `async-python-patterns`; a base e **REF didática** são [coroutines e tasks CPython](https://docs.python.org/3/library/asyncio-task.html), presentes também nos caminhos locais lidos.
+
+{/* current-curation:async-await */}
+
+A [curadoria de Async/Await](/referencia/curadoria/08-concorrencia/#async-await) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e018" />
+
+## Reactive Streams
+
+Define troca assíncrona com demanda e backpressure entre participantes. Num fluxo proposto, o consumidor informa quantos elementos pode receber. O limite é respeitar o protocolo em cada fronteira; uma fila com descarte não o comprova. A skill adjacente é `backend-concurrency-mechanics`; a base e conjunto OSS **REF** são [especificação, exemplos e TCK Reactive Streams](https://www.reactive-streams.org/), sem implantação local confirmada.
+
+{/* current-curation:reactive-streams */}
+
+A [curadoria de Reactive Streams](/referencia/curadoria/08-concorrencia/#reactive-streams) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e019" />
+
+## Backpressure
+
+A capacidade do destino influencia o fluxo do produtor. Num pipeline proposto, o produtor desacelera quando o destino fica sem vaga. O limite é que limitar execução local sem admissão não fecha essa cadeia. A skill de apoio é `backend-concurrency-mechanics`; [Reactive Streams](https://www.reactive-streams.org/) fornece base e **REF**, com exemplo de conector [Beam SolaceIO](https://beam.apache.org/releases/javadoc/2.77.0/org/apache/beam/sdk/io/solace/SolaceIO.html) para comparação. Veja [capacidade](/explicacoes/capacity/#pattern-19).
+
+{/* current-curation:backpressure */}
+
+A [curadoria de Backpressure](/referencia/curadoria/07-resiliencia/#backpressure) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e020" />
+
+## Single Writer Principle
+
+Um responsável possui a escrita de um estado delimitado. Um ator proposto pode atualizar seu próprio estado enquanto outros enviam comandos. O limite é a capacidade desse responsável e a transferência de propriedade entre réplicas. A skill é `backend-concurrency-mechanics`; o [tutorial Apache Pekko](https://pekko.apache.org/docs/pekko/current/typed/guide/tutorial_1.html) fornece base e **REF didática** de estado encapsulado, sem provar uma política global MakersHub.
+
+{/* current-curation:single-writer-principle */}
+
+A [curadoria de Single Writer Principle](/referencia/curadoria/08-concorrencia/#single-writer-principle) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e021" />
+
+## Immutable Data
+
+Uma representação não muda depois de criada. Uma lista de referência proposta pode ser publicada para leitores sem alterações em sua estrutura. O limite é distinguir estrutura e conteúdo: objetos mutáveis dentro dela ainda podem mudar. A skill é `backend-concurrency-mechanics`; a base e implementação OSS [List.of Java](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/List.html) fornecem coleções não modificáveis como comparação **REF**, com essa ressalva.
+
+{/* current-curation:immutable-data */}
+
+A [curadoria de Immutable Data](/referencia/curadoria/08-concorrencia/#immutable-data) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g08-e022" />
+
+## Copy-on-Write
+
+Uma alteração produz uma nova cópia para preservar a visão anterior dos leitores. Uma lista proposta de listeners com muitas leituras e poucas alterações pode usar isso. O limite é o custo de cópia e memória; os objetos internos ainda têm seu próprio contrato. A skill é `backend-concurrency-mechanics`; a base e implementação OSS [CopyOnWriteArrayList](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/concurrent/CopyOnWriteArrayList.html) fornecem **REF** de iteradores sobre snapshot, sem adoção local inferida.
+
+{/* current-curation:copy-on-write */}
+
+A [curadoria de Copy-on-Write](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#copy-on-write) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

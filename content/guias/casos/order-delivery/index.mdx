@@ -1,0 +1,48 @@
+---
+title: "Verifique a proteção: uma ordem repetida cobra de novo"
+description: "Você aprenderá a separar a entrega repetida do efeito de negócio e preservar a intenção de integrar depois do commit."
+diataxis: how-to
+---
+
+# Verifique a proteção: uma ordem repetida cobra de novo
+
+Continue o mesmo caso: [volte ao caso](/jornadas/order-delivery/); [entenda o mecanismo](/explicacoes/casos/order-delivery/); [execute a experiência](/tutoriais/casos/order-delivery/); [consulte contratos e fontes](/referencia/casos/order-delivery/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: As entregas ORDER-1/100, ORDER-1/100 e ORDER-2/50, mais uma interrupção controlada antes da publicação externa. Registre a versão anterior, a versão proposta e o localizador `order_delivery / deduplicate / commit-intention / compensate`.
+
+## 2. Confira quem executa a decisão
+
+A identidade semântica da ordem elimina a repetição no inbox. Uma transação SQLite grava a ordem e a intenção na outbox. Uma falha posterior de alocação produz um crédito compensatório. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/financial.py order-delivery
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+As três entregas produzem dois efeitos de R$ 150 no total. A queda deixa uma ordem e uma intenção recuperável. A compensação devolve o saldo fictício de R$ 900 para R$ 1.000. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `labs/architecture/financial.py::order_delivery` contém o modelo executável.
+- `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/order-delivery.json` registra a busca delimitada e seus limites.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/order-delivery/); [entenda o mecanismo](/explicacoes/casos/order-delivery/); [execute a experiência](/tutoriais/casos/order-delivery/); [consulte contratos e fontes](/referencia/casos/order-delivery/).
+
+O [mapa de conceitos deste caso](/jornadas/order-delivery/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

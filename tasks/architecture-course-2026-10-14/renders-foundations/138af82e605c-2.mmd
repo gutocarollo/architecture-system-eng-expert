@@ -1,0 +1,9 @@
+flowchart TD
+    P[Publicador proposto] --> Topic[Tópico]
+    Topic --> Audit[Assinatura de auditoria]
+    Topic --> KPI[Assinatura de indicadores]
+    Audit --> A1[Worker de auditoria]
+    KPI --> K1[Worker 1 do mesmo grupo]
+    KPI --> K2[Worker 2 do mesmo grupo]
+    KPI -->|consumidor atrasado| Pending[Pendência se o transporte for durável]
+    Pending --> KPI

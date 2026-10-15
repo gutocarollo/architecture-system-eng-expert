@@ -1,0 +1,12 @@
+{
+  "repo": "openstack/neutron-lib",
+  "path": "neutron_lib/api/definitions/portbindings_extended.py",
+  "revision": "6893d1d8c22bac71813422563beb9374e3b902e0",
+  "url": "https://github.com/openstack/neutron-lib/blob/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py",
+  "raw_url": "https://raw.githubusercontent.com/openstack/neutron-lib/6893d1d8c22bac71813422563beb9374e3b902e0/neutron_lib/api/definitions/portbindings_extended.py",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:21:33.429137+00:00",
+  "sha256": "5ee66cd9b774faa60c6ed8ddcd627f43835244af22bb09a1e410a5d104b34667",
+  "line_count": 132,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-openstack--neutron-lib--neutron_lib--api--definitions--portbindings_extended.py"
+}

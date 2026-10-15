@@ -1,0 +1,38 @@
+{
+  "observed_at": "2026-10-14 23:29:07 UTC",
+  "jql": "project = FBI AND statusCategory != Done AND (text ~ \"architecture-system-eng-expert\" OR summary ~ \"arquitetura\") ORDER BY updated DESC",
+  "complete": true,
+  "issues": [
+    {
+      "key": "FBI-4923",
+      "summary": "Users: confiabilidade do cadastro e revisão das premissas de arquitetura",
+      "status": "To Do"
+    },
+    {
+      "key": "FBI-4914",
+      "summary": "[Scraping] Endurecimento pos-ADR-0001: lacunas de arquitetura, CI e documentacao",
+      "status": "To Do"
+    },
+    {
+      "key": "FBI-2723",
+      "summary": "[DW-05] Implementar a arquitetura de consumo por IA já definida",
+      "status": "To Do"
+    },
+    {
+      "key": "FBI-2714",
+      "summary": "[Arquitetura] Passo-0 — auditoria de divergência essencial×acidental warehouse↔faz-engine (pré-requisito de FBI-2617, v2.0 §4.3)",
+      "status": "In Progress"
+    },
+    {
+      "key": "FBI-2617",
+      "summary": "[Arquitetura] Consolidar warehouse ↔ faz-engine (completar migração strangler)",
+      "status": "To Do"
+    },
+    {
+      "key": "FBI-4854",
+      "summary": "[Salesforce] Piloto: salesforce_prod na arquitetura por camadas (Plano de Ondas v3)",
+      "status": "In Progress"
+    }
+  ],
+  "decision": "No equivalent curriculum or prerequisite is identified among these returned cards. No parent copied and no dependency link declared."
+}

@@ -1,0 +1,11 @@
+flowchart TD
+    I["Operadores leem saldo 1000 na versão 7"] --> A["Ana credita 100 e grava versão 8"]
+    A --> B["Antes: Bruno usa saldo antigo e grava 800"]
+    B --> X["Crédito de 100 é perdido"]
+    A --> V["Depois: financial.py::reservation confere versão"]
+    V --> Q{"Versão esperada ainda é 7?"}
+    Q -->|não| R["Recusa; releitura e revalidação dão 900"]
+    V --> F["Destino confere geração ordenada"]
+    F --> O["Writer 101 não sobrescreve geração 102"]
+    V --> K["Reserva usa assessor e horário como chave"]
+    K --> S["Apenas um operador assume o mesmo slot local"]

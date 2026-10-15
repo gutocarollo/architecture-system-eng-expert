@@ -1,0 +1,42 @@
+{
+  "query": "writeThrough repo:apache/ignite -path:examples -path:test",
+  "observed_utc": "2026-10-15T01:51:16.291469Z",
+  "total_count": 190,
+  "items": [
+    {
+      "repo": "apache/ignite",
+      "path": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheAttributes.java",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheAttributes.java"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "modules/core/src/main/java/org/apache/ignite/internal/processors/cluster/CacheMetricsMessage.java",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/modules/core/src/main/java/org/apache/ignite/internal/processors/cluster/CacheMetricsMessage.java"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheContext.java",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/GridCacheContext.java"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/atomic/GridDhtAtomicCache.java",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/modules/core/src/main/java/org/apache/ignite/internal/processors/cache/distributed/dht/atomic/GridDhtAtomicCache.java"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "docs/_docs/net-specific/net-configuration-options.adoc",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/docs/_docs/net-specific/net-configuration-options.adoc"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "modules/platforms/dotnet/examples/Thick/Cache/Store/Program.cs",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/modules/platforms/dotnet/examples/Thick/Cache/Store/Program.cs"
+    },
+    {
+      "repo": "apache/ignite",
+      "path": "docs/_docs/extensions-and-integrations/cassandra/usage-examples.adoc",
+      "url": "https://github.com/apache/ignite/blob/6f153bf0e09bcc6d4492a7400b4917f578fa0791/docs/_docs/extensions-and-integrations/cassandra/usage-examples.adoc"
+    }
+  ]
+}

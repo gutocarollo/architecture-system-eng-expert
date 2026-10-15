@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../src/DcaShop.Infrastructure/DcaShop.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalDcaDotnet)' == 'true'">
+    <ProjectReference Include="$(DcaDotnetDir)DomainCentric.ArchRules.Xunit/DomainCentric.ArchRules.Xunit.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalDcaDotnet)' != 'true'">
+    <PackageReference Include="DomainCentric.ArchRules.Xunit" Version="$(DcaArchRulesVersion)" />
+  </ItemGroup>
+</Project>

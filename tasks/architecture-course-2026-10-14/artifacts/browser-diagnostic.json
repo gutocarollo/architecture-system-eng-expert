@@ -1,0 +1,137 @@
+{
+  "observed_at": "2026-10-14T18:49:25.017Z",
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "dom": {
+    "svg": [
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "_R_3ct5fivblb_",
+        "label": "sequence"
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      },
+      {
+        "id": "",
+        "label": null
+      }
+    ],
+    "iframes": [],
+    "diagramClasses": [],
+    "text": "Entenda as decisões3. Integração confiávelCopy pageUma reunião muda de responsável no MakersHub. A alteração local pode dar certo enquanto uma chamada ao Salesforce falha. Para quem abre a agenda, os dois sistemas passam a contar histórias diferentes. Aprender integração confiável ajuda a localizar essa fronteira e a decidir como o trabalho será retomado.\nO caso de código desta página foi lido em 14/10/2026 no MakersHub, main@e233fb046ec333982cd1547171b0f0bd8d8d92ee. Em backend/app/services/absence_reassignment_service.py:337–418, _apply altera processed_employee_id e marca sf_owner_sync_pendi"
+  }
+}

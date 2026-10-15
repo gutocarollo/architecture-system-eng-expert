@@ -1,0 +1,814 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package router
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"math/rand"
+	"strings"
+	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/kubernetes"
+
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	istiov1alpha1 "github.com/fluxcd/flagger/pkg/apis/istio/common/v1alpha1"
+	istiov1beta1 "github.com/fluxcd/flagger/pkg/apis/istio/v1beta1"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
+)
+
+// IstioRouter is managing Istio virtual services
+type IstioRouter struct {
+	kubeClient    kubernetes.Interface
+	istioClient   clientset.Interface
+	flaggerClient clientset.Interface
+	logger        *zap.SugaredLogger
+	setOwnerRefs  bool
+}
+
+const cookieHeader = "Cookie"
+const setCookieHeader = "Set-Cookie"
+const maxAgeAttr = "Max-Age"
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+// Reconcile creates or updates the Istio virtual service and destination rules
+func (ir *IstioRouter) Reconcile(canary *flaggerv1.Canary) error {
+	_, primaryName, canaryName := canary.GetServiceNames()
+
+	if err := ir.reconcileDestinationRule(canary, canaryName); err != nil {
+		return fmt.Errorf("reconcileDestinationRule failed: %w", err)
+	}
+
+	if err := ir.reconcileDestinationRule(canary, primaryName); err != nil {
+		return fmt.Errorf("reconcileDestinationRule failed: %w", err)
+	}
+
+	if err := ir.reconcileVirtualService(canary); err != nil {
+		return fmt.Errorf("reconcileVirtualService failed: %w", err)
+	}
+	return nil
+}
+
+func (ir *IstioRouter) reconcileDestinationRule(canary *flaggerv1.Canary, name string) error {
+	newSpec := istiov1beta1.DestinationRuleSpec{
+		Host:          name,
+		TrafficPolicy: canary.Spec.Service.TrafficPolicy,
+	}
+
+	destinationRule, err := ir.istioClient.NetworkingV1beta1().DestinationRules(canary.Namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	// insert
+	if errors.IsNotFound(err) {
+		destinationRule = &istiov1beta1.DestinationRule{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: canary.Namespace,
+			},
+			Spec: newSpec,
+		}
+		if ir.setOwnerRefs {
+			destinationRule.OwnerReferences = []metav1.OwnerReference{
+				*metav1.NewControllerRef(canary, schema.GroupVersionKind{
+					Group:   flaggerv1.SchemeGroupVersion.Group,
+					Version: flaggerv1.SchemeGroupVersion.Version,
+					Kind:    flaggerv1.CanaryKind,
+				}),
+			}
+		}
+		_, err = ir.istioClient.NetworkingV1beta1().DestinationRules(canary.Namespace).Create(context.TODO(), destinationRule, metav1.CreateOptions{})
+		if err != nil {
+			return fmt.Errorf("DestinationRule %s.%s create error: %w", name, canary.Namespace, err)
+		}
+		ir.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).
+			Infof("DestinationRule %s.%s created", destinationRule.GetName(), canary.Namespace)
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("DestinationRule %s.%s get query error: %w", name, canary.Namespace, err)
+	}
+
+	// update
+	if destinationRule != nil {
+		if diff := cmp.Diff(newSpec, destinationRule.Spec); diff != "" {
+			clone := destinationRule.DeepCopy()
+			clone.Spec = newSpec
+			_, err = ir.istioClient.NetworkingV1beta1().DestinationRules(canary.Namespace).Update(context.TODO(), clone, metav1.UpdateOptions{})
+			if err != nil {
+				return fmt.Errorf("DestinationRule %s.%s update error: %w", name, canary.Namespace, err)
+			}
+			ir.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).
+				Infof("DestinationRule %s.%s updated", destinationRule.GetName(), canary.Namespace)
+		}
+	}
+
+	return nil
+}
+
+// return true if canary service has appProtocol == tcp
+func isTcp(canary *flaggerv1.Canary) bool {
+	return strings.ToLower(canary.Spec.Service.AppProtocol) == "tcp"
+}
+
+// map canary.spec.service.match into L4Match
+func canaryToL4Match(canary *flaggerv1.Canary) []istiov1beta1.L4MatchAttributes {
+	var match []istiov1beta1.L4MatchAttributes
+	for _, m := range canary.Spec.Service.Match {
+		match = append(match, istiov1beta1.L4MatchAttributes{
+			Port: int(m.Port),
+		})
+	}
+
+	return match
+}
+
+func (ir *IstioRouter) reconcileVirtualService(canary *flaggerv1.Canary) error {
+	apexName, primaryName, canaryName := canary.GetServiceNames()
+
+	if canary.Spec.Service.Delegation {
+		if len(canary.Spec.Service.Hosts) > 0 || len(canary.Spec.Service.Gateways) > 0 {
+			// delegate VirtualService cannot have hosts and gateways.
+			return fmt.Errorf("VirtualService %s.%s cannot have hosts and gateways when delegation enabled", apexName, canary.Namespace)
+		}
+	}
+
+	// set hosts and add the ClusterIP service host if it doesn't exists
+	hosts := canary.Spec.Service.Hosts
+	var hasServiceHost bool
+	for _, h := range hosts {
+		if h == apexName || h == "*" {
+			hasServiceHost = true
+			break
+		}
+	}
+	if !hasServiceHost {
+		hosts = append(hosts, apexName)
+	}
+
+	// set gateways and add the mesh gateway if it doesn't exists
+	gateways := canary.Spec.Service.Gateways
+	var hasMeshGateway bool
+	for _, g := range gateways {
+		if g == "mesh" {
+			hasMeshGateway = true
+			break
+		}
+	}
+
+	// set default mesh gateway if no gateway is specified
+	if !hasMeshGateway && len(canary.Spec.Service.Gateways) == 0 {
+		gateways = append(gateways, "mesh")
+	}
+
+	// create destinations with primary weight 100% and canary weight 0%
+	canaryRoute := []istiov1beta1.HTTPRouteDestination{
+		ir.makeDestination(canary, primaryName, 100),
+		ir.makeDestination(canary, canaryName, 0),
+	}
+
+	if canary.Spec.Service.Delegation {
+		// delegate VirtualService requires the hosts and gateway empty.
+		hosts = []string{}
+		gateways = []string{}
+	}
+
+	var newSpec istiov1beta1.VirtualServiceSpec
+
+	if isTcp(canary) {
+		newSpec = istiov1beta1.VirtualServiceSpec{
+			Hosts:    hosts,
+			Gateways: gateways,
+			Tcp: []istiov1beta1.TCPRoute{
+				{
+					Match: canaryToL4Match(canary),
+					Route: canaryRoute,
+				},
+			},
+		}
+	} else {
+		newSpec = istiov1beta1.VirtualServiceSpec{
+			Hosts:    hosts,
+			Gateways: gateways,
+			Http: []istiov1beta1.HTTPRoute{
+				{
+					Match:      canary.Spec.Service.Match,
+					Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+					Timeout:    canary.Spec.Service.Timeout,
+					Retries:    canary.Spec.Service.Retries,
+					CorsPolicy: canary.Spec.Service.CorsPolicy,
+					Headers:    canary.Spec.Service.Headers,
+					Route:      canaryRoute,
+				},
+			},
+		}
+	}
+
+	newMetadata := canary.Spec.Service.Apex
+	if newMetadata == nil {
+		newMetadata = &flaggerv1.CustomMetadata{}
+	}
+	if newMetadata.Labels == nil {
+		newMetadata.Labels = make(map[string]string)
+	}
+	if newMetadata.Annotations == nil {
+		newMetadata.Annotations = make(map[string]string)
+	}
+	newMetadata.Annotations = filterMetadata(newMetadata.Annotations)
+
+	if !isTcp(canary) && len(canary.GetAnalysis().Match) > 0 {
+		canaryMatch := mergeMatchConditions(canary.GetAnalysis().Match, canary.Spec.Service.Match)
+		newSpec.Http = []istiov1beta1.HTTPRoute{
+			{
+				Match:      canaryMatch,
+				Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+				Timeout:    canary.Spec.Service.Timeout,
+				Retries:    canary.Spec.Service.Retries,
+				CorsPolicy: canary.Spec.Service.CorsPolicy,
+				Headers:    canary.Spec.Service.Headers,
+				Route:      canaryRoute,
+			},
+			{
+				Match:      canary.Spec.Service.Match,
+				Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+				Timeout:    canary.Spec.Service.Timeout,
+				Retries:    canary.Spec.Service.Retries,
+				CorsPolicy: canary.Spec.Service.CorsPolicy,
+				Headers:    canary.Spec.Service.Headers,
+				Route: []istiov1beta1.HTTPRouteDestination{
+					ir.makeDestination(canary, primaryName, 100),
+				},
+			},
+		}
+	}
+
+	virtualService, err := ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Get(context.TODO(), apexName, metav1.GetOptions{})
+	// insert
+	if errors.IsNotFound(err) {
+		virtualService = &istiov1beta1.VirtualService{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        apexName,
+				Namespace:   canary.Namespace,
+				Labels:      newMetadata.Labels,
+				Annotations: newMetadata.Annotations,
+			},
+			Spec: newSpec,
+		}
+		if ir.setOwnerRefs {
+			virtualService.OwnerReferences = []metav1.OwnerReference{
+				*metav1.NewControllerRef(canary, schema.GroupVersionKind{
+					Group:   flaggerv1.SchemeGroupVersion.Group,
+					Version: flaggerv1.SchemeGroupVersion.Version,
+					Kind:    flaggerv1.CanaryKind,
+				}),
+			}
+		}
+		_, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Create(context.TODO(), virtualService, metav1.CreateOptions{})
+		if err != nil {
+			return fmt.Errorf("VirtualService %s.%s create error: %w", apexName, canary.Namespace, err)
+		}
+		ir.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).
+			Infof("VirtualService %s.%s created", virtualService.GetName(), canary.Namespace)
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("VirtualService %s.%s get query error %v", apexName, canary.Namespace, err)
+	}
+
+	if canary.Spec.Service.Delegation {
+		// delegate VirtualService requires the hosts and gateway empty.
+		virtualService.Spec.Gateways = []string{}
+		virtualService.Spec.Hosts = []string{}
+	}
+
+	ignoreCmpOptions := []cmp.Option{
+		cmpopts.IgnoreFields(istiov1beta1.HTTPRouteDestination{}, "Weight"),
+		cmpopts.IgnoreFields(istiov1beta1.HTTPRoute{}, "Mirror", "MirrorPercentage"),
+	}
+	if canary.Spec.Analysis.SessionAffinity != nil {
+		ignoreCookieRouteFunc := func(name string) func(r istiov1beta1.HTTPRoute) bool {
+			return func(r istiov1beta1.HTTPRoute) bool {
+				// Ignore the rule that does sticky routing, i.e. matches against the `Cookie` header.
+				for _, match := range r.Match {
+					if strings.Contains(match.Headers[cookieHeader].Regex, name) {
+						return true
+					}
+				}
+				return false
+			}
+		}
+		ignoreCanaryRoute := cmpopts.IgnoreSliceElements(ignoreCookieRouteFunc(canary.Spec.Analysis.SessionAffinity.CookieName))
+		ignorePrimaryRoute := cmpopts.IgnoreSliceElements(ignoreCookieRouteFunc(canary.Spec.Analysis.SessionAffinity.PrimaryCookieName))
+
+		ignoreCmpOptions = append(ignoreCmpOptions, ignoreCanaryRoute, ignorePrimaryRoute)
+		ignoreCmpOptions = append(ignoreCmpOptions, cmpopts.IgnoreFields(istiov1beta1.HTTPRouteDestination{}, "Headers"))
+	}
+	if v, ok := virtualService.Annotations[kubectlAnnotation]; ok {
+		newMetadata.Annotations[kubectlAnnotation] = v
+	}
+	if v, ok := virtualService.Annotations[configAnnotation]; ok {
+		newMetadata.Annotations[configAnnotation] = v
+	}
+	// update service but keep the original destination weights and mirror
+	if virtualService != nil {
+		specDiff := cmp.Diff(
+			newSpec,
+			virtualService.Spec,
+			ignoreCmpOptions...,
+		)
+		labelsDiff := cmp.Diff(newMetadata.Labels, virtualService.Labels, cmpopts.EquateEmpty())
+		annotationsDiff := cmp.Diff(newMetadata.Annotations, virtualService.Annotations, cmpopts.EquateEmpty())
+		if specDiff != "" || labelsDiff != "" || annotationsDiff != "" {
+			vtClone := virtualService.DeepCopy()
+			vtClone.Spec = newSpec
+			vtClone.ObjectMeta.Annotations = newMetadata.Annotations
+			vtClone.ObjectMeta.Labels = newMetadata.Labels
+
+			//If annotation kubectl.kubernetes.io/last-applied-configuration is present no need to duplicate
+			//serialization.  If not present store the serialized object in annotation
+			//flagger.kubernetes.app/original-configuration
+			if _, ok := vtClone.Annotations[kubectlAnnotation]; !ok && specDiff != "" {
+				b, err := json.Marshal(virtualService.Spec)
+				if err != nil {
+					ir.logger.Warnf("Unable to marshal VS %s for orig-configuration annotation", virtualService.Name)
+				}
+
+				if vtClone.ObjectMeta.Annotations == nil {
+					vtClone.ObjectMeta.Annotations = make(map[string]string)
+				} else {
+					vtClone.ObjectMeta.Annotations = filterMetadata(vtClone.ObjectMeta.Annotations)
+				}
+
+				vtClone.ObjectMeta.Annotations[configAnnotation] = string(b)
+			}
+
+			_, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Update(context.TODO(), vtClone, metav1.UpdateOptions{})
+			if err != nil {
+				return fmt.Errorf("VirtualService %s.%s update error: %w", apexName, canary.Namespace, err)
+			}
+			ir.logger.With("canary", fmt.Sprintf("%s.%s", canary.Name, canary.Namespace)).
+				Infof("VirtualService %s.%s updated", virtualService.GetName(), canary.Namespace)
+		}
+	}
+
+	return nil
+}
+
+// GetRoutes returns the destinations weight for primary and canary
+func (ir *IstioRouter) GetRoutes(canary *flaggerv1.Canary) (
+	primaryWeight int,
+	canaryWeight int,
+	mirrored bool,
+	err error,
+) {
+	apexName, primaryName, canaryName := canary.GetServiceNames()
+	vs := &istiov1beta1.VirtualService{}
+	vs, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Get(context.TODO(), apexName, metav1.GetOptions{})
+	if err != nil {
+		err = fmt.Errorf("VirtualService %s.%s get query error %v", apexName, canary.Namespace, err)
+		return
+	}
+
+	if isTcp(canary) {
+		ir.logger.Infof("Canary %s.%s uses TCP service", canary.Name, canary.Namespace)
+		var tcpRoute istiov1beta1.TCPRoute
+		for _, tcp := range vs.Spec.Tcp {
+			for _, r := range tcp.Route {
+				if r.Destination.Host == canaryName {
+					tcpRoute = tcp
+					break
+				}
+			}
+		}
+		for _, route := range tcpRoute.Route {
+			if route.Destination.Host == primaryName {
+				primaryWeight = route.Weight
+			}
+			if route.Destination.Host == canaryName {
+				canaryWeight = route.Weight
+			}
+		}
+
+		mirrored = false
+
+		if primaryWeight == 0 && canaryWeight == 0 {
+			err = fmt.Errorf("VirtualService %s.%s does not contain routes for %s-primary and %s-canary",
+				apexName, canary.Namespace, apexName, apexName)
+		}
+
+		return
+	}
+
+	ir.logger.Infof("Canary %s.%s uses HTTP service", canary.Name, canary.Namespace)
+
+	var httpRoute istiov1beta1.HTTPRoute
+	for _, http := range vs.Spec.Http {
+		for _, r := range http.Route {
+			if r.Destination.Host == canaryName {
+				httpRoute = http
+				break
+			}
+		}
+	}
+
+	for _, route := range httpRoute.Route {
+		if route.Destination.Host == primaryName {
+			primaryWeight = route.Weight
+		}
+		if route.Destination.Host == canaryName {
+			canaryWeight = route.Weight
+		}
+	}
+	if httpRoute.Mirror != nil && httpRoute.Mirror.Host != "" {
+		mirrored = true
+	}
+
+	if canary.Spec.Analysis.SessionAffinity != nil {
+		for _, http := range vs.Spec.Http {
+			for _, routeDest := range http.Route {
+				// we are interested in the route that sets the cookie as that's the route
+				// that does weighted routing.
+				if routeDest.Headers != nil {
+					if routeDest.Destination.Host == primaryName {
+						primaryWeight = routeDest.Weight
+					}
+					if routeDest.Destination.Host == canaryName {
+						canaryWeight = routeDest.Weight
+					}
+				}
+			}
+		}
+	}
+
+	if primaryWeight == 0 && canaryWeight == 0 {
+		err = fmt.Errorf("VirtualService %s.%s does not contain routes for %s-primary and %s-canary",
+			apexName, canary.Namespace, apexName, apexName)
+	}
+
+	return
+}
+
+// SetRoutes updates the destinations weight for primary and canary
+func (ir *IstioRouter) SetRoutes(
+	canary *flaggerv1.Canary,
+	primaryWeight int,
+	canaryWeight int,
+	mirrored bool,
+) error {
+	apexName, primaryName, canaryName := canary.GetServiceNames()
+
+	vs, err := ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Get(context.TODO(), apexName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("VirtualService %s.%s get query error %v", apexName, canary.Namespace, err)
+	}
+
+	vsCopy := vs.DeepCopy()
+
+	if isTcp(canary) {
+		// weighted routing (progressive canary)
+		weightedRoute := istiov1beta1.TCPRoute{
+			Match: canaryToL4Match(canary),
+			Route: []istiov1beta1.HTTPRouteDestination{
+				ir.makeDestination(canary, primaryName, primaryWeight),
+				ir.makeDestination(canary, canaryName, canaryWeight),
+			},
+		}
+		vsCopy.Spec.Tcp = []istiov1beta1.TCPRoute{
+			weightedRoute,
+		}
+
+		vs, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Update(context.TODO(), vsCopy, metav1.UpdateOptions{})
+		if err != nil {
+			return fmt.Errorf("VirtualService %s.%s update failed: %w", apexName, canary.Namespace, err)
+		}
+		return nil
+	}
+
+	// weighted routing (progressive canary)
+	weightedRoute := &istiov1beta1.HTTPRoute{
+		Match:      canary.Spec.Service.Match,
+		Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+		Timeout:    canary.Spec.Service.Timeout,
+		Retries:    canary.Spec.Service.Retries,
+		CorsPolicy: canary.Spec.Service.CorsPolicy,
+		Headers:    canary.Spec.Service.Headers,
+		Route: []istiov1beta1.HTTPRouteDestination{
+			ir.makeDestination(canary, primaryName, primaryWeight),
+			ir.makeDestination(canary, canaryName, canaryWeight),
+		},
+	}
+	vsCopy.Spec.Http = []istiov1beta1.HTTPRoute{
+		*weightedRoute,
+	}
+
+	if canary.Spec.Analysis.SessionAffinity != nil {
+		rules, err := ir.getSessionAffinityRouteRules(canary, canaryWeight, weightedRoute)
+		if err != nil {
+			return err
+		}
+		vsCopy.Spec.Http = rules
+	}
+
+	if mirrored {
+		vsCopy.Spec.Http[0].Mirror = &istiov1beta1.Destination{
+			Host: canaryName,
+		}
+
+		if mw := canary.GetAnalysis().MirrorWeight; mw > 0 {
+			vsCopy.Spec.Http[0].MirrorPercentage = &istiov1beta1.Percent{Value: float64(mw)}
+		}
+	}
+
+	// fix routing (A/B testing)
+	if len(canary.GetAnalysis().Match) > 0 {
+		// merge the common routes with the canary ones
+		canaryMatch := mergeMatchConditions(canary.GetAnalysis().Match, canary.Spec.Service.Match)
+		vsCopy.Spec.Http = []istiov1beta1.HTTPRoute{
+			{
+				Match:      canaryMatch,
+				Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+				Timeout:    canary.Spec.Service.Timeout,
+				Retries:    canary.Spec.Service.Retries,
+				CorsPolicy: canary.Spec.Service.CorsPolicy,
+				Headers:    canary.Spec.Service.Headers,
+				Route: []istiov1beta1.HTTPRouteDestination{
+					ir.makeDestination(canary, primaryName, primaryWeight),
+					ir.makeDestination(canary, canaryName, canaryWeight),
+				},
+			},
+			{
+				Match:      canary.Spec.Service.Match,
+				Rewrite:    canary.Spec.Service.GetIstioRewrite(),
+				Timeout:    canary.Spec.Service.Timeout,
+				Retries:    canary.Spec.Service.Retries,
+				CorsPolicy: canary.Spec.Service.CorsPolicy,
+				Headers:    canary.Spec.Service.Headers,
+				Route: []istiov1beta1.HTTPRouteDestination{
+					ir.makeDestination(canary, primaryName, primaryWeight),
+				},
+			},
+		}
+	}
+
+	vs, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Update(context.TODO(), vsCopy, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("VirtualService %s.%s update failed: %w", apexName, canary.Namespace, err)
+	}
+	return nil
+}
+
+func (ir *IstioRouter) Finalize(canary *flaggerv1.Canary) error {
+	// Need to see if I can get the annotation orig-configuration
+	apexName, _, _ := canary.GetServiceNames()
+
+	vs, err := ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Get(context.TODO(), apexName, metav1.GetOptions{})
+	if err != nil {
+		return fmt.Errorf("VirtualService %s.%s get query error: %w", apexName, canary.Namespace, err)
+	}
+
+	var storedSpec istiov1beta1.VirtualServiceSpec
+	if a, ok := vs.ObjectMeta.Annotations[kubectlAnnotation]; ok {
+		var storedVS istiov1beta1.VirtualService
+		if err := json.Unmarshal([]byte(a), &storedVS); err != nil {
+			return fmt.Errorf("VirtualService %s.%s failed to unMarshal annotation %s",
+				apexName, canary.Namespace, kubectlAnnotation)
+		}
+		storedSpec = storedVS.Spec
+	} else if a, ok := vs.ObjectMeta.Annotations[configAnnotation]; ok {
+		if err := json.Unmarshal([]byte(a), &storedSpec); err != nil {
+			return fmt.Errorf("VirtualService %s.%s failed to unMarshal annotation %s",
+				apexName, canary.Namespace, configAnnotation)
+		}
+	} else {
+		ir.logger.Warnf("VirtualService %s.%s original configuration not found, unable to revert", apexName, canary.Namespace)
+		return nil
+	}
+
+	clone := vs.DeepCopy()
+	clone.Spec = storedSpec
+
+	_, err = ir.istioClient.NetworkingV1beta1().VirtualServices(canary.Namespace).Update(context.TODO(), clone, metav1.UpdateOptions{})
+	if err != nil {
+		return fmt.Errorf("VirtualService %s.%s update error: %w", apexName, canary.Namespace, err)
+	}
+	return nil
+}
+
+// mergeMatchConditions appends the URI match rules to canary conditions
+func mergeMatchConditions(canary, defaults []istiov1beta1.HTTPMatchRequest) []istiov1beta1.HTTPMatchRequest {
+	if len(defaults) == 0 {
+		return canary
+	}
+
+	merged := make([]istiov1beta1.HTTPMatchRequest, len(canary)*len(defaults))
+	num := 0
+	for _, c := range canary {
+		for _, d := range defaults {
+			merged[num] = *d.DeepCopy()
+			if c.Headers != nil {
+				merged[num].Headers = c.Headers
+			}
+			if c.SourceLabels != nil {
+				merged[num].SourceLabels = c.SourceLabels
+			}
+			num++
+		}
+	}
+
+	return merged
+}
+
+// makeDestination returns a an destination weight for the specified host
+func (ir *IstioRouter) makeDestination(canary *flaggerv1.Canary, host string, weight int) istiov1beta1.HTTPRouteDestination {
+	dest := istiov1beta1.HTTPRouteDestination{
+		Destination: istiov1beta1.Destination{
+			Host: host,
+		},
+		Weight: weight,
+	}
+
+	// set destination port when an ingress gateway is specified
+	if canary.Spec.Service.PortDiscovery &&
+		(len(canary.Spec.Service.Gateways) > 0 &&
+			canary.Spec.Service.Gateways[0] != "mesh" || canary.Spec.Service.Delegation) {
+		dest = istiov1beta1.HTTPRouteDestination{
+			Destination: istiov1beta1.Destination{
+				Host: host,
+				Port: &istiov1beta1.PortSelector{
+					Number: uint32(canary.Spec.Service.Port),
+				},
+			},
+			Weight: weight,
+		}
+	}
+
+	return dest
+}
+
+func randSeq() string {
+	rand.Seed(time.Now().UnixNano())
+
+	b := make([]rune, 10)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func getRouteByServiceName(rule *istiov1beta1.HTTPRoute, svcName string) *istiov1beta1.HTTPRouteDestination {
+	for i, routeDest := range rule.Route {
+		if routeDest.Destination.Host == svcName {
+			return &rule.Route[i]
+		}
+	}
+	return nil
+}
+
+// getSessionAffinityRouteRules returns the HTTPRoute objects required to perform
+// session affinity based Canary releases.
+func (ir *IstioRouter) getSessionAffinityRouteRules(canary *flaggerv1.Canary, canaryWeight int,
+	weightedRoute *istiov1beta1.HTTPRoute) ([]istiov1beta1.HTTPRoute, error) {
+	_, primaryName, canaryName := canary.GetServiceNames()
+	stickyCanaryRoute := *weightedRoute
+	stickyPrimaryRoute := *weightedRoute
+
+	// If a canary run is active, we want all responses corresponding to requests hitting the canary deployment
+	// (due to weighted routing) to include a `Set-Cookie` header. All requests that have the `Cookie` header
+	// and match the value of the `Set-Cookie` header will be routed to the canary deployment.
+	if canaryWeight != 0 {
+		// if the status doesn't have the canary cookie, then generate a new canary cookie.
+		if canary.Status.SessionAffinityCookie == "" {
+			canary.Status.SessionAffinityCookie = fmt.Sprintf("%s=%s", canary.Spec.Analysis.SessionAffinity.CookieName, randSeq())
+		}
+		// if the status doesn't have the primary cookie, then generate a new primary cookie.
+		if canary.Status.PrimarySessionAffinityCookie == "" {
+			canary.Status.PrimarySessionAffinityCookie = fmt.Sprintf("%s=%s", canary.Spec.Analysis.SessionAffinity.PrimaryCookieName, randSeq())
+		}
+
+		// add response modifier to the canary backend route in the rule that does weighted routing
+		// to include the canary cookie.
+		canaryBackendRoute := getRouteByServiceName(weightedRoute, canaryName)
+		if canaryBackendRoute.Headers == nil {
+			canaryBackendRoute.Headers = &istiov1beta1.Headers{
+				Response: &istiov1beta1.HeaderOperations{},
+			}
+		}
+		canaryBackendRoute.Headers.Response.Add = map[string]string{
+			setCookieHeader: canary.Spec.Analysis.SessionAffinity.BuildCookie(canary.Status.SessionAffinityCookie, canary.Spec.Analysis.SessionAffinity.GetMaxAge()),
+		}
+
+		// add response modifier to the primary backend route in the rule that does weighted routing
+		// to include the primary cookie, only if a primary cookie name has been specified.
+		if canary.Spec.Analysis.SessionAffinity.PrimaryCookieName != "" {
+			primaryBackendRoute := getRouteByServiceName(weightedRoute, primaryName)
+			interval, err := time.ParseDuration(canary.Spec.Analysis.Interval)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse canary interval: %w", err)
+			}
+			if primaryBackendRoute.Headers == nil {
+				primaryBackendRoute.Headers = &istiov1beta1.Headers{
+					Response: &istiov1beta1.HeaderOperations{},
+				}
+			}
+			primaryBackendRoute.Headers.Response.Add = map[string]string{
+				setCookieHeader: canary.Spec.Analysis.SessionAffinity.BuildCookie(canary.Status.PrimarySessionAffinityCookie, int(interval.Seconds())),
+			}
+		}
+
+		// configure the sticky canary rule to match against requests that match against the
+		// canary cookie and send them to the canary backend.
+		cookieKeyAndVal := strings.Split(canary.Status.SessionAffinityCookie, "=")
+		cookieMatch := istiov1beta1.HTTPMatchRequest{
+			Headers: map[string]istiov1alpha1.StringMatch{
+				cookieHeader: {
+					Regex: fmt.Sprintf(".*%s.*%s.*", cookieKeyAndVal[0], cookieKeyAndVal[1]),
+				},
+			},
+		}
+		canaryMatch := mergeMatchConditions([]istiov1beta1.HTTPMatchRequest{cookieMatch}, canary.Spec.Service.Match)
+		stickyCanaryRoute.Match = canaryMatch
+		stickyCanaryRoute.Route = []istiov1beta1.HTTPRouteDestination{
+			ir.makeDestination(canary, primaryName, 0),
+			ir.makeDestination(canary, canaryName, 100),
+		}
+
+		// configure the sticky primary rule to match against requests that match against the
+		// primary cookie and send them to the primary backend, only if a primary cookie name has
+		// been specified.
+		if canary.Spec.Analysis.SessionAffinity.PrimaryCookieName != "" {
+			cookieKeyAndVal := strings.Split(canary.Status.PrimarySessionAffinityCookie, "=")
+			primaryCookieMatch := istiov1beta1.HTTPMatchRequest{
+				Headers: map[string]istiov1alpha1.StringMatch{
+					cookieHeader: {
+						Regex: fmt.Sprintf(".*%s.*%s.*", cookieKeyAndVal[0], cookieKeyAndVal[1]),
+					},
+				},
+			}
+			primaryMatch := mergeMatchConditions([]istiov1beta1.HTTPMatchRequest{primaryCookieMatch}, canary.Spec.Service.Match)
+			stickyPrimaryRoute.Match = primaryMatch
+			stickyPrimaryRoute.Route = []istiov1beta1.HTTPRouteDestination{
+				ir.makeDestination(canary, primaryName, 100),
+				ir.makeDestination(canary, canaryName, 0),
+			}
+
+			return []istiov1beta1.HTTPRoute{stickyCanaryRoute, stickyPrimaryRoute, *weightedRoute}, nil
+		}
+
+		return []istiov1beta1.HTTPRoute{stickyCanaryRoute, *weightedRoute}, nil
+	} else {
+		// If canary weight is 0 and SessionAffinityCookie is non-blank, then it belongs to a previous canary run.
+		if canary.Status.SessionAffinityCookie != "" {
+			canary.Status.PreviousSessionAffinityCookie = canary.Status.SessionAffinityCookie
+		}
+		previousCookie := canary.Status.PreviousSessionAffinityCookie
+
+		// Match against the previous session cookie and delete that cookie
+		if previousCookie != "" {
+			cookieKeyAndVal := strings.Split(previousCookie, "=")
+			cookieMatch := istiov1beta1.HTTPMatchRequest{
+				Headers: map[string]istiov1alpha1.StringMatch{
+					cookieHeader: {
+						Regex: fmt.Sprintf(".*%s.*%s.*", cookieKeyAndVal[0], cookieKeyAndVal[1]),
+					},
+				},
+			}
+			canaryMatch := mergeMatchConditions([]istiov1beta1.HTTPMatchRequest{cookieMatch}, canary.Spec.Service.Match)
+			stickyCanaryRoute.Match = canaryMatch
+
+			if stickyCanaryRoute.Headers == nil {
+				stickyCanaryRoute.Headers = &istiov1beta1.Headers{
+					Response: &istiov1beta1.HeaderOperations{
+						Add: map[string]string{},
+					},
+				}
+			} else if stickyCanaryRoute.Headers.Response == nil {
+				stickyCanaryRoute.Headers.Response = &istiov1beta1.HeaderOperations{
+					Add: map[string]string{},
+				}
+			} else if stickyCanaryRoute.Headers.Response.Add == nil {
+				stickyCanaryRoute.Headers.Response.Add = map[string]string{}
+			}
+			stickyCanaryRoute.Headers.Response.Add[setCookieHeader] = fmt.Sprintf("%s; %s=%d", previousCookie, maxAgeAttr, -1)
+		}
+
+		canary.Status.SessionAffinityCookie = ""
+		return []istiov1beta1.HTTPRoute{stickyCanaryRoute, *weightedRoute}, nil
+	}
+}

@@ -1,0 +1,97 @@
+{
+  "profile_version": 2,
+  "project_root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "mode": "CREATE",
+  "context": {
+    "adapter": "generic",
+    "workspace": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+    "bounded_anchor": "Criar uma trilha Nextra MDX Diátaxis de todos os conceitos dos 18 grupos e dos 40 padrões prioritários do texto do usuário, com casos MakersHub e Airflow, agregados PostgreSQL, blast radius FazGraph, Mermaid e referências OSS verificadas; distinguir código, runtime, histórico e proposta.",
+    "protocol_root": null,
+    "method_skill": null,
+    "provided_packet": null,
+    "preparation": {
+      "kind": "metadata",
+      "receipt_path": null
+    },
+    "review_contract": null
+  },
+  "sources": [
+    {
+      "id": "project",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+      "required": true
+    },
+    {
+      "id": "makershub",
+      "root": "/Users/augustocarollo/Developer/makershub",
+      "required": true
+    },
+    {
+      "id": "workflow-evidence",
+      "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998/tasks/architecture-course-2026-10-14/evidence",
+      "required": true
+    }
+  ],
+  "output": {
+    "root": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+    "glossary": "content/referencia/catalogo",
+    "adr_directory": "tasks/architecture-course-2026-10-14/adrs",
+    "allow_domain_writes": false
+  },
+  "council": {
+    "planners": [
+      "/root/s1_learning_design",
+      "/root/s2_application_architecture",
+      "/root/s3_airflow_workflows",
+      "/root/s4_consistency_data",
+      "/root/s5_operational_patterns",
+      "/root/s6_platform_delivery"
+    ],
+    "reviewers": [
+      "/root/council_sol",
+      "/root/council_teaching_sol",
+      "openrouter/x-ai/grok-4.7"
+    ],
+    "max_rechecks": 1
+  },
+  "skills": [
+    {
+      "id": "mapping",
+      "path": "skills/mapping-blast-radius-autoagents/SKILL.md",
+      "base": "package",
+      "role": "mapper",
+      "enabled": true,
+      "depends_on": []
+    },
+    {
+      "id": "orchestrator",
+      "path": "skills/orchestrating-docs-autoagents/SKILL.md",
+      "base": "package",
+      "role": "orchestrator",
+      "enabled": true,
+      "depends_on": [
+        "mapping"
+      ]
+    },
+    {
+      "id": "diataxis",
+      "path": "/Users/augustocarollo/.agents/skills/diataxis/SKILL.md",
+      "base": "absolute",
+      "role": "documentation-method",
+      "enabled": true,
+      "depends_on": [],
+      "resources": [
+        "/Users/augustocarollo/.agents/skills/diataxis/references/explanation.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/tutorials.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/how-to-guides.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/reference.md",
+        "/Users/augustocarollo/.agents/skills/diataxis/references/complex-hierarchies.md"
+      ]
+    }
+  ],
+  "mermaid": {
+    "require_syntax": true,
+    "require_render": true
+  },
+  "max_evidence_age_hours": 24
+}

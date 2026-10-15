@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/shared-kernel/ticker.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/ticker.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.542729+00:00",
+  "sha256": "f6ba7c623023d2b5612c104c09745a05a8af76c1efd6a45eda05891e648f1ee1",
+  "line_count": 28,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--ticker.ts"
+}

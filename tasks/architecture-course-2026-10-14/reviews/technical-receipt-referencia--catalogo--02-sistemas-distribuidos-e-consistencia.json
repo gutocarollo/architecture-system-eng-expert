@@ -1,0 +1,25 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_sol:final-bind-existing-R1-review",
+  "document_id": "referencia/catalogo/02-sistemas-distribuidos-e-consistencia",
+  "document_sha256": "72fb697a5e03e3e2f077322d4e73de5d37fbdc86231fa14f808b629b82a6e041",
+  "context_sha256": "0ab0235684c914a04c56d8145055283f69cff5ce038478a86b563c01b029c19d",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "competing-claims-code",
+    "idempotency-code",
+    "l4a",
+    "l4b",
+    "l4c",
+    "l6a",
+    "original-catalog",
+    "original-request",
+    "pending-intent-code",
+    "s4",
+    "s4-reference-repair",
+    "s6"
+  ]
+}

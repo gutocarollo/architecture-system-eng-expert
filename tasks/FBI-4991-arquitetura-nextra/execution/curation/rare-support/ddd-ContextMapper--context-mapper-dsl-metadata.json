@@ -1,0 +1,14 @@
+{
+  "repository": "ContextMapper/context-mapper-dsl",
+  "default_branch": "master",
+  "sha": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "description": "ContextMapper DSL: A Domain-specific Language for Context Mapping & Service Decomposition",
+  "observed_utc": "2026-10-15T02:03:39.904915+00:00"
+}

@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "assembled_at": "2026-10-15T03:15:10.143Z",
+  "scope": "Passagem limitada a cinco pares históricos; não é uma adjudicação causal dos 914 commits nem prova de produção.",
+  "source_policy": {
+    "registry": "~/.claude/sources/live-sources.json",
+    "skill": "/Users/augustocarollo/.agents/skills/airflow-live-source/SKILL.md",
+    "remote_skill": "airflow-70:/home/fazcapital/airflow/.claude/skills/safe-sync-airflow/SKILL.md",
+    "codegraph_used_before_source_search": true,
+    "source_writes": false,
+    "network_mutations": false,
+    "git_fetch": false,
+    "tests_or_dag_runs": false,
+    "database_or_graph_queries": false
+  },
+  "cases": [
+    {
+      "case_id": "retry",
+      "issue": "FBI-4797",
+      "pr": 161,
+      "field": "customfield_10047",
+      "type": "Bug",
+      "kind": "REPORTED_INCIDENT_WITH_MATCHING_CODE_CHANGE",
+      "symbol": "task_run_60_days_rule_hs",
+      "concepts": [
+        "retry",
+        "transient failure",
+        "atomicity",
+        "idempotency premise",
+        "failure propagation"
+      ],
+      "problem": "A task executava o binário uma vez e propagava qualquer falha. O PR relata cancelamento 55P03 após espera de lock.",
+      "mechanism": "O novo loop permite duas retentativas, separadas por 30 segundos, apenas quando o processo falha e stderr contém 55P03. Outras falhas continuam sendo propagadas.",
+      "limits": [
+        "A atomicidade e a idempotência do motor Haskell são premissas relatadas pelo PR; a transação Haskell não foi auditada nesta passagem.",
+        "O bloqueador original não foi identificado pelo relato. Não consultamos locks atuais, banco nem logs de execução.",
+        "O pior caso de 3 vezes 300 segundos mais 60 de espera excede 10 minutos; o orçamento de aproximadamente 300 segundos do PR depende da duração observada de cerca de 80 segundos por tentativa, não de um teto estático de subprocess."
+      ],
+      "source_claim_status": "Historical source-reported problem and code interpretation; no independent runtime root-cause confirmation.",
+      "pr_source": {
+        "url": "https://bitbucket.org/fazcapital/airflow/pull-requests/161",
+        "state": "MERGED",
+        "updated_on": "2026-10-06T18:46:59.743807+00:00",
+        "source_commit_prefix": "55dfe8acb362",
+        "section_locator": "Descrição / causa, correção ou limites",
+        "excerpt": "A task repete o binário até 2 vezes, 30 s entre tentativas, SOMENTE quando `returncode != 0` e o stderr traz `55P03`."
+      },
+      "jira_source": {
+        "url": "https://fazcapital.atlassian.net/browse/FBI-4797",
+        "issue_type": "Bug",
+        "visible_description_field": "customfield_10047",
+        "updated": "2026-10-06T19:14:52.557-0300",
+        "excerpt": "Ocorrências capturadas: 1 (nas últimas 24h: 1)"
+      },
+      "source_kernel_file": "source-kernels.json",
+      "reported_test_results_reexecuted": false
+    },
+    {
+      "case_id": "capacity",
+      "issue": "FBI-3505",
+      "pr": 129,
+      "field": "customfield_10047",
+      "type": "Bug",
+      "kind": "REPORTED_INCIDENT_WITH_SOURCE_CONTRADICTION",
+      "symbol": "parallelism / max_active_tasks_per_dag / dw_capacity",
+      "concepts": [
+        "bounded concurrency",
+        "backpressure boundary",
+        "connection budget",
+        "capacity assumptions",
+        "canary"
+      ],
+      "problem": "O Jira relata esgotamento de conexões do role airflow e concorrência global acima do orçamento pretendido.",
+      "mechanism": "O commit reduz parallelism de 32 para 5 e max_active_tasks_per_dag de 20 para 5. O contrato declara limite 40, três conexões por task e margem de quatro: 5 × 3 + 4 = 19.",
+      "limits": [
+        "A descrição Jira consultada diz 20; o commit e o PR129 dizem 40, com medição histórica em 01/10. A divergência permanece explícita; não houve consulta ao banco.",
+        "O canário está NOT_EXECUTED no contrato. A fórmula contém premissas, não uma medição de toda a frota.",
+        "Limitar tasks não impõe um limite físico de conexões de todas as aplicações. A configuração efetiva do scheduler não foi lida."
+      ],
+      "source_claim_status": "Historical source-reported problem and code interpretation; no independent runtime root-cause confirmation.",
+      "pr_source": {
+        "url": "https://bitbucket.org/fazcapital/airflow/pull-requests/129",
+        "state": "MERGED",
+        "updated_on": "2026-10-02T16:12:11.664825+00:00",
+        "source_commit_prefix": "751009ba9c74",
+        "section_locator": "Descrição / causa, correção ou limites",
+        "excerpt": "O cálculo 5 x 3 + 4 = 19 cabe no limite 40; ele não prova o teto real."
+      },
+      "jira_source": {
+        "url": "https://fazcapital.atlassian.net/browse/FBI-3505",
+        "issue_type": "Bug",
+        "visible_description_field": "customfield_10047",
+        "updated": "2026-10-02T14:39:47.634-0300",
+        "excerpt": "O role airflow tem rolconnlimit=20 no banco faz_capital."
+      },
+      "source_kernel_file": "source-kernels.json",
+      "reported_test_results_reexecuted": false
+    },
+    {
+      "case_id": "identity",
+      "issue": "FBI-2366",
+      "pr": 140,
+      "field": "customfield_10054",
+      "type": "Story",
+      "kind": "FEATURE_EVOLUTION_WITH_JIRA_SCOPE_MISMATCH",
+      "symbol": "call_key / drop_repeated_calls / stored_call_keys / drop_stored_calls",
+      "concepts": [
+        "business identity",
+        "deduplication",
+        "idempotency boundary",
+        "batch versus stored state",
+        "observability"
+      ],
+      "problem": "O código anterior removia linhas idênticas dentro do lote. O PR relata que o mesmo identificador pode representar ligações com destinos diferentes e que o filtro contra o banco usava apenas o identificador.",
+      "mechanism": "A identidade passa a ser o par ref_call_id e destination, tanto no lote quanto na consulta ao que já está gravado. O lote mantém a primeira linha e conta divergências.",
+      "limits": [
+        "A descrição visível da Story trata de agendamento e logical_date. O suporte para este mecanismo vem do PR140 e do diff, não de uma causa de deduplicação relatada no card.",
+        "Os agregados de banco citados pelo PR são medições históricas do autor; não foram repetidos.",
+        "Não há UNIQUE novo neste recorte. A filtragem antes de inserir não prova exactly-once nem proteção contra dois escritores concorrentes."
+      ],
+      "source_claim_status": "Historical source-reported problem and code interpretation; no independent runtime root-cause confirmation.",
+      "pr_source": {
+        "url": "https://bitbucket.org/fazcapital/airflow/pull-requests/140",
+        "state": "MERGED",
+        "updated_on": "2026-10-02T17:28:15.479449+00:00",
+        "source_commit_prefix": "bff72e872644",
+        "section_locator": "Descrição / causa, correção ou limites",
+        "excerpt": "Antes o filtro a descartava, porque comparava só o id. Agora ela entra se o destino for outro."
+      },
+      "jira_source": {
+        "url": "https://fazcapital.atlassian.net/browse/FBI-2366",
+        "issue_type": "Story",
+        "visible_description_field": "customfield_10054",
+        "updated": "2026-10-02T15:50:25.092-0300",
+        "excerpt": "Frente de agendamento desta PR (#38)."
+      },
+      "source_kernel_file": "source-kernels.json",
+      "reported_test_results_reexecuted": false
+    },
+    {
+      "case_id": "publication",
+      "issue": "FBI-4852",
+      "pr": 203,
+      "field": "customfield_10053",
+      "type": "Epic",
+      "kind": "REPORTED_INCIDENT_WITH_MATCHING_CODE_CHANGE",
+      "symbol": "publish_html / fetch_html / object_path / generate_dashboard",
+      "concepts": [
+        "artifact publication",
+        "object storage",
+        "shared filesystem assumption",
+        "failure boundary",
+        "cache fallback"
+      ],
+      "problem": "O PR relata que a geração de HTML passou a falhar quando o diretório de código ficou somente para leitura e que gerador e servidor passaram a ter discos separados.",
+      "mechanism": "A DAG gera em pasta temporária e só retorna sucesso depois de publicar o HTML no MinIO. O plugin busca o objeto, usa cache de 60 segundos e pode devolver a última cópia conhecida em caso de erro.",
+      "limits": [
+        "O Epic contém estado datado de 07/10 e declara produção em RKE2; isso conflita com o registro local que ainda aponta a fonte viva para a .70. Nenhum cluster foi inspecionado nesta passagem.",
+        "publication.py não existe no disco da .70 no recibo desta passagem. O caso é um par histórico disponível nos objetos Git, não prova do código em produção atual.",
+        "O TTL governa a consulta normal; a cópia devolvida na falha do MinIO não tem limite máximo de idade neste código.",
+        "Não abrimos HTML de clientes nem executamos geradores, publicação, consultas ao banco ou rotas de navegador."
+      ],
+      "source_claim_status": "Historical source-reported problem and code interpretation; no independent runtime root-cause confirmation.",
+      "pr_source": {
+        "url": "https://bitbucket.org/fazcapital/airflow/pull-requests/203",
+        "state": "MERGED",
+        "updated_on": "2026-10-12T01:16:03.081305+00:00",
+        "source_commit_prefix": "f53d1e8d1e68",
+        "section_locator": "Descrição / causa, correção ou limites",
+        "excerpt": "Com o git-sync essa pasta é somente leitura: todo run falha com `OSError: [Errno 30] Read-only file system`."
+      },
+      "jira_source": {
+        "url": "https://fazcapital.atlassian.net/browse/FBI-4852",
+        "issue_type": "Epic",
+        "visible_description_field": "customfield_10053",
+        "updated": "2026-10-11T22:16:20.577-0300",
+        "excerpt": "Épico guarda-chuva da nova arquitetura do Airflow de produção da Faz."
+      },
+      "source_kernel_file": "source-kernels.json",
+      "reported_test_results_reexecuted": false
+    },
+    {
+      "case_id": "run_gate",
+      "issue": "FBI-3218",
+      "pr": 101,
+      "field": "customfield_10047",
+      "type": "Bug",
+      "kind": "FOLLOW_UP_GUARD_WITH_ANCESTRY_PROOF",
+      "symbol": "forex_freshness_gate / FOREX_FRESHNESS_GATE_SQL",
+      "concepts": [
+        "freshness",
+        "run readiness",
+        "stale success",
+        "temporal bound",
+        "concurrency premise"
+      ],
+      "problem": "A guarda podia aceitar a última linha de controle de um run anterior. Este é um endurecimento posterior; o defeito original do Jira era seleção do par de moedas.",
+      "mechanism": "O SQL exige run_at maior ou igual a dag_run.start_date, configurado dentro da transação. A função recusa run sem data inicial.",
+      "limits": [
+        "ce08e702 é ancestral do source def3e84bfe0a do PR101, comprovado com merge-base --is-ancestor.",
+        "O PR156 descreve a migração do mesmo mecanismo para o arquivo renomeado, mas seu source b8f0ce62c89c não está acessível entre os objetos locais desta fonte; nenhum fetch foi feito.",
+        "A dedução de que uma linha posterior pertence ao run depende de max_active_runs=1 e de não haver outro produtor incompatível. Data inicial não equivale a token exclusivo de execução.",
+        "O patch de guarda não deve ser apresentado como o filtro de moedas original do Jira. Nenhuma cotação ou dado financeiro atual foi consultado."
+      ],
+      "source_claim_status": "Historical source-reported problem and code interpretation; no independent runtime root-cause confirmation.",
+      "pr_source": {
+        "url": "https://bitbucket.org/fazcapital/airflow/pull-requests/101",
+        "state": "MERGED",
+        "updated_on": "2026-10-02T22:58:18.962591+00:00",
+        "source_commit_prefix": "def3e84bfe0a",
+        "section_locator": "Atualizado em 02/10",
+        "excerpt": "Gate amarrado ao run (`ce08e70`): só vale a linha de `control.forex_conversion_runs`"
+      },
+      "jira_source": {
+        "url": "https://fazcapital.atlassian.net/browse/FBI-3218",
+        "issue_type": "Bug",
+        "visible_description_field": "customfield_10047",
+        "updated": "2026-09-08T10:45:35.991-0300",
+        "excerpt": "o subselect **não filtra from_symbol nem to_symbol**."
+      },
+      "source_kernel_file": "source-kernels.json",
+      "reported_test_results_reexecuted": false
+    }
+  ],
+  "coverage": {
+    "available_ref_count": 155,
+    "available_unique_commits": 914,
+    "selected_before_after_cases": 5,
+    "causal_adjudication_of_other_commits": 0,
+    "completeness": "Somente objetos alcançáveis pelas refs locais medidas; não enumera commits remotos indisponíveis, objetos soltos nem toda a história de produção."
+  },
+  "barriers": [
+    {
+      "type": "SOURCE_AUTHORITY_DRIFT",
+      "detail": "O registro aponta .70 como fonte viva; o campo visível do Epic4852 descreve uma migração em07/10 e .70 como desenvolvimento. Acesso SSH à .70 funcionou, mas a autoridade atual de produção permanece não resolvida."
+    },
+    {
+      "type": "HISTORICAL_OBJECT_NOT_AVAILABLE",
+      "commit": "b8f0ce62c89c943573aff33c1148eb3464699ef8",
+      "detail": "O objeto source do PR156 não é resolvido nessa fonte local; git show retornou128. O PR101 e o ce08e702 estão acessíveis."
+    },
+    {
+      "type": "NO_RUNTIME_CAUSAL_CONFIRMATION",
+      "detail": "Não foram executadas DAGs, consultas ao banco, canários, leituras de scheduler ou inspeção do cluster."
+    }
+  ],
+  "redactions": "Não são exportados payloads completos Jira/PR, comentários, autores, contatos, valores de clientes, credenciais, dados HTML ou patches completos. O pacote contém locators, trechos mínimos e código selecionado."
+}

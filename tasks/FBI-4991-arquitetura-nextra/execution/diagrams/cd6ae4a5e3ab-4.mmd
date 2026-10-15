@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant A as Executor A
+    participant DB as PostgreSQL
+    participant B as Executor B
+    A->>DB: Claim de linhas PENDING com SKIP LOCKED
+    DB-->>A: Trabalho X passa a BOT_PROCESSING
+    B->>DB: Claim de linhas PENDING com SKIP LOCKED
+    DB-->>B: Pula linhas travadas e escolhe trabalho elegível
+    Note over A,DB: Queda após claim pode deixar X sem conclusão
+    Note over DB,B: Recuperar X exige contrato adicional de expiração ou reconciliação

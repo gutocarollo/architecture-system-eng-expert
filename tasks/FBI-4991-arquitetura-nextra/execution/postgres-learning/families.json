@@ -1,0 +1,26 @@
+{
+  "families": [
+    {
+      "case_id": "query-grain-postgres",
+      "title": "A comissão de R$ 100 aparece como R$ 200",
+      "destinations": {
+        "journey": "/jornadas/query-grain-postgres/",
+        "explanation": "/explicacoes/casos/query-grain-postgres/",
+        "tutorial": "/tutoriais/casos/query-grain-postgres/",
+        "how_to": "/guias/casos/query-grain-postgres/",
+        "reference": "/referencia/casos/query-grain-postgres/"
+      }
+    },
+    {
+      "case_id": "revision-cas-postgres",
+      "title": "Uma única versão atual ainda pode perder uma alteração",
+      "destinations": {
+        "journey": "/jornadas/revision-cas-postgres/",
+        "explanation": "/explicacoes/casos/revision-cas-postgres/",
+        "tutorial": "/tutoriais/casos/revision-cas-postgres/",
+        "how_to": "/guias/casos/revision-cas-postgres/",
+        "reference": "/referencia/casos/revision-cas-postgres/"
+      }
+    }
+  ]
+}

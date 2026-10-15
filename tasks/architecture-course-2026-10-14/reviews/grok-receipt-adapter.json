@@ -1,0 +1,90 @@
+{
+  "recorded_at": "2026-10-14T19:16:26.861425+00:00",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "response_sha256": "50f5abc02b7b02da12d1e0790a40397e35a5cf607824d310b12aaf4eb12a9597",
+  "binding_owner": "Root mechanical receipt adapter",
+  "scope": "The unchanged model verdict is bound to the exact current document and the evidence IDs actually named by the reviewer. The submitted digest covered the full supplied context; this adapter calculates the canonical projection for the selected IDs. No vote or finding was changed.",
+  "bindings": [
+    {
+      "document_id": "explicacoes/api-integration/index",
+      "submitted_context_sha256": "a96a0098373a4f6a23b4c32e59cd71c5d5f6499c598935d725e15be009256e45",
+      "projected_selected_evidence_sha256": "983b865b2bcb82a688e221f6540a7249583b0fff2cb72e63f2689c3880ce940e",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "explicacoes/concurrency/index",
+      "submitted_context_sha256": "51caf73fcd3bf46d6945310e2637c210cf97ee4b8f81014d67318b2fd71167de",
+      "projected_selected_evidence_sha256": "36ab9c69e1e3bec5823a14786e2327c6a2049a391dd87612a112fc61a31ebf11",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "task-worker-code",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "explicacoes/observability/index",
+      "submitted_context_sha256": "11d3de457904b184c2c1f60f9d62607e33c6fa00f5c10724baf7f2e99a299c76",
+      "projected_selected_evidence_sha256": "231fb0d9bce7f5cacd836c026ae2eb793305cf6aa32984c0b0b2ea436bed7134",
+      "evidence_ids": [
+        "s5",
+        "l5b",
+        "l5c",
+        "airflow-client-code",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "referencia/catalogo/07-resiliencia",
+      "submitted_context_sha256": "c52c6b2f993a2abe971122a67f7b1a375b0bc2eb7d5695087299c7260d9ac401",
+      "projected_selected_evidence_sha256": "2f782b6141101c1693c92986416c4a0f3a1baa3fbddc463e13aa451016401cf6",
+      "evidence_ids": [
+        "s5",
+        "l5b",
+        "l5c",
+        "task-worker-code",
+        "airflow-client-code",
+        "nextbilling-code",
+        "cache-code",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "referencia/catalogo/08-concorrencia",
+      "submitted_context_sha256": "adfc668c48be626349aa817295619497fdf88509a57611e8b1b38f800cd1e82b",
+      "projected_selected_evidence_sha256": "10ab15d26277294eb7b584afe7aec3ffe75aa85d8553ceac29f185e0d0b1a3f8",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "task-worker-code",
+        "singleflight-code",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "referencia/catalogo/09-apis-e-integracao",
+      "submitted_context_sha256": "aac20ce905a5ea9b5d61e343153aac71a0ad420e4628f78b99a6901dcded571b",
+      "projected_selected_evidence_sha256": "d6b691ad58186912358c476b03cf3b83d6b76cf696c36802e3620f4a56f6f705",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "original-request"
+      ]
+    },
+    {
+      "document_id": "referencia/catalogo/15-observabilidade",
+      "submitted_context_sha256": "fa36bfcfcdea93ba6bb3c3d712059277373cb93e9fecf6a01682a228734f4756",
+      "projected_selected_evidence_sha256": "bba6cf61d8abe4b936f20612e340b3c068f7eed73a69f49d788eced13b34969e",
+      "evidence_ids": [
+        "s5",
+        "l5c",
+        "airflow-client-code",
+        "original-request"
+      ]
+    }
+  ]
+}

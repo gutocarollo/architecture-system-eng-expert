@@ -1,0 +1,83 @@
+---
+title: "Experimente: a consulta cresce e a soma muda de significado"
+description: "Você aprenderá a conservar o grão monetário e distinguir localização de dados, índice e remapeamento."
+diataxis: tutorial
+---
+
+# Experimente: a consulta cresce e a soma muda de significado
+
+Continue o mesmo caso: [volte ao caso](/jornadas/storage-partitions/); [entenda o mecanismo](/explicacoes/casos/storage-partitions/); [resolva a tarefa](/guias/casos/storage-partitions/); [consulte contratos e fontes](/referencia/casos/storage-partitions/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a conservar o grão monetário e distinguir localização de dados, índice e remapeamento. Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior e das dependências do curso instaladas com `npm ci`. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+Doze posições, três shards, contas A/B com valores 100/200 e 2/3 filhos, mais mil linhas SQLite sintéticas. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+python3 labs/architecture/financial.py storage-partitions
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:19.073255+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+{"after": {"partitions_scanned": 1, "row_7_amount": 70}, "before": {"partitions_scanned": 3}, "guarantee": "A stable key and routing rule direct a lookup to its owning shard.", "limit": "Python modulo is not consistent hashing and reassigns keys when the shard count changes.", "probe": "shard-route"}
+{"after": {"sum_at_account_grain": 300}, "before": {"sum_after_one_to_many_join": 800}, "guarantee": "Aggregating children at the intended grain avoids multiplying the monetary value.", "limit": "A unique key before a join does not prove uniqueness afterwards.", "probe": "grain-join"}
+{"after": {"modulo_moved_keys": 76, "shards": 4}, "before": {"moved_keys": 0, "shards": 3}, "guarantee": "Adding a modulo shard can move many key owners; a consistent ring aims to limit remapping.", "limit": "This quantifies the baseline; it does not implement a production ring, virtual nodes or rebalance.", "probe": "hash-remap"}
+{"after": {"query_plan": "SEARCH position USING COVERING INDEX position_lookup (account_key=?)"}, "before": {"query_plan": "SCAN position"}, "guarantee": "The lookup changes from scanning to an index that includes the selected value.", "limit": "SQLite plan wording and index behavior do not establish a PostgreSQL query plan.", "probe": "covering-index"}
+{"after": {"existing_owner_kept": 76, "keys": 100, "ring_moved_keys": 24}, "before": {"keys": 100, "modulo_moved_keys": 76}, "guarantee": "A hash ring assigns a key to its next virtual-node owner; adding D moves only the keys whose next owner becomes D.", "limit": "The finite ring has 16 virtual points per node and does not implement replication or live rebalance.", "probe": "consistent-ring"}
+{"after": {"directory_owner": "B", "value": 700}, "before": {"lookup_in_default_A": null}, "guarantee": "An explicit directory maps an entity key to its owning shard, independently of a hash function.", "limit": "Directory durability, stale entries and live moves are not modeled.", "probe": "directory-shard"}
+{"after": {"half_open_boundary_owners": [1], "key": 100}, "before": {"inclusive_upper_boundary_owners": [0, 1]}, "guarantee": "Half-open ranges assign the boundary key to exactly one shard rather than overlapping owners.", "limit": "Range balancing, splits and hotspot control are separate concerns.", "probe": "range-boundary"}
+{"after": {"BR_rows": 1, "US_rows": 0, "account_region": "BR"}, "before": {"all_accounts_owner": "US"}, "guarantee": "A geographic attribute chooses the data owner rather than a key hash.", "limit": "The geography is hypothetical and is not a claim about a regulatory residency rule.", "probe": "geographic-owner"}
+{"after": {"contact_columns": ["account_key", "contact_label"], "position_read_columns": ["account_key", "cents"], "rejoin_preserves_row": true}, "before": {"position_read_columns": ["account_key", "cents", "contact_label"]}, "guarantee": "Vertical partitions divide attributes while preserving the key needed to reconstruct the logical entity.", "limit": "The example models attribute ownership and does not measure physical page savings or authorization by itself.", "probe": "vertical-attributes"}
+{"after": {"append_records": 2, "latest_value": 1100, "latest_version": 2}, "before": {"in_place_record_history": 1}, "guarantee": "Updates append records and reads resolve the latest version, exposing the read/compaction work introduced by a log-structured representation.", "limit": "This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery.", "probe": "log-structured-latest"}
+{"after": {"latest_snapshot": 1009, "physical_batch_writes": 1, "updates_in_acknowledged_batch": 10}, "before": {"physical_snapshot_writes": 10}, "guarantee": "Coalescing repeated overwrites of one snapshot reduces physical writes before the batch acknowledgement.", "limit": "This applies to replaceable snapshots, not ten independent ledger facts. No per-update durability is promised before the batch flush.", "probe": "coalesced-snapshot-writes"}
+comparison=PASS case=storage-partitions probes=11 inputs=SYNTHETIC runtime=LOCAL
+```
+
+A posição 7 é encontrada em uma partição. A soma no grão correto fica em R$ 300. O plano SQLite muda de SCAN para SEARCH com COVERING INDEX.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/financial.py` e procure a função `storage_partitions`. Localize a decisão que calcula before e a que calcula after. Compare a entrada e o recurso protegido. O modelo anterior e a proteção estão no mesmo arquivo para permitir repetir a comparação com segurança.
+
+Esta família também possui propriedades específicas em `labs/architecture/models_distribution.py`. O mapa de conceitos liga cada propriedade ao seu probe, às entradas e ao limite. Você pode abrir a função `observations` do módulo e procurar o identificador mostrado no comando.
+
+Para repetir somente um probe, copie seu nome do campo `probe` e acrescente-o ao comando:
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe shard-route
+```
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/storage-partitions/); [entenda o mecanismo](/explicacoes/casos/storage-partitions/); [resolva a tarefa](/guias/casos/storage-partitions/); [consulte contratos e fontes](/referencia/casos/storage-partitions/).
+
+O [mapa de conceitos deste caso](/jornadas/storage-partitions/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

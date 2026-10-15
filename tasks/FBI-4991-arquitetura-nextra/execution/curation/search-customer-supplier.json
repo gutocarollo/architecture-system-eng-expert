@@ -1,0 +1,32 @@
+{
+  "query": "\"customer supplier\" path:docs -repo:ContextMapper/context-mapper-examples",
+  "observed_utc": "2026-10-15T01:59:08.282447Z",
+  "total_count": 116,
+  "items": [
+    {
+      "repo": "mansourMP/Multi_Agent_Orchestrator_Project",
+      "path": "docs/domains/studio/runtime.md",
+      "url": "https://github.com/mansourMP/Multi_Agent_Orchestrator_Project/blob/30560615df55f129f718d47cde121c00762e933b/docs/domains/studio/runtime.md"
+    },
+    {
+      "repo": "CristianBarragan/Foundgine",
+      "path": "docs/SECURITY.md",
+      "url": "https://github.com/CristianBarragan/Foundgine/blob/0fff154c49494b7d409113f497b49af9597eac87/docs/SECURITY.md"
+    },
+    {
+      "repo": "felipuh/ISO_Smart_MedSupplier",
+      "path": "docs/commercial/BUYER_PERSONAS.md",
+      "url": "https://github.com/felipuh/ISO_Smart_MedSupplier/blob/f7f03a789066fb1fbf71fe14fb18ef53f5233d39/docs/commercial/BUYER_PERSONAS.md"
+    },
+    {
+      "repo": "finbyz/Generate-item",
+      "path": "docs/reference/doctype_inventory.md",
+      "url": "https://github.com/finbyz/Generate-item/blob/ca7c43d1c5b281a71793609923bad92777db515b/docs/reference/doctype_inventory.md"
+    },
+    {
+      "repo": "rasouli/rasouli.github.io",
+      "path": "docs/blog/b-2025-08-16-social-life-software-bc-rel-p1.md",
+      "url": "https://github.com/rasouli/rasouli.github.io/blob/1399ebe905fece9292747ec8cd388aa79ae650ba/docs/blog/b-2025-08-16-social-life-software-bc-rel-p1.md"
+    }
+  ]
+}

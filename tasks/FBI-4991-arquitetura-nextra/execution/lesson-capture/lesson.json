@@ -1,0 +1,82 @@
+{
+  "schema_version": 2,
+  "lesson_id": "lesson:processo/success-without-domain-invariant@1",
+  "title": "Confundi um comando concluído com a garantia ensinada",
+  "date": "2026-10-15",
+  "domain": "processo",
+  "intent": "correction",
+  "authoring_state": "assistant_curated",
+  "evidence_state": "implementation_verified",
+  "lifecycle": "active",
+  "symptoms": [
+    "O exercício diz PASS mesmo quando o valor financeiro continua errado."
+  ],
+  "sections": {
+    "symptom": "Na FBI-4991, o exercício de deduplicação anunciava a garantia enquanto uma mutação ainda cobrava 250 em vez de 150.",
+    "looked_like": "A execução concluída e uma diferença entre before e after pareciam comprovar a solução.",
+    "was": "O runner aceitava qualquer diferença entre objetos. A quantidade de efeitos mudava, mas a soma incorreta continuava aceita. O vínculo com um conceito também podia apontar para uma observação de outro mecanismo.",
+    "proof_command": "python3 labs/architecture/check_invariants.py",
+    "prevent": "Ao ensinar uma garantia, defina o resultado do domínio, execute a condição anterior e rejeite a retirada da proteção. Ligue cada conceito à observação que o distingue. Confira os recibos da revisão independente, não apenas a contagem de comandos.",
+    "bitten_where": "O recheck independente da FBI-4991, em 15/10/2026, rejeitou o mutante de 250 e confirmou 629 corrupções financeiras e 31 de objetos recusadas."
+  },
+  "entities": [
+    {
+      "text": "Diataxis",
+      "type": "ProcessControl",
+      "id": "process:skill/diataxis"
+    },
+    {
+      "text": "FBI-4991",
+      "type": "JiraIssue",
+      "id": "jira:FBI-4991"
+    }
+  ],
+  "applies_to": [
+    "process:skill/diataxis",
+    "jira:FBI-4991"
+  ],
+  "provenance": {
+    "cards": [
+      "jira:FBI-4991"
+    ],
+    "prs": [],
+    "commits": [],
+    "session": "FBI-4991 execution 2026-10-15",
+    "source_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching-recheck.json",
+    "source_line": "1",
+    "workspaces": [
+      "workspace:wt-fbi-4991"
+    ]
+  },
+  "guard": [
+    "labs/architecture/check_invariants.py",
+    "labs/architecture/check_matrix.py"
+  ],
+  "recurrence": 1,
+  "promoted": {
+    "value": false,
+    "destination": null
+  },
+  "active": true,
+  "tags": [
+    "project:architecture-system-eng-expert",
+    "workspace:wt-fbi-4991"
+  ],
+  "kind": "lesson",
+  "schema_profile": "canonical",
+  "semantic": {
+    "failure_mode_absent": "A taxonomia consultada não contém o oráculo que aceita qualquer diferença; os modos de snapshot fixo e reimplementação da regra descrevem mecanismos distintos.",
+    "aliases": [
+      "sucesso sem invariante"
+    ]
+  },
+  "semantic_revision": 1,
+  "sources": [
+    "skill:writing-for-agents@sha256:551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a",
+    "fazgraph:glossary@sha256:55f1fe501741a36eee4a7750c2947fe7f14fd52d1249ae9169177fad56211ce9:query=invariante,garantia,tutorial,diataxis",
+    "fazgraph:search-aliases@sha256:6af665a9c962279e61ca15ffbbf66939cdbd859d1c9c35beeda2aa3ce36737f8:query=invariante,garantia,tutorial,diataxis",
+    "fazgraph:ontology@sha256:130d1d7b064dfdd71d70df000299cbf615d76953f12512afdbe980579777f7d0:query=ProcessControl,JiraIssue",
+    "https://fazcapital.atlassian.net/browse/FBI-4991",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching-recheck.json"
+  ]
+}

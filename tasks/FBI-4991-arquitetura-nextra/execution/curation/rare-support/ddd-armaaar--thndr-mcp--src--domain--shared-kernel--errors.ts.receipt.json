@@ -1,0 +1,11 @@
+{
+  "repo": "armaaar/thndr-mcp",
+  "path": "src/domain/shared-kernel/errors.ts",
+  "revision": "e641dc29dd1118c874b76111ffe294ecf7de47fa",
+  "url": "https://github.com/armaaar/thndr-mcp/blob/e641dc29dd1118c874b76111ffe294ecf7de47fa/src/domain/shared-kernel/errors.ts",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:02:17.284316+00:00",
+  "sha256": "c55a56dabc686c6d43123fc9563a517d40dd196505bc3527e830054fd09f65d5",
+  "line_count": 24,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-armaaar--thndr-mcp--src--domain--shared-kernel--errors.ts"
+}

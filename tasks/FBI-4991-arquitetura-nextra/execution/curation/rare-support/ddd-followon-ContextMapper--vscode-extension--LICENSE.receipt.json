@@ -1,0 +1,10 @@
+{
+  "repo": "ContextMapper/vscode-extension",
+  "path": "LICENSE",
+  "revision": "cd0363ec33de4f41cc311a715ed5afd01ff8c7f3",
+  "url": "https://github.com/ContextMapper/vscode-extension/blob/cd0363ec33de4f41cc311a715ed5afd01ff8c7f3/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:22:38.865422+00:00",
+  "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--vscode-extension--LICENSE"
+}

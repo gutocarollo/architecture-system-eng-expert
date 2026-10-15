@@ -1,0 +1,7 @@
+flowchart LR
+    A["Serviço A proposto"] --> PA["Proxy com identidade A"]
+    PA -->|"mTLS e política"| PB["Proxy com identidade B"]
+    PB --> B["Serviço B proposto"]
+    PB -->|"identidade não permitida"| Deny["Chamada negada"]
+    PA -. "métricas de transporte" .-> Observe["Observabilidade proposta"]
+    PB -. "métricas de transporte" .-> Observe

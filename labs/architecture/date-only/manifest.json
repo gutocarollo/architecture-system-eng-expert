@@ -1,0 +1,43 @@
+{
+  "case_id": "date-only",
+  "source_repository": "/Users/augustocarollo/Developer/makershub",
+  "before_sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+  "after_sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+  "snapshots": [
+    {
+      "phase": "before",
+      "sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+      "source_path": "frontend/app/_utils/isoDate.ts",
+      "local_path": "labs/architecture/date-only/before.ts",
+      "sha256": "926797824e276c2c2d45da6ea48b6feb091decb7d79e7317d1a12ddf8379365d"
+    },
+    {
+      "phase": "after",
+      "sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+      "source_path": "frontend/app/_utils/isoDate.ts",
+      "local_path": "labs/architecture/date-only/after.ts",
+      "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5"
+    },
+    {
+      "phase": "before",
+      "sha": "eca3f89e0e703316b807018b7947fbbb2043c806",
+      "source_path": "frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx",
+      "local_path": "labs/architecture/date-only/before-card.tsx",
+      "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d"
+    },
+    {
+      "phase": "after",
+      "sha": "7101d3a4babe95081b0b41d35ec305c08bf8a577",
+      "source_path": "frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx",
+      "local_path": "labs/architecture/date-only/after-card.tsx",
+      "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d"
+    }
+  ],
+  "diff_sha256": "5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59",
+  "inputs": "SYNTHETIC",
+  "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+  "runtime_scope": "LOCAL_LEARNING_ONLY",
+  "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+  "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+  "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+}

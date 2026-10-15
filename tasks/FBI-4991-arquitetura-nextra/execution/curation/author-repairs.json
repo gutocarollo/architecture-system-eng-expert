@@ -1,0 +1,22 @@
+{
+  "observed_utc": "2026-10-15T03:13:08.514554+00:00",
+  "scope": "Author-side corrections captured in the authorized curation workspace. No central FazGraph write was made.",
+  "repairs": [
+    {
+      "finding": "HTML comments generated in MDX are rejected by the actual MDX parser.",
+      "correction": "Use JSX comment syntax in the reconciliation generator and regenerate all affected reference pages.",
+      "gate": "reference-mdx-validation.json: 58 compiled pages, zero parser/link errors at the final fixed point."
+    },
+    {
+      "finding": "Thirteen concepts had no application excerpt because inherited locator terms were empty or named an implementation that had changed.",
+      "correction": "Read the actual product code, rewrite the mechanism and terms, replace stale NiFi FlowController with SocketProtocolListener, and add the Loki memberlist wiring.",
+      "gate": "verify_curation.py now requires an application excerpt for every concept."
+    },
+    {
+      "finding": "The sanitized APISIX artifact initially retained the remote original hash as its canonical artifact hash.",
+      "correction": "sha256 resolves the published sanitized bytes; remote_sha256 and original_artifact_sha256 preserve original provenance.",
+      "gate": "freeze-receipt.json records zero mismatches across all 799 HTTP 200 source records."
+    }
+  ],
+  "lesson_candidate": "A source file, an HTTP 200 and a keyword in a framework do not prove an application mechanism. Keep parser, per-application excerpt, artifact integrity, author semantic classification and independent approval as separate gates."
+}

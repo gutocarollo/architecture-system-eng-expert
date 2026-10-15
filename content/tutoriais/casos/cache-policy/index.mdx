@@ -1,0 +1,81 @@
+---
+title: "Experimente: a posição rápida pertence ao outro recorte"
+description: "Você aprenderá a definir o dono, o recorte, a validade e a ordem de escrita de um resultado em cache."
+diataxis: tutorial
+---
+
+# Experimente: a posição rápida pertence ao outro recorte
+
+Continue o mesmo caso: [volte ao caso](/jornadas/cache-policy/); [entenda o mecanismo](/explicacoes/casos/cache-policy/); [resolva a tarefa](/guias/casos/cache-policy/); [consulte contratos e fontes](/referencia/casos/cache-policy/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a definir o dono, o recorte, a validade e a ordem de escrita de um resultado em cache. Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior e das dependências do curso instaladas com `npm ci`. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+Tenants A/B, consulta position, vencimento 10, instante 11, saldo 1.000 e crédito 100. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+python3 labs/architecture/financial.py cache-policy
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:18.814551+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+{"after": {"tenant_B_reads": "tenant-B"}, "before": {"tenant_B_reads": "tenant-A"}, "guarantee": "Tenant and query scope belong in a key before a cached result is shared.", "limit": "The tenant label is synthetic; real authorization must precede lookup.", "probe": "cache-key"}
+{"after": {"decision": "reload", "stale_returned": false}, "before": {"stale_returned": true}, "guarantee": "TTL creates an explicit validity boundary and expiration returns control to the producer.", "limit": "TTL does not prove source freshness or invalidate a value immediately after a write.", "probe": "cache-expiry"}
+{"after": {"write_through_durable_balance": 1100}, "before": {"write_behind_crash_durable_balance": 1000}, "guarantee": "Acknowledging after durable write avoids losing a buffered credit during this crash.", "limit": "Different ordering has different latency; neither alone gives cross-system atomicity.", "probe": "write-policy"}
+{"after": {"worker_A": 2, "worker_B": 2}, "before": {"worker_A": 1, "worker_B": 2}, "guarantee": "Invalidation permits the local level to reload from its shared owner.", "limit": "Two copies still require freshness, errors, eviction and stampede contracts.", "probe": "cache-levels"}
+{"after": {"cache_populated": true, "source_calls": 1, "values": [1000, 1000, 1000]}, "before": {"cache_populated": true, "source_calls": 3, "values": [1000, 1000, 1000]}, "guarantee": "A cache-aside miss loads from the source and populates the key; later reads hit that key.", "limit": "This is one process; invalidation and concurrent misses require separate mechanisms.", "probe": "cache-aside"}
+{"after": {"absence_cached": true, "results": [null, null, null], "source_calls": 1}, "before": {"absence_cached": false, "results": [null, null, null], "source_calls": 3}, "guarantee": "A known absence is represented by a cached sentinel and suppresses repeated source lookups.", "limit": "An absence must expire; an absent key and a cached None must remain distinguishable.", "probe": "negative-cache"}
+{"after": {"request_path_source_calls": 0, "value": 1000}, "before": {"request_path_source_calls": 1, "value": 1000}, "guarantee": "Preloading a known key moves its initial fetch before the first user read.", "limit": "Warming does not prove that the source is fresh or that all keys should be loaded.", "probe": "cache-warming"}
+{"after": {"cache_api_owns_loading": true, "caller_source_calls": 0, "loader_calls": 1, "values": [1000, 1000, 1000]}, "before": {"cache_api_owns_loading": false, "caller_source_calls": 3}, "guarantee": "The caller uses only cache.read; the cache API invokes its loader on a miss and stores the result.", "limit": "This is a local cache abstraction, not a distributed cache provider.", "probe": "read-through"}
+{"after": {"owner_partitions": 2, "shared_owner_source_calls": 1, "worker_values": [1000, 1000]}, "before": {"independent_worker_cache_source_calls": 2}, "guarantee": "Different logical workers use the same partition owner and share its populated cache entry, unlike independent per-worker caches.", "limit": "The owners are local dictionaries; the experiment isolates shared-owner cache semantics without claiming a networked cache product or cross-machine durability.", "probe": "distributed-cache-owner"}
+comparison=PASS case=cache-policy probes=9 inputs=SYNTHETIC runtime=LOCAL
+```
+
+O tenant B recebe seu próprio valor. O instante 11 já ultrapassou o vencimento 10. O crédito de R$ 100 permanece no armazenamento no modelo que confirmou a escrita durável.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/financial.py` e procure a função `cache_policy`. Localize a decisão que calcula before e a que calcula after. Compare a entrada e o recurso protegido. O modelo anterior e a proteção estão no mesmo arquivo para permitir repetir a comparação com segurança.
+
+Esta família também possui propriedades específicas em `labs/architecture/models_architecture.py`. O mapa de conceitos liga cada propriedade ao seu probe, às entradas e ao limite. Você pode abrir a função `observations` do módulo e procurar o identificador mostrado no comando.
+
+Para repetir somente um probe, copie seu nome do campo `probe` e acrescente-o ao comando:
+
+```sh
+python3 labs/architecture/financial.py cache-policy --probe cache-key
+```
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/cache-policy/); [entenda o mecanismo](/explicacoes/casos/cache-policy/); [resolva a tarefa](/guias/casos/cache-policy/); [consulte contratos e fontes](/referencia/casos/cache-policy/).
+
+O [mapa de conceitos deste caso](/jornadas/cache-policy/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

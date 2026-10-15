@@ -1,0 +1,9 @@
+flowchart TD
+    M[Mensagem identificada] --> Attempt[Tentativa]
+    Attempt -->|sucesso| Ack[Confirma conclusão]
+    Attempt -->|falha transitória dentro da política| Backoff[Espera e retry]
+    Backoff --> Attempt
+    Attempt -->|falha permanente ou limite| DLQ[Quarentena com identidade e causa]
+    DLQ --> Decision[Inspeção e decisão]
+    Decision -->|replay autorizado, mesma identidade| Attempt
+    Decision -->|sem reprocessamento| Terminal[Encerramento documentado]

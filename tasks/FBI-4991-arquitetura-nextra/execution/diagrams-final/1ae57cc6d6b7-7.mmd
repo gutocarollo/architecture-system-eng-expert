@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor User as Operador
+    participant View
+    participant ViewModel as Modelo de apresentação
+    participant Model
+    User->>View: escolhe Automático
+    View->>ViewModel: selectMode(automatic)
+    ViewModel->>Model: solicita a escolha
+    alt Entrada reconhecida
+        Model-->>ViewModel: modo atual
+        ViewModel-->>View: estado observado atualizado
+    else Escolha recusada
+        Model-->>ViewModel: motivo da recusa
+        ViewModel-->>View: modo anterior e mensagem
+    end

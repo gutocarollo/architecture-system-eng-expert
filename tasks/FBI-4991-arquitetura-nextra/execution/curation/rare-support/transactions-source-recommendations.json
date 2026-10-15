@@ -1,0 +1,1321 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-15T03:07:16.803539+00:00",
+  "scope": "Somente TCC, Choreography Saga e Strangler Fig histórico.",
+  "classification_owner": "Autor da investigação; nenhuma revisão independente é assinada por este pacote.",
+  "proof_level": "Leitura de código, contratos e história primária em revisões fixadas. Nenhuma aplicação foi iniciada e nenhum teste foi executado.",
+  "rows": [
+    {
+      "concept_id": "tcc-try-confirm-cancel",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_BOUNDED_TCC_INTERPRETATION",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "application_scope": "Reserva, confirmação e reversão de alocações de recursos de compute durante resize/cold migration no Nova.",
+      "mechanism": "No Try, o Nova mantém os recursos da origem sob o consumidor migration e reserva os recursos do destino sob o consumidor instance. A tentativa pode falhar antes da mudança ser aceita. No Confirm, a instância fica no destino e o Nova remove a instância antiga e a reserva da origem. No Cancel, o destino é destruído, seu uso local é liberado e a alocação original volta ao consumidor instance, substituindo a alocação do destino. O contexto de migração guarda as versões antiga e nova necessárias à decisão.",
+      "classification_basis": "É uma interpretação TCC do ciclo de reservas efetivamente implementado. Os autores do Nova não foram apresentados como usuários do Seata nem como autores desse rótulo.",
+      "limits": "O recorte não equivale a uma garantia TCC global sobre todos os recursos de uma nuvem. A documentação distingue alocações Placement dos claims de recursos locais. O código avisa sobre provedores compartilhados no caminho de reversão e admite falhas de limpeza na confirmação. Não foram exercitados recuperação, timeout ou todos os participantes de volumes e redes.",
+      "base": [
+        {
+          "kind": "REUSED_CURATOR_FRAMEWORK_REFERENCE",
+          "repo": "apache/seata",
+          "path": "tcc/src/main/java/org/apache/seata/rm/tcc/interceptor/TccActionInterceptorHandler.java",
+          "revision": "8a31b1f41da325f5b498d3fa2853221620388d35",
+          "url": "https://github.com/apache/seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/tcc/src/main/java/org/apache/seata/rm/tcc/interceptor/TccActionInterceptorHandler.java",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/60a353a54a64641c1076ee2f8345b1ddfb6fe88865d7add09caaf07400208ed3.txt",
+          "sha256": "80c14772953a6d0825744d825dd0458613996f01edcd1ac88a5ba9064b615f3d",
+          "license": {
+            "status": "READ",
+            "license_spdx": "Apache-2.0",
+            "url": "https://github.com/apache/seata/blob/8a31b1f41da325f5b498d3fa2853221620388d35/LICENSE",
+            "revision": "8a31b1f41da325f5b498d3fa2853221620388d35",
+            "path": "LICENSE"
+          },
+          "inspected_utc": "2026-10-15T03:07:16.781032+00:00",
+          "selected_lines": [
+            {
+              "line": 158,
+              "excerpt": "        businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());"
+            },
+            {
+              "line": 159,
+              "excerpt": "        businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());"
+            }
+          ]
+        }
+      ],
+      "base_application_relationship": "Seata é a referência de framework para os callbacks TCC; Nova implementa seu próprio ciclo de reservas.",
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "doc/source/contributor/resize-and-cold-migrate.rst",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.053035Z",
+          "sha256": "3e457d01ee2cd61ed5c968cc97a0b8ec27adffe52821e89896ac891ed0c606b2",
+          "line_count": 167,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/94aec8425f304d8708613292385c2efa811357150a9369105747a15a0da57b4f.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.781703+00:00",
+          "claim": "A documentação primária explica reserva dupla, confirmação que libera a origem e reversão que libera o destino.",
+          "evidence": [
+            {
+              "start_line": 53,
+              "end_line": 67,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst#L53-L67",
+              "excerpt": "53: Resource claims\n54: ~~~~~~~~~~~~~~~\n55: \n56: Both resize and cold migration perform a `resize claim`_ on the destination\n57: node. Historically the resize claim was meant as a safety check on the selected\n58: node to work around race conditions in the scheduler. Since the scheduler\n59: started `atomically claiming`_ VCPU, MEMORY_MB and DISK_GB allocations using\n60: Placement the role of the resize claim has been reduced to detecting the same\n61: conditions but for resources like PCI devices and NUMA topology which, at least\n62: as of the 20.0.0 (Train) release, are not modeled in Placement and as such are\n63: not atomic.\n64: \n65: If this claim fails, the operation can be rescheduled to an alternative\n66: host, if there are any. The number of possible alternative hosts is determined\n67: by the :oslo.config:option:`scheduler.max_attempts` configuration option."
+            },
+            {
+              "start_line": 74,
+              "end_line": 89,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/doc/source/contributor/resize-and-cold-migrate.rst#L74-L89",
+              "excerpt": "74: and image used to build the server. Once the scheduler runs through its filters\n75: and weighers and picks a host, resource class `allocations`_ are atomically\n76: consumed in placement with the server as the consumer.\n77: \n78: During both resize and cold migrate operations, the allocations held by the\n79: server consumer against the source compute node resource provider are `moved`_\n80: to a `migration record`_ and the scheduler will create allocations, held by the\n81: instance consumer, on the selected destination compute node resource provider.\n82: This is commonly referred to as `migration-based allocations`_ which were\n83: introduced in the 17.0.0 (Queens) release.\n84: \n85: If the operation is successful and confirmed, the source node allocations held\n86: by the migration record are `dropped`_. If the operation fails or is reverted,\n87: the source compute node resource provider allocations held by the migration\n88: record are `reverted`_ back to the instance consumer and the allocations\n89: against the destination compute node resource provider are dropped."
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "openstack/nova",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "path": "LICENSE",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T02:53:52.611843Z",
+            "http_status": 200,
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-ba868e9f834e314af29e089807bdeee532e43bf6b342372a6e94e513d0061179.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "nova/compute/resource_tracker.py",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.153316Z",
+          "sha256": "f51e3a404ce36136ee95ecf2d38a67802f6bd6fcffeadeedb94e7fb08a874bae",
+          "line_count": 2269,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/dae2826b140ced43d5e6bbdaee3f360d3cf5d10caba1de3df4aa01b0b01e0262.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.782919+00:00",
+          "claim": "O tracker emite o ticket de recursos e distingue a liberação da versão antiga e da nova.",
+          "evidence": [
+            {
+              "start_line": 254,
+              "end_line": 265,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py#L254-L265",
+              "excerpt": "254:     def resize_claim(\n255:         self, context, instance, flavor, nodename, migration, allocations,\n256:         image_meta=None, limits=None,\n257:     ):\n258:         \"\"\"Create a claim for a resize or cold-migration move.\n259: \n260:         Note that this code assumes ``instance.new_flavor`` is set when\n261:         resizing with a new flavor.\n262:         \"\"\"\n263:         return self._move_claim(\n264:             context, instance, flavor, nodename, migration,\n265:             allocations, image_meta=image_meta, limits=limits)"
+            },
+            {
+              "start_line": 295,
+              "end_line": 316,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py#L295-L316",
+              "excerpt": "295:     ):\n296:         \"\"\"Indicate that resources are needed for a move to this host.\n297: \n298:         Move can be either a migrate/resize, live-migrate or an\n299:         evacuate/rebuild operation.\n300: \n301:         :param context: security context\n302:         :param instance: instance object to reserve resources for\n303:         :param new_flavor: new flavor being resized to\n304:         :param nodename: The Ironic nodename selected by the scheduler\n305:         :param migration: A migration object if one was already created\n306:                           elsewhere for this operation (otherwise None)\n307:         :param allocations: the placement allocation records.\n308:         :param move_type: move type - can be one of 'migration', 'resize',\n309:                          'live-migration', 'evacuate'\n310:         :param image_meta: instance image metadata\n311:         :param limits: Dict of oversubscription limits for memory, disk,\n312:         and CPUs\n313:         :returns: A Claim ticket representing the reserved resources.  This\n314:         should be turned into finalize  a resource claim or free\n315:         resources after the compute operation is finished.\n316:         \"\"\""
+            },
+            {
+              "start_line": 631,
+              "end_line": 663,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/resource_tracker.py#L631-L663",
+              "excerpt": "631:     def drop_move_claim_at_source(self, context, instance, migration):\n632:         \"\"\"Drop a move claim after confirming a resize or cold migration.\"\"\"\n633:         migration.status = 'confirmed'\n634:         migration.save()\n635: \n636:         self._drop_move_claim(\n637:             context, instance, migration.source_node, instance.old_flavor,\n638:             prefix='old_')\n639: \n640:         # NOTE(stephenfin): Unsetting this is unnecessary for cross-cell\n641:         # resize, since the source and dest instance objects are different and\n642:         # the source instance will be deleted soon. It's easier to just do it\n643:         # though.\n644:         instance.drop_migration_context()\n645: \n646:     @utils.synchronized(COMPUTE_RESOURCE_SEMAPHORE, fair=True)\n647:     def drop_move_claim_at_dest(self, context, instance, migration):\n648:         \"\"\"Drop a move claim after reverting a resize or cold migration.\"\"\"\n649: \n650:         # NOTE(stephenfin): This runs on the destination, before we return to\n651:         # the source and resume the instance there. As such, the migration\n652:         # isn't really reverted yet, but this status is what we use to\n653:         # indicate that we no longer needs to account for usage on this host\n654:         migration.status = 'reverted'\n655:         migration.save()\n656: \n657:         self._drop_move_claim(\n658:             context, instance, migration.dest_node, instance.new_flavor,\n659:             prefix='new_')\n660: \n661:         instance.revert_migration_context()\n662:         instance.save(expected_task_state=[task_states.RESIZE_REVERTING])\n663: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "openstack/nova",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "path": "LICENSE",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T02:53:52.611843Z",
+            "http_status": 200,
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-ba868e9f834e314af29e089807bdeee532e43bf6b342372a6e94e513d0061179.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "nova/compute/manager.py",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.400773Z",
+          "sha256": "4bdd8212073a593447efc35dc75f7181cdc4a4b67d78475a5e9e846dc975e8ff",
+          "line_count": 12137,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/9754858da0808c1cfa0b72614c980e718d1c87df33f5811ff4d5f48c42f7bf1d.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.785685+00:00",
+          "claim": "Os caminhos reais confirmam ou revertem o resize e coordenam a destruição e a liberação das reservas correspondentes.",
+          "evidence": [
+            {
+              "start_line": 4961,
+              "end_line": 4985,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L4961-L4985",
+              "excerpt": "4961:     def confirm_resize(self, context, instance, migration):\n4962:         \"\"\"Confirms a migration/resize and deletes the 'old' instance.\n4963: \n4964:         This is called from the API and runs on the source host.\n4965: \n4966:         Nothing needs to happen on the destination host at this point since\n4967:         the instance is already running there. This routine just cleans up the\n4968:         source host.\n4969:         \"\"\"\n4970:         @utils.synchronized(instance.uuid)\n4971:         def do_confirm_resize(context, instance, migration):\n4972:             LOG.debug(\"Going to confirm migration %s\", migration.id,\n4973:                       instance=instance)\n4974: \n4975:             if migration.status == 'confirmed':\n4976:                 LOG.info(\"Migration %s is already confirmed\",\n4977:                          migration.id, instance=instance)\n4978:                 return\n4979: \n4980:             if migration.status not in ('finished', 'confirming'):\n4981:                 LOG.warning(\"Unexpected confirmation status '%(status)s' \"\n4982:                             \"of migration %(id)s, exit confirmation process\",\n4983:                             {\"status\": migration.status, \"id\": migration.id},\n4984:                             instance=instance)\n4985:                 return"
+            },
+            {
+              "start_line": 5014,
+              "end_line": 5023,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5014-L5023",
+              "excerpt": "5014:                             'state.', self.host, migration.dest_compute,\n5015:                             instance=instance)\n5016:                 finally:\n5017:                     # Whether an error occurred or not, at this point the\n5018:                     # instance is on the dest host. Avoid leaking allocations\n5019:                     # in placement by deleting them here...\n5020:                     self._delete_allocation_after_move(\n5021:                         context, instance, migration)\n5022:                     # ...inform the scheduler about the move...\n5023:                     self._delete_scheduler_instance_info("
+            },
+            {
+              "start_line": 5059,
+              "end_line": 5091,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5059-L5091",
+              "excerpt": "5059:     def _confirm_resize(self, context, instance, migration=None):\n5060:         \"\"\"Destroys the source instance.\"\"\"\n5061:         self._notify_about_instance_usage(context, instance,\n5062:                                           \"resize.confirm.start\")\n5063:         compute_utils.notify_about_instance_action(context, instance,\n5064:             self.host, action=fields.NotificationAction.RESIZE_CONFIRM,\n5065:             phase=fields.NotificationPhase.START)\n5066: \n5067:         # NOTE(tr3buchet): tear down networks on source host\n5068:         self.network_api.setup_networks_on_host(context, instance,\n5069:                            migration.source_compute, teardown=True)\n5070: \n5071:         # TODO(stephenfin): These next three calls should be bundled\n5072:         network_info = self.network_api.get_instance_nw_info(context,\n5073:                                                              instance)\n5074: \n5075:         # NOTE(adrianc): Populate old PCI device in VIF profile\n5076:         # to allow virt driver to properly unplug it from Hypervisor.\n5077:         pci_mapping = (instance.migration_context.\n5078:                        get_pci_mapping_for_migration(True))\n5079:         network_info = self._get_updated_nw_info_with_pci_mapping(\n5080:             network_info, pci_mapping)\n5081: \n5082:         self.driver.confirm_migration(context, migration, instance,\n5083:                                       network_info)\n5084: \n5085:         # Unmount shares and revoke Manila access on source host.\n5086:         self.share_manager.cleanup_shares_after_migration(\n5087:             context, instance, migration, \"confirm resize\")\n5088: \n5089:         # Free up the old_flavor usage from the resource tracker for this host.\n5090:         self.rt.drop_move_claim_at_source(context, instance, migration)\n5091: "
+            },
+            {
+              "start_line": 5120,
+              "end_line": 5136,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5120-L5136",
+              "excerpt": "5120:     def _delete_allocation_after_move(self, context, instance, migration):\n5121:         \"\"\"Deletes resource allocations held by the migration record against\n5122:         the source compute node resource provider after a confirmed cold /\n5123:         successful live migration.\n5124:         \"\"\"\n5125:         try:\n5126:             # NOTE(danms): We're finishing on the source node, so try\n5127:             # to delete the allocation based on the migration uuid\n5128:             self.reportclient.delete_allocation_for_instance(\n5129:                 context, migration.uuid, consumer_type='migration',\n5130:                 force=False)\n5131:         except exception.AllocationDeleteFailed:\n5132:             LOG.error('Deleting allocation in placement for migration '\n5133:                       '%(migration_uuid)s failed. The instance '\n5134:                       '%(instance_uuid)s will be put to ERROR state '\n5135:                       'but the allocation held by the migration is '\n5136:                       'leaked.',"
+            },
+            {
+              "start_line": 5610,
+              "end_line": 5654,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5610-L5654",
+              "excerpt": "5610:     def revert_resize(self, context, instance, migration, request_spec):\n5611:         \"\"\"Destroys the new instance on the destination machine.\n5612: \n5613:         Reverts the model changes, and powers on the old instance on the\n5614:         source machine.\n5615: \n5616:         \"\"\"\n5617:         # NOTE(comstud): A revert_resize is essentially a resize back to\n5618:         # the old size, so we need to send a usage event here.\n5619:         compute_utils.notify_usage_exists(self.notifier, context, instance,\n5620:                                           self.host, current_period=True)\n5621: \n5622:         with self._error_out_instance_on_exception(context, instance):\n5623:             # NOTE(tr3buchet): tear down networks on destination host\n5624:             self.network_api.setup_networks_on_host(context, instance,\n5625:                                                     teardown=True)\n5626: \n5627:             self.network_api.migrate_instance_start(context,\n5628:                                                     instance,\n5629:                                                     migration)\n5630: \n5631:             network_info = self.network_api.get_instance_nw_info(context,\n5632:                                                                  instance)\n5633:             bdms = objects.BlockDeviceMappingList.get_by_instance_uuid(\n5634:                     context, instance.uuid)\n5635:             block_device_info = self._get_instance_block_device_info(\n5636:                                 context, instance, bdms=bdms)\n5637: \n5638:             destroy_disks = not self._is_instance_storage_shared(\n5639:                 context, instance, host=migration.source_compute)\n5640:             self.driver.destroy(context, instance, network_info,\n5641:                                 block_device_info, destroy_disks)\n5642: \n5643:             self.share_manager.cleanup_shares_after_migration(\n5644:                 context, instance, migration, \"revert resize\")\n5645: \n5646:             self._terminate_volume_connections(context, instance, bdms)\n5647: \n5648:             # Free up the new_flavor usage from the resource tracker for this\n5649:             # host.\n5650:             self.rt.drop_move_claim_at_dest(context, instance, migration)\n5651: \n5652:             # RPC cast back to the source host to finish the revert there.\n5653:             self.compute_rpcapi.finish_revert_resize(context, instance,\n5654:                     migration, migration.source_compute, request_spec)"
+            },
+            {
+              "start_line": 5690,
+              "end_line": 5700,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5690-L5700",
+              "excerpt": "5690:             # compatibility if old_vm_state is not set\n5691:             old_vm_state = instance.system_metadata.get(\n5692:                 'old_vm_state', vm_states.ACTIVE)\n5693: \n5694:             # Revert the flavor and host/node fields to their previous values\n5695:             self._revert_instance_flavor_host_node(instance, migration)\n5696: \n5697:             try:\n5698:                 source_allocations = self._revert_allocation(\n5699:                     context, instance, migration)\n5700:             except exception.AllocationMoveFailed:"
+            },
+            {
+              "start_line": 5813,
+              "end_line": 5838,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/compute/manager.py#L5813-L5838",
+              "excerpt": "5813:     def _revert_allocation(self, context, instance, migration):\n5814:         \"\"\"Revert an allocation that is held by migration to our instance.\"\"\"\n5815: \n5816:         # Fetch the original allocation that the instance had on the source\n5817:         # node, which are now held by the migration\n5818:         orig_alloc = self.reportclient.get_allocations_for_consumer(\n5819:             context, migration.uuid)\n5820:         if not orig_alloc:\n5821:             LOG.error('Did not find resource allocations for migration '\n5822:                       '%s on source node %s. Unable to revert source node '\n5823:                       'allocations back to the instance.',\n5824:                       migration.uuid, migration.source_node, instance=instance)\n5825:             return False\n5826: \n5827:         LOG.info('Swapping old allocation on %(rp_uuids)s held by migration '\n5828:                  '%(mig)s for instance',\n5829:                  {'rp_uuids': orig_alloc.keys(), 'mig': migration.uuid},\n5830:                  instance=instance)\n5831:         # FIXME(gibi): This method is flawed in that it does not handle\n5832:         # allocations against sharing providers in any special way. This leads\n5833:         # to duplicate allocations against the sharing provider during\n5834:         # migration.\n5835:         # TODO(cdent): Should we be doing anything with return values here?\n5836:         self.reportclient.move_allocations(context, migration.uuid,\n5837:                                            instance.uuid)\n5838:         return orig_alloc"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "openstack/nova",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "path": "LICENSE",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T02:53:52.611843Z",
+            "http_status": 200,
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-ba868e9f834e314af29e089807bdeee532e43bf6b342372a6e94e513d0061179.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "openstack/nova",
+          "path": "nova/scheduler/client/report.py",
+          "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+          "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py",
+          "raw_url": "https://raw.githubusercontent.com/openstack/nova/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:55:26.930204+00:00",
+          "sha256": "029c57e513c56e087c4b12b05764b8d764580a0a9324ca496fa8de2cf9bb59ea",
+          "line_count": 2688,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-openstack--nova--nova--scheduler--client--report.py",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.787075+00:00",
+          "claim": "O cliente cria as reservas de recursos no Placement. Na reversão, a API recebe a remoção da reserva sob migration e a substituição da reserva instance pelos recursos originais.",
+          "evidence": [
+            {
+              "start_line": 1635,
+              "end_line": 1649,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py#L1635-L1649",
+              "excerpt": "1635:     def claim_resources(self, context, consumer_uuid, alloc_request,\n1636:                         project_id, user_id, allocation_request_version,\n1637:                         consumer_generation=None):\n1638:         \"\"\"Creates allocation records for the supplied instance UUID against\n1639:         the supplied resource providers.\n1640: \n1641:         We check to see if resources have already been claimed for this\n1642:         consumer. If so, we assume that a move operation is underway and the\n1643:         scheduler is attempting to claim resources against the new (destination\n1644:         host). In order to prevent compute nodes currently performing move\n1645:         operations from being scheduled to improperly, we create a \"doubled-up\"\n1646:         allocation that consumes resources on *both* the source and the\n1647:         destination host during the move operation.\n1648: \n1649:         :param context: The security context"
+            },
+            {
+              "start_line": 1712,
+              "end_line": 1731,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py#L1712-L1731",
+              "excerpt": "1712:                     CONSUMER_GENERATION_VERSION)):\n1713:             payload['consumer_generation'] = consumer_generation\n1714: \n1715:         r = self._put_allocations(\n1716:             context,\n1717:             consumer_uuid,\n1718:             payload,\n1719:             version=allocation_request_version)\n1720:         if r.status_code != 204:\n1721:             err = r.json()['errors'][0]\n1722:             if err['code'] == 'placement.concurrent_update':\n1723:                 # NOTE(jaypipes): Yes, it sucks doing string comparison like\n1724:                 # this but we have no error codes, only error messages.\n1725:                 # TODO(gibi): Use more granular error codes when available\n1726:                 if 'consumer generation conflict' in err['detail']:\n1727:                     reason = ('another process changed the consumer %s after '\n1728:                               'the report client read the consumer state '\n1729:                               'during the claim ' % consumer_uuid)\n1730:                     raise exception.AllocationUpdateFailed(\n1731:                         consumer_uuid=consumer_uuid, error=reason)"
+            },
+            {
+              "start_line": 2042,
+              "end_line": 2066,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py#L2042-L2066",
+              "excerpt": "2042:     def move_allocations(self, context, source_consumer_uuid,\n2043:                          target_consumer_uuid):\n2044:         \"\"\"Move allocations from one consumer to the other\n2045: \n2046:         Note that this call moves the current allocation from the source\n2047:         consumer to the target consumer. If parallel update happens on either\n2048:         consumer during this call then Placement will detect that and\n2049:         this code will raise AllocationMoveFailed. If you want to move a known\n2050:         piece of allocation from source to target then this function might not\n2051:         be what you want as it always moves what source has in Placement.\n2052: \n2053:         If the target consumer has allocations but the source consumer does\n2054:         not, this method assumes the allocations were already moved and\n2055:         returns True.\n2056: \n2057:         :param context: The security context\n2058:         :param source_consumer_uuid: the UUID of the consumer from which\n2059:                                      allocations are moving\n2060:         :param target_consumer_uuid: the UUID of the target consumer for the\n2061:                                      allocations\n2062:         :returns: True if the move was successful (or already done),\n2063:                   False otherwise.\n2064:         :raises AllocationMoveFailed: If the source or the target consumer has\n2065:                                       been modified while this call tries to\n2066:                                       move allocations."
+            },
+            {
+              "start_line": 2068,
+              "end_line": 2110,
+              "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/nova/scheduler/client/report.py#L2068-L2110",
+              "excerpt": "2068:         source_alloc = self.get_allocs_for_consumer(\n2069:             context, source_consumer_uuid)\n2070:         target_alloc = self.get_allocs_for_consumer(\n2071:             context, target_consumer_uuid)\n2072: \n2073:         if target_alloc and target_alloc['allocations']:\n2074:             # Check to see if the source allocations still exist because if\n2075:             # they don't they might have already been moved to the target.\n2076:             if not (source_alloc and source_alloc['allocations']):\n2077:                 LOG.info('Allocations not found for consumer %s; assuming '\n2078:                          'they were already moved to consumer %s',\n2079:                          source_consumer_uuid, target_consumer_uuid)\n2080:                 return True\n2081:             LOG.debug('Overwriting current allocation %(allocation)s on '\n2082:                       'consumer %(consumer)s',\n2083:                       {'allocation': target_alloc,\n2084:                        'consumer': target_consumer_uuid})\n2085: \n2086:         new_allocs = {\n2087:             source_consumer_uuid: {\n2088:                 # 'allocations': {} means we are removing the allocation from\n2089:                 # the source consumer\n2090:                 'allocations': {},\n2091:                 'project_id': source_alloc['project_id'],\n2092:                 'user_id': source_alloc['user_id'],\n2093:                 'consumer_generation': source_alloc['consumer_generation']},\n2094:             target_consumer_uuid: {\n2095:                 'allocations': source_alloc['allocations'],\n2096:                 # NOTE(gibi): Is there any case when we need to keep the\n2097:                 # project_id and user_id of the target allocation that we are\n2098:                 # about to overwrite?\n2099:                 'project_id': source_alloc['project_id'],\n2100:                 'user_id': source_alloc['user_id'],\n2101:                 'consumer_generation': target_alloc.get('consumer_generation')\n2102:             }\n2103:         }\n2104:         r = self.post('/allocations', new_allocs,\n2105:                       version=CONSUMER_GENERATION_VERSION,\n2106:                       global_request_id=context.global_id)\n2107:         if r.status_code != 204:\n2108:             err = r.json()['errors'][0]\n2109:             if err['code'] == 'placement.concurrent_update':\n2110:                 # NOTE(jaypipes): Yes, it sucks doing string comparison like"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "openstack/nova",
+            "revision": "2ad1f119019437093f480f0c53b8ca3417560078",
+            "path": "LICENSE",
+            "url": "https://github.com/openstack/nova/blob/2ad1f119019437093f480f0c53b8ca3417560078/LICENSE",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "Apache-2.0",
+            "observed_utc": "2026-10-15T02:53:52.611843Z",
+            "http_status": 200,
+            "sha256": "5df2a0d87d6c562f0ea11c688ac52532aa28d744cabc7994ff0537f64b3b3320",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-ba868e9f834e314af29e089807bdeee532e43bf6b342372a6e94e513d0061179.txt",
+            "excerpt": "\n                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that i"
+          }
+        }
+      ]
+    },
+    {
+      "concept_id": "choreography-saga",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_FEDERATED_FOLLOW_COMPENSATION",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "application_scope": "Pedido e autorização de follow entre duas instâncias Mastodon, incluindo recusa e cancelamento.",
+      "mechanism": "A instância A grava um FollowRequest local e envia Follow ao inbox de B. B decide segundo seu estado local: pode gravar e autorizar a relação e responder Accept, ou recusar por uma regra de negócio e responder Reject. Accept faz A consolidar a relação local. Reject compensa o pedido já gravado em A e pode desfazer uma relação já consolidada. Se A cancela, ela remove seu pedido ou relação e envia Undo; B remove sua cópia correspondente. As mensagens são correlacionadas pela URI do Follow. Os participantes reagem às atividades; o caminho não depende de um coordenador de transação global.",
+      "transaction_boundaries": "O lockfile fixa ActiveRecord 8.1.4. Sua implementação envolve save/destroy em transações locais e documenta o limite por conexão. Os métodos de interação do Mastodon criam ou removem registros locais; DeliveryWorker faz um POST HTTP para o inbox remoto. A outra instância modifica seus próprios registros ao tratar a atividade. Isso não coloca as duas bases em uma transação SQL comum.",
+      "compensation_cases": [
+        {
+          "failure": "B recusa o Follow porque o alvo bloqueia o remetente ou não aceita a operação.",
+          "committed_effect": "A já gravou o pedido local antes de enviar Follow.",
+          "compensation": "B emite Reject; o handler em A chama reject! no pedido ou UnfollowService na relação."
+        },
+        {
+          "failure": "A cancela o pedido enquanto B o processa, ou desfaz a relação.",
+          "committed_effect": "Pode haver pedido ou relação persistida em ambos os participantes.",
+          "compensation": "A apaga o estado local e emite Undo; B remove o pedido ou Follow correspondente. O handler também trata a chegada de Undo antes do Follow."
+        }
+      ],
+      "classification_basis": "A classificação é uma interpretação da coreografia de transações locais com compensações semânticas, sustentada pelo fluxo de código. Não é uma alegação de que Mastodon usa Eventuate ou denomina esse fluxo Saga.",
+      "limits": "Não se afirma atomicidade de todo handler, entrega exatamente uma vez, outbox transacional ou recuperação garantida de toda falha. A entrega tem retries finitos e estados de falha. Undo Accept por referência não é implementado no recorte, como o próprio código registra; a prova de compensação escolhida usa Reject e Undo Follow.",
+      "base": [
+        {
+          "kind": "FILE",
+          "repo": "eventuate-tram/eventuate-tram-core",
+          "path": "eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+          "revision": "e472ed72b8635d0488a95d0892b8901c0158a7d1",
+          "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+          "raw_url": "https://raw.githubusercontent.com/eventuate-tram/eventuate-tram-core/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T03:04:11.516152Z",
+          "sha256": "13d41b57cfb30483d9b9d0248856eee26fdf0422dd11b843b8d1073ea4279cfc",
+          "line_count": 66,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/ad5067d773ec1c5007ccea9b624ba330480bebe83d97bbfebc46d6692c2ed836.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.787603+00:00",
+          "claim": "O framework de referência despacha eventos por agregado e tipo para handlers registrados. O caminho correto desta revisão é eventuate-tram-events.",
+          "evidence": [
+            {
+              "start_line": 24,
+              "end_line": 54,
+              "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/eventuate-tram-events/src/main/java/io/eventuate/tram/events/subscriber/DomainEventDispatcher.java#L24-L54",
+              "excerpt": "24:   public DomainEventDispatcher(String eventDispatcherId, DomainEventHandlers domainEventHandlers, MessageConsumer messageConsumer, DomainEventNameMapping domainEventNameMapping) {\n25:     this.eventDispatcherId = eventDispatcherId;\n26:     this.domainEventHandlers = domainEventHandlers;\n27:     this.messageConsumer = messageConsumer;\n28:     this.domainEventNameMapping = domainEventNameMapping;\n29:   }\n30: \n31:   public void initialize() {\n32:     logger.info(\"Initializing domain event dispatcher\");\n33:     messageConsumer.subscribe(eventDispatcherId, domainEventHandlers.getAggregateTypesAndEvents(), this::messageHandler);\n34:     logger.info(\"Initialized domain event dispatcher\");\n35:   }\n36: \n37:   public void messageHandler(Message message) {\n38:     String aggregateType = message.getRequiredHeader(EventMessageHeaders.AGGREGATE_TYPE);\n39: \n40:     message.setHeader(EventMessageHeaders.EVENT_TYPE,\n41:             domainEventNameMapping.externalEventTypeToEventClassName(aggregateType, message.getRequiredHeader(EventMessageHeaders.EVENT_TYPE)));\n42: \n43:     Optional<DomainEventHandler> handler = domainEventHandlers.findTargetMethod(message);\n44: \n45:     if (handler.isEmpty()) {\n46:       return;\n47:     }\n48: \n49:     DomainEvent param = JSonMapper.fromJson(message.getPayload(), handler.get().getEventClass());\n50: \n51:     handler.get().invoke(new DomainEventEnvelopeImpl<>(message,\n52:             aggregateType,\n53:             message.getRequiredHeader(EventMessageHeaders.AGGREGATE_ID),\n54:             message.getRequiredHeader(Message.ID),"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "eventuate-tram/eventuate-tram-core",
+            "revision": "e472ed72b8635d0488a95d0892b8901c0158a7d1",
+            "path": "LICENSE.md",
+            "url": "https://github.com/eventuate-tram/eventuate-tram-core/blob/e472ed72b8635d0488a95d0892b8901c0158a7d1/LICENSE.md",
+            "license_spdx": "Apache-2.0",
+            "api_license_spdx": "NOASSERTION",
+            "observed_utc": "2026-10-15T02:53:52.181807Z",
+            "http_status": 200,
+            "sha256": "05ae8e8ae6c2ae313d504cd54cd60902fada54670932b3dbff2ef522ed340c6d",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-c7458db016e9351b4bf4ced7616653635ea484223c8e717ed44b0828b1dc2f65.txt",
+            "excerpt": "Copyright (c) 2020 Eventuate, Inc. All rights reserved.\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License fo"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "rails/rails",
+          "path": "activerecord/lib/active_record/transactions.rb",
+          "revision": "c3466ea00d7121798e3aa3144ffdf7174b81d8cb",
+          "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb",
+          "raw_url": "https://raw.githubusercontent.com/rails/rails/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:58:29.429348+00:00",
+          "sha256": "76070ab7f89e50de330b48a9a0dd6bd5cac9076842a8177f7e2595aa11110a6d",
+          "line_count": 549,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-rails--rails--activerecord--lib--active_record--transactions.rb",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.788712+00:00",
+          "claim": "A base de persistência realmente declarada pelo aplicativo delimita save/destroy e não oferece uma transação distribuída entre conexões.",
+          "evidence": [
+            {
+              "start_line": 64,
+              "end_line": 90,
+              "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb#L64-L90",
+              "excerpt": "64:     # == Transactions are not distributed across database connections\n65:     #\n66:     # A transaction acts on a single database connection. If you have\n67:     # multiple class-specific databases, the transaction will not protect\n68:     # interaction among them. One workaround is to begin a transaction\n69:     # on each class whose models you alter:\n70:     #\n71:     #   Student.transaction do\n72:     #     Course.transaction do\n73:     #       course.enroll(student)\n74:     #       student.units += course.units\n75:     #     end\n76:     #   end\n77:     #\n78:     # This is a poor solution, but fully distributed transactions are beyond\n79:     # the scope of Active Record.\n80:     #\n81:     # == +save+ and +destroy+ are automatically wrapped in a transaction\n82:     #\n83:     # Both {#save}[rdoc-ref:Persistence#save] and\n84:     # {#destroy}[rdoc-ref:Persistence#destroy] come wrapped in a transaction that ensures\n85:     # that whatever you do in validations or callbacks will happen under its\n86:     # protected cover. So you can use validations to check for values that\n87:     # the transaction depends on or you can raise exceptions in the callbacks\n88:     # to rollback, including <tt>after_*</tt> callbacks.\n89:     #\n90:     # As a consequence changes to the database are not seen outside your connection"
+            },
+            {
+              "start_line": 379,
+              "end_line": 389,
+              "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/activerecord/lib/active_record/transactions.rb#L379-L389",
+              "excerpt": "379:     def destroy # :nodoc:\n380:       with_transaction_returning_status { super }\n381:     end\n382: \n383:     def save(**) # :nodoc:\n384:       with_transaction_returning_status { super }\n385:     end\n386: \n387:     def save!(**) # :nodoc:\n388:       with_transaction_returning_status { super }\n389:     end"
+            }
+          ],
+          "license": {
+            "repo": "rails/rails",
+            "path": "MIT-LICENSE",
+            "revision": "c3466ea00d7121798e3aa3144ffdf7174b81d8cb",
+            "url": "https://github.com/rails/rails/blob/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/rails/rails/c3466ea00d7121798e3aa3144ffdf7174b81d8cb/MIT-LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:58:29.396684+00:00",
+            "sha256": "717ba1949502290f8e47688ae2e323acd06c8ca47aec9f7596b15f678c1af4a2",
+            "line_count": 20,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-rails--rails--MIT-LICENSE",
+            "status": "READ",
+            "excerpt": "Copyright (c) David Heinemeier Hansson\n\nPermission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to"
+          }
+        }
+      ],
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "Gemfile.lock",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:55:26.906752+00:00",
+          "sha256": "f39ea69a094637e25ba40bb644e75018e55623f04e508430029648ba196f7c7f",
+          "line_count": 1106,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--Gemfile.lock",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.789944+00:00",
+          "claim": "O produto declara Rails e ActiveRecord 8.1.4, correspondentes à implementação de framework verificada.",
+          "evidence": [
+            {
+              "start_line": 69,
+              "end_line": 80,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock#L69-L80",
+              "excerpt": "69:     activerecord (8.1.4)\n70:       activemodel (= 8.1.4)\n71:       activesupport (= 8.1.4)\n72:       timeout (>= 0.4.0)\n73:     activestorage (8.1.4)\n74:       actionpack (= 8.1.4)\n75:       activejob (= 8.1.4)\n76:       activerecord (= 8.1.4)\n77:       activesupport (= 8.1.4)\n78:       marcel (~> 1.0)\n79:     activesupport (8.1.4)\n80:       base64"
+            },
+            {
+              "start_line": 663,
+              "end_line": 676,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/Gemfile.lock#L663-L676",
+              "excerpt": "663:     rails (8.1.4)\n664:       actioncable (= 8.1.4)\n665:       actionmailbox (= 8.1.4)\n666:       actionmailer (= 8.1.4)\n667:       actionpack (= 8.1.4)\n668:       actiontext (= 8.1.4)\n669:       actionview (= 8.1.4)\n670:       activejob (= 8.1.4)\n671:       activemodel (= 8.1.4)\n672:       activerecord (= 8.1.4)\n673:       activestorage (= 8.1.4)\n674:       activesupport (= 8.1.4)\n675:       bundler (>= 1.15.0)\n676:       railties (= 8.1.4)"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/models/concerns/account/interactions.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:56:14.429886+00:00",
+          "sha256": "03c8b5168d07128c11ef7e8b9651dd0f7e21eacd21746c439409bac326aeced4",
+          "line_count": 261,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--models--concerns--account--interactions.rb",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.791421+00:00",
+          "claim": "O participante grava seus pedidos e relações locais e oferece a operação de remoção.",
+          "evidence": [
+            {
+              "start_line": 46,
+              "end_line": 68,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb#L46-L68",
+              "excerpt": "46:   def follow!(other_account, reblogs: nil, notify: nil, languages: nil, uri: nil, rate_limit: false, bypass_limit: false)\n47:     rel = active_relationships.create_with(show_reblogs: reblogs.nil? || reblogs, notify: notify.nil? ? false : notify, languages: languages, uri: uri, rate_limit: rate_limit, bypass_follow_limit: bypass_limit)\n48:       .find_or_create_by!(target_account: other_account)\n49: \n50:     rel.show_reblogs = reblogs   unless reblogs.nil?\n51:     rel.notify       = notify    unless notify.nil?\n52:     rel.languages    = languages unless languages.nil?\n53: \n54:     rel.save! if rel.changed?\n55: \n56:     rel\n57:   end\n58: \n59:   def request_follow!(other_account, reblogs: nil, notify: nil, languages: nil, uri: nil, rate_limit: false, bypass_limit: false)\n60:     rel = follow_requests.create_with(show_reblogs: reblogs.nil? || reblogs, notify: notify.nil? ? false : notify, uri: uri, languages: languages, rate_limit: rate_limit, bypass_follow_limit: bypass_limit)\n61:       .find_or_create_by!(target_account: other_account)\n62: \n63:     rel.show_reblogs = reblogs   unless reblogs.nil?\n64:     rel.notify       = notify    unless notify.nil?\n65:     rel.languages    = languages unless languages.nil?\n66: \n67:     rel.save! if rel.changed?\n68: "
+            },
+            {
+              "start_line": 97,
+              "end_line": 100,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/concerns/account/interactions.rb#L97-L100",
+              "excerpt": "97:   def unfollow!(other_account)\n98:     follow = active_relationships.find_by(target_account: other_account)\n99:     follow&.destroy\n100:   end"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/services/follow_service.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.047295Z",
+          "sha256": "10d484bd54ca868e2a1e095f65500bd72005c8d5949e6907f056176e67209c27",
+          "line_count": 101,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/f5cfb52b5a4051ef0eea9753757121b12dfb2a4d1ff922a6bd355c1293f5dae5.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.791798+00:00",
+          "claim": "O pedido é gravado antes do envio de Follow à instância remota.",
+          "evidence": [
+            {
+              "start_line": 40,
+              "end_line": 45,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb#L40-L45",
+              "excerpt": "40: \n41:     if (@target_account.locked? && !@options[:bypass_locked]) || @source_account.silenced? || @target_account.activitypub?\n42:       request_follow!\n43:     elsif @target_account.local?\n44:       direct_follow!\n45:     end"
+            },
+            {
+              "start_line": 70,
+              "end_line": 80,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb#L70-L80",
+              "excerpt": "70:   def request_follow!\n71:     follow_request = @source_account.request_follow!(@target_account, **follow_options.merge(rate_limit: @options[:with_rate_limit], bypass_limit: @options[:bypass_limit]))\n72: \n73:     if @target_account.local?\n74:       LocalNotificationWorker.perform_async(@target_account.id, follow_request.id, follow_request.class.name, 'follow_request')\n75:     elsif @target_account.activitypub?\n76:       ActivityPub::DeliveryWorker.perform_async(build_json(follow_request), @source_account.id, @target_account.inbox_url, { 'bypass_availability' => true })\n77:     end\n78: \n79:     follow_request\n80:   end"
+            },
+            {
+              "start_line": 93,
+              "end_line": 95,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/follow_service.rb#L93-L95",
+              "excerpt": "93: \n94:   def build_json(follow_request)\n95:     serialize_payload(follow_request, ActivityPub::FollowSerializer).to_json"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity/follow.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.039702Z",
+          "sha256": "199a422f0d3c4683bae0583eda94cfde805f8dfb28d771342e5f47400b9c5451",
+          "line_count": 45,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a57a2120dfd6d2aeca59c5f36fdfcdf532987aa2dfbe2fc4906732971784ee44.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.792189+00:00",
+          "claim": "B aplica suas regras locais, persiste o pedido ou emite Reject e pode autorizar automaticamente.",
+          "evidence": [
+            {
+              "start_line": 7,
+              "end_line": 38,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb#L7-L38",
+              "excerpt": "7:     target_account = account_from_uri(object_uri)\n8: \n9:     return if target_account.nil? || !target_account.local? || delete_arrived_first?(@json['id'])\n10: \n11:     # Update id of already-existing follow requests\n12:     existing_follow_request = ::FollowRequest.find_by(account: @account, target_account: target_account)\n13:     unless existing_follow_request.nil?\n14:       existing_follow_request.update!(uri: @json['id'])\n15:       return\n16:     end\n17: \n18:     if target_account.blocking?(@account) || target_account.domain_blocking?(@account.domain) || target_account.moved? || target_account.instance_actor?\n19:       reject_follow_request!(target_account)\n20:       return\n21:     end\n22: \n23:     # Fast-forward repeat follow requests\n24:     existing_follow = ::Follow.find_by(account: @account, target_account: target_account)\n25:     unless existing_follow.nil?\n26:       existing_follow.update!(uri: @json['id'])\n27:       AuthorizeFollowService.new.call(@account, target_account, skip_follow_request: true, follow_request_uri: @json['id'])\n28:       return\n29:     end\n30: \n31:     follow_request = FollowRequest.create!(account: @account, target_account: target_account, uri: @json['id'])\n32: \n33:     if target_account.locked? || @account.silenced?\n34:       LocalNotificationWorker.perform_async(target_account.id, follow_request.id, 'FollowRequest', 'follow_request')\n35:     else\n36:       AuthorizeFollowService.new.call(@account, target_account)\n37:       LocalNotificationWorker.perform_async(target_account.id, ::Follow.find_by(account: @account, target_account: target_account).id, 'Follow', 'follow')\n38:     end"
+            },
+            {
+              "start_line": 41,
+              "end_line": 44,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/follow.rb#L41-L44",
+              "excerpt": "41:   def reject_follow_request!(target_account)\n42:     json = serialize_payload(FollowRequest.new(account: @account, target_account: target_account, uri: @json['id']), ActivityPub::RejectFollowSerializer).to_json\n43:     ActivityPub::DeliveryWorker.perform_async(json, target_account.id, @account.inbox_url)\n44:   end"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/services/authorize_follow_service.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/authorize_follow_service.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/authorize_follow_service.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:03.876377Z",
+          "sha256": "8a7a7b2a39c40ef675bdedae54df023507bcfa9f27c99660e2c75271d86407c7",
+          "line_count": 27,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/cb90e856a86c98e9ff30de555d68f941229b670ff156fdb2c34b665cf63cddbc.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.792432+00:00",
+          "claim": "A autorização local emite Accept ao inbox do solicitante.",
+          "evidence": [
+            {
+              "start_line": 6,
+              "end_line": 25,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/authorize_follow_service.rb#L6-L25",
+              "excerpt": "6:   def call(source_account, target_account, **options)\n7:     if options[:skip_follow_request]\n8:       follow_request = FollowRequest.new(account: source_account, target_account: target_account, uri: options[:follow_request_uri])\n9:     else\n10:       follow_request = FollowRequest.find_by!(account: source_account, target_account: target_account)\n11:       follow_request.authorize!\n12:     end\n13: \n14:     create_notification(follow_request) if !source_account.local? && source_account.activitypub?\n15:     follow_request\n16:   end\n17: \n18:   private\n19: \n20:   def create_notification(follow_request)\n21:     ActivityPub::DeliveryWorker.perform_async(build_json(follow_request), follow_request.target_account_id, follow_request.account.inbox_url)\n22:   end\n23: \n24:   def build_json(follow_request)\n25:     serialize_payload(follow_request, ActivityPub::AcceptFollowSerializer).to_json"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity/accept.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.062438Z",
+          "sha256": "bfa21ef960640e87f187c36e1034121176411cfe0008a3341e2ed62484a16168",
+          "line_count": 75,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/573303b5c15efb79f4a9280120724fcf3b2e44a3c140ec16ac22bdf4eb7ab88c.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.792784+00:00",
+          "claim": "A resposta Accept consolida a relação local do solicitante.",
+          "evidence": [
+            {
+              "start_line": 4,
+              "end_line": 12,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb#L4-L12",
+              "excerpt": "4:   def perform\n5:     return accept_follow_for_relay if relay_follow?\n6:     return accept_follow!(follow_request_from_object) unless follow_request_from_object.nil?\n7:     return accept_quote!(quote_request_from_object) unless quote_request_from_object.nil?\n8:     return accept_feature_request! if feature_request_from_object.present?\n9: \n10:     case @object['type']\n11:     when 'Follow'\n12:       accept_embedded_follow"
+            },
+            {
+              "start_line": 18,
+              "end_line": 33,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/accept.rb#L18-L33",
+              "excerpt": "18:   def accept_embedded_follow\n19:     target_account = account_from_uri(target_uri)\n20: \n21:     return if target_account.nil? || !target_account.local?\n22: \n23:     follow_request = FollowRequest.find_by(account: target_account, target_account: @account)\n24:     accept_follow!(follow_request)\n25:   end\n26: \n27:   def accept_follow!(request)\n28:     return if request.nil?\n29: \n30:     is_first_follow = !request.target_account.followers.local.exists?\n31:     request.authorize!\n32: \n33:     RemoteAccountRefreshWorker.perform_async(request.target_account_id) if is_first_follow"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity/reject.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/reject.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/reject.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.043445Z",
+          "sha256": "85554a438e827a69edc210e99f2224665770b89de522c26fd0081326b604a4b4",
+          "line_count": 59,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/5169b83ab1b73ae5889db5498f85ebef3c7cebe0d6584a26f064a05b7dd9bcdd.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.793140+00:00",
+          "claim": "Reject compensa tanto o pedido pendente quanto uma relação já existente.",
+          "evidence": [
+            {
+              "start_line": 4,
+              "end_line": 27,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/reject.rb#L4-L27",
+              "excerpt": "4:   def perform\n5:     return reject_follow_for_relay if relay_follow?\n6:     return follow_request_from_object.reject! unless follow_request_from_object.nil?\n7:     return UnfollowService.new.call(follow_from_object.account, @account) unless follow_from_object.nil?\n8:     return reject_quote!(quote_request_from_object) unless quote_request_from_object.nil?\n9:     return reject_feature_request! unless feature_request_from_object.nil?\n10: \n11:     case @object['type']\n12:     when 'Follow'\n13:       reject_embedded_follow\n14:     end\n15:   end\n16: \n17:   private\n18: \n19:   def reject_embedded_follow\n20:     target_account = account_from_uri(target_uri)\n21: \n22:     return if target_account.nil? || !target_account.local?\n23: \n24:     follow_request = FollowRequest.find_by(account: target_account, target_account: @account)\n25:     follow_request&.reject!\n26: \n27:     UnfollowService.new.call(target_account, @account) if target_account.following?(@account)"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/models/follow_request.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:03.879026Z",
+          "sha256": "f4318f6afc002107c6f180cda1872ec274e5873b2dacd163b6a1a4b409ee3fa5",
+          "line_count": 66,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/e9f2753c23fa3d72b805f8b45dc24fd1812e2df683d74ecd72574c645a3add78.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.793479+00:00",
+          "claim": "O modelo liga a autorização à relação, remove o pedido e define reject! como remoção; a URI identifica o pedido.",
+          "evidence": [
+            {
+              "start_line": 34,
+              "end_line": 48,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb#L34-L48",
+              "excerpt": "34:   def authorize!\n35:     follow = account.follow!(target_account, reblogs: show_reblogs, notify: notify, languages: languages, uri: uri, bypass_limit: true)\n36: \n37:     if account.local?\n38:       ListAccount.where(follow_request: self).update_all(follow_request_id: nil, follow_id: follow.id)\n39:       MergeWorker.perform_async(target_account.id, account.id, 'home')\n40:       MergeWorker.push_bulk(account.owned_lists.with_list_account(target_account).pluck(:id)) do |list_id|\n41:         [target_account.id, list_id, 'list']\n42:       end\n43:     end\n44: \n45:     destroy!\n46:   end\n47: \n48:   alias reject! destroy!"
+            },
+            {
+              "start_line": 54,
+              "end_line": 60,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/models/follow_request.rb#L54-L60",
+              "excerpt": "54:   before_validation :set_uri, on: :create\n55:   after_commit :invalidate_follow_recommendations_cache\n56: \n57:   private\n58: \n59:   def set_uri\n60:     self.uri = ActivityPub::TagManager.instance.generate_uri_for(self) if uri.nil?"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/services/unfollow_service.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:03.982285Z",
+          "sha256": "f6592ddc9d3d5585b462b068a95261bdb3d58c9b50f29430117e6b7b491a9fa1",
+          "line_count": 77,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/70041086cc2d5d50f63f84568dd9f8f89191bf7dc47db6dea96fb99c4d210e01.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.793813+00:00",
+          "claim": "A remoção local emite Undo Follow ao outro participante.",
+          "evidence": [
+            {
+              "start_line": 25,
+              "end_line": 39,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb#L25-L39",
+              "excerpt": "25:   def unfollow!\n26:     follow = Follow.find_by(account: @follower, target_account: @followee)\n27:     return unless follow\n28: \n29:     # List members are removed immediately with the follow relationship removal,\n30:     # so we need to fetch the list IDs first\n31:     list_ids = @follower.owned_lists.with_list_account(@followee).pluck(:list_id) unless @options[:skip_unmerge]\n32: \n33:     follow.destroy!\n34: \n35:     if @followee.local? && @follower.remote? && @follower.activitypub?\n36:       send_reject_follow(follow)\n37:     elsif @followee.remote? && @followee.activitypub?\n38:       send_undo_follow(follow)\n39:     end"
+            },
+            {
+              "start_line": 51,
+              "end_line": 65,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/services/unfollow_service.rb#L51-L65",
+              "excerpt": "51:   def undo_follow_request!\n52:     follow_request = FollowRequest.find_by(account: @follower, target_account: @followee)\n53:     return unless follow_request\n54: \n55:     follow_request.destroy!\n56: \n57:     send_undo_follow(follow_request) unless @followee.local?\n58: \n59:     follow_request\n60:   end\n61: \n62:   def send_undo_follow(follow)\n63:     ActivityPub::DeliveryWorker.perform_async(build_json(follow), follow.account_id, follow.target_account.inbox_url)\n64:   end\n65: "
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/lib/activitypub/activity/undo.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:53:04.063085Z",
+          "sha256": "ebc1ffa468119e78ac8fda758eb12fdce4179ccdb8eb0793b8099a6dd5289f0b",
+          "line_count": 131,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/29334a3a55f6bb2726efca2229b4ec076ada09936eed1ce6e141e088c57053fa.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.794131+00:00",
+          "claim": "A compensação remota remove pedido ou relação e possui caminho para compensação anterior à chegada da atividade original.",
+          "evidence": [
+            {
+              "start_line": 10,
+              "end_line": 13,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb#L10-L13",
+              "excerpt": "10:     when 'Follow'\n11:       undo_follow\n12:     when 'Like'\n13:       undo_like"
+            },
+            {
+              "start_line": 45,
+              "end_line": 55,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb#L45-L55",
+              "excerpt": "45: \n46:   def try_undo_follow\n47:     follow = @account.follow_requests.find_by(uri: object_uri) || @account.active_relationships.find_by(uri: object_uri)\n48: \n49:     if follow.present?\n50:       follow.destroy\n51:       true\n52:     else\n53:       false\n54:     end\n55:   end"
+            },
+            {
+              "start_line": 90,
+              "end_line": 106,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/lib/activitypub/activity/undo.rb#L90-L106",
+              "excerpt": "90:     target_account = account_from_uri(target_uri)\n91: \n92:     return if target_account.nil? || !target_account.local?\n93: \n94:     if @account.following?(target_account)\n95:       @account.unfollow!(target_account)\n96:     elsif @account.requested?(target_account)\n97:       FollowRequest.find_by(account: @account, target_account: target_account)&.destroy\n98:     else\n99:       delete_later!(object_uri)\n100:     end\n101:   end\n102: \n103:   def undo_like\n104:     status = status_from_uri(target_uri)\n105: \n106:     return if status.nil? || !status.account.local?"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "mastodon/mastodon",
+          "path": "app/workers/activitypub/delivery_worker.rb",
+          "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+          "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb",
+          "raw_url": "https://raw.githubusercontent.com/mastodon/mastodon/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:54:10.859775+00:00",
+          "sha256": "3c8a15c70dc55ff628f3d7df33561a1e90a3709a17fb3fd1fc2d1f3cfbb4adf6",
+          "line_count": 100,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon--mastodon--app--workers--activitypub--delivery_worker.rb",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.794725+00:00",
+          "claim": "O transporte assíncrono entrega o evento por HTTP e tem política explícita de retry e falhas.",
+          "evidence": [
+            {
+              "start_line": 11,
+              "end_line": 20,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb#L11-L20",
+              "excerpt": "11:   sidekiq_options queue: 'push', retry: 16, dead: false\n12: \n13:   # Unfortunately, we cannot control Sidekiq's jitter, so add our own\n14:   sidekiq_retry_in do |count|\n15:     # This is Sidekiq's default delay\n16:     delay  = (count**4) + 15\n17:     # Our custom jitter, that will be added to Sidekiq's built-in one.\n18:     # Sidekiq's built-in jitter is `rand(10) * (count + 1)`\n19:     jitter = rand(0.5 * (count**4))\n20:     delay + jitter"
+            },
+            {
+              "start_line": 25,
+              "end_line": 36,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb#L25-L36",
+              "excerpt": "25:   def perform(json, source_account_id, inbox_url, options = {})\n26:     @options        = options.with_indifferent_access\n27: \n28:     return unless @options[:bypass_availability] || DeliveryFailureTracker.available?(inbox_url)\n29: \n30:     @json           = json\n31:     @source_account = Account.find(source_account_id)\n32:     @inbox_url      = inbox_url\n33:     @host           = Addressable::URI.parse(inbox_url).normalized_site\n34:     @performed      = false\n35: \n36:     perform_request"
+            },
+            {
+              "start_line": 49,
+              "end_line": 54,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb#L49-L54",
+              "excerpt": "49:   def build_request(http_client)\n50:     Request.new(:post, @inbox_url, body: @json, http_client: http_client).tap do |request|\n51:       request.on_behalf_of(@source_account, sign_with: sign_with)\n52:       request.add_headers(HEADERS)\n53:       request.add_headers({ 'Collection-Synchronization' => synchronization_header }) if ENV['DISABLE_FOLLOWERS_SYNCHRONIZATION'] != 'true' && @options[:synchronize_followers]\n54:     end"
+            },
+            {
+              "start_line": 61,
+              "end_line": 75,
+              "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/app/workers/activitypub/delivery_worker.rb#L61-L75",
+              "excerpt": "61:   def perform_request\n62:     stoplight_wrapper.run do\n63:       request_pool.with(@host) do |http_client|\n64:         build_request(http_client).perform do |response|\n65:           if response_successful?(response)\n66:             @performed = true\n67:           elsif response_error_unsalvageable?(response) || unsalvageable_authorization_failure?(response)\n68:             @unsalvageable = true\n69:           else\n70:             raise Mastodon::UnexpectedResponseError, response\n71:           end\n72:         end\n73:       end\n74:     end\n75:   end"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "mastodon/mastodon",
+            "revision": "d0b3f3263ba59da24c4fa179064a160106b90a81",
+            "path": "LICENSE",
+            "url": "https://github.com/mastodon/mastodon/blob/d0b3f3263ba59da24c4fa179064a160106b90a81/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T02:33:01.980124Z",
+            "http_status": 200,
+            "sha256": "57c8ff33c9c0cfc3ef00e650a1cc910d7ee479a8bc509f6c9209a7c2a11399d6",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-7677e13fa59b672acf0e398335e751020882c5043b5963189dc1c899fdac7779.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the commu"
+          }
+        }
+      ],
+      "primary_docs": [
+        {
+          "url": "https://docs.joinmastodon.org/spec/activitypub/",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:58:31.285871+00:00",
+          "sha256": "9399dc65fc38e3d40c0a2b1a5e05bf026180856e0a3cab0e3e1f459d87866b96",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon-activitypub.html",
+          "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-mastodon-activitypub.txt",
+          "selected_text": [
+            {
+              "line": 498,
+              "text": "Undo a previous Follow, Accept Follow, or Block."
+            }
+          ]
+        },
+        {
+          "url": "https://microservices.io/patterns/data/saga.html",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:58:31.700562+00:00",
+          "sha256": "54805df89f619c8432fd280263a88670ed66fac6cbe0b5429a1ebdc5d4cd1047",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-saga-definition.html",
+          "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-saga-definition.txt",
+          "selected_text": [
+            {
+              "line": 33,
+              "text": "Choreography - each local transaction publishes domain events that trigger local transactions in other services"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "concept_id": "strangler-fig",
+      "decision": "RECOMMEND_AUTHOR_SOURCE_MATCH_HISTORICAL_PANEL_REPLACEMENT",
+      "independent_review": "PENDING",
+      "application_kind": "PRODUCT_OSS",
+      "application_scope": "Migração histórica do subsistema de painéis Grafana de AngularJS para React.",
+      "mechanism": "A plataforma React foi apresentada como sucessora enquanto plugins Angular continuavam aceitos. Na versão 9.5, um carregador apresenta ambos como PanelPlugin e DashboardPanel escolhe o caminho Angular ou React. A ponte Angular cria o componente legado dentro da fronteira moderna. Na revisão 10.4 capturada pelo curador, o dispatch continua e o carregador também instala um wrapper React quando só há um controller Angular. Assim, painéis novos e antigos coexistem e podem ser substituídos por partes; o plano posterior prevê desligar e remover a tecnologia antiga.",
+      "classification_basis": "A documentação primária sustenta a intenção de substituição gradual. Chamar esse recorte de Strangler é a interpretação arquitetural da curadoria; não se atribui esse nome aos autores sem uma fonte.",
+      "limits": "O objeto substituído é a apresentação de painéis e seu SDK, não todo o Grafana. A revisão 9.5 e a revisão 10.4 são testemunhos separados da coexistência, e não um único checkout. A documentação de remoção é histórica e não prova uma implantação atual específica. Config migration isolada não foi tratada como prova; o caso contém dispatch e execução real dos dois caminhos.",
+      "base": [
+        {
+          "kind": "REUSED_CURATOR_FRAMEWORK_REFERENCE",
+          "repo": "facebook/react",
+          "path": "packages/react/src/ReactClient.js",
+          "revision": "99c106c43439ad7af05d42f66582d8d05190e9ff",
+          "url": "https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/packages/react/src/ReactClient.js",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/262602e03aac9dc8f2111e6e2c848f4add9df45ec9b90777c07539813629f45f.txt",
+          "sha256": "d7f70f7754e7f90f42107c0e6ed7af24cb3c559ed1e15de897aafc3b464a913f",
+          "license": {
+            "status": "READ",
+            "license_spdx": "MIT",
+            "url": "https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/LICENSE",
+            "revision": "99c106c43439ad7af05d42f66582d8d05190e9ff",
+            "path": "LICENSE"
+          },
+          "inspected_utc": "2026-10-15T03:07:16.796731+00:00",
+          "selected_lines": []
+        }
+      ],
+      "base_application_relationship": "httpxy é a referência de framework para a forma HTTP de mediação. Grafana aplica uma fronteira de componentes e seu próprio carregador de plugins; não se afirma dependência de httpxy.",
+      "application": [
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/plugins/importPanelPlugin.ts",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/plugins/importPanelPlugin.ts",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/plugins/importPanelPlugin.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:55:26.866921+00:00",
+          "sha256": "85feca62d1c32aced2574a6a5ee24be426c66e179624f7644e8b351b716bdd17",
+          "line_count": 58,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--plugins--importPanelPlugin.ts",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.797169+00:00",
+          "claim": "Em 9.5, a mesma fronteira carrega exportações React ou adapta PanelCtrl para PanelPlugin.",
+          "evidence": [
+            {
+              "start_line": 36,
+              "end_line": 52,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/plugins/importPanelPlugin.ts#L36-L52",
+              "excerpt": "36: function getPanelPlugin(meta: PanelPluginMeta): Promise<PanelPlugin> {\n37:   return importPluginModule(meta.module, meta.info?.version)\n38:     .then((pluginExports) => {\n39:       if (pluginExports.plugin) {\n40:         return pluginExports.plugin as PanelPlugin;\n41:       } else if (pluginExports.PanelCtrl) {\n42:         const plugin = new PanelPlugin(null);\n43:         plugin.angularPanelCtrl = pluginExports.PanelCtrl;\n44:         return plugin;\n45:       }\n46:       throw new Error('missing export: plugin or PanelCtrl');\n47:     })\n48:     .then((plugin) => {\n49:       plugin.meta = meta;\n50:       panelPluginCache[meta.id] = plugin;\n51:       return plugin;\n52:     })"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:54:10.860789+00:00",
+          "sha256": "e4a6596694f9ae9a0140b3609da2005bb6b2724006ed98a096ed56c75bc972d7",
+          "line_count": 126,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--dashboard--dashgrid--DashboardPanel.tsx",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.798608+00:00",
+          "claim": "Em 9.5, angularPanelCtrl seleciona PanelChromeAngular; o outro caminho usa PanelStateWrapper.",
+          "evidence": [
+            {
+              "start_line": 76,
+              "end_line": 109,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx#L76-L109",
+              "excerpt": "76: \n77:     if (!plugin) {\n78:       return null;\n79:     }\n80: \n81:     if (plugin && plugin.angularPanelCtrl) {\n82:       return (\n83:         <PanelChromeAngular\n84:           plugin={plugin}\n85:           panel={panel}\n86:           dashboard={dashboard}\n87:           isViewing={isViewing}\n88:           isEditing={isEditing}\n89:           isInView={isInView}\n90:           width={width}\n91:           height={height}\n92:         />\n93:       );\n94:     }\n95: \n96:     return (\n97:       <PanelStateWrapper\n98:         plugin={plugin}\n99:         panel={panel}\n100:         dashboard={dashboard}\n101:         isViewing={isViewing}\n102:         isEditing={isEditing}\n103:         isInView={isInView}\n104:         width={width}\n105:         height={height}\n106:         onInstanceStateChange={this.onInstanceStateChange}\n107:         timezone={timezone}\n108:         hideMenu={hideMenu}\n109:       />"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/dashboard/dashgrid/PanelChromeAngular.tsx",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelChromeAngular.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelChromeAngular.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:55:26.883628+00:00",
+          "sha256": "b7ddd97aa2af19daceab865df85f29eed633940718c45f916c6afcdb898cc14e",
+          "line_count": 229,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--dashboard--dashgrid--PanelChromeAngular.tsx",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.799188+00:00",
+          "claim": "A ponte executa o componente Angular legado com o painel, dashboard e dimensões da fronteira comum.",
+          "evidence": [
+            {
+              "start_line": 143,
+              "end_line": 163,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelChromeAngular.tsx#L143-L163",
+              "excerpt": "143:   loadAngularPanel() {\n144:     const { panel, dashboard, setPanelAngularComponent } = this.props;\n145: \n146:     // if we have no element or already have loaded the panel return\n147:     if (!this.element) {\n148:       return;\n149:     }\n150: \n151:     const loader = getAngularLoader();\n152:     const template = '<plugin-component type=\"panel\" class=\"panel-height-helper\"></plugin-component>';\n153: \n154:     this.scopeProps = {\n155:       panel: panel,\n156:       dashboard: dashboard,\n157:       size: { width: this.getInnerPanelWidth(), height: this.getInnerPanelHeight() },\n158:     };\n159: \n160:     setPanelAngularComponent({\n161:       key: panel.key,\n162:       angularComponent: loader.load(this.element, this.scopeProps, template),\n163:     });"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:55:26.883831+00:00",
+          "sha256": "c5599c1644c83ee54b12d611f1b18f6c750b42eb72f4931594630965b40b90b9",
+          "line_count": 767,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--features--dashboard--dashgrid--PanelStateWrapper.tsx",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.799894+00:00",
+          "claim": "O outro caminho instancia o componente React fornecido pelo plugin.",
+          "evidence": [
+            {
+              "start_line": 475,
+              "end_line": 511,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx#L475-L511",
+              "excerpt": "475:   renderPanelContent(innerWidth: number, innerHeight: number) {\n476:     const { panel, plugin, dashboard } = this.props;\n477:     const { renderCounter, data } = this.state;\n478:     const { state: loadingState } = data;\n479: \n480:     // do not render component until we have first data\n481:     if (this.skipFirstRender(loadingState)) {\n482:       return null;\n483:     }\n484: \n485:     // This is only done to increase a counter that is used by backend\n486:     // image rendering to know when to capture image\n487:     if (this.shouldSignalRenderingCompleted(loadingState, plugin.meta)) {\n488:       profiler.renderingCompleted();\n489:     }\n490: \n491:     const PanelComponent = plugin.panel!;\n492:     const timeRange = this.state.liveTime ?? data.timeRange ?? this.timeSrv.timeRange();\n493:     const panelOptions = panel.getOptions();\n494: \n495:     // Update the event filter (dashboard settings may have changed)\n496:     // Yes this is called ever render for a function that is triggered on every mouse move\n497:     this.eventFilter.onlyLocal = dashboard.graphTooltip === 0;\n498: \n499:     return (\n500:       <>\n501:         <PanelContextProvider value={this.state.context}>\n502:           <PanelComponent\n503:             id={panel.id}\n504:             data={data}\n505:             title={panel.title}\n506:             timeRange={timeRange}\n507:             timeZone={this.props.dashboard.getTimezone()}\n508:             options={panelOptions}\n509:             fieldConfig={panel.fieldConfig}\n510:             transparent={panel.transparent}\n511:             width={innerWidth}"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/plugins/panel/graph/module.ts",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:54:10.974793+00:00",
+          "sha256": "9ce8892b247e09b63f4d1c5b87a1f4ced35ce9a862d4b0c6f8df6142247a5316",
+          "line_count": 380,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--plugins--panel--graph--module.ts",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.800628+00:00",
+          "claim": "O painel Graph legado declara o controller Angular no mesmo snapshot 9.5.",
+          "evidence": [
+            {
+              "start_line": 374,
+              "end_line": 380,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts#L374-L380",
+              "excerpt": "374:     ],\n375:   })\n376:   .setDataSupport({ annotations: true, alertStates: true })\n377:   .setMigrationHandler(graphPanelMigrationHandler);\n378: \n379: // Use the angular ctrt rather than a react one\n380: plugin.angularPanelCtrl = GraphCtrl;"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/plugins/panel/timeseries/module.tsx",
+          "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+          "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/timeseries/module.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/timeseries/module.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:54:10.974707+00:00",
+          "sha256": "c8f14e9745c033643dd07508ea5858e275f5898d2a5514440a6cc99a23c167a1",
+          "line_count": 29,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--public--app--plugins--panel--timeseries--module.tsx",
+          "reused_curator_capture": false,
+          "inspected_utc": "2026-10-15T03:07:16.801166+00:00",
+          "claim": "O painel TimeSeries declara um componente React no mesmo snapshot 9.5.",
+          "evidence": [
+            {
+              "start_line": 1,
+              "end_line": 15,
+              "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/timeseries/module.tsx#L1-L15",
+              "excerpt": "1: import { PanelPlugin } from '@grafana/data';\n2: import { GraphFieldConfig } from '@grafana/schema';\n3: import { commonOptionsBuilder } from '@grafana/ui';\n4: \n5: import { TimeSeriesPanel } from './TimeSeriesPanel';\n6: import { TimezonesEditor } from './TimezonesEditor';\n7: import { defaultGraphConfig, getGraphFieldConfig } from './config';\n8: import { graphPanelChangedHandler } from './migrations';\n9: import { PanelOptions } from './panelcfg.gen';\n10: import { TimeSeriesSuggestionsSupplier } from './suggestions';\n11: \n12: export const plugin = new PanelPlugin<PanelOptions, GraphFieldConfig>(TimeSeriesPanel)\n13:   .setPanelChangeHandler(graphPanelChangedHandler)\n14:   .useFieldConfig(getGraphFieldConfig(defaultGraphConfig))\n15:   .setPanelOptions((builder) => {"
+            }
+          ],
+          "license": {
+            "repo": "grafana/grafana",
+            "path": "LICENSE",
+            "revision": "efe95b4c213a64acd9566f658b21fb6c11597b32",
+            "url": "https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "raw_url": "https://raw.githubusercontent.com/grafana/grafana/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE",
+            "http_status": 200,
+            "observed_utc": "2026-10-15T02:52:33.836174+00:00",
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "line_count": 661,
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana--grafana--LICENSE",
+            "status": "READ",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+          "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/dashboard/dashgrid/DashboardPanel.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:56:07.496532Z",
+          "sha256": "a79adf1a7fd057bb5ea9e1072a0f00b5a939aba4901f6d36a91d06885e062925",
+          "line_count": 140,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/a8499df28b63349dd09d620b45cb6e3c4a183321ec0d88cc860e95ee146182b2.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.801444+00:00",
+          "claim": "A captura 10.4 conserva o dispatch por tecnologia do plugin.",
+          "evidence": [
+            {
+              "start_line": 89,
+              "end_line": 124,
+              "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/dashboard/dashgrid/DashboardPanel.tsx#L89-L124",
+              "excerpt": "89:     if (!plugin) {\n90:       return null;\n91:     }\n92: \n93:     if (plugin && plugin.angularPanelCtrl) {\n94:       return (\n95:         <PanelChromeAngular\n96:           plugin={plugin}\n97:           panel={panel}\n98:           dashboard={dashboard}\n99:           isViewing={isViewing}\n100:           isEditing={isEditing}\n101:           isInView={isInView}\n102:           isDraggable={isDraggable}\n103:           width={width}\n104:           height={height}\n105:         />\n106:       );\n107:     }\n108: \n109:     return (\n110:       <PanelStateWrapper\n111:         plugin={plugin}\n112:         panel={panel}\n113:         dashboard={dashboard}\n114:         isViewing={isViewing}\n115:         isEditing={isEditing}\n116:         isInView={isInView}\n117:         isDraggable={isDraggable}\n118:         width={width}\n119:         height={height}\n120:         onInstanceStateChange={this.onInstanceStateChange}\n121:         timezone={timezone}\n122:         hideMenu={hideMenu}\n123:       />\n124:     );"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "grafana/grafana",
+            "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T03:02:53.190430Z",
+            "http_status": 200,
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-b240bd5398f6c6f082f1bd6db05d4c305c80299ecb45545c4cf515c4325e5d30.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the comm"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/features/plugins/importPanelPlugin.ts",
+          "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+          "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/plugins/importPanelPlugin.ts",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/plugins/importPanelPlugin.ts",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:56:07.307359Z",
+          "sha256": "f8aa7502c1586a96be897149b513d087d183db863030f01c938d88d59b91f213",
+          "line_count": 96,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/2d7d65c628a3e8b28ad4b5e76a1d20a1ed2d375981412d33fc225e5d035b7857.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.802151+00:00",
+          "claim": "Na captura 10.4, o carregador adapta PanelCtrl e instala getAngularPanelReactWrapper para a fronteira de componentes.",
+          "evidence": [
+            {
+              "start_line": 65,
+              "end_line": 83,
+              "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/plugins/importPanelPlugin.ts#L65-L83",
+              "excerpt": "65:     .then((pluginExports) => {\n66:       if (pluginExports.plugin) {\n67:         return pluginExports.plugin;\n68:       } else if (pluginExports.PanelCtrl) {\n69:         const plugin = new PanelPlugin(null);\n70:         plugin.angularPanelCtrl = pluginExports.PanelCtrl;\n71:         return plugin;\n72:       }\n73:       throw new Error('missing export: plugin or PanelCtrl');\n74:     })\n75:     .then((plugin: PanelPlugin) => {\n76:       plugin.meta = meta;\n77:       panelPluginCache[meta.id] = plugin;\n78: \n79:       if (!plugin.panel && plugin.angularPanelCtrl) {\n80:         plugin.panel = getAngularPanelReactWrapper(plugin);\n81:       }\n82: \n83:       return plugin;"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "grafana/grafana",
+            "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T03:02:53.190430Z",
+            "http_status": 200,
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-b240bd5398f6c6f082f1bd6db05d4c305c80299ecb45545c4cf515c4325e5d30.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the comm"
+          }
+        },
+        {
+          "kind": "FILE",
+          "repo": "grafana/grafana",
+          "path": "public/app/angular/panel/AngularPanelReactWrapper.tsx",
+          "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+          "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/angular/panel/AngularPanelReactWrapper.tsx",
+          "raw_url": "https://raw.githubusercontent.com/grafana/grafana/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/angular/panel/AngularPanelReactWrapper.tsx",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:56:07.309207Z",
+          "sha256": "7173a77b8e70245998cdc43ad7d2eda0a00d4c427f6498930c54ee8fded029d8",
+          "line_count": 127,
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/de280e9df3fac396c1a12e1287a1da4a321aefe7b420cea529d1320075d390bd.txt",
+          "reused_curator_capture": true,
+          "inspected_utc": "2026-10-15T03:07:16.802360+00:00",
+          "claim": "O wrapper React monta e alimenta o componente Angular durante a coexistência.",
+          "evidence": [
+            {
+              "start_line": 21,
+              "end_line": 51,
+              "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/angular/panel/AngularPanelReactWrapper.tsx#L21-L51",
+              "excerpt": "21: export function getAngularPanelReactWrapper(plugin: PanelPlugin): ComponentType<PanelProps> {\n22:   return function AngularWrapper(props: PanelProps) {\n23:     const divRef = useRef<HTMLDivElement>(null);\n24:     const angularState = useRef<AngularScopeProps | undefined>();\n25:     const angularComponent = useRef<AngularComponent | undefined>();\n26: \n27:     useEffect(() => {\n28:       if (!divRef.current) {\n29:         return;\n30:       }\n31: \n32:       const loader = getAngularLoader();\n33:       const template = '<plugin-component type=\"panel\" class=\"panel-height-helper\"></plugin-component>';\n34:       const queryRunner = new FakeQueryRunner();\n35:       const fakePanel = new PanelModelCompatibilityWrapper(plugin, props, queryRunner);\n36: \n37:       angularState.current = {\n38:         // @ts-ignore\n39:         panel: fakePanel,\n40:         // @ts-ignore\n41:         dashboard: getDashboardSrv().getCurrent(),\n42:         size: { width: props.width, height: props.height },\n43:         queryRunner: queryRunner,\n44:       };\n45: \n46:       angularComponent.current = loader.load(divRef.current, angularState.current, template);\n47: \n48:       // eslint-disable-next-line react-hooks/exhaustive-deps\n49:     }, []);\n50: \n51:     // Re-render angular panel when dimensions change"
+            }
+          ],
+          "license": {
+            "status": "READ",
+            "repo": "grafana/grafana",
+            "revision": "03f502a94d17f7dc4e6c34acdf8428aedd986e4c",
+            "path": "LICENSE",
+            "url": "https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE",
+            "license_spdx": "AGPL-3.0",
+            "api_license_spdx": "AGPL-3.0",
+            "observed_utc": "2026-10-15T03:02:53.190430Z",
+            "http_status": 200,
+            "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+            "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/raw/license-b240bd5398f6c6f082f1bd6db05d4c305c80299ecb45545c4cf515c4325e5d30.txt",
+            "excerpt": "                    GNU AFFERO GENERAL PUBLIC LICENSE\n                       Version 3, 19 November 2007\n\n Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\n Everyone is permitted to copy and distribute verbatim copies\n of this license document, but changing it is not allowed.\n\n                            Preamble\n\n  The GNU Affero General Public License is a free, copyleft license for\nsoftware and other kinds of works, specifically designed to ensure\ncooperation with the comm"
+          }
+        }
+      ],
+      "primary_history": [
+        {
+          "url": "https://grafana.com/developers/plugin-tools/migration-guides/update-from-grafana-versions/migrate-6_x-to-7_0",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:58:29.837154+00:00",
+          "sha256": "d671d3920bde874416efff098d11cbe8c8d926f6f80516976d4142090326e449",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana-v7-transition.html",
+          "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana-v7-transition.txt",
+          "selected_text": [
+            {
+              "line": 52,
+              "text": "Plugins built using Angular still work in the near term, but we strongly encourage new plugin authors to develop with the new platform."
+            }
+          ]
+        },
+        {
+          "url": "https://grafana.com/blog/removal-of-angularjs-support-in-grafana-what-you-need-to-know/",
+          "http_status": 200,
+          "observed_utc": "2026-10-15T02:58:30.464051+00:00",
+          "sha256": "dcf66f4480b1b45e7c29ff46699e8368af2889fd732bdfb16c8a0a631cdc83bc",
+          "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana-angular-removal.html",
+          "text_artifact": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/transactions-grafana-angular-removal.txt",
+          "selected_text": [
+            {
+              "line": 161,
+              "text": "In Grafana 12, support for AngularJS will be completely removed alongside the config parameter toggle."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "recommended_author_source_matches": 3,
+    "independent_reviews_pending": 3
+  },
+  "context7": "A consulta de documentação foi tentada e devolveu limite mensal. A implementação Rails 8.1.4 e a documentação oficial foram consultadas diretamente.",
+  "write_scope": "Somente execution/curation/rare-support/; matriz e MDX não foram alterados."
+}

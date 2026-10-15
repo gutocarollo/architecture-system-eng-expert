@@ -1,0 +1,227 @@
+---
+title: "Curadoria: Padrões para decompor sistemas"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Padrões para decompor sistemas."
+diataxis: reference
+---
+
+# Curadoria: Padrões para decompor sistemas
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Branch by Abstraction
+
+O identificador canônico é `branch-by-abstraction`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab conserva a interface de acesso Redis enquanto MultiStore escolhe o armazenamento antigo, o novo ou ambos. Wrapper fornece o acesso comum por pool; as flags alteram a implementação selecionada sem obrigar os chamadores a conhecer cada etapa da migração.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / wrapper.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `default_store`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L368-L374). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A abstração preserva o contrato das operações Redis no recorte. Ela não garante paridade de estado entre os destinos nem troca toda dependência de armazenamento do produto.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#branch-by-abstraction). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## CDC Migration
+
+O identificador canônico é `cdc-migration`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+pg_chameleon prepara a réplica, copia as tabelas iniciais do MySQL, lê seu binlog e aplica os lotes no PostgreSQL. Os métodos de inicialização e replay conservam posições e permitem acompanhar as mudanças depois da cópia inicial.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [the4thdoctor/pg_chameleon / mysql_lib.py @ 54585751](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py); licença [BSD-2-Clause](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt); [the4thdoctor/pg_chameleon / pg_lib.py @ 54585751](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py); licença [BSD-2-Clause](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt); [the4thdoctor/pg_chameleon / README.rst @ 54585751](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/README.rst); licença [BSD-2-Clause](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `BinLogStreamReader`](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py#L1271-L1277). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O programa é uma ferramenta real de migração e replicação MySQL para PostgreSQL. O código não prova que a origem da Faz esteja configurada para esse protocolo; em particular, a medição histórica de wal_level minimal em .137 não demonstra CDC lógico PostgreSQL habilitado.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#cdc-migration). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Dark Launch
+
+O identificador canônico é `dark-launch`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Durante a migração Redis GitLab, write_both executa a gravação no armazenamento padrão e também no destino não padrão. O resultado devolvido ao chamador continua vindo do padrão. Assim, o novo destino recebe trabalho real antes de ser escolhido como autoridade de leitura.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `write_both`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L411-L417). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte é um lançamento oculto do destino de armazenamento, não uma capacidade de interface desativada. Há efeitos reais no destino secundário; erros são registrados e não tornam as duas escritas atômicas.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#dark-launch). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Database Decomposition
+
+O identificador canônico é `database-decomposition`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Os modelos CI GitLab herdam de Ci::ApplicationRecord. Quando a configuração ci existe, essa classe encaminha leituras e escritas à conexão ci, enquanto o restante da aplicação conserva sua conexão principal. A documentação registra a separação de bancos e os cuidados com relações entre eles.
+
+A base de estudo é [rails/rails / activerecord @ ba3572c8](https://github.com/rails/rails/tree/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord); licença [MIT](https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/MIT-LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multiple_databases.md @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / application_record.rb @ 917d3f7a](https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `multiple databases`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md#L95-L101). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O código prova o roteamento lógico por domínio quando configurado. Ele não prova que os bancos de uma implantação específica estejam em servidores diferentes, nem elimina por si só consultas ou dependências entre domínios.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#database-decomposition). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Dual Write Migration
+
+O identificador canônico é `dual-write-migration`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+MultiStore GitLab grava primeiro no armazenamento padrão. Somente se essa chamada funcionar, tenta gravar no não padrão. A falha da segunda escrita é registrada, e o método devolve o resultado da primeira.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L425-L457); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `write_both`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L411-L417). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O código demonstra a janela de divergência de dual write. Não oferece uma transação distribuída nem reconciliação automática de todas as falhas; a troca de autoridade exige observar e corrigir a divergência.
+
+No curso, [abra o caso aplicado](/jornadas/order-delivery/) e [consulte a ação e o probe deste conceito](/jornadas/order-delivery/conceitos/#dual-write-migration). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="expand-contract" />
+
+## Expand/Contract
+
+O identificador canônico é `expand-contract`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A conversão source_xid de bulk_import_entities no GitLab acrescenta a coluna de transição, preenche os dados em lotes, exige a conclusão do backfill antes da finalização, troca as colunas e depois limpa a estrutura temporária. Os arquivos fixados mostram as etapas reais de expansão, migração e contração.
+
+A base de estudo é [rails/rails / activerecord @ ba3572c8](https://github.com/rails/rails/tree/ba3572c874040cfd6d4883f5ca574121968cdf6f/activerecord); licença [MIT](https://github.com/rails/rails/blob/ba3572c874040cfd6d4883f5ca574121968cdf6f/MIT-LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / 20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb @ 39f78019](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE); [gitlabhq/gitlabhq / 20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb @ 39f78019](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/LICENSE); [gitlabhq/gitlabhq / 20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / 20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / 20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / migration.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `initialize_conversion_of_integer_to_bigint`](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb#L9-L15). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+As etapas estão em revisões históricas distintas e não representam uma migração executada nesta sessão. O contrato de escrita compatível e a condição de backfill precisam ser mantidos antes de retirar a coluna antiga.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#expand-contract). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Feature Flags
+
+O identificador canônico é `feature-flags`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab consulta flags distintas para habilitar o uso simultâneo dos armazenamentos Redis e para escolher o primário como padrão. As condições entram no caminho que seleciona a execução, separando habilitação do mecanismo de migração e troca da autoridade de leitura.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / feature.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE); [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L284-L303); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Feature.enabled?`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb#L409-L415). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A flag não concede permissão de negócio nem desfaz comandos Redis já executados. O comportamento depende do estado das duas condições e de os armazenamentos serem diferentes.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#feature-flags). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Modularization
+
+O identificador canônico é `modularization`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab declara contextos de negócio e aplica uma regra de namespace sobre o código. Context Mapper fornece uma linguagem para modelar fronteiras e relações.
+
+A base de estudo é [ContextMapper/context-mapper-dsl / README.md @ 995f486a](https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/README.md); licença [Apache-2.0](https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / bounded_contexts.yml @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/config/bounded_contexts.yml); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [gitlabhq/gitlabhq / bounded_contexts.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/rubocop/cop/gitlab/bounded_contexts.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `bounded`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/config/bounded_contexts.yml#L1-L6). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A configuração e o cop provam uma fronteira nomeada. Eles não provam um monólito modular inteiro nem o processo de negociação do vocabulário; esses itens continuam delimitados na matriz.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#modularization). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Parallel Run
+
+O identificador canônico é `parallel-run`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+MultiStore GitLab executa o pipeline nos dois armazenamentos e compara os arrays de resultados. Se os resultados divergem, registra PipelinedDiffError e incrementa o contador; devolve ao chamador o resultado do armazenamento padrão.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `pipelined_both`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L438-L444). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O bloco precisa respeitar a hipótese de idempotência declarada pelo código. Rodar duas vezes pode duplicar efeitos se essa hipótese falhar. O recorte compara resultados de pipelines Redis e não promete equivalência de todo o produto.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#parallel-run). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Service Extraction
+
+O identificador canônico é `service-extraction`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O cliente GitLab encaminha operações de repositório, como criar e remover tags e branches, ao serviço Gitaly por chamadas com contrato de requisição, destino e timeout. O chamador conserva a operação de aplicação; a execução Git passa pela fronteira remota do serviço extraído.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / operation_service.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `gitaly_client_call`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb#L27-L33). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte demonstra a fronteira de execução real entre a aplicação e Gitaly. Ele não reconstrói sozinho todas as etapas históricas da extração, nem prova a disponibilidade de um servidor Gitaly nesta sessão.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#service-extraction). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Shadow Traffic
+
+O identificador canônico é `shadow-traffic`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Istio traduz a política mirror em configuração de envio de cópia da requisição pelo proxy.
+
+A base de estudo é [envoyproxy/envoy / router.cc @ 960eacbb](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/source/common/router/router.cc); licença [Apache-2.0](https://github.com/envoyproxy/envoy/blob/960eacbb5ccf0a6bcc768089b1e4785ac2e7e3a1/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / route.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/route/route.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `Mirror`](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/pilot/pkg/networking/core/route/route.go#L682-L688). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A cópia precisa isolar efeitos no destino espelho. O código de roteamento não garante essa ausência de efeito por si só.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#shadow-traffic). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Strangler Fig
+
+O identificador canônico é `strangler-fig`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A plataforma React foi apresentada como sucessora enquanto plugins Angular continuavam aceitos. Na versão 9.5, um carregador apresenta ambos como PanelPlugin e DashboardPanel escolhe o caminho Angular ou React. A ponte Angular cria o componente legado dentro da fronteira moderna. Na revisão 10.4 capturada pelo curador, o dispatch continua e o carregador também instala um wrapper React quando só há um controller Angular. Assim, painéis novos e antigos coexistem e podem ser substituídos por partes; o plano posterior prevê desligar e remover a tecnologia antiga.
+
+A base de estudo é [facebook/react / ReactClient.js @ 99c106c4](https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/packages/react/src/ReactClient.js); licença [MIT](https://github.com/facebook/react/blob/99c106c43439ad7af05d42f66582d8d05190e9ff/LICENSE). A aplicação ou candidato de aplicação é [grafana/grafana / importPanelPlugin.ts @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/plugins/importPanelPlugin.ts); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / DashboardPanel.tsx @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/DashboardPanel.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / PanelChromeAngular.tsx @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelChromeAngular.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / PanelStateWrapper.tsx @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/dashboard/dashgrid/PanelStateWrapper.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / module.ts @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/graph/module.ts); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / module.tsx @ efe95b4c](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/plugins/panel/timeseries/module.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/LICENSE); [grafana/grafana / DashboardPanel.tsx @ 03f502a9](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/dashboard/dashgrid/DashboardPanel.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE); [grafana/grafana / importPanelPlugin.ts @ 03f502a9](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/features/plugins/importPanelPlugin.ts); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE); [grafana/grafana / AngularPanelReactWrapper.tsx @ 03f502a9](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/public/app/angular/panel/AngularPanelReactWrapper.tsx); licença [AGPL-3.0](https://github.com/grafana/grafana/blob/03f502a94d17f7dc4e6c34acdf8428aedd986e4c/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `angularPanelCtrl`](https://github.com/grafana/grafana/blob/efe95b4c213a64acd9566f658b21fb6c11597b32/public/app/features/plugins/importPanelPlugin.ts#L41-L47). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O objeto substituído é a apresentação de painéis e seu SDK, não todo o Grafana. A revisão 9.5 e a revisão 10.4 são testemunhos separados da coexistência, e não um único checkout. A documentação de remoção é histórica e não prova uma implantação atual específica. Config migration isolada não foi tratada como prova; o caso contém dispatch e execução real dos dois caminhos.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://grafana.com/developers/plugin-tools/migration-guides/update-from-grafana-versions/migrate-6_x-to-7_0). A fonte primária delimita a decisão e o fluxo descritos.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://grafana.com/blog/removal-of-angularjs-support-in-grafana-what-you-need-to-know/). A fonte primária delimita a decisão e o fluxo descritos.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#strangler-fig). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Transitional Architecture
+
+O identificador canônico é `transitional-architecture`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+MultiStore GitLab é uma ponte temporária entre dois armazenamentos Redis. O fluxo documentado começa no secundário, habilita ambos, troca o padrão para o primário e depois desabilita a execução dupla, permanecendo no destino. O código implementa os controles correspondentes.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / multi_store.rb @ 2b79d1b0](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/framework-migration/skills/database-migration/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `use_primary_and_secondary_stores?`](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L279-L285). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O recorte torna explícita a saída da execução dupla, mas não prova que toda implantação concluiu a migração ou retirou a classe de compatibilidade. A ponte mantém custo e risco enquanto permanecer ativa.
+
+No curso, [abra o caso aplicado](/jornadas/safe-release/) e [consulte a ação e o probe deste conceito](/jornadas/safe-release/conceitos/#transitional-architecture). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

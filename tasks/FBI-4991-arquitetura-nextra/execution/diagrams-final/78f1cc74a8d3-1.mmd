@@ -1,0 +1,10 @@
+flowchart TD
+    I["Consulta da posição fictícia de chave 7"] --> B["Antes: consulta as três partições"]
+    I --> A["financial.py::storage_partitions calcula proprietário"]
+    A --> O["Consulta uma partição pelo módulo da chave"]
+    O --> G{"JOIN mantém o grão monetário?"}
+    G -->|não| X["Filhos multiplicam 300 para 800"]
+    G -->|sim| R["Soma conserva as duas contas: 300"]
+    O --> P["SQLite EXPLAIN QUERY PLAN"]
+    P --> C["Índice com chave e valor permite cobertura"]
+    A --> M["Adicionar shard mede remapeamento do módulo"]

@@ -1,0 +1,417 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a consulta cresce e a soma muda de significado
+
+Este mapa conecta os conceitos ao mesmo problema. A corretora hipotética cresce e divide as posições por chave. Ana procura a posição 7. Uma regra de roteamento permite buscar uma das três partições, enquanto uma junção com registros filhos pode multiplicar os valores financeiros. A prática usa doze posições e duas contas para tornar esses efeitos visíveis.
+
+Comece pela [jornada](/jornadas/storage-partitions/), execute o [tutorial](/tutoriais/casos/storage-partitions/) e use a [referência](/referencia/casos/storage-partitions/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/storage-partitions/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="consistent-hashing" />
+
+## Consistent Hashing
+
+O mecanismo associa chaves a posições e reduz remapeamento quando participantes mudam.
+
+No caso desta família, faça a seguinte observação: Adicione o nó D ao anel com pontos virtuais e conte as chaves cujo próximo dono muda. Compare com o remapeamento do módulo de três para quatro shards.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe consistent-ring
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `consistent-ring`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "modulo_moved_keys": 76,
+    "keys": 100
+  },
+  "after": {
+    "ring_moved_keys": 24,
+    "keys": 100,
+    "existing_owner_kept": 76
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Consistent Hashing; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="covering-index" />
+
+## Covering Index
+
+O índice inclui os atributos necessários à consulta, podendo evitar buscar determinados dados da tabela.
+
+No caso desta família, faça a seguinte observação: Leia o EXPLAIN QUERY PLAN SQLite antes e depois do índice que contém account_key e cents.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe covering-index
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `covering-index`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "query_plan": "SCAN position"
+  },
+  "after": {
+    "query_plan": "SEARCH position USING COVERING INDEX position_lookup (account_key=?)"
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e027) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="directory-based-sharding" />
+
+## Directory-Based Sharding
+
+Um diretório conserva associações entre chaves e localização.
+
+No caso desta família, faça a seguinte observação: Mude a localização da chave 7 para B no diretório e resolva o dono antes de consultar. Confira que adivinhar A não encontra a posição.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe directory-shard
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `directory-shard`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "lookup_in_default_A": null
+  },
+  "after": {
+    "directory_owner": "B",
+    "value": 700
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Directory durability, stale entries and live moves are not modeled.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="geographic-sharding" />
+
+## Geographic Sharding
+
+A divisão geográfica usa uma chave de localização e uma política de colocação.
+
+No caso desta família, faça a seguinte observação: Use a região declarada da conta fictícia para escolher a partição e confira onde seu valor foi guardado.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe geographic-owner
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `geographic-owner`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "all_accounts_owner": "US"
+  },
+  "after": {
+    "account_region": "BR",
+    "BR_rows": 1,
+    "US_rows": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The geography is hypothetical and is not a claim about a regulatory residency rule.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="hash-sharding" />
+
+## Hash Sharding
+
+Uma função hash transforma a chave para localizar sua shard.
+
+No caso desta família, faça a seguinte observação: Encontre a chave 7 pela regra de propriedade e compare uma partição consultada com a varredura das três.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe shard-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shard-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "partitions_scanned": 3
+  },
+  "after": {
+    "partitions_scanned": 1,
+    "row_7_amount": 70
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Hash Sharding; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="horizontal-partitioning" />
+
+## Horizontal Partitioning
+
+O particionamento horizontal separa linhas de uma tabela em partes.
+
+No caso desta família, faça a seguinte observação: Encontre a chave 7 pela regra de propriedade e compare uma partição consultada com a varredura das três.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe shard-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shard-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "partitions_scanned": 3
+  },
+  "after": {
+    "partitions_scanned": 1,
+    "row_7_amount": 70
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Horizontal Partitioning; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="indexing" />
+
+## Indexing
+
+Um índice oferece uma estrutura de acesso aos valores ou relações necessários.
+
+No caso desta família, faça a seguinte observação: Leia o EXPLAIN QUERY PLAN SQLite antes e depois do índice que contém account_key e cents.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe covering-index
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `covering-index`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "query_plan": "SCAN position"
+  },
+  "after": {
+    "query_plan": "SEARCH position USING COVERING INDEX position_lookup (account_key=?)"
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e026) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="log-structured-storage" />
+
+## Log Structured Storage
+
+Armazenamento por log pode reunir escritas em memtables e produzir arquivos ordenados, posteriormente compactados, como numa LSM.
+
+No caso desta família, faça a seguinte observação: Acrescente a nova versão em vez de sobrescrever a antiga e resolva a leitura pelo registro mais recente da chave.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe log-structured-latest
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `log-structured-latest`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "in_place_record_history": 1
+  },
+  "after": {
+    "append_records": 2,
+    "latest_value": 1100,
+    "latest_version": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="range-sharding" />
+
+## Range Sharding
+
+Faixas de uma chave determinam a localização entre shards.
+
+No caso desta família, faça a seguinte observação: Procure a chave 100 nos intervalos 0 até antes de 100 e 100 até antes de 200. Confira que a borda pertence a um único shard.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe range-boundary
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `range-boundary`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "inclusive_upper_boundary_owners": [
+      0,
+      1
+    ]
+  },
+  "after": {
+    "half_open_boundary_owners": [
+      1
+    ],
+    "key": 100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Range balancing, splits and hotspot control are separate concerns.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="sharding" />
+
+## Sharding
+
+Sharding distribui subconjuntos entre unidades de armazenamento com uma regra de localização.
+
+No caso desta família, faça a seguinte observação: Encontre a chave 7 pela regra de propriedade e compare uma partição consultada com a varredura das três.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe shard-route
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `shard-route`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "partitions_scanned": 3
+  },
+  "after": {
+    "partitions_scanned": 1,
+    "row_7_amount": 70
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Sharding; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="vertical-partitioning" />
+
+## Vertical Partitioning
+
+Particionamento vertical separa grupos de atributos de uma entidade, conservando a identidade para reuni-los.
+
+No caso desta família, faça a seguinte observação: Separe os atributos de contato dos atributos de posição pela mesma chave. Confira quais colunas a consulta de posição precisa ler e reuna a linha somente quando necessário.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe vertical-attributes
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `vertical-attributes`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "position_read_columns": [
+      "account_key",
+      "cents",
+      "contact_label"
+    ]
+  },
+  "after": {
+    "position_read_columns": [
+      "account_key",
+      "cents"
+    ],
+    "contact_columns": [
+      "account_key",
+      "contact_label"
+    ],
+    "rejoin_preserves_row": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The example models attribute ownership and does not measure physical page savings or authorization by itself.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+
+<span id="write-amplification-control" />
+
+## Write Amplification Control
+
+Controlar amplificação de escrita significa gerir bytes fisicamente escritos em relação à alteração lógica.
+
+No caso desta família, faça a seguinte observação: Agrupe dez substituições do mesmo snapshot de posição antes de confirmar o lote e grave o último valor uma vez. Compare as escritas físicas necessárias.
+
+```sh
+python3 labs/architecture/financial.py storage-partitions --probe coalesced-snapshot-writes
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `coalesced-snapshot-writes`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "physical_snapshot_writes": 10
+  },
+  "after": {
+    "physical_batch_writes": 1,
+    "latest_snapshot": 1009,
+    "updates_in_acknowledged_batch": 10
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This applies to replaceable snapshots, not ten independent ledger facts. No per-update durability is promised before the batch flush.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
+

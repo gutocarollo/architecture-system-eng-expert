@@ -1,0 +1,9 @@
+flowchart LR
+    Command[Comando hipotético] --> Version{Versão esperada coincide?}
+    Version -->|sim| Stream[Adiciona evento ao stream]
+    Version -->|não| Conflict[Conflito para decisão do chamador]
+    Stream --> Apply[Aplica aporte e estorno na ordem]
+    Apply --> Balance[Estado derivado de R$ 800]
+    Stream --> Projection[Projeção para consulta]
+    Stream -->|reprocessamento dos fatos| Replay[Reconstrói com identidade e versão]
+    Replay --> Projection

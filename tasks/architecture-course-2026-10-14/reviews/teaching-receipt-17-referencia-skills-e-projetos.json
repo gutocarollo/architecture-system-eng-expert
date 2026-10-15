@@ -1,0 +1,16 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/skills-e-projetos",
+  "document_sha256": "3002b16f68849e709072ffe8624b50ad813c2703ec4a62214589728a822ddc2c",
+  "context_sha256": "638ae556739e696fc825617d21add52b57fad7e94674da62d28ad5f66b25d51b",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "s1",
+    "l6b"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "measuredAt": "2026-10-14T23:19:19.622Z",
+  "workspace": "/Users/augustocarollo/.superset.noindex/worktrees/architecture-engineer-expert/perfect-citizen-a30f5998",
+  "branch": "perfect-citizen-a30f5998",
+  "head": "23d5d158d3a964dceba296296368ec14bcd8970b",
+  "sources": [
+    {
+      "url": "https://nextra.site/docs/guide/search",
+      "behavior": "A busca vem ativada por padrão. O guia usa Pagefind em postbuild e publica os arquivos em public/_pagefind."
+    },
+    {
+      "path": "node_modules/nextra-theme-docs/dist/schemas.js",
+      "line": 132,
+      "behavior": "O tema renderiza o componente Search padrão quando a propriedade search é omitida."
+    },
+    {
+      "path": "node_modules/nextra/dist/client/components/search.js",
+      "line": 14,
+      "behavior": "O componente carrega /_pagefind/pagefind.js e aceita os atalhos / e Command K no Mac."
+    }
+  ],
+  "dependency": {
+    "command": "npm view pagefind version --json",
+    "literalOutput": "\"1.5.2\"",
+    "installedExactVersion": "1.5.2"
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "indexedPages": 52,
+    "indexedWords": 5465,
+    "indexedLanguage": "pt-br",
+    "htmlFilesFound": 54,
+    "excludesPagesWithoutBodyTag": true
+  },
+  "preview": {
+    "url": "http://127.0.0.1:59024",
+    "sessionId": 75002,
+    "pid": 59487,
+    "command": "npm run start -- --hostname 127.0.0.1 --port 59024",
+    "activeAfterVerification": true
+  },
+  "browser": {
+    "command": "node tasks/architecture-story-2026-10-14/search/browser-check.mjs",
+    "exitCode": 0,
+    "evidence": "browser-receipt.json",
+    "screenshotInspected": "outbox-search.png"
+  },
+  "limitation": "O índice reflete o build local de 14/10/2026. Mudanças futuras no conteúdo exigem novo npm run build.",
+  "fileHashes": {
+    "next.config.mjs": "a5bd18c54d87293576c8c14a5bb847774921d222b339ddb6dbc979a0f0a97a27",
+    "app/layout.jsx": "8f5b8b2a7d14821ea7723ce584de9c0f3dcaf196809e75be083a8ca1bda40ab3",
+    "package.json": "f27b98a95197e92d40d973c2fb40e5c6bf25961cc507611b99639d0e50cb63ac",
+    "package-lock.json": "554f6c03b73acd55f14a988e43d614d00907dbb48deeb8075c4bff54ba03ded6",
+    ".gitignore": "038b35c5982a98eca5ac830da2a5a42a6fc874df686507674fd63f7655deabb9",
+    "public/_pagefind/pagefind-entry.json": "aec5f53826142b72f4b2e4a358e938a976bf5966f98b9c60525b3a2fe576fe8b",
+    "tasks/architecture-story-2026-10-14/search/build.log": "fbb3c036c0d08dafb382e92eb39a7f470adb391c5dcd7830ee2aa611921c25d0",
+    "tasks/architecture-story-2026-10-14/search/browser-receipt.json": "d8f7babb7bd5f12c92203e957154ddbb9877b30d9f66dfe93c8981b9082b7454",
+    "tasks/architecture-story-2026-10-14/search/outbox-search.png": "bde2a8ba1f93e38eb3c04c8639608386facc0af0491fe7c202b132f5381eb3fc",
+    "tasks/architecture-story-2026-10-14/search/outbox-destination.png": "7cc790f5623bbf2158a1760936a33f73129814f58075314e9b99488bb2fa0e1d"
+  }
+}

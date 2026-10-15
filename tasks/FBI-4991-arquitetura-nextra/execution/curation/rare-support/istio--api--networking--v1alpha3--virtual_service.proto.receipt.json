@@ -1,0 +1,12 @@
+{
+  "repo": "istio/api",
+  "path": "networking/v1alpha3/virtual_service.proto",
+  "revision": "15dd444282ea453178d13f72a6485dcc6da932de",
+  "url": "https://github.com/istio/api/blob/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto",
+  "raw_url": "https://raw.githubusercontent.com/istio/api/15dd444282ea453178d13f72a6485dcc6da932de/networking/v1alpha3/virtual_service.proto",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:43:04.349982+00:00",
+  "sha256": "35fa524ca87ad7156946ba46c26dd2627c35523bfb096fee6dbb6345737f3501",
+  "line_count": 1612,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/istio--api--networking--v1alpha3--virtual_service.proto"
+}

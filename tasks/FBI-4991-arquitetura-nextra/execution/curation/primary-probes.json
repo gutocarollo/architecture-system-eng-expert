@@ -1,0 +1,97 @@
+[
+  {
+    "repo": "elk-zone/elk",
+    "path": "app/components/status/StatusCard.vue",
+    "url": "https://raw.githubusercontent.com/elk-zone/elk/main/app/components/status/StatusCard.vue",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.127911+00:00",
+    "sha256": "c63ecce4093abe02af6a79bdf3677c9ac99320d60904b0396855dac46c852085",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-elk-zone--elk--app--components--status--StatusCard.vue"
+  },
+  {
+    "repo": "elk-zone/elk",
+    "path": "app/components/account/AccountCard.vue",
+    "url": "https://raw.githubusercontent.com/elk-zone/elk/main/app/components/account/AccountCard.vue",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.113593+00:00",
+    "sha256": "4a4f8a47c6307a76bd95ee139fb88451cc3cad2f2b3031e909a465b0d72d8c7c",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-elk-zone--elk--app--components--account--AccountCard.vue"
+  },
+  {
+    "repo": "elk-zone/elk",
+    "path": "app/composables/masto.ts",
+    "error": "HTTP Error 404: Not Found"
+  },
+  {
+    "repo": "neet/masto.js",
+    "path": "src/mastodon/entities/v1/status.ts",
+    "url": "https://raw.githubusercontent.com/neet/masto.js/main/src/mastodon/entities/v1/status.ts",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.104952+00:00",
+    "sha256": "a580a7cd65c1cd76218c9b97138b8f7be58af4c88b23b5f91be54735a08a51b2",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-neet--masto.js--src--mastodon--entities--v1--status.ts"
+  },
+  {
+    "repo": "neet/masto.js",
+    "path": "src/mastodon/entities/v1/account.ts",
+    "url": "https://raw.githubusercontent.com/neet/masto.js/main/src/mastodon/entities/v1/account.ts",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.121399+00:00",
+    "sha256": "8d88b22be9781d5735ade085f5508b83004ce73341ac2931318b073725604f02",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-neet--masto.js--src--mastodon--entities--v1--account.ts"
+  },
+  {
+    "repo": "mixxxdj/mixxx",
+    "path": "src/util/messagepipe.h",
+    "url": "https://raw.githubusercontent.com/mixxxdj/mixxx/main/src/util/messagepipe.h",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.111555+00:00",
+    "sha256": "b6545c0eee3aabc9c3f1aa22773b67bf920762955df5ea6142646bbf4f81b2fa",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-mixxxdj--mixxx--src--util--messagepipe.h"
+  },
+  {
+    "repo": "mixxxdj/mixxx",
+    "path": "src/analyzer/analyzerthread.h",
+    "url": "https://raw.githubusercontent.com/mixxxdj/mixxx/main/src/analyzer/analyzerthread.h",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.118407+00:00",
+    "sha256": "d0b683f911618e8b23046838c0dc3ae53af20ce60a3736786643fc5a2c14e21f",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-mixxxdj--mixxx--src--analyzer--analyzerthread.h"
+  },
+  {
+    "repo": "rigtorp/SPSCQueue",
+    "path": "README.md",
+    "url": "https://raw.githubusercontent.com/rigtorp/SPSCQueue/master/README.md",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.085867+00:00",
+    "sha256": "6fd00f731d367e073758ab809882f2c0eadeeda9b366f24d95807cd5f487384a",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-rigtorp--SPSCQueue--README.md"
+  },
+  {
+    "repo": "appwrite/appwrite",
+    "path": "src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php",
+    "url": "https://raw.githubusercontent.com/appwrite/appwrite/main/src/Appwrite/Platform/Modules/Functions/Http/Executions/Create.php",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.381307+00:00",
+    "sha256": "422298a0f498d11a3256df6bbf1e26320ae5ec1c4071cfd1337b4bfb6ac49c06",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-appwrite--appwrite--src--Appwrite--Platform--Modules--Functions--Http--Executions--Create.php"
+  },
+  {
+    "repo": "appwrite/appwrite",
+    "path": "src/Appwrite/Platform/Workers/Functions.php",
+    "url": "https://raw.githubusercontent.com/appwrite/appwrite/main/src/Appwrite/Platform/Workers/Functions.php",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.396976+00:00",
+    "sha256": "00e856acbafdcce94d294a819cbccccc9b9b17f8b45281689ebe98393c598709",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-appwrite--appwrite--src--Appwrite--Platform--Workers--Functions.php"
+  },
+  {
+    "repo": "appwrite/appwrite",
+    "path": "src/Executor/Executor.php",
+    "url": "https://raw.githubusercontent.com/appwrite/appwrite/main/src/Executor/Executor.php",
+    "http_status": 200,
+    "observed_utc": "2026-10-15T02:44:56.382289+00:00",
+    "sha256": "51bd0379086a3df5edbf3c0983ae481902d0eea2eb4397745c05de118833cf83",
+    "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/probe-appwrite--appwrite--src--Executor--Executor.php"
+  }
+]

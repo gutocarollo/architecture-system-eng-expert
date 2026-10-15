@@ -1,0 +1,20 @@
+export default {
+  "index": "Visão geral",
+  "01-arquiteturas-de-aplicacao": "1. Arquiteturas de aplicação",
+  "02-sistemas-distribuidos-e-consistencia": "2. Sistemas distribuídos e consistência",
+  "03-event-driven-messaging": "3. Event-driven / Messaging",
+  "04-cqrs-event-sourcing-e-modelos-de-leitura": "4. CQRS, Event Sourcing e modelos de leitura",
+  "05-banco-de-dados-e-armazenamento": "5. Banco de dados e armazenamento",
+  "06-cache": "6. Cache",
+  "07-resiliencia": "7. Resiliência",
+  "08-concorrencia": "8. Concorrência",
+  "09-apis-e-integracao": "9. APIs e integração",
+  "10-ddd-domain-driven-design": "10. DDD — Domain-Driven Design",
+  "11-padroes-para-decompor-sistemas": "11. Padrões para decompor sistemas",
+  "12-deploy-e-releases": "12. Deploy e releases",
+  "13-alta-disponibilidade": "13. Alta disponibilidade",
+  "14-seguranca": "14. Segurança",
+  "15-observabilidade": "15. Observabilidade",
+  "16-workflow-e-processamento": "16. Workflow e processamento",
+  "17-padroes-classicos-gof": "17. Padrões clássicos GoF"
+}

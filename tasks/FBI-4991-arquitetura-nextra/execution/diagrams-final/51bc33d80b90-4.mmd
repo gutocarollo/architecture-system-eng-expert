@@ -1,0 +1,8 @@
+flowchart LR
+    External[Registro externo Salesforce] --> Adapter[Adaptador de leitura proposto]
+    Adapter --> Mapping{Significado pode ser resolvido?}
+    Mapping -->|Sim| LocalModel[Contrato local de qualificação]
+    LocalModel --> Rule[Regra de domínio]
+    Mapping -->|Não| Missing[Resultado explícito de ausência ou ambiguidade]
+    Missing --> Reconcile[Corrigir o de-para ou a entrada]
+    Reconcile --> Adapter

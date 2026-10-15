@@ -1,0 +1,104 @@
+---
+title: "Contratos: os escritórios deixam de conversar"
+description: "Entradas, parâmetros, versões, resultados e limites do caso Uma partição separa os escritórios da corretora."
+diataxis: reference
+---
+
+# Contratos: os escritórios deixam de conversar
+
+Esta página reúne os contratos que a prática compara. Você aprenderá a relacionar quorum, disponibilidade, ordem causal e o custo de aguardar uma decisão. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+Para continuar o mesmo problema, [volte à jornada](/jornadas/consensus/), [entenda o mecanismo](/explicacoes/casos/consensus/), [execute o tutorial](/tutoriais/casos/consensus/) ou [consulte o guia da tarefa](/guias/casos/consensus/).
+
+## Entradas e ambiente
+
+Conjunto A/B/C, partições AB/C, quorum de leitura 2, quorum de escrita 2, vetores `\{A:1,B:0\}` e `\{A:0,B:1\}` e clocks 3/8.
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `consensus`. |
+| Símbolos a consultar | `consensus / majority-partition / causal-versions / prepared-participant`. |
+| Comando completo | `python3 labs/architecture/financial.py consensus`. |
+| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
+| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
+| Horário e escopo do recibo | `2026-10-15T01:35:30.643452+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+## Fonte do modelo financeiro
+
+Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+A função `consensus` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/consensus.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
+
+## Resultados que o contrato compara
+
+O modelo aceita um líder no grupo de dois e nenhuma escrita na minoria. Duas leituras e duas escritas em três membros têm pelo menos 2 + 2 − 3 = 1 participante comum.
+
+### `majority-partition`
+
+A comparação permite executar a seguinte ação de estudo: Separe A/B de C e conte quais grupos conseguem reunir dois dos três votos; observe o preço de recusar a escrita da minoria.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `leaders` | `2` | `1` |
+| `minority_writes` | O campo não é emitido nesta condição. | `0` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/consensus/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `quorum-overlap`
+
+A comparação permite executar a seguinte ação de estudo: Calcule 2 + 2 − 3 = 1 membro comum e compare com duas decisões que consultam somente um membro.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `intersection_lower_bound` | `-1` | `1` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/consensus/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `causal-versions`
+
+A comparação permite executar a seguinte ação de estudo: Compare os vetores A:1/B:0 e A:0/B:1 antes de escolher um vencedor; acompanhe a detecção de concorrência.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `last_write_only` | `"A"` | O campo não é emitido nesta condição. |
+| `lost_branch` | `"B"` | O campo não é emitido nesta condição. |
+| `concurrent_detected` | O campo não é emitido nesta condição. | `true` |
+| `merged_vector` | O campo não é emitido nesta condição. | `{"A": 1, "B": 1}` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/consensus/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `logical-clock`
+
+A comparação permite executar a seguinte ação de estudo: Receba o evento de clock 8 no participante de clock 3 e confira por que o próximo clock precisa ser 9.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `receive_clock` | `4` | `9` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/consensus/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `prepared-participant`
+
+A comparação permite executar a seguinte ação de estudo: Interrompa a comunicação após prepare e examine por que um participante não pode inventar commit ao vencer um tempo local.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `prepared_then_timeout` | `"commit_guessed"` | `"wait_for_decision"` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/consensus/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+## Garantia, parâmetros e limites
+
+A decisão exige maioria. Vetores registram as duas versões concorrentes; um relógio lógico avança além do evento recebido. Um participante preparado espera a decisão que não conhece. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+## Recibo e rastreabilidade
+
+A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `consensus`. O hash SHA-256 da saída capturada é `1dfa5c1ceb9cfe67a0c11fb86cc1d69c69031a1f83ec2eb66f75cd9032ae104c`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
+
+Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/consensus/), [leia a explicação](/explicacoes/casos/consensus/), [abra o tutorial](/tutoriais/casos/consensus/) ou [consulte o guia](/guias/casos/consensus/).

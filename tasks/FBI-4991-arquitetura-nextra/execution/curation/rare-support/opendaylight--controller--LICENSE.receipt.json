@@ -1,0 +1,12 @@
+{
+  "repo": "opendaylight/controller",
+  "path": "LICENSE",
+  "revision": "a0b6b1d2000a37ba9109f854f13154c211fe653b",
+  "url": "https://github.com/opendaylight/controller/blob/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/controller/a0b6b1d2000a37ba9109f854f13154c211fe653b/LICENSE",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:44:35.588490+00:00",
+  "sha256": "44277b2bec6093e4ac313afec251a4de599d24c4e768f8574d95b13a9d2d97b5",
+  "line_count": 70,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--controller--LICENSE"
+}

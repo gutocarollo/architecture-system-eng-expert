@@ -1,0 +1,11 @@
+flowchart LR
+    Browser[Cliente] --> Gateway[Entrada com políticas gerais]
+    Gateway --> Policy{Pedido pode seguir?}
+    Policy -->|não| Reject[Resposta de recusa]
+    Policy -->|sim| Route[Escolhe serviço e rota]
+    Route --> Api[FastAPI ou outro serviço]
+    Api --> Business{Acesso ao objeto e regra aceitos?}
+    Business -->|sim| Result[Resultado]
+    Business -->|não| Error[Erro de negócio ou autorização]
+    Error --> Browser
+    Reject --> Browser

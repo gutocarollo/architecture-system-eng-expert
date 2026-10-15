@@ -1,0 +1,12 @@
+{
+  "repo": "esl/MongooseIM",
+  "path": "src/async_pools/mongoose_batch_worker.erl",
+  "revision": "ec856e5e7be117fbff6713c3cea7a74cc1ed278f",
+  "url": "https://github.com/esl/MongooseIM/blob/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/async_pools/mongoose_batch_worker.erl",
+  "raw_url": "https://raw.githubusercontent.com/esl/MongooseIM/ec856e5e7be117fbff6713c3cea7a74cc1ed278f/src/async_pools/mongoose_batch_worker.erl",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:46:55.787685+00:00",
+  "sha256": "b594b058fbf30b542e747651eeeb8d3f0d100521b0f2afb8b3642451df59179d",
+  "line_count": 192,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/esl--MongooseIM--src--async_pools--mongoose_batch_worker.erl"
+}

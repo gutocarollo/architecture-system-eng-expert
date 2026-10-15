@@ -1,0 +1,42 @@
+[
+  {
+    "repoURL": "https://github.com/mattpocock/skills",
+    "stars": 290912,
+    "licenseSPDX": "MIT",
+    "archived": false,
+    "pushed_at": "2026-10-13T08:46:40Z",
+    "default_branch": "main",
+    "observedUTC": "2026-10-14T17:59:09Z",
+    "HTTPstatus": 200
+  },
+  {
+    "repoURL": "https://github.com/redpanda-data/skills",
+    "stars": 8,
+    "licenseSPDX": "Apache-2.0",
+    "archived": false,
+    "pushed_at": "2026-10-14T16:29:36Z",
+    "default_branch": "main",
+    "observedUTC": "2026-10-14T17:59:09Z",
+    "HTTPstatus": 200
+  },
+  {
+    "repoURL": "https://github.com/diagrid-labs/dapr-skills",
+    "stars": 13,
+    "licenseSPDX": "MIT",
+    "archived": false,
+    "pushed_at": "2026-10-14T10:07:27Z",
+    "default_branch": "main",
+    "observedUTC": "2026-10-14T17:59:09Z",
+    "HTTPstatus": 200
+  },
+  {
+    "repoURL": "https://github.com/agentskills/agentskills",
+    "stars": 26137,
+    "licenseSPDX": "Apache-2.0",
+    "archived": false,
+    "pushed_at": "2026-08-09T20:36:04Z",
+    "default_branch": "main",
+    "observedUTC": "2026-10-14T17:59:09Z",
+    "HTTPstatus": 200
+  }
+]

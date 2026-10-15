@@ -1,0 +1,9 @@
+flowchart TD
+    Read[Consulta proposta por accountKey] --> Route[Roteador e regra de localização]
+    Route --> A[Shard A com parte das contas]
+    Route --> B[Shard B com outra parte]
+    Total[Relatório consolidado] --> A
+    Total --> B
+    A --> Merge[Combinação com grão e versão definidos]
+    B --> Merge
+    B -->|indisponível| Partial[Resultado parcial ou falha conforme o contrato]

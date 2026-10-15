@@ -1,0 +1,12 @@
+{
+  "repo": "opendaylight/mdsal",
+  "path": "pom.xml",
+  "revision": "c732ddd893d5305b0b1b21ccd62af0a211c4cfe2",
+  "url": "https://github.com/opendaylight/mdsal/blob/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/pom.xml",
+  "raw_url": "https://raw.githubusercontent.com/opendaylight/mdsal/c732ddd893d5305b0b1b21ccd62af0a211c4cfe2/pom.xml",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T01:45:36.369736+00:00",
+  "sha256": "e736850b1e9771973dd3e613e2516a5baf20e5dfa2b97809a404b32ed84a1cb9",
+  "line_count": 106,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/opendaylight--mdsal--pom.xml"
+}

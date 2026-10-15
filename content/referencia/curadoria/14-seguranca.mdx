@@ -1,0 +1,285 @@
+---
+title: "Curadoria: Segurança"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Segurança."
+diataxis: reference
+---
+
+# Curadoria: Segurança
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral significa que o autor selecionou o mecanismo e suas fontes. A revisão independente desta nova matriz ainda é um gate separado. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## ABAC
+
+O identificador canônico é `abac`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab aplica condições sobre atributos e permissões do projeto; OpenFGA resolve relações entre usuário e objeto. Casbin é uma base alternativa para políticas.
+
+A base de estudo é [casbin/casbin / enforcer.go @ 1e19095c](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/enforcer.go); licença [Apache-2.0](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / project_policy.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [openfga/openfga / check.go @ 526995eb](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/internal/graph/check.go); licença [Apache-2.0](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `condition`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb#L22-L28). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Condições sobre atributos, associação a papel e travessia de relações são mecanismos diferentes; os arquivos devem ser escolhidos conforme o conceito, não tratados como equivalentes.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#abac). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## API Gateway Security
+
+O identificador canônico é `api-gateway-security`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+APISIX casa a rota, aplica plugins de limite e autenticação e encaminha a requisição por seu gateway.
+
+A base de estudo é [openresty/lua-nginx-module / ngx_http_lua_module.c @ 62d9257f](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/src/ngx_http_lua_module.c); licença [BSD-2-Clause](https://github.com/openresty/lua-nginx-module/blob/62d9257fba363e2d2012b36b75fe7c2c7ae65db2/README.markdown#copyright-and-license). A aplicação ou candidato de aplicação é [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / init.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/limit-count/init.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE); [apache/apisix / jwt-auth.lua @ 2e43b6c6](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua); licença [Apache-2.0](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `route`](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/init.lua#L36-L42). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#api-gateway-security). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Bastion Host
+
+O identificador canônico é `bastion-host`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Teleport estabelece uma fronteira de acesso SSH com identidade, autorização e auditoria.
+
+A base de estudo é [golang/crypto / server.go @ cf169cd0](https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go); licença [BSD-3-Clause](https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE). A aplicação ou candidato de aplicação é [gravitational/teleport / sshserver.go @ 1283425b](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go); licença [AGPL-3.0](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ssh`](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go#L1545-L1551). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O arquivo prova o servidor de acesso. Zero Trust completo exige avaliar a política e o caminho do proxy, não apenas existir autenticação SSH.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#bastion-host). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Defense in Depth
+
+O identificador canônico é `defense-in-depth`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O chart Airflow combina regras de acesso a logs, seleção de tráfego de rede e configuração de execução dos pods.
+
+A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/apis/networking/types.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / pod-log-reader-role.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / api-server-networkpolicy.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-networkpolicy.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / scheduler-deployment.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/scheduler/scheduler-deployment.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `rules`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml#L46-L52). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura do chart verifica a composição de controles. A política precisa ser habilitada e o CNI deve aplicá-la para restringir a rede numa implantação real.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#defense-in-depth). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Least Privilege
+
+O identificador canônico é `least-privilege`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O chart Airflow combina regras de acesso a logs, seleção de tráfego de rede e configuração de execução dos pods.
+
+A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/apis/networking/types.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / pod-log-reader-role.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / api-server-networkpolicy.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-networkpolicy.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / scheduler-deployment.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/scheduler/scheduler-deployment.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `rules`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml#L46-L52). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura do chart verifica a composição de controles. A política precisa ser habilitada e o CNI deve aplicá-la para restringir a rede numa implantação real.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#least-privilege). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## mTLS
+
+O identificador canônico é `mtls`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O cliente Citadel no agente Istio monta credenciais TLS e usa certificados para identificar o workload na conexão com a CA.
+
+A base de estudo é [spiffe/go-spiffe / config.go @ 77c6d2e0](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go); licença [Apache-2.0](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / client.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `tls`](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go#L136-L142). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#mtls). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Network Segmentation
+
+O identificador canônico é `network-segmentation`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O chart Airflow combina regras de acesso a logs, seleção de tráfego de rede e configuração de execução dos pods.
+
+A base de estudo é [kubernetes/kubernetes / types.go @ 4f2dd0c8](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/pkg/apis/networking/types.go); licença [Apache-2.0](https://github.com/kubernetes/kubernetes/blob/4f2dd0c8498c5ca4640ba1586ef8627aac738a4f/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / pod-log-reader-role.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / api-server-networkpolicy.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/api-server/api-server-networkpolicy.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / scheduler-deployment.yaml @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/scheduler/scheduler-deployment.yaml); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `rules`](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/chart/templates/rbac/pod-log-reader-role.yaml#L46-L52). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura do chart verifica a composição de controles. A política precisa ser habilitada e o CNI deve aplicá-la para restringir a rede numa implantação real.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#network-segmentation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## OAuth2
+
+O identificador canônico é `oauth2`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Argo CD configura o cliente OIDC, realiza o fluxo de autorização OAuth2 e usa o provedor para validar o ID Token antes de criar a sessão.
+
+A base de estudo é [coreos/go-oidc / verify.go @ c914bd38](https://github.com/coreos/go-oidc/blob/c914bd380327a5a3a81403774d1a5d5b73772ce7/oidc/verify.go); licença [Apache-2.0](https://github.com/coreos/go-oidc/blob/c914bd380327a5a3a81403774d1a5d5b73772ce7/LICENSE). A aplicação ou candidato de aplicação é [argoproj/argo-cd / oidc.go @ fad45c4b](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/util/oidc/oidc.go); licença [Apache-2.0](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `oauth2`](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/util/oidc/oidc.go#L185-L191). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+OAuth2 autoriza acesso; OIDC acrescenta a identidade. A configuração de issuer, audience e retorno precisa corresponder ao provedor da implantação.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#oauth2). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## OIDC
+
+O identificador canônico é `oidc`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Argo CD configura o cliente OIDC, realiza o fluxo de autorização OAuth2 e usa o provedor para validar o ID Token antes de criar a sessão.
+
+A base de estudo é [coreos/go-oidc / verify.go @ c914bd38](https://github.com/coreos/go-oidc/blob/c914bd380327a5a3a81403774d1a5d5b73772ce7/oidc/verify.go); licença [Apache-2.0](https://github.com/coreos/go-oidc/blob/c914bd380327a5a3a81403774d1a5d5b73772ce7/LICENSE). A aplicação ou candidato de aplicação é [argoproj/argo-cd / oidc.go @ fad45c4b](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/util/oidc/oidc.go); licença [Apache-2.0](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `oauth2`](https://github.com/argoproj/argo-cd/blob/fad45c4b479990d1ace77d54fd67e6f04de412df/util/oidc/oidc.go#L185-L191). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+OAuth2 autoriza acesso; OIDC acrescenta a identidade. A configuração de issuer, audience e retorno precisa corresponder ao provedor da implantação.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#oidc). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Policy-Based Access Control
+
+O identificador canônico é `policy-based-access-control`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab aplica condições sobre atributos e permissões do projeto; OpenFGA resolve relações entre usuário e objeto. Casbin é uma base alternativa para políticas.
+
+A base de estudo é [casbin/casbin / enforcer.go @ 1e19095c](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/enforcer.go); licença [Apache-2.0](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / project_policy.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [openfga/openfga / check.go @ 526995eb](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/internal/graph/check.go); licença [Apache-2.0](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `condition`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb#L22-L28). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Condições sobre atributos, associação a papel e travessia de relações são mecanismos diferentes; os arquivos devem ser escolhidos conforme o conceito, não tratados como equivalentes.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#policy-based-access-control). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## RBAC
+
+O identificador canônico é `rbac`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab aplica condições sobre atributos e permissões do projeto; OpenFGA resolve relações entre usuário e objeto. Casbin é uma base alternativa para políticas.
+
+A base de estudo é [casbin/casbin / enforcer.go @ 1e19095c](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/enforcer.go); licença [Apache-2.0](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / project_policy.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [openfga/openfga / check.go @ 526995eb](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/internal/graph/check.go); licença [Apache-2.0](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/kubernetes-operations/skills/k8s-security-policies/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `condition`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb#L22-L28). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Condições sobre atributos, associação a papel e travessia de relações são mecanismos diferentes; os arquivos devem ser escolhidos conforme o conceito, não tratados como equivalentes.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#rbac). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## ReBAC
+
+O identificador canônico é `rebac`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+GitLab aplica condições sobre atributos e permissões do projeto; OpenFGA resolve relações entre usuário e objeto. Casbin é uma base alternativa para políticas.
+
+A base de estudo é [casbin/casbin / enforcer.go @ 1e19095c](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/enforcer.go); licença [Apache-2.0](https://github.com/casbin/casbin/blob/1e19095c5287eff82ae0d5cc07502d87017944f2/LICENSE). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / project_policy.rb @ b7a1f67a](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/LICENSE); [openfga/openfga / check.go @ 526995eb](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/internal/graph/check.go); licença [Apache-2.0](https://github.com/openfga/openfga/blob/526995eb202464e2cace266fb5be56c212af9ecf/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `condition`](https://github.com/gitlabhq/gitlabhq/blob/b7a1f67aa40446467440af3751675dbd5140b999/app/policies/project_policy.rb#L22-L28). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Condições sobre atributos, associação a papel e travessia de relações são mecanismos diferentes; os arquivos devem ser escolhidos conforme o conceito, não tratados como equivalentes.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#rebac). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Secrets Rotation
+
+O identificador canônico é `secrets-rotation`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Vault 1.14 solicita a rotação da credencial e seu plugin PostgreSQL aplica a troca no banco pelo contrato da base de plugins.
+
+A base de estudo é [hashicorp/vault / database.go @ 13a649f8](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/sdk/database/dbplugin/v5/database.go); licença [MPL-2.0](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/LICENSE). A aplicação ou candidato de aplicação é [hashicorp/vault / path_rotate_credentials.go @ 13a649f8](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_rotate_credentials.go); licença [MPL-2.0](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/LICENSE); [hashicorp/vault / postgresql.go @ 13a649f8](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/plugins/database/postgresql/postgresql.go); licença [MPL-2.0](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/cicd-automation/skills/secrets-management/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `RotateRootCredentials`](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_rotate_credentials.go#L36-L42). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A versão é histórica sob MPL. A leitura do mecanismo não prova que a rotação esteja habilitada nem conclui a janela de convivência de uma implantação específica.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#secrets-rotation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Service-to-Service Identity
+
+O identificador canônico é `service-to-service-identity`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+O cliente Citadel no agente Istio monta credenciais TLS e usa certificados para identificar o workload na conexão com a CA.
+
+A base de estudo é [spiffe/go-spiffe / config.go @ 77c6d2e0](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/spiffetls/tlsconfig/config.go); licença [Apache-2.0](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/LICENSE). A aplicação ou candidato de aplicação é [istio/istio / client.go @ 4e2c1c57](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go); licença [Apache-2.0](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `tls`](https://github.com/istio/istio/blob/4e2c1c576e33a7b411ee7f38ac4bb9dd45c36631/security/pkg/nodeagent/caclient/providers/citadel/client.go#L136-L142). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#service-to-service-identity). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Short-Lived Credentials
+
+O identificador canônico é `short-lived-credentials`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+A versão Vault 1.14 cria usuários de banco por lease com TTL e utiliza o plugin de banco para aplicar a credencial.
+
+A base de estudo é [hashicorp/vault / database.go @ 13a649f8](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/sdk/database/dbplugin/v5/database.go); licença [MPL-2.0](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/LICENSE). A aplicação ou candidato de aplicação é [hashicorp/vault / path_creds_create.go @ 13a649f8](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_creds_create.go); licença [MPL-2.0](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/cicd-automation/skills/secrets-management/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 1 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `TTL`](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_creds_create.go#L106-L112). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+A versão 1.14 é histórica sob MPL. O código de criação por lease não prova rotação de uma credencial estática: essa linha também deve acompanhar path_rotate_credentials.go.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#short-lived-credentials). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Token Exchange
+
+O identificador canônico é `token-exchange`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Keycloak processa troca de token, valida o solicitante e define o token retornado no protocolo OIDC.
+
+A base de estudo é [keycloak/keycloak-js / keycloak.js @ 8803e6b5](https://github.com/keycloak/keycloak-js/blob/8803e6b54a4ba6f9dc0150d0329c98e7902a9ee8/lib/keycloak.js); licença [Apache-2.0](https://github.com/keycloak/keycloak-js/blob/8803e6b54a4ba6f9dc0150d0329c98e7902a9ee8/LICENSE.txt). A aplicação ou candidato de aplicação é [keycloak/keycloak / StandardTokenExchangeProvider.java @ 8a081db4](https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java); licença [Apache-2.0](https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/LICENSE.txt).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 3 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `TokenExchange`](https://github.com/keycloak/keycloak/blob/8a081db466da3ff8de74efab2f3d9844277c18ba/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java#L444-L450). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+Troca de token não cobre todo OAuth2 ou OIDC. O leitor deve acompanhar também o cliente e o fluxo de autorização correspondente.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#token-exchange). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Zero Trust
+
+O identificador canônico é `zero-trust`. **Há uma correspondência autoral com fontes primárias.** A revisão independente precisa conferir esta versão.
+
+Teleport estabelece uma fronteira de acesso SSH com identidade, autorização e auditoria.
+
+A base de estudo é [golang/crypto / server.go @ cf169cd0](https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/ssh/server.go); licença [BSD-3-Clause](https://github.com/golang/crypto/blob/cf169cd0986fa0e2e0963ee5f8d234885f869750/LICENSE). A aplicação ou candidato de aplicação é [gravitational/teleport / sshserver.go @ 1283425b](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go); licença [AGPL-3.0](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/LICENSE).
+
+A orientação pública selecionada é [addyosmani/agent-skills / SKILL.md @ aeac41d4](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/skills/security-and-hardening/SKILL.md); licença [MIT](https://github.com/addyosmani/agent-skills/blob/aeac41d4d005999432bb7312f7ff06383a91d59d/LICENSE). Seu pack tinha **106700 estrelas** na consulta `2026-10-15T01:26:21.755062Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para localizar o mecanismo, comece pelo [trecho que contém `ssh`](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go#L1545-L1551). O localizador textual ajuda a encontrar o código; a leitura do fluxo e os limites abaixo determinam o que ele comprova.
+
+O arquivo prova o servidor de acesso. Zero Trust completo exige avaliar a política e o caminho do proxy, não apenas existir autenticação SSH.
+
+No curso, [abra o caso aplicado](/jornadas/access-policy/) e [consulte a ação e o probe deste conceito](/jornadas/access-policy/conceitos/#zero-trust). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

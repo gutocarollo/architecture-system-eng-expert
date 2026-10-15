@@ -1,0 +1,7 @@
+flowchart LR
+    Requests["100 requisições sintéticas"] --> Router["Roteamento proposto"]
+    Router -->|"90"| Stable["Versão estável"]
+    Router -->|"10"| Candidate["Versão candidata"]
+    Candidate --> Observe["Observar latência, erros e escolha correta"]
+    Observe -->|"critério falhou"| Return["Retornar tráfego para estável"]
+    Observe -->|"critério aceito"| Grow["Aumentar participação por etapa"]

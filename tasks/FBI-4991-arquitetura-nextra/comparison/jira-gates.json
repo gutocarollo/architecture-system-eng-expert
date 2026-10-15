@@ -1,0 +1,22 @@
+[
+  {
+    "gate": "catalog",
+    "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/jira-fbi-gate.mjs",
+    "exit_code": 0,
+    "output": {
+      "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "allow",
+        "permissionDecisionReason": "jira-fbi catalog-v4 gate passed"
+      }
+    },
+    "allowed": true
+  },
+  {
+    "gate": "adf",
+    "script": "/Users/augustocarollo/.agents/skills/jira-fbi/scripts/claude-hook-wrapper.cjs",
+    "exit_code": 0,
+    "output": null,
+    "allowed": true
+  }
+]

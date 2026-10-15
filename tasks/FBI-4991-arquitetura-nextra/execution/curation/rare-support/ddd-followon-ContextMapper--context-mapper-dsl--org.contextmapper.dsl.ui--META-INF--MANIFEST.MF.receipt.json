@@ -1,0 +1,12 @@
+{
+  "repo": "ContextMapper/context-mapper-dsl",
+  "path": "org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+  "revision": "995f486a9cdecb6946257d5c7b6d98ada2978124",
+  "url": "https://github.com/ContextMapper/context-mapper-dsl/blob/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+  "raw_url": "https://raw.githubusercontent.com/ContextMapper/context-mapper-dsl/995f486a9cdecb6946257d5c7b6d98ada2978124/org.contextmapper.dsl.ui/META-INF/MANIFEST.MF",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:19:28.397700+00:00",
+  "sha256": "271c022cbaea0ede859584f3f472a2b60101651e19586b78d30b8d9c75ddeaaa",
+  "line_count": 31,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-followon-ContextMapper--context-mapper-dsl--org.contextmapper.dsl.ui--META-INF--MANIFEST.MF"
+}

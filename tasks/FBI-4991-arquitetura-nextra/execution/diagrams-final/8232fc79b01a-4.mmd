@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant Producer as Produtor
+    participant Admission as Admissão limitada
+    participant Worker as Consumidor
+    Worker->>Admission: informa ou libera capacidade
+    Producer->>Admission: oferece trabalho
+    alt existe capacidade
+        Admission->>Worker: aceita trabalho
+        Worker-->>Admission: conclui e libera vaga
+    else capacidade esgotada
+        Admission-->>Producer: não aceita agora
+        Note over Producer: reduz ritmo ou espera segundo o contrato
+        Producer->>Admission: tenta quando permitido
+    end

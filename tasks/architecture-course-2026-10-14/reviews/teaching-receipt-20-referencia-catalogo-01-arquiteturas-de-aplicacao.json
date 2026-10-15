@@ -1,0 +1,18 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "referencia/catalogo/01-arquiteturas-de-aplicacao",
+  "document_sha256": "94fbb6133740e753c78c8e48fe0a463fc59d6de767529c2410a3ce0566b0e44a",
+  "context_sha256": "7fb53b6c225d1e8c4cf208bb365c88a0ffcfcc0fd78b441ebbd51801e06243f5",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "original-catalog",
+    "s2",
+    "l2a",
+    "s2-reference-repair"
+  ]
+}

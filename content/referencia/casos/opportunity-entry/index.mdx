@@ -1,0 +1,72 @@
+---
+title: "Contratos: a oportunidade existente conserva sua identidade"
+description: "Entradas, parâmetros, versões, resultados e limites do caso A oportunidade existente conserva sua identidade."
+diataxis: reference
+---
+
+# Contratos: a oportunidade existente conserva sua identidade
+
+Esta página reúne os contratos que a prática compara. Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+Para continuar o mesmo problema, [volte à jornada](/jornadas/opportunity-entry/), [entenda o mecanismo](/explicacoes/casos/opportunity-entry/), [execute o tutorial](/tutoriais/casos/opportunity-entry/) ou [consulte o guia da tarefa](/guias/casos/opportunity-entry/).
+
+## Entradas e ambiente
+
+Uma OPP aberta fictícia, uma Conta fictícia, dois operadores com chaves diferentes e fixtures de estágio Contatado/Ganha/Perdida.
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `opportunity-entry`. |
+| Símbolos a consultar | `execute_r1_from_opportunity_flow / _claim_opportunity_entry / opportunity_entry_refusal`. |
+| Comando completo | `python3 labs/architecture/opportunity-entry/run.py`. |
+| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
+| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
+| Horário e escopo do recibo | `2026-10-15T01:35:30.287094+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+## Versões e fronteiras da reprodução
+
+Este caso vem do [card FBI-4719](https://fazcapital.atlassian.net/browse/FBI-4719) e do [PR 594](https://bitbucket.org/fazcapital/makershub/pull-requests/594). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/services/super_r1_service.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/services/super_r1_service.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+| Fase | Fonte histórica | SHA | Cópia do laboratório |
+| --- | --- | --- | --- |
+| Anterior | [backend/app/services/super_r1_service.py](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/services/super_r1_service.py) | `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf` | `labs/architecture/opportunity-entry/before.py`. |
+| Posterior | [backend/app/services/super_r1_service.py](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/services/super_r1_service.py) | `8206752f9b1bc8650d0a4572f4a0d64566260b83` | `labs/architecture/opportunity-entry/after.py`. |
+| Anterior | [backend/app/integrations/salesforce_integration.py](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/integrations/salesforce_integration.py) | `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf` | `labs/architecture/opportunity-entry/before-integration.py`. |
+| Posterior | [backend/app/integrations/salesforce_integration.py](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/integrations/salesforce_integration.py) | `8206752f9b1bc8650d0a4572f4a0d64566260b83` | `labs/architecture/opportunity-entry/after-integration.py`. |
+| Anterior | [backend/app/services/qualify_service.py](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/services/qualify_service.py) | `3958ac9ee407f6dc2fe1a6905c475befa69cf9cf` | `labs/architecture/opportunity-entry/before-qualify.py`. |
+| Posterior | [backend/app/services/qualify_service.py](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/services/qualify_service.py) | `8206752f9b1bc8650d0a4572f4a0d64566260b83` | `labs/architecture/opportunity-entry/after-qualify.py`. |
+
+O diff preservado é `labs/architecture/opportunity-entry/source.diff`; seu SHA-256 é `78d961e87d0d26a7a6d67b17a86bbb2fce6cf762e849fd8b2c95426bc52476f7`. As cópias possuem hashes no manifesto do mesmo diretório. Esses hashes identificam o recorte reproduzido; não certificam o checkout ou o deploy que alguém abrir em outra ocasião.
+
+## Resultados que o contrato compara
+
+A criação muda de uma chamada para zero. O identificador continua 006SYNTHETICOPEN. O segundo claim recebe 409. As funções históricas também recusam oportunidades ganhas ou perdidas.
+
+A reprodução histórica emite o resultado completo abaixo. Os rótulos `before` e `after` distinguem as versões; `comparison=PASS` significa que as condições esperadas apareceram nos dois recortes.
+
+```text
+before: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double
+after: create_calls=0 opportunity_id=006SYNTHETICOPEN downstream=double
+before-claim: two_actor_keys_own=2
+after-claim: shared_opportunity_second_status=409
+after-policy: stage=Contatado status=0
+after-policy: stage=Ganha status=409
+after-policy: stage=Perdida status=409
+comparison=PASS scope=historical_function_bodies_with_adapter_doubles
+```
+
+## Garantia, parâmetros e limites
+
+A função posterior pula Opportunity.create quando há source_opp_id. _claim_opportunity_entry usa um scope, um ator fixo e opportunity_id para reclamar o objeto em disputa. Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
+
+Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+## Recibo e rastreabilidade
+
+A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `opportunity-entry`. O hash SHA-256 da saída capturada é `a34bc8e0caf46ea4ef59b9aa529f461e71bcccfabce057a697c8f37413703a7b`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
+
+Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/opportunity-entry/), [leia a explicação](/explicacoes/casos/opportunity-entry/), [abra o tutorial](/tutoriais/casos/opportunity-entry/) ou [consulte o guia](/guias/casos/opportunity-entry/).

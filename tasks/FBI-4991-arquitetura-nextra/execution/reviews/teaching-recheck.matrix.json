@@ -1,0 +1,2212 @@
+{
+  "verdict": "PASS",
+  "concepts_adjudicated": 310,
+  "concepts_with_relevant_observation": 310,
+  "specific_practice_pending": 0,
+  "distinct_commands_executed": 189,
+  "source_matrix_sha256": "1da715cb1097dff8dbfa8f6cfffed1ab1344771d7e78a6672f098ebf6d2b8f5d",
+  "sharing_policy": "An identical command was run once, and its output is shared explicitly by the listed concepts.",
+  "proof_limit": "Command success checks the bounded local observation; it does not close specific_pattern_implementation_gap or independent review.",
+  "receipts": [
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe ab-cohorts",
+      "concept_ids": [
+        "a-b-deployment"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:09.632116+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"assignment_stable\": true, \"fees\": [1, 2, 1, 2], \"visible_cohorts\": [\"A\", \"B\"]}, \"before\": {\"fees\": [1, 1, 1, 1], \"visible_cohorts\": [\"A\"]}, \"guarantee\": \"Both A and B are user-visible treatments assigned to distinct stable cohorts.\", \"limit\": \"This demonstrates cohort routing; experiment design, significance and rollout controls are not implemented.\", \"probe\": \"ab-cohorts\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c8f9d88cdd7f824202f8e47a0dc00dc5658421481e8dce9125f56dbe7a54a2c5"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe object-authorization",
+      "concept_ids": [
+        "abac",
+        "least-privilege",
+        "policy-based-access-control",
+        "rbac",
+        "rebac"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:09.822824+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cross_tenant_allowed\": false}, \"before\": {\"cross_tenant_allowed\": true}, \"guarantee\": \"Role, attributes and ownership must be checked against the specific resource.\", \"limit\": \"No live roles, customer records or Faz permission contracts are inferred.\", \"probe\": \"object-authorization\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "27e3389ad7d14dfb9bca4176f82b5382276a0410f6d88e2303dd1352df4d05ca"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept 'Abstract Factory'",
+      "concept_ids": [
+        "abstract-factory"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:09.856698+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Abstract Factory\", \"before\": {\"accepted\": false, \"fee\": 10.0}, \"after\": {\"accepted\": true, \"fee\": 10.0}, \"mechanism\": \"One product family creates its compatible validator and fee calculator together.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "ea23a2f5f1e04e9964eda6c6e82e20e3d580e1c7eddea2383d0bd59ba221e27e"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe multi-writer-reconcile",
+      "concept_ids": [
+        "active-active",
+        "multi-leader",
+        "multi-primary"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:09.920771+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"merged_balance\": 1150, \"sites_accepting_writes\": 2, \"unique_credits\": 2}, \"before\": {\"last_absolute_balance_wins\": 1050, \"lost_credit\": 100}, \"guarantee\": \"Both sites accept writes and reconciliation preserves distinct additive credits instead of choosing one absolute snapshot.\", \"limit\": \"This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy.\", \"probe\": \"multi-writer-reconcile\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "6cd73bda882e1d3c8ee85a953ccba5fd0554b9a5721cc5135f5ea32364b0a35e"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe standby-recovery-work",
+      "concept_ids": [
+        "active-passive",
+        "cold-standby",
+        "failover",
+        "hot-standby",
+        "warm-standby"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:09.983870+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"all_promoted\": true, \"all_versions\": [2, 2, 2], \"recovery_steps\": {\"cold\": [\"restore\", \"start\", \"catch-up\", \"promote\"], \"hot\": [\"promote\"], \"warm\": [\"catch-up\", \"promote\"]}}, \"before\": {\"failed_primary_available\": false}, \"guarantee\": \"Standby readiness changes the restore/start/catch-up work required before the role transition.\", \"limit\": \"The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.\", \"probe\": \"standby-recovery-work\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b3f7fb8b2e32cfb1b7c662e928cc3bd98eec03e38711b554fc2b41f7afbaea53"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe actor-mailbox-writer",
+      "concept_ids": [
+        "actor-model",
+        "single-writer-principle"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.045699+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"counter\": 2, \"mailbox_empty\": true, \"state_writer_count\": 1}, \"before\": {\"counter_after_two_stale_writers\": 1}, \"guarantee\": \"A private state owner serializes messages and provides a single writer for this actor.\", \"limit\": \"The mailbox is local; supervision, distributed actors and message durability are not claimed.\", \"probe\": \"actor-mailbox-writer\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f4cc4fe3e7559bb60c3ec8a0cac63083eb189883d26e77f001066a2c5e864767"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Adapter",
+      "concept_ids": [
+        "adapter"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.076667+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Adapter\", \"before\": null, \"after\": 100.0, \"mechanism\": \"The boundary translates cents into the domain amount.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "32e9c745526772e41a2a070ba5c5978a2e7984d07a5c19dfcebfae0c6531e3e3"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe aggregate-root-invariant",
+      "concept_ids": [
+        "aggregate",
+        "aggregate-root"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.135291+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"protected_total\": 50, \"public_children_are_tuple\": true, \"second_add_refused\": true}, \"before\": {\"bypassed_total\": 130, \"exceeds_limit\": true}, \"guarantee\": \"The root owns the public mutation operation and checks the invariant spanning its children before accepting the next item.\", \"limit\": \"The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established.\", \"probe\": \"aggregate-root-invariant\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "067f9a653a7084b2f94189d0d6eb9d7ed7c83704a057c50154feb6f8b7cf2568"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe route-enrich-aggregate",
+      "concept_ids": [
+        "aggregator",
+        "content-based-router",
+        "message-enricher",
+        "message-router"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.196268+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"enriched\": 6, \"statement\": 3, \"trade\": 3}, \"before\": {\"one_untyped_batch\": 6}, \"guarantee\": \"A router chooses a destination; an enricher adds context and an aggregator can count each result.\", \"limit\": \"The example does not guarantee distributed ordering or delivery.\", \"probe\": \"route-enrich-aggregate\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c280588a799821ddd790b68e745749f2b81c9baf08905023170eadced3e1076f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe sidecar-outbound-policy",
+      "concept_ids": [
+        "ambassador",
+        "service-mesh",
+        "sidecar"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.255466+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"identities\": [\"order-service\", \"position-service\"], \"policy_versions\": [2, 2], \"updated_statuses\": [200, 200], \"workload_business_code_changed\": false}, \"before\": {\"old_policy_status\": 403}, \"guarantee\": \"A companion outbound proxy adds transport policy and identity; distributing the same policy to both companion proxies exhibits one mesh control/data-plane property.\", \"limit\": \"The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment.\", \"probe\": \"sidecar-outbound-policy\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b8f58ffb7ab34c0777c02fb5e8f88aecbde101b02ebebd757ee26593cf9c097d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe provider-contract",
+      "concept_ids": [
+        "anti-corruption-layer"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.314957+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"amount\": 100.0, \"booked\": true}, \"before\": {\"booked\": false}, \"guarantee\": \"The adapter translates an external language at one boundary.\", \"limit\": \"No provider is called; network and credentials are absent.\", \"probe\": \"provider-contract\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "906af257b2dde226473d53f4465ccd776ab51d8e0eb2c0d6b666f0e01fd755ab"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe bff-composed-view",
+      "concept_ids": [
+        "api-composition",
+        "backend-for-frontend-bff",
+        "gateway-aggregation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.377977+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"backend_calls_for_two_views\": 4, \"frontend_round_trips_per_view\": 1, \"mobile\": {\"balance\": 1100, \"pending_count\": 1}, \"web_order_count\": 2}, \"before\": {\"frontend_round_trips_per_view\": 2}, \"guarantee\": \"A server-side composition calls two owners and returns a client-specific view, reducing client round trips without pretending the backend calls disappear.\", \"limit\": \"Partial failures, freshness and authorization of each constituent service need separate contracts.\", \"probe\": \"bff-composed-view\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "cb12b8661580f50f3636e5348b298f48137195952a75ee513f19191516a0c7f4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload",
+      "concept_ids": [
+        "api-gateway",
+        "api-gateway-security",
+        "gateway-offloading",
+        "gateway-routing",
+        "reverse-proxy"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.437321+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"entry_auth_checks\": 3, \"forwarded_amount\": 100, \"forwarded_method\": \"POST\", \"guest_backend_calls\": 0, \"guest_status\": 403, \"position_status\": 200, \"routed_backends\": [\"orders\", \"positions\"]}, \"before\": {\"unprotected_guest_backend_calls\": 1}, \"guarantee\": \"The entry point routes requests, offloads authentication checks and forwards the accepted method/payload to the selected backend.\", \"limit\": \"This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.\", \"probe\": \"gateway-route-offload\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8dad0703192b2eb450f792ef25fdf9c9ad7a64d0a1b4029c55a2b542b52edf72"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py ledger-projection --probe replay-events",
+      "concept_ids": [
+        "append-only-log",
+        "domain-event",
+        "event-sourcing"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.505634+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"events\": 3, \"replayed_balance\": 900}, \"before\": {\"mutable_balance_without_history\": 800}, \"guarantee\": \"An append-only record can replay the credits and debit into a read position.\", \"limit\": \"These are business events, not arbitrary row-change logs; audit storage alone is not Event Sourcing.\", \"probe\": \"replay-events\"}\ncomparison=PASS case=ledger-projection probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "579639441dd64f0c0903d4a4d0fb52bc81bbb52bcde310509b420aa8cce69eb4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe application-service-order",
+      "concept_ids": [
+        "application-service"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.568578+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted\": false, \"balance\": 1000, \"operations\": [\"load\", \"reject\"], \"save_calls\": 0}, \"before\": {\"save_before_validation_calls\": 1}, \"guarantee\": \"The application service coordinates the use case and calls domain behavior before persistence instead of embedding a write before validation.\", \"limit\": \"The ordering model does not supply an ORM transaction, authentication or a production application layer.\", \"probe\": \"application-service-order\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d95b03254a99199672bd6dfa83a670a7e4b044c791331a6466e3db6e1994d111"
+    },
+    {
+      "command": "python3 labs/architecture/single-flight-cancel/run.py",
+      "concept_ids": [
+        "async-await",
+        "cache-stampede-protection",
+        "futures-promises",
+        "mutex",
+        "single-flight"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.628199+00:00",
+      "exit_code": 0,
+      "stdout": "before: readers=5 cancelled=5 survivors=0 producer_calls=1\nafter: readers=5 cancelled=1 survivors=4 producer_calls=1\ncomparison=PASS before_defect_observed=True after_guarantee_observed=True\n",
+      "stderr": "",
+      "output_sha256": "05cfb344616401c3b01996ee0f5177335546d7ad8a65fffd82886c551b0d9b87"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe replica-lag",
+      "concept_ids": [
+        "asynchronous-replication",
+        "eventual-consistency",
+        "leader-follower",
+        "primary-replica",
+        "read-replica",
+        "replication"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.700611+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance\": 1100, \"primary_version\": 2, \"replica_version\": 2}, \"before\": {\"primary_version\": 2, \"replica_version\": 1}, \"guarantee\": \"An asynchronous replica may serve an older committed value and converges only after applying the update.\", \"limit\": \"The model has one update and reliable replay, not a distributed replication protocol.\", \"probe\": \"replica-lag\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c3b07d5f049b734dec054f1722e14fca45856fd96345803b253552f2a131dd5c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe at-least-once-ack-retry",
+      "concept_ids": [
+        "at-least-once-delivery"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.774132+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"acknowledged\": true, \"attempts\": 2, \"deliveries\": 2, \"unique_event_ids\": 1}, \"before\": {\"acknowledged\": false, \"attempts\": 1}, \"guarantee\": \"Retry after an ambiguous acknowledgement restores acknowledgement while admitting repeat delivery of the same event.\", \"limit\": \"Only this bounded acknowledgement-loss schedule is modeled; an exactly-once effect still needs the recipient transaction or idempotency mechanism.\", \"probe\": \"at-least-once-ack-retry\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "56e0e4f3c6e575e1123df0c38e234f9e3d0f1b600d3c875a5d9252ae4520c826"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe at-most-once-loss",
+      "concept_ids": [
+        "at-most-once-delivery"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.851684+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"ack_lost_effects_without_retry\": 1, \"delivery_lost_effects_without_retry\": 0, \"maximum_attempts\": 1}, \"before\": {\"retry_without_dedup_effects\": 2}, \"guarantee\": \"At most one attempt avoids repeat delivery in this fixture but can lose the operation entirely.\", \"limit\": \"This is a sender-attempt model, not a broker delivery guarantee or proof of the external effect.\", \"probe\": \"at-most-once-loss\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f4b52ce372e89e73c3041527c4e254cf41d799eddc42270880741928c9cd07ed"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe automatic-failover-detection",
+      "concept_ids": [
+        "automatic-failover",
+        "heartbeat"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:10.930019+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"heartbeat_stale\": true, \"old_primary_healthy\": false, \"successor\": \"B\", \"successor_version\": 2}, \"before\": {\"automatic_successor\": null, \"primary_responded_at\": 0}, \"guarantee\": \"A failure detector based on heartbeat age triggers the modeled role transition automatically.\", \"limit\": \"A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition.\", \"probe\": \"automatic-failover-detection\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8c4e8cbb27a3bbed04db970766f23f4a08999a727242e9a209bd6e8faa937454"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe demand-backpressure",
+      "concept_ids": [
+        "backpressure"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.002601+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"maximum_buffer\": 2, \"processed\": 6, \"rejected\": 0}, \"before\": {\"maximum_buffer\": 6, \"processed\": 6}, \"guarantee\": \"The producer advances only while downstream capacity is available; six tasks finish without buffering all six.\", \"limit\": \"The synchronous schedule models demand; it is not a Reactive Streams implementation.\", \"probe\": \"demand-backpressure\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "bb55e9d2e1c7f3d59a4c12f5352d3c170b9c8cd21361be701e95662e3a8b0b79"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe bastion-admin-hop",
+      "concept_ids": [
+        "bastion-host"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.359591+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"authorized_two_hops\": true, \"direct_path_allowed\": false, \"hops\": [[\"workstation\", \"bastion\"], [\"bastion\", \"ledger-admin\"]], \"non_admin_rejected\": true}, \"before\": {\"unrestricted_direct_admin_path\": true}, \"guarantee\": \"Administrative access is funneled through an authenticated jump boundary and direct access to the protected target is denied.\", \"limit\": \"The graph executes authorization and routing decisions, not SSH, a real bastion host, firewall rules or session recording.\", \"probe\": \"bastion-admin-hop\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e9583c03e4780c4c3f34e13f93b11a94346089432c7838e31d73e138eecddfe7"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe batch-stream-emission",
+      "concept_ids": [
+        "batch-processing",
+        "stream-processing"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.453094+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"final_position\": 130, \"incremental_outputs\": [100, 80, 130], \"updates_before_last_event\": 2}, \"before\": {\"batch_outputs_at_end\": [130]}, \"guarantee\": \"Batch emits after the chosen finite input set completes; stream processing updates the result as each event arrives.\", \"limit\": \"The finite input demonstrates emission semantics rather than an unbounded engine, watermark or event-time guarantee.\", \"probe\": \"batch-stream-emission\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f2b78d1ab67109c0d030e3c581ce56ff64fda64c5aea731b5e8131027e281a0f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe blackboard-specialists",
+      "concept_ids": [
+        "blackboard-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.572460+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"allocation\": \"reserved\", \"risk_approved\": true, \"rounds\": 2}, \"before\": {\"allocation\": null}, \"guarantee\": \"Independent specialists read and contribute to a shared problem state until their prerequisites become available.\", \"limit\": \"The fixture has monotonic facts and two rounds; conflict resolution and an unrestricted expert scheduler are outside it.\", \"probe\": \"blackboard-specialists\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3f6a69813764b52620cbcfaf89070d42b4cd56eab0630ba518e8d0e9a85bded5"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe blue-green-route",
+      "concept_ids": [
+        "blue-green-deployment"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.656236+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"blue_still_ready\": true, \"provisioned_environments\": 2, \"visible_after_rollback\": 1, \"visible_after_switch\": 2}, \"before\": {\"visible_version\": 1}, \"guarantee\": \"Traffic changes between two already-provisioned environments and can return to the previous ready environment.\", \"limit\": \"The route switch does not undo incompatible data written by the new environment; no deployment platform is contacted.\", \"probe\": \"blue-green-route\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "aef45179c1c00458e65d79112ee799e4bc874aaba2f6ecb693fe7ef2eab6fcfe"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe context-contract-change",
+      "concept_ids": [
+        "bounded-context",
+        "context-map",
+        "customer-supplier",
+        "ddd",
+        "ubiquitous-language"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.735656+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"broken_after_context_adaptation\": 0, \"impacted_consumers\": [\"order-check\", \"portfolio-screen\", \"trading-adapter\"], \"portfolio_available\": 1000, \"trading_available\": 800, \"trading_order_900_allowed\": false}, \"before\": {\"old_shared_available\": 1000, \"uncoordinated_change_breaks_consumers\": [\"portfolio-screen\", \"order-check\"]}, \"guarantee\": \"An actual schema change exposes affected consumers; bounded contexts give available different meanings, and the supplier/consumer agreement restores explicit contracts and a shared vocabulary within each context.\", \"limit\": \"The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.\", \"probe\": \"context-contract-change\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "ead7c475b38b6b652b9d4a8522f68bf6393d5de93ec16d95698b7cd99b05c684"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe strangler-abstraction-route",
+      "concept_ids": [
+        "branch-by-abstraction",
+        "service-extraction",
+        "strangler-fig",
+        "transitional-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.812330+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"calls\": [[\"/orders\", \"legacy\"], [\"/orders\", \"new\"], [\"/positions\", \"legacy\"]], \"client_contract_preserved\": true, \"legacy_position_result\": 50, \"new_order_result\": 100}, \"before\": {\"orders_owner\": \"legacy\", \"result\": 100}, \"guarantee\": \"An abstraction preserves the caller contract while routing one extracted capability to its new owner, leaving the rest on the legacy path during transition.\", \"limit\": \"The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover.\", \"probe\": \"strangler-abstraction-route\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "4eb8cdc7c01fbdde5fe0382af4ab4e2acf563a8abf1f0ae512c577f68d106991"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Bridge",
+      "concept_ids": [
+        "bridge"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.851379+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Bridge\", \"before\": {\"coupled_variant_classes\": 4}, \"after\": {\"abstraction_types\": 2, \"transport_types\": 2, \"deliveries\": [\"standard:memory:100\", \"standard:paper:100\", \"premium:memory:100\", \"premium:paper:100\"]}, \"mechanism\": \"The notice abstraction hierarchy and the transport implementation hierarchy vary independently through composition.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "753523c974d94a65911180ace63e168e3646c1c768216ceb712aa8442f6baab5"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Builder",
+      "concept_ids": [
+        "builder"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.898352+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Builder\", \"before\": 100, \"after\": 250, \"mechanism\": \"Construction accumulates chosen fields before returning an order.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "390dd307976fae6b70d424dbe3566c3d22f817f7d1c5249763db0e49e7b71f08"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe bulkhead-independent-pools",
+      "concept_ids": [
+        "bulkhead"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:11.980766+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"order_allowed_with_separate_pool\": true, \"order_capacity\": 1, \"quote_capacity\": 2}, \"before\": {\"order_allowed_while_quotes_fill_global_pool\": false}, \"guarantee\": \"A saturated dependency consumes only its own budget; the independent order pool retains capacity.\", \"limit\": \"The actual semaphore admissions are local. Memory, CPU and cross-process resource isolation require additional budgets.\", \"probe\": \"bulkhead-independent-pools\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d918d71c1a82eeeb51db8f7c53bc4dff880e003db0ac957d5bc68a856221de92"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe cache-aside",
+      "concept_ids": [
+        "cache-aside"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.051834+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cache_populated\": true, \"source_calls\": 1, \"values\": [1000, 1000, 1000]}, \"before\": {\"cache_populated\": true, \"source_calls\": 3, \"values\": [1000, 1000, 1000]}, \"guarantee\": \"A cache-aside miss loads from the source and populates the key; later reads hit that key.\", \"limit\": \"This is one process; invalidation and concurrent misses require separate mechanisms.\", \"probe\": \"cache-aside\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "18cebdeaf5d78ecd57fdeafb62ca0a6d6206f3b80fad2ec81a075298f31b3562"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe cache-levels",
+      "concept_ids": [
+        "cache-invalidation",
+        "local-cache",
+        "two-level-cache"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.121887+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"worker_A\": 2, \"worker_B\": 2}, \"before\": {\"worker_A\": 1, \"worker_B\": 2}, \"guarantee\": \"Invalidation permits the local level to reload from its shared owner.\", \"limit\": \"Two copies still require freshness, errors, eviction and stampede contracts.\", \"probe\": \"cache-levels\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b40ee191e934db34cd01462328c85a2ebc9391b221d421ff6237233a5f19f4e6"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe cache-warming",
+      "concept_ids": [
+        "cache-warming"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.191055+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"request_path_source_calls\": 0, \"value\": 1000}, \"before\": {\"request_path_source_calls\": 1, \"value\": 1000}, \"guarantee\": \"Preloading a known key moves its initial fetch before the first user read.\", \"limit\": \"Warming does not prove that the source is fresh or that all keys should be loaded.\", \"probe\": \"cache-warming\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "6dc2f1910df3d60920591e12d5f61ac16e7e22fe9df221f2e06d030994916db4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe progressive-route",
+      "concept_ids": [
+        "canary-release",
+        "feature-flags",
+        "progressive-delivery"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.259406+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"new_version_exposure\": 5, \"rollback_route\": \"old\"}, \"before\": {\"new_version_exposure\": 100}, \"guarantee\": \"A controlled route limits the first new-version population and can redirect it.\", \"limit\": \"Synthetic exposure counts do not prove Kubernetes readiness or rollback of incompatible data.\", \"probe\": \"progressive-route\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f14dd9f7c073c34eb5aa0e20c84facb54b5eaca783f3d068023005c59d4f4e69"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe cascading-replication",
+      "concept_ids": [
+        "cascading-replication"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.334804+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"A_version\": 2, \"B_version\": 2, \"C_source\": \"B\", \"C_version\": 2}, \"before\": {\"C_before_B_relay\": 1}, \"guarantee\": \"Replication follows A to B to C, exposing the intermediate replica as the source of the final replica.\", \"limit\": \"The model has one ordered update, no WAL streams, failover or network delay.\", \"probe\": \"cascading-replication\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0b12ea4f0ba664adea981a458b73aed543ca010e96046f0d5ab550085c8c1a0f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe cdc-committed-change",
+      "concept_ids": [
+        "cdc-migration",
+        "change-data-capture-cdc",
+        "dual-write-migration"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.415311+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"captured_committed_changes\": 1, \"rolled_back_changes\": 0, \"target_cents\": 110000}, \"before\": {\"independent_target_cents_after_second_write_failure\": 100000}, \"guarantee\": \"A database trigger captures only the committed after-image visible to the feed reader, allowing a destination to catch up instead of relying on a second independent application write.\", \"limit\": \"Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.\", \"probe\": \"cdc-committed-change\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "9eeab98a8c4e4119bd65f85cb4f250024fc91a1ecda3ea0aa890ccd9708338d8"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe cell-failure-boundary",
+      "concept_ids": [
+        "cell-based-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.490025+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"isolated_cell_successes\": 1, \"responses\": [\"accepted-B\"]}, \"before\": {\"shared_failure_successes\": 0}, \"guarantee\": \"Independent cells contain one failure while the other cell completes its own request.\", \"limit\": \"Capacity, routing safety, replication and failover between real regions remain outside this local failure-boundary experiment.\", \"probe\": \"cell-failure-boundary\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e2407a0bbde46d65fd0225437f6604ef04db6c721f49abd202a7561290cd011b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py diagnostics --probe correlate-retries",
+      "concept_ids": [
+        "centralized-logging",
+        "correlation-id",
+        "request-id",
+        "structured-logging"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.650400+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"operation_spans\": 3, \"requests\": 2}, \"before\": {\"trace_one_request_spans\": 2}, \"guarantee\": \"An operation identity relates two request attempts without confusing them.\", \"limit\": \"A list of spans is not OpenTelemetry instrumentation or proof of cross-service context propagation.\", \"probe\": \"correlate-retries\"}\ncomparison=PASS case=diagnostics probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e52c59cabac76164af8f8286331426f09e71ba1835f4fab49e600be810440dc3"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept 'Chain of Responsibility'",
+      "concept_ids": [
+        "chain-of-responsibility"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.690708+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Chain of Responsibility\", \"before\": true, \"after\": false, \"mechanism\": \"Each validator can stop a request before the next responsibility.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "b94a13cc8e2e531e1430ae3be9933c9ff60294efa450d250234e9057e5eaf6f4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe chaos-delivery-experiment",
+      "concept_ids": [
+        "chaos-engineering"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.772606+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"debit\": 100, \"effects_after_recovery\": 1, \"injected_faults\": [\"delivery_dropped\"], \"orders\": 1, \"steady_invariant_restored\": true}, \"before\": {\"effects_after_injected_drop\": 0}, \"guarantee\": \"A declared steady-state invariant is observed before/after an intentional fault and recovery experiment.\", \"limit\": \"The fault is injected only in a controlled local model, not in a production system or distributed chaos platform.\", \"probe\": \"chaos-delivery-experiment\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e91da7f387de94090c24ab71c02dfc48db3413e6d8d796a5b9cd960df3ba1b77"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe choreographed-compensation",
+      "concept_ids": [
+        "choreography",
+        "choreography-saga"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.855499+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"event_trace\": [\"order-placed\", \"funds-reserved\", \"allocation-failed\", \"compensated\"], \"final_balance\": 1000, \"top_level_step_coordinator\": false}, \"before\": {\"debit_without_reaction_to_failed_allocation\": 900}, \"guarantee\": \"Local subscribers emit the next facts and a compensation handler reacts to the failure, exhibiting choreographed saga collaboration.\", \"limit\": \"Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography.\", \"probe\": \"choreographed-compensation\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "ffd93f957e687ea4559004194c8212fff9f400b5479bf2509245423c75919ee8"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe retry-budget",
+      "concept_ids": [
+        "circuit-breaker",
+        "exponential-backoff",
+        "fail-fast",
+        "jitter"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:12.932915+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"attempts\": 3, \"delays\": [1, 2, 4], \"final\": \"open-circuit\", \"jittered_delays\": [1.1, 2.2, 4.3]}, \"before\": {\"attempt_times\": [0, 0, 0], \"final\": \"overload\"}, \"guarantee\": \"Budgeted attempts, exponential delay and fixed jitter spread work; the open circuit refuses more calls.\", \"limit\": \"The jitter is deterministic for learning; timeouts, deadlines, rate limits and bulkheads have distinct owners.\", \"probe\": \"retry-budget\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e7f82d492b6f75b340e18c65b8b4c6b6466b84a05f6b671491817c687e3d873d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe inward-ports-and-layers",
+      "concept_ids": [
+        "clean-architecture",
+        "hexagonal-ports-adapters",
+        "layered-n-tier",
+        "onion-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.009614+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"call_order\": [\"presentation\", \"application\", \"domain\"], \"domain_imports_storage_driver\": false, \"saved_per_adapter\": {\"memory-A\": 1, \"memory-B\": 1}}, \"before\": {\"domain_imports_storage_driver\": true}, \"guarantee\": \"Ordered invocation exhibits layers; the domain depends on its port and two replaceable adapters implement that port, exhibiting the inward dependency property of Clean/Onion/Hexagonal designs.\", \"limit\": \"Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.\", \"probe\": \"inward-ports-and-layers\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0c0d3548e255637e7a92a30d93bda109293dbb566bede357e1276307899302a9"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Command",
+      "concept_ids": [
+        "command"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.049202+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Command\", \"before\": 100, \"after\": 150, \"mechanism\": \"The requested credit is represented as an executable value.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "fda5589f2a785b4859246613f837c6f7ac9d938ffb983f5dac39a160201765f1"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py ledger-projection --probe cqrs-handlers",
+      "concept_ids": [
+        "command-handler",
+        "cqrs",
+        "query-handler",
+        "write-model"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.134436+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"query_balance\": 1100, \"query_contract\": \"display_balance,position_version\", \"query_version\": 2, \"write_balance\": 1100}, \"before\": {\"query_balance\": 1000, \"query_version\": 1, \"write_balance\": 1100}, \"guarantee\": \"A command handler validates and updates the write model; a query handler reads a separate projection contract, which advances by events.\", \"limit\": \"The models share one process and memory. CQRS does not imply a broker, another database or Event Sourcing.\", \"probe\": \"cqrs-handlers\"}\ncomparison=PASS case=ledger-projection probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0912725fadbbf8acef8f268bca793183748a0efe0d8d26f37543fae67befd012"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe version-conflict",
+      "concept_ids": [
+        "compare-and-swap-cas",
+        "optimistic-concurrency-control"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.267057+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance_after_reread\": 900, \"stale_rejected\": true}, \"before\": {\"balance\": 800, \"lost_credit\": 100}, \"guarantee\": \"The stale editor cannot silently overwrite a preceding credit.\", \"limit\": \"The re-read must revalidate business intent; a retry is not always permissible.\", \"probe\": \"version-conflict\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "4297d37b6877d1cc6928a925440e6b409d5d99ed4e281fafdcdd77ce0a0598a9"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe compensate",
+      "concept_ids": [
+        "compensating-transaction",
+        "orchestration-saga",
+        "saga"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.344018+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance_after_failed_allocation\": 1000}, \"before\": {\"balance_after_failed_allocation\": 900}, \"guarantee\": \"A compensating credit offsets the prior debit when allocation fails.\", \"limit\": \"Compensation is a new business action; it does not erase history or undo every external effect.\", \"probe\": \"compensate\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "dda81be453a3f5c8f7528abaf2f6d8e048e0a00473c55a9c2e271c3d78749ee9"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe consumer-topology",
+      "concept_ids": [
+        "competing-consumers",
+        "producer-consumer"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.418051+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"shared_queue_effects\": 2, \"worker_effects\": [1, 1]}, \"before\": {\"workers_each_execute_all\": 6}, \"guarantee\": \"Competing consumers divide work while separate subscriptions each receive the facts they need.\", \"limit\": \"Retries still require an inbox; pub/sub is not a shared task queue.\", \"probe\": \"consumer-topology\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1fe548fc906ef803ed26b57370c0911154f2f068b219f6e057f5d8aca1bcc925"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe module-public-contract",
+      "concept_ids": [
+        "component-based-architecture",
+        "modular-monolith",
+        "vertical-slice-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.492796+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cross_module_internal_writes\": 0, \"order_feature_parts\": [\"validate\", \"place\", \"persist\"], \"public_calls\": [\"orders.public.place\", \"positions.public.project\"], \"single_process\": true}, \"before\": {\"cross_module_internal_writes\": 1}, \"guarantee\": \"Public component contracts separate modules in one process; the order feature groups the steps of one vertical use case.\", \"limit\": \"The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture.\", \"probe\": \"module-public-contract\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f2a1be7d239f8109e0e015a1ac4fe3c5af96a72bb8314de14aff13c3453bfb8b"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Composite",
+      "concept_ids": [
+        "composite"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.529242+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Composite\", \"before\": 100, \"after\": 175, \"mechanism\": \"Leaves and groups share a recursive total operation.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "478a19f1281da886b51e3a3b32b48134cc386a50d648a313e579bfc9860560c2"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe conformist-contract",
+      "concept_ids": [
+        "conformist"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.601101+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"consumer_uses_upstream_state\": true, \"translation_layer_added\": false}, \"before\": {\"local_consumer_assumes_accepted\": false}, \"guarantee\": \"The downstream deliberately adopts the upstream vocabulary and schema, including its coupling cost.\", \"limit\": \"The exercise demonstrates the relationship choice, not a recommendation to accept every provider concept.\", \"probe\": \"conformist-contract\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "28ebc8b52347cf1dad8e98526a8ceb65e95cc32c77e2f2a02c390ec5c4a82c67"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe majority-partition",
+      "concept_ids": [
+        "consensus",
+        "quorum",
+        "split-brain-prevention"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.671746+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"leaders\": 1, \"minority_writes\": 0}, \"before\": {\"leaders\": 2}, \"guarantee\": \"Only a partition with two of three members can authorize a new write.\", \"limit\": \"This finite model is not Raft or Paxos: terms, durable logs, elections and message faults are not implemented.\", \"probe\": \"majority-partition\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "6e59cd2c9113b2bc45528c95bc11602acb94347f5e918843838a2abaf2ce0106"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe consistent-ring",
+      "concept_ids": [
+        "consistent-hashing"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.750114+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"existing_owner_kept\": 76, \"keys\": 100, \"ring_moved_keys\": 24}, \"before\": {\"keys\": 100, \"modulo_moved_keys\": 76}, \"guarantee\": \"A hash ring assigns a key to its next virtual-node owner; adding D moves only the keys whose next owner becomes D.\", \"limit\": \"The finite ring has 16 virtual points per node and does not implement replication or live rebalance.\", \"probe\": \"consistent-ring\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0a3fae58bb814ac94b920d8b789d5079092f1b0a06bd2de783bb164ede050f39"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe copy-on-write-snapshot",
+      "concept_ids": [
+        "copy-on-write"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.817544+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"different_objects\": true, \"reader_original\": 1000, \"writer_new_copy\": 1100}, \"before\": {\"reader_original_after_shared_mutation\": 1100}, \"guarantee\": \"A writer changes a new copy instead of mutating the snapshot held by the old reader.\", \"limit\": \"The fixture is a flat dictionary; deep object graphs, memory reclamation and lock-free publication require additional contracts.\", \"probe\": \"copy-on-write-snapshot\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "fbc15f01677d420775ee610938f961d840cdede60018684c9be7631cb6fa93b8"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe covering-index",
+      "concept_ids": [
+        "covering-index",
+        "indexing"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.902374+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"query_plan\": \"SEARCH position USING COVERING INDEX position_lookup (account_key=?)\"}, \"before\": {\"query_plan\": \"SCAN position\"}, \"guarantee\": \"The lookup changes from scanning to an index that includes the selected value.\", \"limit\": \"SQLite plan wording and index behavior do not establish a PostgreSQL query plan.\", \"probe\": \"covering-index\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "63ccc1db3dfd91acc9cf545f58839bef833d0f25759c46dd17681fbbbf109b04"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe dag-dependencies",
+      "concept_ids": [
+        "dag",
+        "orchestrator",
+        "pipe-and-filter",
+        "pipeline"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:13.971763+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"order\": [\"extract\", \"transform\", \"publish\"]}, \"before\": {\"order\": [\"publish\", \"extract\", \"transform\"]}, \"guarantee\": \"A task becomes eligible only after its prerequisites finish.\", \"limit\": \"A DAG describes dependency; the loop does not implement a durable workflow engine or Airflow.\", \"probe\": \"dag-dependencies\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "905d3e22c3b53c6230901dfbfff475b6f8443ac10d364947dc3922213122a073"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe shadow-parity",
+      "concept_ids": [
+        "dark-launch",
+        "parallel-run",
+        "shadow-deployment",
+        "shadow-traffic"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.034713+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"shadow_mismatch\": true, \"visible_primary\": 10}, \"before\": {\"silent_new_result\": 1000}, \"guarantee\": \"A shadow computation compares results while the primary owns the user-visible effect.\", \"limit\": \"Both implementations must avoid duplicate writes; this probe uses pure functions.\", \"probe\": \"shadow-parity\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "22872710896efac26981c4d732a7f9051a2e4e575fbe183e4aa06a090060aad4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe decomposed-data-owners",
+      "concept_ids": [
+        "database-decomposition",
+        "modularization"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.095624+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"order_value\": 150, \"owner_count\": 2, \"position_value\": 1000, \"separate_stores\": true}, \"before\": {\"applications_share_same_mutable_table\": true, \"shared_rows\": 2}, \"guarantee\": \"Data is split into stores with explicit capability owners, exposing the need for an integration contract between the formerly shared consumers.\", \"limit\": \"The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed.\", \"probe\": \"decomposed-data-owners\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c4dec4bf4ec78e9101d4ec10631e8f7d4f696e959cb90660d5265f4d21fb9219"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe retry-dlq",
+      "concept_ids": [
+        "dead-letter-queue",
+        "job-queue",
+        "message-queue",
+        "poison-message-handling",
+        "retry",
+        "retry-queue"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.163729+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"dead_letters\": 1, \"delivered\": 1, \"poison_attempts\": 3}, \"before\": {\"dead_letters\": 0, \"poison_attempts\": 6}, \"guarantee\": \"A poison message exhausts three attempts and is retained outside the normal queue.\", \"limit\": \"The six-attempt before trace is a bounded sample of an unbounded retry policy.\", \"probe\": \"retry-dlq\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d03455f6442c1ab0fd46a7e82459d8312db7beafb55e0d03c47eac233af2568d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe deadline-budget",
+      "concept_ids": [
+        "deadline-propagation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.245805+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"child_budget\": 3, \"overruns_parent\": false}, \"before\": {\"child_budget\": 10, \"overruns_parent\": true}, \"guarantee\": \"The child inherits the remaining parent budget instead of starting an independent longer deadline.\", \"limit\": \"Cancellation of an external operation still depends on its own API contract.\", \"probe\": \"deadline-budget\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5e76c1b2e10a750d370861a8a0e8d15e8bbb18b8bbae7157ebea48aed3f2aedc"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Decorator",
+      "concept_ids": [
+        "decorator"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.285471+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Decorator\", \"before\": 1.0, \"after\": 3.0, \"mechanism\": \"A wrapper extends behavior while retaining the wrapped order.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "9129a527ba2b768a28befdc4ddec7458e4ab8992702eac382a4dff5d78b63104"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe deduplicate",
+      "concept_ids": [
+        "deduplication",
+        "idempotency"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.359370+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"debit\": 150, \"effects\": 2}, \"before\": {\"debit\": 250, \"effects\": 3}, \"guarantee\": \"Repeated delivery of the same semantic operation has one effect in this store.\", \"limit\": \"The key lifetime, atomic storage and payload conflict policy remain design obligations.\", \"probe\": \"deduplicate\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2931397bafc3f4032b93d814094e281178ace43fee2998881a977fd37fc2d53c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe least-network-path",
+      "concept_ids": [
+        "defense-in-depth",
+        "network-segmentation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.629743+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"direct_browser_ledger\": false}, \"before\": {\"direct_browser_ledger\": true}, \"guarantee\": \"Explicit allowed edges reduce paths that bypass the application owner.\", \"limit\": \"A set is a policy model, not a network firewall, bastion or service mesh.\", \"probe\": \"least-network-path\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8fb649091e4dffff96e90f5f1ea2d7f9022a37f5cc03c270e6dc22c1ff5b101f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe delayed-queue",
+      "concept_ids": [
+        "delayed-queue"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.703810+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"dispatch_time\": 5, \"dispatched_before_due\": false}, \"before\": {\"dispatched_before_due\": true}, \"guarantee\": \"Eligibility depends on a not-before time, so a task remains delayed until the clock reaches its due time.\", \"limit\": \"This is a controlled clock, not a durable scheduled broker.\", \"probe\": \"delayed-queue\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "79f633ab8d7ace3b542db7937d68841466f4914fdd25cefdf318b5300d43b894"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint",
+      "concept_ids": [
+        "denormalization",
+        "materialized-view",
+        "precomputation",
+        "projection",
+        "read-model"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.789869+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"lag_events\": 0, \"projection\": 900}, \"before\": {\"lag_events\": 2, \"projection\": 1000}, \"guarantee\": \"A projection advances only after consuming its missing events.\", \"limit\": \"The demonstration has no durable checkpoint, broker or read-your-writes API.\", \"probe\": \"projection-checkpoint\"}\ncomparison=PASS case=ledger-projection probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a07ee2527e606ddc96a720722e75602b3f07551a8abfece0568c99c7e6f74e50"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe directory-shard",
+      "concept_ids": [
+        "directory-based-sharding"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.873927+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"directory_owner\": \"B\", \"value\": 700}, \"before\": {\"lookup_in_default_A\": null}, \"guarantee\": \"An explicit directory maps an entity key to its owning shard, independently of a hash function.\", \"limit\": \"Directory durability, stale entries and live moves are not modeled.\", \"probe\": \"directory-shard\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b65b0b9058df9c9f49305bf2bae6f59907317947dac237a4fd70d118585f32e3"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe distributed-cache-owner",
+      "concept_ids": [
+        "distributed-cache"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:14.941639+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"owner_partitions\": 2, \"shared_owner_source_calls\": 1, \"worker_values\": [1000, 1000]}, \"before\": {\"independent_worker_cache_source_calls\": 2}, \"guarantee\": \"Different logical workers use the same partition owner and share its populated cache entry, unlike independent per-worker caches.\", \"limit\": \"The owners are local dictionaries; the experiment isolates shared-owner cache semantics without claiming a networked cache product or cross-machine durability.\", \"probe\": \"distributed-cache-owner\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "665207502fcde32f50837517885558a35ff0fe15ee2fbbbca5857d9e86335a61"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe shared-arbiter-lock",
+      "concept_ids": [
+        "distributed-lock"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.017886+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"held_claims\": 1, \"second_connection_allowed\": false, \"wrong_owner_deleted_rows\": 0}, \"before\": {\"independent_local_locks_allow_both\": true}, \"guarantee\": \"Both participants use one atomic unique-key arbiter instead of independent local locks; ownership is checked at release.\", \"limit\": \"SQLite is local to this machine. The experiment proves shared-arbiter coordination, not a networked lease service under partitions.\", \"probe\": \"shared-arbiter-lock\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3276f52f5966950b733a7ae16d0cbced640ebb7aaf0092ce074af23838537f2f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py diagnostics --probe opentelemetry-sdk-export",
+      "concept_ids": [
+        "distributed-tracing",
+        "opentelemetry"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.153931+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"exported_spans\": 2, \"failed_spans\": 1, \"parent_matches\": true, \"request_ids\": 1, \"same_trace\": true, \"span_names\": [\"gateway\", \"provider\"], \"traceparent_propagated\": true}, \"before\": {\"exported_spans\": 0, \"traceparent_propagated\": false}, \"guarantee\": \"The real SDK exports two parent/child spans in one trace, propagates context and records one failed span for one request.\", \"limit\": \"The exporter is in memory with SDK 1.45.1. There is no collector, network service or claim of production instrumentation.\", \"probe\": \"opentelemetry-sdk-export\"}\ncomparison=PASS case=diagnostics probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b3eeb78b8f480eb05250da9eadfb637902c3181b22db58051cde063b220f9206"
+    },
+    {
+      "command": "python3 labs/architecture/opportunity-entry/run.py",
+      "concept_ids": [
+        "domain-policy",
+        "entity",
+        "idempotency-key"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.267738+00:00",
+      "exit_code": 0,
+      "stdout": "before: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double\nafter: create_calls=0 opportunity_id=006SYNTHETICOPEN downstream=double\nbefore-claim: two_actor_keys_own=2\nafter-claim: shared_opportunity_second_status=409\nafter-policy: stage=Contatado status=0\nafter-policy: stage=Ganha status=409\nafter-policy: stage=Perdida status=409\ncomparison=PASS scope=historical_function_bodies_with_adapter_doubles\n",
+      "stderr": "",
+      "output_sha256": "a34bc8e0caf46ea4ef59b9aa529f461e71bcccfabce057a697c8f37413703a7b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe domain-service-transfer",
+      "concept_ids": [
+        "domain-service"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.333396+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"conserved_total\": 1000, \"source_balance\": 900, \"target_balance\": 100}, \"before\": {\"credit_without_debit_total\": 1100}, \"guarantee\": \"A domain operation involving two entities preserves the stated transfer invariant without belonging naturally to either entity alone.\", \"limit\": \"Only an in-memory operation is executed; durable atomic transfer, fees and real financial rules are not claimed.\", \"probe\": \"domain-service-transfer\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5bddeff6f1403396dc3eb3799be498aaa62ff0b6a3b4dd532fb513c7fb15de19"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe commit-intention",
+      "concept_ids": [
+        "dual-write",
+        "transactional-outbox"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.412651+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"orders\": 1, \"recoverable_events\": 1}, \"before\": {\"orders\": 1, \"published\": 0}, \"guarantee\": \"One local transaction preserves both an order and its delivery intention.\", \"limit\": \"Delivery and recipient deduplication are still separate; this is SQLite, not PostgreSQL CDC.\", \"probe\": \"commit-intention\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d4525b060df57eb90ad9a7e0ae8575f81ff2a1da99a7cf29044df058bd6c8009"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe event-payload",
+      "concept_ids": [
+        "event-notification",
+        "event-carried-state-transfer",
+        "integration-event"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.486640+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"amount\": 100, \"source_lookups\": 0, \"status\": \"accepted\"}, \"before\": {\"amount\": 100, \"source_lookups\": 1}, \"guarantee\": \"A notification identifies what changed; a carried-state event lets this consumer act without fetching the source.\", \"limit\": \"A richer event also exposes more schema and data; it does not guarantee current source state.\", \"probe\": \"event-payload\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f249c54e518a49609dcade10d12a38966de5cd7aa96667b5cca4aca7a89f8c6c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe stream-offset-resume",
+      "concept_ids": [
+        "event-streaming"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.562743+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"last_offset\": 2, \"position_after_resume\": 130, \"resume_offsets\": [1, 2]}, \"before\": {\"replay_all_after_first_effect\": 230}, \"guarantee\": \"An ordered event log and an explicit consumer position let the consumer resume the remaining events.\", \"limit\": \"The log is a local immutable fixture. Retention, partitioned offsets, broker transactions and durable checkpoint atomicity are separate concerns.\", \"probe\": \"stream-offset-resume\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "787779489eefaf2f043ced6f57ae2c8a4cf35c35e41035b8906a30e870c14558"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe event-driven-handler",
+      "concept_ids": [
+        "event-driven-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.631583+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"producer_balance\": 1100, \"producer_direct_projection_writes\": 0, \"projection_after_event_dispatch\": 1100}, \"before\": {\"projection_before_event_dispatch\": 1000}, \"guarantee\": \"The producer emits a fact and a subscribed handler reacts to it asynchronously in the local schedule.\", \"limit\": \"Transport, delivery guarantees and cross-process execution are not part of this event-driven property model.\", \"probe\": \"event-driven-handler\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "135f853bc62b84ba180c0a83de465bdaf2cac4bea8dc05d6e516be2e48493dc1"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe transactional-inbox",
+      "concept_ids": [
+        "exactly-once-semantics",
+        "transactional-inbox"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.718344+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"debit\": 150, \"effects\": 2, \"inbox_rows\": 2}, \"before\": {\"debit\": 250, \"effects\": 3}, \"guarantee\": \"A transaction records message consumption and its monetary effect together, with a unique message key.\", \"limit\": \"Atomicity is local to SQLite; external side effects require their own idempotency contract.\", \"probe\": \"transactional-inbox\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "4f29993d5f3371737dc8074e144ebcbe0fd1f7f9bd42394818ed91c4ef05fa35"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe expand-contract",
+      "concept_ids": [
+        "expand-contract"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.790949+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"new_reader_value\": 100000, \"old_reader_value\": 1000}, \"before\": {\"old_reader_value\": null}, \"guarantee\": \"Expanding first keeps the old field while the new reader learns the new field.\", \"limit\": \"Removing the old field requires evidence that old readers have retired.\", \"probe\": \"expand-contract\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2e8adfc857323cefcdc58be1bbfdc65380685ded36905060826c54f38207363e"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Facade",
+      "concept_ids": [
+        "facade"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.828053+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Facade\", \"before\": \"two-separate-calls\", \"after\": {\"accepted\": true, \"fee\": 1.0}, \"mechanism\": \"One entrance coordinates validation and fee calculation.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "921f654602dcc32ea41023963d2c8283906080612a319318f78545559f4b85bd"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe domain-factory-validity",
+      "concept_ids": [
+        "factory"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.895847+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"created_amount\": 100, \"created_source\": \"A\", \"created_target\": \"B\", \"invalid_construction_rejected\": true}, \"before\": {\"raw_invalid_amount\": -100}, \"guarantee\": \"A factory centralizes the valid construction of the domain object and rejects invalid combinations.\", \"limit\": \"The construction rule belongs only to this hypothetical transfer fixture.\", \"probe\": \"domain-factory-validity\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "302a8e4bc44033e1fe8063af79f28d5f29fb2d9e11d58ef954e2e8b300f4b46a"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept 'Factory Method'",
+      "concept_ids": [
+        "factory-method"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.931551+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Factory Method\", \"before\": \"Order\", \"after\": \"PremiumOrder\", \"mechanism\": \"An overridable creation operation selects the concrete order.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "fd587397db2f225bf3333b49eeb13b38d0ddf95709096852c1c9304494aab0d4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe fallback-limited-function",
+      "concept_ids": [
+        "fallback",
+        "graceful-degradation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:15.997318+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"response\": {\"balance\": 1000, \"fresh\": false, \"writes_enabled\": false}, \"source\": \"last-known-cache\"}, \"before\": {\"dependency_failure_result\": \"error\"}, \"guarantee\": \"The fallback preserves a deliberately reduced read function and labels the stale result instead of silently claiming full service.\", \"limit\": \"The cached value is synthetic; the acceptable age and permitted actions need the actual product contract.\", \"probe\": \"fallback-limited-function\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "53d63d5f380395a4a330429716b2d35dcb79a498d5a099d6566e3407d119ff49"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe fanin-source-correlation",
+      "concept_ids": [
+        "fan-in"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.065322+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"identities\": [\"ORDER-1\", \"ORDER-2\", \"SETTLEMENT-1\"], \"merged_messages\": 3, \"source_counts\": {\"orders\": 2, \"settlements\": 1}}, \"before\": {\"single_source_messages\": 2}, \"guarantee\": \"Multiple input streams converge into one correlated output without discarding source ownership.\", \"limit\": \"The finite merge does not order independent clocks or wait for a distributed completeness barrier.\", \"probe\": \"fanin-source-correlation\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5ddb8d94ea635884f5b1d99c1326526292cc55cec6cff20aa0a7f911b96f8b6c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe subscription-fanout",
+      "concept_ids": [
+        "fan-out",
+        "publish-subscribe"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.133851+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"audit\": [\"EVENT-1\", \"EVENT-2\"], \"risk\": [\"EVENT-1\", \"EVENT-2\"], \"total_deliveries\": 4}, \"before\": {\"one_shared_queue_total_deliveries\": 2}, \"guarantee\": \"Independent subscriptions each receive the two events, unlike one work queue that divides the two tasks.\", \"limit\": \"Each subscription needs its own retry and deduplication policy.\", \"probe\": \"subscription-fanout\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d9e32ac74cd5b101253077cc453e2f661a715018bad86a8d19f2ed63f6adf482"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe fence",
+      "concept_ids": [
+        "fencing",
+        "fencing-token"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.205927+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"last_writer\": \"B\", \"stale_101_rejected\": true, \"value\": 102}, \"before\": {\"last_writer\": \"expired-A\", \"value\": 101}, \"guarantee\": \"The destination compares an ordered generation, including delayed writers.\", \"limit\": \"A random owner UUID is not an ordered fence; an external destination must perform this check.\", \"probe\": \"fence\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1d6e2e769d90f9b8052fce61f8c9a9919a66567362545a24b124894e672d9726"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe resequence-state",
+      "concept_ids": [
+        "finite-state-machine",
+        "resequencer",
+        "state-machine"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.269432+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"final\": \"settled\", \"invalid_first_rejected\": true, \"states\": [\"accepted\", \"reserved\", \"settled\"]}, \"before\": {\"invalid_first\": \"settled\", \"states\": [\"settled\", \"reserved\", \"accepted\"]}, \"guarantee\": \"Sequence metadata enables ordering and a state machine rejects an invalid transition.\", \"limit\": \"A missing earlier message needs timeout/recovery policy; sorting a batch is not a streaming resequencer.\", \"probe\": \"resequence-state\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "004f6b5a79ea30f65c8154b28abb75c4fa4dc57d27136dbed8913b4bda8806e1"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe fire-forget-return",
+      "concept_ids": [
+        "fire-and-forget"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.340959+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"caller_completed_before_failure\": true, \"caller_result\": \"accepted\", \"trace\": [\"caller-returned\", \"worker-failed\"]}, \"before\": {\"caller_waiting_for_failed_handler\": true}, \"guarantee\": \"The caller does not await the later handler result, so its successful return does not prove eventual delivery or business completion.\", \"limit\": \"The outgoing queue is not durable and no delivery guarantee is claimed.\", \"probe\": \"fire-forget-return\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "bb43585b03517fbfa676164c02201e87b997eb2b72ec2de2b9556871e7c2199d"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Flyweight",
+      "concept_ids": [
+        "flyweight"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.377085+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Flyweight\", \"before\": 5, \"after\": 1, \"mechanism\": \"Five orders share one immutable-style symbol object; per-order amounts stay separate.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "be41db195496c9e387ff3d696f0a41a0229f2255448c04c6e3e736fa4b98a564"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe reused-thread-workers",
+      "concept_ids": [
+        "fork-join",
+        "scatter-gather",
+        "thread-pool",
+        "worker-pool"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.450484+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"joined_total\": 20, \"partials\": [2, 4, 6, 8], \"tasks_completed\": 4, \"threads_used\": 2}, \"before\": {\"new_worker_per_task\": 4}, \"guarantee\": \"The executor reuses two workers, forks four computations and joins their four results into one total.\", \"limit\": \"No process pool, distributed worker, work durability or network scatter/gather is claimed.\", \"probe\": \"reused-thread-workers\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "6b1fdd1db2d751157cbd010e6d8ed76bb259159cacb3b2748085146a59707f34"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe geographic-owner",
+      "concept_ids": [
+        "geographic-sharding"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.532218+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"BR_rows\": 1, \"US_rows\": 0, \"account_region\": \"BR\"}, \"before\": {\"all_accounts_owner\": \"US\"}, \"guarantee\": \"A geographic attribute chooses the data owner rather than a key hash.\", \"limit\": \"The geography is hypothetical and is not a claim about a regulatory residency rule.\", \"probe\": \"geographic-owner\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "fd765677d0e565562b467bc3a8c0994c410a230833ecbd68a5269fd721647035"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe versioned-desired-reconcile",
+      "concept_ids": [
+        "gitops",
+        "infrastructure-as-code"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.595094+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"after_reconcile\": {\"image\": \"v2\", \"replicas\": 2}, \"drift_before_reconcile\": {\"image\": \"v2\", \"replicas\": 0}, \"planned_fields\": [\"image\", \"replicas\"], \"selected_revision\": \"revision-2\"}, \"before\": {\"observed\": {\"image\": \"v1\", \"replicas\": 0}}, \"guarantee\": \"A versioned desired-state source drives the plan and reconciliation instead of allowing manual runtime drift to become the desired source.\", \"limit\": \"The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof.\", \"probe\": \"versioned-desired-reconcile\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2b058d08b4f23189192188fec9efa737b612402d716c907659c41b5a53a135ee"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py diagnostics --probe golden-use-resource-signals",
+      "concept_ids": [
+        "golden-signals",
+        "use-method-utilization-saturation-errors"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.728040+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"active_slots\": 2, \"cpu_utilization\": 0.8, \"failed_requests\": 1, \"maximum_duration_ms\": 800, \"queued_requests\": 3, \"slot_capacity\": 2, \"traffic_requests_per_second\": 2.0}, \"before\": {\"process_health\": \"ok\", \"resource_saturation_measured\": false}, \"guarantee\": \"The sample distinguishes healthy process status from traffic/latency/errors/saturation and from resource utilization/saturation/errors.\", \"limit\": \"These are controlled sample measurements, not production percentiles, SLOs or a capacity benchmark.\", \"probe\": \"golden-use-resource-signals\"}\ncomparison=PASS case=diagnostics probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2f6af286d630a041ae162f5c539ce19a530801db00777256d4d7424fae1695bd"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe gossip-membership",
+      "concept_ids": [
+        "gossip-protocol",
+        "peer-to-peer"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.798924+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"all_agree\": true, \"known_members\": {\"A\": 3, \"B\": 3, \"C\": 3}}, \"before\": {\"known_members\": {\"A\": 1, \"B\": 1, \"C\": 1}}, \"guarantee\": \"Repeated peer exchanges disseminate membership without a central broadcaster.\", \"limit\": \"Dissemination is not consensus; failures, tombstones and convergence under partitions are not implemented.\", \"probe\": \"gossip-membership\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "05b1e32834afdd9e49e7c648bcf40dd6752f69f5a5b9dd8be02692c4d7c4a9c4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe federated-entity-key",
+      "concept_ids": [
+        "graphql-federation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.864129+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"composed_account\": {\"account_id\": \"SYNTHETIC-1\", \"balance\": 1100, \"open_orders\": 2}, \"entity_type\": \"Account\", \"subgraph_owners\": [\"portfolio\", \"orders\"]}, \"before\": {\"join_by_unrelated_display_label\": null}, \"guarantee\": \"Entity-reference resolution joins fields owned by different subgraphs through the declared entity key instead of a display label.\", \"limit\": \"This is the entity-key resolution property of federation. It does not include a GraphQL parser, supergraph schema, query planner or Apollo runtime.\", \"probe\": \"federated-entity-key\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "eba192f0fc66673fcc9d7ced4e5365d12c88c5127c1cfc0b2fd2eee3d636d741"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe shard-route",
+      "concept_ids": [
+        "hash-sharding",
+        "horizontal-partitioning",
+        "sharding"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:16.937439+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"partitions_scanned\": 1, \"row_7_amount\": 70}, \"before\": {\"partitions_scanned\": 3}, \"guarantee\": \"A stable key and routing rule direct a lookup to its owning shard.\", \"limit\": \"Python modulo is not consistent hashing and reassigns keys when the shard count changes.\", \"probe\": \"shard-route\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1d40622a0c928c87f08be4f855d70b72a893f80b0e66c3bdce9539d66782701f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe hypermedia-affordance",
+      "concept_ids": [
+        "hateoas"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.002242+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cancel_link\": null, \"client_attempts_cancel\": false, \"representation_state\": \"settled\"}, \"before\": {\"hardcoded_client_attempts_cancel_after_settlement\": true}, \"guarantee\": \"The representation exposes state-dependent action links and the client follows an available relation rather than hardcoding every transition.\", \"limit\": \"The exercise covers one affordance and not an entire hypermedia API or authorization policy.\", \"probe\": \"hypermedia-affordance\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d57b5b3c48ffb9793000ccc28cc5c30365283232500a812e86b2ad3bd56579e2"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py diagnostics --probe probe-business-path",
+      "concept_ids": [
+        "health-check",
+        "synthetic-monitoring"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.127355+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"health_endpoint\": \"ok\", \"synthetic_order\": \"provider_failed\"}, \"before\": {\"health_endpoint\": \"ok\", \"order_path\": \"unmeasured\"}, \"guarantee\": \"A synthetic business-path check can fail while the process health endpoint stays green.\", \"limit\": \"Only a controlled synthetic path ran; no real order is sent.\", \"probe\": \"probe-business-path\"}\ncomparison=PASS case=diagnostics probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5075f87cb49124b34bec95c557468b45aed9cd8a4decdab97c01b65fb1edfb81"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe hybrid-clock-receive",
+      "concept_ids": [
+        "hybrid-logical-clock"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.200904+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"causal_order_preserved\": true, \"hybrid_logical\": 4, \"hybrid_wall\": 1010}, \"before\": {\"naive_physical_receive_time\": 1005}, \"guarantee\": \"The receive rule combines the physical maximum with a logical counter when the received wall component wins.\", \"limit\": \"The one receive schedule does not synchronize physical clocks or prove a distributed implementation under every skew pattern.\", \"probe\": \"hybrid-clock-receive\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "61677ef62f9c045d15369cd348c39270a6f1fdd8daf0dc204ea52347242b8714"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe value-object",
+      "concept_ids": [
+        "immutable-data",
+        "value-object"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.267249+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"distinct_instances\": true, \"equal_values\": true, \"immutable\": true, \"invalid_rejected\": true}, \"before\": {\"mutable\": true, \"negative_constructed\": true}, \"guarantee\": \"A monetary value compares by its components, rejects an invalid amount and is immutable without an entity identity.\", \"limit\": \"The fixture supports one currency and a nonnegative domain rule; it is not a universal monetary contract.\", \"probe\": \"value-object\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "fde5e9bf39e0888b8d2bf17e965d2b65c4e53387cf2fb14cbf1a64b303433845"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe immutable-replacement",
+      "concept_ids": [
+        "immutable-infrastructure"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.333454+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"new_active_id\": \"instance-2\", \"new_active_image\": \"v2\", \"old_image_retained\": \"v1\", \"old_instance_unchanged\": true}, \"before\": {\"in_place_image_change_owner\": \"instance-1\"}, \"guarantee\": \"The new infrastructure instance is created as a replacement while the prior instance remains unchanged.\", \"limit\": \"Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation.\", \"probe\": \"immutable-replacement\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b718541abef7d3de5add28a74461d22a86fe659a2916468563c2e0c765a36b8e"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Interpreter",
+      "concept_ids": [
+        "interpreter"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.372569+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Interpreter\", \"before\": false, \"after\": true, \"mechanism\": \"A small explicit grammar is evaluated against the order context; no eval is used.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "010007b4e7e2e2efbc13715de37da54269f4a51e42a5447c63e2225bb70c5c36"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Iterator",
+      "concept_ids": [
+        "iterator"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.409779+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Iterator\", \"before\": [100], \"after\": [100, 50], \"mechanism\": \"Traversal provides elements without exposing storage indexing.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "ad53413ea4dd53f80249f6e3ba1b8ec589f94a6fa4605f977f32fe4a0e6aad4c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe kappa-one-log-replay",
+      "concept_ids": [
+        "kappa-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.490537+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"log_offsets\": [0, 1, 2, 3], \"position_after_new_event\": 140, \"processing_implementations\": 1, \"replayed_position\": 130}, \"before\": {\"buggy_projection_before_replay\": 170}, \"guarantee\": \"One retained event log and one processing path support replay and ongoing processing rather than a separate batch algorithm.\", \"limit\": \"Retention, reprocessing isolation and operational cutover of a new stream version are not implemented.\", \"probe\": \"kappa-one-log-replay\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d79a5ffc6162303823b6c2a4e3f27c3630f41b85f7951f4ed9c9e8bc527e0e53"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe lambda-disjoint-views",
+      "concept_ids": [
+        "lambda-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.587042+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"batch_cutoff_offset\": 1, \"batch_value\": 80, \"merged_position\": 130, \"speed_after_cutoff\": 50}, \"before\": {\"batch_plus_overlapping_all_stream\": 210}, \"guarantee\": \"Batch and speed-layer views cover disjoint input positions before being merged, preventing double counting at their boundary.\", \"limit\": \"The example models the Lambda view boundary, without two deployed engines, backfill orchestration or full event-time handling.\", \"probe\": \"lambda-disjoint-views\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "900f9c8dfab674cf75bf7f09c346a68ec1d7b0a0a8ca37c071229f4c81a8bc77"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe logical-clock",
+      "concept_ids": [
+        "lamport-clock"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.733035+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"receive_clock\": 9}, \"before\": {\"receive_clock\": 4}, \"guarantee\": \"A receive event advances beyond the causal sender clock.\", \"limit\": \"Lamport order does not prove concurrency; hybrid clocks also need physical-clock policy.\", \"probe\": \"logical-clock\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c8d71285f0b9e687cf3e585c996323d28700ef996e93923db8eef0d2a7badc3b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe election-one-vote",
+      "concept_ids": [
+        "leader-election"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.813315+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"A_votes\": 2, \"B_voted_for\": \"A\", \"C_votes\": 1, \"elected_candidates\": 1}, \"before\": {\"candidates_with_unrestricted_votes\": 2}, \"guarantee\": \"A voter remembers its vote in the term and refuses a second different candidate in that term.\", \"limit\": \"The fixture does not implement log freshness, randomized timeouts, persistence or all election transitions.\", \"probe\": \"election-one-vote\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3d4ae013eaacbd6cfc24713ff9b4bb4f2f9f1303fa3a1e48f383a446caf834d7"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe lease-expiry-owner",
+      "concept_ids": [
+        "lease"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.894550+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"B_acquired_after_expiry\": true, \"expires\": 11, \"old_owner_release_allowed\": false, \"owner\": \"B\"}, \"before\": {\"B_can_acquire_unexpired_static_lock\": false}, \"guarantee\": \"Expiry makes the abandoned authorization reclaimable, while owner comparison prevents an old owner from releasing the new lease.\", \"limit\": \"The model uses a controlled clock; expiration is not destination fencing and does not stop an old external side effect.\", \"probe\": \"lease-expiry-owner\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "4b6fb4400e7291cd975e5f69acb8b855f29e41c80459f0f82b5f01d0ba2ae39e"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe admission",
+      "concept_ids": [
+        "load-shedding"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:17.969868+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"buffered\": 20, \"rejected\": 100}, \"before\": {\"buffered\": 120, \"rejected\": 0}, \"guarantee\": \"Admission limits queued work before consuming unbounded memory.\", \"limit\": \"A consumer semaphore alone cannot impose this limit on the producer.\", \"probe\": \"admission\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "dc60b0f55429ca1d92a527ace35f5e2517bc5c1101ee21b369e2f2ad1b0390ab"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe cas-system-progress",
+      "concept_ids": [
+        "lock-free"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.047754+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"A_completed\": 2, \"B_completed\": 0, \"B_retry_needed\": true, \"counter\": 2}, \"before\": {\"mutex_owner_paused_blocks_all\": true}, \"guarantee\": \"The CAS retry pattern permits system progress while one contender stalls; this schedule also shows why that is not a per-thread bounded completion guarantee.\", \"limit\": \"The CAS primitive is atomic by model assumption. This is a concrete progress/starvation schedule, not a universal proof for a native-memory implementation.\", \"probe\": \"cas-system-progress\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b3e248bb43d66dce88f38b01c4dd52979f397d5b47ff875f0d865cc6cea73694"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe log-structured-latest",
+      "concept_ids": [
+        "log-structured-storage"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.147444+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"append_records\": 2, \"latest_value\": 1100, \"latest_version\": 2}, \"before\": {\"in_place_record_history\": 1}, \"guarantee\": \"Updates append records and reads resolve the latest version, exposing the read/compaction work introduced by a log-structured representation.\", \"limit\": \"This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery.\", \"probe\": \"log-structured-latest\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1ac9915bc285b7babc75e50ab032215b4d0c9eb3283985e560eb9b90afa55025"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe poll-vs-long-poll",
+      "concept_ids": [
+        "long-polling",
+        "polling"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.228219+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"long_poll_requests\": 1, \"value\": \"position-ready\"}, \"before\": {\"periodic_requests_until_ready\": 3, \"value\": \"position-ready\"}, \"guarantee\": \"Polling issues repeated requests; long polling holds one request until the result becomes available.\", \"limit\": \"The wait uses a local asyncio event, with no HTTP timeout, intermediary buffering or reconnect loop.\", \"probe\": \"poll-vs-long-poll\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "57aa27b90c2a6c06fd2d72906d2816c83f8417cdd50bc8c12d1e604a1130acc4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe mapreduce-grouping",
+      "concept_ids": [
+        "mapreduce"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.306973+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"grouped_totals\": {\"buy\": 150, \"sell\": 20}, \"mapped_records\": 3}, \"before\": {\"ungrouped_partial_values\": [100, 20, 50]}, \"guarantee\": \"The map/group/reduce stages aggregate values per key instead of confusing all partial values with one total.\", \"limit\": \"This is local grouping, not a distributed shuffle, combiner or fault-tolerant MapReduce runtime.\", \"probe\": \"mapreduce-grouping\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "31212b871556175787f152fb29a5fc008b7c23c0967f4b457a2b75b5192a922b"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Mediator",
+      "concept_ids": [
+        "mediator"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.345954+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Mediator\", \"before\": 1, \"after\": 2, \"mechanism\": \"A coordinator routes one order event to audit and risk participants.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "06612c4417b24acebbf09da7b209494da4009024c25f8c59f30170c673b687dd"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Memento",
+      "concept_ids": [
+        "memento"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.382197+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Memento\", \"before\": 200, \"after\": 100, \"mechanism\": \"An explicit saved snapshot restores a previous local state; business reversals still need events.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "e22519345ea0f95a049820a2afb9ebd5f7c91d2c4742d477762d02b9cf4b587d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe message-filter",
+      "concept_ids": [
+        "message-filter"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.453521+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted\": 2, \"invalid_accepted\": 0, \"valid_amount\": 150}, \"before\": {\"accepted\": 3, \"invalid_accepted\": 1}, \"guarantee\": \"A filter drops the invalid item while preserving the two valid orders.\", \"limit\": \"The predicate is a fixture, not a financial eligibility rule.\", \"probe\": \"message-filter\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8bd233ca5e95354d230be9d308fbe6e0453d1825139c5bd22c2c95767717ae8d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe message-translation",
+      "concept_ids": [
+        "message-translator"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.525089+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"amount\": 100.0, \"amount_unit\": \"BRL\", \"consumer_has_order_id\": true, \"status\": \"accepted\"}, \"before\": {\"amount_unit\": \"cents\", \"consumer_has_order_id\": false}, \"guarantee\": \"The translator creates the consumer schema and changes both field names and the amount unit.\", \"limit\": \"Translation must preserve meaning; unknown provider states would require an explicit error policy.\", \"probe\": \"message-translation\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "eda883e58f06966816d6f0deab80883e3cc04f56c0dbe2f424225339789ab467"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py diagnostics --probe measure-signals",
+      "concept_ids": [
+        "metrics",
+        "red-method-rate-errors-duration"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.651176+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"failed_requests\": 1, \"max_span_duration_ms\": 800, \"observation_window_seconds\": 1, \"operations\": 1, \"request_error_ratio\": 0.5, \"request_rate_per_second\": 2.0, \"requests\": 2, \"spans\": 3}, \"before\": {\"looks_healthy_from_average_only\": true}, \"guarantee\": \"Rate, errors and duration expose a slow failed dependency hidden by a vague status.\", \"limit\": \"This sample cannot establish percentiles, an SLO or production capacity.\", \"probe\": \"measure-signals\"}\ncomparison=PASS case=diagnostics probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2fa8b696d6ec7512f50cdf9750bc2626eac750a3882482684eac073fd1c395c4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe microkernel-plugin",
+      "concept_ids": [
+        "microkernel-plugin-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.720041+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"core_dispatch_branches_added\": 0, \"fee\": 5.0, \"premium_available\": true}, \"before\": {\"premium_available\": false}, \"guarantee\": \"A stable kernel invokes a registered extension through a shared contract.\", \"limit\": \"Isolation, signing, lifecycle and dependency policy of untrusted plugins are not implemented.\", \"probe\": \"microkernel-plugin\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1e4612697ad17a43b3f4638b24fc169195a7567190cca764312ed6101670ad97"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe service-boundaries",
+      "concept_ids": [
+        "microservices",
+        "soa"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.786801+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance_results\": [1100, 1100], \"public_operations\": [\"credit\", \"read\", \"read\"], \"read_after_other_service_failure\": 1100}, \"before\": {\"shared_failure_stops_balance_read\": true}, \"guarantee\": \"An explicit business service owns its store and operation contract; the other service failure does not mutate or prevent its operation in this controlled schedule.\", \"limit\": \"Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven.\", \"probe\": \"service-boundaries\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e7ded4f0d70e7b5b10b267a99dc1cc72771bf8ac03832d0e28e719a03fbf893b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe session-read-version",
+      "concept_ids": [
+        "monotonic-reads",
+        "read-your-writes"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:18.858036+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance\": 1100, \"read_version\": 2, \"regressed\": false}, \"before\": {\"read_version\": 1, \"regressed\": true}, \"guarantee\": \"A session requires at least the version already observed or written and routes away from an older replica.\", \"limit\": \"Version routing needs an explicit session token and a reachable owner; it is not global linearizability.\", \"probe\": \"session-read-version\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a91d5b3c4740c1ae0c4f237cd80873ed470e2c0eea507c12400e483c33af7157"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe mutual-tls-peer-certs",
+      "concept_ids": [
+        "mtls"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.121527+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"client_authenticated_by_server\": true, \"client_without_certificate_accepted\": false, \"payload_exchange_completed\": true, \"server_authenticated_by_client\": true, \"trusted_client_accepted\": true}, \"before\": {\"client_without_certificate_accepted\": true}, \"guarantee\": \"Real SSLContext handshakes reject a client missing its certificate when mutual verification is required and authenticate both trusted peers before exchanging data.\", \"limit\": \"Certificates and keys are generated only in a temporary directory and removed. No listening port, external connection, production CA or service configuration is changed.\", \"probe\": \"mutual-tls-peer-certs\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0b1db7b94839a1b0199c4ba1eeb894694d80e20537e46594d39bc4d8c38af9e1"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe failure-domain-spread",
+      "concept_ids": [
+        "multi-az",
+        "multi-region"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.195222+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"survivors_after_region_R1_loss\": 1, \"survivors_after_zone_A_loss\": 1}, \"before\": {\"survivors_after_region_R1_loss\": 0, \"survivors_after_zone_A_loss\": 0}, \"guarantee\": \"Replica placement across different failure domains leaves one instance after the declared zone or region outage.\", \"limit\": \"Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.\", \"probe\": \"failure-domain-spread\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "53be32d2458ce8731845c66f31a2d79b095b5e8ca7946609150e95e847bf80b9"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe mvc-controller-model-view",
+      "concept_ids": [
+        "mvc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.269114+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"controller_writes\": 1, \"rendered\": [\"Balance 1100\"], \"view_writes\": 0}, \"before\": {\"view_writes\": 1}, \"guarantee\": \"The controller changes the model and selects a view; the view renders a DTO and never owns the write.\", \"limit\": \"A local role model; routing, templates and a web framework are not implemented.\", \"probe\": \"mvc-controller-model-view\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2ce9f5b4f9c440bd4a55d517f98545006b0f3323e652784e95923761c4551a35"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe mvp-passive-view",
+      "concept_ids": [
+        "mvp"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.337542+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"display\": \"R$ 1100,00\", \"presenter_source_reads\": 1, \"view_source_reads\": 0}, \"before\": {\"display\": \"1100\", \"view_source_reads\": 1}, \"guarantee\": \"The presenter loads and prepares the model result; a passive view only receives the display value.\", \"limit\": \"The recording view models the interface boundary rather than a full UI toolkit.\", \"probe\": \"mvp-passive-view\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1fcfccb68d5ebece69dca4737a4abba67233230e6923e52ddf7f3b2d8bc7265b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe mvvm-binding",
+      "concept_ids": [
+        "mvvm"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.404894+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"binding_callbacks\": 1, \"view_after_bound_assignment\": \"1100\", \"view_model_balance\": 1100}, \"before\": {\"view_after_plain_assignment\": \"1000\"}, \"guarantee\": \"A binding propagates an observable view-model property change into the view.\", \"limit\": \"The model covers one-way binding; validation, two-way binding and UI lifecycle remain outside it.\", \"probe\": \"mvvm-binding\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "be9b4372dd24e222be020a5f129f77a0d48eb055c8c19f8507300a31e2d84d1b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe negative-cache",
+      "concept_ids": [
+        "negative-caching"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.471838+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"absence_cached\": true, \"results\": [null, null, null], \"source_calls\": 1}, \"before\": {\"absence_cached\": false, \"results\": [null, null, null], \"source_calls\": 3}, \"guarantee\": \"A known absence is represented by a cached sentinel and suppresses repeated source lookups.\", \"limit\": \"An absence must expire; an absent key and a cached None must remain distinguishable.\", \"probe\": \"negative-cache\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1ad4d319502c62017c378cad9d9ae23b5d382b9384837138a472ef4b879a0839"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe oauth-code-pkce",
+      "concept_ids": [
+        "oauth2"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.744681+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"code_reuse_rejected\": true, \"resource_scope\": \"order:read\", \"resource_subject\": \"SYNTHETIC-USER\", \"wrong_redirect_rejected\": true, \"wrong_verifier_rejected\": true}, \"before\": {\"code_without_binding_can_be_replayed\": true}, \"guarantee\": \"The local authorization-code model binds verifier and redirect, permits one code redemption and issues an audience/scope-limited signed access token.\", \"limit\": \"A teaching model of RFC 6749/7636 message checks; it is not an authorization-server library, browser login, refresh flow or production OAuth security implementation.\", \"probe\": \"oauth-code-pkce\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "0ad9d88018887ce85aeb7d52a6af02b83a4dd7f3cd08a8be31734c09387ae490"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Observer",
+      "concept_ids": [
+        "observer"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.784299+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Observer\", \"before\": 0, \"after\": 1, \"mechanism\": \"A registered observer receives the published state change.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "d916e20e412ce0bb50b4aff5c9dd57765fd087da6116190b55e5d60670973038"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe oidc-id-token-validation",
+      "concept_ids": [
+        "oidc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:19.980560+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"tampered_signature_rejected\": true, \"verified_subject\": \"SYNTHETIC-USER\", \"wrong_audience_rejected\": true, \"wrong_nonce_rejected\": true}, \"before\": {\"claims_read_without_signature_or_client_binding\": true}, \"guarantee\": \"The ID-token validation property checks issuer, audience, nonce, expiration and the configured HS256 signature before accepting the subject.\", \"limit\": \"The synthetic client uses a preconfigured shared key. Discovery, JWKS, key negotiation, all claim rules and an actual OpenID Provider are not implemented.\", \"probe\": \"oidc-id-token-validation\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "88cd0f9b7663d902cdd011eb60236a200dd2f90831f91b52549f6252604c472b"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe open-host-service",
+      "concept_ids": [
+        "open-host-service"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.051213+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"client_balances\": [1000.0, 1000.0], \"internal_field_exposed\": false, \"public_contract_version\": 1}, \"before\": {\"clients_broken_by_internal_schema\": 2}, \"guarantee\": \"A stable public service contract supports multiple consumers while internal representation changes behind it.\", \"limit\": \"Version governance, authentication and remote transport are not provided by this local contract exercise.\", \"probe\": \"open-host-service\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8e866c3daaadb12423b97516bc776d79f980b4247997652b1294b051b5a9153f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe outbox-cdc-feed",
+      "concept_ids": [
+        "outbox-cdc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.171310+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"captured_outbox_events\": [\"EVENT-1\"], \"resume_after_sequence\": 1}, \"before\": {\"order_saved_external_delivery_intention_lost\": true}, \"guarantee\": \"The transactional outbox is the captured table, and its committed insert becomes the CDC feed item.\", \"limit\": \"The learning connector is a SQLite trigger plus feed query; transport, source-log offsets and recipient deduplication are not implemented.\", \"probe\": \"outbox-cdc-feed\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b54741a84addddda8e31a67fa9184aac1a1262b199afec791416190423590c7c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe pac-agent-controls",
+      "concept_ids": [
+        "pac"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.256480+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"controls_visited\": [\"orders\", \"fees\", \"parent\"], \"parent_display\": \"150\", \"parent_total\": 150}, \"before\": {\"shared_view_last_child_value\": 50}, \"guarantee\": \"Each agent owns abstraction, presentation and control; parent control coordinates the child agents.\", \"limit\": \"This is a small hierarchical PAC model, not a recommendation to adopt PAC in MakersHub.\", \"probe\": \"pac-agent-controls\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "756061081916ac86582f77d592c0fec4bd68abcb27bbe9a53eccc9899c37bb65"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe paxos-accepted-carry",
+      "concept_ids": [
+        "paxos"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.347300+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted_nodes\": 2, \"ballot\": 8, \"new_round_proposal\": \"ORDER-A\"}, \"before\": {\"new_round_proposal\": \"ORDER-B\", \"would_replace_chosen_value\": true}, \"guarantee\": \"A prepare quorum reports accepted values; the proposer carries the value at the highest accepted ballot rather than inventing a different value.\", \"limit\": \"A finite single-decree Paxos schedule with reliable local messages; persistence, liveness and arbitrary faults are not implemented.\", \"probe\": \"paxos-accepted-carry\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "7d4d492239007d2e8ae7fbb456a91d2b11b65c9a63f2a80fb060fa90ac07f3c0"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe pessimistic-writer-lock",
+      "concept_ids": [
+        "pessimistic-locking"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.447409+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance_after_serial_writes\": 115000, \"second_writer_blocked_before_release\": true}, \"before\": {\"uncoordinated_stale_balance\": 105000}, \"guarantee\": \"The writer obtains exclusion before changing the record; the second writer cannot begin its write transaction until release.\", \"limit\": \"This is SQLite database-writer exclusion, not PostgreSQL row locking or a recommendation to hold locks during network calls.\", \"probe\": \"pessimistic-writer-lock\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d77203a084c0d7bd84e954a8f2385bcb38d99521e48a0b06e015de9c801317a9"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe priority-queue",
+      "concept_ids": [
+        "priority-queue"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.525101+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"processing_order\": [\"urgent\", \"standard\", \"low\"]}, \"before\": {\"processing_order\": [\"standard\", \"urgent\", \"low\"]}, \"guarantee\": \"Priority metadata, with a stable sequence tie-breaker, changes which queued task is selected first.\", \"limit\": \"A priority policy can starve low-priority work; that policy is not solved by the heap.\", \"probe\": \"priority-queue\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "868bea2156adb0165f9f57ff7e545b59d5608ea80d2653ba75f9c1f2358f7050"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Prototype",
+      "concept_ids": [
+        "prototype"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.560599+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Prototype\", \"before\": [], \"after\": [\"premium\"], \"mechanism\": \"A prototype copy can be customized without mutating the original.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "b721e00d078514fe6c6872ab53934f9346b2b1a01333eb07b82bd727b1bf653c"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Proxy",
+      "concept_ids": [
+        "proxy"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.595497+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Proxy\", \"before\": 100, \"after\": \"denied\", \"mechanism\": \"A substitute checks permission before delegating to the target.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "9d1ce52d8b0293b6686d90d680716a926e5c62d25a19165d457d349b2dda55c3"
+    },
+    {
+      "command": "TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs",
+      "concept_ids": [
+        "published-language"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.779086+00:00",
+      "exit_code": 0,
+      "stdout": "zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=05/10/26\ntimestamp=2026-10-05T00:00:00Z after=04/10/26 preserves_instant=true\ncomparison=PASS date_only_and_instant_are_distinct=True\n",
+      "stderr": "",
+      "output_sha256": "c7703032f7e51081a7a0bbed43f89fd9974411c617263c6d2aac681e66d0cc81"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe quorum-overlap",
+      "concept_ids": [
+        "quorum-read-write"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.862806+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"intersection_lower_bound\": 1}, \"before\": {\"intersection_lower_bound\": 0}, \"guarantee\": \"For three replicas, read two and write two have at least one common member.\", \"limit\": \"Intersection alone does not prove linearizability; version selection and failure assumptions matter.\", \"probe\": \"quorum-overlap\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a2e985cdec9a03dbc81b64731f3f02a0c16fea2e2de71ca689e62059118e2d06"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe raft-log-prefix",
+      "concept_ids": [
+        "raft"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:20.937282+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"length_after_rejection\": 2, \"log_terms\": [1, 3, 3], \"matches_leader\": true, \"mismatched_prefix_rejected\": true, \"retry_accepted\": true}, \"before\": {\"blind_append_accepts_mismatched_prefix\": true}, \"guarantee\": \"The follower checks the previous index/term before appending; a retry from a matching prefix replaces conflicting suffix entries.\", \"limit\": \"This isolates Raft log matching, without election, durable storage, commitment or a complete replicated state machine.\", \"probe\": \"raft-log-prefix\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "8471e846b493be4ead2025396cdf351e969abf43e056252e81b2c08174db30da"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe range-boundary",
+      "concept_ids": [
+        "range-sharding"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.020905+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"half_open_boundary_owners\": [1], \"key\": 100}, \"before\": {\"inclusive_upper_boundary_owners\": [0, 1]}, \"guarantee\": \"Half-open ranges assign the boundary key to exactly one shard rather than overlapping owners.\", \"limit\": \"Range balancing, splits and hotspot control are separate concerns.\", \"probe\": \"range-boundary\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a268781162295b865ddfbb34a7c5e1c52af3be079c41bbf732b205f0c42c1a84"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe rate-window",
+      "concept_ids": [
+        "rate-limiting",
+        "throttling"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.094173+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted\": 3, \"per_second_limit\": 2, \"rejected\": 1}, \"before\": {\"accepted\": 4, \"rejected\": 0}, \"guarantee\": \"A fixed time window admits at most two calls in each second.\", \"limit\": \"A boundary burst can span adjacent windows; distributed limit storage is not implemented.\", \"probe\": \"rate-window\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "af615c2a44b8f787051e11c06b16517f152289fe0b0bd949f7ad3f1489bfc870"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe reactive-demand-contract",
+      "concept_ids": [
+        "reactive-streams"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.171641+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"after_request_two\": [1, 2], \"delivered_after_request_three_and_cancel\": [1, 2, 3], \"delivered_before_request\": 0, \"unconsumed\": 1}, \"before\": {\"unrequested_push_count\": 4}, \"guarantee\": \"Demand gates delivery and cancellation stops subsequent onNext-style emissions in this local publisher/subscriber contract.\", \"limit\": \"No Reactive Streams library, asynchronous serialization rule or full TCK conformance is claimed.\", \"probe\": \"reactive-demand-contract\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "9f0d24e0ef28426bff0ab430f2b9912338267cbb4a5ed2872a978d4c939cd4a3"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe read-through",
+      "concept_ids": [
+        "read-through"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.245240+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cache_api_owns_loading\": true, \"caller_source_calls\": 0, \"loader_calls\": 1, \"values\": [1000, 1000, 1000]}, \"before\": {\"cache_api_owns_loading\": false, \"caller_source_calls\": 3}, \"guarantee\": \"The caller uses only cache.read; the cache API invokes its loader on a miss and stores the result.\", \"limit\": \"This is a local cache abstraction, not a distributed cache provider.\", \"probe\": \"read-through\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "b3c7df04adbe4bcb6e2eebeaa6a733a57a370359791956e74d460d06c9cda7e9"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe reader-writer-exclusion",
+      "concept_ids": [
+        "reader-writer-lock"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.320068+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"reader_blocked_during_write\": true, \"simultaneous_readers\": 2, \"writer_acquired_after_release\": true, \"writer_blocked_during_reads\": true}, \"before\": {\"uncoordinated_writer_during_two_reads\": true}, \"guarantee\": \"Concurrent readers are compatible with each other and incompatible with an exclusive writer in the finite state model.\", \"limit\": \"This is a serialized lock-state schedule, not a thread-safe RWLock implementation or a fairness proof.\", \"probe\": \"reader-writer-exclusion\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "16e736f989d3d2da2d0f9a36e80c5763630934e2c8ae43d7e4264e6f3374e259"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py safe-release --probe rolling-recreate-capacity",
+      "concept_ids": [
+        "recreate-deployment",
+        "rolling-deployment"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.385191+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"minimum_ready\": 1, \"new_instances\": 2, \"rolling_ready_history\": [2, 1, 2, 1, 2]}, \"before\": {\"minimum_ready\": 0, \"recreate_ready_history\": [2, 0, 2]}, \"guarantee\": \"Recreate produces a zero-ready interval in this schedule, while a one-at-a-time rolling replacement preserves one ready instance.\", \"limit\": \"Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.\", \"probe\": \"rolling-recreate-capacity\"}\ncomparison=PASS case=safe-release probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "059755c1ed7047ee949e3a8d83257f0a85439e9d95c780aa454e3594e7096dbb"
+    },
+    {
+      "command": "python3 labs/architecture/early-refresh/run.py",
+      "concept_ids": [
+        "refresh-ahead"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.438100+00:00",
+      "exit_code": 0,
+      "stdout": "before: early_started=False boundary_blocked=True result=calls-v2 producer_calls=2\nafter: early_started=True boundary_blocked=False result=calls-v2 producer_calls=2\ncomparison=PASS evolution=True slow_refresh_can_still_block_after_hard_ttl=True\n",
+      "stderr": "",
+      "output_sha256": "1201e28b8a9c207c67c6dabad6fd7a4be235fee7fa305dfabfede5d2aed8f9ac"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe repository-storage-contract",
+      "concept_ids": [
+        "repository"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.514461+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balances_from_each_adapter\": [1100, 1100], \"domain_account_type\": \"Account\"}, \"before\": {\"domain_storage_shapes\": [\"dictionary\", \"row-list\"]}, \"guarantee\": \"The repository presents a domain collection contract while storage representation changes behind it.\", \"limit\": \"The adapters are local fakes, without SQL mapping, identity maps or unit-of-work concurrency.\", \"probe\": \"repository-storage-contract\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "720e2ce51c300c820db8e73508b2006a39ce2147d1bbf2f2482e953a77a4fde2"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe rpc-operation-contract",
+      "concept_ids": [
+        "request-reply",
+        "rpc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.601032+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"operation\": \"reserve\", \"reply_request_id\": \"REQUEST-1\", \"request_id\": \"REQUEST-1\", \"result\": {\"reserved_amount\": 100}}, \"before\": {\"unmatched_reply_request_id\": \"OTHER\"}, \"guarantee\": \"The dispatcher invokes an explicit operation and returns its result to the matching requester.\", \"limit\": \"The finite request/reply dispatcher does not implement a remote transport, deadlines or an RPC framework.\", \"probe\": \"rpc-operation-contract\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2747496818b078b5fdec74e563d26d5f2a22392a2f85474192cf264e9317a25f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe resource-key",
+      "concept_ids": [
+        "reservation-pattern"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.684210+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted_with_slot_key\": 1}, \"before\": {\"accepted_with_actor_keys\": 2}, \"guarantee\": \"The shared slot, rather than the caller, is the protected identity.\", \"limit\": \"This set is one-process memory; distributed storage must claim atomically and manage expiry.\", \"probe\": \"resource-key\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d41f38aa9c92fc058e531ef1da98e9137ed911a0582b444401bf89afe94214d1"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe rest-resource-methods",
+      "concept_ids": [
+        "rest"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.764304+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"GET_amount\": 100, \"GET_status\": 200, \"GET_writes\": 0, \"POST_status\": 201, \"total_writes\": 1, \"unsupported_method_status\": 405}, \"before\": {\"GET_with_unconditional_write_calls\": 1}, \"guarantee\": \"Resource paths, method semantics and response status are explicit; GET does not become an operation that writes.\", \"limit\": \"Requests are local dictionaries and function calls, without an HTTP server, caching intermediaries or complete REST constraints.\", \"probe\": \"rest-resource-methods\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "76704067e71f4eff00e63aba87bf55729771f6e7dd6b49608c890900df27eba4"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe signed-key-rotation",
+      "concept_ids": [
+        "secrets-rotation"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:21.976567+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"new_token_accepted\": true, \"old_token_rejected_after_retirement\": true, \"tampered_new_token_rejected\": true}, \"before\": {\"old_token_accepted_during_overlap\": true}, \"guarantee\": \"A signed credential remains valid through the overlap and becomes inadmissible after its signing key is removed from trust.\", \"limit\": \"Keys are fixed synthetic HMAC material. Secret storage, asymmetric key distribution and coordinated live-service rotation are outside the experiment.\", \"probe\": \"signed-key-rotation\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "10cff2eb1b35257fa1b29ff5d3330a1b5e5b9216db80ba0eae0d9afe9dd9d016"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe watchdog-restart",
+      "concept_ids": [
+        "self-healing",
+        "watchdog"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.048473+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"generation\": 2, \"healthy_after_restart\": true}, \"before\": {\"generation\": 1, \"healthy\": false}, \"guarantee\": \"The supervisor detects the failed local state and rearms it through a replacement generation.\", \"limit\": \"It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.\", \"probe\": \"watchdog-restart\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f39c60c988bf7e921fb2bf26a3d40eac69675dbe2ae5aabe62253fdff467660d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe semaphore-permits",
+      "concept_ids": [
+        "semaphore"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.141113+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"active_at_end\": 0, \"completed\": 4, \"maximum_simultaneous_tasks\": 2}, \"before\": {\"unbounded_simultaneous_tasks\": 4}, \"guarantee\": \"A real asyncio semaphore bounds concurrent entry to two and releases its permits after each task.\", \"limit\": \"The semaphore is local to this event loop and does not limit the producer buffer or sum capacity across processes.\", \"probe\": \"semaphore-permits\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e592e31463c5c6fa5c54863a5a9991f6169551b4d24d17c349307ba9faa25b85"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe separate-ways-change",
+      "concept_ids": [
+        "separate-ways"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.224289+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"changed_context_fee\": 2.0, \"independent_context_fee\": 1.0, \"integration_edges\": 0}, \"before\": {\"unrelated_context_fee_after_shared_mutation\": 2.0}, \"guarantee\": \"Choosing separate ways prevents an unrelated context from inheriting the other context change through a shared mutable object.\", \"limit\": \"Duplication has a maintenance cost; this fixture does not decide the real organizational boundary.\", \"probe\": \"separate-ways-change\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3f0a95b213731a692a6385798440b9739e7e5aa958510b318727defc4a2d5321"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe sse-event-resume",
+      "concept_ids": [
+        "server-sent-events"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.303860+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"content_type\": \"text/event-stream\", \"messages_are_server_to_client\": true, \"resumed_balance\": 1100, \"resumed_event_ids\": [2]}, \"before\": {\"reconnect_without_cursor_events\": 2}, \"guarantee\": \"SSE event records carry IDs and data; a server can honor the last received ID when selecting the resumed stream.\", \"limit\": \"The record parser is local. HTTP streaming, browser EventSource, retry timing and proxy behavior are not executed.\", \"probe\": \"sse-event-resume\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "17387fc808268d96a268f69389ddcf786995ea6f4bbef5c281bf00585954fdd5"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe serverless-invocation",
+      "concept_ids": [
+        "serverless"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.407161+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"invocation_balances\": [1100, 1100], \"local_counters\": [1, 1], \"state_owner\": \"external_port\"}, \"before\": {\"next_fresh_local_balance\": 1000}, \"guarantee\": \"The handler tolerates fresh invocation memory and keeps authoritative state outside that ephemeral environment.\", \"limit\": \"No cloud runtime, billing, autoscaling or vendor-specific execution contract is simulated.\", \"probe\": \"serverless-invocation\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a694ad705c7ac9292bd3df50f6256ed7352f70a6c7ca5529e7d8284ffed12d2e"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe signed-service-identity",
+      "concept_ids": [
+        "service-to-service-identity"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.674721+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"authenticated_service_subject\": \"order-service\", \"permission_scope\": \"order:read\", \"resource_audience\": \"order-api\", \"unauthenticated_client_rejected\": true}, \"before\": {\"self_declared_service_header_accepted\": true}, \"guarantee\": \"The resource authenticates a signed service principal and validates its intended audience/scope rather than trusting a caller-supplied service label.\", \"limit\": \"Client secrets and tokens are synthetic; there is no real identity provider, protected key store or live service deployment.\", \"probe\": \"signed-service-identity\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "090518b0fc9e98b8384c800119e87484b146f500fd41226c9b64ce93416b248d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe shared-kernel-impact",
+      "concept_ids": [
+        "shared-kernel"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:22.755255+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"changed_results\": [2, 2], \"consumers_affected_by_shared_rule_change\": 2, \"shared_results\": [1, 1]}, \"before\": {\"independent_rounding_results\": [1, 2]}, \"guarantee\": \"The shared kernel makes a small domain rule genuinely shared and exposes the joint impact of changing it.\", \"limit\": \"The rounding is synthetic. Joint ownership and release coordination are required rather than inferred from a common helper.\", \"probe\": \"shared-kernel-impact\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "70c6771f4cf8916536cbc2dc01f857d232a4ec19124f7f65e871e9e05b5232f5"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe credential-boundary",
+      "concept_ids": [
+        "short-lived-credentials"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.118414+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"accepted\": false}, \"before\": {\"expired_token_accepted\": true}, \"guarantee\": \"Expiration and audience constrain where and when a credential is accepted.\", \"limit\": \"Claims are unsigned in this model; it does not implement OAuth2, OIDC, mTLS or key verification.\", \"probe\": \"credential-boundary\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "308ef610d81188bd145ec1b83fb832ac459c7b7d9cf5f462af4571e471fd4309"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Singleton",
+      "concept_ids": [
+        "singleton"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.158150+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Singleton\", \"before\": 2, \"after\": 1, \"mechanism\": \"The local registry returns one instance for one name within this process.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "a0bf8c2e1fff1400918e24b791ea3a6f205c6c77c93b79ee24d3eb32128b0082"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py ledger-projection --probe snapshot-replay",
+      "concept_ids": [
+        "snapshotting"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.235417+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"balance\": 900, \"events_to_replay\": 1}, \"before\": {\"events_to_replay\": 3}, \"guarantee\": \"A snapshot plus its following events reconstructs the same state with less replay.\", \"limit\": \"A snapshot must match an event position; it does not replace the authoritative event history.\", \"probe\": \"snapshot-replay\"}\ncomparison=PASS case=ledger-projection probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3774b773200558260a078cd22f4b83b4e5fdabfbf1a2822610ddadbf8e309a40"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe space-based-grid",
+      "concept_ids": [
+        "space-based-architecture"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.307557+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"external_database_calls\": 0, \"grid_partitions\": 3, \"per_partition\": [4, 4, 4], \"processed\": 12, \"value_sum\": 90}, \"before\": {\"central_store_failure_processed\": 0}, \"guarantee\": \"A partitioned memory grid owns data and co-locates processing; the same owner partitions can serve shared cache reads to different logical workers.\", \"limit\": \"The grid is a finite local model, without durable replication, network partitions or a deployed distributed-cache product.\", \"probe\": \"space-based-grid\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d2f034da3b5b0aec1c79cdfbeb087dd5b895ca18fc364125febc3c4120baaffb"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe specification-reuse",
+      "concept_ids": [
+        "specification"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.380784+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"query_candidates\": [\"A\"], \"same_predicate_result\": true, \"validator_candidates\": [\"A\"]}, \"before\": {\"query_candidates\": [\"A\", \"B\"], \"validator_candidates\": [\"A\"]}, \"guarantee\": \"One named criterion is reused across selection and validation, eliminating the duplicated inconsistent predicate in this fixture.\", \"limit\": \"The threshold is a synthetic teaching rule, not an advisor or customer eligibility rule from Faz.\", \"probe\": \"specification-reuse\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "50e8199539322e3ca11cc2b37a88f0dfd2d41668d54548e0cd3300c14c868eee"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe spinlock-active-attempts",
+      "concept_ids": [
+        "spinlock"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.459729+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"acquired_after_scheduled_release\": true, \"active_attempts\": 4, \"blocking_sleep_calls\": 0}, \"before\": {\"owner_paused_initially_held\": true}, \"guarantee\": \"The contender repeatedly tests the lock state without blocking, consuming execution steps while the owner is paused.\", \"limit\": \"The model uses serialized test-and-set steps, not a hardware spinlock, CPU benchmark or permission to spin while waiting for HTTP.\", \"probe\": \"spinlock-active-attempts\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "52ad38bbd602d1cdde69af7036fa4e3401fa39d87bc52fafef5506c8d834ac20"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe message-splitter",
+      "concept_ids": [
+        "splitter"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.536172+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"amount\": 150, \"batch_ids\": [\"BATCH-1\"], \"handler_items\": 2, \"individual_orders\": 2}, \"before\": {\"handler_items\": 1, \"individual_orders\": 0}, \"guarantee\": \"A splitter converts one batch envelope into individual messages and retains their correlation.\", \"limit\": \"Joining completion and recovering missing children are separate contracts.\", \"probe\": \"message-splitter\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "6c61f373ec9a453d512de9754f588459ad62e3cc63e11e398910d7dda01bde9e"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept State",
+      "concept_ids": [
+        "state"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.576850+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"State\", \"before\": \"accepted-twice\", \"after\": \"second-transition-rejected\", \"mechanism\": \"Behavior depends on the current state and rejects a transition outside its contract.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "fa62035c1bda682750947aa8ec8df8bb17bdebe4be6720d92d3df4859139c1f8"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe stateless-request",
+      "concept_ids": [
+        "stateless-services"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.687472+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"local_session_counts\": [0, 0], \"worker_users\": [\"SYNTHETIC-USER\", \"SYNTHETIC-USER\"]}, \"before\": {\"second_worker_user\": null}, \"guarantee\": \"Application instances obtain session state outside local request-process memory, so routing to another instance preserves the request context.\", \"limit\": \"The shared dictionary models an external owner, not a deployed session service or verified token.\", \"probe\": \"stateless-request\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "df447e854c708aee0df2e240c9a4a2bf18a22212da3bad524293d4b9e4dc8d3a"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Strategy",
+      "concept_ids": [
+        "strategy"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.732018+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Strategy\", \"before\": 1.0, \"after\": 2.0, \"mechanism\": \"The caller supplies a fee algorithm without replacing the order operation.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "e716e703bdfb5e16fbb2268b6fff27c6629524d804904230b5dd63660a16775f"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe owner-latest-read",
+      "concept_ids": [
+        "strong-consistency"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.814755+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"latest_version\": 2, \"ordered_history\": [[\"read\", 1, 1000], [\"write\", 2, 1100], [\"read\", 2, 1100]], \"read_after_completed_write\": 1100, \"read_before_write\": 1000}, \"before\": {\"read_from_uncoordinated_stale_replica_after_write\": 1000}, \"guarantee\": \"Every read in this single-owner schedule observes the latest preceding completed write, independently of a client session hint.\", \"limit\": \"This is one serialized-owner history, not a universal linearizability proof or a distributed strong-consistency system under failures.\", \"probe\": \"owner-latest-read\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5be3986dd9878ce57bce8481380bd77e8290f2adefef944d5c5946f1884b000a"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe synchronous-replica-ack",
+      "concept_ids": [
+        "synchronous-replication"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.892412+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"ack_after_replica_applied\": true, \"ack_while_replica_behind\": false, \"read_version_after_ack\": 2}, \"before\": {\"writer_ack_before_replica_applied\": true}, \"guarantee\": \"The writer acknowledgement is ordered after this replica applies the write, providing the tested after-ack visibility property.\", \"limit\": \"This bounded primary/replica schedule does not alone prove linearizability, all replica routing or consistency under partitions.\", \"probe\": \"synchronous-replica-ack\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "1069e2432be9bab90bcb3a934e40893e75d7950338c73f8a56b102a16a563a57"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-delivery --probe tcc-resource-states",
+      "concept_ids": [
+        "tcc-try-confirm-cancel"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:23.973950+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"cancelled_cash\": 1000, \"cancelled_units\": 1, \"confirmed\": {\"cash\": 900, \"state\": \"confirmed\", \"units\": 0}}, \"before\": {\"immediate_debit_after_peer_refusal\": 900}, \"guarantee\": \"Try holds resources; Confirm consumes the hold, while Cancel releases the same held resources.\", \"limit\": \"The two local outcomes model one reservation contract; distributed recovery, timeout races and idempotent callbacks remain separate obligations.\", \"probe\": \"tcc-resource-states\"}\ncomparison=PASS case=order-delivery probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "80e0e91552399c99140340c7d774fef6a68376c7112ac458a9d95e1e28a2501d"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept 'Template Method'",
+      "concept_ids": [
+        "template-method"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.012834+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Template Method\", \"before\": 101, \"after\": 100.5, \"mechanism\": \"The operation preserves a sequence while a subclass changes the fee step.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "1101d44896f4d024b22fce450e0b174ac0c095ace137abbd5e4fbb284c66d29c"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe three-phase-precommit",
+      "concept_ids": [
+        "three-phase-commit-3pc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.094680+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"all_precommitted\": true, \"decision_if_partition_possible\": \"wait\", \"decision_under_synchronous_no_partition_assumption\": \"commit\", \"phases_before_timeout\": [\"canCommit\", \"preCommit\"]}, \"before\": {\"two_phase_prepared_timeout\": \"wait_for_coordinator\"}, \"guarantee\": \"The extra precommit state distinguishes the modeled 3PC decision from an uncertain 2PC prepare, under the explicit timing and no-partition assumptions.\", \"limit\": \"This is not a partition-tolerant atomic commit implementation; the autonomous commit decision is not generalized outside those assumptions.\", \"probe\": \"three-phase-precommit\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "23693727b0be58494aded730ad9b3e885eb1c15f06b869019df9caad5339ba1a"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe timeout-boundary",
+      "concept_ids": [
+        "timeout"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.172695+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"waiting_state\": \"timeout\"}, \"before\": {\"waiting_state\": \"pending_without_bound\"}, \"guarantee\": \"A real asynchronous wait is cancelled by its timeout instead of remaining pending.\", \"limit\": \"The timeout bounds this awaiter, not every external side effect or a worker thread.\", \"probe\": \"timeout-boundary\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "c719d4ec2cd281fecb96af41550dc2963bab5e9a43c2def4ec7e4544a809321a"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe downscoped-token-exchange",
+      "concept_ids": [
+        "token-exchange"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.543523+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"actor\": \"gateway-service\", \"exchanged_audience\": \"order-api\", \"exchanged_scope\": \"order:read\", \"expires\": 5, \"subject\": \"SYNTHETIC-USER\"}, \"before\": {\"original_token_wrong_resource_rejected\": true}, \"guarantee\": \"The exchanged credential is bound to the target resource and a narrower delegated scope, preserving subject and actor identities.\", \"limit\": \"This is an RFC 8693-style claim transformation model, without a token-exchange endpoint or a complete delegation authorization policy.\", \"probe\": \"downscoped-token-exchange\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a3dd843f1d86114a581a8547200403c34cfc6920a8fd345e443a95249a9da805"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe cache-expiry",
+      "concept_ids": [
+        "ttl-cache"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.613186+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"decision\": \"reload\", \"stale_returned\": false}, \"before\": {\"stale_returned\": true}, \"guarantee\": \"TTL creates an explicit validity boundary and expiration returns control to the producer.\", \"limit\": \"TTL does not prove source freshness or invalidate a value immediately after a write.\", \"probe\": \"cache-expiry\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "d19f6363f2f758fb417ea0528ca975d7cbf498263ec0328e0b2dacfad86397ac"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe prepared-participant",
+      "concept_ids": [
+        "two-phase-commit-2pc"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.688012+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"prepared_then_timeout\": \"wait_for_decision\"}, \"before\": {\"prepared_then_timeout\": \"commit_guessed\"}, \"guarantee\": \"A prepared participant cannot invent the coordinator decision.\", \"limit\": \"This models blocking in atomic commit; it neither implements 2PC/3PC nor proves partition tolerance.\", \"probe\": \"prepared-participant\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "3609467fc60d9bfebccd71a4b69e785de3509cb43731d3f40dbd1e8f7ba79dd7"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py consensus --probe causal-versions",
+      "concept_ids": [
+        "version-vector"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.762454+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"concurrent_detected\": true, \"merged_vector\": {\"A\": 1, \"B\": 1}}, \"before\": {\"last_write_only\": \"A\", \"lost_branch\": \"B\"}, \"guarantee\": \"A vector exposes concurrent branches before application-specific reconciliation.\", \"limit\": \"The vector does not decide the financial meaning of merging two orders.\", \"probe\": \"causal-versions\"}\ncomparison=PASS case=consensus probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f1fbe4d04dc8ba0d19a37a5ff9b32dface49ddf30c17a882019cab8ce92e4803"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe vertical-attributes",
+      "concept_ids": [
+        "vertical-partitioning"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.851900+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"contact_columns\": [\"account_key\", \"contact_label\"], \"position_read_columns\": [\"account_key\", \"cents\"], \"rejoin_preserves_row\": true}, \"before\": {\"position_read_columns\": [\"account_key\", \"cents\", \"contact_label\"]}, \"guarantee\": \"Vertical partitions divide attributes while preserving the key needed to reconstruct the logical entity.\", \"limit\": \"The example models attribute ownership and does not measure physical page savings or authorization by itself.\", \"probe\": \"vertical-attributes\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "258d79a6021360e329229aae4588be0abb6985499345710316cc8ef63d3a6d7b"
+    },
+    {
+      "command": "python3 labs/architecture/object_patterns.py --concept Visitor",
+      "concept_ids": [
+        "visitor"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.903186+00:00",
+      "exit_code": 0,
+      "stdout": "{\"concept\": \"Visitor\", \"before\": 0, \"after\": 0.5, \"mechanism\": \"A separate visitor performs an operation over an order through its public contract.\"}\ncomparison=PASS object_mechanisms=1 scope=LOCAL_FINANCIAL_MODEL\n",
+      "stderr": "",
+      "output_sha256": "a7295dd3a856a50f4d13e66e4f1b745694264d98661669f76f3c40f8504d811e"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe bounded-spsc-steps",
+      "concept_ids": [
+        "wait-free"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:24.998599+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"maximum_steps\": 4, \"put_results\": [true, true, false], \"take_values\": [10, 20, null]}, \"before\": {\"retry_loop_steps_have_no_per_operation_bound\": true}, \"guarantee\": \"With one producer, one consumer and atomic ordered index publication, each straight-line operation returns success/full/empty in at most four modeled steps without a retry loop.\", \"limit\": \"The bounded-step argument belongs to this SPSC atomic-index model; Python execution time, allocation, native memory ordering and multiple producers are not covered.\", \"probe\": \"bounded-spsc-steps\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "9ea99f9e142a0bf197f3695f55b94d10bfa2416dba8c7fe28c609aa631510294"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe signed-webhook-callback",
+      "concept_ids": [
+        "webhook"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.076910+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"callback_status\": 200, \"effects\": [100], \"invalid_signature_status\": 401, \"repeat_status\": 200}, \"before\": {\"polling_receiver_callback_effects\": 0}, \"guarantee\": \"The provider pushes the event to a callback; signature verification precedes the receiver effect and the event identity suppresses a repeat.\", \"limit\": \"All keys and payloads are synthetic. Timestamp replay windows, secret distribution, TLS and a live callback server are not implemented.\", \"probe\": \"signed-webhook-callback\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "02584864f89039fffd3b853fde8678971f460514913a811d9897df7cced6a27d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py order-boundaries --probe websocket-duplex-frames",
+      "concept_ids": [
+        "websocket"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.154364+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"client_frame_masked\": true, \"client_to_server\": \"reserve:ORDER-1\", \"new_client_poll_for_server_message\": false, \"server_to_client\": \"position:1100\"}, \"before\": {\"server_push_requires_new_poll\": true}, \"guarantee\": \"Two independent text-frame directions share the duplex model; client frames are masked and server frames are decoded without a new poll.\", \"limit\": \"Only small unfragmented text frames are modeled, without the HTTP upgrade handshake, extensions, control frames or a production WebSocket implementation.\", \"probe\": \"websocket-duplex-frames\"}\ncomparison=PASS case=order-boundaries probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "5d54e0a80b2f192f7e41e84bcd0b59e438c62d3da683cf7e78112febca1f4d3d"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py reservation --probe idle-worker-steal",
+      "concept_ids": [
+        "work-stealing"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.244527+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"A_completed\": [1], \"B_completed\": [2], \"unique_completed\": 2}, \"before\": {\"A_remaining_work\": 2, \"idle_B_completed\": 0}, \"guarantee\": \"An idle worker steals eligible queued work from another worker while task ownership changes exactly once in this schedule.\", \"limit\": \"The deques are manipulated sequentially; a real concurrent deque requires its own atomicity and memory-order guarantees.\", \"probe\": \"idle-worker-steal\"}\ncomparison=PASS case=reservation probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "a34a804da5876c49abca00968a93b2604a047e749c46d9eb94de8aeb619d5d66"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py queue-workflow --probe durable-workflow-resume",
+      "concept_ids": [
+        "workflow-engine"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.319476+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"credit_effects\": 1, \"effect_keys\": [\"credit:ORDER-1\", \"notify:ORDER-1\"], \"final_phase\": \"complete\", \"phase_loaded_after_reopen\": \"credited\"}, \"before\": {\"restart_from_beginning_credit_attempts\": 2}, \"guarantee\": \"A persisted workflow identity and phase drive recovery after process-state loss, skipping the completed local step.\", \"limit\": \"The local effects and checkpoints share SQLite transactions. External activity retries, timers, worker leasing and a full durable-workflow framework are not implemented.\", \"probe\": \"durable-workflow-resume\"}\ncomparison=PASS case=queue-workflow probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "ec69131353c27de7176b90740653ec9f398d588a46bafbf34493e40097cdd317"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py storage-partitions --probe coalesced-snapshot-writes",
+      "concept_ids": [
+        "write-amplification-control"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.403110+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"latest_snapshot\": 1009, \"physical_batch_writes\": 1, \"updates_in_acknowledged_batch\": 10}, \"before\": {\"physical_snapshot_writes\": 10}, \"guarantee\": \"Coalescing repeated overwrites of one snapshot reduces physical writes before the batch acknowledgement.\", \"limit\": \"This applies to replaceable snapshots, not ten independent ledger facts. No per-update durability is promised before the batch flush.\", \"probe\": \"coalesced-snapshot-writes\"}\ncomparison=PASS case=storage-partitions probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "2016f1428052d9f615527e681833fa8232fc197ac439cfc161d5a0a4fa4154dd"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py cache-policy --probe write-policy",
+      "concept_ids": [
+        "write-behind-write-back",
+        "write-through"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.476202+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"write_through_durable_balance\": 1100}, \"before\": {\"write_behind_crash_durable_balance\": 1000}, \"guarantee\": \"Acknowledging after durable write avoids losing a buffered credit during this crash.\", \"limit\": \"Different ordering has different latency; neither alone gives cross-system atomicity.\", \"probe\": \"write-policy\"}\ncomparison=PASS case=cache-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "e398e6768c0dbccc130cd26f3c0f25cace63ec0cd96445a0a6be783ad8751f63"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py ledger-projection --probe durable-transaction",
+      "concept_ids": [
+        "write-ahead-log-wal"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.547576+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"rolled_back_cents\": 100000, \"sqlite_journal_mode\": \"wal\"}, \"before\": {\"partial_update_visible\": 110000}, \"guarantee\": \"A local transaction rolls back an incomplete change while SQLite uses its WAL mode.\", \"limit\": \"This is a SQLite engine check, not a PostgreSQL recovery, replication or fsync proof.\", \"probe\": \"durable-transaction\"}\ncomparison=PASS case=ledger-projection probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "bae074d166c66391568275de5e50d54a2fcec7518af5ebd9f4443fbb0507dfce"
+    },
+    {
+      "command": "python3 labs/architecture/financial.py access-policy --probe verify-internal-request",
+      "concept_ids": [
+        "zero-trust"
+      ],
+      "observed_at_utc": "2026-10-15T02:42:25.848492+00:00",
+      "exit_code": 0,
+      "stdout": "{\"after\": {\"internal_flag_bypasses_verification\": false, \"internal_rogue_rejected\": true, \"verified_service_allowed\": true}, \"before\": {\"internal_origin_alone_grants_access\": true}, \"guarantee\": \"Network location does not replace per-request identity and resource-policy verification in the tested boundary.\", \"limit\": \"This demonstrates one zero-trust access property, not an organization-wide zero-trust architecture, device posture or continuous risk engine.\", \"probe\": \"verify-internal-request\"}\ncomparison=PASS case=access-policy probes=1 inputs=SYNTHETIC runtime=LOCAL\n",
+      "stderr": "",
+      "output_sha256": "f360407be1c5959142e44ea7bfb3f3887f5427c775aeaa02e2e12c7dfa73a808"
+    }
+  ]
+}

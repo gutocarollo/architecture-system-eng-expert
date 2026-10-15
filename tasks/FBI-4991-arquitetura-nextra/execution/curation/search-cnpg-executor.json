@@ -1,0 +1,27 @@
+{
+  "query": "repo:cloudnative-pg/cloudnative-pg \"restore\" path:internal/cmd/manager -path:test",
+  "observed_utc": "2026-10-15T02:01:51.913427Z",
+  "total_count": 12,
+  "items": [
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/cmd/manager/instance/restore/restore.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/cmd/manager/instance/restore/restore.go"
+    },
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/cmd/manager/instance/restore/doc.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/cmd/manager/instance/restore/doc.go"
+    },
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/cmd/manager/instance/restore/cmd.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/cmd/manager/instance/restore/cmd.go"
+    },
+    {
+      "repo": "cloudnative-pg/cloudnative-pg",
+      "path": "internal/cmd/manager/walrestore/cmd.go",
+      "url": "https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/cmd/manager/walrestore/cmd.go"
+    }
+  ]
+}

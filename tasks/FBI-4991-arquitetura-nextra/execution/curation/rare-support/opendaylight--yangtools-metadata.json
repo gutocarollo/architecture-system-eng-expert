@@ -1,0 +1,13 @@
+{
+  "repository": "opendaylight/yangtools",
+  "default_branch": "master",
+  "sha": "8d3b30ad9ed2a6d5b43604169d95b2b98e082b69",
+  "license": {
+    "key": "epl-1.0",
+    "name": "Eclipse Public License 1.0",
+    "spdx_id": "EPL-1.0",
+    "url": "https://api.github.com/licenses/epl-1.0",
+    "node_id": "MDc6TGljZW5zZTc="
+  },
+  "observed_utc": "2026-10-15T01:42:46.002809+00:00"
+}

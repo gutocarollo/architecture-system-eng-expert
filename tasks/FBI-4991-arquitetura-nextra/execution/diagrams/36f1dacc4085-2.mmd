@@ -1,0 +1,15 @@
+flowchart TD
+    DOWNLOAD[loop_engine.run_cycle: download] --> FILE[Arquivo local do relatório]
+    FILE --> ARCHIVE[upload_files_to_minio: arquivar bytes originais]
+    FILE --> TRANSFORM[process_single_file: transformar a cópia local]
+    ARCHIVE --> OBJECT[(Objeto holdings_reports: endpoint não identificado)]
+    TRANSFORM --> LOAD[upload_file_scoped: carga escopada]
+    LOAD --> STAGING[(Staging XP e registro de atualização)]
+    STAGING --> MATCH[Proxy XP: check_match]
+    MATCH --> DECISION{Há data pareada que atende o teste?}
+    DECISION -->|não| WAIT[Aguardar nova condição]
+    DECISION -->|sim| PRODUCE[produce_dataset: Asset de prontidão]
+    PRODUCE --> CONSUMER[Consumer XP: fonte .70]
+    CONSUMER --> CALCULATE[calculate_fct_and_rpt]
+    CALCULATE --> SYNC[sync_makershub]
+    SYNC --> VALIDATE[validate_sync]

@@ -1,0 +1,10 @@
+flowchart TD
+    Q[Definir a alteração proposta] --> P[Consultar pipeline pelo termo natural]
+    P --> N{Nó pretendido identificado?}
+    N -->|não| G[Registrar lacuna e localizar a fonte]
+    N -->|sim| B[Consultar blast_radius do nó confirmado]
+    B --> S[Consultar agregado PostgreSQL em leitura]
+    S --> R[Conferir chave, grão e cardinalidade]
+    R --> C{Fontes necessárias conferidas?}
+    C -->|não| G
+    C -->|sim| D[Registrar impacto com data, contrato e limite]

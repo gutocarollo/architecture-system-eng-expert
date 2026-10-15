@@ -1,0 +1,11 @@
+{
+  "repo": "bluesky-social/atproto",
+  "path": "LICENSE.txt",
+  "revision": "388dac9f7fdfa5ba8e4af08217b4afdc30d993ee",
+  "url": "https://github.com/bluesky-social/atproto/blob/388dac9f7fdfa5ba8e4af08217b4afdc30d993ee/LICENSE.txt",
+  "http_status": 200,
+  "observed_utc": "2026-10-15T02:11:07.324986+00:00",
+  "sha256": "6187b4a0ac575f87358486c3aafcfbe08148e012ef76a2f6c6ea58f661703285",
+  "line_count": 7,
+  "artifact": "tasks/FBI-4991-arquitetura-nextra/execution/curation/rare-support/ddd-bluesky-social--atproto--LICENSE.txt"
+}

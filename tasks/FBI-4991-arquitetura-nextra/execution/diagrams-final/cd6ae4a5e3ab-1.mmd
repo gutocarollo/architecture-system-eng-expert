@@ -1,0 +1,8 @@
+flowchart LR
+    Recorder[Gravação registrada] --> Event[Evento de disponibilidade]
+    Event --> Transcript[Transcrição]
+    Event --> Search[Índice de consulta]
+    Transcript -->|sucesso| Text[Texto produzido]
+    Transcript -->|falha transitória| Retry[Retentativa identificada]
+    Retry --> Transcript
+    Search --> Index[Representação de leitura]

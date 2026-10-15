@@ -1,0 +1,13 @@
+{
+  "repository": "devicehive/devicehive-java-server",
+  "default_branch": "master",
+  "sha": "905e3b932ddc30bd239a192e6eaadc3e5f17004f",
+  "license": {
+    "key": "apache-2.0",
+    "name": "Apache License 2.0",
+    "spdx_id": "Apache-2.0",
+    "url": "https://api.github.com/licenses/apache-2.0",
+    "node_id": "MDc6TGljZW5zZTI="
+  },
+  "observed_utc": "2026-10-15T01:47:36.950827+00:00"
+}

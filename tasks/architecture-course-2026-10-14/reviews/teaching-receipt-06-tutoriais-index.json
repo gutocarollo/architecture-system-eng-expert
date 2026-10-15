@@ -1,0 +1,16 @@
+{
+  "receipt_version": 1,
+  "reviewer_id": "/root/council_teaching_sol",
+  "dispatch_id": "collaboration.followup_task:/root/council_teaching_sol:final-bind-existing-TH1-review",
+  "document_id": "tutoriais/index",
+  "document_sha256": "ce7bc1ee72376dd6212b7f1af672c005d06786b2f26626bac2f5bb53032ff71d",
+  "context_sha256": "b5616fc5e443cc58c3060505c32b53212b138e74040c410035b6f0d61a067cf1",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "original-request",
+    "s1",
+    "l1c"
+  ]
+}

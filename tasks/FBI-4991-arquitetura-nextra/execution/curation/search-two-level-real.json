@@ -1,0 +1,17 @@
+{
+  "query": "\"getLocalCachedMap\" \"account\" language:Java -repo:redisson/redisson",
+  "observed_utc": "2026-10-15T01:53:22.431586Z",
+  "total_count": 2,
+  "items": [
+    {
+      "repo": "AJ198081/AJ198081.github.io",
+      "path": "redisson/src/test/java/dev/aj/redisson/RedissonReactiveClientTest.java",
+      "url": "https://github.com/AJ198081/AJ198081.github.io/blob/ba91d8757bbbc1ae5d64281e36d62e86ffe1dba9/redisson/src/test/java/dev/aj/redisson/RedissonReactiveClientTest.java"
+    },
+    {
+      "repo": "jfcbxp/redisson-test",
+      "path": "src/test/java/com/jfcbxp/redisson/RedissonApplicationTests.java",
+      "url": "https://github.com/jfcbxp/redisson-test/blob/b053e5da1ba496972f3554344d749ba7557a4042/src/test/java/com/jfcbxp/redisson/RedissonApplicationTests.java"
+    }
+  ]
+}

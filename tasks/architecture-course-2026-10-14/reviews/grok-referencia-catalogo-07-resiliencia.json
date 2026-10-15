@@ -1,0 +1,21 @@
+{
+  "document_id": "referencia/catalogo/07-resiliencia",
+  "document_sha256": "d0f172ed9fcbbfcc11a5ecd5ae4b8beda01925c4a8558f8176be0a33e02822f0",
+  "verdict": "APPROVED",
+  "open_high_findings": [],
+  "relation_ids": [],
+  "evidence_ids": [
+    "s5",
+    "l5b",
+    "l5c",
+    "task-worker-code",
+    "airflow-client-code",
+    "nextbilling-code",
+    "cache-code",
+    "original-request"
+  ],
+  "receipt_version": 1,
+  "reviewer_id": "openrouter/x-ai/grok-4.7",
+  "dispatch_id": "gen-1792004014-dpFlKeCpIPkhNG7yoUtq",
+  "context_sha256": "2f782b6141101c1693c92986416c4a0f3a1baa3fbddc463e13aa451016401cf6"
+}

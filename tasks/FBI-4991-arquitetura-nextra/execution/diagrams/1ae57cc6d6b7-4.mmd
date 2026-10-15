@@ -1,0 +1,14 @@
+flowchart TB
+    subgraph ProposedSlices[Organização proposta por caso de uso]
+        D1Input[Entrada QualifyD1] --> D1Handler[Handler QualifyD1]
+        CallInput[Entrada ListCallableLeads] --> CallHandler[Handler ListCallableLeads]
+        KpiInput[Entrada ReadInsuranceKpi] --> KpiHandler[Handler ReadInsuranceKpi]
+        D1Handler --> D1Result{Validação concluída?}
+        D1Result -->|Sim| D1Store[Persistência da intenção]
+        D1Result -->|Não| D1Refusal[Resultado de recusa]
+        CallHandler --> CallQuery[Consulta de contatos]
+        KpiHandler --> KpiQuery[Consulta de indicadores]
+    end
+    Authorization[Contrato compartilhado de autorização] -. aplicado às entradas .-> D1Input
+    Authorization -. aplicado às entradas .-> CallInput
+    Authorization -. aplicado às entradas .-> KpiInput
