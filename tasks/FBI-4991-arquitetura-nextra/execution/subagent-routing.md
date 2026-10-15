@@ -204,3 +204,19 @@ TASK: Implement approved option B, password-protected R2-backed Nextra delivery.
 ## SUBAGENT_ROUTE terminal delivery — 2026-10-15T17:47:05.933789+00:00
 
 TASK: Cold integration/security gate on frozen course, source-correspondence receipts, downloadable labs and Sites Worker. LANE: TERMINAL. MODEL: gpt-6.1-sol. EFFORT: xhigh. FORK_TURNS: none. Native default with independent adversarial contract. New context deliberately breaks author/reviewer anchoring. Prior HIGH reviewers are retired from approved scopes. Planned task /root/terminal_delivery; actual dispatch follows candidate commit. Round gate reviews/round-gate-terminal.json. Seven actual planners and four reviewers preserve planners>reviewers.
+
+## SUBAGENT_ROUTE first remaining diagram semantics — 2026-10-15T18:22:06.795259+00:00
+
+Two new default/gpt-6.1-sol/xhigh REVIEW lanes cover91 diagrams with no prior semantic judgment, excluding terminal3. Approved source/code reviewers remain out of their approved loops. Fresh children are deliberate domain/context independence, not a second terminal audit. Seven planners and six total distinct reviewers preserve planners>reviewers. Assignments46/45 are compact graph judgments with per-diagram source anchors; output bound to source hashes. Gate reviews/round-gate-diagram-semantics.json.
+
+## SUBAGENT_ROUTE final Jira preparation — 2026-10-15T18:23:05.012546+00:00
+
+TASK: Prepare exact Story ADF append and canonical gates from current evidence, without publishing. LANE: EVIDENCE. MODEL: gpt-6.1-sol. EFFORT: high. FORK_TURNS:none. New default child because prior catalog investigator phase/role was source-authority discovery, now delivery-writing; keep ownership and independence explicit. Root retains external write/read-back.
+
+## WARM_REUSE two factual diagram repairs — 2026-10-15T18:37:35.436700+00:00
+
+Same diagram_semantics_one and two, default/gpt-6.1-sol/xhigh REVIEW. Only72 and39 return respectively. One HIGH-only recheck per initial lane; accepted89 and originalterminal3 stay out of the loop. Root repaired labels and one dependency edge; runtime/Worker code unchanged. Render receipts mermaid-semantic-repairs.json.
+
+## WARM_REUSE final Story evidence — 2026-10-15T18:47 UTC
+
+/root/jira_delivery_prepare remains default/gpt-6.1-sol/high EVIDENCE. Preserve original Story and prepare final bounded semantic closure plus hosting requirements. Root retains publication, latest deployment substitution and external write/read-back. No additional review round.

@@ -1,9 +1,9 @@
 {
-  "observed_at": "2026-10-15T17:40:21.898012+00:00",
+  "observed_at": "2026-10-15T18:35:22.555766+00:00",
   "source_files": 98,
   "download": "public/downloads/architecture-labs.zip",
-  "bytes": 610592,
-  "sha256": "229046fc241a89d206020a61714bd5cece173cbf2fc31301a053dff3790cbafe",
+  "bytes": 610586,
+  "sha256": "f1c6e826f3183a21a2f1691aa40202060ab3471e3af897cfa7ef1d79d4b9dd7a",
   "files": {
     "labs/airflow-lock-retry/README.md": "81a209bd948b4993930bcf2753b029ef89057a1ca65841097557e710ec1d300b",
     "labs/airflow-lock-retry/after.py": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731",
@@ -16,7 +16,7 @@
     "labs/architecture/README.md": "a253df88964b66372b79de42b6e17cdb2a16f054fae8fb89caac4643d276ab62",
     "labs/architecture/additional_observations.py": "1f8f4305e639bd6d0e92ef38515be21b9a8210a1297ec95584ce4d0d056661c6",
     "labs/architecture/author_learning.py": "68b1b021c70fabeaaa8e6d1b9230af4afe9ec6744ad55c835a319970ad5ed1bb",
-    "labs/architecture/case_diagrams.json": "a9803be68be09f95df3b8520e8f57214e6ea87e3a25c1ac98afaab02b8b69b5b",
+    "labs/architecture/case_diagrams.json": "f81a8c73e65b329cd73399cba9bd9b8bfca3e52281b51d0167347d966debab5e",
     "labs/architecture/check_challenges.py": "c36057e1a6f106f472e4b0744382c112b6c9bd196d0a92a4fab62daf54eb2a89",
     "labs/architecture/check_invariants.py": "48b465f116f607dc6a87c93a86a5be4d8807c5b3acd8a8c052106b9100a7fe1a",
     "labs/architecture/check_matrix.py": "3c8e707c41ff903792345b97245b3843c936915b85509b42497f3ed74a5a6aca",

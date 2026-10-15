@@ -13,4 +13,4 @@ Os critérios de aceite da documentação e suas pendências estão no card; est
 - [x] Comparar fontes atuais e preservar as diferenças entre fonte local e produção.
 - [x] Rever a emenda independentemente e exigir pendência quando falta prova histórica.
 - [x] Atualizar a descrição ADF da FBI-4991 e conferir status/catálogo preservados.
-- [ ] Implementar e verificar as jornadas e os hands-ons descritos nos critérios 12–18.
+- [x] Implementar e verificar as dezoito jornadas e seus laboratórios; os limites e o aceite integral ficam no registro de execução e na Story.

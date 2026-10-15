@@ -52,7 +52,9 @@
       "/root/story_requirements_review",
       "/root/curation_independent",
       "/root/curation_second",
-      "/root/terminal_delivery"
+      "/root/terminal_delivery",
+      "/root/diagram_semantics_one",
+      "/root/diagram_semantics_two"
     ],
     "max_rechecks": 1
   },

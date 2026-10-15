@@ -1,0 +1,25 @@
+{
+  "lesson_id": "lesson:processo/success-without-domain-invariant@2",
+  "steps": [
+    {
+      "log": "transport-validate.log",
+      "exit_code": 0
+    },
+    {
+      "log": "transport-secrets.log",
+      "exit_code": 0
+    },
+    {
+      "log": "transport-render.log",
+      "exit_code": 0
+    },
+    {
+      "log": "transport-ingest-dry.log",
+      "exit_code": 0
+    },
+    {
+      "log": "transport-ingest-apply.log",
+      "exit_code": 0
+    }
+  ]
+}

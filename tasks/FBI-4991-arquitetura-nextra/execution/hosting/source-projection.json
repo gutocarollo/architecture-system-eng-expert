@@ -1,6 +1,6 @@
 {
-  "observed_at": "2026-10-15T17:40:45.775617+00:00",
-  "source_head": "32b80d5fc8eda42e2aa9b496d82c30b574120e68",
+  "observed_at": "2026-10-15T18:35:22.705561+00:00",
+  "source_head": "623ae1d3d34143df53c571327a508de47ab58951",
   "project_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab",
   "source_files": {
     "app/[[...mdxPath]]/page.jsx": "b394674281e4e1d2b31693ff3467d4b6ed2250b4a980a36ab414e2f2de2c0aed",
@@ -30,7 +30,7 @@
     "content/explicacoes/casos/reservation/index.mdx": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
     "content/explicacoes/casos/revision-cas-postgres/index.mdx": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
     "content/explicacoes/casos/safe-release/index.mdx": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
-    "content/explicacoes/casos/single-flight-cancel/index.mdx": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+    "content/explicacoes/casos/single-flight-cancel/index.mdx": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
     "content/explicacoes/casos/storage-partitions/index.mdx": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
     "content/explicacoes/code-boundaries/index.mdx": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
     "content/explicacoes/code-patterns/index.mdx": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
@@ -41,7 +41,7 @@
     "content/explicacoes/index.mdx": "100eb14d37d0386c5c452b827c57e34ea151c5a4e5dab69a2dc8f68f3ec8b99b",
     "content/explicacoes/messages/index.mdx": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
     "content/explicacoes/observability/index.mdx": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
-    "content/explicacoes/read-models/index.mdx": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+    "content/explicacoes/read-models/index.mdx": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
     "content/explicacoes/reliable-integration/index.mdx": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
     "content/explicacoes/safe-change/index.mdx": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
     "content/explicacoes/security/index.mdx": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
@@ -214,7 +214,7 @@
     "content/tutoriais/single-flight.mdx": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
     "content/tutoriais/state-machine.mdx": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
     "patches/nextra-theme-docs+4.6.1.patch": "1c54186f7920f73f5c4d74ccd4ff5bf0352d885072efca778c75fbeca095c117",
-    "public/downloads/architecture-labs.zip": "229046fc241a89d206020a61714bd5cece173cbf2fc31301a053dff3790cbafe",
+    "public/downloads/architecture-labs.zip": "f1c6e826f3183a21a2f1691aa40202060ab3471e3af897cfa7ef1d79d4b9dd7a",
     "mdx-components.jsx": "ef9e47075361b51a667027501174d110041c5692929100b49244db71aaa0a2d0",
     "package.json": "f27b98a95197e92d40d973c2fb40e5c6bf25961cc507611b99639d0e50cb63ac",
     "package-lock.json": "554f6c03b73acd55f14a988e43d614d00907dbb48deeb8075c4bff54ba03ded6"

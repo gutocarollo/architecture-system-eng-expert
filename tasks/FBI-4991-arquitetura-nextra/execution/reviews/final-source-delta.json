@@ -1,0 +1,17 @@
+{
+  "observed_at": "2026-10-15T18:48:22.958205+00:00",
+  "verdict": "PASS_BOUNDED",
+  "prior_terminal": "reviews/terminal.json",
+  "prior_source_commit": "623ae1d3d34143df53c571327a508de47ab58951",
+  "site_source_commit": "fafe26360c7140239a74ce31305fb07637de7c54",
+  "worker_sha256": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+  "worker_unchanged_since_terminal": true,
+  "download_entries": 100,
+  "download_changed_entries": [
+    "architecture-labs/labs/architecture/case_diagrams.json",
+    "architecture-labs/source-manifest.json"
+  ],
+  "lab_runtime_sources_unchanged_since_independent_16_runner_execution": true,
+  "zip_sha256": "f1c6e826f3183a21a2f1691aa40202060ab3471e3af897cfa7ef1d79d4b9dd7a",
+  "scope": "The fresh download has the same source set and runtime bytes; the lab diagram metadata and manifest change only. The two MDX semantic corrections have their own warm independent judgments. This is deterministic delta reconciliation, not a fresh terminal audit."
+}

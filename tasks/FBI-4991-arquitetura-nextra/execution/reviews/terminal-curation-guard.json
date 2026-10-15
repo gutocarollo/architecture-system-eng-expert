@@ -1,0 +1,1512 @@
+{
+  "observed_utc": "2026-10-15T18:11:13.609126+00:00",
+  "scope": "Deterministic current-adjudication and fingerprint checks; no semantic approval is inferred.",
+  "matrix_sha256": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b",
+  "repaired_positive_judgments": 51,
+  "unchanged_first_pass": 259,
+  "checks": 375,
+  "failures": 0,
+  "results": [
+    {
+      "name": "positive:aggregate",
+      "passed": true
+    },
+    {
+      "name": "positive:aggregate-root",
+      "passed": true
+    },
+    {
+      "name": "positive:anti-corruption-layer",
+      "passed": true
+    },
+    {
+      "name": "positive:at-least-once-delivery",
+      "passed": true
+    },
+    {
+      "name": "positive:branch-by-abstraction",
+      "passed": true
+    },
+    {
+      "name": "positive:cdc-migration",
+      "passed": true
+    },
+    {
+      "name": "positive:centralized-logging",
+      "passed": true
+    },
+    {
+      "name": "positive:chain-of-responsibility",
+      "passed": true
+    },
+    {
+      "name": "positive:choreography",
+      "passed": true
+    },
+    {
+      "name": "positive:circuit-breaker",
+      "passed": true
+    },
+    {
+      "name": "positive:compensating-transaction",
+      "passed": true
+    },
+    {
+      "name": "positive:composite",
+      "passed": true
+    },
+    {
+      "name": "positive:consistent-hashing",
+      "passed": true
+    },
+    {
+      "name": "positive:context-map",
+      "passed": true
+    },
+    {
+      "name": "positive:dark-launch",
+      "passed": true
+    },
+    {
+      "name": "positive:database-decomposition",
+      "passed": true
+    },
+    {
+      "name": "positive:denormalization",
+      "passed": true
+    },
+    {
+      "name": "positive:distributed-cache",
+      "passed": true
+    },
+    {
+      "name": "positive:distributed-tracing",
+      "passed": true
+    },
+    {
+      "name": "positive:domain-policy",
+      "passed": true
+    },
+    {
+      "name": "positive:domain-service",
+      "passed": true
+    },
+    {
+      "name": "positive:dual-write-migration",
+      "passed": true
+    },
+    {
+      "name": "positive:expand-contract",
+      "passed": true
+    },
+    {
+      "name": "positive:factory",
+      "passed": true
+    },
+    {
+      "name": "positive:feature-flags",
+      "passed": true
+    },
+    {
+      "name": "positive:finite-state-machine",
+      "passed": true
+    },
+    {
+      "name": "positive:graphql-federation",
+      "passed": true
+    },
+    {
+      "name": "positive:materialized-view",
+      "passed": true
+    },
+    {
+      "name": "positive:mvc",
+      "passed": true
+    },
+    {
+      "name": "positive:orchestration-saga",
+      "passed": true
+    },
+    {
+      "name": "positive:parallel-run",
+      "passed": true
+    },
+    {
+      "name": "positive:pipeline",
+      "passed": true
+    },
+    {
+      "name": "positive:precomputation",
+      "passed": true
+    },
+    {
+      "name": "positive:range-sharding",
+      "passed": true
+    },
+    {
+      "name": "positive:recreate-deployment",
+      "passed": true
+    },
+    {
+      "name": "positive:refresh-ahead",
+      "passed": true
+    },
+    {
+      "name": "positive:rest",
+      "passed": true
+    },
+    {
+      "name": "positive:saga",
+      "passed": true
+    },
+    {
+      "name": "positive:scatter-gather",
+      "passed": true
+    },
+    {
+      "name": "positive:service-extraction",
+      "passed": true
+    },
+    {
+      "name": "positive:service-mesh",
+      "passed": true
+    },
+    {
+      "name": "positive:service-to-service-identity",
+      "passed": true
+    },
+    {
+      "name": "positive:single-flight",
+      "passed": true
+    },
+    {
+      "name": "positive:state",
+      "passed": true
+    },
+    {
+      "name": "positive:state-machine",
+      "passed": true
+    },
+    {
+      "name": "positive:template-method",
+      "passed": true
+    },
+    {
+      "name": "positive:thread-pool",
+      "passed": true
+    },
+    {
+      "name": "positive:token-exchange",
+      "passed": true
+    },
+    {
+      "name": "positive:transitional-architecture",
+      "passed": true
+    },
+    {
+      "name": "positive:websocket",
+      "passed": true
+    },
+    {
+      "name": "positive:zero-trust",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:a-b-deployment",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:abac",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:abstract-factory",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:active-active",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:active-passive",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:actor-model",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:adapter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:aggregator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:ambassador",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:api-composition",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:api-gateway",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:api-gateway-security",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:append-only-log",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:application-service",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:async-await",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:asynchronous-replication",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:at-most-once-delivery",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:automatic-failover",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:backend-for-frontend-bff",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:backpressure",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:bastion-host",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:batch-processing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:blackboard-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:blue-green-deployment",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:bounded-context",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:bridge",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:builder",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:bulkhead",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cache-aside",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cache-invalidation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cache-stampede-protection",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cache-warming",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:canary-release",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cascading-replication",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cell-based-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:change-data-capture-cdc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:chaos-engineering",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:choreography-saga",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:clean-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cold-standby",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:command",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:command-handler",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:compare-and-swap-cas",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:competing-consumers",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:component-based-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:conformist",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:consensus",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:content-based-router",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:copy-on-write",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:correlation-id",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:covering-index",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:cqrs",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:customer-supplier",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:dag",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:ddd",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:dead-letter-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:deadline-propagation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:decorator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:deduplication",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:defense-in-depth",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:delayed-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:directory-based-sharding",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:distributed-lock",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:domain-event",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:dual-write",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:entity",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:event-notification",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:event-sourcing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:event-streaming",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:event-carried-state-transfer",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:event-driven-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:eventual-consistency",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:exactly-once-semantics",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:exponential-backoff",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:facade",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:factory-method",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fail-fast",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:failover",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fallback",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fan-in",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fan-out",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fencing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fencing-token",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fire-and-forget",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:flyweight",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:fork-join",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:futures-promises",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:gateway-aggregation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:gateway-offloading",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:gateway-routing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:geographic-sharding",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:gitops",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:golden-signals",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:gossip-protocol",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:graceful-degradation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:hash-sharding",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:hateoas",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:health-check",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:heartbeat",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:hexagonal-ports-adapters",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:horizontal-partitioning",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:hot-standby",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:hybrid-logical-clock",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:idempotency",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:idempotency-key",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:immutable-data",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:immutable-infrastructure",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:indexing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:infrastructure-as-code",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:integration-event",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:interpreter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:iterator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:jitter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:job-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:kappa-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:lambda-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:lamport-clock",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:layered-n-tier",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:leader-election",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:leader-follower",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:lease",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:least-privilege",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:load-shedding",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:local-cache",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:lock-free",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:log-structured-storage",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:long-polling",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mapreduce",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mediator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:memento",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:message-enricher",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:message-filter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:message-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:message-router",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:message-translator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:metrics",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:microkernel-plugin-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:microservices",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:modular-monolith",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:modularization",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:monotonic-reads",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mtls",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:multi-az",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:multi-leader",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:multi-primary",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:multi-region",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mutex",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mvp",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:mvvm",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:negative-caching",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:network-segmentation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:oauth2",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:observer",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:oidc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:onion-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:open-host-service",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:opentelemetry",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:optimistic-concurrency-control",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:orchestrator",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:outbox-cdc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:pac",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:paxos",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:peer-to-peer",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:pessimistic-locking",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:pipe-and-filter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:poison-message-handling",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:policy-based-access-control",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:polling",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:primary-replica",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:priority-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:producer-consumer",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:progressive-delivery",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:projection",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:prototype",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:proxy",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:publish-subscribe",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:published-language",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:query-handler",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:quorum",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:quorum-read-write",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:raft",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:rate-limiting",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:rbac",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:reactive-streams",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:read-model",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:read-replica",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:read-through",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:read-your-writes",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:reader-writer-lock",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:rebac",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:red-method-rate-errors-duration",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:replication",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:repository",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:request-id",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:request-reply",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:resequencer",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:reservation-pattern",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:retry",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:retry-queue",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:reverse-proxy",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:rolling-deployment",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:rpc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:secrets-rotation",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:self-healing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:semaphore",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:separate-ways",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:server-sent-events",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:serverless",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:shadow-deployment",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:shadow-traffic",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:sharding",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:shared-kernel",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:short-lived-credentials",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:sidecar",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:single-writer-principle",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:singleton",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:snapshotting",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:soa",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:space-based-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:specification",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:spinlock",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:split-brain-prevention",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:splitter",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:stateless-services",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:strangler-fig",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:strategy",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:stream-processing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:strong-consistency",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:structured-logging",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:synchronous-replication",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:synthetic-monitoring",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:tcc-try-confirm-cancel",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:three-phase-commit-3pc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:throttling",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:timeout",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:transactional-inbox",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:transactional-outbox",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:ttl-cache",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:two-level-cache",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:two-phase-commit-2pc",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:ubiquitous-language",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:use-method-utilization-saturation-errors",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:value-object",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:version-vector",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:vertical-partitioning",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:vertical-slice-architecture",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:visitor",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:wait-free",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:warm-standby",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:watchdog",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:webhook",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:work-stealing",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:worker-pool",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:workflow-engine",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:write-amplification-control",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:write-behind-write-back",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:write-model",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:write-through",
+      "passed": true
+    },
+    {
+      "name": "preserved-first-pass:write-ahead-log-wal",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:aggregate",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:aggregate-root",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:anti-corruption-layer",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:at-least-once-delivery",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:branch-by-abstraction",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:cdc-migration",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:centralized-logging",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:chain-of-responsibility",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:choreography",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:circuit-breaker",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:compensating-transaction",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:composite",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:consistent-hashing",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:context-map",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:dark-launch",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:database-decomposition",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:denormalization",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:distributed-cache",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:distributed-tracing",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:domain-policy",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:domain-service",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:dual-write-migration",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:expand-contract",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:factory",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:feature-flags",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:finite-state-machine",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:graphql-federation",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:materialized-view",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:mvc",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:orchestration-saga",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:parallel-run",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:pipeline",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:precomputation",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:range-sharding",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:recreate-deployment",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:refresh-ahead",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:rest",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:saga",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:scatter-gather",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:service-extraction",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:service-mesh",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:service-to-service-identity",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:single-flight",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:state",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:state-machine",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:template-method",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:thread-pool",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:token-exchange",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:transitional-architecture",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:websocket",
+      "passed": true
+    },
+    {
+      "name": "actual-warm-recheck:zero-trust",
+      "passed": true
+    },
+    {
+      "name": "missing-positive-judgment",
+      "passed": true
+    },
+    {
+      "name": "pending-decision-is-not-positive",
+      "passed": true
+    },
+    {
+      "name": "open-author-gate",
+      "passed": true
+    },
+    {
+      "name": "missing-base-evidence",
+      "passed": true
+    },
+    {
+      "name": "missing-application-evidence",
+      "passed": true
+    },
+    {
+      "name": "changed-limits-invalidate-judgment",
+      "passed": true
+    },
+    {
+      "name": "generic-repository-cannot-fall-back-to-positive",
+      "passed": true
+    },
+    {
+      "name": "changed-excerpt",
+      "passed": true
+    },
+    {
+      "name": "changed-source-binding",
+      "passed": true
+    },
+    {
+      "name": "changed-reviewed-source-not-carried",
+      "passed": true
+    },
+    {
+      "name": "changed-reviewed-skill-scope-not-carried",
+      "passed": true
+    },
+    {
+      "name": "forged-review-binding-rejected",
+      "passed": true
+    },
+    {
+      "name": "changed-mechanism-cannot-inherit-review",
+      "passed": true
+    },
+    {
+      "name": "unapproved-license-change-rejected",
+      "passed": true
+    }
+  ],
+  "independent_pending_count": 0
+}

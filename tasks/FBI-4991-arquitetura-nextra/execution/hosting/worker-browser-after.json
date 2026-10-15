@@ -1,0 +1,141 @@
+{
+  "sourceHash": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+  "origin": "http://localhost:61167",
+  "fixture": "Local fake R2; real Chrome form navigation; synthetic injected platform-script marker. No live credentials.",
+  "events": [
+    {
+      "measuredAt": "2026-10-15T17:53:50.602Z",
+      "method": "GET",
+      "path": "/login",
+      "origin": null,
+      "referer": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 200,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": "form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+      "hasSessionCookie": false,
+      "r2Reads": 0
+    },
+    {
+      "measuredAt": "2026-10-15T17:53:50.631Z",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "origin": null,
+      "referer": "http://localhost:61167/login",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 401,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": false,
+      "r2Reads": 0
+    },
+    {
+      "measuredAt": "2026-10-15T17:53:55.698Z",
+      "method": "POST",
+      "path": "/login",
+      "origin": "http://localhost:61167",
+      "referer": "http://localhost:61167/login",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 303,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": false,
+      "r2Reads": 0
+    },
+    {
+      "measuredAt": "2026-10-15T17:53:55.702Z",
+      "method": "GET",
+      "path": "/",
+      "origin": null,
+      "referer": "http://localhost:61167/login",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 200,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": true,
+      "r2Reads": 1
+    },
+    {
+      "measuredAt": "2026-10-15T17:53:55.723Z",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "origin": null,
+      "referer": "http://localhost:61167/",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 404,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": true,
+      "r2Reads": 2
+    },
+    {
+      "measuredAt": "2026-10-15T17:54:01.678Z",
+      "method": "GET",
+      "path": "/_fixture/null-form",
+      "origin": null,
+      "referer": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 200,
+      "referrerPolicy": "no-referrer",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": true,
+      "r2Reads": 2
+    },
+    {
+      "measuredAt": "2026-10-15T17:54:08.462Z",
+      "method": "POST",
+      "path": "/login",
+      "origin": "null",
+      "referer": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 403,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": true,
+      "r2Reads": 2
+    },
+    {
+      "measuredAt": "2026-10-15T17:54:08.496Z",
+      "method": "GET",
+      "path": "/_fixture/cross-form",
+      "origin": null,
+      "referer": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 200,
+      "referrerPolicy": "origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": false,
+      "r2Reads": 2
+    },
+    {
+      "measuredAt": "2026-10-15T17:54:08.547Z",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "origin": null,
+      "referer": "http://127.0.0.1:61167/",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 401,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": false,
+      "r2Reads": 2
+    },
+    {
+      "measuredAt": "2026-10-15T17:54:12.080Z",
+      "method": "POST",
+      "path": "/login",
+      "origin": "http://127.0.0.1:61167",
+      "referer": "http://127.0.0.1:61167/",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "status": 403,
+      "referrerPolicy": "same-origin",
+      "contentSecurityPolicy": null,
+      "hasSessionCookie": false,
+      "r2Reads": 2
+    }
+  ],
+  "reads": [
+    "releases/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/index.html",
+    "releases/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/favicon.ico"
+  ]
+}

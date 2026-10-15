@@ -1,0 +1,9 @@
+ontology resolved from the main tree: /Users/augustocarollo/code/fazgraph/docs/canonical/_ontology/ontology.yaml
+WARN semantica_adapter unavailable, Check 3 alias normalization degraded to a plain .strip().lower(): semantica_adapter: import failed against the pinned checkout at /Users/augustocarollo/Developer/semantica (HEAD ecb33a5b): No module named 'chardet'. This is almost always a missing optional dependency of Semantica itself (chardet/beautifulsoup4/langdetect/python-dateutil) -- run this script under `uv run --script`, which declares all four in its PEP 723 header, instead of a bare `python3`.
+GATE OK secrets: 1 record(s) clean
+GATE OK secrets: 1 record(s) clean
+GATE OK schema: 1 record(s), 0 failure(s)
+GATE OK bank=lessons strategy=lesson chunks, base chunks, auto_consolidation=False
+OK   lesson:processo/success-without-domain-invariant@2 action=retain status=200 units=1 pending=None
+OK   verify lesson:processo/success-without-domain-invariant@2 exact=True
+applied=1 landed=1 pending=0 progress=tasks/lessons.jsonl.ingest-progress.jsonl

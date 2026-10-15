@@ -17,6 +17,7 @@ syntax=json.loads(syntax_path.read_text())
 assert not syntax['errors'] and syntax['status']=='PASS'
 previous=[BASE/'mermaid-render-final.json',BASE/'mermaid-pg-cas.json']
 if (BASE/'mermaid-airflow-retry.json').exists(): previous.append(BASE/'mermaid-airflow-retry.json')
+if (BASE/'mermaid-semantic-repairs.json').exists(): previous.append(BASE/'mermaid-semantic-repairs.json')
 renders={}
 for path in previous:
     receipt=json.loads(path.read_text())

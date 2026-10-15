@@ -1,0 +1,167 @@
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Resultado da execução e entrega protegida — 15 de outubro de 2026"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "O curso reúne 181 documentos MDX no Nextra, 18 jornadas e 90 destinos de aprendizado. Sete casos têm origem histórica, sendo seis do MakersHub e um do Airflow; os outros onze são casos financeiros explicitamente hipotéticos. A curadoria de 310 conceitos foi confrontada com julgamentos independentes vinculados às fontes. O recibo de curadoria registra zero pendências de rechecagem, com 14 classificações de nível médio preservadas como limite ou backlog. A contagem de documentos e destinos descreve o material entregue e não certifica, por si só, a totalidade dos critérios de aceite."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "O pacote de exercícios oferece 16 executores em um ZIP com 98 arquivos e foi executado após extração sem diretório Git. Dois casos de PostgreSQL usaram um servidor real da versão 16.15 em ambiente isolado, com dados sintéticos: a correção do grão reduziu duas linhas e comissão duplicada de 200 para uma linha e comissão de 100; a comparação de revisão passou a rejeitar a escrita obsoleta. O caso Airflow executou funções históricas com substitutos controlados e demonstrou duas tentativas diante de um lock transitório. Essa prática não executou DAGs, processos Haskell nem conexões de produção."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "A base examinada do curso é 623ae1d3d34143df53c571327a508de47ab58951, acrescida das duas correções de diagramas vinculadas aos hashes dos recibos de rechecagem. A publicação registrada anteriormente oferece o site protegido em "
+        },
+        {
+          "type": "text",
+          "text": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": ", com a implementação de acesso 1677c81236d3588736e88597e9589d942b655a25, versão nativa v2 e política pública de revisão 2. Esses recibos antecedem as correções semânticas; a versão final corrigida e sua nova verificação pública ainda precisam ser reconciliadas com a publicação. A opção B aprovada permite entrar com uma senha compartilhada, sem exigir conta ChatGPT. O servidor valida a sessão antes de entregar HTML, arquivos _next, índice _pagefind ou downloads armazenados em R2 privado. A senha e as chaves de sessão são mantidas no Keychain e nos segredos de execução."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Na publicação anterior às correções semânticas, entre 18:13:33 e 18:15:02 UTC de 15 de outubro, a verificação pública registrou bloqueio anônimo nos 1.397 caminhos do manifesto, correspondência SHA256 nos mesmos 1.397 arquivos autenticados e novo bloqueio anônimo após aquecer o cache. O login correto, a rejeição da senha incorreta, a busca e a saída da sessão cumpriram os comportamentos examinados. failures e pageErrors permaneceram vazios. O veredito bruto FAIL foi preservado: o diagnóstico da mesma versão, entre 18:18:28 e 18:18:46 UTC, relacionou os erros de console às respostas 401 de bloqueio e ao favicon ausente com resposta 404. A avaliação funcional desses cenários é aprovada com esses erros registrados; isso não significa uma validação integral sem ressalvas."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "A auditoria terminal em reviews/terminal.json aprovou o escopo de site protegido e entrega em rascunho com PASS_FOR_PROTECTED_SITE_AND_DRAFT e zero achados HIGH. Os três julgamentos semânticos desse recibo se somam aos 46 da primeira lane e aos 45 da segunda, totalizando 94 diagramas confrontados com suas fontes ou com o modelo hipotético declarado. As duas rechecagens limitadas aos achados HIGH retornaram PASS_BOUNDED e deixaram zero HIGH aberto. A correção da linhagem recolocou o dashboard entre captação e ranking; a correção do cancelamento identificou a ação injetada pelo laboratório, sem atribuir ao navegador uma causa histórica não demonstrada. Permanecem dois apontamentos médios de comunicação visual e um apontamento baixo nos diagramas, além do backlog da curadoria. A aprovação semântica respeita as versões, os trechos e os snapshots identificados; não prova operação atual em produção, execução de DAGs ou análise causal integral do histórico."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "A classificação do histórico abrange 12.697 commits e 595 cards FBI: sete relações tiveram causa relatada e apoio no código, 290 permaneceram como relato, 35 ficaram sem evidência causal e 263 foram classificadas como mudanças às quais essa prova não se aplica. A análise causal integral continua sem confirmação. O repositório privado GitHub gutocarollo/architecture-system-eng-expert permanece fora da lista permitida do catálogo, e a fonte de autoridade para registrar Repository não foi localizada na auditoria delimitada. Existe proposta concreta de Document com patch e ensaios de geração, fora do escopo autorizado de escrita. O bloqueio de catálogo permanece aberto; este complemento mantém a Story em In Progress e a resolução vazia."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "R18 — Entrega com senha compartilhada, sem conta ChatGPT"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "O estudante que recebeu a senha deve conseguir abrir o endereço publicado sem criar ou usar uma conta ChatGPT. O servidor deve exigir uma sessão válida antes de entregar qualquer conteúdo do curso, inclusive HTML, arquivos de aplicação, índice de busca e ZIP dos exercícios. A navegação autenticada deve permitir estudar, pesquisar e baixar o pacote. A saída da sessão deve devolver o estudante à entrada protegida. Os valores da senha e das chaves de sessão não podem aparecer no código, nos documentos, no Jira ou nos recibos."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Critério de aceite adicional 19 — Comprovar a entrega protegida"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Um recibo identifica o endereço publicado, a versão de código, a versão nativa, a revisão da política de acesso, o manifesto e o horário da verificação. Ele demonstra que uma pessoa sem conta ChatGPT entra com a senha correta, recebe rejeição com senha incorreta, usa a busca e baixa os exercícios; demonstra também que os caminhos do manifesto continuam inacessíveis sem sessão antes e depois do aquecimento do cache e após a saída. As respostas de bloqueio esperadas e as falhas incidentais permanecem identificadas no resultado. Esse critério acrescenta a entrega protegida aos requisitos anteriores e não os substitui."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Fontes e fronteira deste complemento"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Os recibos desta execução estão em tasks/"
+        },
+        {
+          "type": "text",
+          "text": "FBI-4991",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://fazcapital.atlassian.net/browse/FBI-4991"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "-arquitetura-nextra/execution/: reviews/terminal.json, reviews/diagram-semantics-one.json, reviews/diagram-semantics-one-recheck.json, reviews/diagram-semantics-two.json, reviews/diagram-semantics-two.recheck.json, reviews/root-cases.json, reviews/teaching-recheck.json, curation/summary.json, hosting/lab-bundle-receipt.json, hosting/download-extraction-final.json, hosting/public-access-policy.json, hosting/public-verification.json, hosting/public-network-diagnostic-verification.json, history/history-causal-completion-summary.json e catalog/registration-authority-proposal.json. O resultado funcional reconciliado está em jira-final-preparation/public-functional-assessment.json. Os 63 blocos anteriores, os requisitos R1 a R17 e os critérios 12 a 18 são preservados integralmente. A atualização registra o alcance observado e as pendências; ela não encerra o aceite integral da Story."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "observed_at": "2026-10-15T18:10:02.592110+00:00",
+  "source": "Owner runtime interpretation; terminal independent verdict is separate.",
+  "full_receipt_sha256": "57d37c58ab395ec44cb747eefa48120cd565955f2f6beb05ceaee208ad8d70bf",
+  "diagnostic_receipt_sha256": "caa192fb8b321e067a44f46703e68cd21155696757ea06c960fa3045c21325da",
+  "raw_harness_verdict": "FAIL",
+  "functional_failures": [],
+  "page_errors": [],
+  "anonymous_denied": 1397,
+  "authenticated_sha_verified": 1397,
+  "anonymous_after_warm_denied": 1397,
+  "wrong_password_rejected": true,
+  "logout": {
+    "requestStatus": 0,
+    "redirectedToLogin": true
+  },
+  "http_errors": [
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/login",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 404
+    }
+  ],
+  "remaining_nonblocking_observation": "GET favicon.ico returns404 after authentication; no icon was included in Nextra export.",
+  "functional_security_verdict": "PASS"
+}

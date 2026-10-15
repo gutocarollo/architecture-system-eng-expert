@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-10-15T18:35:22.428130+00:00",
+  "repairs": [
+    "DSEM2-H1",
+    "diagram-72"
+  ],
+  "before": {
+    "content/explicacoes/casos/single-flight-cancel/index.mdx": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+    "content/explicacoes/read-models/index.mdx": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+    "labs/architecture/case_diagrams.json": "a9803be68be09f95df3b8520e8f57214e6ea87e3a25c1ac98afaab02b8b69b5b"
+  },
+  "after": {
+    "content/explicacoes/casos/single-flight-cancel/index.mdx": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
+    "content/explicacoes/read-models/index.mdx": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+    "labs/architecture/case_diagrams.json": "f81a8c73e65b329cd73399cba9bd9b8bfca3e52281b51d0167347d966debab5e"
+  },
+  "scope": "Two factual diagram repairs; runtime code and guards unchanged.",
+  "metadata_only_file": "labs/architecture/case_diagrams.json"
+}

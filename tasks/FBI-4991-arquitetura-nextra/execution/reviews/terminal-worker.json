@@ -1,0 +1,198 @@
+{
+  "startedAt": "2026-10-15T18:03:48.661Z",
+  "sourceSha256": "3afee5efd34af4dbc9e8b6b50f031b6f6b09b325e4a1b9ee0b8e2010414cf825",
+  "scope": "Independent local adversarial inputs; fake private R2 and real headless Chrome. Synthetic credentials only; no live service mutation.",
+  "checks": [
+    {
+      "name": "anonymous HTML, Next, Pagefind, RSC, download and HEAD deny before R2",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "fail closed for missing config and R2 bindings",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "same-origin POST gate rejects missing null and foreign origins",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "invalid, duplicate, oversized and wrong-type logins cannot issue sessions",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "valid signed host session unlocks all resource classes and HEAD has no body",
+      "passed": true,
+      "r2Reads": 7,
+      "r2Writes": 0
+    },
+    {
+      "name": "tampered, unsigned and unprefixed sessions cannot read R2",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "password and signing-secret rotation invalidate existing session",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "expired and future-issued signed sessions are rejected server-side",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "open redirect and encoded path attacks cannot select foreign objects",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "session and course password do not authorize admin uploads",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    },
+    {
+      "name": "bounded admin upload validates method destination checksum and size",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 1
+    },
+    {
+      "name": "read and write failures fail closed then recover on next request",
+      "passed": true,
+      "r2Reads": 2,
+      "r2Writes": 1
+    },
+    {
+      "name": "logout expires host cookie and subsequent anonymous access is denied",
+      "passed": true,
+      "r2Reads": 0,
+      "r2Writes": 0
+    }
+  ],
+  "mutations": [
+    {
+      "name": "anonymous-gate-removal",
+      "killed": true
+    },
+    {
+      "name": "origin-gate-removal",
+      "killed": true
+    }
+  ],
+  "browser": {
+    "passed": true,
+    "browserOrigin": "http://localhost:62989",
+    "browserVersion": "Chrome/155.0.8059.40",
+    "events": [
+      {
+        "method": "GET",
+        "path": "/jornadas/terminal",
+        "origin": null,
+        "status": 303,
+        "reads": 0
+      },
+      {
+        "method": "GET",
+        "path": "/login",
+        "origin": null,
+        "status": 200,
+        "reads": 0
+      },
+      {
+        "method": "GET",
+        "path": "/favicon.ico",
+        "origin": null,
+        "status": 401,
+        "reads": 0
+      },
+      {
+        "method": "POST",
+        "path": "/login",
+        "origin": "http://localhost:62989",
+        "status": 401,
+        "reads": 0
+      },
+      {
+        "method": "GET",
+        "path": "/favicon.ico",
+        "origin": null,
+        "status": 401,
+        "reads": 0
+      },
+      {
+        "method": "POST",
+        "path": "/login",
+        "origin": "http://localhost:62989",
+        "status": 303,
+        "reads": 0
+      },
+      {
+        "method": "GET",
+        "path": "/jornadas/terminal",
+        "origin": null,
+        "status": 200,
+        "reads": 1
+      },
+      {
+        "method": "GET",
+        "path": "/_next/terminal.js",
+        "origin": null,
+        "status": 200,
+        "reads": 2
+      },
+      {
+        "method": "GET",
+        "path": "/favicon.ico",
+        "origin": null,
+        "status": 200,
+        "reads": 3
+      },
+      {
+        "method": "POST",
+        "path": "/logout",
+        "origin": "http://localhost:62989",
+        "status": 303,
+        "reads": 3
+      },
+      {
+        "method": "GET",
+        "path": "/login",
+        "origin": null,
+        "status": 200,
+        "reads": 3
+      },
+      {
+        "method": "GET",
+        "path": "/favicon.ico",
+        "origin": null,
+        "status": 401,
+        "reads": 3
+      },
+      {
+        "method": "GET",
+        "path": "/_pagefind/pagefind.js",
+        "origin": null,
+        "status": 401,
+        "reads": 3
+      }
+    ],
+    "pageErrors": [],
+    "logoutSearchStatus": 401,
+    "scope": "Real Chromium form POST origin, cookie acceptance, wrong-password recovery, private JS and logout; local synthetic R2 only."
+  },
+  "verdict": "PASS",
+  "finishedAt": "2026-10-15T18:03:53.296Z"
+}

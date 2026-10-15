@@ -1,0 +1,70 @@
+{
+  "read_at_utc": "2026-10-15T18:46:09.803883+00:00",
+  "verification_scope": "Read and reconcile existing local receipts only; no production, network, PostgreSQL or FazGraph rerun.",
+  "sources": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal.json",
+      "sha256": "84548c42879ee94a0e7a990c26f1d574b9e32e1d3d2cde45f4a53da16e1bf75c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one.json",
+      "sha256": "940047d35ba4a9e566cee0b47767df6ed0f516243025e4e92a11421593318d20"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-recheck.json",
+      "sha256": "7e32a41ccf2b59073ed9a785349deb0f3757f9841f4a443e2ce29d23e82bead3"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two.json",
+      "sha256": "7d509517498c1d3adaafdebe08a9cff2e0b8f07dba443004413a53ea80c042ba"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two.recheck.json",
+      "sha256": "e93d8904d1f901812514f360a17392cca96649a33e2bafd935dc9f1e4f04830a"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/root-cases.json",
+      "sha256": "16393fc094a84c6b0143fbbd9927a4577aca86205b4479157276a2c0ef9cbeee"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching-recheck.json",
+      "sha256": "40814e7a05d585b4414e755307cc77b2f5e57849ed86978da4c0b3599d26a015"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/curation/summary.json",
+      "sha256": "830d70ba57d968f42d00d0cb6e8bb7c5ea9764c4894f6d681bac9f832b5ed961"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/decision.json",
+      "sha256": "54eb2585ba6a7cc8f520b40ca3bee75ebd0296179980126dcf69c99696ed2574"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/lab-bundle-receipt.json",
+      "sha256": "13bf52e1a4314ee719761ce8180f7003edd4864167c11e881081deeb4ab89e2c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/download-extraction-final.json",
+      "sha256": "7e8cbab2405dac0afe1a5e4de8aab811f30bf62ebe7e077b3dc87a2318d3c380"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-access-policy.json",
+      "sha256": "367aa0b973d6c047e06d85ba6dee9d8b55f8cdf967539f5868673c2bf1a9fa0c"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-verification.json",
+      "sha256": "42b11131a2771bbb9e6a41b4cee855e7baef8166c553d9a78e4baa0130a17af3"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/hosting/public-network-diagnostic-verification.json",
+      "sha256": "cc26eed63c84416968c7c8dc1e24852d0ab62e237dd201b3d3d1dff45d04b90e"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/history/history-causal-completion-summary.json",
+      "sha256": "c179866566f39f85b79c23ea348d3ac2848798ac34306e206e6db02795e48431"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/catalog/registration-authority-proposal.json",
+      "sha256": "457a176489943cb48399b5d8b0d4799c174bc61fe32b166399dcc5191853c4d8"
+    }
+  ]
+}

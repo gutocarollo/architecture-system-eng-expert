@@ -1,0 +1,6 @@
+flowchart LR
+    Input[public.rpt_inflow__movement_adjusted: tabela comum] --> Model[dbt.fct_captacao no snapshot de linhagem]
+    Model --> Dashboard[dbt.fct_advisor_dashboard]
+    Model --> Goals[dbt.fct_goals]
+    Dashboard --> Ranking[dbt.fct_ranking]
+    Input -. limite de interpretação .-> Scope[Soma assinada, grão de movimento e data até 08/10]

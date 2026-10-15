@@ -40,6 +40,7 @@ def main():
     parser.add_argument('--base-url', required=True)
     parser.add_argument('--private-service-access', action='store_true')
     parser.add_argument('--workers', type=int, default=12)
+    parser.add_argument('--resume', action='store_true')
     args = parser.parse_args()
     target = urllib.parse.urlsplit(args.base_url)
     identity = json.loads((BASE / 'site-identity.json').read_text())
@@ -82,7 +83,11 @@ def main():
                                 checksum_contract='R2 put receives the SHA-256 condition; live read-back is a separate phase.', attempts=attempt)
             except urllib.error.HTTPError as error:
                 if error.code not in (429, 500, 502, 503, 504) or attempt == 3:
-                    raise RuntimeError(f'Asset upload HTTP {error.code}') from None
+                    detail = error.read(512).decode(errors='replace')
+                    for value in [*secrets.values(), service_token or '']:
+                        if value:
+                            detail = detail.replace(value, '[redacted]')
+                    raise RuntimeError(f'Asset upload HTTP {error.code}: {detail}') from None
             except urllib.error.URLError:
                 if attempt == 3:
                     raise RuntimeError('Asset upload network failure') from None
@@ -90,16 +95,28 @@ def main():
         raise RuntimeError('Asset retry budget exhausted')
 
     results = []
+    if args.resume and (BASE / 'upload-receipt.json').exists():
+        prior = json.loads((BASE / 'upload-receipt.json').read_text())
+        if prior['release_id'] != release or prior['base_url'] != args.base_url or prior['manifest_sha256'] != hashlib.sha256(manifest_path.read_bytes()).hexdigest():
+            raise SystemExit('The prior upload receipt is for another release, origin or manifest.')
+        expected_hashes = {item['path']: item['sha256'] for item in manifest['files']}
+        for result in prior['results']:
+            if result['status'] != 204 or result['requested_sha256'] != expected_hashes.get(result['path']):
+                raise SystemExit('The prior upload acknowledgment is incompatible with this manifest.')
+        results = prior['results']
+    acknowledged = {result['path'] for result in results}
+    if len(acknowledged) != len(results):
+        raise SystemExit('Duplicate prior upload acknowledgments.')
     failures = []
     started = datetime.now(timezone.utc).isoformat()
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=max(1, min(args.workers, 16)))
-    pending = {executor.submit(upload, item): item['path'] for item in manifest['files']}
+    pending = {executor.submit(upload, item): item['path'] for item in manifest['files'] if item['path'] not in acknowledged}
     try:
         for future in concurrent.futures.as_completed(pending):
             try:
                 results.append(future.result())
                 if len(results) % 100 == 0:
-                    print(json.dumps(dict(uploaded=len(results), total=len(pending))), flush=True)
+                    print(json.dumps(dict(uploaded=len(results), total=len(manifest['files']))), flush=True)
             except Exception as error:
                 failures.append(dict(path=pending[future], error=str(error)))
                 for queued in pending:

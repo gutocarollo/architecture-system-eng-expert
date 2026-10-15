@@ -9,6 +9,8 @@ Repositório de estudo e referência de **arquitetura de sistemas distribuídos*
 
 ## Curso em Nextra e MDX
 
+O curso publicado está em [Arquitetura na prática](https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site). Ele usa uma senha compartilhada validada pelo servidor e permite estudar sem uma conta ChatGPT. A senha está no Keychain do proprietário, no serviço `com.fazcapital.sites.fbi4991`, conta `course-password`; o valor não é versionado.
+
 O [curso aplicado](content/index.mdx) organiza o material nos quatro tipos de documentação do Diátaxis. Os capítulos explicam as decisões; os tutoriais conduzem experiências locais; os guias ajudam a investigar e recuperar fluxos; os catálogos servem à consulta. A navegação começa por dores de agendamento, integração, indicadores, capacidade e operação.
 
 ```sh

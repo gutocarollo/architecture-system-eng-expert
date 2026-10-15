@@ -1,0 +1,22 @@
+{
+  "round": "diagram-HIGH-only-warm-recheck/1",
+  "mission_total": 100,
+  "mission_weight_affected": 5,
+  "mission_weight_source": "Causal and lineage correctness in two core learning narratives; subset of teaching weight, without counting their source-integrity checks twice.",
+  "unresolved_high": 2,
+  "decision_this_round_can_change": "accept the two repaired factual flows or require correction",
+  "scores": [
+    5,
+    5,
+    5,
+    3,
+    5
+  ],
+  "quality_factor_pct": 96,
+  "gross_gain_pct_of_whole": 4.8,
+  "opportunity_cost_pct_of_whole": 0.3,
+  "net_gain_pct_of_whole": 4.5,
+  "expected_loss_if_skipped_pct_of_whole": 5,
+  "round_decision": "DISPATCH",
+  "stop_condition": "Only diagram39 and72 accepted by original reviewers; approved89 plus terminal3 preserved by body/doc fingerprints."
+}

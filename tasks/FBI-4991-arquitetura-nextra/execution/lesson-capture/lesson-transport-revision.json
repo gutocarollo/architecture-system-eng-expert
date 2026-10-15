@@ -1,0 +1,88 @@
+{
+  "schema_version": 2,
+  "lesson_id": "lesson:processo/success-without-domain-invariant@2",
+  "title": "Confira a garantia no ambiente que será entregue",
+  "date": "2026-10-15",
+  "domain": "processo",
+  "intent": "correction",
+  "authoring_state": "assistant_curated",
+  "evidence_state": "implementation_verified",
+  "lifecycle": "active",
+  "symptoms": [
+    "O código funciona no checkout e falha no pacote extraído.",
+    "O teste HTTP passa, mas o formulário do navegador retorna403."
+  ],
+  "sections": {
+    "symptom": "Na FBI-4991, o ZIP extraído não encontrava TypeScript. No Site privado, os testes HTTP passavam, mas o formulário do Chrome retornava403.",
+    "looked_like": "As dependências herdadas do repositório e o header Origin enviado pelo cliente de teste pareciam reproduzir a entrega.",
+    "was": "O ZIP não declarava o compilador. A política no-referrer fazia o formulário enviar Origin nulo, que o gate same-origin recusava. A execução precisava incluir instalação isolada e transporte real do navegador.",
+    "proof_command": "node sites/architecture-course/server-build/browser-fixture.mjs",
+    "prevent": "Ao entregar um pacote, instale seus locks em uma extração sem o ambiente original. Ao proteger formulários, confira no navegador a origem, os cookies, o retry e o logout. O gate exige o resultado do domínio e as condições de execução.",
+    "bitten_where": "O pacote corrigido executou dezesseis runners fora do Git. O Chrome reproduziu403 com Origin nulo e abriu o documento com a política same-origin; origens nulas e externas continuaram recusadas. Os1397arquivos publicados foram recusados sem sessão e conferidos por SHA após login."
+  },
+  "entities": [
+    {
+      "text": "Diataxis",
+      "type": "ProcessControl",
+      "id": "process:skill/diataxis"
+    },
+    {
+      "text": "FBI-4991",
+      "type": "JiraIssue",
+      "id": "jira:FBI-4991"
+    }
+  ],
+  "applies_to": [
+    "process:skill/diataxis",
+    "jira:FBI-4991"
+  ],
+  "provenance": {
+    "cards": [
+      "jira:FBI-4991"
+    ],
+    "prs": [],
+    "commits": [],
+    "session": "FBI-4991 execution 2026-10-15",
+    "source_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/hosting/worker-browser-regression.json",
+    "source_line": "1",
+    "workspaces": [
+      "workspace:wt-fbi-4991"
+    ]
+  },
+  "guard": [
+    "labs/architecture/check_invariants.py",
+    "labs/architecture/check_matrix.py",
+    "sites/architecture-course/server-build/browser-fixture.mjs",
+    "tasks/FBI-4991-arquitetura-nextra/execution/hosting/build_lab_bundle.py"
+  ],
+  "recurrence": 2,
+  "promoted": {
+    "value": false,
+    "destination": null
+  },
+  "active": true,
+  "tags": [
+    "project:architecture-system-eng-expert",
+    "workspace:wt-fbi-4991"
+  ],
+  "kind": "lesson",
+  "schema_profile": "canonical",
+  "semantic": {
+    "failure_mode_absent": "A taxonomia consultada não especifica a validação que herda dependências e injeta headers que o navegador altera.",
+    "aliases": [
+      "sucesso sem invariante"
+    ]
+  },
+  "semantic_revision": 2,
+  "sources": [
+    "skill:writing-for-agents@sha256:551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a",
+    "fazgraph:glossary@sha256:55f1fe501741a36eee4a7750c2947fe7f14fd52d1249ae9169177fad56211ce9:query=invariante,garantia,tutorial,diataxis",
+    "fazgraph:search-aliases@sha256:6af665a9c962279e61ca15ffbbf66939cdbd859d1c9c35beeda2aa3ce36737f8:query=invariante,garantia,tutorial,diataxis",
+    "fazgraph:ontology@sha256:130d1d7b064dfdd71d70df000299cbf615d76953f12512afdbe980579777f7d0:query=ProcessControl,JiraIssue",
+    "https://fazcapital.atlassian.net/browse/FBI-4991",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/teaching-recheck.json",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/hosting/download-extraction-final.json",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/hosting/worker-browser-regression.json",
+    "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/hosting/private-fixed-verification.json"
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "packet_version": 2,
   "project_root": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
-  "created_at": "2026-10-15T17:59:08.323472Z",
+  "created_at": "2026-10-15T18:47:22.758515Z",
   "status": "PARTIAL",
   "scope": "Executar e revisar as pendências da FBI-4991: conectar a totalidade dos conceitos em jornadas Diátaxis, executar antes/depois históricos e práticas financeiras, fechar curadoria por conceito, investigar histórico com evidência causal, registrar catálogo, versionar e publicar com revisão independente e read-back.",
   "inventory": [
@@ -319,8 +319,8 @@
   "sources": [
     {
       "id": "project",
-      "revision": "2ea8a2c98cca7dd4e028ff323141cfa40e90d656+working-tree-hashes",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "revision": "623ae1d3d34143df53c571327a508de47ab58951+working-tree-hashes",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "state": "AVAILABLE",
       "reason": "The documents and evidence below bind the working-tree bytes; the base SHA is not a claim that changes are committed."
     },
@@ -920,7 +920,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"policy\": \"Fixed fixture contracts for each probe; runners never regenerate these expected values.\",\n  \"probes\": {\n    \"provider-contract\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": {\n        \"booked\": false\n      },\n      \"after\": {\n        \"booked\": true,\n        \"amount\": 100.0\n      },\n      \"invariant\": \"The adapter translates an external language at one boundary.\"\n    },\n    \"replace-policy\": {\n      \"case_id\": \"order-boundaries\",\n      \"before\": [\n        10.0,\n        10.0\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "contract"
     },
     {
@@ -931,7 +931,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"scope\": \"310 concepts individually adjudicated; only relevant bounded observations carry an executable command, and missing specific practices remain PENDING\",\n  \"concepts\": [\n    {\n      \"concept_id\": \"a-b-deployment\",\n      \"canonical_name\": \"A/B Deployment\",\n      \"corpus_entry_id\": \"g12-e009\",\n      \"groups\": [\n        12\n      ],\n      \"case_id\": \"safe-release\",\n      \"mechanism\": \"O desenho expõe grupos a variantes para comparar uma hipótese de comportamento ou resultado.\",\n      \"exercise_action\": \"Distribua quatro usuários entre A e B; confira que os dois grupos recebem respostas visíveis diferentes e mantêm sua associação ao usuário.\",\n      \"probe\": \"ab-cohorts\",\n      \"command\": \"python3 labs/architecture/financial.py safe-release --probe ab-cohorts\",\n      \"coverage_level\": \"EXECUTABLE_PRINCIPLE_COMPARISON\",\n      \"destinations\": {\n        \"journey\": \"/jornadas/safe-release/\",\n        \"explanation\": \"/explicacoes/casos/safe-release/\",\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "contract"
     },
     {
@@ -942,7 +942,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"grain\": {\n    \"path\": \"backend/app/repositories/account.py\",\n    \"function\": \"get_family_revenue_by_period\",\n    \"before\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n    \"after\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n    \"sources\": {\n      \"before\": {\n        \"sha\": \"b1df42295ce42d593ae14f0a8a9092c28d1b410d\",\n        \"file_sha256\": \"788284c5d78ec62e218e90db9f154d5c9be946530ee01c5a380112ad17e9deeb\",\n        \"function_lines\": [\n          2234,\n          2301\n        ],\n        \"template_sha256\": \"5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8\",\n        \"template\": \"grain-before.sql.template\"\n      },\n      \"after\": {\n        \"sha\": \"05b2cacdddd59b968641b12d8d124bad1888392f\",\n        \"file_sha256\": \"cc552670e7637f39b56382eb75ff80e7671143c1a6ec8263bf1e2f940f0ff6ec\",\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "code"
     },
     {
@@ -953,7 +953,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"case_id\": \"airflow-lock-retry\",\n  \"repository\": \"fazcapital/airflow\",\n  \"path\": \"dags/inflow__xp__stg_to_fct.py\",\n  \"function\": \"task_run_60_days_rule_hs\",\n  \"before\": \"febaf1be978aad59c29f38d1bd74f357f8e942b5\",\n  \"after\": \"55dfe8acb362e6854d1af4e7dd7d17e6497af9bd\",\n  \"snapshots\": {\n    \"before\": {\n      \"sha256\": \"3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753\",\n      \"source_file_sha256\": \"87b745c73fedb2065756e18114421b1bfb2d90f1838a6ca354af2264f984d3a4\",\n      \"source_blob\": \"5f6641421f6adbf6b7206d4bb3dca0261a84c00b\",\n      \"start_line\": 226,\n      \"end_line\": 270,\n      \"normalization\": \"Dedent the selected nested function; preserve its body and historical comments verbatim.\"\n    },\n    \"after\": {\n      \"sha256\": \"3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731\",\n      \"source_file_sha256\": \"e9ecd6338d6c22af7f55b4017b610e7a705ab3268864b5a770ac52220a1735f5\",\n      \"source_blob\": \"2fa3dd686111f73b3148674454c203015269f1bd\",\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "code"
     },
     {
@@ -964,7 +964,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"observed_at\": \"2026-10-15T03:11:09.634806+00:00\",\n  \"scope\": \"ISOLATED_SYNTHETIC_POSTGRESQL\",\n  \"production_execution\": false,\n  \"postgres_version\": \"postgres (PostgreSQL) 16.15 (Homebrew)\",\n  \"isolation_verified\": true,\n  \"grain\": {\n    \"before\": {\n      \"rows\": 2,\n      \"commission_sum\": 200,\n      \"results\": [\n        {\n          \"month\": \"2026-01-01\",\n          \"account_code\": 101,\n          \"name\": \"SYNTHETIC-FAMILY\",\n          \"cluster\": \"SYNTHETIC-CLUSTER\",\n          \"commission\": 100,\n          \"monthly_roa\": 0.01\n        },\n        {\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "runtime"
     },
     {
@@ -975,7 +975,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"verdict\": \"PASS\",\n  \"receipts\": [\n    {\n      \"case\": \"grain\",\n      \"observed_at\": \"2026-10-15T03:11:07.507516+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 94, in main\\n    assert grain['after']['rows'] == 1 and grain['after']['commission_sum'] == 100, grain['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'rows': 2, 'commission_sum': 200, 'results': [{'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}, {'month': '2026-01-01', 'account_code': 101, 'name': 'SYNTHETIC-FAMILY', 'cluster': 'SYNTHETIC-CLUSTER', 'commission': 100, 'monthly_roa': 0.01}]}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n    },\n    {\n      \"case\": \"revision\",\n      \"observed_at\": \"2026-10-15T03:11:09.579248+00:00\",\n      \"before_exit\": 1,\n      \"before_error\": \"Traceback (most recent call last):\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 146, in <module>\\n    main()\\n    ~~~~^^\\n  File \\\"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/postgres-lineage/run.py\\\", line 127, in main\\n    assert revision['after'] == dict(stale_writer_rejected=True, azure_id='AZURE-CONFIRMED', current_rows=1), revision['after']\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError: {'stale_writer_rejected': False, 'azure_id': 'AZURE-OLD', 'current_rows': 1}\\n\",\n      \"patch_exit\": 0,\n      \"after_exit\": 0,\n      \"after_output\": \"revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True\\ncomparison=PASS isolation_verified=True temporary_server_stopped=True\\n\"\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "runtime"
     },
     {
@@ -986,18 +986,18 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "import { Footer, Layout, Navbar } from 'nextra-theme-docs'\nimport { Head } from 'nextra/components'\nimport { getPageMap } from 'nextra/page-map'\nimport 'nextra-theme-docs/style.css'\n\nexport const metadata = {\n  title: {\n    default: 'Arquitetura na prática — Faz Capital',\n    template: '%s — Arquitetura na prática'\n  },\n  description: 'Aprenda arquitetura com problemas, código e dados do MakersHub e do Airflow.'\n}\n\nexport default async function RootLayout({ children }) {\n  return (\n    <html lang=\"pt-BR\" dir=\"ltr\" suppressHydrationWarning>\n      <Head />\n      <body>\n        <Layout\n          navbar={<Navbar logo={<b>Arquitetura na prática</b>} />}\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "code"
     },
     {
       "id": "course-validation",
       "source_id": "project",
       "path": "tasks/architecture-course-2026-10-14/artifacts/fbi4991-execution-validation.json",
-      "sha256": "43567c853ece7054c5d3a21a095bee0506a5b91fdcbcf09cd61ddbb80cb2ee32",
+      "sha256": "033d6aea8e94e4ca0380515aab70494c0a9c19aaab44dc74d601c965aeb786bb",
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"schema_version\": 1,\n  \"status\": \"REVIEW_REQUIRED\",\n  \"assessment_limit\": \"Structural checks locate dedicated prose sections and content links. Meaning, pedagogical quality, framework suitability, evidence scope, remote URL availability, runtime behavior, Mermaid rendering, and diagram semantics remain for human review.\",\n  \"link_validation_scope\": \"Markdown links, Markdown reference links, and literal JSX href attributes in .md/.mdx pages. Internal routes and anchors are checked locally; dynamic JSX hrefs and external URLs remain unverified.\",\n  \"checker_analysis\": {\n    \"role\": \"Checker diagnosis only; this report does not independently accept authored documentation.\",\n    \"repaired_behaviors\": [\n      \"Normalize Nextra routes with or without a trailing slash.\",\n      \"Resolve relative Markdown links against the source content file before checking route targets.\",\n      \"Locate priority sections by explanation_anchor, canonical headings, safe aliases, title segments, and JSX id attributes.\",\n      \"Use true heading boundaries across the MDX AST; do not require ten fixed subheadings per priority.\"\n    ],\n    \"jsx_id_support\": \"Literal id attributes on MDX JSX flow and text elements, including span and anchor elements, are indexed and associated with nearby heading sections. Local fragment validation still requires an exact rendered id.\",\n    \"priority_part_policy\": \"Mermaid fences and actual link candidates are reported structurally. Definition, story, benefit, cost, limits, evidence scope, and reference suitability remain UNVERIFIABLE for human review.\",\n    \"external_link_policy\": \"HTTP(S) targets are recorded as unverified; no remote request was made.\",\n    \"observations\": {\n      \"invalid_local_links\": 0,\n      \"external_links_unverified\": 4309,\n      \"source_relative_local_links\": 0,\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "runtime"
     },
     {
@@ -1008,7 +1008,7 @@
       "line_start": 1,
       "line_end": 17,
       "quote": "{\n  \"repository\": \"gutocarollo/architecture-system-eng-expert\",\n  \"repository_mutation_performed\": false,\n  \"reason\": \"Active catalog whitelist rejects the material course repository. Jira admin permission exists, but changing only the Jira option does not change the catalog authority.\",\n  \"required_contract_change\": {\n    \"file\": \"/Users/augustocarollo/.agents/skills/jira-fbi/reference/catalog-contract.json\",\n    \"field\": \"dimensions.repositories.allowedValues\",\n    \"add\": \"gutocarollo/architecture-system-eng-expert\",\n    \"state\": \"NOT_APPLY_READY: the declared Repository authority and projection were not located in the audited source paths; adding only a literal whitelist value is insufficient.\"\n  },\n  \"asset_state\": \"not_registered\",\n  \"permission_receipt\": \"permissions.json\",\n  \"decision_state\": \"Document registration has a tested existing-kind proposal outside this documentation repository. Repository registration remains blocked by the exact authority gap recorded in the audit.\",\n  \"affected_asset_id_proposed\": \"doc:architecture/architecture-system-eng-expert\",\n  \"asset_registration_proposal\": \"asset-document-registration.patch\",\n  \"repository_authority_audit\": \"registration-authority-audit.md\"\n}\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "scope"
     },
     {
@@ -1019,7 +1019,7 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"measured_at\": \"2026-10-15T02:54:53.943830+00:00\",\n  \"fbi_issues\": 595,\n  \"new_source_judgments\": 587,\n  \"classification_counts\": {\n    \"CAUSE_REPORTED_AND_CODE_SUPPORTED\": 7,\n    \"MISSING_CAUSE_EVIDENCE\": 35,\n    \"REPORTED_ONLY\": 290,\n    \"NOT_APPLICABLE_CHANGE\": 263\n  },\n  \"issue_classification_complete\": true,\n  \"all_causes_confirmed\": false,\n  \"commit_matrix_records\": 12697,\n  \"unresolved_evidence_keys\": [\n    \"FBI-3061\",\n    \"FBI-4803\",\n    \"FBI-4802\",\n    \"FBI-3662\",\n    \"FBI-4807\",\n    \"FBI-4806\",\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "contract"
     },
     {
@@ -1030,8 +1030,30 @@
       "line_start": 1,
       "line_end": 20,
       "quote": "{\n  \"sql\": \"SELECT inet_server_addr()::text AS server_address, inet_server_port() AS server_port, current_database() AS database_name, current_user AS role_name, COUNT(*) AS row_count, COUNT(DISTINCT movement_adjusted_sk) AS distinct_movement_keys, MAX(movement_date) AS latest_movement_date, COUNT(*) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01') AS october_movement_count, ROUND(SUM(brl_amount) FILTER (WHERE movement_date >= DATE '2026-10-01' AND movement_date < DATE '2026-11-01')::numeric, 2) AS october_signed_brl_amount, clock_timestamp() AS observed_at FROM public.rpt_inflow__movement_adjusted;\",\n  \"result\": {\n    \"rows\": [\n      {\n        \"server_address\": \"192.168.254.137/32\",\n        \"server_port\": 5432,\n        \"database_name\": \"faz_capital\",\n        \"role_name\": \"augusto_carollo\",\n        \"row_count\": 557731,\n        \"distinct_movement_keys\": 557731,\n        \"latest_movement_date\": \"2026-10-08\",\n        \"october_movement_count\": 3380,\n        \"october_signed_brl_amount\": \"18742122.16\",\n        \"observed_at\": \"2026-10-15 00:01:35.715697-03:00\"\n      }\n    ],\n    \"row_count\": 1,\n    \"returned_row_count\": 1,\n    \"truncated\": false,\n",
-      "observed_at": "2026-10-15T17:59:08.323472Z",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
       "kind": "runtime"
+    },
+    {
+      "id": "diagram-semantic-closure",
+      "source_id": "project",
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantic-closure.json",
+      "sha256": "e63bd18752987e3540aa034b4023823fd10671e8754965eac57e91047b3666db",
+      "line_start": 1,
+      "line_end": 20,
+      "quote": "{\n  \"observed_at\": \"2026-10-15T18:46:51.264127+00:00\",\n  \"verdict\": \"PASS_BOUNDED\",\n  \"semantic_reviewed\": 94,\n  \"unresolved_high\": 0,\n  \"count_is_not_approval\": true,\n  \"scope\": \"Independent judgments certify the stated historical source, proposal or lab abstraction; they do not certify current production execution.\",\n  \"source_receipts\": [\n    {\n      \"path\": \"tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one.json\",\n      \"sha256\": \"940047d35ba4a9e566cee0b47767df6ed0f516243025e4e92a11421593318d20\"\n    },\n    {\n      \"path\": \"tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-recheck.json\",\n      \"sha256\": \"7e32a41ccf2b59073ed9a785349deb0f3757f9841f4a443e2ce29d23e82bead3\"\n    },\n    {\n      \"path\": \"tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two.json\",\n      \"sha256\": \"7d509517498c1d3adaafdebe08a9cff2e0b8f07dba443004413a53ea80c042ba\"\n    },\n",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
+      "kind": "contract"
+    },
+    {
+      "id": "terminal-delivery",
+      "source_id": "project",
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal.json",
+      "sha256": "84548c42879ee94a0e7a990c26f1d574b9e32e1d3d2cde45f4a53da16e1bf75c",
+      "line_start": 1,
+      "line_end": 20,
+      "quote": "{\n  \"observed_at_utc\": \"2026-10-15T18:13:29.021291+00:00\",\n  \"verdict\": \"PASS_FOR_PROTECTED_SITE_AND_DRAFT\",\n  \"adversarial_verification\": \"SATISFEITO\",\n  \"scope\": \"Frozen source623 and Sites1677; independently checked local password gate, downloadable source package and integration; hosted receipts reconciled. This is a draft/site gate, not full Story acceptance.\",\n  \"reviewer\": {\n    \"agent\": \"/root/terminal_delivery\",\n    \"native_type\": \"default\",\n    \"contract\": \"adversarial-review\",\n    \"model\": \"gpt-6.1-sol\",\n    \"effort\": \"xhigh\",\n    \"fork_turns\": \"none\"\n  },\n  \"checkouts\": [\n    {\n      \"path\": \"/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991\",\n      \"branch\": \"docs/FBI-4991-arquitetura-aplicada\",\n      \"head\": \"623ae1d3d34143df53c571327a508de47ab58951\",\n      \"tracked_changes\": []\n    },\n",
+      "observed_at": "2026-10-15T18:47:22.758515Z",
+      "kind": "contract"
     }
   ],
   "coverage": {
@@ -1769,7 +1791,7 @@
     {
       "id": "explicacoes/casos/single-flight-cancel/index",
       "path": "content/explicacoes/casos/single-flight-cancel/index.mdx",
-      "sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+      "sha256": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
       "author_id": "/root/applied_learning_build",
       "inventory_ids": [
         "async-await",
@@ -2016,7 +2038,7 @@
     {
       "id": "explicacoes/read-models/index",
       "path": "content/explicacoes/read-models/index.mdx",
-      "sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
       "author_id": "/root/s4_consistency_data",
       "inventory_ids": [
         "command-handler",
@@ -5717,7 +5739,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-1.png",
         "artifact_sha256": "2ad7e2b1a6a29ce265d6cddc7c30e7325e6ebcc972cb184c864c15ef89d69c4c"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-2",
@@ -5738,7 +5760,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-2.png",
         "artifact_sha256": "05da36f195049c9fd9d4838936f59aef9da2c480c5ecf863ea3a0f708566f559"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-3",
@@ -5759,7 +5781,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-3.png",
         "artifact_sha256": "8f6fba9c007ca8e4e24af3642821ece3a310a410e6ed4fd42e9f48f9c3bac673"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-4",
@@ -5780,7 +5802,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-1.png",
         "artifact_sha256": "46b795843e81c0c4ca2535fbd84ea8b2aead18ffe276ac5a66815c6f4b3d25a3"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-5",
@@ -5801,7 +5823,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-2.png",
         "artifact_sha256": "1b9384a4160458d10146987dd9a5e50d7c9437bb90c167395f4d1020ab72deb9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-6",
@@ -5822,7 +5844,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-3.png",
         "artifact_sha256": "dee3758a7e02aa601b903cde0f79550b1d86af5d49a15d33ce1d0391622a9ba4"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-7",
@@ -5843,7 +5865,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-4.png",
         "artifact_sha256": "90b57d488bf44c8f3e670029af3ef2f532325cc367d083640a909239caf911a9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-8",
@@ -5864,7 +5886,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-5.png",
         "artifact_sha256": "93a8ce4af808f72fef5f13edc4f1ab751e25ffea07dbea0398d1cb6c774ed4c9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-9",
@@ -5885,7 +5907,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-6.png",
         "artifact_sha256": "69127724c28c612f685b5d48bd08060744d7dc96b25629fad125c0e65137c737"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-10",
@@ -5906,7 +5928,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-1.png",
         "artifact_sha256": "5638dfa289bc514af9d716c619c3d9981071f8358a2c1fa4c0816befc129e2aa"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-11",
@@ -5927,7 +5949,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-2.png",
         "artifact_sha256": "b65facd05d85db92f72085306f1e2092772a0bed6fec98f536b04ce4a37f1058"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-12",
@@ -5948,7 +5970,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-3.png",
         "artifact_sha256": "6f1f6841bde1bfd3be0a675725c93b541d6d182d8f4b31945cc442d1db56d46b"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-13",
@@ -5969,7 +5991,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-4.png",
         "artifact_sha256": "6e7a4b7086145557be7ab15990916726bd9a8b6419da854e936123f1337922db"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-14",
@@ -5993,7 +6015,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-1.png",
         "artifact_sha256": "fae7f473c5a126f5de7b5057e40779be218b5748f0ebf563001f6d58da8bfe67"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-15",
@@ -6017,7 +6039,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-2.png",
         "artifact_sha256": "c453d07f377c7f992b074f0c178207650c5c317aa65980bad45d3b420e4a3658"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-16",
@@ -6041,7 +6063,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-3.png",
         "artifact_sha256": "edb5f1b7328ba01d47261d69b0bfc103fd6a4cca88ae53f56a6b609917f9673a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-17",
@@ -6065,7 +6087,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-4.png",
         "artifact_sha256": "b1bdced49098e0e3abb8d615bc0518e7b18b72814ee50fd44a2927c0792fe9c9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-18",
@@ -6086,7 +6108,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-1.png",
         "artifact_sha256": "65fcc62457e00a7e6d88b668eb229f65f99caab83edbd90ed42b0229efef4cae"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-19",
@@ -6107,7 +6129,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-2.png",
         "artifact_sha256": "41fe1e6dd07dffa41bf4d6120dde3eaa473fc9459204844fd0af2eee65c632d0"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-20",
@@ -6128,7 +6150,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-3.png",
         "artifact_sha256": "dd47fb37d29dda9bfa0c4807e6fb8900a8386e905b8d4938169bd2b0933cd25a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-21",
@@ -6149,7 +6171,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-4.png",
         "artifact_sha256": "71f5c782ec0f794a62afd286dc25759e49b886f5dd3b33f7a300629ad5983557"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-22",
@@ -6170,7 +6192,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-5.png",
         "artifact_sha256": "3df3b03567079b7bd0d3abeb666a148de76226b9219ce3ea71660cef01a7d5ad"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-23",
@@ -6191,7 +6213,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5f5a126bb8fe-1.png",
         "artifact_sha256": "761f3455ffefb64fe3bea110536cc41bdfcb97b120796973712eaeaeb897a9be"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-24",
@@ -6212,7 +6234,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-airflow-retry/fc01d0e06b14-1.png",
         "artifact_sha256": "34dd2124c80bf0a8940691f297f7fa9578e7f40b0bca503b22e8ce35d74fb99a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-25",
@@ -6233,7 +6255,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/69368410409a-1.png",
         "artifact_sha256": "bec8c651e1f8b16790a08c7345fd47c2eb71d5590a9e3efb5a4b416b8edb5d8c"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-26",
@@ -6254,7 +6276,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/311f694a6fce-1.png",
         "artifact_sha256": "dda2eba8ea900d0a6a0a87228d6118489bd260aa43675f9fcb73af07763a6905"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-27",
@@ -6275,7 +6297,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6be4087f89a4-1.png",
         "artifact_sha256": "11e0faa3e1fe75ee42433d7a658fc3a8fcd09e383fa7be43df38729bc7c83623"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-28",
@@ -6296,7 +6318,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/7bf82963c234-1.png",
         "artifact_sha256": "b89e026e9d8adb6604dfe2e01416634ecafef3f1a1ed2e45e7e02f876675bccf"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-29",
@@ -6317,7 +6339,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/a748fead45bd-1.png",
         "artifact_sha256": "4d8938386c6cf71a5ae40dc387872e5e02eda02755a060f6f75de048263dba7a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-30",
@@ -6338,7 +6360,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9dbbbc5b65f-1.png",
         "artifact_sha256": "3f6216c16c90bf79045b646d0a2789ca1a8f37486b076298cf8693a53e4edce2"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-31",
@@ -6359,7 +6381,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5051fec2d620-1.png",
         "artifact_sha256": "bdfab4ed8970ab856adc2ba865203c6c2e33d9c71327725f1c4574ea51de2279"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-32",
@@ -6380,7 +6402,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2388283f7393-1.png",
         "artifact_sha256": "d9d799742e52df2700429605ac479fe65c89ed4f8d99f0e4bab22255e258e851"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-33",
@@ -6401,7 +6423,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/da75a9fbff12-1.png",
         "artifact_sha256": "236eaacd846c783a8416d14ad354ba6eeabb75b621f194f96c4b789cb1c49abe"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-34",
@@ -6422,7 +6444,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4c6d1c6069b6-1.png",
         "artifact_sha256": "1f20f02897aa21e110c54fc1c9e8c2d4568a539f04189ac055931d570d5b034f"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-35",
@@ -6443,7 +6465,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/35eea51b499e-1.png",
         "artifact_sha256": "b00e14b89c7ca5875ccd696b61846c97f64798c67f7eb300a4e3b317baa82687"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-36",
@@ -6464,7 +6486,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/83f0afa4486e-1.png",
         "artifact_sha256": "f9db1b6c579bc7a0cdee6c762b7a928f64dbeea13e9e670ea151ea98e9e44734"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-37",
@@ -6485,7 +6507,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-pg-cas/9ced80d897ad-1.png",
         "artifact_sha256": "9a79f6f9f7613039a8d362c45ed2d78bc9f96a7a4cfe139ca771d7f4a9af65e7"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-38",
@@ -6506,7 +6528,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/fdb7f5367ec0-1.png",
         "artifact_sha256": "41288a449a0078cf05d2a2341872a5affb822b9a0ab32da3cbfcf0acbcca2a1e"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-39",
@@ -6517,17 +6539,17 @@
         "status": "PASS",
         "tool": "mermaid.parse",
         "version": "11.17.2",
-        "source_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034"
+        "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19"
       },
       "render": {
         "status": "PASS",
         "tool": "mmdc",
         "version": "11.12.0",
-        "source_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034",
-        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/581d6a020643-1.png",
-        "artifact_sha256": "36630c10adbcd001705a335b32d31bc8d2e8656ab7d2a2087b0c8ce3d0e51a39"
+        "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/581d6a020643-1.png",
+        "artifact_sha256": "438d78629860b4ce7bdb05062c2e8b0622e146ccdb80dfefa917fef95eec495a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-40",
@@ -6548,7 +6570,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/78f1cc74a8d3-1.png",
         "artifact_sha256": "4621ebec9434b77887a4bd0df58a8d254602f8ae394b32293648431a56023b64"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-41",
@@ -6572,7 +6594,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-1.png",
         "artifact_sha256": "b10d5d3ab5894de6f45a8b8532a55913f2e951ebe86e118e147b0fc4b59dda4c"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-42",
@@ -6596,7 +6618,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-2.png",
         "artifact_sha256": "4bb6178f7fdbeba233e55f04d417bcd0f878cbfb3fe22974e0e1f91ebbc6cca9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-43",
@@ -6620,7 +6642,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-3.png",
         "artifact_sha256": "ad2aba582300d7e0822e4474fcb5d9dd9aec18a627531fd4dc2e214de8c68648"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-44",
@@ -6644,7 +6666,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-4.png",
         "artifact_sha256": "242b9a98bdb2c30cd294a3eca62d3f6ae5d3395a66852bdf62b136e1ef1066ba"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-45",
@@ -6668,7 +6690,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-5.png",
         "artifact_sha256": "9dd13b9ebbe3d6a44a0c5d3f983414ede82d88e533c5889df329271628dd85ce"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-46",
@@ -6692,7 +6714,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-6.png",
         "artifact_sha256": "8b4069821f37a118f0495f29a436a2b57847c39df9fe3991fdacea86329011a2"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-47",
@@ -6716,7 +6738,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-7.png",
         "artifact_sha256": "ebd0591699510b52599eb52e263dd37a0baa7975cfeb73f4751a764c8bcf5bab"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-48",
@@ -6737,7 +6759,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-1.png",
         "artifact_sha256": "1d6d728cb88c6c0dea4bbe311c107f92f0fa337400a5d2f20f5251a6fcad867f"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-49",
@@ -6758,7 +6780,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-2.png",
         "artifact_sha256": "b22e7f218a9ead2edfcb712e3ef85ed20d15f7f503b049743b70ffd5620ea889"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-50",
@@ -6779,7 +6801,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-3.png",
         "artifact_sha256": "5be7d8a2ea456377219aa53b3b9e0473c2e10a4e59bbb8f6cddc5e2711f1fe0a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-51",
@@ -6800,7 +6822,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/c795b74afd1d-1.png",
         "artifact_sha256": "685a558b01f478950f298469505fdd9928a1b8755579b97869f258a294e7bd38"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-52",
@@ -6821,7 +6843,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/c795b74afd1d-2.png",
         "artifact_sha256": "dae60e241abec505309740893cced92c4372f1b10a25538e8b37efe79ec7d071"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-53",
@@ -6842,7 +6864,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-1.png",
         "artifact_sha256": "b4927e4b7824ab3889876038797163c029172e4db57fad11d3b774d9eaa49b11"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-54",
@@ -6863,7 +6885,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-2.png",
         "artifact_sha256": "c0411ccdb68f84d9e7c5320bcc0b5d0aa6baa883369ae885959604306729a393"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-55",
@@ -6884,7 +6906,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-3.png",
         "artifact_sha256": "352414a2aa236e6de7ffe9bc72509158a910ef47abc031b3df6e8dc1594c4bbf"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-56",
@@ -6905,7 +6927,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-4.png",
         "artifact_sha256": "b8e78988093e4a4c202c73753929601e17365195b27df5b498614e822e4658f6"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-57",
@@ -6926,7 +6948,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-1.png",
         "artifact_sha256": "53456923a68c4a42ae7cf3eb97c1697777d74c0bb1d949a43b1546f796bf5a81"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-58",
@@ -6947,7 +6969,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-2.png",
         "artifact_sha256": "ea10349abbc19b715da9b66861630dbc45e56eeedcba45225052336adf954aee"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-59",
@@ -6968,7 +6990,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-3.png",
         "artifact_sha256": "d103ea1cb01c10d3012b55a3ad5293e8426aaf9728b257adcbea3acb85530963"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-60",
@@ -6989,7 +7011,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-4.png",
         "artifact_sha256": "5c2924a2626b3ae81cd685eb450ddd25b1397f20af183444ba5dc4b7c2b50527"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-61",
@@ -7010,7 +7032,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6958e8946c7a-1.png",
         "artifact_sha256": "9b47a3e2ced0ad42bfc8c500baae4eee52e5f06f7480a2711d91c75f86b6e262"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-62",
@@ -7031,7 +7053,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6958e8946c7a-2.png",
         "artifact_sha256": "e9ae28765c74d2b1c981216396fe9c10fb7638d11001572ba50e7f263f8f4043"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-63",
@@ -7052,7 +7074,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-1.png",
         "artifact_sha256": "5545d15543295c65bc2cf528bebfc51b7d6726159c5b271c81699727231de27e"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-64",
@@ -7073,7 +7095,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-2.png",
         "artifact_sha256": "0c571e32637d0b8d52bcc4fa36b206ad1fe8b94a570a36ace726e58cc05343ca"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-65",
@@ -7094,7 +7116,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-3.png",
         "artifact_sha256": "7ee579d9bcada70f505c982bf8992983ad4b1d7a21c90b51f26d4e4c40024367"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-66",
@@ -7115,7 +7137,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-4.png",
         "artifact_sha256": "d18e11cb997cca151951f7a56dfeaa8b6d3590dd9ebdcc8a048f535e28ef0205"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-67",
@@ -7136,7 +7158,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-5.png",
         "artifact_sha256": "c8821b403ac7c23324c117035b82792bfb8444a11fbb2f48410a84d19739e2f4"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-68",
@@ -7157,7 +7179,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9683aefc7b6-1.png",
         "artifact_sha256": "1e36648133b7c2c4461248c1154441285475d8b005ce325d1643b8672a7f1bc9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-69",
@@ -7178,7 +7200,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9683aefc7b6-2.png",
         "artifact_sha256": "a847d01bf598f4e3947e51770ac75f4cb18ef9ed9ee88035ff5162d64f43b23d"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-70",
@@ -7199,10 +7221,10 @@
         "tool": "mmdc",
         "version": "11.12.0",
         "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
-        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-1.png",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-1.png",
         "artifact_sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-71",
@@ -7223,10 +7245,10 @@
         "tool": "mmdc",
         "version": "11.12.0",
         "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
-        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-2.png",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-2.png",
         "artifact_sha256": "017a8b30fc46cb3855799f244dfa6dce89d6fa036876a1012eaf8e651767c583"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-72",
@@ -7240,17 +7262,17 @@
         "status": "PASS",
         "tool": "mermaid.parse",
         "version": "11.17.2",
-        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587"
+        "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1"
       },
       "render": {
         "status": "PASS",
         "tool": "mmdc",
         "version": "11.12.0",
-        "source_sha256": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
-        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-3.png",
-        "artifact_sha256": "a4745dd794316e2a49767308bc96fea75726b20f062c5b80a89ecb9ac8e66a93"
+        "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-3.png",
+        "artifact_sha256": "b9f87f91474d94ff6ba8750a4e30e60642eea1796a97096ea3e2639daba4981d"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-73",
@@ -7271,10 +7293,10 @@
         "tool": "mmdc",
         "version": "11.12.0",
         "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
-        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-4.png",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-4.png",
         "artifact_sha256": "d0c6bf77d3aa38aa8678f4524888694aee1c91fb113fc402d89cdba3dc7b54cf"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-74",
@@ -7295,7 +7317,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-1.png",
         "artifact_sha256": "4b08956a5f8981b5ef3db46306eeae2cba493a7704d9e705963c517ceeff2731"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-75",
@@ -7316,7 +7338,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-2.png",
         "artifact_sha256": "eaa6fe9003d3512e4255285c0b0045c806a61a230c7c187a584613222b3eb415"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-76",
@@ -7337,7 +7359,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-3.png",
         "artifact_sha256": "8b6ced7932671cecc9b02d2333ff528d7c2a6978f70320a52cde0cb2ddb14b69"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-77",
@@ -7358,7 +7380,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-4.png",
         "artifact_sha256": "23ca186aca451fe6940b9bcbaa33ad2d07fa0fc5b8bff9e720ed107a9eb7323a"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-78",
@@ -7379,7 +7401,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-1.png",
         "artifact_sha256": "f937a84b6044c0f54d4d4c72e1935437e3a0c1a32eac0336691e18900eca8a82"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-79",
@@ -7400,7 +7422,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-2.png",
         "artifact_sha256": "f1574d902524f7982fe379cf3a24d3fd33b1f1d3a3c9738cd649fd28df1f71a8"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-80",
@@ -7421,7 +7443,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-3.png",
         "artifact_sha256": "036534e71488d9fc4d9a91ad965d9247299725a05c55d6b19ed8aad13ac0dd1b"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-81",
@@ -7442,7 +7464,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-4.png",
         "artifact_sha256": "6e07069a4cebcfa705fae18c7f8dd2534e4b52c12dd253687c61f10f897b00ad"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-82",
@@ -7463,7 +7485,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-5.png",
         "artifact_sha256": "d353e0cce01caf99c6b26e8f0ed7710d93255db4e26f796650ac249e41a264e9"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-83",
@@ -7484,7 +7506,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/718336970d50-1.png",
         "artifact_sha256": "1b78ba8ec629243a320b3e3caf64ccfafc550e91e86c5658d6bac3ac837cc43f"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-84",
@@ -7505,7 +7527,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/718336970d50-2.png",
         "artifact_sha256": "9394f0a2ecb33233c0af7545741b5fd7c232a2c82c1df2faa816a0c13f17b119"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-85",
@@ -7526,7 +7548,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-1.png",
         "artifact_sha256": "9bc0d21f8aedec98bd4116a67d0df3639d721a267c8f6ab47fc54831ffa820c0"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-86",
@@ -7547,7 +7569,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-2.png",
         "artifact_sha256": "e1978c8fabdbba0695bda28a72507c2ba09ef4eb0d413d0e395b92f583bed802"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-87",
@@ -7568,7 +7590,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-3.png",
         "artifact_sha256": "274dbc369783138ab6ef6aebb9b62222eef5d740c7f947a26e2fa12ac717086b"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-88",
@@ -7589,7 +7611,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cf75273cb9a3-1.png",
         "artifact_sha256": "4326b2903052fadd1423e0ae41572b6e7b97d32b8c38f814b83726509cb1d46d"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-89",
@@ -7610,7 +7632,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1f58701594b9-1.png",
         "artifact_sha256": "a5319f79685e9afd0a78da551901aa07a2ac3a433a00cc9d15e168f4617c5db6"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-90",
@@ -7631,7 +7653,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6c9437bb1665-1.png",
         "artifact_sha256": "663fb037856279117eb12b83a86b2e24221e8c77d40fe9691adb404c68832902"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-91",
@@ -7652,7 +7674,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/89a7e3391b6a-1.png",
         "artifact_sha256": "09aff14da69183a69cab0c012f4298bf0d7ed64cae60be7b48626927cd82169f"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-92",
@@ -7676,7 +7698,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/a4b36f784f89-1.png",
         "artifact_sha256": "580533a500f5a365347d18e93a78fd63f218c0ee5214edc5a11ab7faee5a21e5"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-93",
@@ -7697,7 +7719,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0413c038a44f-1.png",
         "artifact_sha256": "c880b813ee58a12d5efcc411677c8ce0f9e546ca298ad436099b411809e0b996"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     },
     {
       "id": "diagram-94",
@@ -7718,7 +7740,7 @@
         "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4ef9fa93fd31-1.png",
         "artifact_sha256": "19c16b0f84eba15307ee9eaffe594c28ac346ac71d57f1f6d6bdc27a10c38167"
       },
-      "semantic_review": "NOT_RUN"
+      "semantic_review": "PASS"
     }
   ],
   "reviews": [],
@@ -7742,7 +7764,7 @@
       "kind": "review",
       "critical": true,
       "source_id": "project",
-      "description": "The current packet and diagrams require actual independent receipts; earlier-cycle receipts were not transplanted."
+      "description": "The terminal draft/site review and all94 bounded diagram judgments are recorded as evidence. Formal per-document council receipts are not present for all181 documents; source and diagram approvals must not be promoted into fabricated full-document approvals."
     },
     {
       "id": "production-boundary",

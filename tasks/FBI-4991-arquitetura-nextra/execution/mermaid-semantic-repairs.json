@@ -1,0 +1,121 @@
+{
+  "observed_at": "2026-10-15T18:36:19.794Z",
+  "parser_self_test": "PASS",
+  "syntax_only": false,
+  "module_sha256": "8937e64a0bc872c0c908cf8e432511c6ec63720213b54aae32ff46cd9ee56e16",
+  "blocks_total": 5,
+  "blocks": [
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "document_sha256": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/581d6a020643-1.png",
+        "artifact_sha256": "438d78629860b4ce7bdb05062c2e8b0622e146ccdb80dfefa917fef95eec495a"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "fence_index": 1,
+      "line_start": 24,
+      "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-1.png",
+        "artifact_sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "fence_index": 2,
+      "line_start": 52,
+      "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-2.png",
+        "artifact_sha256": "017a8b30fc46cb3855799f244dfa6dce89d6fa036876a1012eaf8e651767c583"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "fence_index": 3,
+      "line_start": 82,
+      "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-3.png",
+        "artifact_sha256": "b9f87f91474d94ff6ba8750a4e30e60642eea1796a97096ea3e2639daba4981d"
+      },
+      "semantic_review": "NOT_RUN"
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "fence_index": 4,
+      "line_start": 97,
+      "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "syntax": {
+        "status": "PASS",
+        "tool": "mermaid.parse",
+        "version": "11.17.2",
+        "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903"
+      },
+      "render": {
+        "status": "PASS",
+        "tool": "mmdc",
+        "version": "11.12.0",
+        "source_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+        "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-4.png",
+        "artifact_sha256": "d0c6bf77d3aa38aa8678f4524888694aee1c91fb113fc402d89cdba3dc7b54cf"
+      },
+      "semantic_review": "NOT_RUN"
+    }
+  ],
+  "errors": [],
+  "status": "PASS"
+}

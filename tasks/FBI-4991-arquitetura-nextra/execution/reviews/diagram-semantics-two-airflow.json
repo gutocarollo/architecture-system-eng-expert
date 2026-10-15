@@ -1,0 +1,114 @@
+{
+  "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+  "host": "airflow-70",
+  "root": "/home/fazcapital/airflow/airflow-dags",
+  "codegraph_present": true,
+  "method": "read disk bytes and Path.stat; no runtime execution",
+  "files": [
+    {
+      "path": "/home/fazcapital/airflow/airflow-dags/dags/crm__salesforce__api_to_stg__task.py",
+      "sha256": "63d2b11a4eb36cb637504cacb0f96808351109799f8e2aad2c8ac89805b4403d",
+      "mtime_utc": "2026-06-26T20:29:48.111771+00:00",
+      "spans": [
+        {
+          "start": 1,
+          "end": 21,
+          "text": "\"\"\"Airflow DAG for Salesforce Task data extractio\"\"\"\nimport os\nfrom toolkit.salesforce.factory import SalesforceDagFactory\n\nos.environ.setdefault('AIRFLOW__CORE__ENABLE_XCOM_PICKLING', 'True')\n\nfactory = SalesforceDagFactory(\n    postgres_conn_id=\"postgres_prod\",\n    schema_name=\"salesforce_prod\",\n    table_prefix=\"stg_salesforce__\",\n)\n\ndag = factory.create_dag(\n    dag_id='crm__salesforce__api_to_stg__task',\n    is_paused_upon_creation=False,\n    endpoint=\"task\",\n    schedule=None,\n    catchup=False,\n    tags=[\"salesforce\", \"etl\", \"optimized\"],\n    description=\"Pipeline para buscar os dados do endpoint de task do Salesforce\",\n)"
+        }
+      ]
+    },
+    {
+      "path": "/home/fazcapital/airflow/airflow-dags/dags/recordings__nextbilling__api_to_stg__audio.py",
+      "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+      "mtime_utc": "2026-08-20T04:02:42.144901+00:00",
+      "spans": [
+        {
+          "start": 608,
+          "end": 683,
+          "text": "                    now = datetime.now()\n                    year = now.year\n                    month = str(now.month).zfill(2)\n                    day = str(now.day).zfill(2)\n                \n                # Build object key baseado no tipo de call\n                if lead_id:\n                    object_key = f\"calls/qualivox-audio/year={year}/month={month}/day={day}/team={TEAM_NAME}/employee_id={employee_id}/owner_id={owner_id}/lead_id={lead_id}/record_id={recording_id}/audio.mp3\"\n                else:\n                    base_path = f\"calls/qualivox-audio/year={year}/month={month}/day={day}/team={TEAM_NAME}/employee_id={employee_id}/account_id={account_id}/owner_id={owner_id}\"\n                    if customer_id:\n                        object_key = f\"{base_path}/customer_id={customer_id}/record_id={recording_id}/audio.mp3\"\n                    else:\n                        object_key = f\"{base_path}/record_id={recording_id}/audio.mp3\"\n                \n                # Check if file already exists\n                try:\n                    stat_info = minio_client.stat_object(bucket_name, object_key)\n                    \n                    # Adicionar metadata mesmo se arquivo já existe\n                    uploaded_metadata.append({\n                        'call_id': call_id,\n                        'nextbilling_call_id': recording_id,\n                        'call_start_date': call_start_date_str,\n                        'call_duration_seconds': call_duration_seconds,\n                        'account_id': account_id,\n                        'employee_id': employee_id,\n                        'owner_id': owner_id,\n                        'lead_id': lead_id,\n                        'customer_id': customer_id,\n                        'audio_file_path': object_key,\n                        'audio_file_size_bytes': stat_info.size\n                    })\n                    \n                    skipped_existing += 1\n                    continue\n                except S3Error as e:\n                    if e.code != 'NoSuchKey':\n                        raise e\n                \n                # Download áudio\n                logging.info(f\"📥 Downloading recording_id: {recording_id}\")\n                response = requests.get(recording_url, timeout=300, verify=verify_ssl)\n                response.raise_for_status()\n                \n                if len(response.content) == 0:\n                    logging.warning(f\"Empty response for recording_id: {recording_id}\")\n                    failed += 1\n                    continue\n                \n                # Upload para MinIO\n                file_data = BytesIO(response.content)\n                file_size = len(response.content)\n                \n                minio_client.put_object(\n                    bucket_name=bucket_name,\n                    object_name=object_key,\n                    data=file_data,\n                    length=file_size,\n                    content_type='audio/mpeg'\n                )\n                \n                logging.info(f\"✅ Uploaded: {object_key}\")\n                \n                # Guardar metadata para inserção no banco\n                uploaded_metadata.append({\n                    'call_id': call_id,\n                    'nextbilling_call_id': recording_id,\n                    'call_start_date': call_start_date_str,\n                    'call_duration_seconds': call_duration_seconds,\n                    'account_id': account_id,\n                    'employee_id': employee_id,\n                    'owner_id': owner_id,\n                    'lead_id': lead_id,\n                    'customer_id': customer_id,\n                    'audio_file_path': object_key,"
+        },
+        {
+          "start": 741,
+          "end": 774,
+          "text": "        insert_sql = \"\"\"\n        INSERT INTO public.fct_minio__call (\n            call_id,\n            nextbilling_call_id,\n            call_started_at,\n            call_duration_seconds,\n            account_id,\n            employee_id,\n            owner_id,\n            salesforce_lead_id,\n            client_id,\n            audio_file_path,\n            audio_file_size_bytes,\n            is_deleted,\n            created_at,\n            updated_at\n        ) VALUES (\n            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP\n        )\n        ON CONFLICT (nextbilling_call_id) \n        DO UPDATE SET\n            call_id = EXCLUDED.call_id,\n            call_started_at = EXCLUDED.call_started_at,\n            call_duration_seconds = EXCLUDED.call_duration_seconds,\n            account_id = EXCLUDED.account_id,\n            employee_id = EXCLUDED.employee_id,\n            owner_id = EXCLUDED.owner_id,\n            salesforce_lead_id = EXCLUDED.salesforce_lead_id,\n            client_id = EXCLUDED.client_id,\n            audio_file_path = EXCLUDED.audio_file_path,\n            audio_file_size_bytes = EXCLUDED.audio_file_size_bytes,\n            is_deleted = EXCLUDED.is_deleted,\n            updated_at = CURRENT_TIMESTAMP\n        \"\"\""
+        },
+        {
+          "start": 912,
+          "end": 938,
+          "text": "# Tasks\nextract_task = PythonOperator(\n    task_id='extract_recordings',\n    python_callable=extract_recordings_task,\n    dag=dag,\n)\n\nenrich_task = PythonOperator(\n    task_id='enrich_with_salesforce_data',\n    python_callable=enrich_with_salesforce_data_task,\n    dag=dag,\n)\n\ndownload_task = PythonOperator(\n    task_id='download_and_upload',\n    python_callable=download_and_upload_task,\n    dag=dag,\n)\n\nload_task = PythonOperator(\n    task_id='load_metadata',\n    python_callable=load_metadata_task,\n    dag=dag,\n)\n\n# Pipeline\nextract_task >> enrich_task >> download_task >> load_task"
+        }
+      ]
+    },
+    {
+      "path": "/home/fazcapital/airflow/airflow-dags/toolkit/salesforce/factory.py",
+      "sha256": "e20a6b8996a672bbd0d514e1ef1b83f9deb7459bd50bd773f0aabd610cfbeb1b",
+      "mtime_utc": "2026-10-08T19:09:44.127984+00:00",
+      "spans": [
+        {
+          "start": 88,
+          "end": 104,
+          "text": "            extract = PythonOperator(task_id='extract', python_callable=_wrap(pipeline.extract))\n            transform = PythonOperator(task_id='transform', python_callable=_wrap(pipeline.transform))\n            validate = PythonOperator(task_id='validate_columns', python_callable=_wrap(pipeline.validate_columns))\n            load = PythonOperator(task_id='load', python_callable=_wrap(pipeline.load))\n            extract_deleted = PythonOperator(task_id='extract_deleted', python_callable=_wrap(pipeline.extract_deleted))\n            process_deleted = PythonOperator(task_id='process_deleted', python_callable=_wrap(pipeline.process_deleted))\n\n            self._apply_network_policy(extract)\n            self._apply_network_policy(extract_deleted)\n            self._apply_processing_policy(transform)\n            self._apply_processing_policy(validate)\n            self._apply_processing_policy(load)\n            self._apply_processing_policy(process_deleted)\n\n            extract >> transform >> validate >> load\n            extract_deleted >> process_deleted\n"
+        }
+      ]
+    },
+    {
+      "path": "/home/fazcapital/airflow/airflow-dags/toolkit/salesforce/pipeline.py",
+      "sha256": "612971e958185958bd7bc4501a2844df8a397b1f6a4f38a78bf7d78130886e41",
+      "mtime_utc": "2026-10-08T19:35:14.664156+00:00",
+      "spans": [
+        {
+          "start": 771,
+          "end": 786,
+          "text": "    def extract(self, **context) -> Dict[str, Any]:\n        sf = connect_salesforce()\n        sf_object = getattr(sf, self.endpoint.title())\n        # Build explicit field list from describe to avoid FIELDS(ALL) LIMIT restriction\n        describe = sf_object.describe()\n        fields_meta = describe.get('fields', [])\n        field_names = [\n            f['name']\n            for f in fields_meta\n            if f.get('queryable', True) and not f.get('deprecatedAndHidden', False)\n            and f.get('type') not in {'address', 'location'}\n        ]\n        # Explicitly include compound address fields if present and queryable\n        wanted_compounds = {'BillingAddress', 'ShippingAddress'}\n        meta_by_name = {f['name']: f for f in fields_meta if 'name' in f}\n        for addr_field in wanted_compounds:"
+        },
+        {
+          "start": 883,
+          "end": 910,
+          "text": "    def transform(self, **context) -> Dict[str, Any]:\n        raw_records = self._get_latest_jsonl(context, 'extract')\n        date_columns = get_date_columns_for_endpoint(self.endpoint) or []\n        cleaned = [DataProcessor.clean_record(\n            r, date_columns) for r in raw_records]\n        self._keep_live_ids(raw_records)\n        self._discard_inline_payload('extract', raw_records)\n        record_count = len(cleaned)\n        key = self._put_jsonl(context, 'transform', cleaned)\n        meta = {'endpoint': self.endpoint,\n                'total_records': record_count, 'records_key': key}\n        self._put_json(context, 'transform_meta', meta)\n        return meta\n\n    def validate_columns(self, **context) -> Dict[str, Any]:\n        records = self._get_latest_jsonl(context, 'transform')\n        column_info = DataProcessor.get_column_info(records)\n\n        fields_metadata = None\n        try:\n            fields_metadata = self._get_latest_json(context, 'fields_metadata')\n        except Exception:\n            pass\n\n        hook = PostgresHook(postgres_conn_id=self.postgres_conn_id)\n        engine = hook.get_sqlalchemy_engine()\n        table_name = f\"{self.table_prefix}{self.endpoint}\"\n        created: List[str] = []"
+        },
+        {
+          "start": 954,
+          "end": 969,
+          "text": "    def load(self, **context) -> Dict[str, Any]:\n        records = self._get_latest_jsonl(context, 'transform')\n        if not records:\n            self._discard_inline_payload('transform', records)\n            logging.info(\n                f\"load=skipped | endpoint={self.endpoint} | reason=no_records\")\n            return {'endpoint': self.endpoint, 'inserted': 0, 'mode': 'no_data'}\n\n        # Verificar se foi full extract programado (22h)\n        extract_meta = self._get_latest_json(context, 'extract_meta')\n        is_nightly_full = (extract_meta.get('extract_type') == 'nightly_full')\n\n        hook = PostgresHook(postgres_conn_id=self.postgres_conn_id)\n        engine = hook.get_sqlalchemy_engine()\n        table = f'{self.schema_name}.{self.table_prefix}{self.endpoint}'\n        inserted = 0"
+        },
+        {
+          "start": 979,
+          "end": 1009,
+          "text": "            if is_empty:\n                # Primeira carga: usar COPY para performance máxima\n                logging.info(\n                    f\"load_mode=bulk_copy | table={table} | reason=initial_load\")\n                cols = list(records[0].keys())\n\n                conn_raw = hook.get_conn()\n                try:\n                    with conn_raw.cursor() as cur:\n                        columns_sql = ', '.join(f'\"{c}\"' for c in cols)\n                        for chunk_index, chunk in enumerate(self._iter_record_chunks(records)):\n                            output = io.StringIO()\n                            writer = csv.writer(output)\n                            if chunk_index == 0:\n                                writer.writerow(cols)\n                            for rec in chunk:\n                                row = [(rec.get(c) if rec.get(c) is not None else '')\n                                       for c in cols]\n                                writer.writerow(row)\n                            output.seek(0)\n                            header = ', HEADER TRUE' if chunk_index == 0 else ''\n                            copy_sql = (\n                                f\"COPY {table} ({columns_sql}) FROM STDIN \"\n                                f\"WITH (FORMAT CSV{header}, NULL '')\"\n                            )\n                            cur.copy_expert(copy_sql, output)\n                    conn_raw.commit()\n                finally:\n                    conn_raw.close()\n                inserted = len(records)\n                mode = 'initial_copy'"
+        },
+        {
+          "start": 1057,
+          "end": 1075,
+          "text": "                        update_set = ', '.join(\n                            [f'\"{c}\" = EXCLUDED.\"{c}\"' for c in cols if c != 'Id'])\n\n                        if 'SystemModstamp' in cols:\n                            upsert_sql = text(\n                                f'''INSERT INTO {table} ({columns_sql}) \n                                    VALUES ({values_sql}) \n                                    ON CONFLICT (\"Id\") DO UPDATE SET {update_set}\n                                    WHERE {table}.\"SystemModstamp\" IS DISTINCT FROM EXCLUDED.\"SystemModstamp\"'''\n                            )\n                        else:\n                            upsert_sql = text(\n                                f'INSERT INTO {table} ({columns_sql}) VALUES ({values_sql}) ON CONFLICT (\"Id\") DO UPDATE SET {update_set}'\n                            )\n\n                        for chunk in self._iter_record_chunks(records):\n                            conn.execute(upsert_sql, chunk)\n                            inserted += len(chunk)\n"
+        }
+      ]
+    },
+    {
+      "path": "/home/fazcapital/airflow/airflow-dags/dbt/models/facts/fct_salesforce__calls.sql",
+      "sha256": "e794f5af231f1518b3e728c4ae1bba6d12c42c8f41557c7daf8112b02b26fc2e",
+      "mtime_utc": "2026-08-20T04:02:42.146901+00:00",
+      "spans": [
+        {
+          "start": 1,
+          "end": 7,
+          "text": "{{\n  config(\n    materialized='incremental',\n    unique_key='call_id',\n    on_schema_change='fail'\n  )\n}}"
+        },
+        {
+          "start": 48,
+          "end": 74,
+          "text": "        s.\"CreatedDate\"::timestamptz AS call_started_at,\n        s.\"IsDeleted\" AS is_deleted,\n        iac.\"Name\" AS client_id,\n        CURRENT_TIMESTAMP AS updated_at,\n        s.\"CreatedDate\"::timestamptz AS source_created_at,\n        s.\"SystemModstamp\"::timestamptz AS source_updated_at,\n        now() AS loaded_at\n\n    FROM salesforce_prod.stg_salesforce__task s\n    LEFT JOIN public.dim_employee_scd2 e\n        ON s.\"OwnerId\" = e.salesforce_user_id\n        AND e.is_current IS TRUE\n    LEFT JOIN salesforce_prod.stg_salesforce__investmentaccount__c iac\n    \tON s.\"AccountId\" = iac.\"DWCliente__c\"\n    WHERE s.\"TaskSubtype\" = 'Call'\n\n    -- Incremental filter: filtra por modificacao real (SystemModstamp), nao por criacao\n    -- Lookback de 2h cobre late-arriving data. Watermark = MAX(source_updated_at) da tabela.\n    {% if is_incremental() %}\n        AND s.\"SystemModstamp\"::timestamptz >= (\n            SELECT GREATEST(\n                MAX(source_updated_at) - INTERVAL '2 hours',\n                '{{ var(\"start_date\", \"2020-01-01\") }}'::timestamptz\n            )\n            FROM {{ this }}\n        )\n    {% endif %}"
+        },
+        {
+          "start": 97,
+          "end": 102,
+          "text": "        ROW_NUMBER() OVER (\n            PARTITION BY COALESCE(nextbilling_call_id::TEXT, call_id)\n            ORDER BY source_updated_at DESC, call_id\n        ) as rn\n    FROM salesforce_calls_base\n)"
+        },
+        {
+          "start": 123,
+          "end": 124,
+          "text": "FROM salesforce_calls_deduplicated\nWHERE rn = 1"
+        }
+      ]
+    }
+  ]
+}

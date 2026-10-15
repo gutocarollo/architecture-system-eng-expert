@@ -1,0 +1,2348 @@
+{
+  "review": "first independent semantic pass, lane two",
+  "reviewer": "/root/diagram_semantics_two",
+  "model": "gpt-6.1-sol",
+  "native_role": "default",
+  "contract": "independent read-only adversarial semantic reviewer",
+  "observed_at_utc": "2026-10-15T18:31:36.172962+00:00",
+  "product_doc_source_head": "623ae1d3d34143df53c571327a508de47ab58951",
+  "execution_metadata_head_at_assembly": "623ae1d3d34143df53c571327a508de47ab58951",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "assignment_sha256": "9c517b0c5c8c34ad7c434a6a82e7475b4ec71140a3fd3c8d6ca3cc2c0e324afd",
+  "scope_count": 45,
+  "counts": {
+    "PASS_BOUNDED": 44,
+    "HIGH": 1,
+    "PENDING": 0
+  },
+  "verdict": "REPAIR_REQUIRED_DSEM2_H1",
+  "scope_limits": [
+    "All 45 actual Mermaid bodies and their surrounding prose were read. Approval is semantic and bounded to the identified abstraction.",
+    "No code/docs edits, deployment, live business operations, new suite or production fault injection were performed.",
+    "CodeGraph was reached on the indexed MakersHub checkout; named Airflow disk sources were read and also traversed through the canonical host CodeGraph.",
+    "Primary source claims are bound to file hashes and spans. Configuration diagrams use their explicitly dated captures.",
+    "The existing 310-concept OSS curation and already-approved three semantic diagrams are outside this lane.",
+    "Context7 was attempted and returned quota exhaustion; four official vendor pages were read directly."
+  ],
+  "findings": [
+    {
+      "id": "DSEM2-H1",
+      "severity": "HIGH",
+      "status": "REPAIR_REQUIRED",
+      "diagram": "diagram-39",
+      "class": "TESTE/EVIDENCIA",
+      "verdict": "NAO-PROVADO for transport cause; REAL support gap",
+      "document": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "lines": [
+        25,
+        26
+      ],
+      "claim": "Assessor fecha uma consulta -> FastAPI cancela um awaiter",
+      "evidence": "cancel-harness:26-36 explicitly executes readers[0].cancel(); cancel-after:55-97 implements consequences after cancellation, not the browser/FastAPI transport bridge.",
+      "impact": "The diagram teaches an unestablished transport cause as part of a historical source flow.",
+      "fix": "Replace the source trigger/label with an explicit laboratory-injected cancellation, keeping shield/callback/four-survivor relationships.",
+      "boundary": "This neither establishes nor denies that FastAPI requests may be cancelled in other conditions."
+    }
+  ],
+  "backlog": [
+    {
+      "severity": "LOW",
+      "diagram": "diagram-33",
+      "note": "The node reporting debit 250 summarizes messages ORDER-1(100), ORDER-1(100), ORDER-2(50); naming ORDER-2 in the input would make this arithmetic visible without opening the source."
+    }
+  ],
+  "sources": {
+    "calendar": {
+      "path": "/Users/augustocarollo/Developer/makershub/frontend/app/api/calendar/events/route.ts",
+      "sha256": "d19db8be50e748a034be8c33ffef46d049fd827b7a996e960960ba7dd5fc5906",
+      "spans": [
+        [
+          40,
+          81
+        ],
+        [
+          93,
+          108
+        ],
+        [
+          141,
+          272
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-api": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/api/v1/insurance.py",
+      "sha256": "cc505da6a5657e020de85858f6275ca5a4e260cac84d88e26455ffdb5de75f14",
+      "spans": [
+        [
+          46,
+          73
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-service": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/insurance_service.py",
+      "sha256": "7975fa3aa049b5af214a116c442b9655d8443804264ea8dcf84cf54bc8094a5a",
+      "spans": [
+        [
+          19,
+          24
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-repo": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/repositories/insurance_repo.py",
+      "sha256": "a44cb58867bf60f4af694167598bbe58724e3050f051f66e1035b8cd955c3f75",
+      "spans": [
+        [
+          74,
+          112
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-hook": {
+      "path": "/Users/augustocarollo/Developer/makershub/frontend/app/(pages)/insurance/_hooks/useInsurance.ts",
+      "sha256": "c66cdba07b774cd7d49e576103984a776ed6e841163179c11c82f45b96650e97",
+      "spans": [
+        [
+          248,
+          259
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-manager": {
+      "path": "/Users/augustocarollo/Developer/makershub/frontend/app/(pages)/insurance/_data/InsuranceDataManager.tsx",
+      "sha256": "7a4362a3037929d2cfe67dfcdc2655e47e924b8e9b056b56455ee0df7a339b24",
+      "spans": [
+        [
+          238,
+          240
+        ],
+        [
+          406,
+          445
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "insurance-page": {
+      "path": "/Users/augustocarollo/Developer/makershub/frontend/app/(pages)/insurance/page.tsx",
+      "sha256": "a77bd6df82a620f1199b4ef73603ef0d1f2e5abbedb81eba64c0916d18b567fc",
+      "spans": [
+        [
+          40,
+          51
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "singleflight-current": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/utils/single_flight.py",
+      "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+      "spans": [
+        [
+          75,
+          154
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "nextbilling": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/integrations/nextbilling_integration.py",
+      "sha256": "ef760272312aa59e50c10b58f27cea3434f2d1bc56329cfc4b123425d8246f85",
+      "spans": [
+        [
+          198,
+          218
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "breaker": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/core/task_queue.py",
+      "sha256": "645b6668c75ea9bc6a145269279af48ce8f8f90167b5d235ecb51505a9205147",
+      "spans": [
+        [
+          127,
+          227
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "worker": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/core/task_worker.py",
+      "sha256": "2f70ca71ece744c19c65a6fbe9fe59630007ec0c1eed87e28300f6fdd120a219",
+      "spans": [
+        [
+          221,
+          262
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "api-rate": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/core/api_key_auth.py",
+      "sha256": "68200373a5ae9d894d78be3f1e73115467424a55a662dd2d04155b1f33d0443f",
+      "spans": [
+        [
+          99,
+          124
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "slowapi-rate": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/core/rate_limiter.py",
+      "sha256": "54894629f28aa9fb6b93f40dd30e74083e7406c4571c759b293df3655cc34511",
+      "spans": [
+        [
+          118,
+          137
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "idempotency": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/idempotency_store.py",
+      "sha256": "5383b6db3350faba40a65d0d73be929ee866b79a493e3647203fc61704721e12",
+      "spans": [
+        [
+          70,
+          100
+        ],
+        [
+          127,
+          173
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "outbox-flag": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/absence_reassignment_service.py",
+      "sha256": "4d6cab0034db33fcdbc908f9fdb048a01e17adc1eb31020f65cba967d479d370",
+      "spans": [
+        [
+          337,
+          415
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "metrics": {
+      "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/metrics_service.py",
+      "sha256": "f07ff42bb883785f0ff3d29c2e682a9b2902fd6625f07263db149df960a54c3c",
+      "spans": [
+        [
+          230,
+          319
+        ]
+      ],
+      "kind": "local source",
+      "matches_documented_revision": true
+    },
+    "financial-cache": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+      "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+      "spans": [
+        [
+          284,
+          302
+        ]
+      ],
+      "kind": "controlled hypothetical model"
+    },
+    "financial-order": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+      "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+      "spans": [
+        [
+          65,
+          107
+        ]
+      ],
+      "kind": "controlled hypothetical model"
+    },
+    "financial-reservation": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+      "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+      "spans": [
+        [
+          109,
+          140
+        ]
+      ],
+      "kind": "controlled hypothetical model"
+    },
+    "date-before-card": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/before-card.tsx",
+      "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d",
+      "spans": [
+        [
+          239,
+          247
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "date-after-card": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/after-card.tsx",
+      "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d",
+      "spans": [
+        [
+          241,
+          244
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "date-helper": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/after.ts",
+      "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5",
+      "spans": [
+        [
+          7,
+          12
+        ],
+        [
+          30,
+          45
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "date-harness": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/date-only/run.mjs",
+      "sha256": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3",
+      "spans": [
+        [
+          18,
+          26
+        ]
+      ],
+      "kind": "controlled harness; read only"
+    },
+    "early-before": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/early-refresh/before.py",
+      "sha256": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406",
+      "spans": [
+        [
+          55,
+          80
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "early-after": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/early-refresh/after.py",
+      "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+      "spans": [
+        [
+          75,
+          154
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "early-harness": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/early-refresh/run.py",
+      "sha256": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3",
+      "spans": [
+        [
+          9,
+          47
+        ]
+      ],
+      "kind": "controlled harness; read only"
+    },
+    "opportunity-before": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/opportunity-entry/before-integration.py",
+      "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38",
+      "spans": [
+        [
+          6205,
+          6224
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "opportunity-after": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/opportunity-entry/after-integration.py",
+      "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05",
+      "spans": [
+        [
+          6811,
+          6826
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "opportunity-rule": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/opportunity-entry/after.py",
+      "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365",
+      "spans": [
+        [
+          542,
+          580
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "opportunity-claim": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/opportunity-entry/after-qualify.py",
+      "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0",
+      "spans": [
+        [
+          103,
+          104
+        ],
+        [
+          375,
+          378
+        ],
+        [
+          2575,
+          2601
+        ],
+        [
+          2622,
+          2679
+        ],
+        [
+          2982,
+          2986
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "cancel-before": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/before.py",
+      "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a",
+      "spans": [
+        [
+          55,
+          82
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "cancel-after": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/after.py",
+      "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+      "spans": [
+        [
+          55,
+          97
+        ]
+      ],
+      "kind": "historical extracted source"
+    },
+    "cancel-harness": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py",
+      "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+      "spans": [
+        [
+          15,
+          36
+        ]
+      ],
+      "kind": "controlled harness; cancellation injected explicitly"
+    },
+    "topology-capture": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence/s6-platform.md",
+      "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+      "spans": [
+        [
+          19,
+          29
+        ],
+        [
+          33,
+          45
+        ],
+        [
+          88,
+          102
+        ]
+      ],
+      "kind": "dated primary command projections, 2026-10-14 16:10-16:16 UTC"
+    },
+    "workflow-capture": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence/s3-airflow.md",
+      "sha256": "80ae9897b0df608b35ad907f70ea47ec8d27bb620ee142d3265ffebd56c15961",
+      "spans": [
+        [
+          19,
+          21
+        ],
+        [
+          39,
+          41
+        ],
+        [
+          69,
+          76
+        ]
+      ],
+      "kind": "dated disk-read receipt, 2026-10-14"
+    },
+    "tut-idempotency": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/idempotency.mdx",
+      "sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+      "spans": [
+        [
+          29,
+          56
+        ],
+        [
+          75,
+          79
+        ]
+      ],
+      "kind": "embedded standalone local program"
+    },
+    "tut-outbox": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/outbox.mdx",
+      "sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+      "spans": [
+        [
+          29,
+          71
+        ],
+        [
+          94,
+          98
+        ]
+      ],
+      "kind": "embedded standalone local program"
+    },
+    "tut-singleflight": {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/tutoriais/single-flight.mdx",
+      "sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+      "spans": [
+        [
+          29,
+          112
+        ],
+        [
+          134,
+          138
+        ]
+      ],
+      "kind": "embedded standalone local program"
+    },
+    "sf-task": {
+      "path": "/home/fazcapital/airflow/airflow-dags/dags/crm__salesforce__api_to_stg__task.py",
+      "sha256": "63d2b11a4eb36cb637504cacb0f96808351109799f8e2aad2c8ac89805b4403d",
+      "mtime_utc": "2026-06-26T20:29:48.111771+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+      "spans": [
+        [
+          1,
+          21
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-airflow.json",
+      "capture_sha256": "7ef81fa4e51681c7090bbace39cb1d78ddf6772c1276ea5f30ce149320925e5a"
+    },
+    "audio": {
+      "path": "/home/fazcapital/airflow/airflow-dags/dags/recordings__nextbilling__api_to_stg__audio.py",
+      "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+      "mtime_utc": "2026-08-20T04:02:42.144901+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+      "spans": [
+        [
+          608,
+          683
+        ],
+        [
+          741,
+          774
+        ],
+        [
+          912,
+          938
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-airflow.json",
+      "capture_sha256": "7ef81fa4e51681c7090bbace39cb1d78ddf6772c1276ea5f30ce149320925e5a"
+    },
+    "sf-factory": {
+      "path": "/home/fazcapital/airflow/airflow-dags/toolkit/salesforce/factory.py",
+      "sha256": "e20a6b8996a672bbd0d514e1ef1b83f9deb7459bd50bd773f0aabd610cfbeb1b",
+      "mtime_utc": "2026-10-08T19:09:44.127984+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+      "spans": [
+        [
+          88,
+          104
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-airflow.json",
+      "capture_sha256": "7ef81fa4e51681c7090bbace39cb1d78ddf6772c1276ea5f30ce149320925e5a"
+    },
+    "sf-pipeline": {
+      "path": "/home/fazcapital/airflow/airflow-dags/toolkit/salesforce/pipeline.py",
+      "sha256": "612971e958185958bd7bc4501a2844df8a397b1f6a4f38a78bf7d78130886e41",
+      "mtime_utc": "2026-10-08T19:35:14.664156+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+      "spans": [
+        [
+          771,
+          786
+        ],
+        [
+          883,
+          910
+        ],
+        [
+          954,
+          969
+        ],
+        [
+          979,
+          1009
+        ],
+        [
+          1057,
+          1075
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-airflow.json",
+      "capture_sha256": "7ef81fa4e51681c7090bbace39cb1d78ddf6772c1276ea5f30ce149320925e5a"
+    },
+    "sf-calls": {
+      "path": "/home/fazcapital/airflow/airflow-dags/dbt/models/facts/fct_salesforce__calls.sql",
+      "sha256": "e794f5af231f1518b3e728c4ae1bba6d12c42c8f41557c7daf8112b02b26fc2e",
+      "mtime_utc": "2026-08-20T04:02:42.146901+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "observed_at_utc": "2026-10-15T18:27:37.447524+00:00",
+      "spans": [
+        [
+          1,
+          7
+        ],
+        [
+          48,
+          74
+        ],
+        [
+          97,
+          102
+        ],
+        [
+          123,
+          124
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-airflow.json",
+      "capture_sha256": "7ef81fa4e51681c7090bbace39cb1d78ddf6772c1276ea5f30ce149320925e5a"
+    },
+    "cosmos": {
+      "path": "/home/fazcapital/airflow/airflow-dags/dags/fct_salesforce_calls__salesforce__stg_to_fct.py",
+      "sha256": "5875f94a31d05d2c5cebdae11906ee68452b6cf7b7c47be0e0cf8f129883807f",
+      "mtime_utc": "2026-10-06T21:38:10.627084+00:00",
+      "observed_at_utc": "2026-10-15T18:29:04.245860+00:00",
+      "kind": "canonical host disk read; no execution",
+      "host": "airflow-70",
+      "spans": [
+        [
+          1,
+          95
+        ]
+      ],
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-cosmos.json",
+      "capture_sha256": "695bc8283505abdb91aca626a3dd94ceb0ef4931a1471385f3317d8e7ab699f4"
+    },
+    "pg-wal": {
+      "url": "https://www.postgresql.org/docs/16/wal-intro.html",
+      "http_response_sha256": "50f186ebe754ba5c9a486342b0df31335f703d7b0ca81cfdf24e615c5ef6fa63",
+      "support": "PostgreSQL 16 WAL introduction, paragraphs 1-2: flush WAL before corresponding data pages; redo after a crash.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text.",
+      "observed_at_utc": "2026-10-15T18:28:08.888924+00:00",
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-official.json",
+      "capture_sha256": "260f27eb92537ab61011d98ee38447703fb0e125682588211dd1b657918d2207"
+    },
+    "pg-refresh": {
+      "url": "https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html",
+      "http_response_sha256": "dab01cdc74e66143e809dc8cc561c9fdff97fca6f3fd4189857dffba585ec689",
+      "support": "PostgreSQL 16 REFRESH: full replacement; CONCURRENTLY permits SELECT, requires a qualifying UNIQUE index and a populated view.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text.",
+      "observed_at_utc": "2026-10-15T18:28:08.888924+00:00",
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-official.json",
+      "capture_sha256": "260f27eb92537ab61011d98ee38447703fb0e125682588211dd1b657918d2207"
+    },
+    "pg-standby": {
+      "url": "https://www.postgresql.org/docs/16/warm-standby.html",
+      "http_response_sha256": "68ff0ce12d5a65c9b1e35828c835eb3d0f29c44cb5aa9a7cc6b283db487833ba",
+      "support": "PostgreSQL 16 27.2.5: asynchronous streaming can make a committed change visible on standby later; sending WAL and applying it differ.",
+      "version": "16",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text.",
+      "observed_at_utc": "2026-10-15T18:28:08.888924+00:00",
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-official.json",
+      "capture_sha256": "260f27eb92537ab61011d98ee38447703fb0e125682588211dd1b657918d2207"
+    },
+    "entra-oidc": {
+      "url": "https://learn.microsoft.com/en-us/entra/architecture/auth-oidc",
+      "http_response_sha256": "fae63fb94f52b70dea87c7dd15bc442f57ef180125668c9bcbcb38048402dd77",
+      "support": "Microsoft Entra OIDC: authentication extends OAuth 2.0; a resource validates the intended access token; application authorization remains separate.",
+      "version": "Microsoft Entra public contract",
+      "inspection": "Read official page through web tool; HTTP body hashed separately without retention of full copyrighted text.",
+      "observed_at_utc": "2026-10-15T18:28:08.888924+00:00",
+      "capture_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two-official.json",
+      "capture_sha256": "260f27eb92537ab61011d98ee38447703fb0e125682588211dd1b657918d2207"
+    }
+  },
+  "diagrams": [
+    {
+      "id": "diagram-2",
+      "basis": "observed source abstraction",
+      "source_refs": [
+        "calendar"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Sessão e token precedem Graph; o ramo sem calendário compartilhado chama getSchedule e transforma a disponibilidade.",
+      "limit": "O desenho resume o ramo compartilhado; não demonstra permissões, autenticação executada ou implantação.",
+      "document": "content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "body_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb",
+      "fence_index": 2,
+      "line_start": 58,
+      "inspected_sources": [
+        {
+          "id": "calendar",
+          "sha256": "d19db8be50e748a034be8c33ffef46d049fd827b7a996e960960ba7dd5fc5906",
+          "spans": [
+            [
+              40,
+              81
+            ],
+            [
+              93,
+              108
+            ],
+            [
+              141,
+              272
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-4",
+      "basis": "dated configuration capture",
+      "source_refs": [
+        "topology-capture"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A captura separa main/git-sync/emptyDir, scheduler único, duas APIs, metadata CNPG e logs configurados.",
+      "limit": "Só vale para a topologia capturada em 14/10; não acompanha uma task até S3 nem prova failover.",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09",
+      "fence_index": 1,
+      "line_start": 22,
+      "inspected_sources": [
+        {
+          "id": "topology-capture",
+          "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+          "spans": [
+            [
+              19,
+              29
+            ],
+            [
+              33,
+              45
+            ],
+            [
+              88,
+              102
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-6",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "O destino aceita 43 e rejeita 42 depois da troca de lease; a conferência está no recurso protegido.",
+      "limit": "A geração ordenada é premissa da proposta; não é uma garantia conferida nas Leases Kubernetes medidas.",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685",
+      "fence_index": 3,
+      "line_start": 59,
+      "hypothetical_model": {
+        "path": "content/explicacoes/availability/index.mdx",
+        "span": [
+          49,
+          79
+        ],
+        "sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-8",
+      "basis": "dated configuration capture",
+      "source_refs": [
+        "topology-capture"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Git-sync e scheduler compartilham emptyDir no pod; a árvore sincronizada fornece os arquivos ao scheduler.",
+      "limit": "Configuração capturada em 14/10; não representa execução recente, GitOps completo ou igualdade de todo repositório.",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3",
+      "fence_index": 5,
+      "line_start": 114,
+      "inspected_sources": [
+        {
+          "id": "topology-capture",
+          "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+          "spans": [
+            [
+              19,
+              29
+            ],
+            [
+              33,
+              45
+            ],
+            [
+              88,
+              102
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-10",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "Cadastro, elegibilidade, disponibilidade e confirmação concorrente aparecem como decisões distintas com recusas próprias.",
+      "limit": "É proposta explicativa. A proteção concreta da reserva e as regras comerciais não são implementadas pelo desenho.",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+      "fence_index": 1,
+      "line_start": 22,
+      "hypothetical_model": {
+        "path": "content/explicacoes/business-rules/index.mdx",
+        "span": [
+          12,
+          42
+        ],
+        "sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-12",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A fronteira local candidata é separada do Salesforce e a retomada reentra por comando validado.",
+      "limit": "A existência de um Aggregate D1 e sua fronteira transacional permanecem hipóteses explícitas.",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+      "fence_index": 3,
+      "line_start": 93,
+      "hypothetical_model": {
+        "path": "content/explicacoes/business-rules/index.mdx",
+        "span": [
+          83,
+          111
+        ],
+        "sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-14",
+      "basis": "observed source abstraction",
+      "source_refs": [
+        "insurance-api",
+        "insurance-service",
+        "insurance-repo"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O hit retorna antes do serviço; o miss delega, grava TTL 300 e devolve o resultado; exceções viram erro HTTP.",
+      "limit": "Não demonstra idade da origem, escopo de autorização completo ou cache efetivamente disponível em produção.",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c",
+      "fence_index": 1,
+      "line_start": 22,
+      "inspected_sources": [
+        {
+          "id": "insurance-api",
+          "sha256": "cc505da6a5657e020de85858f6275ca5a4e260cac84d88e26455ffdb5de75f14",
+          "spans": [
+            [
+              46,
+              73
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-service",
+          "sha256": "7975fa3aa049b5af214a116c442b9655d8443804264ea8dcf84cf54bc8094a5a",
+          "spans": [
+            [
+              19,
+              24
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-repo",
+          "sha256": "a44cb58867bf60f4af694167598bbe58724e3050f051f66e1035b8cd955c3f75",
+          "spans": [
+            [
+              74,
+              112
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-16",
+      "basis": "observed source plus hypothetical cancellation",
+      "source_refs": [
+        "singleflight-current",
+        "nextbilling",
+        "cancel-after"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O segundo leitor reutiliza _inflight; shield isola cancelamento do awaiter e o callback libera o slot também após erro.",
+      "limit": "Um processo e uma instância; o cancelamento é condição do cenário, sem afirmar que fechar o browser sempre o cause.",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2",
+      "fence_index": 3,
+      "line_start": 84,
+      "inspected_sources": [
+        {
+          "id": "singleflight-current",
+          "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+          "spans": [
+            [
+              75,
+              154
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "nextbilling",
+          "sha256": "ef760272312aa59e50c10b58f27cea3434f2d1bc56329cfc4b123425d8246f85",
+          "spans": [
+            [
+              198,
+              218
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "cancel-after",
+          "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+          "spans": [
+            [
+              55,
+              97
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-18",
+      "basis": "source-backed conceptual state machine",
+      "source_refs": [
+        "breaker",
+        "worker"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O critério de falhas abre o breaker; cooldown permite half-open, e sucesso/falha fecham/reabrem.",
+      "limit": "A abstração não certifica quota exata de probes, sincronização entre processos ou failover.",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "breaker",
+          "sha256": "645b6668c75ea9bc6a145269279af48ce8f8f90167b5d235ecb51505a9205147",
+          "spans": [
+            [
+              127,
+              227
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "worker",
+          "sha256": "2f70ca71ece744c19c65a6fbe9fe59630007ec0c1eed87e28300f6fdd120a219",
+          "spans": [
+            [
+              221,
+              262
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-20",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A classificação direciona trabalhos a pools próprios e a sobrecarga tem recusa ou adiamento explícitos.",
+      "limit": "Separação proposta; a força do isolamento depende dos recursos realmente reservados, não apenas do desenho.",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99",
+      "fence_index": 3,
+      "line_start": 93,
+      "hypothetical_model": {
+        "path": "content/explicacoes/capacity/index.mdx",
+        "span": [
+          83,
+          111
+        ],
+        "sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-22",
+      "basis": "source-backed hypothetical policy",
+      "source_refs": [
+        "api-rate",
+        "slowapi-rate"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O ramo de indisponibilidade prossegue segundo fail-open; exceder o contador recebe 429 e informação de espera.",
+      "limit": "A quota 60 é fictícia. Autenticação continua uma condição separada; a disponibilidade do contador não foi executada.",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143",
+      "fence_index": 5,
+      "line_start": 148,
+      "inspected_sources": [
+        {
+          "id": "api-rate",
+          "sha256": "68200373a5ae9d894d78be3f1e73115467424a55a662dd2d04155b1f33d0443f",
+          "spans": [
+            [
+              99,
+              124
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "slowapi-rate",
+          "sha256": "54894629f28aa9fb6b93f40dd30e74083e7406c4571c759b293df3655cc34511",
+          "spans": [
+            [
+              118,
+              137
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-25",
+      "basis": "executable hypothetical model",
+      "source_refs": [
+        "financial-cache"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Chave tenant/consulta, expiração, invalidação e persistência antes da confirmação correspondem aos probes locais.",
+      "limit": "É uma composição didática de probes independentes, com dicionários locais; não é um trace único nem armazenamento durável real.",
+      "document": "content/explicacoes/casos/cache-policy/index.mdx",
+      "document_sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+      "body_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "financial-cache",
+          "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+          "spans": [
+            [
+              284,
+              302
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-27",
+      "basis": "historical extracted source",
+      "source_refs": [
+        "date-before-card",
+        "date-after-card",
+        "date-helper",
+        "date-harness"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O helper distingue a string inteira YYYY-MM-DD e monta componentes locais; timestamps seguem new Date.",
+      "limit": "Os valores são do cenário São Paulo declarado. Não consulta backend nem prova que o card implantado usa essa revisão.",
+      "document": "content/explicacoes/casos/date-only/index.mdx",
+      "document_sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+      "body_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "date-before-card",
+          "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d",
+          "spans": [
+            [
+              239,
+              247
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "date-after-card",
+          "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d",
+          "spans": [
+            [
+              241,
+              244
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "date-helper",
+          "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5",
+          "spans": [
+            [
+              7,
+              12
+            ],
+            [
+              30,
+              45
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "date-harness",
+          "sha256": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3",
+          "spans": [
+            [
+              18,
+              26
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-29",
+      "basis": "historical extracted source",
+      "source_refs": [
+        "early-before",
+        "early-after",
+        "early-harness"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A janela antecipada inicia tarefa no mesmo slot e devolve valor válido; a expiração dura continua aguardando o produtor.",
+      "limit": "O harness libera a renovação antes de 1,05; não há promessa de eliminar toda espera nem medição de latência real.",
+      "document": "content/explicacoes/casos/early-refresh/index.mdx",
+      "document_sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+      "body_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "early-before",
+          "sha256": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406",
+          "spans": [
+            [
+              55,
+              80
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "early-after",
+          "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+          "spans": [
+            [
+              75,
+              154
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "early-harness",
+          "sha256": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3",
+          "spans": [
+            [
+              9,
+              47
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-31",
+      "basis": "historical extracted source",
+      "source_refs": [
+        "opportunity-before",
+        "opportunity-after",
+        "opportunity-rule",
+        "opportunity-claim"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Há criação anterior, reaproveitamento por source_opp_id, recusas de estado/tipo e claim por OPP com ator fixo; a liberação aguarda writers.",
+      "limit": "Os efeitos externos são doubles, e o ciclo final de writers não é executado pelo probe; isso está explicitado no desenho.",
+      "document": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "document_sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+      "body_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "opportunity-before",
+          "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38",
+          "spans": [
+            [
+              6205,
+              6224
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "opportunity-after",
+          "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05",
+          "spans": [
+            [
+              6811,
+              6826
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "opportunity-rule",
+          "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365",
+          "spans": [
+            [
+              542,
+              580
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "opportunity-claim",
+          "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0",
+          "spans": [
+            [
+              103,
+              104
+            ],
+            [
+              375,
+              378
+            ],
+            [
+              2575,
+              2601
+            ],
+            [
+              2622,
+              2679
+            ],
+            [
+              2982,
+              2986
+            ]
+          ],
+          "url": null
+        }
+      ],
+      "png_inspected": {
+        "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5051fec2d620-1.png",
+        "sha256": "bdfab4ed8970ab856adc2ba865203c6c2e33d9c71327725f1c4574ea51de2279"
+      }
+    },
+    {
+      "id": "diagram-33",
+      "basis": "executable hypothetical model",
+      "source_refs": [
+        "financial-order"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O inbox conserva identidade, SQLite registra ordem e intenção na mesma transação e uma ação compensatória recompõe 100.",
+      "limit": "São probes independentes, não uma saga única executada; o worker é proposto. As três mensagens são ORDER-1, ORDER-1 e ORDER-2.",
+      "document": "content/explicacoes/casos/order-delivery/index.mdx",
+      "document_sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+      "body_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "financial-order",
+          "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+          "spans": [
+            [
+              65,
+              107
+            ]
+          ],
+          "url": null
+        }
+      ],
+      "png_inspected": {
+        "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/da75a9fbff12-1.png",
+        "sha256": "236eaacd846c783a8416d14ad354ba6eeabb75b621f194f96c4b789cb1c49abe"
+      }
+    },
+    {
+      "id": "diagram-36",
+      "basis": "executable hypothetical model",
+      "source_refs": [
+        "financial-reservation"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A versão 7 é recusada após o crédito, a releitura produz 900, o destino rejeita 101 e a chave do slot independe do operador.",
+      "limit": "Modelo local determinístico; as três guardas são probes independentes e não comprovam exclusão entre processos.",
+      "document": "content/explicacoes/casos/reservation/index.mdx",
+      "document_sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+      "body_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "financial-reservation",
+          "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+          "spans": [
+            [
+              109,
+              140
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-39",
+      "basis": "historical source with unsupported transport-cause label",
+      "source_refs": [
+        "cancel-before",
+        "cancel-after",
+        "cancel-harness"
+      ],
+      "status": "HIGH",
+      "rationale": "Shield, callback e quatro sobreviventes têm suporte. A entrada atribui ao FastAPI a causa de cancelamento que o harness injeta explicitamente.",
+      "limit": "A leitura não prova nem refuta cancelamentos possíveis do FastAPI; só não estabelece essa seta como causa histórica/observada.",
+      "document": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "document_sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+      "body_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "cancel-before",
+          "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a",
+          "spans": [
+            [
+              55,
+              82
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "cancel-after",
+          "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+          "spans": [
+            [
+              55,
+              97
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "cancel-harness",
+          "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+          "spans": [
+            [
+              15,
+              36
+            ]
+          ],
+          "url": null
+        }
+      ],
+      "finding_id": "DSEM2-H1"
+    },
+    {
+      "id": "diagram-41",
+      "basis": "observed source abstraction",
+      "source_refs": [
+        "insurance-page",
+        "insurance-hook",
+        "insurance-manager",
+        "insurance-api",
+        "insurance-service",
+        "insurance-repo"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A página chama o hook; Promise.all inclui KPI; o miss percorre serviço/repositório/SQL e grava cache 300; erro propaga.",
+      "limit": "Sequência estática do KPI, sem afirmar uma recuperação completa da interface ou execução recente do SQL.",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+      "fence_index": 1,
+      "line_start": 20,
+      "inspected_sources": [
+        {
+          "id": "insurance-page",
+          "sha256": "a77bd6df82a620f1199b4ef73603ef0d1f2e5abbedb81eba64c0916d18b567fc",
+          "spans": [
+            [
+              40,
+              51
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-hook",
+          "sha256": "c66cdba07b774cd7d49e576103984a776ed6e841163179c11c82f45b96650e97",
+          "spans": [
+            [
+              248,
+              259
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-manager",
+          "sha256": "7a4362a3037929d2cfe67dfcdc2655e47e924b8e9b056b56455ee0df7a339b24",
+          "spans": [
+            [
+              238,
+              240
+            ],
+            [
+              406,
+              445
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-api",
+          "sha256": "cc505da6a5657e020de85858f6275ca5a4e260cac84d88e26455ffdb5de75f14",
+          "spans": [
+            [
+              46,
+              73
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-service",
+          "sha256": "7975fa3aa049b5af214a116c442b9655d8443804264ea8dcf84cf54bc8094a5a",
+          "spans": [
+            [
+              19,
+              24
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "insurance-repo",
+          "sha256": "a44cb58867bf60f4af694167598bbe58724e3050f051f66e1035b8cd955c3f75",
+          "spans": [
+            [
+              74,
+              112
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-43",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "Adaptador HTTP usa a porta de entrada; o caso de uso depende das portas e os adaptadores concretos implementam contratos.",
+      "limit": "As setas pontilhadas são dependências/implementações propostas, não chamadas observadas nem refatoração já realizada.",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+      "fence_index": 3,
+      "line_start": 97,
+      "hypothetical_model": {
+        "path": "content/explicacoes/code-boundaries/index.mdx",
+        "span": [
+          87,
+          116
+        ],
+        "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+      },
+      "inspected_sources": [],
+      "png_inspected": {
+        "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-3.png",
+        "sha256": "ad2aba582300d7e0822e4474fcb5d9dd9aec18a627531fd4dc2e214de8c68648"
+      }
+    },
+    {
+      "id": "diagram-45",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A ação explícita selectMode percorre controller/model e a view recebe estado ou recusa, preservando o modo.",
+      "limit": "É comparação MVC didática, sem atribuir essa estrutura ao componente React ou ao seu framework.",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+      "fence_index": 5,
+      "line_start": 151,
+      "hypothetical_model": {
+        "path": "content/explicacoes/code-boundaries/index.mdx",
+        "span": [
+          141,
+          175
+        ],
+        "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-47",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A view envia ação ao ViewModel, o model decide e o estado observado retorna à apresentação.",
+      "limit": "Não prova binding implementado, estado compartilhado entre instâncias ou classificação MVVM integral do MakersHub.",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+      "fence_index": 7,
+      "line_start": 198,
+      "hypothetical_model": {
+        "path": "content/explicacoes/code-boundaries/index.mdx",
+        "span": [
+          188,
+          222
+        ],
+        "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-49",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "As duas escolhas válidas incluem auto-transições idempotentes; uma entrada inválida conserva o estado.",
+      "limit": "O estado inicial Manual pertence ao modelo proposto, sem alegar default de produção ou classes GoF.",
+      "document": "content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "body_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+      "fence_index": 2,
+      "line_start": 128,
+      "hypothetical_model": {
+        "path": "content/explicacoes/code-patterns/index.mdx",
+        "span": [
+          118,
+          145
+        ],
+        "sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-51",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "O recurso registra 102 antes do retorno de A e rejeita 101; expiração de lease e fencing são decisões separadas.",
+      "limit": "A emissão monotônica e a comparação no destino são premissas declaradas; UUID de ownership local não as estabelece.",
+      "document": "content/explicacoes/concurrency/index.mdx",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "body_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04",
+      "fence_index": 1,
+      "line_start": 32,
+      "hypothetical_model": {
+        "path": "content/explicacoes/concurrency/index.mdx",
+        "span": [
+          22,
+          57
+        ],
+        "sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-53",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A consulta de outubro pode evitar outras partições somente se o plano permitir; o armazenamento permanece no mesmo PostgreSQL.",
+      "limit": "Não afirma particionamento existente, pruning executado ou ganho de desempenho na tabela medida.",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+      "fence_index": 1,
+      "line_start": 20,
+      "hypothetical_model": {
+        "path": "content/explicacoes/data-distribution/index.mdx",
+        "span": [
+          10,
+          33
+        ],
+        "sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-55",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A entrada de C transfere um intervalo e preserva parte das chaves, com migração e retomada explicitadas.",
+      "limit": "Não define posições exatas, porcentagem universal, consenso ou membership já implantado.",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+      "fence_index": 3,
+      "line_start": 61,
+      "hypothetical_model": {
+        "path": "content/explicacoes/data-distribution/index.mdx",
+        "span": [
+          51,
+          76
+        ],
+        "sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-57",
+      "basis": "vendor-contract conceptual model",
+      "source_refs": [
+        "pg-wal"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A persistência dos registros necessários precede as páginas correspondentes; a recuperação reaplica o que o WAL cobre.",
+      "limit": "É mecanismo conceitual PostgreSQL 16, sem crash real, política efetiva de commit ou garantia de durabilidade medida.",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+      "fence_index": 1,
+      "line_start": 24,
+      "inspected_sources": [
+        {
+          "id": "pg-wal",
+          "sha256": "50f186ebe754ba5c9a486342b0df31335f703d7b0ca81cfdf24e615c5ef6fa63",
+          "spans": null,
+          "url": "https://www.postgresql.org/docs/16/wal-intro.html"
+        }
+      ]
+    },
+    {
+      "id": "diagram-59",
+      "basis": "vendor-contract hypothetical model",
+      "source_refs": [
+        "pg-standby"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O commit local pode preceder a aplicação remota; a consulta antes da aplicação pode devolver o estado anterior.",
+      "limit": "A seta de propagação indica envio, não confirmação de aplicação. O aporte e a réplica são hipotéticos.",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+      "fence_index": 3,
+      "line_start": 61,
+      "inspected_sources": [
+        {
+          "id": "pg-standby",
+          "sha256": "68ff0ce12d5a65c9b1e35828c835eb3d0f29c44cb5aa9a7cc6b283db487833ba",
+          "spans": null,
+          "url": "https://www.postgresql.org/docs/16/warm-standby.html"
+        }
+      ]
+    },
+    {
+      "id": "diagram-61",
+      "basis": "source-inspired recovery model",
+      "source_refs": [
+        "audio"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O código separa objeto e metadado; o modelo trata resultado desconhecido por consulta da mesma identidade antes da retomada.",
+      "limit": "Os estados e as consultas de recuperação são proposta; a DAG não tem essa máquina persistida nem atomicidade entre objeto e SQL.",
+      "document": "content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "body_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+      "fence_index": 1,
+      "line_start": 20,
+      "inspected_sources": [
+        {
+          "id": "audio",
+          "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+          "spans": [
+            [
+              608,
+              683
+            ],
+            [
+              741,
+              774
+            ],
+            [
+              912,
+              938
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-63",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "O fato de disponibilidade permite reações independentes; a falha transitória de transcrição retorna ao consumidor.",
+      "limit": "A publicação durável, o limite de retry e a implantação de consumidores não são demonstrados por este modelo.",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+      "fence_index": 1,
+      "line_start": 26,
+      "hypothetical_model": {
+        "path": "content/explicacoes/messages/index.mdx",
+        "span": [
+          16,
+          43
+        ],
+        "sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-65",
+      "basis": "observed local guard plus hypothetical remote failure",
+      "source_refs": [
+        "idempotency"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "INSERT/SELECT da identidade e replay done correspondem ao código; a queda entre efeito remoto e finish demonstra o limite da guarda local.",
+      "limit": "Salesforce e a queda são hipotéticos; claim_or_replay não chama o fornecedor nem prova deduplicação externa.",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+      "fence_index": 3,
+      "line_start": 75,
+      "inspected_sources": [
+        {
+          "id": "idempotency",
+          "sha256": "5383b6db3350faba40a65d0d73be929ee866b79a493e3647203fc61704721e12",
+          "spans": [
+            [
+              70,
+              100
+            ],
+            [
+              127,
+              173
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-67",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "Falhas transitórias seguem orçamento, falhas permanentes/limite vão à quarentena, e replay conserva a identidade.",
+      "limit": "Não garante transferência atômica para DLQ, autorização implementada ou ausência de efeitos parciais no destino.",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+      "fence_index": 5,
+      "line_start": 134,
+      "hypothetical_model": {
+        "path": "content/explicacoes/messages/index.mdx",
+        "span": [
+          124,
+          152
+        ],
+        "sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-69",
+      "basis": "observed source abstraction",
+      "source_refs": [
+        "metrics"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O snapshot ocorre sob lock, o I/O fora dele, os deltas usam bases confirmadas e o avanço acontece depois do commit.",
+      "limit": "Não certifica agregações não aditivas, flushes simultâneos, retenção ou ausência de commit com resposta ambígua.",
+      "document": "content/explicacoes/observability/index.mdx",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "body_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a",
+      "fence_index": 2,
+      "line_start": 72,
+      "inspected_sources": [
+        {
+          "id": "metrics",
+          "sha256": "f07ff42bb883785f0ff3d29c2e682a9b2902fd6625f07263db149df960a54c3c",
+          "spans": [
+            [
+              230,
+              319
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-71",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A versão condiciona append; aporte 1000 menos estorno 200 deriva 800, e replay reconstrói projeções.",
+      "limit": "A prosa exige comparação/append atômicos. Não há ledger financeiro implantado nem repetição de pagamento no replay.",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "body_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+      "fence_index": 2,
+      "line_start": 52,
+      "hypothetical_model": {
+        "path": "content/explicacoes/read-models/index.mdx",
+        "span": [
+          42,
+          70
+        ],
+        "sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-73",
+      "basis": "vendor-contract proposed model",
+      "source_refs": [
+        "pg-refresh"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A leitura usa conteúdo disponível enquanto REFRESH CONCURRENTLY obedece suas pré-condições; o sucesso renova leituras posteriores.",
+      "limit": "É proposta PostgreSQL 16, não refresh observado. Falha não atesta frescor, e o modelo não promete atualização incremental.",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+      "body_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "fence_index": 4,
+      "line_start": 97,
+      "inspected_sources": [
+        {
+          "id": "pg-refresh",
+          "sha256": "dab01cdc74e66143e809dc8cc561c9fdff97fca6f3fd4189857dffba585ec689",
+          "spans": null,
+          "url": "https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html"
+        }
+      ]
+    },
+    {
+      "id": "diagram-75",
+      "basis": "observed local write plus proposed relay",
+      "source_refs": [
+        "outbox-flag"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Owner e flag pending mudam na mesma instrução local; o relay proposto conserva intenção e explicita duplicação após aceite remoto.",
+      "limit": "A flag guarda estado pendente, não cada evento. O destino e a conclusão do lote não foram executados pelo diagrama.",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+      "fence_index": 2,
+      "line_start": 48,
+      "inspected_sources": [
+        {
+          "id": "outbox-flag",
+          "sha256": "4d6cab0034db33fcdbc908f9fdb048a01e17adc1eb31020f65cba967d479d370",
+          "spans": [
+            [
+              337,
+              415
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-77",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "Rejeição anterior à liquidação libera a reserva; aceite definitivo é o pivô e falha de comprovante gera retry do aviso.",
+      "limit": "Não cobre timeout de resultado desconhecido nem implementa devolução automática; a narrativa só resolve os dois resultados explícitos.",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b",
+      "fence_index": 4,
+      "line_start": 103,
+      "hypothetical_model": {
+        "path": "content/explicacoes/reliable-integration/index.mdx",
+        "span": [
+          93,
+          130
+        ],
+        "sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-79",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "A expansão mantém aliases de uma fonte única; a contração aguarda ausência observada de leitores antigos.",
+      "limit": "Não é migração executada. Contagens de consumidores e observação de uso precisam existir antes de aplicar a proposta.",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866",
+      "fence_index": 2,
+      "line_start": 42,
+      "hypothetical_model": {
+        "path": "content/explicacoes/safe-change/index.mdx",
+        "span": [
+          32,
+          60
+        ],
+        "sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-81",
+      "basis": "hypothetical model",
+      "source_refs": [],
+      "status": "PASS_BOUNDED",
+      "rationale": "De 100 requisições, 90 seguem estável e 10 candidata; critérios controlam retorno ou crescimento.",
+      "limit": "A amostra delimita requisições, não pessoas; rollback de tráfego não desfaz efeitos anteriores.",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0",
+      "fence_index": 4,
+      "line_start": 87,
+      "hypothetical_model": {
+        "path": "content/explicacoes/safe-change/index.mdx",
+        "span": [
+          77,
+          103
+        ],
+        "sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2"
+      },
+      "inspected_sources": []
+    },
+    {
+      "id": "diagram-83",
+      "basis": "vendor-contract hypothetical model",
+      "source_refs": [
+        "entra-oidc"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Identidade autenticada do cliente e access token da API têm papéis distintos; a política de objeto decide permitir ou negar.",
+      "limit": "OIDC e nomes são didáticos. A autorização falha fechada no modelo, sem certificar login, política ou transporte implantados.",
+      "document": "content/explicacoes/security/index.mdx",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "body_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b",
+      "fence_index": 1,
+      "line_start": 20,
+      "inspected_sources": [
+        {
+          "id": "entra-oidc",
+          "sha256": "fae63fb94f52b70dea87c7dd15bc442f57ef180125668c9bcbcb38048402dd77",
+          "spans": null,
+          "url": "https://learn.microsoft.com/en-us/entra/architecture/auth-oidc"
+        }
+      ]
+    },
+    {
+      "id": "diagram-85",
+      "basis": "canonical disk-source abstraction",
+      "source_refs": [
+        "sf-task",
+        "sf-factory",
+        "sf-pipeline",
+        "sf-calls",
+        "cosmos",
+        "workflow-capture",
+        "topology-capture"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A factory ordena extract/transform/validate/load e cadeia de removidos; staging alimenta o modelo dbt selecionado por Cosmos.",
+      "limit": "A ligação por tabela é dependência de dados, não ordem de agendamento entre DAGs. O código .70 não certifica toda a paridade do cluster.",
+      "document": "content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "body_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+      "fence_index": 1,
+      "line_start": 30,
+      "inspected_sources": [
+        {
+          "id": "sf-task",
+          "sha256": "63d2b11a4eb36cb637504cacb0f96808351109799f8e2aad2c8ac89805b4403d",
+          "spans": [
+            [
+              1,
+              21
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "sf-factory",
+          "sha256": "e20a6b8996a672bbd0d514e1ef1b83f9deb7459bd50bd773f0aabd610cfbeb1b",
+          "spans": [
+            [
+              88,
+              104
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "sf-pipeline",
+          "sha256": "612971e958185958bd7bc4501a2844df8a397b1f6a4f38a78bf7d78130886e41",
+          "spans": [
+            [
+              771,
+              786
+            ],
+            [
+              883,
+              910
+            ],
+            [
+              954,
+              969
+            ],
+            [
+              979,
+              1009
+            ],
+            [
+              1057,
+              1075
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "sf-calls",
+          "sha256": "e794f5af231f1518b3e728c4ae1bba6d12c42c8f41557c7daf8112b02b26fc2e",
+          "spans": [
+            [
+              1,
+              7
+            ],
+            [
+              48,
+              74
+            ],
+            [
+              97,
+              102
+            ],
+            [
+              123,
+              124
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "cosmos",
+          "sha256": "5875f94a31d05d2c5cebdae11906ee68452b6cf7b7c47be0e0cf8f129883807f",
+          "spans": [
+            [
+              1,
+              95
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "workflow-capture",
+          "sha256": "80ae9897b0df608b35ad907f70ea47ec8d27bb620ee142d3265ffebd56c15961",
+          "spans": [
+            [
+              19,
+              21
+            ],
+            [
+              39,
+              41
+            ],
+            [
+              69,
+              76
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "topology-capture",
+          "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+          "spans": [
+            [
+              19,
+              29
+            ],
+            [
+              33,
+              45
+            ],
+            [
+              88,
+              102
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-87",
+      "basis": "canonical disk source plus proposed failure",
+      "source_refs": [
+        "audio",
+        "topology-capture"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A ordem da DAG passa por extração, enriquecimento, stat/put e load_metadata com conflito por nextbilling_call_id.",
+      "limit": "O ramo de falha SQL é cenário proposto e resume uma tentativa que falhou; não houve upload, SQL ou gravação recente executados nesta revisão.",
+      "document": "content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "body_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+      "fence_index": 3,
+      "line_start": 86,
+      "inspected_sources": [
+        {
+          "id": "audio",
+          "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+          "spans": [
+            [
+              608,
+              683
+            ],
+            [
+              741,
+              774
+            ],
+            [
+              912,
+              938
+            ]
+          ],
+          "url": null
+        },
+        {
+          "id": "topology-capture",
+          "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+          "spans": [
+            [
+              19,
+              29
+            ],
+            [
+              33,
+              45
+            ],
+            [
+              88,
+              102
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-89",
+      "basis": "embedded controlled simulation",
+      "source_refs": [
+        "tut-idempotency"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "A chave e o hash preservam resposta após repetição; outro slot com a mesma chave retorna MISMATCH sem novo efeito.",
+      "limit": "Memória sequencial local; não prova atomicidade concorrente, persistência ou resposta HTTP real.",
+      "document": "content/tutoriais/idempotency.mdx",
+      "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+      "body_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+      "fence_index": 1,
+      "line_start": 82,
+      "inspected_sources": [
+        {
+          "id": "tut-idempotency",
+          "sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+          "spans": [
+            [
+              29,
+              56
+            ],
+            [
+              75,
+              79
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-91",
+      "basis": "embedded controlled simulation",
+      "source_refs": [
+        "tut-outbox"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "O publicador cai depois do efeito e antes da marca; a segunda entrega encontra a identidade no consumidor e marca sent.",
+      "limit": "A unidade local são duas atribuições em memória; não prova transação durável nem retomada depois de reiniciar o processo.",
+      "document": "content/tutoriais/outbox.mdx",
+      "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+      "body_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+      "fence_index": 1,
+      "line_start": 101,
+      "inspected_sources": [
+        {
+          "id": "tut-outbox",
+          "sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+          "spans": [
+            [
+              29,
+              71
+            ],
+            [
+              94,
+              98
+            ]
+          ],
+          "url": null
+        }
+      ]
+    },
+    {
+      "id": "diagram-93",
+      "basis": "embedded controlled simulation",
+      "source_refs": [
+        "tut-singleflight"
+      ],
+      "status": "PASS_BOUNDED",
+      "rationale": "Cinco leitores compartilham inflight e shield isola A; em 8 a janela iniciada em 7 renova sem aguardar o valor novo.",
+      "limit": "A conta de duas buscas é do produtor controlado. Nenhuma latência externa ou coordenação entre workers é demonstrada.",
+      "document": "content/tutoriais/single-flight.mdx",
+      "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+      "body_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+      "fence_index": 1,
+      "line_start": 141,
+      "inspected_sources": [
+        {
+          "id": "tut-singleflight",
+          "sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+          "spans": [
+            [
+              29,
+              112
+            ],
+            [
+              134,
+              138
+            ]
+          ],
+          "url": null
+        }
+      ]
+    }
+  ],
+  "next_step": "Repair only the unsupported transport trigger in diagram-39, then one warm recheck of that material finding at its new document/body hashes; retain the other 44 judgments when their bytes match."
+}

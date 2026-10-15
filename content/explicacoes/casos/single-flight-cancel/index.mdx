@@ -18,11 +18,11 @@ O cancelamento de um leitor é propagado para o produtor, e os cinco recebem Can
 
 A espera passa por asyncio.shield. A liberação do slot e o cache do resultado passam para o callback da própria tarefa.
 
-O fluxo abaixo descreve o corpo de código histórico lido; os recursos externos do laboratório são doubles declarados. Ele não certifica um caminho de produção.
+O fluxo abaixo liga o cancelamento injetado pelo laboratório ao corpo de código histórico lido. Os recursos externos são substitutos locais controlados. Ele não certifica um caminho de produção.
 
 ```mermaid
 flowchart TD
-    U["Assessor fecha uma consulta"] --> C["FastAPI cancela um awaiter"]
+    U["Laboratório inicia cinco leitores concorrentes"] --> C["Laboratório cancela um awaiter"]
     C --> B["Antes: single_flight.py::get usa await task"]
     B --> X["Task do produtor cancelada: cinco leitores falham"]
     C --> A["Depois: single_flight.py::get usa asyncio.shield"]

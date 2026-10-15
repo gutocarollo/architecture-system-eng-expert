@@ -1,0 +1,112 @@
+{
+  "startedAt": "2026-10-15T18:55:12.237Z",
+  "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+  "releaseId": "9610402f817c2a20860be620f45c164b3b77478feed1cbf769f57b021fb8d6bf",
+  "privateNativeBoundary": false,
+  "diagnosticOnly": true,
+  "failures": [],
+  "anonymous": [
+    {
+      "path": "_pagefind/pagefind.js",
+      "status": 401
+    },
+    {
+      "path": "downloads/architecture-labs.zip",
+      "status": 401
+    },
+    {
+      "path": "index.html",
+      "status": 303
+    }
+  ],
+  "readBack": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256Matches": true
+    },
+    {
+      "path": "_pagefind/pagefind.js",
+      "status": 200,
+      "sha256Matches": true
+    },
+    {
+      "path": "downloads/architecture-labs.zip",
+      "status": 200,
+      "sha256Matches": true
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "pageErrors": [],
+  "httpErrors": [
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/login",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 404
+    }
+  ],
+  "anonymousEntry": {
+    "url": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site/login?returnTo=%2F",
+    "heading": "Acesso ao curso"
+  },
+  "wrongPasswordRejected": true,
+  "authenticatedHeading": "Aprenda a enxergar o problema antes de escolher o padrão",
+  "sessionFlags": {
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax"
+  },
+  "anonymousAfterWarm": [
+    {
+      "path": "_pagefind/pagefind.js",
+      "status": 401
+    },
+    {
+      "path": "index.html",
+      "status": 303
+    },
+    {
+      "path": "downloads/architecture-labs.zip",
+      "status": 401
+    }
+  ],
+  "search": {
+    "selected": "/jornadas/single-flight-cancel/conceitos/",
+    "actual": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site/jornadas/single-flight-cancel/conceitos/"
+  },
+  "caseHeading": "Uma falha de lock derruba a tarefa do Airflow",
+  "logout": {
+    "requestStatus": 0,
+    "redirectedToLogin": true
+  },
+  "completedAt": "2026-10-15T18:55:31.205Z",
+  "verdict": "FAIL"
+}

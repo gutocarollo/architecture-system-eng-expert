@@ -4,5 +4,8 @@
   "created_at": "2026-10-15T17:17:01.649913+00:00",
   "default_access": "owner-private",
   "password_choice": "B",
-  "current_publication": "NOT_DEPLOYED"
+  "current_publication": "DEPLOYED",
+  "current_access_mode": "public",
+  "current_version_number": 3,
+  "current_deployment_id": "appgdep_6ad12157e6208191952a28970a7763e3"
 }

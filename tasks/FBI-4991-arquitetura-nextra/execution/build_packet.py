@@ -50,7 +50,9 @@ for identifier,relative,kind in [
     ('course-validation','tasks/architecture-course-2026-10-14/artifacts/fbi4991-execution-validation.json','runtime'),
     ('catalog-barrier','tasks/FBI-4991-arquitetura-nextra/execution/catalog/registration-proposal.json','scope'),
     ('history-adjudication','tasks/FBI-4991-arquitetura-nextra/execution/history/history-causal-completion-summary.json','contract'),
-    ('current-data','tasks/FBI-4991-arquitetura-nextra/execution/live-data-0301.json','runtime')]:
+    ('current-data','tasks/FBI-4991-arquitetura-nextra/execution/live-data-0301.json','runtime'),
+    ('diagram-semantic-closure','tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantic-closure.json','contract'),
+    ('terminal-delivery','tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal.json','contract')]:
     if (ROOT/relative).exists(): add_evidence(identifier,relative,kind)
 
 old_documents={item['path']:item for item in old['documents']}
@@ -79,11 +81,16 @@ render_file=BASE/'mermaid-current.json'
 if render_file.exists():
     rendered=json.loads(render_file.read_text())
     doc_by_path={str(ROOT/d['path']):d for d in packet['documents']}
+    closure_path=BASE/'reviews/diagram-semantic-closure.json'
+    semantic={item['id']:item for item in json.loads(closure_path.read_text())['diagrams']} if closure_path.exists() else {}
     for index,block in enumerate(rendered['blocks'],1):
         doc=doc_by_path[block['path']]
         if doc['sha256']!=block['document_sha256']: raise SystemExit('Diagram document changed: '+doc['path'])
+        approval=semantic.get(f'diagram-{index}')
+        if approval and (approval['document_sha256']!=doc['sha256'] or approval['body_sha256']!=block['source_sha256']):
+            raise SystemExit('Stale diagram semantic judgment: '+doc['path'])
         packet['diagrams'].append(dict(id=f'diagram-{index}',document_id=doc['id'],fence_index=block['fence_index'],
-            relation_ids=doc['relation_ids'],syntax=block['syntax'],render=block['render'],semantic_review='NOT_RUN'))
+            relation_ids=doc['relation_ids'],syntax=block['syntax'],render=block['render'],semantic_review='PASS' if approval and approval['status']=='PASS_BOUNDED' else 'NOT_RUN'))
 
 catalog=json.loads((BASE/'catalog/registration-proposal.json').read_text())
 if catalog['asset_state']!='registered': packet['gaps'].append(dict(id='catalog-registration',kind='authorization',critical=True,source_id='project',description='The exact repository and asset remain outside the approved catalog contract; the concrete proposal is preserved without bypassing validation.'))
@@ -103,7 +110,7 @@ if history_summary.exists():
     history=json.loads(history_summary.read_text())
     if not history['all_causes_confirmed']:
         packet['gaps'].append(dict(id='history-causal-proof',kind='source',critical=True,source_id='project',description=f"Individual classification is complete for {history['fbi_issues']} FBI issues, with {history['classification_counts']['MISSING_CAUSE_EVIDENCE']} explicitly missing causal evidence and {history['reported_only_count']} reported-only classifications. Full causal confirmation is not established by patch indexing or source triage."))
-packet['gaps'].append(dict(id='independent-final-review',kind='review',critical=True,source_id='project',description='The current packet and diagrams require actual independent receipts; earlier-cycle receipts were not transplanted.'))
+packet['gaps'].append(dict(id='independent-final-review',kind='review',critical=True,source_id='project',description='The terminal draft/site review and all94 bounded diagram judgments are recorded as evidence. Formal per-document council receipts are not present for all181 documents; source and diagram approvals must not be promoted into fabricated full-document approvals.'))
 packet['gaps'].append(dict(id='production-boundary',kind='scope',critical=False,source_id='project',description='Local experiments and read-only source inspection do not establish deployment or end-to-end production execution.'))
 for receipt_path in sorted((BASE/'reviews/terminal-receipts').glob('*.json')):
     receipt=json.loads(receipt_path.read_text())

@@ -1,0 +1,62 @@
+{
+  "observed_at_utc": "2026-10-15T18:46:09.803883+00:00",
+  "kind": "RECORDED_ARTIFACT_RECONCILIATION_NOT_A_NEW_NETWORK_RUN",
+  "verdict": "FUNCTIONAL_PASS_WITH_RECORDED_CONSOLE_ERRORS",
+  "raw_verdict_preserved": "FAIL",
+  "raw_interval_utc": [
+    "2026-10-15T18:13:33.833Z",
+    "2026-10-15T18:15:02.704Z"
+  ],
+  "diagnostic_interval_utc": [
+    "2026-10-15T18:18:28.311Z",
+    "2026-10-15T18:18:46.710Z"
+  ],
+  "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+  "release_id": "d3ca4575af6e36ac80fa3974d6720a0195b89f701e59a04ab4e1465500c7a06c",
+  "anonymous_denied": 1397,
+  "authenticated_sha256_matches": 1397,
+  "anonymous_after_cache_warm_denied": 1397,
+  "password_wrong_rejected": true,
+  "password_correct_authenticated": true,
+  "search_destination_matches": true,
+  "logout_redirected_to_login": true,
+  "functional_failures": [],
+  "page_errors": [],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 401 ()",
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "diagnostic_http_errors": [
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/login",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 401
+    },
+    {
+      "path": "/favicon.ico",
+      "origin": "https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site",
+      "method": "GET",
+      "status": 404
+    }
+  ],
+  "interpretation": "The raw FAIL remains preserved. Matching-release diagnostic requests attribute console errors to expected 401 responses from denied requests and the authenticated missing favicon404. This does not establish universal all-green QA or full Story acceptance."
+}

@@ -1,25 +1,27 @@
 # Continuidade da FBI-4991
 
-Atualizado em 2026-10-15T04:12:03.465259+00:00. O checkpoint local é `32b80d5fc8eda42e2aa9b496d82c30b574120e68`. Ele registra a entrega em andamento; não representa aprovação integral nem publicação remota.
+## Entrega e revisão
 
-## Entrega implementada
+A base da auditoria terminal é `623ae1d3d34143df53c571327a508de47ab58951`. Depois dela, duas correções de diagramas receberam rechecagens independentes. O agregado `reviews/diagram-semantic-closure.json` vincula os 94 pareceres aos hashes atuais. O recibo `reviews/final-source-delta.json` confirma que o Worker e os executores mantiveram os mesmos bytes examinados na auditoria terminal. O ZIP só mudou no texto de um diagrama e em seu manifesto.
 
-O curso tem 181 páginas MDX e dezoito jornadas ligadas aos quatro usos do Diátaxis. Sete casos derivam de código histórico (seis MakersHub e um Airflow); onze são hipóteses financeiras declaradas. A matriz identifica os 310 conceitos e os recortes das práticas. Os laboratórios não alegam implementar integralmente protocolos distribuídos complexos.
+O curso tem 181 páginas MDX, 18 jornadas, 90 destinos e cobertura delimitada dos 310 conceitos. Sete casos derivam de código histórico (seis MakersHub e um Airflow); onze são hipóteses financeiras explícitas. Os 51 reparos HIGH da curadoria foram aceitos, com 14 classificações médias preservadas. O pacote de 98 fontes e 16 executores passou após extração sem Git em execução independente.
 
-A revisão pedagógica encerrou os achados T1–T3. Os novos exercícios PostgreSQL executam os kernels históricos em um cluster temporário isolado. O exercício Airflow executa a função histórica com dependências controladas. A auditoria terminal precisa examinar estes três casos novos e a integração.
+## Hospedagem autorizada
 
-O build atual indexou 181 páginas. Há 94 diagramas com parsing e render. A navegação das dezoito jornadas está em conferência no navegador. O preview deste worktree lê a porta de `.env.local`; o preview do checkout anterior deve ser preservado.
+A opção B foi publicada em https://fazcapital-arquitetura-na-pratica.navy-teal-7786.chatgpt.site. A versão nativa v3 usa a fonte `fafe26360c7140239a74ce31305fb07637de7c54`, o release `9610402f817c2a20860be620f45c164b3b77478feed1cbf769f57b021fb8d6bf` e a revisão de execução 4. O provedor confirmou `succeeded` em 15/10/2026 às 18:54:35 UTC. A audiência nativa é pública e a aplicação exige senha no servidor antes de ler objetos do R2 privado. A senha e as chaves ficam exclusivamente no Keychain e nos segredos de execução; nunca copiar seus valores para este repositório.
 
-## Curadoria em reparo
+O envio de atualização foi retomado após respostas403 e400, preservadas nos recibos. A retomada validou release, origem e manifesto; os 1.397 uploads receberam confirmação204. A conferência pública final encerrou com 1.397 correspondências de hash e bloqueios antes/depois do cache; seus limites devem ser relidos em `hosting/public-final-verification.json`, junto ao diagnóstico de rede da mesma versão. Não transformar automaticamente o FAIL bruto causado pelo favicon e pelas recusas esperadas em um resultado universal sem ressalvas.
 
-A primeira revisão independente classificou os 310 conceitos: 245 correspondências aceitas com limites, quatorze melhorias médias e 51 reparos materiais. Os 51 reparos estão divididos entre os agentes aquecidos curation_complete, base_reference_repairs e rare_oss_sources. A autoria deve exigir adjudicação positiva por função; ausência de issues não é aprovação. Após o freeze reparado, retornar somente os vinte e 31 HIGH aos respectivos revisores, preservando por fingerprint os 259 conceitos restantes.
+## Pendências materiais
 
-## Limites materiais
+A análise causal integral não está comprovada. Dos 595 cards classificados, sete têm relato e apoio no código, 290 têm apenas relato, 35 não têm evidência causal e 263 são mudanças às quais a prova não se aplica. Os 12.697 commits estão indexados; indexação não demonstra causa.
 
-A classificação de 595 cards FBI está completa; a confirmação causal integral não está. Sete relatos têm kernel de código, 290 são apenas relatos, 35 carecem de evidência causal e 263 são mudanças sem incidente aplicável. Não inventar causalidade nem afirmar incidente em produção a partir do título.
+O catálogo global ainda não admite este repositório GitHub. A autoridade Repository declarada no contrato Jira não foi localizada no escopo auditado. Existe proposta concreta de Document e ensaio de projeção, sem escrita fora desta frente.
 
-O registro do repositório GitHub no catálogo global continua sem fonte de autoridade localizada. Existe proposta concreta para um Document e dry-run aceito, mas o contrato global e a ontologia ficam fora da escrita autorizada desta frente. Preservar o bloqueio e a Story em andamento; não cadastrar como MakersHub para contornar o gate.
+O pacote formal continua PARTIAL: os pareceres por fonte, laboratório e diagrama não substituem recibos de aprovação por documento para a totalidade das 181 páginas. Não declarar a Story aceita com essa lacuna. O backlog médio/baixo e os limites históricos ficam explícitos. Nenhum recibo de estudo comprova alteração ou deploy dos sistemas de produção.
 
-## Fechamento restante
+## Publicação da fonte e Jira
 
-Concluir os 51 reparos, rechecagens HIGH e auditoria terminal independente. Conferir os arquivos comprimidos decodificados e o índice final antes da publicação. Publicar a branch e um PR em rascunho no GitHub privado `gutocarollo/architecture-system-eng-expert`, reler o SHA remoto e o PR, atualizar o campo Story correto do Jira e reler o card. Nenhuma etapa local comprova merge, deploy ou produção.
+O destino autorizado é o GitHub privado `gutocarollo/architecture-system-eng-expert`, branch `docs/FBI-4991-arquitetura-aplicada`, com PR em rascunho. O checkout da fonte Sites possui outro remoto e deve ser tratado separadamente.
+
+A Story FBI-4991 usa o campo ADF `customfield_10054`. Preservar os 63 blocos anteriores, o status In Progress e a resolução vazia. Antes da atualização, reler a Story e comparar sua versão e o corpo; depois da escrita, reler e conferir a igualdade do ADF. Os gates executáveis canônicos usam o caminho físico `.agents/skills/jira-fbi/scripts/` e o preview real via stdin.

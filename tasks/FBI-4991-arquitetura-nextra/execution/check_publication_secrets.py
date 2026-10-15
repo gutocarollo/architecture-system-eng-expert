@@ -48,7 +48,8 @@ for finding in findings:
     if current.returncode==0 and live==expected and hashlib.sha256(current.stdout).hexdigest()==expected:
         validated.append(finding);proofs.append(dict(report_path=path,line=finding['StartLine'],source_path=source_path,type='COMPUTED_FILE_SHA256',working_and_staged_source_match=True));continue
     historical=False
-    for revision in ['HEAD','HEAD^']:
+    revisions=subprocess.check_output(['git','rev-list','HEAD','--',source_path],cwd=ROOT,text=True).splitlines()
+    for revision in dict.fromkeys(['HEAD','HEAD^',*revisions]):
         blob=subprocess.run(['git','show',revision+':'+source_path],cwd=ROOT,capture_output=True)
         if blob.returncode==0 and hashlib.sha256(blob.stdout).hexdigest()==expected:
             commit=subprocess.check_output(['git','rev-parse',revision],cwd=ROOT,text=True).strip()

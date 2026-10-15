@@ -1,0 +1,6 @@
+[docs/FBI-4991-arquitetura-aplicada 2ea8a2c9] docs(wiki): registrar correção verificada do acesso ao curso (FBI-4991)
+ 5 files changed, 94 insertions(+)
+ create mode 100644 tasks/FBI-4991-arquitetura-nextra/execution/hosting/private-deployment-form-fix.json
+ create mode 100644 tasks/FBI-4991-arquitetura-nextra/execution/hosting/source-workflow-form-fix.json
+ create mode 100644 tasks/FBI-4991-arquitetura-nextra/execution/hosting/worker-browser-after.jpg
+ create mode 100644 tasks/FBI-4991-arquitetura-nextra/execution/hosting/worker-browser-regression.json

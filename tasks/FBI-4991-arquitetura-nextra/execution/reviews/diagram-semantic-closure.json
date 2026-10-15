@@ -1,0 +1,4195 @@
+{
+  "observed_at": "2026-10-15T18:46:51.264127+00:00",
+  "verdict": "PASS_BOUNDED",
+  "semantic_reviewed": 94,
+  "unresolved_high": 0,
+  "count_is_not_approval": true,
+  "scope": "Independent judgments certify the stated historical source, proposal or lab abstraction; they do not certify current production execution.",
+  "source_receipts": [
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one.json",
+      "sha256": "940047d35ba4a9e566cee0b47767df6ed0f516243025e4e92a11421593318d20"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-recheck.json",
+      "sha256": "7e32a41ccf2b59073ed9a785349deb0f3757f9841f4a443e2ce29d23e82bead3"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two.json",
+      "sha256": "7d509517498c1d3adaafdebe08a9cff2e0b8f07dba443004413a53ea80c042ba"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-two.recheck.json",
+      "sha256": "e93d8904d1f901812514f360a17392cca96649a33e2bafd935dc9f1e4f04830a"
+    },
+    {
+      "path": "tasks/FBI-4991-arquitetura-nextra/execution/reviews/terminal-diagrams.json",
+      "sha256": "bcaa5185ee3a482b5caa96a7280427f35245bdb2c783c96d80ac27a957111e5e"
+    }
+  ],
+  "backlog": [
+    {
+      "id": "D42-LABELS",
+      "diagram": "diagram-42",
+      "severity": "MEDIUM",
+      "scope": "diagram communication",
+      "finding": "Seta direta de Qualificação aos internos usa a mesma convenção do caminho condicional de permissão.",
+      "proposed_change": "Distinguir dependência estrutural com linha pontilhada/rótulo ou deixar o acesso aos internos somente pelo ramo permitido.",
+      "gate": "Não reabre código/autorização real; não exige nova rodada geral."
+    },
+    {
+      "id": "D94-LABELS",
+      "diagram": "diagram-94",
+      "severity": "MEDIUM",
+      "scope": "rendered diagram",
+      "finding": "Três rótulos de self-loop se sobrepõem no PNG original de 335x333; as recusas não ficam legíveis.",
+      "proposed_change": "Consolidar os laços recusados em um rótulo curto ou usar nós de recusa separados; conferir o PNG reparado.",
+      "gate": "Corpo e programa permanecem semanticamente correspondentes; melhora visual não exige nova rodada geral."
+    },
+    {
+      "severity": "LOW",
+      "diagram": "diagram-33",
+      "note": "The node reporting debit 250 summarizes messages ORDER-1(100), ORDER-1(100), ORDER-2(50); naming ORDER-2 in the input would make this arithmetic visible without opening the source."
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "diagram-1",
+      "document": "content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "body_sha256": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-1",
+        "document": "content/explicacoes/api-integration/index.mdx",
+        "documentSHA": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+        "bodySHA": "04659328ef25d70ab2ab1971c4649bd95222c6fba95ddb55cb8187e99795fd1a",
+        "body_span": [
+          24,
+          34
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "proposta de responsabilidades",
+        "rationale": "A entrada decide políticas gerais antes de rotear; a API conserva a decisão de acesso ao objeto e a recusa.",
+        "limit": "Não identifica o gateway implantado nem certifica APISIX ou a configuração de produção.",
+        "hypothetical_model": "Cliente, gate geral, seleção de rota e gate de negócio são responsabilidades propostas; recusas devolvem erro ao cliente.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-1.png",
+          "sha256": "2ad7e2b1a6a29ce265d6cddc7c30e7325e6ebcc972cb184c864c15ef89d69c4c",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-01.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-2",
+      "document": "content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "body_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-2",
+        "basis": "observed source abstraction",
+        "source_refs": [
+          "calendar"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Sessão e token precedem Graph; o ramo sem calendário compartilhado chama getSchedule e transforma a disponibilidade.",
+        "limit": "O desenho resume o ramo compartilhado; não demonstra permissões, autenticação executada ou implantação.",
+        "document": "content/explicacoes/api-integration/index.mdx",
+        "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+        "body_sha256": "32db76f76373a4efa0da118cb1dc980e54ee4e919ee6c0ce9bcc9b0d38dc81bb",
+        "fence_index": 2,
+        "line_start": 58,
+        "inspected_sources": [
+          {
+            "id": "calendar",
+            "sha256": "d19db8be50e748a034be8c33ffef46d049fd827b7a996e960960ba7dd5fc5906",
+            "spans": [
+              [
+                40,
+                81
+              ],
+              [
+                93,
+                108
+              ],
+              [
+                141,
+                272
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-3",
+      "document": "content/explicacoes/api-integration/index.mdx",
+      "document_sha256": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+      "body_sha256": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-3",
+        "document": "content/explicacoes/api-integration/index.mdx",
+        "documentSHA": "6cb5b9dce9c6abcc9b02604a96be864ba83976dff52f6c7d72fb145cd1f077f1",
+        "bodySHA": "cb30812e4374dfbf799f1d8efff2f6da4a948b5638dfc72e48eeb7a0047b272c",
+        "body_span": [
+          94,
+          100
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "tradução semântica proposta",
+        "rationale": "O contrato local só alcança a regra após reconhecer identidade e significado; a falha exige investigar a origem.",
+        "limit": "Não prova que esse mapeamento completo esteja implementado no dispatcher.",
+        "hypothetical_model": "Adaptador recebe representação externa; significado reconhecido produz contrato local; significado desconhecido produz erro explícito.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8c51dce9783b-3.png",
+          "sha256": "8f6fba9c007ca8e4e24af3642821ece3a310a410e6ed4fd42e9f48f9c3bac673",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-01.png"
+        }
+      },
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-4",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-4",
+        "basis": "dated configuration capture",
+        "source_refs": [
+          "topology-capture"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A captura separa main/git-sync/emptyDir, scheduler único, duas APIs, metadata CNPG e logs configurados.",
+        "limit": "Só vale para a topologia capturada em 14/10; não acompanha uma task até S3 nem prova failover.",
+        "document": "content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "body_sha256": "b8ed0e4a799e477e9e774181eadd67f0ea7bebbd26aa96c0b03689135789ae09",
+        "fence_index": 1,
+        "line_start": 22,
+        "inspected_sources": [
+          {
+            "id": "topology-capture",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                19,
+                29
+              ],
+              [
+                33,
+                45
+              ],
+              [
+                88,
+                102
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-5",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-5",
+        "document": "content/explicacoes/availability/index.mdx",
+        "documentSHA": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "bodySHA": "456cc4b989b545066247de33aa09ff9324bd4d6ed330e09c056126f824b8309e",
+        "body_span": [
+          46,
+          51
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "captura documental de 14/10, sem nova medição de etcd",
+        "rationale": "O desenho conserva os três votantes, o líder .75 no termo 8 e a maioria de dois descritos no recibo literal.",
+        "limit": "A captura documental não é um ensaio de falha; dois sobreviventes ainda precisam comunicar-se. Não se atribui esse estado a 15/10.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "s6_capture",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence/s6-platform.md",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                27,
+                29
+              ],
+              [
+                99,
+                100
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-2.png",
+          "sha256": "1b9384a4160458d10146987dd9a5e50d7c9437bb90c167395f4d1020ab72deb9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-01.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-6",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-6",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "O destino aceita 43 e rejeita 42 depois da troca de lease; a conferência está no recurso protegido.",
+        "limit": "A geração ordenada é premissa da proposta; não é uma garantia conferida nas Leases Kubernetes medidas.",
+        "document": "content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "body_sha256": "eecbec62887bf56eca7d94f837f121a2ed93f5596cccedda41d793053f274685",
+        "fence_index": 3,
+        "line_start": 59,
+        "hypothetical_model": {
+          "path": "content/explicacoes/availability/index.mdx",
+          "span": [
+            49,
+            79
+          ],
+          "sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-7",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-7",
+        "document": "content/explicacoes/availability/index.mdx",
+        "documentSHA": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "bodySHA": "2ae49e992ccd30712cb9da1f893a7fc5ada0e2fffec07c8b0c9cd82f6b6846db",
+        "body_span": [
+          85,
+          92
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "captura documental CNPG de 14/10",
+        "rationale": "As duas confirmações são alternativas elegíveis para ANY 1, compatíveis com synchronous_commit=on e number=1 no recibo.",
+        "limit": "A resposta não exige ambos os standbys; não prova replay na hora do commit, failover ou RPO futuro. O raw de execução separado não está no pacote.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "s6_capture",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence/s6-platform.md",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                25,
+                25
+              ],
+              [
+                96,
+                97
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-4.png",
+          "sha256": "90b57d488bf44c8f3e670029af3ef2f532325cc367d083640a909239caf911a9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-01.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-8",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-8",
+        "basis": "dated configuration capture",
+        "source_refs": [
+          "topology-capture"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Git-sync e scheduler compartilham emptyDir no pod; a árvore sincronizada fornece os arquivos ao scheduler.",
+        "limit": "Configuração capturada em 14/10; não representa execução recente, GitOps completo ou igualdade de todo repositório.",
+        "document": "content/explicacoes/availability/index.mdx",
+        "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "body_sha256": "ffe58dadfe859bbaafea505c6bda5bb370b75794d1504a7ee42e8e5e3d8fa0e3",
+        "fence_index": 5,
+        "line_start": 114,
+        "inspected_sources": [
+          {
+            "id": "topology-capture",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                19,
+                29
+              ],
+              [
+                33,
+                45
+              ],
+              [
+                88,
+                102
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 5
+    },
+    {
+      "id": "diagram-9",
+      "document": "content/explicacoes/availability/index.mdx",
+      "document_sha256": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+      "body_sha256": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-9",
+        "document": "content/explicacoes/availability/index.mdx",
+        "documentSHA": "c5677cb7589d58e4a2107ea0772bf0624d507db28823ccad28dede5319cb0266",
+        "bodySHA": "51383952fb5ed2ef3ecd5cc9c80e340b99aeb0b05159c2ddf18b381e1a7af5e3",
+        "body_span": [
+          129,
+          135
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "blueprint de service mesh",
+        "rationale": "A identidade de transporte pode ser recusada pelo proxy de destino; a telemetria acompanha as duas fronteiras.",
+        "limit": "Não demonstra Istio, Linkerd, Envoy ou mTLS implantado e não concede autorização de negócio.",
+        "hypothetical_model": "Dois serviços propostos comunicam-se por proxies; a política de transporte pode aceitar ou negar a chamada.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/ef74cd5403d5-6.png",
+          "sha256": "69127724c28c612f685b5d48bd08060744d7dc96b25629fad125c0e65137c737",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-02.png"
+        }
+      },
+      "fence_index": 6
+    },
+    {
+      "id": "diagram-10",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-10",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "Cadastro, elegibilidade, disponibilidade e confirmação concorrente aparecem como decisões distintas com recusas próprias.",
+        "limit": "É proposta explicativa. A proteção concreta da reserva e as regras comerciais não são implementadas pelo desenho.",
+        "document": "content/explicacoes/business-rules/index.mdx",
+        "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "body_sha256": "bd0038d4a897a9dd21fbbbd857528fdbbf3dcc764124e326a350ce331c21684e",
+        "fence_index": 1,
+        "line_start": 22,
+        "hypothetical_model": {
+          "path": "content/explicacoes/business-rules/index.mdx",
+          "span": [
+            12,
+            42
+          ],
+          "sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-11",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-11",
+        "document": "content/explicacoes/business-rules/index.mdx",
+        "documentSHA": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "bodySHA": "ba77e697bfd23d0f1d3e7a363e37253bf29d08ca7ddec67a50e31d4319506944",
+        "body_span": [
+          48,
+          59
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "context map candidato",
+        "rationale": "As relações pontilhadas dizem a confirmar ou a definir; o mapa não converte pastas em acordos de negócio já existentes.",
+        "limit": "A aprovação é do mapa de estudo, sem reconhecer donos ou contratos organizacionais.",
+        "hypothetical_model": "Qualificação, Telefonia, Seguros, Salesforce e processamento D1 são contextos candidatos com relações ainda não acordadas.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-2.png",
+          "sha256": "b65facd05d85db92f72085306f1e2092772a0bed6fec98f536b04ce4a37f1058",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-02.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-12",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-12",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A fronteira local candidata é separada do Salesforce e a retomada reentra por comando validado.",
+        "limit": "A existência de um Aggregate D1 e sua fronteira transacional permanecem hipóteses explícitas.",
+        "document": "content/explicacoes/business-rules/index.mdx",
+        "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "body_sha256": "943698ff249efccd49c11b039642763413739d91dfdda51e9e976c806af64d32",
+        "fence_index": 3,
+        "line_start": 93,
+        "hypothetical_model": {
+          "path": "content/explicacoes/business-rules/index.mdx",
+          "span": [
+            83,
+            111
+          ],
+          "sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-13",
+      "document": "content/explicacoes/business-rules/index.mdx",
+      "document_sha256": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+      "body_sha256": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-13",
+        "document": "content/explicacoes/business-rules/index.mdx",
+        "documentSHA": "55d471bca1aaf3e72b9c0186d15c49630470e3361e86bd6c5f720e5b1a504f52",
+        "bodySHA": "83978b75cc49338d63df266facfb82e8b3ff93db5080d8974ab841cfdb51d234",
+        "body_span": [
+          131,
+          138
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "ACL proposta",
+        "rationale": "A tradução recusada torna ausência e ambiguidade explícitas antes da regra; corrigir o de-para reinicia a tradução.",
+        "limit": "Não certifica um de-para real, nem trata uma mera cópia de schema como tradução semântica.",
+        "hypothetical_model": "Registro Salesforce passa por adaptador; resolução de significado produz modelo local ou ausência explícita, seguida de reconciliação.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/51bc33d80b90-4.png",
+          "sha256": "6e7a4b7086145557be7ab15990916726bd9a8b6419da854e936123f1337922db",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-02.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-14",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-14",
+        "basis": "observed source abstraction",
+        "source_refs": [
+          "insurance-api",
+          "insurance-service",
+          "insurance-repo"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O hit retorna antes do serviço; o miss delega, grava TTL 300 e devolve o resultado; exceções viram erro HTTP.",
+        "limit": "Não demonstra idade da origem, escopo de autorização completo ou cache efetivamente disponível em produção.",
+        "document": "content/explicacoes/cache/index.mdx",
+        "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "body_sha256": "2aa8db08e05f013bc4306c82d3576157859c57a207b142516a3f1c5661edd35c",
+        "fence_index": 1,
+        "line_start": 22,
+        "inspected_sources": [
+          {
+            "id": "insurance-api",
+            "sha256": "cc505da6a5657e020de85858f6275ca5a4e260cac84d88e26455ffdb5de75f14",
+            "spans": [
+              [
+                46,
+                73
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-service",
+            "sha256": "7975fa3aa049b5af214a116c442b9655d8443804264ea8dcf84cf54bc8094a5a",
+            "spans": [
+              [
+                19,
+                24
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-repo",
+            "sha256": "a44cb58867bf60f4af694167598bbe58724e3050f051f66e1035b8cd955c3f75",
+            "spans": [
+              [
+                74,
+                112
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-15",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-15",
+        "document": "content/explicacoes/cache/index.mdx",
+        "documentSHA": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "bodySHA": "7a4e5d99f444bf2b33977aa6d689dd980ede39480e2390348678dc1ba861f295",
+        "body_span": [
+          58,
+          64
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "código MakersHub no SHA e233fb04",
+        "rationale": "O get consulta Redis quando disponível; na indisponibilidade shared_only impede o fallback LRU e devolve falta.",
+        "limit": "O desenho não descreve L1 seguido sempre de L2, nem garante que todos os chamadores consultem a origem com a política correta.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "cache",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/utils/cache_manager.py",
+            "sha256": "9642e40f27a3982f885dbefb0d74d930b3c3fe0c1982c38f456dfa2f3d70d3c0",
+            "spans": [
+              [
+                128,
+                172
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-2.png",
+          "sha256": "c453d07f377c7f992b074f0c178207650c5c317aa65980bad45d3b420e4a3658",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-02.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-16",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-16",
+        "basis": "observed source plus hypothetical cancellation",
+        "source_refs": [
+          "singleflight-current",
+          "nextbilling",
+          "cancel-after"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O segundo leitor reutiliza _inflight; shield isola cancelamento do awaiter e o callback libera o slot também após erro.",
+        "limit": "Um processo e uma instância; o cancelamento é condição do cenário, sem afirmar que fechar o browser sempre o cause.",
+        "document": "content/explicacoes/cache/index.mdx",
+        "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "body_sha256": "c01d88a7d10adae928b88206221179a9c90e6a7a27a614405e2a27f7dc8cbff2",
+        "fence_index": 3,
+        "line_start": 84,
+        "inspected_sources": [
+          {
+            "id": "singleflight-current",
+            "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+            "spans": [
+              [
+                75,
+                154
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "nextbilling",
+            "sha256": "ef760272312aa59e50c10b58f27cea3434f2d1bc56329cfc4b123425d8246f85",
+            "spans": [
+              [
+                198,
+                218
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "cancel-after",
+            "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+            "spans": [
+              [
+                55,
+                97
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-17",
+      "document": "content/explicacoes/cache/index.mdx",
+      "document_sha256": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+      "body_sha256": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-17",
+        "document": "content/explicacoes/cache/index.mdx",
+        "documentSHA": "b29d777d61aadd2c848bbacf864aed57f7fb71d2ed0cc70a4fad93e69a85abba",
+        "bodySHA": "95e1f2f866f66148eba2aff10990df6b5d1756c61cd731d11ed99fd80a1a5337",
+        "body_span": [
+          116,
+          134
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "código SingleFlight, renovação no processo",
+        "rationale": "O valor ainda válido pode ser devolvido sem aguardar o produtor; somente sucesso renova os dois prazos e a leitura após expiração espera carga.",
+        "limit": "É coordenação local. A sequência abstrai o agendamento: o código agenda o refresh antes de retornar; não há promessa de ordem global entre resposta e execução da task.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "singleflight",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/utils/single_flight.py",
+            "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+            "spans": [
+              [
+                75,
+                106
+              ],
+              [
+                108,
+                154
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/aa5ceacc4fc2-4.png",
+          "sha256": "b1bdced49098e0e3abb8d615bc0518e7b18b72814ee50fd44a2927c0792fe9c9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-03.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-18",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-18",
+        "basis": "source-backed conceptual state machine",
+        "source_refs": [
+          "breaker",
+          "worker"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O critério de falhas abre o breaker; cooldown permite half-open, e sucesso/falha fecham/reabrem.",
+        "limit": "A abstração não certifica quota exata de probes, sincronização entre processos ou failover.",
+        "document": "content/explicacoes/capacity/index.mdx",
+        "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "body_sha256": "c8da31eb15e34278f65f71aa34894503ffb3c437c62da0a23834b5ed3476ba42",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "breaker",
+            "sha256": "645b6668c75ea9bc6a145269279af48ce8f8f90167b5d235ecb51505a9205147",
+            "spans": [
+              [
+                127,
+                227
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "worker",
+            "sha256": "2f70ca71ece744c19c65a6fbe9fe59630007ec0c1eed87e28300f6fdd120a219",
+            "spans": [
+              [
+                221,
+                262
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-19",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-19",
+        "document": "content/explicacoes/capacity/index.mdx",
+        "documentSHA": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "bodySHA": "fb3993990146a4093bc7da11f862dd33f28a5cce4aa73c3e29b2f6701330a7a0",
+        "body_span": [
+          49,
+          69
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "sequência didática de retry com orçamento",
+        "rationale": "O desenho distingue resposta HTTP de erro de timeout local e conserva a incerteza sobre o efeito remoto.",
+        "limit": "As duas tentativas ilustradas são um orçamento didático; não pretendem enumerar as três tentativas máximas do cliente Airflow nem provar POST idempotente.",
+        "hypothetical_model": "Uma chamada repete após falha recuperável; pode concluir, esgotar o orçamento com resposta HTTP ou terminar espera local sem resultado remoto conhecido.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-2.png",
+          "sha256": "41fe1e6dd07dffa41bf4d6120dde3eaa473fc9459204844fd0af2eee65c632d0",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-03.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-20",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-20",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A classificação direciona trabalhos a pools próprios e a sobrecarga tem recusa ou adiamento explícitos.",
+        "limit": "Separação proposta; a força do isolamento depende dos recursos realmente reservados, não apenas do desenho.",
+        "document": "content/explicacoes/capacity/index.mdx",
+        "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "body_sha256": "f333c0aa7d1e326d7d3bde909225e2cd245ae9829dd57b0e8ca105f2f669fc99",
+        "fence_index": 3,
+        "line_start": 93,
+        "hypothetical_model": {
+          "path": "content/explicacoes/capacity/index.mdx",
+          "span": [
+            83,
+            111
+          ],
+          "sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-21",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-21",
+        "document": "content/explicacoes/capacity/index.mdx",
+        "documentSHA": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "bodySHA": "882bdb8727b5784031e4f2fb9082467d0cfce60aa733357fa9bd755de8e31ef4",
+        "body_span": [
+          117,
+          130
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "protocolo proposto de backpressure",
+        "rationale": "A admissão recusa trabalho quando falta capacidade e faz o produtor esperar ou reduzir ritmo; o consumidor libera vaga.",
+        "limit": "Não descreve a admissão da fila Redis observada, nem fornece durabilidade ao trabalho recusado.",
+        "hypothetical_model": "Consumidor comunica capacidade a uma admissão limitada; produtor só tenta conforme a política após recusa.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/8232fc79b01a-4.png",
+          "sha256": "71f5c782ec0f794a62afd286dc25759e49b886f5dd3b33f7a300629ad5983557",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-03.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-22",
+      "document": "content/explicacoes/capacity/index.mdx",
+      "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+      "body_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-22",
+        "basis": "source-backed hypothetical policy",
+        "source_refs": [
+          "api-rate",
+          "slowapi-rate"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O ramo de indisponibilidade prossegue segundo fail-open; exceder o contador recebe 429 e informação de espera.",
+        "limit": "A quota 60 é fictícia. Autenticação continua uma condição separada; a disponibilidade do contador não foi executada.",
+        "document": "content/explicacoes/capacity/index.mdx",
+        "document_sha256": "13e50ee708d19e8a7510b8a3b1f91fe40f3505e4323b232a00faadeb703e5e9c",
+        "body_sha256": "ecd020f58e4ecaeb739a0c5c8678df69376a68fb6d5af331ac368c8dc1a0d143",
+        "fence_index": 5,
+        "line_start": 148,
+        "inspected_sources": [
+          {
+            "id": "api-rate",
+            "sha256": "68200373a5ae9d894d78be3f1e73115467424a55a662dd2d04155b1f33d0443f",
+            "spans": [
+              [
+                99,
+                124
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "slowapi-rate",
+            "sha256": "54894629f28aa9fb6b93f40dd30e74083e7406c4571c759b293df3655cc34511",
+            "spans": [
+              [
+                118,
+                137
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 5
+    },
+    {
+      "id": "diagram-23",
+      "document": "content/explicacoes/casos/access-policy/index.mdx",
+      "document_sha256": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+      "body_sha256": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-23",
+        "document": "content/explicacoes/casos/access-policy/index.mdx",
+        "documentSHA": "c38e421bcf2d5574ac22a1940230f687fb8dbbf9e26527d5ca32e12965bf89b8",
+        "bodySHA": "2c439e7bdc2caa44bb62dcbd464bedb2882a8663b7e77dccc0b3cb279ac9142c",
+        "body_span": [
+          24,
+          33
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo financeiro local access_policy",
+        "rationale": "O papel sozinho permite o contraexemplo; papel, tenant e conta recusam o acesso cruzado, e as verificações de audience, prazo e chave são representadas.",
+        "limit": "O gráfico compõe probes independentes da função; não implementa uma cadeia criptográfica, OAuth, firewall ou política real da Faz.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                431,
+                443
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5f5a126bb8fe-1.png",
+          "sha256": "761f3455ffefb64fe3bea110536cc41bdfcb97b120796973712eaeaeb897a9be",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-03.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-24",
+      "document": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "document_sha256": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+      "body_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/terminal_delivery",
+      "receipt": "terminal-diagrams.json",
+      "judgment": {
+        "diagram_id": "diagram-24",
+        "document_id": "explicacoes/casos/airflow-lock-retry/index",
+        "document_path": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+        "document_sha256": "e4a952446236f026cc5f710286fed053ecc2e0c036fc1f6b5730d1e6ec8f559b",
+        "fence_index": 1,
+        "diagram_source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "d508fe34ed33b7ca56b1d576466fe952fdf201f168044dc83a3b746910116043",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-airflow-retry/fc01d0e06b14-1.png",
+          "artifact_sha256": "34dd2124c80bf0a8940691f297f7fa9578e7f40b0bca503b22e8ce35d74fb99a"
+        },
+        "inspected_source_sha256": {
+          "labs/airflow-lock-retry/after.py": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731"
+        },
+        "semantic_verdict": "PASS_BOUNDED",
+        "basis": "O loop repete apenas retorno diferente de zero com 55P03, respeita duas novas tentativas e espera fixa de 30 segundos. TimeoutExpired se propaga; o desenho representa esse ramo, o parse JSON no sucesso e RuntimeError na falha final. A descrição não transforma isso em backoff exponencial ou prazo global.",
+        "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-25",
+      "document": "content/explicacoes/casos/cache-policy/index.mdx",
+      "document_sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+      "body_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-25",
+        "basis": "executable hypothetical model",
+        "source_refs": [
+          "financial-cache"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Chave tenant/consulta, expiração, invalidação e persistência antes da confirmação correspondem aos probes locais.",
+        "limit": "É uma composição didática de probes independentes, com dicionários locais; não é um trace único nem armazenamento durável real.",
+        "document": "content/explicacoes/casos/cache-policy/index.mdx",
+        "document_sha256": "ff960e8095f0515230a8f2946f429030ea6659c52033b06dce763e3cd65fec25",
+        "body_sha256": "98baba5d9ce4cf1214e48e75fa3c4f4018a111706263895028c935bcac6bdd3d",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "financial-cache",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                284,
+                302
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-26",
+      "document": "content/explicacoes/casos/consensus/index.mdx",
+      "document_sha256": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+      "body_sha256": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-26",
+        "document": "content/explicacoes/casos/consensus/index.mdx",
+        "documentSHA": "942512b4ae79d96f96b0e62c22226adef15ee45188b6191bd8e1806cc81ce750",
+        "bodySHA": "ca8a23b1b0825a855de2fae59a652a6bef661f3806e48cbceabb4a9b0f8c93d8",
+        "body_span": [
+          24,
+          33
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo financeiro finito de consenso",
+        "rationale": "A partição A/B satisfaz dois de três, a minoria C não; os vetores concorrentes e a espera por decisão têm os limites declarados.",
+        "limit": "Contar maioria e comparar vetores em probes não implementa log, termos, Raft/Paxos ou linearizabilidade.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                143,
+                160
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/311f694a6fce-1.png",
+          "sha256": "dda2eba8ea900d0a6a0a87228d6118489bd260aa43675f9fcb73af07763a6905",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-04.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-27",
+      "document": "content/explicacoes/casos/date-only/index.mdx",
+      "document_sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+      "body_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-27",
+        "basis": "historical extracted source",
+        "source_refs": [
+          "date-before-card",
+          "date-after-card",
+          "date-helper",
+          "date-harness"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O helper distingue a string inteira YYYY-MM-DD e monta componentes locais; timestamps seguem new Date.",
+        "limit": "Os valores são do cenário São Paulo declarado. Não consulta backend nem prova que o card implantado usa essa revisão.",
+        "document": "content/explicacoes/casos/date-only/index.mdx",
+        "document_sha256": "61482e552c25c5094b5aa6d0189b85eef7ad1f0b0a3826928a621916d9921454",
+        "body_sha256": "692b1452171a642e705d0b0349d69e50fd0ecc3c7671f98f5147814f98945d0d",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "date-before-card",
+            "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d",
+            "spans": [
+              [
+                239,
+                247
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "date-after-card",
+            "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d",
+            "spans": [
+              [
+                241,
+                244
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "date-helper",
+            "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5",
+            "spans": [
+              [
+                7,
+                12
+              ],
+              [
+                30,
+                45
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "date-harness",
+            "sha256": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3",
+            "spans": [
+              [
+                18,
+                26
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-28",
+      "document": "content/explicacoes/casos/diagnostics/index.mdx",
+      "document_sha256": "c062c1456a037844f0e44e8027c5241e8ab7f00b5e9404c2868d0cdfee1fa4c4",
+      "body_sha256": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-28",
+        "document": "content/explicacoes/casos/diagnostics/index.mdx",
+        "documentSHA": "c062c1456a037844f0e44e8027c5241e8ab7f00b5e9404c2868d0cdfee1fa4c4",
+        "bodySHA": "c24d2f3a5b2d326f0426d2e2325caed73986875e38ee98f81c091eb686c8bee4",
+        "body_span": [
+          24,
+          33
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo sintético diagnostics",
+        "rationale": "Os três spans reúnem duas requests da ORDER-1, com um erro e maior duração de 800 ms; a probe da ordem pode falhar com health ok.",
+        "limit": "Não é OpenTelemetry real nem estabelece percentil, SLO ou causa de produção.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                446,
+                462
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/7bf82963c234-1.png",
+          "sha256": "b89e026e9d8adb6604dfe2e01416634ecafef3f1a1ed2e45e7e02f876675bccf",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-04.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-29",
+      "document": "content/explicacoes/casos/early-refresh/index.mdx",
+      "document_sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+      "body_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-29",
+        "basis": "historical extracted source",
+        "source_refs": [
+          "early-before",
+          "early-after",
+          "early-harness"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A janela antecipada inicia tarefa no mesmo slot e devolve valor válido; a expiração dura continua aguardando o produtor.",
+        "limit": "O harness libera a renovação antes de 1,05; não há promessa de eliminar toda espera nem medição de latência real.",
+        "document": "content/explicacoes/casos/early-refresh/index.mdx",
+        "document_sha256": "f9ac95ec12625770cb5f3ec68cd9767664aec2ca5a7c6980ccbea56c3b56e4a4",
+        "body_sha256": "f0a0a3c59f3b737095ef3583ca1d7408c7c93bfe32aeb2a81afffa57ec6e2153",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "early-before",
+            "sha256": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406",
+            "spans": [
+              [
+                55,
+                80
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "early-after",
+            "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7",
+            "spans": [
+              [
+                75,
+                154
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "early-harness",
+            "sha256": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3",
+            "spans": [
+              [
+                9,
+                47
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-30",
+      "document": "content/explicacoes/casos/ledger-projection/index.mdx",
+      "document_sha256": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+      "body_sha256": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-30",
+        "document": "content/explicacoes/casos/ledger-projection/index.mdx",
+        "documentSHA": "25fd1903aa70d88669cae9cb54e8a2e0d25944c4f2dcb79d7cefa16beab13e74",
+        "bodySHA": "978fc7a120a14f3b20d85181cad5517a19ed4f2939a9d6c66238512293be1260",
+        "body_span": [
+          24,
+          34
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo ledger_projection",
+        "rationale": "Os três fatos somam 900; a projeção parte de 1000 com dois fatos faltantes, e o rollback SQLite fica separado do replay.",
+        "limit": "Não é ledger de produção, checkpoint durável ou recuperação PostgreSQL.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                343,
+                361
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9dbbbc5b65f-1.png",
+          "sha256": "3f6216c16c90bf79045b646d0a2789ca1a8f37486b076298cf8693a53e4edce2",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-04.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-31",
+      "document": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "document_sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+      "body_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-31",
+        "basis": "historical extracted source",
+        "source_refs": [
+          "opportunity-before",
+          "opportunity-after",
+          "opportunity-rule",
+          "opportunity-claim"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Há criação anterior, reaproveitamento por source_opp_id, recusas de estado/tipo e claim por OPP com ator fixo; a liberação aguarda writers.",
+        "limit": "Os efeitos externos são doubles, e o ciclo final de writers não é executado pelo probe; isso está explicitado no desenho.",
+        "document": "content/explicacoes/casos/opportunity-entry/index.mdx",
+        "document_sha256": "b613139a97f583a38306f5fee68a41dbad4de3c88a8f6ddc1e0b9696d926fe11",
+        "body_sha256": "fe64816589e6f1ace1e9a0e8b1aff534e95f335b9fa4c07447a2100fe2f06bf8",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "opportunity-before",
+            "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38",
+            "spans": [
+              [
+                6205,
+                6224
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "opportunity-after",
+            "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05",
+            "spans": [
+              [
+                6811,
+                6826
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "opportunity-rule",
+            "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365",
+            "spans": [
+              [
+                542,
+                580
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "opportunity-claim",
+            "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0",
+            "spans": [
+              [
+                103,
+                104
+              ],
+              [
+                375,
+                378
+              ],
+              [
+                2575,
+                2601
+              ],
+              [
+                2622,
+                2679
+              ],
+              [
+                2982,
+                2986
+              ]
+            ],
+            "url": null
+          }
+        ],
+        "png_inspected": {
+          "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/5051fec2d620-1.png",
+          "sha256": "bdfab4ed8970ab856adc2ba865203c6c2e33d9c71327725f1c4574ea51de2279"
+        }
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-32",
+      "document": "content/explicacoes/casos/order-boundaries/index.mdx",
+      "document_sha256": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+      "body_sha256": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-32",
+        "document": "content/explicacoes/casos/order-boundaries/index.mdx",
+        "documentSHA": "4d5dc484c87cb62673d6d0b62a1b434abed38ff9009e0b8844d963d2eea46232",
+        "bodySHA": "2feb7f35a9093ed10c6f27a003fa942e46451bc595bba75a169a6758566f3870",
+        "body_span": [
+          24,
+          33
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "composição proposta dos mecanismos de order_boundaries",
+        "rationale": "AUTHORISED e 10000 centavos viram accepted e 100; a validação impede a escrita negativa e a estratégia altera a taxa.",
+        "limit": "A função contém probes separadas; a seta é uma composição didática, sem provar uma única transação executável que encadeia todos os mecanismos.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                24,
+                45
+              ],
+              [
+                61,
+                63
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2388283f7393-1.png",
+          "sha256": "d9d799742e52df2700429605ac479fe65c89ed4f8d99f0e4bab22255e258e851",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-04.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-33",
+      "document": "content/explicacoes/casos/order-delivery/index.mdx",
+      "document_sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+      "body_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-33",
+        "basis": "executable hypothetical model",
+        "source_refs": [
+          "financial-order"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O inbox conserva identidade, SQLite registra ordem e intenção na mesma transação e uma ação compensatória recompõe 100.",
+        "limit": "São probes independentes, não uma saga única executada; o worker é proposto. As três mensagens são ORDER-1, ORDER-1 e ORDER-2.",
+        "document": "content/explicacoes/casos/order-delivery/index.mdx",
+        "document_sha256": "160e503736eb4cb31e4f65912f94bc574aef9d0c373a1fe95423ba6935ab5d78",
+        "body_sha256": "d404918dac26c1741fc9ee5b37d387ffa7edc80a4d2de78a7fbfa35f16cb0c44",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "financial-order",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                65,
+                107
+              ]
+            ],
+            "url": null
+          }
+        ],
+        "png_inspected": {
+          "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/da75a9fbff12-1.png",
+          "sha256": "236eaacd846c783a8416d14ad354ba6eeabb75b621f194f96c4b789cb1c49abe"
+        }
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-34",
+      "document": "content/explicacoes/casos/query-grain-postgres/index.mdx",
+      "document_sha256": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
+      "body_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/terminal_delivery",
+      "receipt": "terminal-diagrams.json",
+      "judgment": {
+        "diagram_id": "diagram-34",
+        "document_id": "explicacoes/casos/query-grain-postgres/index",
+        "document_path": "content/explicacoes/casos/query-grain-postgres/index.mdx",
+        "document_sha256": "f207f19d948104b50ba03fa5b2d0fa369f829d9fdd1cb1614ad6dea14229fae1",
+        "fence_index": 1,
+        "diagram_source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "4c3ded42b140641ea69f2779ebbb56a66f3561dce85d4047288e86d93b2ffc77",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4c6d1c6069b6-1.png",
+          "artifact_sha256": "1f20f02897aa21e110c54fc1c9e8c2d4568a539f04189ac055931d570d5b034f"
+        },
+        "inspected_source_sha256": {
+          "labs/postgres-lineage/grain-before.sql.template": "5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8",
+          "labs/postgres-lineage/grain-after.sql.template": "5763e281efee82243efd47520d27432fe59913720a0bb2ef2b5a25a147d13874"
+        },
+        "semantic_verdict": "PASS_BOUNDED",
+        "basis": "A junção anterior combina uma comissão por conta e mês com linhas por assessor. O CTE custody_per agrupa mês e conta e usa MAX no contrato de custódia repetida. O desenho representa a duplicação e o agrupamento do kernel entregue; o texto delimita a regra de MAX e não certifica ROA.",
+        "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-35",
+      "document": "content/explicacoes/casos/queue-workflow/index.mdx",
+      "document_sha256": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+      "body_sha256": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-35",
+        "document": "content/explicacoes/casos/queue-workflow/index.mdx",
+        "documentSHA": "2a254250d96b29a1ec12a8afed3b29ab4472c98d0d1c3a3bf58a929f6fda1cb0",
+        "bodySHA": "963c37124fbf95c30ba0c8e1fec75338c00ae40951fdb4c198a81ed0e2569371",
+        "body_span": [
+          24,
+          35
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "composição proposta dos probes queue_workflow",
+        "rationale": "A conta de admissão é 120 menos 20 igual a 100 recusas; poison esgota três tentativas e fica fora da fila normal.",
+        "limit": "A composição liga probes de memória. Não é um broker, uma DAG real nem um replay durável; a espera de retry é modelo.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                186,
+                237
+              ],
+              [
+                274,
+                277
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/35eea51b499e-1.png",
+          "sha256": "b00e14b89c7ca5875ccd696b61846c97f64798c67f7eb300a4e3b317baa82687",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-05.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-36",
+      "document": "content/explicacoes/casos/reservation/index.mdx",
+      "document_sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+      "body_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-36",
+        "basis": "executable hypothetical model",
+        "source_refs": [
+          "financial-reservation"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A versão 7 é recusada após o crédito, a releitura produz 900, o destino rejeita 101 e a chave do slot independe do operador.",
+        "limit": "Modelo local determinístico; as três guardas são probes independentes e não comprovam exclusão entre processos.",
+        "document": "content/explicacoes/casos/reservation/index.mdx",
+        "document_sha256": "d54ae4b1433243cf3b6bb69571f163de36d56547c8e71f6f1e6b15198c63e4e9",
+        "body_sha256": "494850f082978d0a95db54e7f4f5101f14d490549f87ac4f8fa11be2c81b46e2",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "financial-reservation",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                109,
+                140
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-37",
+      "document": "content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "document_sha256": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+      "body_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/terminal_delivery",
+      "receipt": "terminal-diagrams.json",
+      "judgment": {
+        "diagram_id": "diagram-37",
+        "document_id": "explicacoes/casos/revision-cas-postgres/index",
+        "document_path": "content/explicacoes/casos/revision-cas-postgres/index.mdx",
+        "document_sha256": "2835f761a468a3ea804d16965818a0330f09420fac5fa4d7265bfd079cf1f362",
+        "fence_index": 1,
+        "diagram_source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+        "render": {
+          "status": "PASS",
+          "tool": "mmdc",
+          "version": "11.12.0",
+          "source_sha256": "e2b5dabb6a29eb0e6409e029832ab6888780ec537c4ae6ef5f4569c59236cf8b",
+          "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-pg-cas/9ced80d897ad-1.png",
+          "artifact_sha256": "9a79f6f9f7613039a8d362c45ed2d78bc9f96a7a4cfe139ca771d7f4a9af65e7"
+        },
+        "inspected_source_sha256": {
+          "labs/postgres-lineage/revision-after.sql.template": "7705f280f959ae8bcf09016a9f1085d0ceb4918a78777c666e54143e7a7e34de"
+        },
+        "semantic_verdict": "PASS_BOUNDED",
+        "basis": "O predicado compara _employee_id e xmin com source_revision antes de encerrar a versão atual, com RETURNING. A sequência representa a revisão que fica obsoleta após a confirmação de outro escritor; o texto declara a necessidade de reler e o limite transitório de xmin.",
+        "execution_boundary": "Source correspondence and rendered PNG inspected in this terminal; prior independent root-cases receipt is preserved, not a new PostgreSQL production execution."
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-38",
+      "document": "content/explicacoes/casos/safe-release/index.mdx",
+      "document_sha256": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+      "body_sha256": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-38",
+        "document": "content/explicacoes/casos/safe-release/index.mdx",
+        "documentSHA": "b2a27050fe08d62a4707ee7922ea58610eb9464ce0d30ad47c2902ea2b7c86a4",
+        "bodySHA": "f98b4e1c8537403b7c3da58cc6c2c9602ce3d2aec5d02ebd4ee2a59ff5e7c8c5",
+        "body_span": [
+          24,
+          35
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo safe_release",
+        "rationale": "A expansão conserva os dois campos, cinco de cem requisições formam 5%, e funções puras detectam a diferença 10 contra 1000 preservando o primário.",
+        "limit": "Os probes não executam uma pipeline de deployment nem uma promoção real; a rota e o shadow são mecanismos compostos para estudo.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                410,
+                422
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/fdb7f5367ec0-1.png",
+          "sha256": "41288a449a0078cf05d2a2341872a5affb822b9a0ab32da3cbfcf0acbcca2a1e",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-05.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-39",
+      "document": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "document_sha256": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
+      "body_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-39",
+        "basis": "historical source with unsupported transport-cause label",
+        "source_refs": [
+          "cancel-before",
+          "cancel-after",
+          "cancel-harness"
+        ],
+        "status": "HIGH",
+        "rationale": "Shield, callback e quatro sobreviventes têm suporte. A entrada atribui ao FastAPI a causa de cancelamento que o harness injeta explicitamente.",
+        "limit": "A leitura não prova nem refuta cancelamentos possíveis do FastAPI; só não estabelece essa seta como causa histórica/observada.",
+        "document": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+        "document_sha256": "2235302b3237c994f2ff678b8807493bdfa57b01881cc2e6390a158f2302ca7a",
+        "body_sha256": "870da4dc8cf9a705e44abbbc49bd5c41b6146593c9d77be96569fb107a0f0034",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "cancel-before",
+            "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a",
+            "spans": [
+              [
+                55,
+                82
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "cancel-after",
+            "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+            "spans": [
+              [
+                55,
+                97
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "cancel-harness",
+            "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+            "spans": [
+              [
+                15,
+                36
+              ]
+            ],
+            "url": null
+          }
+        ],
+        "finding_id": "DSEM2-H1"
+      },
+      "repair_judgment": {
+        "id": "DSEM2-H1",
+        "status": "RESOLVED",
+        "diagram": {
+          "id": "diagram-39",
+          "status": "PASS_BOUNDED",
+          "document": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+          "document_sha256": "e5c161c698269c733a11ef7740f36abbf2dd3abbf418e94652572cb0155b2bcd",
+          "body_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+          "fence_index": 1,
+          "basis": "DSEM2-H1 warm repair recheck"
+        },
+        "rationale": "The trigger now identifies the five laboratory awaiters and explicit cancellation in run.py:26-29; the caption separates this injected condition from the historical module. Shield/callback/four-survivor claims are retained and source bodies are unchanged.",
+        "boundary": "No assertion is made about automatic cancellation on browser disconnect, and no possible FastAPI cancellation behavior is denied. This remains a controlled in-process demonstration, not a production trace.",
+        "sources": [
+          {
+            "id": "cancel-before",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/before.py",
+            "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a",
+            "spans": [
+              [
+                55,
+                82
+              ]
+            ],
+            "unchanged_since_initial_review": true
+          },
+          {
+            "id": "cancel-after",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/after.py",
+            "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c",
+            "spans": [
+              [
+                55,
+                97
+              ]
+            ],
+            "unchanged_since_initial_review": true
+          },
+          {
+            "id": "cancel-harness",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/single-flight-cancel/run.py",
+            "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595",
+            "spans": [
+              [
+                15,
+                36
+              ]
+            ],
+            "unchanged_since_initial_review": true
+          }
+        ],
+        "generator": {
+          "path": "labs/architecture/case_diagrams.json",
+          "sha256": "f81a8c73e65b329cd73399cba9bd9b8bfca3e52281b51d0167347d966debab5e",
+          "only_changed_key": "single-flight-cancel",
+          "matches_mermaid": true
+        },
+        "syntax_and_render": {
+          "receipt": "tasks/FBI-4991-arquitetura-nextra/execution/mermaid-semantic-repairs.json",
+          "receipt_sha256": "8126326abbd0c9527c39315ae3d3f912abe4063ce62f076e0ea5361e85d81543",
+          "syntax": {
+            "status": "PASS",
+            "tool": "mermaid.parse",
+            "version": "11.17.2",
+            "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19"
+          },
+          "render": {
+            "status": "PASS",
+            "tool": "mmdc",
+            "version": "11.12.0",
+            "source_sha256": "497912ccad79ccd0acace839ca7845c837aa830986ad86a283282b0969252d19",
+            "artifact_path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/581d6a020643-1.png",
+            "artifact_sha256": "438d78629860b4ce7bdb05062c2e8b0622e146ccdb80dfefa917fef95eec495a"
+          },
+          "png_inspected": true
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-40",
+      "document": "content/explicacoes/casos/storage-partitions/index.mdx",
+      "document_sha256": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+      "body_sha256": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-40",
+        "document": "content/explicacoes/casos/storage-partitions/index.mdx",
+        "documentSHA": "84e5fd9b484a6d65153624ca84fdf367eab3c516093e50d56739f74667739398",
+        "bodySHA": "1efd1c0d856808dd51be7032542e8ff7292596212a5048e49753596ace24ce4c",
+        "body_span": [
+          24,
+          33
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "modelo storage_partitions",
+        "rationale": "A chave 7 seleciona uma partição por módulo; o contraexemplo de JOIN soma 100 vezes 2 mais 200 vezes 3 igual a 800, frente a 300 no grão correto.",
+        "limit": "O índice e o plano são SQLite e a junção é aritmética de fixture; não representam topologia ou EXPLAIN PostgreSQL.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "financial",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/labs/architecture/financial.py",
+            "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01",
+            "spans": [
+              [
+                378,
+                398
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/78f1cc74a8d3-1.png",
+          "sha256": "4621ebec9434b77887a4bd0df58a8d254602f8ae394b32293648431a56023b64",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-05.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-41",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-41",
+        "basis": "observed source abstraction",
+        "source_refs": [
+          "insurance-page",
+          "insurance-hook",
+          "insurance-manager",
+          "insurance-api",
+          "insurance-service",
+          "insurance-repo"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A página chama o hook; Promise.all inclui KPI; o miss percorre serviço/repositório/SQL e grava cache 300; erro propaga.",
+        "limit": "Sequência estática do KPI, sem afirmar uma recuperação completa da interface ou execução recente do SQL.",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "body_sha256": "67d670e8acdb57d9321b0c59739bc89c050e949c4833b13d94362d2eaa14977f",
+        "fence_index": 1,
+        "line_start": 20,
+        "inspected_sources": [
+          {
+            "id": "insurance-page",
+            "sha256": "a77bd6df82a620f1199b4ef73603ef0d1f2e5abbedb81eba64c0916d18b567fc",
+            "spans": [
+              [
+                40,
+                51
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-hook",
+            "sha256": "c66cdba07b774cd7d49e576103984a776ed6e841163179c11c82f45b96650e97",
+            "spans": [
+              [
+                248,
+                259
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-manager",
+            "sha256": "7a4362a3037929d2cfe67dfcdc2655e47e924b8e9b056b56455ee0df7a339b24",
+            "spans": [
+              [
+                238,
+                240
+              ],
+              [
+                406,
+                445
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-api",
+            "sha256": "cc505da6a5657e020de85858f6275ca5a4e260cac84d88e26455ffdb5de75f14",
+            "spans": [
+              [
+                46,
+                73
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-service",
+            "sha256": "7975fa3aa049b5af214a116c442b9655d8443804264ea8dcf84cf54bc8094a5a",
+            "spans": [
+              [
+                19,
+                24
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "insurance-repo",
+            "sha256": "a44cb58867bf60f4af694167598bbe58724e3050f051f66e1035b8cd955c3f75",
+            "spans": [
+              [
+                74,
+                112
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-42",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-42",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "documentSHA": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "bodySHA": "a5fa86bee2afdf6a73443e43c2ed9d67bcfcd74ad6517a10018665ba977a5d39",
+        "body_span": [
+          65,
+          81
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "organização modular proposta",
+        "rationale": "Os três módulos expõem APIs públicas e mantêm os detalhes internos; o texto declara que essa fronteira ainda é proposta.",
+        "limit": "A seta direta Qualificação para internos é uma relação estrutural. Como fluxo de autorização ela é ambígua e pode parecer contornar Pedido permitido; melhoria MEDIUM no backlog.",
+        "hypothetical_model": "Uma aplicação reúne Qualificação, Telefonia e Seguros; dependências entre capacidades usam contratos públicos.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-2.png",
+          "sha256": "4bb6178f7fdbeba233e55f04d417bcd0f878cbfb3fe22974e0e1f91ebbc6cca9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-05.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-43",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-43",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "Adaptador HTTP usa a porta de entrada; o caso de uso depende das portas e os adaptadores concretos implementam contratos.",
+        "limit": "As setas pontilhadas são dependências/implementações propostas, não chamadas observadas nem refatoração já realizada.",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "body_sha256": "01dd5264997ebcc76de22b0abfa0aeeff38d5f7034265aaa5c598bf5a01c4d46",
+        "fence_index": 3,
+        "line_start": 97,
+        "hypothetical_model": {
+          "path": "content/explicacoes/code-boundaries/index.mdx",
+          "span": [
+            87,
+            116
+          ],
+          "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+        },
+        "inspected_sources": [],
+        "png_inspected": {
+          "path": "tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-3.png",
+          "sha256": "ad2aba582300d7e0822e4474fcb5d9dd9aec18a627531fd4dc2e214de8c68648"
+        }
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-44",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-44",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "documentSHA": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "bodySHA": "20cfd79a50bdb0ced3ebafba4bbb20b8b2ba8fc2d9a5465a126aff7036400364",
+        "body_span": [
+          120,
+          133
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "fatias verticais propostas",
+        "rationale": "Cada entrada conduz ao seu handler; a intenção D1 só persiste pelo ramo validado e as três entradas recebem o contrato compartilhado de autorização.",
+        "limit": "Não comprova que esses handlers ou essa organização já existam no checkout.",
+        "hypothetical_model": "QualifyD1, ListCallableLeads e ReadInsuranceKpi agrupam entrada, operação e consulta/persistência por caso de uso.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-4.png",
+          "sha256": "242b9a98bdb2c30cd294a3eca62d3f6ae5d3395a66852bdf62b136e1ef1066ba",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-06.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-45",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-45",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A ação explícita selectMode percorre controller/model e a view recebe estado ou recusa, preservando o modo.",
+        "limit": "É comparação MVC didática, sem atribuir essa estrutura ao componente React ou ao seu framework.",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "body_sha256": "9d93160d7a604ef851b3039bb1325576d2bbd563fcdc8244f0510f3825f3117d",
+        "fence_index": 5,
+        "line_start": 151,
+        "hypothetical_model": {
+          "path": "content/explicacoes/code-boundaries/index.mdx",
+          "span": [
+            141,
+            175
+          ],
+          "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 5
+    },
+    {
+      "id": "diagram-46",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-46",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "documentSHA": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "bodySHA": "b4a03e2ac642ff3fd8f4afe650bc4228eff20ce229b2942d2ed8b6224508c173",
+        "body_span": [
+          175,
+          190
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "variante MVP proposta",
+        "rationale": "A view passiva envia selectMode ao Presenter; o Model confirma ou recusa e o Presenter renderiza a escolha ou conserva o modo anterior.",
+        "limit": "Não descreve a sincronização atual entre as janelas React nem classifica o aplicativo inteiro como MVP.",
+        "hypothetical_model": "Escolher automatic é intenção explícita; o Presenter coordena o Model e a apresentação passiva para sucesso ou recusa.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/1ae57cc6d6b7-6.png",
+          "sha256": "8b4069821f37a118f0495f29a436a2b57847c39df9fe3991fdacea86329011a2",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-06.png"
+        }
+      },
+      "fence_index": 6
+    },
+    {
+      "id": "diagram-47",
+      "document": "content/explicacoes/code-boundaries/index.mdx",
+      "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+      "body_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-47",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A view envia ação ao ViewModel, o model decide e o estado observado retorna à apresentação.",
+        "limit": "Não prova binding implementado, estado compartilhado entre instâncias ou classificação MVVM integral do MakersHub.",
+        "document": "content/explicacoes/code-boundaries/index.mdx",
+        "document_sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959",
+        "body_sha256": "8befdf26d5438fbf96098bd290aa1e3df95d6d439daf943b7ca37db495a797a1",
+        "fence_index": 7,
+        "line_start": 198,
+        "hypothetical_model": {
+          "path": "content/explicacoes/code-boundaries/index.mdx",
+          "span": [
+            188,
+            222
+          ],
+          "sha256": "7bb6ae7dec9af8b6ece823c73cf072989fc8caa4ce912b30839b67d5d6123959"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 7
+    },
+    {
+      "id": "diagram-48",
+      "document": "content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "body_sha256": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-48",
+        "document": "content/explicacoes/code-patterns/index.mdx",
+        "documentSHA": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+        "bodySHA": "95525fce59f7fa1c9a82c1353534108b9d785c5aef66eee99d913b044f85ae51",
+        "body_span": [
+          77,
+          92
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "estrutura de contratos proposta",
+        "rationale": "ReadOperation depende de ProviderPort; os provedores PostgreSQL e Salesforce implementam o mesmo fetch, com direção coerente de implementação.",
+        "limit": "O gráfico oferece uma estrutura candidata. Não prova classes locais nem duas dimensões concretas de variação já exercitadas.",
+        "hypothetical_model": "Uma abstração de leitura usa um contrato de provedor implementado por dois adaptadores intercambiáveis.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-1.png",
+          "sha256": "1d6d728cb88c6c0dea4bbe311c107f92f0fa337400a5d2f20f5251a6fcad867f",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-06.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-49",
+      "document": "content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "body_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-49",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "As duas escolhas válidas incluem auto-transições idempotentes; uma entrada inválida conserva o estado.",
+        "limit": "O estado inicial Manual pertence ao modelo proposto, sem alegar default de produção ou classes GoF.",
+        "document": "content/explicacoes/code-patterns/index.mdx",
+        "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+        "body_sha256": "aeaedd0d3c82d1814e8aec2aad7e7e66b5ca57d4f2891b3546384798cf272d38",
+        "fence_index": 2,
+        "line_start": 128,
+        "hypothetical_model": {
+          "path": "content/explicacoes/code-patterns/index.mdx",
+          "span": [
+            118,
+            145
+          ],
+          "sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-50",
+      "document": "content/explicacoes/code-patterns/index.mdx",
+      "document_sha256": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+      "body_sha256": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-50",
+        "document": "content/explicacoes/code-patterns/index.mdx",
+        "documentSHA": "b2c3b29b4df59e1a7b7c3a9092a2670c8b47e618878f6a44058bfe18e63a8bc3",
+        "bodySHA": "3891fba22d6b2a9ccbb40da7f1140a87ed9f06cc13e3eb2955cbcaf574b908ab",
+        "body_span": [
+          149,
+          164
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "coordenação e observação propostas",
+        "rationale": "O comando reconhecido atualiza o modelo e notifica a apresentação; o comando inválido retorna ao coordenador sem mudar o estado.",
+        "limit": "Não certifica Observer/Mediator GoF ou compartilhamento de uma instância de hook entre janelas.",
+        "hypothetical_model": "View entrega selectMode ao coordenador; o modelo valida e informa observador ou recusa ao coordenador.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/2806f09d17bf-3.png",
+          "sha256": "5be7d8a2ea456377219aa53b3b9e0473c2e10a4e59bbb8f6cddc5e2711f1fe0a",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-06.png"
+        }
+      },
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-51",
+      "document": "content/explicacoes/concurrency/index.mdx",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "body_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-51",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "O recurso registra 102 antes do retorno de A e rejeita 101; expiração de lease e fencing são decisões separadas.",
+        "limit": "A emissão monotônica e a comparação no destino são premissas declaradas; UUID de ownership local não as estabelece.",
+        "document": "content/explicacoes/concurrency/index.mdx",
+        "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+        "body_sha256": "70c3413069072c222438965e7d39e81249c0c2a1d33bc856a1cc01f385848a04",
+        "fence_index": 1,
+        "line_start": 32,
+        "hypothetical_model": {
+          "path": "content/explicacoes/concurrency/index.mdx",
+          "span": [
+            22,
+            57
+          ],
+          "sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-52",
+      "document": "content/explicacoes/concurrency/index.mdx",
+      "document_sha256": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+      "body_sha256": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-52",
+        "document": "content/explicacoes/concurrency/index.mdx",
+        "documentSHA": "a83595be0daa2959490b79f8f4f57d705f013fe7df9e0590b559694740fe15bb",
+        "bodySHA": "fb5f1178a444facfd58f95fd77f52cf86eee6564191561b64c329e8136bf3808",
+        "body_span": [
+          63,
+          76
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "registro financeiro hipotético versionado",
+        "rationale": "A e B leem versão 7; A avança para 8 e B recebe conflito antes de reler e revalidar, preservando o crédito de A.",
+        "limit": "Aceitação exige comparação e escrita atômicas no recurso; a hipótese não comprova esse contrato em uma API implantada.",
+        "hypothetical_model": "Saldo 1000/v7 recebe crédito 100/v8; estorno 200 da cópia antiga é recusado; após revalidação saldo pode chegar a 900.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/c795b74afd1d-2.png",
+          "sha256": "dae60e241abec505309740893cced92c4372f1b10a25538e8b37efe79ec7d071",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-07.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-53",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-53",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A consulta de outubro pode evitar outras partições somente se o plano permitir; o armazenamento permanece no mesmo PostgreSQL.",
+        "limit": "Não afirma particionamento existente, pruning executado ou ganho de desempenho na tabela medida.",
+        "document": "content/explicacoes/data-distribution/index.mdx",
+        "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "body_sha256": "18c03a944aff89c3bd6038291320532c8d0ec3d6d238b5f7458a641e0b12d6e7",
+        "fence_index": 1,
+        "line_start": 20,
+        "hypothetical_model": {
+          "path": "content/explicacoes/data-distribution/index.mdx",
+          "span": [
+            10,
+            33
+          ],
+          "sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-54",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-54",
+        "document": "content/explicacoes/data-distribution/index.mdx",
+        "documentSHA": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "bodySHA": "7e714f328df4ab6f1e052ae7895395ded3a64144039e88ab9af0db7b00d2be0f",
+        "body_span": [
+          37,
+          45
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "roteamento e consolidação hipotéticos",
+        "rationale": "O texto distingue lookup de uma conta em sua shard da consolidação que reúne ambas; o ramo indisponível permite parcial identificado ou falha.",
+        "limit": "As duas setas do roteador representam destinos alternativos conforme a chave, e não broadcast obrigatório de todo lookup. Não é topologia implantada.",
+        "hypothetical_model": "Duas shards guardam partes disjuntas de contas; o roteador localiza a proprietária e um relatório global reúne resultados sob contrato de grão/versão.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-2.png",
+          "sha256": "c0411ccdb68f84d9e7c5320bcc0b5d0aa6baa883369ae885959604306729a393",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-07.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-55",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-55",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A entrada de C transfere um intervalo e preserva parte das chaves, com migração e retomada explicitadas.",
+        "limit": "Não define posições exatas, porcentagem universal, consenso ou membership já implantado.",
+        "document": "content/explicacoes/data-distribution/index.mdx",
+        "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "body_sha256": "0ee6e8352e20f71ae8dfcdadf36946c0f12cd790154248dca2cef8b6552db075",
+        "fence_index": 3,
+        "line_start": 61,
+        "hypothetical_model": {
+          "path": "content/explicacoes/data-distribution/index.mdx",
+          "span": [
+            51,
+            76
+          ],
+          "sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-56",
+      "document": "content/explicacoes/data-distribution/index.mdx",
+      "document_sha256": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+      "body_sha256": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-56",
+        "document": "content/explicacoes/data-distribution/index.mdx",
+        "documentSHA": "34abbabc12cfdd02c4b61285e3ea4087341869e64674563c4151e5e0db2d4354",
+        "bodySHA": "5b2d10f6ff9c23001f4e9b4befbc89e6d35bdb8ec9eb58a683a1c84eaa37d9fa",
+        "body_span": [
+          94,
+          102
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "interseção hipotética de quorum",
+        "rationale": "W={A,B,C} e R={C,D,E} compartilham C; comparar versão e conflito é obrigatório antes de qualquer promessa de frescor.",
+        "limit": "A interseção não prova linearizabilidade; membership fixo e seleção correta da versão são premissas.",
+        "hypothetical_model": "Cinco réplicas, escrita em três e leitura de três; há pelo menos uma participante comum, sem garantia global adicional inferida.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cbaeb38d795e-4.png",
+          "sha256": "b8e78988093e4a4c202c73753929601e17365195b27df5b498614e822e4658f6",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-07.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-57",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-57",
+        "basis": "vendor-contract conceptual model",
+        "source_refs": [
+          "pg-wal"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A persistência dos registros necessários precede as páginas correspondentes; a recuperação reaplica o que o WAL cobre.",
+        "limit": "É mecanismo conceitual PostgreSQL 16, sem crash real, política efetiva de commit ou garantia de durabilidade medida.",
+        "document": "content/explicacoes/data-durability/index.mdx",
+        "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "body_sha256": "a9d9ec147f1e379526841aa7fe94979588db30d08743f76bb39fe917a3d797e5",
+        "fence_index": 1,
+        "line_start": 24,
+        "inspected_sources": [
+          {
+            "id": "pg-wal",
+            "sha256": "50f186ebe754ba5c9a486342b0df31335f703d7b0ca81cfdf24e615c5ef6fa63",
+            "spans": null,
+            "url": "https://www.postgresql.org/docs/16/wal-intro.html"
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-58",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-58",
+        "document": "content/explicacoes/data-durability/index.mdx",
+        "documentSHA": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "bodySHA": "cb1b30c4548c1d9146725deae0cdc405e4126a04757bbdaa4843370a01e8f7e2",
+        "body_span": [
+          43,
+          47
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "cadeia PITR proposta",
+        "rationale": "A restauração usa backup-base e WAL contínuo até o alvo; um segmento necessário ausente deixa esse alvo sem demonstração.",
+        "limit": "Não prova backup, arquivamento, restore ou PITR habilitado no servidor .137.",
+        "hypothetical_model": "Restore isolado aplica uma cadeia compatível e sem lacunas para reconstruir um ponto temporal escolhido.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-2.png",
+          "sha256": "ea10349abbc19b715da9b66861630dbc45e56eeedcba45225052336adf954aee",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-07.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-59",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-59",
+        "basis": "vendor-contract hypothetical model",
+        "source_refs": [
+          "pg-standby"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O commit local pode preceder a aplicação remota; a consulta antes da aplicação pode devolver o estado anterior.",
+        "limit": "A seta de propagação indica envio, não confirmação de aplicação. O aporte e a réplica são hipotéticos.",
+        "document": "content/explicacoes/data-durability/index.mdx",
+        "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "body_sha256": "16cb087221dc811c3daeaf096cc49b5628c7eb62bbce007bd0dab483cc05701d",
+        "fence_index": 3,
+        "line_start": 61,
+        "inspected_sources": [
+          {
+            "id": "pg-standby",
+            "sha256": "68ff0ce12d5a65c9b1e35828c835eb3d0f29c44cb5aa9a7cc6b283db487833ba",
+            "spans": null,
+            "url": "https://www.postgresql.org/docs/16/warm-standby.html"
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-60",
+      "document": "content/explicacoes/data-durability/index.mdx",
+      "document_sha256": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+      "body_sha256": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-60",
+        "document": "content/explicacoes/data-durability/index.mdx",
+        "documentSHA": "f2a1472861509a08ff1ea2c53da5c5dcfff5b88470bdc061743a66d208937c74",
+        "bodySHA": "2c763d5a4610a58ca5b199dd868e276efcbbae397072c66c2fee4a91d6b9c665",
+        "body_span": [
+          89,
+          94
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "autoridade e fencing conceituais",
+        "rationale": "Tanto o líder novo como o antigo chegam ao mesmo destino, que aceita somente a autoridade válida e rejeita a antiga.",
+        "limit": "A eleição sozinha não implementa esse guard; nenhum destino com fencing na Faz é certificado.",
+        "hypothetical_model": "Após B assumir, A pode voltar; o recurso protegido precisa validar a autoridade, inclusive no retorno atrasado.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/353fd3d5a784-4.png",
+          "sha256": "5c2924a2626b3ae81cd685eb450ddd25b1397f20af183444ba5dc4b7c2b50527",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-08.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-61",
+      "document": "content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "body_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-61",
+        "basis": "source-inspired recovery model",
+        "source_refs": [
+          "audio"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O código separa objeto e metadado; o modelo trata resultado desconhecido por consulta da mesma identidade antes da retomada.",
+        "limit": "Os estados e as consultas de recuperação são proposta; a DAG não tem essa máquina persistida nem atomicidade entre objeto e SQL.",
+        "document": "content/explicacoes/distributed-work/index.mdx",
+        "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+        "body_sha256": "f600405b0d32e8a2d9116ada67be3332b1c3e5739c1ff0d0e116c73aec8b68f3",
+        "fence_index": 1,
+        "line_start": 20,
+        "inspected_sources": [
+          {
+            "id": "audio",
+            "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+            "spans": [
+              [
+                608,
+                683
+              ],
+              [
+                741,
+                774
+              ],
+              [
+                912,
+                938
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-62",
+      "document": "content/explicacoes/distributed-work/index.mdx",
+      "document_sha256": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+      "body_sha256": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-62",
+        "document": "content/explicacoes/distributed-work/index.mdx",
+        "documentSHA": "c96345ff2180c34d40aab1f7b1e398724b744006907f26dfe272921ab831b626",
+        "bodySHA": "b669163987f783c4f6d527973956b4a73a9cfb058572335850f611da26971ccb",
+        "body_span": [
+          70,
+          79
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "decisão de negócio proposta para Saga",
+        "rationale": "A rejeição principal libera a reserva; uma operação válida conserva o efeito e registra o aviso acessório pendente para retomada.",
+        "limit": "Concluir refere-se à operação principal; não certifica que o aviso pendente já foi entregue, nem que existe uma Saga implantada.",
+        "hypothetical_model": "Pedido fictício de 100 conserva reserva quando regra principal aceita; falha acessória gera trabalho pendente, sem compensar operação válida.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6958e8946c7a-2.png",
+          "sha256": "e9ae28765c74d2b1c981216396fe9c10fb7638d11001572ba50e7f263f8f4043",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-08.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-63",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-63",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "O fato de disponibilidade permite reações independentes; a falha transitória de transcrição retorna ao consumidor.",
+        "limit": "A publicação durável, o limite de retry e a implantação de consumidores não são demonstrados por este modelo.",
+        "document": "content/explicacoes/messages/index.mdx",
+        "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "body_sha256": "d6d9582272d2436b8f189c78606cd7171438de629be6d889758a9b1da48d2c1b",
+        "fence_index": 1,
+        "line_start": 26,
+        "hypothetical_model": {
+          "path": "content/explicacoes/messages/index.mdx",
+          "span": [
+            16,
+            43
+          ],
+          "sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-64",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-64",
+        "document": "content/explicacoes/messages/index.mdx",
+        "documentSHA": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "bodySHA": "27f20e66fab0423e2f2a95c96de2ee790dad97e4e323b94b949453b58c59efbc",
+        "body_span": [
+          47,
+          55
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "Pub/Sub proposto com grupos",
+        "rationale": "Auditoria e KPI são assinaturas independentes; os dois workers KPI pertencem ao mesmo grupo, e a pendência é condicional à durabilidade do transporte.",
+        "limit": "As duas arestas do grupo não significam que cada worker execute cada mensagem; o texto define divisão. Não prova Redis Pub/Sub durável.",
+        "hypothetical_model": "Um tópico fan-outa para duas assinaturas; consumidores concorrentes de uma assinatura repartem seu trabalho.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-2.png",
+          "sha256": "0c571e32637d0b8d52bcc4fa36b206ad1fe8b94a570a36ace726e58cc05343ca",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-08.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-65",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-65",
+        "basis": "observed local guard plus hypothetical remote failure",
+        "source_refs": [
+          "idempotency"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "INSERT/SELECT da identidade e replay done correspondem ao código; a queda entre efeito remoto e finish demonstra o limite da guarda local.",
+        "limit": "Salesforce e a queda são hipotéticos; claim_or_replay não chama o fornecedor nem prova deduplicação externa.",
+        "document": "content/explicacoes/messages/index.mdx",
+        "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "body_sha256": "c6c31346b417fc3bfb36f4f8b47541b1b9e76b804e448c9d960a1ee5f3d4cc92",
+        "fence_index": 3,
+        "line_start": 75,
+        "inspected_sources": [
+          {
+            "id": "idempotency",
+            "sha256": "5383b6db3350faba40a65d0d73be929ee866b79a493e3647203fc61704721e12",
+            "spans": [
+              [
+                70,
+                100
+              ],
+              [
+                127,
+                173
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-66",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-66",
+        "document": "content/explicacoes/messages/index.mdx",
+        "documentSHA": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "bodySHA": "73d07b030190186e97e757c01ff3fbe3a33928471749414adf2538c2311877e5",
+        "body_span": [
+          109,
+          118
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "claim PostgreSQL do MakersHub",
+        "rationale": "A CTE escolhe PENDING sob limite e SKIP LOCKED e o UPDATE muda para BOT_PROCESSING na mesma instrução; a necessidade de recuperar abandono permanece explícita.",
+        "limit": "O gráfico é uma intercalação possível enquanto há locks; depois de commit, o estado também exclui o item. Não prova workers ativos ou recuperação completa.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "claim",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/repositories/lead_pipeline_repository.py",
+            "sha256": "6f3bd65cf9a401ddae83b8a4c78d7a8196a0f1e3a6207d3a9847b574d04cdaa3",
+            "spans": [
+              [
+                485,
+                515
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cd6ae4a5e3ab-4.png",
+          "sha256": "d18e11cb997cca151951f7a56dfeaa8b6d3590dd9ebdcc8a048f535e28ef0205",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-08.png"
+        }
+      },
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-67",
+      "document": "content/explicacoes/messages/index.mdx",
+      "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+      "body_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-67",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "Falhas transitórias seguem orçamento, falhas permanentes/limite vão à quarentena, e replay conserva a identidade.",
+        "limit": "Não garante transferência atômica para DLQ, autorização implementada ou ausência de efeitos parciais no destino.",
+        "document": "content/explicacoes/messages/index.mdx",
+        "document_sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8",
+        "body_sha256": "2afc22d49128f4cc998fdbeb058c8a25bc6fe5666ddebe1d12de9b126e91f760",
+        "fence_index": 5,
+        "line_start": 134,
+        "hypothetical_model": {
+          "path": "content/explicacoes/messages/index.mdx",
+          "span": [
+            124,
+            152
+          ],
+          "sha256": "6490d79817ebfc6f95e186fe95c31e5162418156a70ead7e90dc4bff8de946b8"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 5
+    },
+    {
+      "id": "diagram-68",
+      "document": "content/explicacoes/observability/index.mdx",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "body_sha256": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-68",
+        "document": "content/explicacoes/observability/index.mdx",
+        "documentSHA": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+        "bodySHA": "c79c4d1ef425a2ede41bcedf20bb2e6273709cdaed93bcac03ffce0631f034d7",
+        "body_span": [
+          30,
+          48
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "blueprint de tracing",
+        "rationale": "O span filho da consulta e o contexto propagado à chamada externa permitem relacionar os ramos de sucesso e erro; exportação depende da política.",
+        "limit": "Não comprova instrumentação/exporter/collector existente nem causa de incidente.",
+        "hypothetical_model": "API instrumentada cria filhos para banco e cliente externo, conserva identidade da operação na falha e exporta sinais conforme a política.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/f9683aefc7b6-1.png",
+          "sha256": "1e36648133b7c2c4461248c1154441285475d8b005ce325d1643b8672a7f1bc9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-09.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-69",
+      "document": "content/explicacoes/observability/index.mdx",
+      "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+      "body_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-69",
+        "basis": "observed source abstraction",
+        "source_refs": [
+          "metrics"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O snapshot ocorre sob lock, o I/O fora dele, os deltas usam bases confirmadas e o avanço acontece depois do commit.",
+        "limit": "Não certifica agregações não aditivas, flushes simultâneos, retenção ou ausência de commit com resposta ambígua.",
+        "document": "content/explicacoes/observability/index.mdx",
+        "document_sha256": "f496432e43af2a75e710746bc959a132d635cf4cb2f1ec4c8cfde2fe42dc93e7",
+        "body_sha256": "23078a287ca4a10a47bd2b4b1b25bcd683c4bdce551db019d925ca685038873a",
+        "fence_index": 2,
+        "line_start": 72,
+        "inspected_sources": [
+          {
+            "id": "metrics",
+            "sha256": "f07ff42bb883785f0ff3d29c2e682a9b2902fd6625f07263db149df960a54c3c",
+            "spans": [
+              [
+                230,
+                319
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-70",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "body_sha256": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-70",
+        "document": "content/explicacoes/read-models/index.mdx",
+        "documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+        "bodySHA": "d54ad98b8f484866e247cfdb2034e77074d2ba66d9dfa229e2182f0a64f7b5f8",
+        "body_span": [
+          24,
+          32
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "caminhos estáticos de relatório MakersHub",
+        "rationale": "persist_report adquire política/lock quando configurado e decide commit ou rollback; read chama o port/repository que monta total, linhas e resumo.",
+        "limit": "A separação é local, não um transporte assíncrono. O gráfico resume o fluxo e omite o registro posterior da tentativa falha.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "report_write",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/report_persistence_service.py",
+            "sha256": "378dc4b86f3c76eea2a7aac719ce6bb1ee26046cb6c5d66a56bb12b89f8b08dd",
+            "spans": [
+              [
+                127,
+                168
+              ]
+            ]
+          },
+          {
+            "source": "report_read",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/report_read_service.py",
+            "sha256": "8ea29b5adcc5b225c3a54f80ae6857e81bbfc67fc3ff0147471e547903db79a7",
+            "spans": [
+              [
+                24,
+                60
+              ]
+            ]
+          },
+          {
+            "source": "report_repository",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/repositories/report_read_repository.py",
+            "sha256": "2c2b03a63fd043431b338e386bad0af94b7437f618dfa4a927bd72ed317e2738",
+            "spans": [
+              [
+                191,
+                281
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/e8656fc9fff4-1.png",
+          "sha256": "c69598e467c3f0f7ef49eca1c21b2c02421c596c0ec6e757a5e3ae521367969c",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-09.png"
+        },
+        "document_hash_rebind_receipt": "diagram-semantics-one-recheck.json"
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-71",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "body_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-71",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A versão condiciona append; aporte 1000 menos estorno 200 deriva 800, e replay reconstrói projeções.",
+        "limit": "A prosa exige comparação/append atômicos. Não há ledger financeiro implantado nem repetição de pagamento no replay.",
+        "document": "content/explicacoes/read-models/index.mdx",
+        "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+        "body_sha256": "7c41c7c6911cf3ddf52b139a340ebffb6aea5e447ff2ea3aad3421b797753bbe",
+        "fence_index": 2,
+        "line_start": 52,
+        "hypothetical_model": {
+          "path": "content/explicacoes/read-models/index.mdx",
+          "span": [
+            42,
+            70
+          ],
+          "sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-72",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "body_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one-recheck.json",
+      "judgment": {
+        "id": "diagram-72",
+        "document": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/content/explicacoes/read-models/index.mdx",
+        "documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+        "bodySHA": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+        "body_span": [
+          82,
+          87
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "linhagem do snapshot FazGraph de 13/10",
+        "rationale": "A aresta reparada corresponde ao caminho que o snapshot primário devolveu: fct_captacao alimenta fct_advisor_dashboard, e este alimenta fct_ranking. A figura atual preserva essa etapa.",
+        "limit": "O parecer certifica a representação desse snapshot e desse hunk; não certifica execução de DAG, deploy, frescor dos dados ou estado de produção atual.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "graph_primary",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-graph-primary.json",
+            "sha256": "7cfe6e8a3dbe814ffd6858b04a7883047d6a9339be9f72430a57104efac4b5c5",
+            "spans": []
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-semantic-repairs/e8656fc9fff4-3.png",
+          "sha256": "b9f87f91474d94ff6ba8750a4e30e60642eea1796a97096ea3e2639daba4981d",
+          "visually_inspected": true,
+          "judgment": "O PNG mostra captação para dashboard e dashboard para ranking; rótulos e direções são legíveis."
+        },
+        "previous_documentSHA": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+        "current_documentSHA": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+        "previous_bodySHA": "731e1602442473d2e5cbb473c2c66984997199b7b30243315a24b9f1d18b5587",
+        "current_bodySHA": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1",
+        "exact_hunk": "- Model --> Ranking[dbt.fct_ranking]\n+ Dashboard --> Ranking[dbt.fct_ranking]",
+        "only_requested_document_delta": true,
+        "source_receipt": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/reviews/diagram-semantics-one-graph-primary.json",
+          "sha256": "7cfe6e8a3dbe814ffd6858b04a7883047d6a9339be9f72430a57104efac4b5c5",
+          "delta": "none; reused the exact existing primary receipt without any new source measurement",
+          "snapshot_graph_mtime_utc": "2026-10-13T03:08:04+00:00",
+          "literal_evidence": "- dbt.fct_advisor_dashboard → dbt.fct_ranking  (via dbt:fct_ranking)"
+        },
+        "syntax_receipt": {
+          "status": "PASS",
+          "tool": "mermaid.parse",
+          "version": "11.17.2",
+          "source_sha256": "1077e189725d51f5e09b820a545132ee030ca65697f4ae8b84e19faaa748b6f1"
+        }
+      },
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-73",
+      "document": "content/explicacoes/read-models/index.mdx",
+      "document_sha256": "8f29603bce6224121926258212263058d4e83b48234a4c5a8477ffae1ca4a42c",
+      "body_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-73",
+        "basis": "vendor-contract proposed model",
+        "source_refs": [
+          "pg-refresh"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A leitura usa conteúdo disponível enquanto REFRESH CONCURRENTLY obedece suas pré-condições; o sucesso renova leituras posteriores.",
+        "limit": "É proposta PostgreSQL 16, não refresh observado. Falha não atesta frescor, e o modelo não promete atualização incremental.",
+        "document": "content/explicacoes/read-models/index.mdx",
+        "document_sha256": "b6b5bb50326858a85aef98e1727a8c2f02473786b9d861e053efa63fc4bb8fb6",
+        "body_sha256": "df4daeeb36fc17eb24b6e28f3ff5a9cda08c28056357dfdf56e81f493d339903",
+        "fence_index": 4,
+        "line_start": 97,
+        "inspected_sources": [
+          {
+            "id": "pg-refresh",
+            "sha256": "dab01cdc74e66143e809dc8cc561c9fdff97fca6f3fd4189857dffba585ec689",
+            "spans": null,
+            "url": "https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html"
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-74",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-74",
+        "document": "content/explicacoes/reliable-integration/index.mdx",
+        "documentSHA": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "bodySHA": "ec4c2e3c6ce95f2358afc45f48cd62e43f0e3156377ddc5cc6dd32b6a7d1b915",
+        "body_span": [
+          22,
+          32
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "UPDATE condicional real de _apply",
+        "rationale": "O responsável e pending mudam na mesma instrução, condicionados ao responsável anterior; rowcount zero retorna False antes de histórico e efeitos atribuídos à troca.",
+        "limit": "A instrução não é um commit autônomo nem certifica entrega Salesforce; a transação externa ainda possui seu contrato.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "apply",
+            "path": "/Users/augustocarollo/Developer/makershub/backend/app/services/absence_reassignment_service.py",
+            "sha256": "4d6cab0034db33fcdbc908f9fdb048a01e17adc1eb31020f65cba967d479d370",
+            "spans": [
+              [
+                337,
+                415
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-1.png",
+          "sha256": "4b08956a5f8981b5ef3db46306eeae2cba493a7704d9e705963c517ceeff2731",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-09.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-75",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-75",
+        "basis": "observed local write plus proposed relay",
+        "source_refs": [
+          "outbox-flag"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Owner e flag pending mudam na mesma instrução local; o relay proposto conserva intenção e explicita duplicação após aceite remoto.",
+        "limit": "A flag guarda estado pendente, não cada evento. O destino e a conclusão do lote não foram executados pelo diagrama.",
+        "document": "content/explicacoes/reliable-integration/index.mdx",
+        "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "body_sha256": "56272ffcfd274dcba86b973533c134d001fa5103e244e61eacebf886ed53b82e",
+        "fence_index": 2,
+        "line_start": 48,
+        "inspected_sources": [
+          {
+            "id": "outbox-flag",
+            "sha256": "4d6cab0034db33fcdbc908f9fdb048a01e17adc1eb31020f65cba967d479d370",
+            "spans": [
+              [
+                337,
+                415
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-76",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-76",
+        "document": "content/explicacoes/reliable-integration/index.mdx",
+        "documentSHA": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "bodySHA": "7344d47817b375a914143f1dab5d240bc367f80819de61a93f53c3a749f0c7dc",
+        "body_span": [
+          82,
+          87
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "CDC/outbox propostos",
+        "rationale": "O estado e a outbox entram numa transação, a decodificação lógica alimenta o consumidor e atraso exige retenção/progresso.",
+        "limit": "Não afirma CDC habilitado no banco datado com wal_level=minimal; identidade e deduplicação continuam necessárias.",
+        "hypothetical_model": "Escritor transacional publica intenção por WAL lógico e conector CDC; o consumidor mantém checkpoint e o slot/log requer retenção compatível.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/387db1d6f08b-3.png",
+          "sha256": "8b6ced7932671cecc9b02d2333ff528d7c2a6978f70320a52cde0cb2ddb14b69",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-10.png"
+        }
+      },
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-77",
+      "document": "content/explicacoes/reliable-integration/index.mdx",
+      "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+      "body_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-77",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "Rejeição anterior à liquidação libera a reserva; aceite definitivo é o pivô e falha de comprovante gera retry do aviso.",
+        "limit": "Não cobre timeout de resultado desconhecido nem implementa devolução automática; a narrativa só resolve os dois resultados explícitos.",
+        "document": "content/explicacoes/reliable-integration/index.mdx",
+        "document_sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b",
+        "body_sha256": "0ff8488de2b1999055352402198880539bf611ee3a56617d71b371788afde22b",
+        "fence_index": 4,
+        "line_start": 103,
+        "hypothetical_model": {
+          "path": "content/explicacoes/reliable-integration/index.mdx",
+          "span": [
+            93,
+            130
+          ],
+          "sha256": "fa192b82b3baf31453a81e540c4bc871b55bd1ba142abd855db051215bef106b"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-78",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-78",
+        "document": "content/explicacoes/safe-change/index.mdx",
+        "documentSHA": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "bodySHA": "e8ab9ec65ea799e045404cd0911a15a7305b6167783dc53de56adfd2f9b1aa54",
+        "body_span": [
+          20,
+          28
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "Strangler com comparação proposta",
+        "rationale": "A versão atual continua dona da resposta e da única escrita; a candidata não executa efeitos e só passa a escritora após critério aceito.",
+        "limit": "Copiar entrada exige autorização e supressão de todos os efeitos; o desenho não prova migração ativa.",
+        "hypothetical_model": "Roteador conserva primário e usa cálculo candidato puro; divergência mantém rota e aceite transfere uma operação a um escritor.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-1.png",
+          "sha256": "f937a84b6044c0f54d4d4c72e1935437e3a0c1a32eac0336691e18900eca8a82",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-10.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-79",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-79",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "A expansão mantém aliases de uma fonte única; a contração aguarda ausência observada de leitores antigos.",
+        "limit": "Não é migração executada. Contagens de consumidores e observação de uso precisam existir antes de aplicar a proposta.",
+        "document": "content/explicacoes/safe-change/index.mdx",
+        "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "body_sha256": "1dcd4775735b86f0671ffa1c2db397c029d9e3c16de41ac026bb4e695c7f5866",
+        "fence_index": 2,
+        "line_start": 42,
+        "hypothetical_model": {
+          "path": "content/explicacoes/safe-change/index.mdx",
+          "span": [
+            32,
+            60
+          ],
+          "sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-80",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-80",
+        "document": "content/explicacoes/safe-change/index.mdx",
+        "documentSHA": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "bodySHA": "ce4f6b7658f1636efd2d818aa5ae36e59b11bc447979b5bb48ea6447643e6d33",
+        "body_span": [
+          66,
+          73
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "Blue/Green proposto",
+        "rationale": "O Service ativo atende pela azul enquanto o preview verifica a verde; promoção depende de compatibilidade/saúde e exige observação posterior.",
+        "limit": "Voltar tráfego não desfaz alterações de dados; não comprova Argo instalado nem ensaio de rollback.",
+        "hypothetical_model": "Dois conjuntos de aplicação com serviços ativo e preview; um gate promove ou preserva o conjunto atual.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-3.png",
+          "sha256": "036534e71488d9fc4d9a91ad965d9247299725a05c55d6b19ed8aad13ac0dd1b",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-10.png"
+        }
+      },
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-81",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-81",
+        "basis": "hypothetical model",
+        "source_refs": [],
+        "status": "PASS_BOUNDED",
+        "rationale": "De 100 requisições, 90 seguem estável e 10 candidata; critérios controlam retorno ou crescimento.",
+        "limit": "A amostra delimita requisições, não pessoas; rollback de tráfego não desfaz efeitos anteriores.",
+        "document": "content/explicacoes/safe-change/index.mdx",
+        "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "body_sha256": "8908c7b14ac9dc63eda70aa6014c1f6db4ee63bcb55812dea7a20e034b5c80c0",
+        "fence_index": 4,
+        "line_start": 87,
+        "hypothetical_model": {
+          "path": "content/explicacoes/safe-change/index.mdx",
+          "span": [
+            77,
+            103
+          ],
+          "sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2"
+        },
+        "inspected_sources": []
+      },
+      "repair_judgment": null,
+      "fence_index": 4
+    },
+    {
+      "id": "diagram-82",
+      "document": "content/explicacoes/safe-change/index.mdx",
+      "document_sha256": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+      "body_sha256": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-82",
+        "document": "content/explicacoes/safe-change/index.mdx",
+        "documentSHA": "ae62d79a2abf9a0e861ad3c94de878d84bd51cf9ea14ba6c8727b1efb71431d2",
+        "bodySHA": "43ee92414d72253bf4944aae360795de7ca329a294d5907295ba6952b671647d",
+        "body_span": [
+          107,
+          115
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "feature flag proposta",
+        "rationale": "A autorização vem antes da elegibilidade da flag; desligar a função muda a rota de comportamento e conserva efeitos já aceitos.",
+        "limit": "A flag não concede direitos e não compensa registros anteriores. Não é uma política de produção observada.",
+        "hypothetical_model": "Pessoa autorizada recebe comportamento antigo ou novo conforme sua flag; efeitos aceitos exigem contrato próprio para correção.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/0d5b5e6c0ece-5.png",
+          "sha256": "d353e0cce01caf99c6b26e8f0ed7710d93255db4e26f796650ac249e41a264e9",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-10.png"
+        }
+      },
+      "fence_index": 5
+    },
+    {
+      "id": "diagram-83",
+      "document": "content/explicacoes/security/index.mdx",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "body_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-83",
+        "basis": "vendor-contract hypothetical model",
+        "source_refs": [
+          "entra-oidc"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Identidade autenticada do cliente e access token da API têm papéis distintos; a política de objeto decide permitir ou negar.",
+        "limit": "OIDC e nomes são didáticos. A autorização falha fechada no modelo, sem certificar login, política ou transporte implantados.",
+        "document": "content/explicacoes/security/index.mdx",
+        "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+        "body_sha256": "b7dfc92e4153777fa7c644a8eb5f9ddd0a690acb00e3d83de7da0158e2993e5b",
+        "fence_index": 1,
+        "line_start": 20,
+        "inspected_sources": [
+          {
+            "id": "entra-oidc",
+            "sha256": "fae63fb94f52b70dea87c7dd15bc442f57ef180125668c9bcbcb38048402dd77",
+            "spans": null,
+            "url": "https://learn.microsoft.com/en-us/entra/architecture/auth-oidc"
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-84",
+      "document": "content/explicacoes/security/index.mdx",
+      "document_sha256": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+      "body_sha256": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-84",
+        "document": "content/explicacoes/security/index.mdx",
+        "documentSHA": "ddc600a30732ae53d5046c98173844dd318bd4f72896b610d3dd427d44363318",
+        "bodySHA": "2986a9d27b2ae05849373b4fd57ec928f1a2be94b98074d5b117e8bab02e6365",
+        "body_span": [
+          61,
+          68
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "camadas de defesa conceituais",
+        "rationale": "O pedido deve ter identidade e autorização, transporte protegido, privilégios delimitados e consulta restrita; a recusa impede leitura.",
+        "limit": "As setas organizam responsabilidades, não a cronologia do handshake TLS; as camadas não estão todas comprovadas no runtime Airflow.",
+        "hypothetical_model": "Uma operação usa defesas em cada fronteira e a recuperação não amplia permissões para contornar falha.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/718336970d50-2.png",
+          "sha256": "9394f0a2ecb33233c0af7545741b5fd7c232a2c82c1df2faa816a0c13f17b119",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-11.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-85",
+      "document": "content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "body_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-85",
+        "basis": "canonical disk-source abstraction",
+        "source_refs": [
+          "sf-task",
+          "sf-factory",
+          "sf-pipeline",
+          "sf-calls",
+          "cosmos",
+          "workflow-capture",
+          "topology-capture"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A factory ordena extract/transform/validate/load e cadeia de removidos; staging alimenta o modelo dbt selecionado por Cosmos.",
+        "limit": "A ligação por tabela é dependência de dados, não ordem de agendamento entre DAGs. O código .70 não certifica toda a paridade do cluster.",
+        "document": "content/explicacoes/workflow/index.mdx",
+        "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+        "body_sha256": "0c5d30b37242760ab43aaa3c16720e30e7a5689f815eb48c9cea19860d5651ba",
+        "fence_index": 1,
+        "line_start": 30,
+        "inspected_sources": [
+          {
+            "id": "sf-task",
+            "sha256": "63d2b11a4eb36cb637504cacb0f96808351109799f8e2aad2c8ac89805b4403d",
+            "spans": [
+              [
+                1,
+                21
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "sf-factory",
+            "sha256": "e20a6b8996a672bbd0d514e1ef1b83f9deb7459bd50bd773f0aabd610cfbeb1b",
+            "spans": [
+              [
+                88,
+                104
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "sf-pipeline",
+            "sha256": "612971e958185958bd7bc4501a2844df8a397b1f6a4f38a78bf7d78130886e41",
+            "spans": [
+              [
+                771,
+                786
+              ],
+              [
+                883,
+                910
+              ],
+              [
+                954,
+                969
+              ],
+              [
+                979,
+                1009
+              ],
+              [
+                1057,
+                1075
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "sf-calls",
+            "sha256": "e794f5af231f1518b3e728c4ae1bba6d12c42c8f41557c7daf8112b02b26fc2e",
+            "spans": [
+              [
+                1,
+                7
+              ],
+              [
+                48,
+                74
+              ],
+              [
+                97,
+                102
+              ],
+              [
+                123,
+                124
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "cosmos",
+            "sha256": "5875f94a31d05d2c5cebdae11906ee68452b6cf7b7c47be0e0cf8f129883807f",
+            "spans": [
+              [
+                1,
+                95
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "workflow-capture",
+            "sha256": "80ae9897b0df608b35ad907f70ea47ec8d27bb620ee142d3265ffebd56c15961",
+            "spans": [
+              [
+                19,
+                21
+              ],
+              [
+                39,
+                41
+              ],
+              [
+                69,
+                76
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "topology-capture",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                19,
+                29
+              ],
+              [
+                33,
+                45
+              ],
+              [
+                88,
+                102
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-86",
+      "document": "content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "body_sha256": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-86",
+        "document": "content/explicacoes/workflow/index.mdx",
+        "documentSHA": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+        "bodySHA": "a2a1a717ef99f1ce9735676f3030b91be4bf95d237fcebfea63e77b7771a418a",
+        "body_span": [
+          56,
+          70
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "código e capturas XP com fonte delimitada",
+        "rationale": "O processor usa o arquivo local para arquivar bytes e transformar; o proxy só publica o Asset após o teste e o consumer encadeia cálculo, sync e validação.",
+        "limit": "As chamadas do processor são sequenciais; os ramos representam origem dos dados. O objeto não alimenta a transformação. O consumer foi lido em objeto Git, sem nova medição de deploy ou execução .70.",
+        "hypothetical_model": null,
+        "primary_evidence": [
+          {
+            "source": "xp_processor",
+            "path": "/Users/augustocarollo/Developer/airflow-dags/toolkit/faz_consulting_scraping_portfolio_positions_headless/processor.py",
+            "sha256": "dbb158f6a35fddb5135a23affd11e3baaea71adccd43542749d3f839ab357b16",
+            "spans": [
+              [
+                510,
+                574
+              ],
+              [
+                1173,
+                1247
+              ]
+            ]
+          },
+          {
+            "source": "xp_proxy",
+            "path": "/Users/augustocarollo/Developer/airflow-dags::8f06738d7d3bc735c48c5c5450d5297b4dedc398:dags/stg_xp__diversification__proxy.py",
+            "sha256": "ea489597682d480f9345e9c8c931566ac78db0dc70c14337065668e2adfff059",
+            "spans": [
+              [
+                22,
+                22
+              ],
+              [
+                29,
+                150
+              ],
+              [
+                175,
+                184
+              ]
+            ]
+          },
+          {
+            "source": "xp_consumer",
+            "path": "/Users/augustocarollo/Developer/airflow-dags::8f06738d7d3bc735c48c5c5450d5297b4dedc398:dags/fct_xp_consolidated_position__build.py",
+            "sha256": "b4dc087967093481a1a1eec9dcfbfa45c126fb57611c9e60e52f9248cc196bbd",
+            "spans": [
+              [
+                27,
+                49
+              ],
+              [
+                57,
+                64
+              ],
+              [
+                104,
+                116
+              ],
+              [
+                132,
+                182
+              ]
+            ]
+          },
+          {
+            "source": "xp_loop",
+            "path": "/Users/augustocarollo/Developer/airflow-dags::8f06738d7d3bc735c48c5c5450d5297b4dedc398:toolkit/faz_consulting_scraping_portfolio_positions_headless/loop_engine.py",
+            "sha256": "09a97df1805bc483ee43d04ed6efeaa485f1ab956d6cc5c23d72bae059fdfb46",
+            "spans": [
+              [
+                41,
+                99
+              ]
+            ]
+          },
+          {
+            "source": "s3_capture",
+            "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/architecture-course-2026-10-14/evidence/s3-airflow.md",
+            "sha256": "80ae9897b0df608b35ad907f70ea47ec8d27bb620ee142d3265ffebd56c15961",
+            "spans": [
+              [
+                27,
+                35
+              ],
+              [
+                69,
+                76
+              ]
+            ]
+          }
+        ],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/36f1dacc4085-2.png",
+          "sha256": "e1978c8fabdbba0695bda28a72507c2ba09ef4eb0d413d0e395b92f583bed802",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-11.png"
+        }
+      },
+      "fence_index": 2
+    },
+    {
+      "id": "diagram-87",
+      "document": "content/explicacoes/workflow/index.mdx",
+      "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+      "body_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-87",
+        "basis": "canonical disk source plus proposed failure",
+        "source_refs": [
+          "audio",
+          "topology-capture"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A ordem da DAG passa por extração, enriquecimento, stat/put e load_metadata com conflito por nextbilling_call_id.",
+        "limit": "O ramo de falha SQL é cenário proposto e resume uma tentativa que falhou; não houve upload, SQL ou gravação recente executados nesta revisão.",
+        "document": "content/explicacoes/workflow/index.mdx",
+        "document_sha256": "3a39fdb9c077c729652ce7a3ba91a75f8dea3c5b40599579a65370d550d0527c",
+        "body_sha256": "bac814ebaa454af7a89c4095d23376fa919004c8d8fd9a67efae54e27854c3dd",
+        "fence_index": 3,
+        "line_start": 86,
+        "inspected_sources": [
+          {
+            "id": "audio",
+            "sha256": "0f07f024b88303ed2f07f1343eb45e879591291222706d68916f65f4aeac50ad",
+            "spans": [
+              [
+                608,
+                683
+              ],
+              [
+                741,
+                774
+              ],
+              [
+                912,
+                938
+              ]
+            ],
+            "url": null
+          },
+          {
+            "id": "topology-capture",
+            "sha256": "683026dd10e350c5ad68dbe1e2c73ac6865f74d5b21e34593a6355d5424f750c",
+            "spans": [
+              [
+                19,
+                29
+              ],
+              [
+                33,
+                45
+              ],
+              [
+                88,
+                102
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 3
+    },
+    {
+      "id": "diagram-88",
+      "document": "content/guias/investigar-impacto.mdx",
+      "document_sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+      "body_sha256": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-88",
+        "document": "content/guias/investigar-impacto.mdx",
+        "documentSHA": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c",
+        "bodySHA": "51d9fea566819c9e8a1ae3a7a07851da0aa7282ce29491d4f7b679410751b930",
+        "body_span": [
+          116,
+          125
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "procedimento do guia",
+        "rationale": "A investigação parte da alteração, orienta-se por pipeline, calcula alcance e só depois consulta dados em leitura; as lacunas impedem fechamento indevido.",
+        "limit": "O procedimento não prova sozinho contratos de consumidores nem transforma contagens históricas em estado atual.",
+        "hypothetical_model": "Definir alteração; localizar nó; blast_radius; agregado PostgreSQL; conferir grão/cardinalidade; registrar impacto ou lacuna.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/cf75273cb9a3-1.png",
+          "sha256": "4326b2903052fadd1423e0ae41572b6e7b97d32b8c38f814b83726509cb1d46d",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-11.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-89",
+      "document": "content/tutoriais/idempotency.mdx",
+      "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+      "body_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-89",
+        "basis": "embedded controlled simulation",
+        "source_refs": [
+          "tut-idempotency"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "A chave e o hash preservam resposta após repetição; outro slot com a mesma chave retorna MISMATCH sem novo efeito.",
+        "limit": "Memória sequencial local; não prova atomicidade concorrente, persistência ou resposta HTTP real.",
+        "document": "content/tutoriais/idempotency.mdx",
+        "document_sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+        "body_sha256": "578e47159bd0ac0c62d9e0a4830319cfb3b23ec80e5a94c73a8e84d298b4fa60",
+        "fence_index": 1,
+        "line_start": 82,
+        "inspected_sources": [
+          {
+            "id": "tut-idempotency",
+            "sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b",
+            "spans": [
+              [
+                29,
+                56
+              ],
+              [
+                75,
+                79
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-90",
+      "document": "content/tutoriais/optimistic-concurrency.mdx",
+      "document_sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+      "body_sha256": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-90",
+        "document": "content/tutoriais/optimistic-concurrency.mdx",
+        "documentSHA": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec",
+        "bodySHA": "ccc28cffb4893cbc0eb9dfd0330aa57005fcd9e5c2791c870b39777bf182ed4c",
+        "body_span": [
+          79,
+          88
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "programa Python em memória da própria página",
+        "rationale": "As duas cópias leem 7; a primeira grava 8; a segunda comparação esperada 7 falha, conservando approved na versão 8.",
+        "limit": "A sequência não demonstra concorrência de threads ou transação em banco; o texto exige comparação/gravação atômicas ao portar.",
+        "hypothetical_model": "read_record retorna cópia de version/text; save_record compara versão antes de alterar e incrementar; chamadas são sequenciais.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/6c9437bb1665-1.png",
+          "sha256": "663fb037856279117eb12b83a86b2e24221e8c77d40fe9691adb404c68832902",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-11.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-91",
+      "document": "content/tutoriais/outbox.mdx",
+      "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+      "body_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-91",
+        "basis": "embedded controlled simulation",
+        "source_refs": [
+          "tut-outbox"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "O publicador cai depois do efeito e antes da marca; a segunda entrega encontra a identidade no consumidor e marca sent.",
+        "limit": "A unidade local são duas atribuições em memória; não prova transação durável nem retomada depois de reiniciar o processo.",
+        "document": "content/tutoriais/outbox.mdx",
+        "document_sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+        "body_sha256": "40c09ec72930895c4a2d47539f84f13695d16dc704fb678c9a6012e49206789d",
+        "fence_index": 1,
+        "line_start": 101,
+        "inspected_sources": [
+          {
+            "id": "tut-outbox",
+            "sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09",
+            "spans": [
+              [
+                29,
+                71
+              ],
+              [
+                94,
+                98
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-92",
+      "document": "content/tutoriais/read-projection.mdx",
+      "document_sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+      "body_sha256": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-92",
+        "document": "content/tutoriais/read-projection.mdx",
+        "documentSHA": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
+        "bodySHA": "b0855d1abad1c93908cd52ed2710e8298df247269ed5d98b0d518199c5a522fb",
+        "body_span": [
+          91,
+          95
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "dois estados da projeção didática da página",
+        "rationale": "O gráfico relaciona as fotografias10 e15 ao avanço de cursor, coerentes com o resultado esperado do programa.",
+        "limit": "A primeira atualização ocorre quando somente evt-01 existe; evt-02 entra depois. A caixa agregada com os dois eventos é resumo do conjunto final, não uma chamada que processe parcialmente ambos.",
+        "hypothetical_model": "commit10; refresh consome todo o prefixo existente; commit5; leitura fica10/15; próximo refresh consome novo evento e chega15.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/a4b36f784f89-1.png",
+          "sha256": "580533a500f5a365347d18e93a78fd63f218c0ee5214edc5a11ab7faee5a21e5",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-12.png"
+        }
+      },
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-93",
+      "document": "content/tutoriais/single-flight.mdx",
+      "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+      "body_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_two",
+      "receipt": "diagram-semantics-two.recheck.json",
+      "initial_receipt": "diagram-semantics-two.json",
+      "judgment": {
+        "id": "diagram-93",
+        "basis": "embedded controlled simulation",
+        "source_refs": [
+          "tut-singleflight"
+        ],
+        "status": "PASS_BOUNDED",
+        "rationale": "Cinco leitores compartilham inflight e shield isola A; em 8 a janela iniciada em 7 renova sem aguardar o valor novo.",
+        "limit": "A conta de duas buscas é do produtor controlado. Nenhuma latência externa ou coordenação entre workers é demonstrada.",
+        "document": "content/tutoriais/single-flight.mdx",
+        "document_sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+        "body_sha256": "dd0e024d44bf597e2dc42ad61c07d97ff68b0678952bfd98a8ed086b60c19549",
+        "fence_index": 1,
+        "line_start": 141,
+        "inspected_sources": [
+          {
+            "id": "tut-singleflight",
+            "sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
+            "spans": [
+              [
+                29,
+                112
+              ],
+              [
+                134,
+                138
+              ]
+            ],
+            "url": null
+          }
+        ]
+      },
+      "repair_judgment": null,
+      "fence_index": 1
+    },
+    {
+      "id": "diagram-94",
+      "document": "content/tutoriais/state-machine.mdx",
+      "document_sha256": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
+      "body_sha256": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+      "status": "PASS_BOUNDED",
+      "reviewer": "/root/diagram_semantics_one",
+      "receipt": "diagram-semantics-one.json",
+      "judgment": {
+        "id": "diagram-94",
+        "document": "content/tutoriais/state-machine.mdx",
+        "documentSHA": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
+        "bodySHA": "92e517362098c4cdb8bb58d8522a1faecc9ec8d3367dc2a0aad642e895ca7d80",
+        "body_span": [
+          86,
+          91
+        ],
+        "status": "PASS_BOUNDED",
+        "scope": "máquina de estados Python da própria página",
+        "rationale": "UNKNOWN, operador e especialista sem motivo preservam IN_CONTACT; somente o especialista com motivo chega a PENDING, como o código.",
+        "limit": "Os rótulos dos laços se sobrepõem no PNG original. A semântica do corpo corresponde, mas a legibilidade visual não fica aprovada; achado MEDIUM no backlog.",
+        "hypothetical_model": "allowed_edges contém apenas IN_CONTACT para PENDING; papel e motivo são verificados antes de atribuir self.state.",
+        "primary_evidence": [],
+        "render": {
+          "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/tasks/FBI-4991-arquitetura-nextra/execution/diagrams-final/4ef9fa93fd31-1.png",
+          "sha256": "19c16b0f84eba15307ee9eaffe594c28ac346ac71d57f1f6d6bdc27a10c38167",
+          "inspected": true,
+          "contact_sheet": "diagram-semantics-one-contact-12.png"
+        }
+      },
+      "fence_index": 1
+    }
+  ]
+}

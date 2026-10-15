@@ -1,0 +1,16 @@
+case=single-flight-cancel exit=0 stdout_lines=3
+case=early-refresh exit=0 stdout_lines=3
+case=date-only exit=0 stdout_lines=3
+case=opportunity-entry exit=0 stdout_lines=8
+case=order-boundaries exit=0 stdout_lines=42
+case=order-delivery exit=0 stdout_lines=10
+case=reservation exit=0 stdout_lines=16
+case=consensus exit=0 stdout_lines=22
+case=queue-workflow exit=0 stdout_lines=31
+case=cache-policy exit=0 stdout_lines=10
+case=ledger-projection exit=0 stdout_lines=6
+case=storage-partitions exit=0 stdout_lines=12
+case=safe-release exit=0 stdout_lines=12
+case=access-policy exit=0 stdout_lines=13
+case=diagnostics exit=0 stdout_lines=6
+case=object-patterns exit=0 stdout_lines=24
