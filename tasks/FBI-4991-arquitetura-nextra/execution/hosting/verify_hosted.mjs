@@ -11,6 +11,9 @@ const origin = new URL(identity.expected_url).origin
 const manifest = JSON.parse(await readFile(path.join(folder, 'asset-manifest.json'), 'utf8'))
 const credentials = JSON.parse(execFileSync('python3', [path.join(folder, 'keychain_secrets.py'), '--process-export'], { encoding: 'utf8' }))
 const privateMode = process.argv.includes('--private-service-access')
+const labelIndex = process.argv.indexOf('--receipt-label')
+const receiptLabel = labelIndex >= 0 ? process.argv[labelIndex + 1] : (privateMode ? 'private' : 'public')
+if (!/^[a-z0-9-]+$/.test(receiptLabel || '')) throw new Error('Invalid receipt label')
 let privateToken
 if (privateMode) {
   process.stdin.setRawMode?.(true)
@@ -77,7 +80,7 @@ try {
   await page.goto(origin, { waitUntil: 'networkidle0' })
   report.anonymousEntry = { url: page.url(), heading: await page.$eval('h1', node => node.textContent) }
   if (new URL(page.url()).pathname !== '/login' || !report.anonymousEntry.heading.includes('Acesso ao curso')) throw new Error('Anonymous entry did not reach the course password form')
-  await page.screenshot({ path: path.join(folder, privateMode ? 'private-login.png' : 'public-login.png') })
+  await page.screenshot({ path: path.join(folder, `${receiptLabel}-login.png`) })
   await page.type('input[name="password"]', 'invalid-course-password')
   await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0' }), page.click('button[type="submit"]')])
   report.wrongPasswordRejected = Boolean(await page.$('[role="alert"]'))
@@ -120,7 +123,7 @@ try {
   await page.goto(origin + '/jornadas/airflow-lock-retry/', { waitUntil: 'networkidle0' })
   await page.waitForSelector('main h1')
   report.caseHeading = await page.$eval('main h1', node => node.textContent)
-  await page.screenshot({ path: path.join(folder, privateMode ? 'private-nextra.png' : 'public-nextra.png') })
+  await page.screenshot({ path: path.join(folder, `${receiptLabel}-nextra.png`) })
   const signOut = await page.evaluate(async () => {
     const response = await fetch('/logout', { method: 'POST', redirect: 'manual' })
     return response.status
@@ -135,7 +138,7 @@ try {
 }
 report.completedAt = new Date().toISOString()
 report.verdict = report.failures.length || report.pageErrors.length || report.consoleErrors.length ? 'FAIL' : 'PASS'
-await writeFile(path.join(folder, privateMode ? 'private-verification.json' : 'public-verification.json'), JSON.stringify(report, null, 2) + '\n')
+await writeFile(path.join(folder, `${receiptLabel}-verification.json`), JSON.stringify(report, null, 2) + '\n')
 console.log(JSON.stringify({ verdict: report.verdict, anonymous: report.anonymous.length, readBack: report.readBack.length,
   failures: report.failures, pageErrors: report.pageErrors, consoleErrors: report.consoleErrors }))
 process.exitCode = report.verdict === 'PASS' ? 0 : 1
