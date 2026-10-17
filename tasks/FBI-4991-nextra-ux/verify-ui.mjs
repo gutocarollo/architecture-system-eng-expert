@@ -60,7 +60,7 @@ try {
   }
   await page.setViewport({ width: 1440, height: 1000 })
   await page.goto(origin + '/jornadas/reservation/conceitos', { waitUntil: 'networkidle2' })
-  const group = await page.$('.nextra-sidebar a[href="/jornadas/reservation"]')
+  const group = await page.$(':is(.nextra-sidebar a[href="/jornadas/reservation"], .nextra-sidebar a[href="/jornadas/reservation/"])')
   assert(Boolean(group), 'Reservation group is not a native link')
   if (group) {
     await group.evaluate(element => element.scrollIntoView({ block: 'center' }))
@@ -77,15 +77,15 @@ try {
     report.groupClick = { url: page.url(), heading: await page.$eval('main h1', e => e.textContent), scroll: await page.evaluate(() => window.__courseScroll || []) }
     assert(report.groupClick.scroll.some(y => y > 0 && y < 640), 'Page click did not expose an intermediate scroll position')
     assert(report.groupClick.scroll.at(-1) <= 1, 'Page click did not finish at the top')
-    const landedGroup = await page.$('.nextra-sidebar a[href="/jornadas/reservation"]')
+    const landedGroup = await page.$(':is(.nextra-sidebar a[href="/jornadas/reservation"], .nextra-sidebar a[href="/jornadas/reservation/"])')
     const arrow = await landedGroup.$('svg')
     if (arrow) {
       const before = await landedGroup.evaluate(element => element.parentElement.className)
       const priorUrl = page.url()
       await arrow.click()
       await new Promise(resolve => setTimeout(resolve, 350))
-      const after = await page.$eval('.nextra-sidebar a[href="/jornadas/reservation"]', element => element.parentElement.className)
-      report.arrow = { before, after, urlUnchanged: priorUrl === page.url(), transition: await page.$eval('.nextra-sidebar a[href="/jornadas/reservation"] svg', element => getComputedStyle(element).transitionDuration) }
+      const after = await page.$eval(':is(.nextra-sidebar a[href="/jornadas/reservation"], .nextra-sidebar a[href="/jornadas/reservation/"])', element => element.parentElement.className)
+      report.arrow = { before, after, urlUnchanged: priorUrl === page.url(), transition: await page.$eval(':is(.nextra-sidebar a[href="/jornadas/reservation"], .nextra-sidebar a[href="/jornadas/reservation/"]) svg', element => getComputedStyle(element).transitionDuration) }
       assert(before !== after && report.arrow.urlUnchanged, 'The arrow did not toggle independently')
     }
   }

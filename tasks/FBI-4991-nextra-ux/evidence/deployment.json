@@ -1,0 +1,14 @@
+{
+  "observed_at": "2026-10-17T03:55:40.871691+00:00",
+  "project": "hub",
+  "service": "makershub-architecture-course",
+  "url": "https://hub-makershub-architecture-course.6bv96u.easypanel.host",
+  "image": "127.0.0.1:55051/fazcapital/architecture-course@sha256:f4f07378fff02ac467d65e3ae4295fc46f4a3a76102d0571a2ba18e0332e718a",
+  "action_id": "cmvbv5na7001u07ppa5togi2b",
+  "action_status": "done",
+  "source_commit": "d5c3c1cf5808e88a2bfe4c4e109ae01fbc4f8a43",
+  "password_changed": false,
+  "note": "Deployment was performed through the EasyPanel MCP; browser and byte receipts are separate.",
+  "source_worktree_patch": "patches/nextra-theme-docs+4.6.1.patch",
+  "source_patch_sha256": "91997cc001618fed04170cbfa449c465143928c7e52299dfed5ce84e9ca52cad"
+}

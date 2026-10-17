@@ -46,6 +46,8 @@ python3 labs/airflow-lock-retry/run.py
 python3 labs/airflow-lock-retry/check_challenge.py
 ```
 
+Depois de regenerar os textos, execute `node scripts/prepare-course-navigation.mjs` para preservar os índices navegáveis dos grupos.
+
 Para regenerar os textos após mudar um modelo, execute os runners e siga a ordem de geração indicada em [labs/architecture/README.md](labs/architecture/README.md). Depois da geração das duas frentes, execute `python3 tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/author_pages.py` e, em seguida, `python3 tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/author_pages.py` e `python3 tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/integrate_pages.py` para recompor os casos PostgreSQL e sua navegação. Regenerar não substitui a revisão independente.
 
 A busca global fica no cabeçalho do Nextra e usa o índice Pagefind criado no build. A tecla `/` leva o foco ao campo. O percurso de uma consulta e os links entre os quatro tipos são conferidos em navegador sem abrir a interface do usuário.

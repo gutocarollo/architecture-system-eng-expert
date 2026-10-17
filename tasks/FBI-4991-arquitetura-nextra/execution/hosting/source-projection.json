@@ -1,6 +1,6 @@
 {
-  "observed_at": "2026-10-17T03:33:35.463038+00:00",
-  "source_head": "83150a31c0d27f655b1160570aedd6c3e32e5d63",
+  "observed_at": "2026-10-17T03:46:25.279093+00:00",
+  "source_head": "d5c3c1cf5808e88a2bfe4c4e109ae01fbc4f8a43",
   "project_id": "appgprj_6ad10a8b63b081919c3eabac313e64ab",
   "source_files": {
     "app/[[...mdxPath]]/page.jsx": "5300d7527b498e2703aa5532573bc88d8a0f7949b223d2f10c5f61ba907e5c09",
@@ -214,7 +214,7 @@
     "content/tutoriais/read-projection.mdx": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7",
     "content/tutoriais/single-flight.mdx": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc",
     "content/tutoriais/state-machine.mdx": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985",
-    "patches/nextra-theme-docs+4.6.1.patch": "1c54186f7920f73f5c4d74ccd4ff5bf0352d885072efca778c75fbeca095c117",
+    "patches/nextra-theme-docs+4.6.1.patch": "91997cc001618fed04170cbfa449c465143928c7e52299dfed5ce84e9ca52cad",
     "public/downloads/architecture-labs.zip": "f1c6e826f3183a21a2f1691aa40202060ab3471e3af897cfa7ef1d79d4b9dd7a",
     "mdx-components.jsx": "ef9e47075361b51a667027501174d110041c5692929100b49244db71aaa0a2d0",
     "package.json": "f27b98a95197e92d40d973c2fb40e5c6bf25961cc507611b99639d0e50cb63ac",
@@ -224,5 +224,5 @@
     "Static export with trailing slashes",
     "Pagefind indexes the exported out directory"
   ],
-  "access": "Owner-private native Sites access; shared-password support is not established by this projection."
+  "access": "Generated static export; password and delivery guarantees must be verified in the target hosting runtime."
 }

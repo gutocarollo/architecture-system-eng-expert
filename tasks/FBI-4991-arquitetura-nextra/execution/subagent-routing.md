@@ -240,3 +240,7 @@ Two lanes: a default/gpt-6.1-sol/high read-only DEEP_EXPLORE compares installed 
 ## SUBAGENT_ROUTE independent UX slice review — 2026-10-17T03:31:04.683299+00:00
 
 TASK: First independent review of the user-requested navigation/spacing/label/count slice. LANE:REVIEW. MODEL:gpt-6.1-sol. EFFORT:xhigh. FORK_TURNS:none. Root plus two planning/source/content lanes precede one reviewer. This does not reopen source curation or prior semantic diagram judgments; the119 index frontmatter changes and26meta index removals are navigation metadata. Review core implementation, canonicalNextra contract, preserve source links and honest40/46/310/15/18 counts. One pass and high-only warm recheck.
+
+## ROUND_GATE hosted caret correction
+
+Mission100: navigation35,motion20,width15,clarityandtitle25,deployment5. Affected10pointsnavigation. Decisionrepair; scores5/3/5/2/5; weightedfactor84%; gross8.4%; opportunitycost2%; net6.4%. One warm HIGH-only recheck to the sameUXreviewer. Sourcefile is isolated from the shared dependency directory; one normalization prevents an own trailing-slash route from being treated as a focused descendant. No other source review reopened.

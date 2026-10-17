@@ -1,0 +1,9 @@
+{
+  "observed_at": "2026-10-17T03:45:37.429053+00:00",
+  "symptom": "Hosted title click navigates; caret cannot collapse while the own folder anchor with trailing slash is focused.",
+  "source": "nextra-theme-docs/dist/components/sidebar.js",
+  "cause_contract": "An own /folder/ URL matched startsWith(/folder/) as if a descendant were focused; normalize the focus path before comparing.",
+  "change": "Remove the final slash from the focused route only; preserve actual URLs, descendant focus and native arrow handler.",
+  "shared_dependencies_preserved": true,
+  "isolated_theme_package": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991/node_modules/nextra-theme-docs"
+}

@@ -1,0 +1,9 @@
+{
+  "verified": true,
+  "chunks": [
+    {
+      "path": "_next/static/chunks/8687-766de8a546e167e6.js",
+      "compiled_excerpt": "te+\"/\"),P=M||O&&k.startsWith(T.route+\"/\"),j=g(e=>e.focused).replace(/\\/$/,\"\").startsWith(T.route+\"/\"),{theme:R}=T,{defaultMenuCollapseLevel:_,autoCollapse:"
+    }
+  ]
+}
