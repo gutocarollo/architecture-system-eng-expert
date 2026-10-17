@@ -6,9 +6,13 @@ diataxis: reference
 
 # Todos os conceitos e seus casos
 
-A matriz adjudica os 310 conceitos canônicos do pedido. Cada entrada conserva a família, o caso e os quatro destinos Diátaxis. Somente um vínculo pertinente oferece um comando de prática; os demais identificam a experiência específica que ainda falta. Alguns vínculos mostram um mecanismo local diretamente; outros usam um contraexemplo executável para estudar um requisito do conceito. Um modelo de maioria, por exemplo, ajuda a discutir Raft, mas não executa Raft.
+Esta matriz mostra onde estudar os **310 conceitos do catálogo**. As **15 linhas da tabela são casos principais**, e cada caso reúne vários conceitos em torno de um problema. Por isso, 15 casos podem organizar os 310 conceitos. Cada conceito é contado uma vez, no seu caso principal; a soma da coluna “Conceitos associados” é 310.
 
-| Caso | Conceitos | Destinos que conservam o mesmo problema |
+Por exemplo, “Uma fila absorve trabalho e recupera falhas” reúne 55 conceitos. Retry, Exponential Backoff e Jitter estão nesse caso e também formam um dos 40 temas da seleção [Arquitetura na prática: Makershub](/referencia/prioritarios/). Assim, **40 conta temas prioritários, 310 conta conceitos e 15 conta casos principais**. Esses números descrevem formas diferentes de organizar o mesmo material.
+
+Abra um caso e escolha como estudar o problema: a explicação apresenta a decisão, o tutorial conduz a prática, o guia ajuda a avaliar uma tarefa e a referência permite consultar o contrato. O mapa de conceitos do caso informa qual observação o exercício permite fazer e até onde essa observação vale.
+
+| Caso principal de estudo | Conceitos associados | O mesmo caso em quatro formas de estudo |
 | --- | --- | --- |
 | [Cancelamento de uma busca compartilhada](/jornadas/single-flight-cancel/conceitos/) | 5 | [Explicação](/explicacoes/casos/single-flight-cancel/), [tutorial](/tutoriais/casos/single-flight-cancel/), [guia](/guias/casos/single-flight-cancel/) e [referência](/referencia/casos/single-flight-cancel/). |
 | [A lista continua disponível durante a renovação](/jornadas/early-refresh/conceitos/) | 1 | [Explicação](/explicacoes/casos/early-refresh/), [tutorial](/tutoriais/casos/early-refresh/), [guia](/guias/casos/early-refresh/) e [referência](/referencia/casos/early-refresh/). |
@@ -26,11 +30,13 @@ A matriz adjudica os 310 conceitos canônicos do pedido. Cada entrada conserva a
 | [A permissão acompanha a ordem e a identidade](/jornadas/access-policy/conceitos/) | 16 | [Explicação](/explicacoes/casos/access-policy/), [tutorial](/tutoriais/casos/access-policy/), [guia](/guias/casos/access-policy/) e [referência](/referencia/casos/access-policy/). |
 | [A equipe descobre onde a ordem parou](/jornadas/diagnostics/conceitos/) | 12 | [Explicação](/explicacoes/casos/diagnostics/), [tutorial](/tutoriais/casos/diagnostics/), [guia](/guias/casos/diagnostics/) e [referência](/referencia/casos/diagnostics/). |
 
-Os 310 conceitos foram adjudicados contra a operação efetivamente executada. Há 310 vínculos com observação pertinente e 0 práticas específicas pendentes. As entradas pendentes não oferecem um comando de outro mecanismo como substituto. Os vínculos pertinentes também conservam os limites do modelo; uma observação de maioria não implementa Raft completo.
+As contagens mostram que os conceitos possuem um caminho de estudo. Alguns exercícios demonstram um mecanismo local; outros usam uma comparação ou um contraexemplo para estudar um requisito. Um modelo de maioria ajuda a discutir Raft, por exemplo, mas não executa o protocolo Raft completo. Os links e a soma 310 não comprovam a implementação integral de 310 padrões, a conclusão de todas as revisões ou o comportamento em produção.
 
-## Os quarenta prioritários
+A lista de [jornadas aplicadas](/jornadas/) tem **18 jornadas**. Além destes 15 casos, ela inclui duas jornadas históricas de PostgreSQL, [a comissão duplicada por uma junção](/jornadas/query-grain-postgres/) e [a alteração perdida por um escritor atrasado](/jornadas/revision-cas-postgres/), e uma jornada histórica de Airflow, [a nova tentativa após uma falha de lock](/jornadas/airflow-lock-retry/). Esses três aprofundamentos têm seus próprios exercícios e não acrescentam conceitos à contagem desta tabela.
 
-Os itens compostos conservam todos os seus conceitos. Cada link chega à entrada aplicada que contém mecanismo, comando e limite.
+## Arquitetura na prática: Makershub
+
+A seleção [Arquitetura na prática: Makershub](/referencia/prioritarios/) tem 40 temas e aponta para 46 conceitos distintos. Os temas compostos conservam todos os seus conceitos. Cada link abaixo abre a entrada do caso que apresenta o mecanismo, a prática proposta e seus limites.
 
 1. Modular Monolith: [Modular Monolith](/jornadas/order-boundaries/conceitos/#modular-monolith).
 2. Hexagonal Architecture: [Hexagonal / Ports & Adapters](/jornadas/order-boundaries/conceitos/#hexagonal-ports-adapters).
@@ -73,4 +79,4 @@ Os itens compostos conservam todos os seus conceitos. Cada link chega à entrada
 39. Dead Letter Queue: [Dead Letter Queue](/jornadas/queue-workflow/conceitos/#dead-letter-queue).
 40. State Machine: [State Machine](/jornadas/queue-workflow/conceitos/#state-machine).
 
-A versão legível por máquina está em `tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json`. Os recibos locais ficam ao lado dela. A revisão independente avalia os mesmos hashes; a presença de um vínculo não preenche uma revisão pendente.
+Para começar por um problema que você reconhece, volte às [jornadas aplicadas](/jornadas/). Para comparar as fontes de um conceito, abra a [curadoria completa](/referencia/curadoria/).

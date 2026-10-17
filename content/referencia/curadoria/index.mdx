@@ -1,4 +1,5 @@
 ---
+asIndexPage: true
 title: Curadoria dos 310 conceitos
 description: Matriz completa de skills, frameworks e aplicações OSS, com versões, licenças, tendência datada e lacunas explícitas.
 diataxis: reference
@@ -6,31 +7,33 @@ diataxis: reference
 
 # Curadoria dos 310 conceitos
 
-Esta matriz responde ao pedido de uma orientação de agente, uma base de biblioteca ou framework e uma aplicação OSS real para cada conceito. Os **310 conceitos canônicos** possuem uma entrada própria com fontes e situação. Nesta versão autoral, **310** têm correspondência proposta entre mecanismo e fontes primárias, enquanto **0** conservam pendências. Os pareceres independentes cobrem 310 entradas; 0 aguardam decisão. A primeira passada conserva 259 decisões, incluindo 14 observações não bloqueantes; a rechecagem aceitou os 51 recortes reparados. A decisão vale para o mecanismo documentado, não certifica uma implantação ou todo o produto OSS. Nenhum conceito foi dispensado como “não aplicável”.
+Esta curadoria reúne **310 conceitos de arquitetura** para consulta. Cada conceito tem uma entrada com referências para estudar o mecanismo, comparar bibliotecas ou frameworks e observar seu uso em produtos de código aberto. Abra a família do assunto que você procura ou use a busca pelo nome do conceito.
 
-Uma biblioteca mostra como o mecanismo é implementado. Um produto OSS mostra seu uso ou a execução desse mecanismo num sistema real, incluindo produtos de infraestrutura. Um sample, template ou workshop continua identificado como demonstração, mesmo quando executável. Uma documentação ou um localizador que apenas contém o nome do conceito não fecha a correspondência.
+A página [Arquitetura na prática: Makershub](/referencia/prioritarios/) oferece uma seleção de 40 temas para começar. Alguns temas reúnem vários conceitos, como Retry, Exponential Backoff e Jitter. Já a [matriz de conceitos e casos](/jornadas/matriz/) distribui os 310 conceitos entre 15 casos principais de estudo. As 17 famílias abaixo organizam os conceitos por assunto; os 15 casos os organizam pelo problema que você pode investigar.
+
+Uma fonte de código mostra um recorte do mecanismo em uma biblioteca ou em um produto. Um exercício permite observar uma condição e comparar seus efeitos. Consulte os limites de cada entrada antes de aplicar a ideia: uma comparação local pode ensinar um requisito do padrão sem implementar o protocolo completo ou comprovar seu uso em produção.
 
 ## Consulte por família
 
-| Família | Conceitos canônicos nesta página | Correspondências autorais | Pendências |
-| --- | ---: | ---: | ---: |
-| [Arquiteturas de aplicação](/referencia/curadoria/01-arquiteturas-de-aplicacao/) | 22 | 22 | 0 |
-| [Sistemas distribuídos e consistência](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/) | 38 | 38 | 0 |
-| [Event-driven / Messaging](/referencia/curadoria/03-event-driven-messaging/) | 25 | 25 | 0 |
-| [CQRS, Event Sourcing e modelos de leitura](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/) | 11 | 11 | 0 |
-| [Banco de dados e armazenamento](/referencia/curadoria/05-banco-de-dados-e-armazenamento/) | 27 | 27 | 0 |
-| [Cache](/referencia/curadoria/06-cache/) | 14 | 14 | 0 |
-| [Resiliência](/referencia/curadoria/07-resiliencia/) | 19 | 19 | 0 |
-| [Concorrência](/referencia/curadoria/08-concorrencia/) | 15 | 15 | 0 |
-| [APIs e integração](/referencia/curadoria/09-apis-e-integracao/) | 23 | 23 | 0 |
-| [DDD — Domain-Driven Design](/referencia/curadoria/10-ddd-domain-driven-design/) | 20 | 20 | 0 |
-| [Padrões para decompor sistemas](/referencia/curadoria/11-padroes-para-decompor-sistemas/) | 13 | 13 | 0 |
-| [Deploy e releases](/referencia/curadoria/12-deploy-e-releases/) | 10 | 10 | 0 |
-| [Alta disponibilidade](/referencia/curadoria/13-alta-disponibilidade/) | 12 | 12 | 0 |
-| [Segurança](/referencia/curadoria/14-seguranca/) | 17 | 17 | 0 |
-| [Observabilidade](/referencia/curadoria/15-observabilidade/) | 10 | 10 | 0 |
-| [Workflow e processamento](/referencia/curadoria/16-workflow-e-processamento/) | 14 | 14 | 0 |
-| [Padrões clássicos GoF](/referencia/curadoria/17-padroes-classicos-gof/) | 20 | 20 | 0 |
+| Família de assuntos | Conceitos distintos nesta família |
+| --- | ---: |
+| [Arquiteturas de aplicação](/referencia/curadoria/01-arquiteturas-de-aplicacao/) | 22 |
+| [Sistemas distribuídos e consistência](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/) | 38 |
+| [Event-driven / Messaging](/referencia/curadoria/03-event-driven-messaging/) | 25 |
+| [CQRS, Event Sourcing e modelos de leitura](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/) | 11 |
+| [Banco de dados e armazenamento](/referencia/curadoria/05-banco-de-dados-e-armazenamento/) | 27 |
+| [Cache](/referencia/curadoria/06-cache/) | 14 |
+| [Resiliência](/referencia/curadoria/07-resiliencia/) | 19 |
+| [Concorrência](/referencia/curadoria/08-concorrencia/) | 15 |
+| [APIs e integração](/referencia/curadoria/09-apis-e-integracao/) | 23 |
+| [DDD — Domain-Driven Design](/referencia/curadoria/10-ddd-domain-driven-design/) | 20 |
+| [Padrões para decompor sistemas](/referencia/curadoria/11-padroes-para-decompor-sistemas/) | 13 |
+| [Deploy e releases](/referencia/curadoria/12-deploy-e-releases/) | 10 |
+| [Alta disponibilidade](/referencia/curadoria/13-alta-disponibilidade/) | 12 |
+| [Segurança](/referencia/curadoria/14-seguranca/) | 17 |
+| [Observabilidade](/referencia/curadoria/15-observabilidade/) | 10 |
+| [Workflow e processamento](/referencia/curadoria/16-workflow-e-processamento/) | 14 |
+| [Padrões clássicos GoF](/referencia/curadoria/17-padroes-classicos-gof/) | 20 |
 
 Um conceito presente em várias famílias aparece uma vez nesta curadoria, na primeira família canônica. Sua entrada conserva todos os grupos e os vínculos com os quarenta prioritários. Use a busca do curso pelo nome ou pelo ID do conceito para chegar diretamente à referência.
 
@@ -66,4 +69,4 @@ A descoberta anterior incluía NCATS Blackboard sem licença comprovada. A refer
 
 A matriz completa é publicada em `tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json.gz`, junto com o manifesto de hashes e o helper `unpack_matrix.py`. A cópia integral `matrix.json` é um artefato local restaurável. `sources.json` conserva URL, HTTP, horário, SHA, caminho, hash e trechos. `revision-licenses.json` conserva a prova de licença por revisão. `github-metadata.json` e `trending-monthly.json` conservam as medições de popularidade e seu universo. Os scripts `harvest.py`, `license_revisions.py` e `build_matrix.py` ficam no mesmo diretório. Reexecutar a coleta produz uma nova medição; não transforma o snapshot antigo em estado atual.
 
-Para estudar o problema e repetir uma condição conhecida, siga as [jornadas aplicadas](/jornadas/). A [tabela dos quarenta prioritários](/referencia/prioritarios/) conserva a ordem do pedido e liga os padrões ao estudo.
+Para estudar o problema e repetir uma condição conhecida, siga as [jornadas aplicadas](/jornadas/). A [seleção Arquitetura na prática: Makershub](/referencia/prioritarios/) conserva a ordem do pedido e liga os padrões ao estudo.

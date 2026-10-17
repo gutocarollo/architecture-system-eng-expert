@@ -1,5 +1,4 @@
 export default {
-  "index": "Escolha uma dor",
   "matriz": "Todos os conceitos",
   "single-flight-cancel": "Cancelamento de uma busca compartilhada",
   "early-refresh": "A lista continua disponível durante a renovação",

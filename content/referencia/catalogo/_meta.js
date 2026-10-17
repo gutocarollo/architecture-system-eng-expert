@@ -1,5 +1,4 @@
 export default {
-  "index": "Visão geral",
   "01-arquiteturas-de-aplicacao": "1. Arquiteturas de aplicação",
   "02-sistemas-distribuidos-e-consistencia": "2. Sistemas distribuídos e consistência",
   "03-event-driven-messaging": "3. Event-driven / Messaging",

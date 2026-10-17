@@ -1,0 +1,54 @@
+{
+  "observed_at_utc": "2026-10-17T03:24:44.870831+00:00",
+  "workspace": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "base_sha": "83150a31c0d27f655b1160570aedd6c3e32e5d63",
+  "priority_entries": 40,
+  "priority_concept_memberships": 46,
+  "priority_unique_concepts": 46,
+  "canonical_source_entries": 310,
+  "canonical_unique_concepts": 310,
+  "learning_concepts": 310,
+  "primary_case_groups": 15,
+  "primary_case_counts": {
+    "safe-release": 21,
+    "access-policy": 16,
+    "order-boundaries": 85,
+    "consensus": 38,
+    "queue-workflow": 55,
+    "ledger-projection": 14,
+    "single-flight-cancel": 5,
+    "order-delivery": 16,
+    "cache-policy": 11,
+    "diagnostics": 12,
+    "reservation": 20,
+    "storage-partitions": 12,
+    "opportunity-entry": 3,
+    "date-only": 1,
+    "early-refresh": 1
+  },
+  "journey_registry_counts": {
+    "learning/families.json": 15,
+    "postgres-learning/families.json": 2,
+    "airflow-learning/families.json": 1
+  },
+  "journey_total": 18,
+  "learning_status_metadata": {
+    "RELEVANT_BOUNDED_OBSERVATION": 310
+  },
+  "independent_review_metadata": {
+    "PENDING": 310
+  },
+  "specific_pattern_implementation_gap_metadata": {
+    "True": 238,
+    "False": 72
+  },
+  "scope_note": "Counts describe local catalog associations and registry entries. They do not prove complete pattern implementation, completed independent review, a fresh exercise execution or production deployment. The learning metadata retains PENDING for all 310 rows; the separate source-curation review summary has a different scope.",
+  "source_sha256": {
+    "tasks/architecture-course-2026-10-14/evidence/coverage.json": "b11a8acba81e325bfbb9a26ab8c9b2510c4f1b7ce977d762a5bc8ff0ff6391e8",
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/families.json": "c0e8bd95600b05b4543430225e3e8528a55bea461ab04fd7c848aab1ab0b8968",
+    "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/families.json": "16773f8d5da17da10b753bc2e1b1ed857c9c465facb73cb6829d18bcb1d355fe",
+    "tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/families.json": "ae42403a630208379c700fe49c71588c8f219be7d99d9bff68d9b8ca719f2259",
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json": "1da715cb1097dff8dbfa8f6cfffed1ab1344771d7e78a6672f098ebf6d2b8f5d",
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": "ee53aae70c2edf9256dc0b56660993b05283b0b1db028b6f738343764aa3313b"
+  }
+}

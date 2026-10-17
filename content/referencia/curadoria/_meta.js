@@ -1,5 +1,4 @@
 export default {
-  "index": "Matriz e método",
   "01-arquiteturas-de-aplicacao": "Arquiteturas de aplicação",
   "02-sistemas-distribuidos-e-consistencia": "Sistemas distribuídos e consistência",
   "03-event-driven-messaging": "Event-driven / Messaging",

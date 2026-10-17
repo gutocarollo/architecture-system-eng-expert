@@ -1,1 +1,3 @@
-export default { index: 'O caso', conceitos: 'Conceitos e prática' }
+export default {
+  "conceitos": "Conceitos e prática"
+}

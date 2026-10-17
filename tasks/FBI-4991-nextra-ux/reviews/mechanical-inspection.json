@@ -1,0 +1,50 @@
+{
+  "observed_at_utc": "2026-10-17T03:32:28.903457+00:00",
+  "base_sha": "83150a31c0d27f655b1160570aedd6c3e32e5d63",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "changed_index_files": 119,
+  "index_metadata_only": 116,
+  "other_index_diffs": [
+    "content/explicacoes/index.mdx",
+    "content/referencia/curadoria/index.mdx",
+    "content/referencia/index.mdx"
+  ],
+  "missing_as_index": [],
+  "count_source_hashes_match": {
+    "tasks/architecture-course-2026-10-14/evidence/coverage.json": true,
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/families.json": true,
+    "tasks/FBI-4991-arquitetura-nextra/execution/postgres-learning/families.json": true,
+    "tasks/FBI-4991-arquitetura-nextra/execution/airflow-learning/families.json": true,
+    "tasks/FBI-4991-arquitetura-nextra/execution/learning/concept-matrix.json": true,
+    "tasks/FBI-4991-arquitetura-nextra/execution/curation/matrix.json": true
+  },
+  "link_changes": {
+    "content/referencia/prioritarios.mdx": {
+      "removed": {},
+      "added_count": 1
+    },
+    "content/referencia/curadoria/index.mdx": {
+      "removed": {},
+      "added_count": 2
+    },
+    "content/jornadas/matriz.mdx": {
+      "removed": {},
+      "added_count": 8
+    }
+  },
+  "table_counts": {
+    "content/referencia/prioritarios.mdx": {
+      "rows": 40,
+      "sum_second_numeric": 0
+    },
+    "content/referencia/curadoria/index.mdx": {
+      "rows": 17,
+      "sum_second_numeric": 310
+    },
+    "content/jornadas/matriz.mdx": {
+      "rows": 15,
+      "sum_second_numeric": 310
+    }
+  },
+  "mdx_components_changed": false
+}

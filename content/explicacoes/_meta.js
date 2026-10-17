@@ -1,25 +1,33 @@
 export default {
- casos: 'Casos conectados',
-  index: 'Mapa dos capítulos',
-  meaning: { type: 'separator', title: 'Significado e integração' },
-  'business-rules': '1. Regras do negócio',
-  'code-boundaries': '2. Fronteiras do código',
-  'reliable-integration': '3. Integração confiável',
-  'distributed-work': '4. Operações distribuídas',
-  messages: '5. Mensagens',
-  'read-models': '6. Modelos de leitura',
-  capacityGroup: { type: 'separator', title: 'Resposta e capacidade' },
-  cache: '7. Cache',
-  concurrency: '8. Concorrência',
-  capacity: '9. Capacidade e resiliência',
-  'api-integration': '10. APIs e integração',
-  'data-durability': '11. Durabilidade',
-  availability: '12. Disponibilidade',
-  changeGroup: { type: 'separator', title: 'Evolução e investigação' },
-  'data-distribution': '13. Distribuição dos dados',
-  'safe-change': '14. Mudanças seguras',
-  security: '15. Segurança',
-  observability: '16. Observabilidade',
-  workflow: '17. Workflows',
-  'code-patterns': '18. Padrões GoF'
+  "casos": "Casos conectados",
+  "meaning": {
+    "type": "separator",
+    "title": "Significado e integração"
+  },
+  "business-rules": "1. Regras do negócio",
+  "code-boundaries": "2. Fronteiras do código",
+  "reliable-integration": "3. Integração confiável",
+  "distributed-work": "4. Operações distribuídas",
+  "messages": "5. Mensagens",
+  "read-models": "6. Modelos de leitura",
+  "capacityGroup": {
+    "type": "separator",
+    "title": "Resposta e capacidade"
+  },
+  "cache": "7. Cache",
+  "concurrency": "8. Concorrência",
+  "capacity": "9. Capacidade e resiliência",
+  "api-integration": "10. APIs e integração",
+  "data-durability": "11. Durabilidade",
+  "availability": "12. Disponibilidade",
+  "changeGroup": {
+    "type": "separator",
+    "title": "Evolução e investigação"
+  },
+  "data-distribution": "13. Distribuição dos dados",
+  "safe-change": "14. Mudanças seguras",
+  "security": "15. Segurança",
+  "observability": "16. Observabilidade",
+  "workflow": "17. Workflows",
+  "code-patterns": "18. Padrões GoF"
 }

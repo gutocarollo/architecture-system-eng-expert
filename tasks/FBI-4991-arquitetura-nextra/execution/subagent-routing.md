@@ -220,3 +220,23 @@ Same diagram_semantics_one and two, default/gpt-6.1-sol/xhigh REVIEW. Only72 and
 ## WARM_REUSE final Story evidence — 2026-10-15T18:47 UTC
 
 /root/jira_delivery_prepare remains default/gpt-6.1-sol/high EVIDENCE. Preserve original Story and prepare final bounded semantic closure plus hosting requirements. Root retains publication, latest deployment substitution and external write/read-back. No additional review round.
+
+## SUBAGENT_ROUTE navigation source diagnosis — 2026-10-15T23:16:56.003832+00:00
+
+TASK: Read-only investigation of Next16.4 static-export RSC navigation contract and the deployed Worker. LANE: DEEP_EXPLORE. MODEL: gpt-6.1-sol. EFFORT: high. FORK_TURNS:none. Context hygiene requires delegated read-heavy framework exploration. The three available parked threads own diagram semantics or Jira, so none matches this runtime lane. Root owns live browser reproduction and all implementation/publication. Child may write only navigation/source-contract evidence, not product files. Exit: exact pinned source contract and falsifiable predictions, no cause claim based only on screenshots.
+
+## SUBAGENT_ROUTE EasyPanel runtime adapter — 2026-10-15T23:34:04.651565+00:00
+
+TASK: Reuse password gate and serve frozen Nextra export from local container storage on EasyPanel. LANE: INTEGRATE. MODEL:gpt-6.1-sol. EFFORT:high. FORK_TURNS:none. User explicitly authorized moving hosting to the MakersHub project with a supplied shared password. Root owns MCP mutations, secret configuration, image transport and hosted verification; child owns deploy/easypanel runtime and packaging only. Source explorer is read-only in a different lane; parked diagram/Jira reviewers are incompatible. No production MakersHub source writes.
+
+## SUBAGENT_ROUTE independent EasyPanel gate — 2026-10-15T23:37:51.372543+00:00
+
+TASK: Review the new filesystem runtime before public deployment. LANE:REVIEW. MODEL:gpt-6.1-sol. EFFORT:xhigh. FORK_TURNS:none. First review of this new user-authorized hosting fixed point; prior Site gate does not approve Node/filesystem adaptation. Own only tasks/FBI-4991-easypanel/review. No product or external writes. An independent new context is needed; author and source explorer cannot approve their own adaptation. Root performs hosted navigation and artifact checks. One pass, one high-only recheck; no full council restart.
+
+## SUBAGENT_ROUTE Nextra UX and count explanations — 2026-10-17T03:22:38.733972+00:00
+
+Two lanes: a default/gpt-6.1-sol/high read-only DEEP_EXPLORE compares installed Nextra/sidebar/scroll/width with the current MakersHub Help Center source; a default/gpt-6.1-sol/high BUILD lane owns only the existing MDX count explanations and their responsible generator text. Root owns app/layout, navigation integration, metadata, CSS, deployment and browser verification. Warm reuse was checked: list_agents currently returns only root, so prior named threads cannot be reused. Scope is the user-provided interaction and labels; no additional product decisions or MakersHub source writes. Independent review follows one bounded final slice.
+
+## SUBAGENT_ROUTE independent UX slice review — 2026-10-17T03:31:04.683299+00:00
+
+TASK: First independent review of the user-requested navigation/spacing/label/count slice. LANE:REVIEW. MODEL:gpt-6.1-sol. EFFORT:xhigh. FORK_TURNS:none. Root plus two planning/source/content lanes precede one reviewer. This does not reopen source curation or prior semantic diagram judgments; the119 index frontmatter changes and26meta index removals are navigation metadata. Review core implementation, canonicalNextra contract, preserve source links and honest40/46/310/15/18 counts. One pass and high-only warm recheck.

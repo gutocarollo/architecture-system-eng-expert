@@ -1,5 +1,4 @@
 export default {
-  "index": "Casos conectados",
   "single-flight-cancel": "Cancelamento de uma busca compartilhada",
   "early-refresh": "A lista continua disponível durante a renovação",
   "date-only": "A emissão continua no mesmo dia em São Paulo",

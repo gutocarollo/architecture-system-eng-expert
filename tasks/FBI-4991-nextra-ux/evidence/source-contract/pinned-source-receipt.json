@@ -1,0 +1,236 @@
+{
+  "measured_at_utc": "2026-10-17T03:26:27.993567+00:00",
+  "worktree": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-4991",
+  "branch": "docs/FBI-4991-arquitetura-aplicada",
+  "sha": "83150a31c0d27f655b1160570aedd6c3e32e5d63",
+  "versions": {
+    "nextra": "4.6.1",
+    "nextra-theme-docs": "4.6.1",
+    "next": "16.4.0"
+  },
+  "sources": [
+    {
+      "path": "node_modules/nextra-theme-docs/dist/schemas.js",
+      "ranges": [
+        {
+          "start": 31,
+          "end": 44,
+          "source": "31: const sidebarSchema = z.strictObject({\n32:   autoCollapse: z.boolean().optional().meta({\n33:     description: \"If `true`, automatically collapse inactive folders above `defaultMenuCollapseLevel`.\"\n34:   }),\n35:   defaultMenuCollapseLevel: z.number().int().min(1).default(2).meta({\n36:     description: \"Specifies the folder level at which the menu on the left is collapsed by default.\"\n37:   }),\n38:   defaultOpen: z.boolean().default(true).meta({\n39:     description: \"Hide/show sidebar by default.\"\n40:   }),\n41:   toggleButton: z.boolean().default(true).meta({\n42:     description: \"Hide/show sidebar toggle button.\"\n43:   })\n44: });"
+        },
+        {
+          "start": 127,
+          "end": 141,
+          "source": "127:   pageMap: z.array(z.custom().meta({\n128:     type: 'import(\"nextra\").PageMapItem'\n129:   })).meta({\n130:     description: \"Page map list. Result of `getPageMap(route = '/')` call.\"\n131:   }),\n132:   search: reactNode.default(() => /* @__PURE__ */ jsx(Search, {})).meta({\n133:     default: \"<Search />\",\n134:     description: \"Rendered [`<Search>` component](/docs/built-ins/search). E.g. `<Search {...searchProps} />`\"\n135:   }),\n136:   sidebar: sidebarSchema.default(sidebarSchema.parse({})),\n137:   themeSwitch: themeSwitchSchema.default(themeSwitchSchema.parse({})).meta({\n138:     description: \"Translation of options in the theme switch.\"\n139:   }),\n140:   toc: tocSchema.default(tocSchema.parse({}))\n141: });"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra-theme-docs/dist/components/sidebar.js",
+      "ranges": [
+        {
+          "start": 68,
+          "end": 77,
+          "source": "68:   const handleClick2 = (event) => {\n69:     const el = event.currentTarget;\n70:     const isClickOnIcon = el !== event.target;\n71:     if (isClickOnIcon) {\n72:       event.preventDefault();\n73:     }\n74:     const isOpen = el.parentElement.classList.contains(\"open\");\n75:     TreeState[item.route] = isLink && !isClickOnIcon && !active || !isOpen;\n76:     rerender({});\n77:   };"
+        },
+        {
+          "start": 97,
+          "end": 98,
+          "source": "97:   const isLink = \"frontMatter\" in item;\n98:   const ComponentToUse = isLink ? Anchor : Button;"
+        },
+        {
+          "start": 127,
+          "end": 138,
+          "source": "127:   return /* @__PURE__ */ jsxs(\"li\", { className: t3, children: [\n128:     /* @__PURE__ */ jsxs(ComponentToUse, { ...isLink ? {\n129:       href: item.route,\n130:       prefetch: false\n131:     } : {\n132:       \"data-href\": item.route\n133:     }, className: t6, onClick: handleClick2, onFocus, children: [\n134:       t7,\n135:       t10\n136:     ] }),\n137:     item.children && /* @__PURE__ */ jsx(Collapse, { isOpen: open, children: /* @__PURE__ */ jsx(Menu, { className: classes.border, directories: item.children, anchors, level }) })\n138:   ] });"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra/dist/server/page-map/normalize.js",
+      "ranges": [
+        {
+          "start": 21,
+          "end": 45,
+          "source": "21: function sortFolder(pageMap) {\n22:   const newChildren = [];\n23:   const isFolder = !Array.isArray(pageMap);\n24:   const folder = isFolder ? { ...pageMap } : { children: pageMap };\n25:   const meta = {};\n26:   for (const item of folder.children) {\n27:     if (isFolder && \"frontMatter\" in item && item.frontMatter?.asIndexPage && item.route === folder.route) {\n28:       folder.frontMatter = item.frontMatter;\n29:     } else if (\"children\" in item) {\n30:       newChildren.push(normalizePageMap(item));\n31:     } else if (\"data\" in item) {\n32:       for (const [key, titleOrObject] of Object.entries(item.data)) {\n33:         const { data, error } = metaSchema.safeParse(titleOrObject);\n34:         if (error) {\n35:           throw z.prettifyError(error);\n36:         }\n37:         if (key === \"*\") {\n38:           delete data.title;\n39:           delete data.href;\n40:         }\n41:         meta[key] = data;\n42:       }\n43:     } else {\n44:       newChildren.push(item);\n45:     }"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra/dist/client/mdx-components/anchor.js",
+      "ranges": [
+        {
+          "start": 50,
+          "end": 61,
+          "source": "50:   if (typeof href === \"string\") {\n51:     if (href.startsWith(\"#\")) {\n52:       let t52;\n53:       if ($[9] !== href || $[10] !== props) {\n54:         t52 = /* @__PURE__ */ jsx(\"a\", { href, ...props });\n55:         $[9] = href;\n56:         $[10] = props;\n57:         $[11] = t52;\n58:       } else {\n59:         t52 = $[11];\n60:       }\n61:       return t52;"
+        },
+        {
+          "start": 95,
+          "end": 105,
+          "source": "95:   let t5;\n96:   if ($[19] !== href || $[20] !== prefetch || $[21] !== props) {\n97:     t5 = /* @__PURE__ */ jsx(Link, { href, prefetch, ...props });\n98:     $[19] = href;\n99:     $[20] = prefetch;\n100:     $[21] = props;\n101:     $[22] = t5;\n102:   } else {\n103:     t5 = $[22];\n104:   }\n105:   return t5;"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra/dist/client/mdx-components/table.js",
+      "ranges": [
+        {
+          "start": 4,
+          "end": 23,
+          "source": "4: const Table_ = (props) => {\n5:   const $ = _c(5);\n6:   let t0;\n7:   if ($[0] !== props.className) {\n8:     t0 = cn(\"x:block x:overflow-x-auto\", props.className);\n9:     $[0] = props.className;\n10:     $[1] = t0;\n11:   } else {\n12:     t0 = $[1];\n13:   }\n14:   let t1;\n15:   if ($[2] !== props || $[3] !== t0) {\n16:     t1 = /* @__PURE__ */ jsx(\"table\", { ...props, className: t0 });\n17:     $[2] = props;\n18:     $[3] = t0;\n19:     $[4] = t1;\n20:   } else {\n21:     t1 = $[4];\n22:   }\n23:   return t1;"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra-theme-docs/dist/mdx-components/wrapper.client.js",
+      "ranges": [
+        {
+          "start": 24,
+          "end": 36,
+          "source": "24:   if ($[0] !== metadata || $[1] !== themeContext.layout || $[2] !== themeContext.toc) {\n25:     t1 = (themeContext.layout === \"default\" || themeContext.toc) && /* @__PURE__ */ jsx(\"nav\", { className: \"nextra-toc x:order-last x:max-xl:hidden x:w-64 x:shrink-0 x:print:hidden\", \"aria-label\": \"table of contents\", children: themeContext.toc && /* @__PURE__ */ jsx(TOC, { filePath: metadata.filePath, pageTitle: metadata.title }) });\n26:     $[0] = metadata;\n27:     $[1] = themeContext.layout;\n28:     $[2] = themeContext.toc;\n29:     $[3] = t1;\n30:   } else {\n31:     t1 = $[3];\n32:   }\n33:   const t2 = themeContext.typesetting === \"article\" && \"nextra-body-typesetting-article\";\n34:   let t3;\n35:   if ($[4] !== t2) {\n36:     t3 = cn(\"x:w-full x:min-w-0 x:break-words x:min-h-[calc(100vh-var(--nextra-navbar-height))]\", \"x:text-slate-700 x:dark:text-slate-200 x:pb-8 x:px-4 x:pt-4 x:md:px-12\", t2);"
+        },
+        {
+          "start": 82,
+          "end": 91,
+          "source": "82:   let t8;\n83:   if ($[20] !== bottomContent || $[21] !== children || $[22] !== t3 || $[23] !== t4 || $[24] !== t5 || $[25] !== t6 || $[26] !== t7) {\n84:     t8 = /* @__PURE__ */ jsxs(\"article\", { className: t3, children: [\n85:       t4,\n86:       t5,\n87:       children,\n88:       t6,\n89:       t7,\n90:       bottomContent\n91:     ] });"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra-theme-docs/dist/mdx-components/index.js",
+      "ranges": [
+        {
+          "start": 40,
+          "end": 46,
+          "source": "40:   table: ({\n41:     className,\n42:     ...props\n43:   }) => /* @__PURE__ */ jsx(Table, { className: cn(\"nextra-scrollbar x:not-first:mt-[1.25em] x:p-0\", className), ...props }),\n44:   td: Table.Td,\n45:   th: Table.Th,\n46:   tr: Table.Tr,"
+        },
+        {
+          "start": 60,
+          "end": 70,
+          "source": "60:     return /* @__PURE__ */ jsx(\n61:       \"div\",\n62:       {\n63:         className: \"x:mx-auto x:flex x:max-w-(--nextra-content-width)\",\n64:         ...props,\n65:         children: /* @__PURE__ */ jsxs(TOCProvider, { value: toc, children: [\n66:           /* @__PURE__ */ jsx(Sidebar, {}),\n67:           /* @__PURE__ */ jsxs(ClientWrapper, { metadata, bottomContent, sourceCode, children: [\n68:             /* @__PURE__ */ jsx(SkipNavContent, {}),\n69:             /* @__PURE__ */ jsx(\"main\", { \"data-pagefind-body\": metadata.searchable !== false || void 0, children })\n70:           ] })"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/nextra/dist/client/components/head.js",
+      "ranges": [
+        {
+          "start": 115,
+          "end": 122,
+          "source": "115:   const t1 = `\n116: :root {\n117:   --nextra-primary-hue: ${color.hue.light}deg;\n118:   --nextra-primary-saturation: ${color.saturation.light}%;\n119:   --nextra-primary-lightness: ${color.lightness.light}%;\n120:   --nextra-bg: ${backgroundColor.light};\n121:   --nextra-content-width: 90rem;\n122: }"
+        }
+      ]
+    },
+    {
+      "path": "node_modules/next/dist/shared/lib/router/utils/disable-smooth-scroll.js",
+      "ranges": [
+        {
+          "start": 14,
+          "end": 43,
+          "source": "14: function disableSmoothScrollDuringRouteTransition(fn, options = {}) {\n15:     // if only the hash is changed, we don't need to disable smooth scrolling\n16:     // we only care to prevent smooth scrolling when navigating to a new page to avoid jarring UX\n17:     if (options.onlyHashChange) {\n18:         fn();\n19:         return;\n20:     }\n21:     const htmlElement = document.documentElement;\n22:     const hasDataAttribute = htmlElement.dataset.scrollBehavior === 'smooth';\n23:     if (!hasDataAttribute) {\n24:         // Warn if smooth scrolling is detected but no data attribute is present\n25:         if (process.env.NODE_ENV === 'development' && getComputedStyle(htmlElement).scrollBehavior === 'smooth') {\n26:             const { warnOnce } = require('../../utils/warn-once');\n27:             warnOnce('Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, ' + 'add `data-scroll-behavior=\"smooth\"` to your <html> element. ' + 'Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior');\n28:         }\n29:         // No smooth scrolling configured, run directly without style manipulation\n30:         fn();\n31:         return;\n32:     }\n33:     // Proceed with temporarily disabling smooth scrolling\n34:     const existing = htmlElement.style.scrollBehavior;\n35:     htmlElement.style.scrollBehavior = 'auto';\n36:     if (!options.dontForceLayout) {\n37:         // In Chrome-based browsers we need to force reflow before calling `scrollTo`.\n38:         // Otherwise it will not pickup the change in scrollBehavior\n39:         // More info here: https://github.com/vercel/next.js/issues/40719#issuecomment-1336248042\n40:         htmlElement.getClientRects();\n41:     }\n42:     fn();\n43:     htmlElement.style.scrollBehavior = existing;"
+        }
+      ]
+    },
+    {
+      "path": "sites/architecture-course/app/layout.jsx",
+      "ranges": [
+        {
+          "start": 14,
+          "end": 31,
+          "source": "14: export default async function RootLayout({ children }) {\n15:   return (\n16:     <html lang=\"pt-BR\" dir=\"ltr\" suppressHydrationWarning>\n17:       <Head />\n18:       <body>\n19:         <Layout\n20:           navbar={<Navbar logo={<b>Arquitetura na prática</b>} />}\n21:           footer={<Footer>Material de estudo da Faz Capital.</Footer>}\n22:           pageMap={await getPageMap()}\n23:           docsRepositoryBase=\"https://github.com/gutocarollo/architecture-system-eng-expert/tree/main\"\n24:           editLink={null}\n25:           feedback={{ content: null }}\n26:           toc={{ title: 'Nesta página' }}\n27:         >\n28:           {children}\n29:         </Layout>\n30:       </body>\n31:     </html>"
+        }
+      ]
+    },
+    {
+      "path": "sites/architecture-course/next.config.mjs",
+      "ranges": [
+        {
+          "start": 1,
+          "end": 10,
+          "source": "1: import nextra from 'nextra'\n2: \n3: const withNextra = nextra({})\n4: \n5: export default withNextra({\n6:   poweredByHeader: false,\n7:   output: 'export',\n8:   trailingSlash: true,\n9:   images: { unoptimized: true }\n10: })"
+        }
+      ]
+    },
+    {
+      "path": "content/jornadas/reservation/index.mdx",
+      "ranges": [
+        {
+          "start": 1,
+          "end": 5,
+          "source": "1: ---\n2: title: \"Dois operadores disputam a mesma reserva\"\n3: description: \"Você aprenderá a escolher o recurso protegido e reconhecer uma decisão tomada sobre uma versão antiga.\"\n4: diataxis: explanation\n5: ---"
+        }
+      ]
+    },
+    {
+      "path": "content/jornadas/reservation/_meta.js",
+      "ranges": [
+        {
+          "start": 1,
+          "end": 1,
+          "source": "1: export default { index: 'O caso', conceitos: 'Conceitos e prática' }"
+        }
+      ]
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-5049/help-center/src/app/brand.css",
+      "ranges": [
+        {
+          "start": 60,
+          "end": 113,
+          "source": "60: /*\n61:  * More room for the content column, on every docs page:\n62:  * - page width 90rem -> 100rem: the one variable Nextra uses for the navbar,\n63:  *   the main row and the footer, so the three stay aligned; on a 1920px screen\n64:  *   the empty side margins drop from 240px to 160px;\n65:  * - \"Nesta página\" (the TOC column) 16rem -> 13rem;\n66:  * - article side padding 48px -> 32px from md up (x:md:px-12).\n67:  * At 1440px the text column grows from 768px to 848px.\n68:  * html:root, not :root: Nextra's <Head> injects \":root { --nextra-content-width:\n69:  * 90rem }\" in a <style> after this file, which wins at equal specificity.\n70:  */\n71: html:root {\n72:   --nextra-content-width: 100rem;\n73: }\n74: \n75: .nextra-toc.x\\:w-64 {\n76:   width: 13rem;\n77: }\n78: \n79: @media (width >= 48rem) {\n80:   article.x\\:md\\:px-12 {\n81:     padding-inline: 2rem;\n82:   }\n83: }\n84: \n85: /*\n86:  * Motion das abas laterais (sidebar + TOC), no idioma da skill\n87:  * clarification-artifact (references/design-spec.md §§3, 7, 8):\n88:  * - abrir/recolher de pasta: 300ms ease (o Collapse do Nextra injeta\n89:  *   500ms/300ms inline; o !important abaixo uniformiza nos 300ms do spec);\n90:  * - seta da pasta: giro em 300ms ease (o spec gira 180°; aqui a seta do\n91:  *   tema gira 90°, mesma duração e curva);\n92:  * - links: fundo/cor/borda em 250ms ease (o opacity do spec);\n93:  * - clique em âncora: rolagem suave (o spec anima ease-out cúbico em\n94:  *   650ms via JS; aqui o equivalente nativo em CSS);\n95:  * - prefers-reduced-motion: tudo vira salto, como no spec.\n96:  */\n97: .nextra-sidebar li > div[style*='transition-duration'] {\n98:   transition-duration: 300ms !important;\n99:   transition-timing-function: ease !important;\n100: }\n101: \n102: .nextra-sidebar li svg {\n103:   transition: transform 300ms ease !important;\n104: }\n105: \n106: .nextra-sidebar a,\n107: .nextra-sidebar button,\n108: ul.nextra-mask a {\n109:   transition:\n110:     background-color 250ms ease,\n111:     color 250ms ease,\n112:     border-color 250ms ease;\n113: }"
+        },
+        {
+          "start": 135,
+          "end": 148,
+          "source": "135: html {\n136:   scroll-behavior: smooth;\n137: }\n138: \n139: @media (prefers-reduced-motion: reduce) {\n140:   html {\n141:     scroll-behavior: auto;\n142:   }\n143: \n144:   .nextra-sidebar *,\n145:   ul.nextra-mask * {\n146:     transition: none !important;\n147:   }\n148: }"
+        }
+      ]
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-5049/help-center/src/app/layout.jsx",
+      "ranges": [
+        {
+          "start": 51,
+          "end": 78,
+          "source": "51: export default async function RootLayout({ children }) {\n52:   return (\n53:     <html lang=\"pt-BR\" dir=\"ltr\" suppressHydrationWarning>\n54:       {/* MakersHub pink #E60F46 = hsl(345 88% 48%); midnight background #0A0E1A. Dark lightness 65, not 58:\n55:           at 58 the active sidebar item measured 4.33:1 (axe color-contrast), below WCAG AA 4.5:1. */}\n56:       <Head\n57:         color={{ hue: 345, saturation: 88, lightness: { dark: 65, light: 48 } }}\n58:         backgroundColor={{ dark: 'rgb(10,14,26)', light: 'rgb(241,241,241)' }}\n59:       />\n60:       <body>\n61:         <Layout\n62:           navbar={navbar}\n63:           footer={footer}\n64:           search={search}\n65:           pageMap={await getPageMap()}\n66:           editLink={null}\n67: \n68:           // The footer prev/next is DocsPagination, passed as bottomContent in [[...mdxPath]]/page.jsx.\n69:           navigation={false}\n70:           feedback={{ content: null }}\n71:           copyPageButton={false}\n72:           lastUpdated={<LastUpdated locale=\"pt-BR\">Atualizado em</LastUpdated>}\n73:           themeSwitch={{ dark: 'Escuro', light: 'Claro', system: 'Sistema' }}\n74:           {...themeConfig}\n75:         >\n76:           {children}\n77:           <TocActiveSync />\n78:         </Layout>"
+        }
+      ]
+    },
+    {
+      "path": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-5049/help-center/src/app/theme.config.jsx",
+      "ranges": [
+        {
+          "start": 1,
+          "end": 17,
+          "source": "1: // From arc53/DocsGPT docs/theme.config.jsx (MIT); edit link removed (internal repo), labels in pt-BR.\n2: const config = {\n3:   darkMode: true,\n4:   nextThemes: {\n5:     defaultTheme: 'dark',\n6:   },\n7:   sidebar: {\n8:     defaultMenuCollapseLevel: 1,\n9:   },\n10:   toc: {\n11:     float: true,\n12:     title: 'Nesta página',\n13:     backToTop: 'Voltar ao topo',\n14:   },\n15: };\n16: \n17: export default config;"
+        }
+      ]
+    }
+  ],
+  "context7": {
+    "resolve_library_id": "successful /shuding/nextra",
+    "query_docs": "successful twice; returned asIndexPage documented mechanism"
+  },
+  "official_sources": [
+    "https://nextra.site/docs/file-conventions/meta-file#with-index-page",
+    "https://nextjs.org/docs/messages/missing-data-scroll-behavior"
+  ],
+  "comparison_scope": {
+    "requested_makershub": "/Users/augustocarollo/Developer/makershub",
+    "physical_makershub": "/Users/augustocarollo/Developer.noindex/makershub",
+    "branch": "main",
+    "sha": "e233fb046ec333982cd1547171b0f0bd8d8d92ee",
+    "lookup": "CodeGraph first, then rg exact words in frontend/app, frontend/components, frontend/package.json",
+    "result": "No Nextra or HelpCenter found in this bounded source scope; cannot establish matching HelpCenter behavior from this checkout.",
+    "reusable_help_center": {
+      "worktree": "/Volumes/tank/Developer/makershub-workspaces/wt-FBI-5049",
+      "branch": "fix/FBI-5049-help-center-video-inventory",
+      "sha": "c1cf3e760473d2932d319c4b395af1bb73f5a497",
+      "source": "help-center/src/app/brand.css",
+      "caveat": "A local branch source, not verified production. Main requested above has no matching HelpCenter source."
+    }
+  },
+  "recommendations": {
+    "sidebar": "Use existing index.mdx asIndexPage:true; remove index entry from its _meta because normalize removes that child. This merges first index into folder and removes the redundant inner O caso item. No undocumented firstItemClick prop.",
+    "width_motion": "Reuse bounded brand.css ranges 71-113 and 135-147 from FBI-5049. That source has smooth CSS with no data-scroll-behavior attribute on html. Adding that attribute in Next16.4 suppresses smooth on route changes, so adopt only if desired semantics explicitly distinguish anchor vs new page.",
+    "tables": "Keep Nextra Table native block overflow-x-auto. Base theme article min-w-0 already exists. Browser measurement needed to determine whether clipping is container overflow or expected table horizontal scrolling; source alone does not prove cause."
+  }
+}

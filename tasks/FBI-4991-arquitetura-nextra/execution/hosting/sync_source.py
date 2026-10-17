@@ -13,6 +13,7 @@ manifest = DESTINATION / '.openai/hosting.json'
 hosting = json.loads(manifest.read_text())
 if not hosting.get('project_id'):
     raise SystemExit('Register and persist the Sites project before synchronizing.')
+subprocess.run(['node', 'scripts/prepare-course-navigation.mjs'], cwd=ROOT, check=True)
 files = []
 for directory in ['app', 'content', 'patches', 'public/downloads']:
     for source in sorted((ROOT / directory).rglob('*')):
@@ -51,6 +52,6 @@ receipt = dict(observed_at=datetime.now(timezone.utc).isoformat(),
                project_id=hosting['project_id'],
                source_files={str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
                projection_changes=['Static export with trailing slashes', 'Pagefind indexes the exported out directory'],
-               access='Owner-private native Sites access; shared-password support is not established by this projection.')
+               access='Generated static export; password and delivery guarantees must be verified in the target hosting runtime.')
 (BASE / 'source-projection.json').write_text(json.dumps(receipt, indent=2) + '\n')
 print(json.dumps(dict(project_id=hosting['project_id'], projected_files=len(files), destination=str(DESTINATION))))

@@ -22,19 +22,21 @@ def source_link(source):
     return '[' + label + '](' + source['url'] + ')'
 
 text = '''---
-title: Os 40 padrões prioritários
-description: A ordem original dos quarenta padrões, reconciliada com as fontes dos 310 conceitos.
+title: "Arquitetura na prática: Makershub"
+description: Quarenta temas para estudar decisões de arquitetura com casos históricos do MakersHub e modelos financeiros.
 diataxis: reference
 ---
 
-# Os 40 padrões prioritários
+# Arquitetura na prática: Makershub
 
-Esta tabela conserva a ordem dos quarenta itens do pedido original. Cada item está ligado aos seus conceitos canônicos na [curadoria completa dos 310 conceitos](/referencia/curadoria/). Quando um item combina dois conceitos, as duas referências permanecem visíveis. A situação abaixo vem da matriz atual, que conserva a revisão do código, a licença lida, a skill pertinente e os limites da aplicação.
+Use esta seleção de **40 temas prioritários** para escolher uma decisão de arquitetura e chegar ao caso que ajuda a estudá-la. A trilha combina mudanças históricas do MakersHub com modelos financeiros hipotéticos. Cada linha reúne os conceitos do tema, as fontes de estudo e o caso aplicado.
 
-Uma correspondência autoral ainda precisa passar pela revisão independente. Uma pendência continua aberta mesmo quando há código executável ou um framework conhecido. Os exemplos didáticos anteriores permanecem nos recibos de descoberta; esta tabela usa os caminhos de aplicação selecionados na matriz e não transforma um template em produto real.
+Os números contam coisas diferentes. Esta seleção tem 40 temas, que apontam para **46 conceitos distintos** da [curadoria completa dos 310 conceitos](/referencia/curadoria/). Um tema pode reunir vários conceitos: “Retry + Exponential Backoff + Jitter” ocupa uma linha aqui e reúne três conceitos. A [matriz de conceitos e casos](/jornadas/matriz/) agrupa o catálogo em **15 casos principais**; um mesmo caso pode ajudar a estudar vários temas desta seleção.
 
-| # | Padrão do pedido | Conceitos e fontes completas | Caso aplicado | Base de estudo | Código da aplicação | Situação autoral |
-| --- | --- | --- | --- | --- | --- | --- |
+Comece pelo caso aplicado para conhecer o problema e a comparação proposta. Depois, consulte as fontes para examinar o mecanismo em uma biblioteca ou em um produto de código aberto. Cada exercício informa o que você pode observar e quais garantias ainda exigem outra experiência. A presença de um conceito nesta seleção não significa que o padrão completo esteja implementado no MakersHub ou no laboratório.
+
+| # | Tema prioritário | Conceitos e fontes completas | Caso aplicado | Base de estudo | Código da aplicação |
+| --- | --- | --- | --- | --- | --- |
 '''
 receipts = []
 for priority in coverage['priority_entries']:
@@ -46,7 +48,7 @@ for priority in coverage['priority_entries']:
     applications = list(dict.fromkeys(source_link(row['application'][0]) for row in rows))
     pending = [row['canonical_name'] for row in rows if row['status'] != 'AUTHOR_SOURCE_MATCH']
     status = 'Pendente: ' + ', '.join(pending) if pending else 'Correspondência proposta; revisão independente pendente.'
-    text += '| ' + str(priority['priority_id']) + ' | ' + priority['original_label'] + ' | ' + concepts + ' | ' + cases + ' | ' + '; '.join(bases) + ' | ' + '; '.join(applications) + ' | ' + status + ' |\n'
+    text += '| ' + str(priority['priority_id']) + ' | ' + priority['original_label'] + ' | ' + concepts + ' | ' + cases + ' | ' + '; '.join(bases) + ' | ' + '; '.join(applications) + ' |\n'
     receipts.append({'priority_id': priority['priority_id'], 'concept_ids': priority['concept_ids'], 'concept_reference_urls': [concept_link(row) for row in rows], 'pending': pending})
 text += '''
 ## Como os mecanismos se combinam
