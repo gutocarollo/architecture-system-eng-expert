@@ -1,0 +1,142 @@
+---
+title: "Grupo 4 — CQRS, Event Sourcing e modelos de leitura"
+description: "As 11 ocorrências do catálogo, com fonte de verdade, comandos, consultas, eventos, projeções e snapshots."
+diataxis: reference
+---
+
+# Grupo 4 — CQRS, Event Sourcing e modelos de leitura
+
+Esta referência preserva as 11 ocorrências do grupo 4. Os casos MakersHub são trechos lidos em 14/10/2026 no SHA `e233fb046ec333982cd1547171b0f0bd8d8d92ee`; exemplos de ledger são hipotéticos. **REF** significa aplicação didática; **PROD** significa produto OSS, sem comprovar adoção de cada capacidade na Faz. O localizador das skills é `~/.codex/skills/<nome>/SKILL.md`. A explicação desenvolvida está em [modelos de leitura](/explicacoes/read-models/).
+
+<span id="g04-e001" />
+
+## CQRS
+
+CQRS separa modelos e operações de alteração dos de consulta. A base aplicada é o framework [Marten](https://github.com/JasperFx/marten), com contratos de query session e document session; a aplicação OSS **REF** é o Helpdesk de EventSourcing.NetCore.
+
+O [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) recebe `IDocumentSession` nas rotas de comando e `IQuerySession` nas consultas. O fluxo MakersHub lido oferece outro caso, entre `ReportPersistenceService` e `ReportReadService`. O custo é manter os contratos correspondentes; a separação não exige dois bancos, broker ou Event Sourcing. [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) é fonte teórica, não framework. Wild Workouts é uma comparação **REF** em Go. A skill é `backend-cqrs-patterns`.
+
+{/* current-curation:cqrs */}
+
+A [curadoria de CQRS](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#cqrs) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e002" />
+
+## Event Sourcing
+
+Event Sourcing usa eventos como fonte de verdade do estado modelado. A base de framework é o event store do Marten sobre PostgreSQL; a aplicação OSS **REF** é o [Helpdesk](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/Helpdesk).
+
+Sua [`DocumentSessionExtensions.Add`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Core/Marten/DocumentSessionExtensions.cs) chama `Events.StartStream` e `SaveChangesAsync`; a configuração habilita agregação de `Incident`. O custo é evoluir eventos, gerir versão e reconstrução. O caso hipotético de aporte de R$ 1.000 e estorno de R$ 200 produz R$ 800, mas replay não deve repetir automaticamente efeitos externos. A auditoria de reatribuição MakersHub não foi comprovada como stream completo. [Azure Event Sourcing](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing) fornece o fundamento conceitual. A skill é `backend-event-sourcing`.
+
+{/* current-curation:event-sourcing */}
+
+A [curadoria de Event Sourcing](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#event-sourcing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e003" />
+
+## Projection
+
+Uma projeção deriva uma representação de leitura a partir de uma fonte definida. A base é o framework Marten, com agregação, transformações e daemon de projeções; a aplicação OSS **REF** é o [Helpdesk](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/Helpdesk).
+
+Em [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs), `IncidentHistoryTransformation`, `IncidentDetailsProjection` e `IncidentShortInfoProjection` são inline, enquanto `CustomerIncidentsSummaryProjection` é async. O custo é atualização e acompanhamento do progresso; o tipo de processamento muda o contrato de atraso. Projeção também pode derivar de lotes ou tabelas. A captação do snapshot FazGraph não foi classificada como projeção de event store apenas por ser derivada. A skill é `projection-patterns`.
+
+{/* current-curation:projection */}
+
+A [curadoria de Projection](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#projection) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e004" />
+
+## Materialized View
+
+Uma materialized view nativa do PostgreSQL persiste o resultado de uma consulta definida. Um resumo proposto por período pode evitar recalcular toda a consulta em cada abertura.
+
+O custo é armazenamento e refresh. `CONCURRENTLY` exige condições específicas e não torna o cálculo incremental. `rpt_inflow__movement_adjusted` tinha `relkind=r` na medição de 14/10 às 16:07:16 UTC: é tabela comum. A base e produto **PROD** são [PostgreSQL 16](https://www.postgresql.org/docs/16/sql-refreshmaterializedview.html). A skill adjacente é `projection-patterns`.
+
+{/* current-curation:materialized-view */}
+
+A [curadoria de Materialized View](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#materialized-view) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e005" />
+
+## Read Model
+
+Um read model representa dados conforme as perguntas atendidas. A base aplicada é [`IQuerySession` do Marten](https://github.com/JasperFx/marten/blob/master/src/Marten/IQuerySession.cs); a aplicação OSS **REF** é o Helpdesk de EventSourcing.NetCore.
+
+As consultas de [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) leem `IncidentShortInfo`, `IncidentDetails`, `IncidentHistory` e `CustomerIncidentsSummary`, com formatos diferentes dos comandos. No MakersHub lido, `ReportReadParams` e `ReportReadResult` cumprem o contrato do relatório. O custo é manter representação e frescor. Um KPI e uma decisão de reserva podem exigir garantias distintas. [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) fornece a teoria. A skill é `backend-cqrs-patterns`.
+
+{/* current-curation:read-model */}
+
+A [curadoria de Read Model](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#read-model) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e006" />
+
+## Write Model
+
+Um write model organiza regras para aceitar alterações. A base aplicada é [`IDocumentSession` do Marten](https://github.com/JasperFx/marten/blob/master/src/Marten/IDocumentSession.cs), com event store e unidade de trabalho; a aplicação OSS **REF** é o Helpdesk.
+
+[`DocumentSessionExtensions`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Core/Marten/DocumentSessionExtensions.cs) inicia streams, salva alterações e usa `WriteToAggregate` com versão para atualizações. O handler define as regras de negócio; a biblioteca administra a persistência. O custo é expressar invariantes e tratar conflitos. Um payload de consulta não substitui regras de alteração. A política de relatório MakersHub é outro caso delimitado. [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) é fonte conceitual. A skill é `backend-cqrs-patterns`.
+
+{/* current-curation:write-model */}
+
+A [curadoria de Write Model](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#write-model) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e007" />
+
+## Snapshotting
+
+Um snapshot guarda estado associado ao progresso do stream para reduzir a reconstrução. A base OSS é o framework [Equinox](https://github.com/jet/equinox); a aplicação **REF** é o ECommerce.Equinox do corpus EventSourcing.NetCore, reutilizado localmente e conferido upstream.
+
+Em [`ConfirmedSeries.fs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/ECommerce.Equinox/ECommerce.Domain/ConfirmedSeries.fs), `Fold.toSnapshot` cria `Snapshotted`, e `Fold.isOrigin` reconhece esse evento como origem. A configuração chama `createSnapshotted`; [`Store.fs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/ECommerce.Equinox/ECommerce.Domain/Store.fs) seleciona `AccessStrategy.Snapshot` nos adaptadores Cosmos/Dynamo. O custo é schema, versão e política de atualização. Essa configuração não é usada pelos adaptadores Esdb/Sss mostrados no mesmo sample; não é uma garantia de todo backend nem backup do banco. A skill é `backend-event-sourcing`.
+
+{/* current-curation:snapshotting */}
+
+A [curadoria de Snapshotting](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#snapshotting) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e008" />
+
+## Command Handler
+
+Um command handler processa uma intenção e aplica suas regras. A base de transporte do exemplo é ASP.NET Core Minimal APIs, integrada ao framework Marten; a aplicação OSS **REF** é o Helpdesk.
+
+Em [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs), `MapPost` recebe `LogIncidentRequest`, constrói `LogIncident`, chama `IncidentService.Handle` e persiste o evento pela document session. Esse caminho identifica entrada, regra e persistência. O custo é definir recusa, conflito e recuperação; um handler separado não fica automaticamente idempotente. `persist_report` no MakersHub lido tem outra responsabilidade de comando. [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs) é teoria adicional. A skill é `backend-cqrs-patterns`.
+
+{/* current-curation:command-handler */}
+
+A [curadoria de Command Handler](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#command-handler) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e009" />
+
+## Query Handler
+
+Um query handler responde uma pergunta sem aplicar a alteração de negócio em questão. A base é ASP.NET Core Minimal APIs com [`IQuerySession` do Marten](https://github.com/JasperFx/marten/blob/master/src/Marten/IQuerySession.cs); a aplicação OSS **REF** é o Helpdesk.
+
+As rotas `MapGet` de [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) consultam listas e documentos, enquanto `MapPost` atende comandos. O custo inclui autorização, formato e custo de consulta. O nome Query não garante ausência de efeitos auxiliares nem frescor da projeção. `ReportReadService.read` é o caso MakersHub lido. A fonte conceitual adicional é [Azure CQRS](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs). A skill é `backend-cqrs-patterns`.
+
+{/* current-curation:query-handler */}
+
+A [curadoria de Query Handler](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#query-handler) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e010" />
+
+## Domain Events
+
+Um evento de domínio descreve um fato relevante dentro de um contexto. A base de persistência do exemplo é o framework Marten; a aplicação OSS **REF** é o [Helpdesk](https://github.com/oskardudycz/EventSourcing.NetCore/tree/main/Sample/Helpdesk).
+
+A rota de registro em [`Program.cs`](https://github.com/oskardudycz/EventSourcing.NetCore/blob/main/Sample/Helpdesk/Helpdesk.Api/Program.cs) produz um evento pela regra `IncidentService.Handle` e o adiciona ao stream com `DocumentSessionExtensions.Add`. A configuração aplica projeções aos eventos desse domínio. O custo é definir significado, identidade e evolução. Um UPDATE capturado não explica sozinho a intenção, e esse sample não prova eventos completos de reatribuição MakersHub. As skills são `backend-event-sourcing` e `domain-driven-design`.
+
+{/* current-curation:domain-event */}
+
+A [curadoria de Domain Event](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#domain-event) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g04-e011" />
+
+## Integration Events
+
+Um integration event publica um contrato para consumidores de outro contexto. A base OSS é [`EventBus` de Watermill CQRS](https://github.com/ThreeDotsLabs/watermill/blob/master/components/cqrs/event_bus.go), cujo `Publish` serializa o evento e o envia pelo publisher configurado.
+
+A aplicação **REF** [consumer-groups](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/consumer-groups) define `UserSignedUp` e consumidores de CRM e newsletter, com dados e reações próprias. O custo é entrega, versão e proteção dos campos. Publicar não confirma o resultado de cada reação; copiar todo o schema interno cria um contrato maior que o necessário. O fluxo MakersHub com broker permanece proposto. As skills são `backend-message-queue` e `backend-transactional-outbox`.
+
+{/* current-curation:integration-event */}
+
+A [curadoria de Integration Event](/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura/#integration-event) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

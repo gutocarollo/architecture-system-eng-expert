@@ -1,0 +1,49 @@
+---
+asIndexPage: true
+title: "Verifique a proteção: a permissão precisa alcançar o objeto certo"
+description: "Você aprenderá a distinguir autenticação, autorização de um objeto e fronteiras de uma credencial."
+diataxis: how-to
+---
+
+# Verifique a proteção: a permissão precisa alcançar o objeto certo
+
+Continue o mesmo caso: [volte ao caso](/jornadas/access-policy/); [entenda o mecanismo](/explicacoes/casos/access-policy/); [execute a experiência](/tutoriais/casos/access-policy/); [consulte contratos e fontes](/referencia/casos/access-policy/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: Assessora advisor/A/SYNTHETIC-1, objeto B/SYNTHETIC-2 e credencial fictícia com audience position-api, expires 10 e key_id old. Registre a versão anterior, a versão proposta e o localizador `access_policy / object-authorization / credential-boundary / least-network-path`.
+
+## 2. Confira quem executa a decisão
+
+A política confere papel, tenant e vínculo da conta. A decisão de credencial confere audience e expires. Uma chave retirada sai do conjunto aceito. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/financial.py access-policy
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+O acesso entre tenants é recusado. O token com validade 10 já expirou no instante 11. A rota direta entre browser e ledger não pertence às ligações permitidas. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `labs/architecture/financial.py::access_policy` contém o modelo executável.
+- `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/access-policy.json` registra a busca delimitada e seus limites.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/access-policy/); [entenda o mecanismo](/explicacoes/casos/access-policy/); [execute a experiência](/tutoriais/casos/access-policy/); [consulte contratos e fontes](/referencia/casos/access-policy/).
+
+O [mapa de conceitos deste caso](/jornadas/access-policy/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

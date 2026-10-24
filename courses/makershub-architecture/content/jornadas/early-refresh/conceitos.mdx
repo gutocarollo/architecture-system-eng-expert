@@ -1,0 +1,32 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a lista precisa continuar disponível
+
+Este mapa conecta os conceitos ao mesmo problema. A lista de chamadas é consultada repetidamente. A versão anterior mantém o valor até o TTL, mas a primeira leitura após o vencimento espera a resposta do produtor. FBI-2331 acrescentou uma janela de renovação antecipada para que a consulta seguinte pudesse encontrar o valor novo. Esta história trata de uma evolução documentada.
+
+Comece pela [jornada](/jornadas/early-refresh/), execute o [tutorial](/tutoriais/casos/early-refresh/) e use a [referência](/referencia/casos/early-refresh/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/early-refresh/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="refresh-ahead" />
+
+## Refresh Ahead
+
+A carga de um novo valor começa antes de terminar a validade utilizável do anterior.
+
+No caso desta família, faça a seguinte observação: Leia em 0,6, libere a renovação e repita em 1,05. Compare a espera anterior com a resposta renovada sem espera.
+
+```sh
+python3 labs/architecture/early-refresh/run.py
+```
+
+O código desta observação está em `labs/architecture/early-refresh/run.py`. O identificador do probe é `historical-refresh`.
+
+O vínculo é um mecanismo local executado. O relógio e o produtor são controlados. Se a renovação ainda estiver lenta quando houver expiração dura, a versão nova também pode precisar esperar. Não se provou uma redução de latência em produção.
+
+A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/early-refresh/) permite continuar com o mesmo problema.
+

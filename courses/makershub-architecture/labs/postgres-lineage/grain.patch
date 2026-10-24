@@ -1,0 +1,43 @@
+--- candidate.sql
++++ candidate.sql
+@@ -17,15 +17,21 @@
+                       AND rc.date_key <= :end_date
+                     GROUP BY 1, 2
+                 ),
+-                roa_per AS (
++                custody_per AS (
+                     SELECT
+                         CAST(date_trunc('month', r.month_end_date) AS date) AS month_start,
+                         r.account_code AS account_code,
+-                        r.monthly_roa
+-                    FROM public.rpt_advisor__roa r
++                        MAX(r.net_assets_amount) AS net_assets
++                    FROM public.rpt_advisor__roa_pj1 r
+                     INNER JOIN fam f ON f.account_code = r.account_code
+                     WHERE r.month_end_date >= :start_date
+                       AND r.month_end_date <= :end_date
++                      AND r.net_assets_amount > 0
++                      AND r.month_end_date >= (
++                          SELECT CAST(date_trunc('month', MIN(rc0.date_key)) AS date)
++                          FROM public.rpt_commission__detail rc0
++                      )
++                    GROUP BY 1, 2
+                 )
+                 SELECT
+                     m.month_start AS month,
+@@ -33,12 +39,12 @@
+                     f.name,
+                     f.cluster,
+                     COALESCE(c.commission, 0) AS commission,
+-                    COALESCE(r.monthly_roa, 0) AS monthly_roa
++                    cu.net_assets
+                 FROM months m
+                 CROSS JOIN fam f
+                 LEFT JOIN commission_per c
+                     ON c.month_start = m.month_start AND c.account_code = f.account_code
+-                LEFT JOIN roa_per r
+-                    ON r.month_start = m.month_start AND r.account_code = f.account_code
++                LEFT JOIN custody_per cu
++                    ON cu.month_start = m.month_start AND cu.account_code = f.account_code
+                 ORDER BY m.month_start ASC, f.account_code ASC
+             

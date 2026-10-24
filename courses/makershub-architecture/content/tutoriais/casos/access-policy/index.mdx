@@ -1,0 +1,85 @@
+---
+asIndexPage: true
+title: "Experimente: a permissão precisa alcançar o objeto certo"
+description: "Você aprenderá a distinguir autenticação, autorização de um objeto e fronteiras de uma credencial."
+diataxis: tutorial
+---
+
+# Experimente: a permissão precisa alcançar o objeto certo
+
+Continue o mesmo caso: [volte ao caso](/jornadas/access-policy/); [entenda o mecanismo](/explicacoes/casos/access-policy/); [resolva a tarefa](/guias/casos/access-policy/); [consulte contratos e fontes](/referencia/casos/access-policy/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a distinguir autenticação, autorização de um objeto e fronteiras de uma credencial. Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior. Execute `npm ci --prefix labs/architecture` para instalar a versão do TypeScript fixada no lock dos laboratórios. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+Assessora advisor/A/SYNTHETIC-1, objeto B/SYNTHETIC-2 e credencial fictícia com audience position-api, expires 10 e key_id old. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+python3 labs/architecture/financial.py access-policy
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:19.437458+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+{"after": {"cross_tenant_allowed": false}, "before": {"cross_tenant_allowed": true}, "guarantee": "Role, attributes and ownership must be checked against the specific resource.", "limit": "No live roles, customer records or Faz permission contracts are inferred.", "probe": "object-authorization"}
+{"after": {"accepted": false}, "before": {"expired_token_accepted": true}, "guarantee": "Expiration and audience constrain where and when a credential is accepted.", "limit": "Claims are unsigned in this model; it does not implement OAuth2, OIDC, mTLS or key verification.", "probe": "credential-boundary"}
+{"after": {"old_key_accepted": false}, "before": {"old_key_accepted": true}, "guarantee": "Retiring a key makes a credential issued by that key inadmissible to this verifier.", "limit": "Real rotation needs verified signatures, overlap windows and dependent-service rollout.", "probe": "rotate-key"}
+{"after": {"direct_browser_ledger": false}, "before": {"direct_browser_ledger": true}, "guarantee": "Explicit allowed edges reduce paths that bypass the application owner.", "limit": "A set is a policy model, not a network firewall, bastion or service mesh.", "probe": "least-network-path"}
+{"after": {"code_reuse_rejected": true, "resource_scope": "order:read", "resource_subject": "SYNTHETIC-USER", "wrong_redirect_rejected": true, "wrong_verifier_rejected": true}, "before": {"code_without_binding_can_be_replayed": true}, "guarantee": "The local authorization-code model binds verifier and redirect, permits one code redemption and issues an audience/scope-limited signed access token.", "limit": "A teaching model of RFC 6749/7636 message checks; it is not an authorization-server library, browser login, refresh flow or production OAuth security implementation.", "probe": "oauth-code-pkce"}
+{"after": {"tampered_signature_rejected": true, "verified_subject": "SYNTHETIC-USER", "wrong_audience_rejected": true, "wrong_nonce_rejected": true}, "before": {"claims_read_without_signature_or_client_binding": true}, "guarantee": "The ID-token validation property checks issuer, audience, nonce, expiration and the configured HS256 signature before accepting the subject.", "limit": "The synthetic client uses a preconfigured shared key. Discovery, JWKS, key negotiation, all claim rules and an actual OpenID Provider are not implemented.", "probe": "oidc-id-token-validation"}
+{"after": {"new_token_accepted": true, "old_token_rejected_after_retirement": true, "tampered_new_token_rejected": true}, "before": {"old_token_accepted_during_overlap": true}, "guarantee": "A signed credential remains valid through the overlap and becomes inadmissible after its signing key is removed from trust.", "limit": "Keys are fixed synthetic HMAC material. Secret storage, asymmetric key distribution and coordinated live-service rotation are outside the experiment.", "probe": "signed-key-rotation"}
+{"after": {"authenticated_service_subject": "order-service", "permission_scope": "order:read", "resource_audience": "order-api", "unauthenticated_client_rejected": true}, "before": {"self_declared_service_header_accepted": true}, "guarantee": "The resource authenticates a signed service principal and validates its intended audience/scope rather than trusting a caller-supplied service label.", "limit": "Client secrets and tokens are synthetic; there is no real identity provider, protected key store or live service deployment.", "probe": "signed-service-identity"}
+{"after": {"actor": "gateway-service", "exchanged_audience": "order-api", "exchanged_scope": "order:read", "expires": 5, "subject": "SYNTHETIC-USER"}, "before": {"original_token_wrong_resource_rejected": true}, "guarantee": "The exchanged credential is bound to the target resource and a narrower delegated scope, preserving subject and actor identities.", "limit": "This is an RFC 8693-style claim transformation model, without a token-exchange endpoint or a complete delegation authorization policy.", "probe": "downscoped-token-exchange"}
+{"after": {"internal_flag_bypasses_verification": false, "internal_rogue_rejected": true, "verified_service_allowed": true}, "before": {"internal_origin_alone_grants_access": true}, "guarantee": "Network location does not replace per-request identity and resource-policy verification in the tested boundary.", "limit": "This demonstrates one zero-trust access property, not an organization-wide zero-trust architecture, device posture or continuous risk engine.", "probe": "verify-internal-request"}
+{"after": {"authorized_two_hops": true, "direct_path_allowed": false, "hops": [["workstation", "bastion"], ["bastion", "ledger-admin"]], "non_admin_rejected": true}, "before": {"unrestricted_direct_admin_path": true}, "guarantee": "Administrative access is funneled through an authenticated jump boundary and direct access to the protected target is denied.", "limit": "The graph executes authorization and routing decisions, not SSH, a real bastion host, firewall rules or session recording.", "probe": "bastion-admin-hop"}
+{"after": {"client_authenticated_by_server": true, "client_without_certificate_accepted": false, "payload_exchange_completed": true, "server_authenticated_by_client": true, "trusted_client_accepted": true}, "before": {"client_without_certificate_accepted": true}, "guarantee": "Real SSLContext handshakes reject a client missing its certificate when mutual verification is required and authenticate both trusted peers before exchanging data.", "limit": "Certificates and keys are generated only in a temporary directory and removed. No listening port, external connection, production CA or service configuration is changed.", "probe": "mutual-tls-peer-certs"}
+comparison=PASS case=access-policy probes=12 inputs=SYNTHETIC runtime=LOCAL
+```
+
+O acesso entre tenants é recusado. O token com validade 10 já expirou no instante 11. A rota direta entre browser e ledger não pertence às ligações permitidas.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/financial.py` e procure a função `access_policy`. Localize a decisão que calcula before e a que calcula after. Compare a entrada e o recurso protegido. O modelo anterior e a proteção estão no mesmo arquivo para permitir repetir a comparação com segurança.
+
+Esta família também possui propriedades específicas em `labs/architecture/models_security.py`. O mapa de conceitos liga cada propriedade ao seu probe, às entradas e ao limite. Você pode abrir a função `observations` do módulo e procurar o identificador mostrado no comando.
+
+Para repetir somente um probe, copie seu nome do campo `probe` e acrescente-o ao comando:
+
+```sh
+python3 labs/architecture/financial.py access-policy --probe object-authorization
+```
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/access-policy/); [entenda o mecanismo](/explicacoes/casos/access-policy/); [resolva a tarefa](/guias/casos/access-policy/); [consulte contratos e fontes](/referencia/casos/access-policy/).
+
+O [mapa de conceitos deste caso](/jornadas/access-policy/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

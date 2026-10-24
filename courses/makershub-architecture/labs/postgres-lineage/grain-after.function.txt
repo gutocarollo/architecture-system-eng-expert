@@ -1,0 +1,91 @@
+    async def get_family_revenue_by_period(
+            self,
+            account_id: int,
+            start_date: Any,
+            end_date: Any) -> List[Dict[str, Any]]:
+        """Office commission per family member per month within [start_date, end_date].
+
+        Family is resolved via current snapshot of mv_family_accounts (pragmatic);
+        a CROSS JOIN with month_series produces a dense matrix so months/members
+        without commission still appear with 0.
+
+        net_assets is the month-end custody (MAX per account and month) from
+        rpt_advisor__roa_pj1, NULL when the account had no custody that month.
+        The table has one row per (month, account, advisor), so custody is
+        aggregated before the join: joining the raw rows repeated the point,
+        with the full commission, once per advisor (FBI-4604).
+
+        rpt_advisor__roa_pj1 and not rpt_advisor__roa: both carry the same
+        month-end custody (171,723 account-months compared, 1 apart), but
+        rpt_advisor__roa only goes back to 2025-08. With it, "Ano passado"
+        (2025) lost January to July: account 4718576 read 1.59% from 5 months
+        where the rule gives 1.29% from 12.
+
+        Custody before the first month of rpt_commission__detail (2023-01) is
+        left out: pj1 goes back to 2022-01, and a month with custody but no
+        revenue history would enter the ROA as a month of zero revenue (a
+        2022 period read "0,00%" instead of "—").
+        """
+        try:
+            sql = _FAMILY_MEMBERS_CTE + """,
+                months AS (
+                    SELECT CAST(generate_series(
+                        date_trunc('month', CAST(:start_date AS date)),
+                        date_trunc('month', CAST(:end_date AS date)),
+                        interval '1 month'
+                    ) AS date) AS month_start
+                ),
+                commission_per AS (
+                    SELECT
+                        CAST(date_trunc('month', rc.date_key) AS date) AS month_start,
+                        rc.account_code AS account_code,
+                        SUM(COALESCE(rc.office_commission_brl, 0)) AS commission
+                    FROM public.rpt_commission__detail rc
+                    INNER JOIN fam f ON f.account_code = rc.account_code
+                    WHERE rc.date_key >= :start_date
+                      AND rc.date_key <= :end_date
+                    GROUP BY 1, 2
+                ),
+                custody_per AS (
+                    SELECT
+                        CAST(date_trunc('month', r.month_end_date) AS date) AS month_start,
+                        r.account_code AS account_code,
+                        MAX(r.net_assets_amount) AS net_assets
+                    FROM public.rpt_advisor__roa_pj1 r
+                    INNER JOIN fam f ON f.account_code = r.account_code
+                    WHERE r.month_end_date >= :start_date
+                      AND r.month_end_date <= :end_date
+                      AND r.net_assets_amount > 0
+                      AND r.month_end_date >= (
+                          SELECT CAST(date_trunc('month', MIN(rc0.date_key)) AS date)
+                          FROM public.rpt_commission__detail rc0
+                      )
+                    GROUP BY 1, 2
+                )
+                SELECT
+                    m.month_start AS month,
+                    f.account_code,
+                    f.name,
+                    f.cluster,
+                    COALESCE(c.commission, 0) AS commission,
+                    cu.net_assets
+                FROM months m
+                CROSS JOIN fam f
+                LEFT JOIN commission_per c
+                    ON c.month_start = m.month_start AND c.account_code = f.account_code
+                LEFT JOIN custody_per cu
+                    ON cu.month_start = m.month_start AND cu.account_code = f.account_code
+                ORDER BY m.month_start ASC, f.account_code ASC
+            """
+            result = await self.session.execute(
+                text(sql),
+                {
+                    "account_code": account_id,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                },
+            )
+            return [dict(row) for row in result.mappings().fetchall()]
+        except Exception as e:
+            logger.error("Error fetching family revenue by period: %s", e)
+            raise e

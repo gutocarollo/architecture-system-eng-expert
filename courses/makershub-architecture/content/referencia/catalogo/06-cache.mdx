@@ -1,0 +1,178 @@
+---
+title: "6. Cache"
+description: "Definições, exemplos, garantias e fontes dos quatorze conceitos de cache do catálogo."
+diataxis: reference
+---
+
+# 6. Cache
+
+Esta referência preserva os labels do catálogo. Os casos MakersHub correspondem ao código `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, lido em 14/10/2026 às 16:16 UTC, sem prova de deploy. **REF didática** identifica um exemplo da API; produto OSS identifica o software cujo código foi consultado, sem afirmar implantação local. As skills são orientações, consultáveis na [curadoria](/referencia/skills-e-projetos/).
+
+<span id="g06-e001" />
+
+## Cache Aside
+
+A aplicação lê o cache e, na falta, consulta a origem e grava o resultado. Em Seguros, `insurance.py:53–67` faz esse caminho com TTL de 300 segundos. O limite é a falta: ela ainda depende da origem; a chave precisa representar os filtros e o escopo pertinentes.
+
+A skill é `backend-caching`. A base é [Redis cache-aside](https://redis.io/docs/latest/develop/use-cases/cache-aside/). O produto OSS [Superset](https://github.com/apache/superset/blob/master/superset/common/query_context_processor.py) fornece o processador de query, complementado pelo [utilitário de cache](https://github.com/apache/superset/blob/master/superset/utils/cache.py). O backend de uma instalação Superset não foi identificado. Há uma [explicação desenvolvida](/explicacoes/cache/#pattern-14).
+
+{/* current-curation:cache-aside */}
+
+A [curadoria de Cache Aside](/referencia/curadoria/06-cache/#cache-aside) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e002" />
+
+## Read Through
+
+O cache usa um loader para buscar a origem quando a entrada falta. Numa consulta proposta de indicadores, o chamador pede a chave ao cache e não implementa o ramo de carga. O limite é manter claras as falhas do loader e a identidade da consulta; a abstração não elimina latência ou erro da origem.
+
+A skill é `backend-caching`. A base é `LoadingCache` de Caffeine: [LocalLoadingCache.get](https://github.com/ben-manes/caffeine/blob/6bfe815f0f6a2daba967385d02c52890c33d8142/caffeine/src/main/java/com/github/benmanes/caffeine/cache/LocalLoadingCache.java#L45-L60) associa a carga ao cálculo da entrada ausente. O [teste get_absent](https://github.com/ben-manes/caffeine/blob/6bfe815f0f6a2daba967385d02c52890c33d8142/caffeine/src/test/java/com/github/benmanes/caffeine/cache/LoadingCacheTest.java#L154-L160) é aplicação **REF didática** de uso no repositório comunitário, com expectativa de resultado e de carga. O código foi lido; o teste não foi executado nesta autoria e não demonstra adoção no MakersHub.
+
+{/* current-curation:read-through */}
+
+A [curadoria de Read Through](/referencia/curadoria/06-cache/#read-through) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e003" />
+
+## Write Through
+
+A escrita passa por uma camada que atualiza a origem de forma síncrona conforme seu contrato. Num cadastro proposto, concluir só após a persistência pode evitar aceitar uma alteração guardada apenas em memória. O limite é o custo da escrita e a garantia diante de falha parcial; atualizar dois sistemas não cria automaticamente uma transação conjunta.
+
+A skill é `backend-caching`. A base comunitária é o `MapWriter` do Redisson: [mapWriterFuture](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonMap.java#L663-L697) compõe a conclusão do writer com o resultado da operação quando o modo não é write-behind. O [teste testWriterPutAll](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/BaseMapTest.java#L1382-L1398), com a [configuração do writer](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/RedissonMapTest.java#L213-L223), é **REF didática** de uso. Esses arquivos são código comunitário lido, não testes executados nem uma transação entre Redis e a origem.
+
+{/* current-curation:write-through */}
+
+A [curadoria de Write Through](/referencia/curadoria/06-cache/#write-through) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e004" />
+
+## Write Behind / Write Back
+
+A camada aceita a escrita e persiste na origem depois. Num acumulador proposto de telemetria, agrupar gravações pode reduzir trabalho por pedido. O limite é a janela antes da persistência: queda, duplicação e ordem precisam de recuperação explícita; um aceite em memória não é commit durável.
+
+A skill é `backend-caching`. A base comunitária é o modo `WRITE_BEHIND` de [RedissonMap.mapWriterFuture](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonMap.java#L663-L670), que entrega a tarefa ao processador de escrita posterior. [MapWriteBehindTask](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/MapWriteBehindTask.java#L70-L166) processa a fila e chama o writer. A [configuração getWriteBehindTestMap](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/RedissonMapTest.java#L218-L223) e o [teste testWriteBehindFastRemove](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/BaseMapTest.java#L1175-L1225) são **REF didática** de uso, sem execução nesta autoria ou garantia de recuperação certificada.
+
+{/* current-curation:write-behind-write-back */}
+
+A [curadoria de Write Behind / Write Back](/referencia/curadoria/06-cache/#write-behind-write-back) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e005" />
+
+## Refresh Ahead
+
+A carga de um novo valor começa antes de terminar a validade utilizável do anterior. O NextBilling do checkout inicia a renovação numa leitura elegível. O limite é o disparo e a expiração: sem leitura na janela, a entrada pode vencer; refresh com falha não produz uma versão válida nova.
+
+A skill é `backend-caching`. A base e aplicação **REF didática** são o [exemplo Caffeine de refresh](https://github.com/ben-manes/caffeine/wiki/Refresh). O MakersHub usa sua própria classe, sem Caffeine comprovado. A [explicação](/explicacoes/cache/#pattern-15) apresenta o ramo de falha.
+
+{/* current-curation:refresh-ahead */}
+
+A [curadoria de Refresh Ahead](/referencia/curadoria/06-cache/#refresh-ahead) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e006" />
+
+## TTL Cache
+
+A entrada tem validade temporal. Seguros grava por 300 segundos; o fallback local compara expiração com relógio monotônico. O limite é a origem: a idade da entrada não demonstra a idade dos dados, e leitores podem pagar nova carga depois da expiração.
+
+A skill é `backend-caching`. A base é validade temporal; no produto OSS CoreDNS, [item.ttl](https://github.com/coredns/coredns/blob/3580a2996e989a80930391b301453a9c52339fac/plugin/cache/item.go#L112-L114) calcula o tempo restante, e [getIfNotStale](https://github.com/coredns/coredns/blob/3580a2996e989a80930391b301453a9c52339fac/plugin/cache/handler.go#L239-L282) decide se a entrada serve. O código também admite uma política explícita de `serve_stale`; vencimento não significa descarte em qualquer configuração. Os arquivos foram lidos, sem medição de uma instância CoreDNS ou transferência desses valores ao cache financeiro.
+
+{/* current-curation:ttl-cache */}
+
+A [curadoria de TTL Cache](/referencia/curadoria/06-cache/#ttl-cache) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e007" />
+
+## Negative Caching
+
+Armazena a ausência confirmada de um recurso para evitar consultas repetidas. Num lookup proposto, uma chave inexistente recebe prazo curto e identidade própria. O limite é distinguir ausência de indisponibilidade: timeout não prova que o recurso não existe.
+
+A skill é `backend-caching`. A base é cache de respostas negativas. No produto OSS CoreDNS, [ResponseWriter.WriteMsg](https://github.com/coredns/coredns/blob/3580a2996e989a80930391b301453a9c52339fac/plugin/cache/cache.go#L430-L451) trata `NameError` e `NoData` com validade própria, e [ResponseWriter.set](https://github.com/coredns/coredns/blob/3580a2996e989a80930391b301453a9c52339fac/plugin/cache/cache.go#L513-L529) insere a entrada no cache negativo. Há tratamento separado para falha transitória; ausência confirmada e erro continuam tendo significados diferentes. Essa leitura de código não comprova cache negativo em todas as APIs MakersHub.
+
+{/* current-curation:negative-caching */}
+
+A [curadoria de Negative Caching](/referencia/curadoria/06-cache/#negative-caching) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e008" />
+
+## Distributed Cache
+
+Uma camada compartilhada atende diferentes processos ou máquinas. Redis é o backend compartilhado escolhido pelo `CacheManager` quando disponível no código. O limite inclui rede, serialização e coordenação; compartilhar armazenamento não une tasks locais de single-flight.
+
+A skill é `backend-caching`. A base é [Redis](https://redis.io/docs/latest/develop/use-cases/cache-aside/). O [cache Superset](https://github.com/apache/superset/blob/master/superset/utils/cache.py) é código de produto OSS para comparar a abstração; seu backend específico não foi confirmado. O exemplo local MakersHub verifica o caminho para Redis.
+
+{/* current-curation:distributed-cache */}
+
+A [curadoria de Distributed Cache](/referencia/curadoria/06-cache/#distributed-cache) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e009" />
+
+## Local Cache
+
+A representação pertence à memória de um processo. O LRU do fallback e o microcache NextBilling têm esse escopo. O limite é que reinício e outro worker não compartilham a mesma entrada; invalidação local não alcança automaticamente os demais.
+
+A skill é `backend-caching`. Caffeine fornece a base e a [aplicação REF de população em memória](https://github.com/ben-manes/caffeine/wiki/Population). O código MakersHub fornece um caso local separado de comparação.
+
+{/* current-curation:local-cache */}
+
+A [curadoria de Local Cache](/referencia/curadoria/06-cache/#local-cache) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e010" />
+
+## Two-Level Cache
+
+Uma política consulta uma camada local e outra compartilhada, definindo cargas, validade e invalidação entre elas. Num KPI proposto, L1 pode evitar uma viagem ao Redis e L2 pode evitar consulta PostgreSQL. O limite é manter cópias coerentes e o escopo correto.
+
+A skill é `backend-caching`; Redis e um cache local são bases possíveis. O MakersHub observado tem seleção Redis ou fallback e não prova essa hierarquia. Na implementação comunitária [RedissonLocalCachedMap.getAsync](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonLocalCachedMap.java#L285-L316), o acerto local retorna imediatamente; no modo que inclui Redis, a falta chama o mapa remoto e depois popula a cópia local. O [teste testLoadAllCache](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/RedissonLocalCachedMapTest.java#L123-L140) é **REF didática** de uso do mapa e de inspeção da cópia local. Os arquivos lidos têm cabeçalho Apache-2.0 e SHA fixado; a comparação não depende de classificar toda a documentação ou todos os recursos Redisson PRO como OSS.
+
+{/* current-curation:two-level-cache */}
+
+A [curadoria de Two-Level Cache](/referencia/curadoria/06-cache/#two-level-cache) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e011" />
+
+## Cache Stampede Protection
+
+Coordena ou distribui recomputações para evitar que muitos leitores iniciem a mesma carga na expiração. No feed online, os leitores do mesmo processo compartilham a task. O limite é seu escopo: dois processos ainda podem iniciar cargas distintas.
+
+A skill é `backend-caching`. A biblioteca OSS [Cashews](https://github.com/Krukov/cashews) documenta cache assíncrono e lock por chave como base de comparação **REF**. O caminho MakersHub é a aplicação local comprovada, sem benchmark de economia atual.
+
+{/* current-curation:cache-stampede-protection */}
+
+A [curadoria de Cache Stampede Protection](/referencia/curadoria/06-cache/#cache-stampede-protection) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e012" />
+
+## Single Flight
+
+Leitores da mesma identidade aguardam um produtor em andamento. `SingleFlightCache.get` reúne chamadas NextBilling e protege a task com shield. O limite é que essa coordenação pertence ao processo e precisa tratar erro, cancelamento e limpeza.
+
+A skill é `backend-caching`. A base é task compartilhada e [asyncio.shield](https://docs.python.org/3/library/asyncio-task.html#shielding-from-cancellation). A aplicação local é MakersHub; [Cashews](https://github.com/Krukov/cashews) é biblioteca OSS comparável, sem alegar equivalência de todos os contratos.
+
+{/* current-curation:single-flight */}
+
+A [curadoria de Single Flight](/referencia/curadoria/06-cache/#single-flight) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e013" />
+
+## Cache Warming
+
+Pré-carrega entradas escolhidas antes de quem as pedirá. Num dashboard proposto, preparar alguns recortes conhecidos pode poupar espera inicial. O limite é custo e seleção: aquecer combinações que ninguém usa consome capacidade da origem.
+
+A skill é `backend-caching`. A base comunitária é [RedissonMap.loadAllAsync](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/main/java/org/redisson/RedissonMap.java#L1255-L1270), que obtém as chaves do loader e carrega seus valores. A aplicação **REF didática** [testLoadAllCache](https://github.com/redisson/redisson/blob/016cf1465277409787216ea07dc5ba40696f2efd/redisson/src/test/java/org/redisson/RedissonLocalCachedMapTest.java#L123-L140) prepara 100 entradas fictícias, chama `loadAll(false, 2)` e inspeciona as entradas do mapa e da cópia local. O teste foi lido, sem execução nesta autoria; ele mostra carga explícita e não comprova cron periódico. O refresh NextBilling depende de leitura elegível.
+
+{/* current-curation:cache-warming */}
+
+A [curadoria de Cache Warming](/referencia/curadoria/06-cache/#cache-warming) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g06-e014" />
+
+## Cache Invalidation
+
+Remove ou torna inacessível uma representação que deixou de ser reutilizável. O código local invalida chaves e padrões; autorização também usa geração específica. O limite é a corrida com escritores e o alcance entre fontes: SCAN em duas passadas não é exclusão atômica e SSE da tela não prova invalidação Redis por dbt.
+
+A skill é `backend-caching`. A base é remoção ou geração. O [exemplo Caffeine](https://github.com/ben-manes/caffeine/wiki/Population) usa `invalidate` como **REF didática**; a aplicação MakersHub fornece o caso Redis/local. Para a distinção entre validade e origem, veja [cache](/explicacoes/cache/) e [observabilidade](/explicacoes/observability/).
+
+{/* current-curation:cache-invalidation */}
+
+A [curadoria de Cache Invalidation](/referencia/curadoria/06-cache/#cache-invalidation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

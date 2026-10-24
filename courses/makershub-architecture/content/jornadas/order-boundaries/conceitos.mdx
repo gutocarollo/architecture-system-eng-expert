@@ -1,0 +1,2982 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a regra se espalha pelo produto
+
+Este mapa conecta os conceitos ao mesmo problema. Ana é uma operadora fictícia de uma corretora. O provedor envia uma autorização como AUTHORISED e o produto espera accepted. Se cada tela interpretar o contrato sozinha, a mesma ordem pode parecer recusada em um lugar e aceita em outro. O exemplo concentra a tradução e deixa a regra financeira dentro da operação.
+
+Comece pela [jornada](/jornadas/order-boundaries/), execute o [tutorial](/tutoriais/casos/order-boundaries/) e use a [referência](/referencia/casos/order-boundaries/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/order-boundaries/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="abstract-factory" />
+
+## Abstract Factory
+
+Cria uma família de objetos compatíveis.
+
+No caso desta família, faça a seguinte observação: Compare um validador básico misturado à taxa premium com a família premium que cria os dois contratos juntos. A ordem de 2.000 muda de recusada para aceita sem trocar sua taxa de 10.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept 'Abstract Factory'
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "accepted": false,
+    "fee": 10.0
+  },
+  "after": {
+    "accepted": true,
+    "fee": 10.0
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="actor-model" />
+
+## Actor Model
+
+Cada actor mantém estado próprio, processa uma mensagem por vez e conversa com outros actors por mensagens assíncronas.
+
+No caso desta família, faça a seguinte observação: Envie dois incrementos ao ator e deixe somente seu consumidor de mailbox escrever o estado. Compare com dois leitores que gravam a partir do mesmo valor antigo.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe actor-mailbox-writer
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `actor-mailbox-writer`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "counter_after_two_stale_writers": 1
+  },
+  "after": {
+    "counter": 2,
+    "mailbox_empty": true,
+    "state_writer_count": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The mailbox is local; supervision, distributed actors and message durability are not claimed.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="adapter" />
+
+## Adapter
+
+Converte uma interface para o contrato esperado pelo chamador.
+
+No caso desta família, faça a seguinte observação: Leia 10.000 centavos no provedor e observe o valor local de 100 que o consumidor consegue usar.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Adapter
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": null,
+  "after": 100.0
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="aggregate" />
+
+## Aggregate
+
+O conceito Aggregate é um conjunto pequeno atualizado sob uma única fronteira de consistência.
+
+No caso desta família, faça a seguinte observação: Tente acrescentar 50 e 80 a uma cesta com limite 100. Compare a escrita direta dos filhos com a única entrada pública da raiz, que preserva o total válido.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe aggregate-root-invariant
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `aggregate-root-invariant`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "bypassed_total": 130,
+    "exceeds_limit": true
+  },
+  "after": {
+    "protected_total": 50,
+    "second_add_refused": true,
+    "public_children_are_tuple": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="aggregate-root" />
+
+## Aggregate Root
+
+O conceito Aggregate Root é o único ponto público que protege invariantes do agregado.
+
+No caso desta família, faça a seguinte observação: Tente acrescentar 50 e 80 a uma cesta com limite 100. Compare a escrita direta dos filhos com a única entrada pública da raiz, que preserva o total válido.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe aggregate-root-invariant
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `aggregate-root-invariant`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "bypassed_total": 130,
+    "exceeds_limit": true
+  },
+  "after": {
+    "protected_total": 50,
+    "second_add_refused": true,
+    "public_children_are_tuple": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="ambassador" />
+
+## Ambassador
+
+Um proxy próximo ao chamador intermedeia acesso a dependências.
+
+No caso desta família, faça a seguinte observação: Faça cada workload usar seu proxy de saída. Atualize a política nos dois proxies e confira identidade, versão e resposta sem alterar a operação de negócio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe sidecar-outbound-policy
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `sidecar-outbound-policy`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "old_policy_status": 403
+  },
+  "after": {
+    "updated_statuses": [
+      200,
+      200
+    ],
+    "identities": [
+      "order-service",
+      "position-service"
+    ],
+    "policy_versions": [
+      2,
+      2
+    ],
+    "workload_business_code_changed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="anti-corruption-layer" />
+
+## Anti-Corruption Layer
+
+Traduz o modelo externo para o significado do contexto local.
+
+No caso desta família, faça a seguinte observação: Compare o status externo AUTHORISED com o status accepted que a ordem aceita. Depois acompanhe a conversão de 10.000 centavos em R$ 100.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe provider-contract
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `provider-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "booked": false
+  },
+  "after": {
+    "booked": true,
+    "amount": 100.0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Anti-Corruption Layer; não implementa o padrão completo. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="api-composition" />
+
+## API Composition
+
+Consulta componentes e monta um resultado útil ao cliente.
+
+No caso desta família, faça a seguinte observação: Monte a mesma visão a partir de posição e ordens para web e mobile. Observe uma chamada do cliente e os formatos distintos preparados no servidor.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe bff-composed-view
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `bff-composed-view`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "frontend_round_trips_per_view": 2
+  },
+  "after": {
+    "frontend_round_trips_per_view": 1,
+    "mobile": {
+      "balance": 1100,
+      "pending_count": 1
+    },
+    "web_order_count": 2,
+    "backend_calls_for_two_views": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Partial failures, freshness and authorization of each constituent service need separate contracts.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="api-gateway" />
+
+## API Gateway
+
+Organiza entrada, roteamento e políticas gerais de API.
+
+No caso desta família, faça a seguinte observação: Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `gateway-route-offload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unprotected_guest_backend_calls": 1
+  },
+  "after": {
+    "guest_status": 403,
+    "guest_backend_calls": 0,
+    "routed_backends": [
+      "orders",
+      "positions"
+    ],
+    "forwarded_method": "POST",
+    "forwarded_amount": 100,
+    "entry_auth_checks": 3,
+    "position_status": 200
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="api-gateway-security" />
+
+## API Gateway Security
+
+A entrada da API aplica controles de transporte, identidade e uso antes de encaminhar o pedido.
+
+No caso desta família, faça a seguinte observação: Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `gateway-route-offload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unprotected_guest_backend_calls": 1
+  },
+  "after": {
+    "guest_status": 403,
+    "guest_backend_calls": 0,
+    "routed_backends": [
+      "orders",
+      "positions"
+    ],
+    "forwarded_method": "POST",
+    "forwarded_amount": 100,
+    "entry_auth_checks": 3,
+    "position_status": 200
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.
+
+A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="application-service" />
+
+## Application Service
+
+Um Application Service coordena um caso de uso, suas dependências e persistência; não deve esconder toda a regra no fluxo.
+
+No caso desta família, faça a seguinte observação: Envie um comando inválido ao serviço de aplicação. Siga carregamento, validação e rejeição e confira que ele não manda persistir uma operação recusada.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe application-service-order
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `application-service-order`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "save_before_validation_calls": 1
+  },
+  "after": {
+    "accepted": false,
+    "operations": [
+      "load",
+      "reject"
+    ],
+    "balance": 1000,
+    "save_calls": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The ordering model does not supply an ORM transaction, authentication or a production application layer.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="backend-for-frontend-bff" />
+
+## Backend for Frontend (BFF)
+
+Oferece um contrato específico para um tipo de frontend, compondo ou adaptando dados.
+
+No caso desta família, faça a seguinte observação: Monte a mesma visão a partir de posição e ordens para web e mobile. Observe uma chamada do cliente e os formatos distintos preparados no servidor.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe bff-composed-view
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `bff-composed-view`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "frontend_round_trips_per_view": 2
+  },
+  "after": {
+    "frontend_round_trips_per_view": 1,
+    "mobile": {
+      "balance": 1100,
+      "pending_count": 1
+    },
+    "web_order_count": 2,
+    "backend_calls_for_two_views": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Partial failures, freshness and authorization of each constituent service need separate contracts.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="blackboard-architecture" />
+
+## Blackboard Architecture
+
+Uma arquitetura Blackboard reúne um estado compartilhado, participantes especializados que leem e acrescentam conhecimento e um controle que escolhe quais participantes podem agir.
+
+No caso desta família, faça a seguinte observação: Execute os especialistas na ordem em que alocação tenta agir antes de risco. Observe o quadro de fatos permitir que a próxima rodada conclua a alocação.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe blackboard-specialists
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `blackboard-specialists`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "allocation": null
+  },
+  "after": {
+    "allocation": "reserved",
+    "rounds": 2,
+    "risk_approved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The fixture has monotonic facts and two rounds; conflict resolution and an unrestricted expert scheduler are outside it.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="bounded-context" />
+
+## Bounded Context
+
+O conceito Bounded Context é a fronteira em que um modelo e seus termos têm significado consistente.
+
+No caso desta família, faça a seguinte observação: Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe context-contract-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `context-contract-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_change_breaks_consumers": [
+      "portfolio-screen",
+      "order-check"
+    ],
+    "old_shared_available": 1000
+  },
+  "after": {
+    "portfolio_available": 1000,
+    "trading_order_900_allowed": false,
+    "trading_available": 800,
+    "impacted_consumers": [
+      "order-check",
+      "portfolio-screen",
+      "trading-adapter"
+    ],
+    "broken_after_context_adaptation": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="bridge" />
+
+## Bridge
+
+Separa duas dimensões que variam independentemente.
+
+No caso desta família, faça a seguinte observação: Combine os avisos standard e premium com os transportes memory e paper. Confira quatro entregas usando duas hierarquias independentes e sem criar uma subclasse para cada combinação.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Bridge
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "coupled_variant_classes": 4
+  },
+  "after": {
+    "abstraction_types": 2,
+    "transport_types": 2,
+    "deliveries": [
+      "standard:memory:100",
+      "standard:paper:100",
+      "premium:memory:100",
+      "premium:paper:100"
+    ]
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="builder" />
+
+## Builder
+
+Monta um objeto complexo em etapas nomeadas.
+
+No caso desta família, faça a seguinte observação: Mude o campo amount pelo passo nomeado de construção e confira o objeto final com valor 250.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Builder
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 100,
+  "after": 250
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="cell-based-architecture" />
+
+## Cell-Based Architecture
+
+O sistema se replica em células independentes, cada qual com dados e recursos isolados; um roteador direciona cada cliente à sua célula.
+
+No caso desta família, faça a seguinte observação: Provoque a falha da célula A e continue o pedido destinado à célula B. Confira que a recuperação não redireciona silenciosamente dados de A para B.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe cell-failure-boundary
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `cell-failure-boundary`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_failure_successes": 0
+  },
+  "after": {
+    "isolated_cell_successes": 1,
+    "responses": [
+      "accepted-B"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Capacity, routing safety, replication and failover between real regions remain outside this local failure-boundary experiment.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="chain-of-responsibility" />
+
+## Chain of Responsibility
+
+Passa uma solicitação por verificações independentes até uma aceitar ou recusar.
+
+No caso desta família, faça a seguinte observação: Passe a ordem de 2.000 pelos validadores de valor positivo e de limite 1.000. Confira qual responsabilidade interrompe a aceitação.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept 'Chain of Responsibility'
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": true,
+  "after": false
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="clean-architecture" />
+
+## Clean Architecture
+
+Entidades e casos de uso ficam dentro; adaptadores e frameworks dependem para dentro, seguindo a regra de dependência.
+
+No caso desta família, faça a seguinte observação: Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe inward-ports-and-layers
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `inward-ports-and-layers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "domain_imports_storage_driver": true
+  },
+  "after": {
+    "domain_imports_storage_driver": false,
+    "saved_per_adapter": {
+      "memory-A": 1,
+      "memory-B": 1
+    },
+    "call_order": [
+      "presentation",
+      "application",
+      "domain"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="command" />
+
+## Command
+
+Empacota uma ação e seus dados para que outro componente possa executá-la.
+
+No caso desta família, faça a seguinte observação: Guarde o crédito de 50 como uma operação executável e aplique-o depois ao valor 100, chegando a 150.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Command
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 100,
+  "after": 150
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="component-based-architecture" />
+
+## Component-Based Architecture
+
+O sistema se compõe de componentes com contratos de entrada e saída; isso descreve composição, não fronteiras de domínio.
+
+No caso desta família, faça a seguinte observação: Execute a ordem pelo contrato público do módulo e atualize posições pelo contrato do outro módulo. Examine o agrupamento da validação, do handler e da persistência na fatia de ordens.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe module-public-contract
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `module-public-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_module_internal_writes": 1
+  },
+  "after": {
+    "cross_module_internal_writes": 0,
+    "public_calls": [
+      "orders.public.place",
+      "positions.public.project"
+    ],
+    "order_feature_parts": [
+      "validate",
+      "place",
+      "persist"
+    ],
+    "single_process": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="composite" />
+
+## Composite
+
+Permite tratar um item e um grupo de itens pelo mesmo contrato.
+
+No caso desta família, faça a seguinte observação: Reúna uma ordem de 100 e um grupo com ordens de 50 e 25. O mesmo método de totalização percorre os grupos e soma 175.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Composite
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 100,
+  "after": 175
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="conformist" />
+
+## Conformist
+
+Conformist descreve um consumidor que aceita o modelo do fornecedor e suas mudanças, com pouca ou nenhuma capacidade de negociar sua forma.
+
+No caso desta família, faça a seguinte observação: Adapte o consumidor para usar diretamente provider_state=AUTHORISED, sem criar tradução local. Compare essa escolha com o adaptador semântico do caso anterior.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe conformist-contract
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `conformist-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "local_consumer_assumes_accepted": false
+  },
+  "after": {
+    "consumer_uses_upstream_state": true,
+    "translation_layer_added": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The exercise demonstrates the relationship choice, not a recommendation to accept every provider concept.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="context-map" />
+
+## Context Map
+
+Registra contextos e a relação/integração entre eles.
+
+No caso desta família, faça a seguinte observação: Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe context-contract-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `context-contract-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_change_breaks_consumers": [
+      "portfolio-screen",
+      "order-check"
+    ],
+    "old_shared_available": 1000
+  },
+  "after": {
+    "portfolio_available": 1000,
+    "trading_order_900_allowed": false,
+    "trading_available": 800,
+    "impacted_consumers": [
+      "order-check",
+      "portfolio-screen",
+      "trading-adapter"
+    ],
+    "broken_after_context_adaptation": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="customer-supplier" />
+
+## Customer/Supplier
+
+Customer/Supplier descreve uma relação em que as necessidades do consumidor downstream participam do planejamento do fornecedor upstream.
+
+No caso desta família, faça a seguinte observação: Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe context-contract-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `context-contract-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_change_breaks_consumers": [
+      "portfolio-screen",
+      "order-check"
+    ],
+    "old_shared_available": 1000
+  },
+  "after": {
+    "portfolio_available": 1000,
+    "trading_order_900_allowed": false,
+    "trading_available": 800,
+    "impacted_consumers": [
+      "order-check",
+      "portfolio-screen",
+      "trading-adapter"
+    ],
+    "broken_after_context_adaptation": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="ddd" />
+
+## DDD
+
+DDD organiza a linguagem e as regras do domínio segundo os limites do negócio.
+
+No caso desta família, faça a seguinte observação: Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe context-contract-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `context-contract-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_change_breaks_consumers": [
+      "portfolio-screen",
+      "order-check"
+    ],
+    "old_shared_available": 1000
+  },
+  "after": {
+    "portfolio_available": 1000,
+    "trading_order_900_allowed": false,
+    "trading_available": 800,
+    "impacted_consumers": [
+      "order-check",
+      "portfolio-screen",
+      "trading-adapter"
+    ],
+    "broken_after_context_adaptation": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="decorator" />
+
+## Decorator
+
+Envolve um objeto e acrescenta comportamento, mantendo o mesmo contrato.
+
+No caso desta família, faça a seguinte observação: Envolva a taxa original de 1 com um adicional de 2 e confira 3 sem mudar a classe da ordem.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Decorator
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 1.0,
+  "after": 3.0
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="domain-service" />
+
+## Domain Service
+
+Um Domain Service expressa uma regra que não pertence naturalmente a uma entidade; a regra precisa continuar distinguível da coordenação de infraestrutura.
+
+No caso desta família, faça a seguinte observação: Transfira 100 entre duas entidades pelo serviço de domínio e confira a conservação do total, em vez de creditar o destino isoladamente.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe domain-service-transfer
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `domain-service-transfer`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "credit_without_debit_total": 1100
+  },
+  "after": {
+    "source_balance": 900,
+    "target_balance": 100,
+    "conserved_total": 1000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only an in-memory operation is executed; durable atomic transfer, fees and real financial rules are not claimed.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="event-driven-architecture" />
+
+## Event-Driven Architecture
+
+Um produtor publica fatos de negócio por contrato; consumidores reagem sem o produtor executar cada consequência diretamente.
+
+No caso desta família, faça a seguinte observação: Aceite o crédito no produtor e observe a projeção só avançar quando seu handler recebe o evento. Inspecione que o produtor não chama a projeção diretamente.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe event-driven-handler
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `event-driven-handler`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection_before_event_dispatch": 1000
+  },
+  "after": {
+    "projection_after_event_dispatch": 1100,
+    "producer_balance": 1100,
+    "producer_direct_projection_writes": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Transport, delivery guarantees and cross-process execution are not part of this event-driven property model.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="facade" />
+
+## Facade
+
+Oferece uma interface simplificada para um conjunto de operações.
+
+No caso desta família, faça a seguinte observação: Use uma entrada para reunir a validação e a taxa, recebendo accepted e fee na mesma resposta.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Facade
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": "two-separate-calls",
+  "after": {
+    "accepted": true,
+    "fee": 1.0
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="factory" />
+
+## Factory
+
+Uma Factory cria objeto válido quando a construção tem regras/associação não trivial.
+
+No caso desta família, faça a seguinte observação: Construa a transferência pela fábrica e tente repetir com valor negativo. Confira que uma transferência inválida não chega a existir pelo contrato público.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe domain-factory-validity
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `domain-factory-validity`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "raw_invalid_amount": -100
+  },
+  "after": {
+    "created_amount": 100,
+    "created_source": "A",
+    "created_target": "B",
+    "invalid_construction_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The construction rule belongs only to this hypothetical transfer fixture.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="factory-method" />
+
+## Factory Method
+
+Deixa uma implementação concreta decidir qual produto criar por um método definido no contrato.
+
+No caso desta família, faça a seguinte observação: Compare o método de criação do criador básico com a sobrescrita do criador premium; confira as classes concretas devolvidas.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept 'Factory Method'
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": "Order",
+  "after": "PremiumOrder"
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="flyweight" />
+
+## Flyweight
+
+Compartilha dados imutáveis repetidos para economizar memória.
+
+No caso desta família, faça a seguinte observação: Crie cinco referências ao mesmo símbolo e compare cinco identidades independentes com uma identidade compartilhada. O valor de cada ordem continua sendo próprio.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Flyweight
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 5,
+  "after": 1
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="gateway-aggregation" />
+
+## Gateway Aggregation
+
+Reúne respostas de diferentes serviços na entrada.
+
+No caso desta família, faça a seguinte observação: Monte a mesma visão a partir de posição e ordens para web e mobile. Observe uma chamada do cliente e os formatos distintos preparados no servidor.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe bff-composed-view
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `bff-composed-view`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "frontend_round_trips_per_view": 2
+  },
+  "after": {
+    "frontend_round_trips_per_view": 1,
+    "mobile": {
+      "balance": 1100,
+      "pending_count": 1
+    },
+    "web_order_count": 2,
+    "backend_calls_for_two_views": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Partial failures, freshness and authorization of each constituent service need separate contracts.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="gateway-offloading" />
+
+## Gateway Offloading
+
+Move responsabilidades gerais definidas, como quota de entrada, para a camada de gateway.
+
+No caso desta família, faça a seguinte observação: Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `gateway-route-offload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unprotected_guest_backend_calls": 1
+  },
+  "after": {
+    "guest_status": 403,
+    "guest_backend_calls": 0,
+    "routed_backends": [
+      "orders",
+      "positions"
+    ],
+    "forwarded_method": "POST",
+    "forwarded_amount": 100,
+    "entry_auth_checks": 3,
+    "position_status": 200
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="gateway-routing" />
+
+## Gateway Routing
+
+Escolhe um serviço de destino segundo o pedido.
+
+No caso desta família, faça a seguinte observação: Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `gateway-route-offload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unprotected_guest_backend_calls": 1
+  },
+  "after": {
+    "guest_status": 403,
+    "guest_backend_calls": 0,
+    "routed_backends": [
+      "orders",
+      "positions"
+    ],
+    "forwarded_method": "POST",
+    "forwarded_amount": 100,
+    "entry_auth_checks": 3,
+    "position_status": 200
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="graphql-federation" />
+
+## GraphQL Federation
+
+Compõe schemas de subgraphs para consulta sob um contrato de entidades e campos.
+
+No caso desta família, faça a seguinte observação: Passe a representação da entidade Account com sua chave aos dois subgraphs lógicos e componha balance e open_orders pelo mesmo identificador.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe federated-entity-key
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `federated-entity-key`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "join_by_unrelated_display_label": null
+  },
+  "after": {
+    "entity_type": "Account",
+    "composed_account": {
+      "account_id": "SYNTHETIC-1",
+      "balance": 1100,
+      "open_orders": 2
+    },
+    "subgraph_owners": [
+      "portfolio",
+      "orders"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is the entity-key resolution property of federation. It does not include a GraphQL parser, supergraph schema, query planner or Apollo runtime.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="hateoas" />
+
+## HATEOAS
+
+Uma representação inclui controles de navegação para o cliente seguir a interação.
+
+No caso desta família, faça a seguinte observação: Mude a ordem de accepted para settled e deixe o cliente procurar a relação cancel na representação recebida. Confira que ele não inventa uma ação que o servidor deixou de oferecer.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe hypermedia-affordance
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `hypermedia-affordance`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "hardcoded_client_attempts_cancel_after_settlement": true
+  },
+  "after": {
+    "representation_state": "settled",
+    "cancel_link": null,
+    "client_attempts_cancel": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The exercise covers one affordance and not an entire hypermedia API or authorization policy.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="hexagonal-ports-adapters" />
+
+## Hexagonal / Ports & Adapters
+
+O núcleo define portas de entrada e saída; adaptadores traduzem HTTP, banco ou Salesforce sem fazer o núcleo depender deles.
+
+No caso desta família, faça a seguinte observação: Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe inward-ports-and-layers
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `inward-ports-and-layers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "domain_imports_storage_driver": true
+  },
+  "after": {
+    "domain_imports_storage_driver": false,
+    "saved_per_adapter": {
+      "memory-A": 1,
+      "memory-B": 1
+    },
+    "call_order": [
+      "presentation",
+      "application",
+      "domain"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="immutable-data" />
+
+## Immutable Data
+
+Uma representação não muda depois de criada.
+
+No caso desta família, faça a seguinte observação: Construa dois valores monetários iguais em instâncias distintas, recuse um valor negativo e tente alterar o objeto congelado.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe value-object
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `value-object`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "negative_constructed": true,
+    "mutable": true
+  },
+  "after": {
+    "equal_values": true,
+    "distinct_instances": true,
+    "invalid_rejected": true,
+    "immutable": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Immutable Data; não implementa o padrão completo. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="interpreter" />
+
+## Interpreter
+
+Representa uma gramática pequena como objetos que avaliam partes de uma expressão.
+
+No caso desta família, faça a seguinte observação: Avalie a gramática pequena amount maior que 100 no contexto amount=250, sem executar uma string como código.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Interpreter
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": false,
+  "after": true
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="iterator" />
+
+## Iterator
+
+Percorre uma coleção sem expor como ela armazena os itens.
+
+No caso desta família, faça a seguinte observação: Percorra as ordens de 100 e 50 pelo gerador e confira os dois valores sem acessar a indexação interna da coleção.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Iterator
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": [
+    100
+  ],
+  "after": [
+    100,
+    50
+  ]
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="layered-n-tier" />
+
+## Layered / N-Tier
+
+Camadas agrupam responsabilidades por papel e encaminham chamadas por fronteiras definidas.
+
+No caso desta família, faça a seguinte observação: Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe inward-ports-and-layers
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `inward-ports-and-layers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "domain_imports_storage_driver": true
+  },
+  "after": {
+    "domain_imports_storage_driver": false,
+    "saved_per_adapter": {
+      "memory-A": 1,
+      "memory-B": 1
+    },
+    "call_order": [
+      "presentation",
+      "application",
+      "domain"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="long-polling" />
+
+## Long Polling
+
+O servidor segura um pedido até haver resultado ou atingir o prazo, e o cliente pode abrir outro.
+
+No caso desta família, faça a seguinte observação: Consulte três vezes até a posição existir e compare com uma requisição que aguarda o evento de atualização antes de responder.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe poll-vs-long-poll
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `poll-vs-long-poll`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "periodic_requests_until_ready": 3,
+    "value": "position-ready"
+  },
+  "after": {
+    "long_poll_requests": 1,
+    "value": "position-ready"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The wait uses a local asyncio event, with no HTTP timeout, intermediary buffering or reconnect loop.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="mediator" />
+
+## Mediator
+
+Um coordenador recebe ações e organiza a conversa entre componentes que não devem conhecer uns aos outros.
+
+No caso desta família, faça a seguinte observação: Envie um evento ao coordenador e observe as duas notificações que ele encaminha para auditoria e risco.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Mediator
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 1,
+  "after": 2
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="memento" />
+
+## Memento
+
+Guarda um retrato privado para restaurar um estado depois.
+
+No caso desta família, faça a seguinte observação: Guarde o estado local com amount=100, altere para 200 e restaure a cópia preservada. Diferencie restauração local de estorno financeiro.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Memento
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 200,
+  "after": 100
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="message-translator" />
+
+## Message Translator
+
+Um tradutor converte uma representação para outro contrato.
+
+No caso desta família, faça a seguinte observação: Traduza order_ref e amount_cents do provedor para order_id e amount do consumidor, conservando 10.000 centavos como R$ 100 e AUTHORISED como accepted.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe message-translation
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `message-translation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "consumer_has_order_id": false,
+    "amount_unit": "cents"
+  },
+  "after": {
+    "consumer_has_order_id": true,
+    "amount": 100.0,
+    "amount_unit": "BRL",
+    "status": "accepted"
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="microkernel-plugin-architecture" />
+
+## Microkernel / Plugin Architecture
+
+Um núcleo expõe pontos de extensão estáveis; plugins acrescentam capacidades por esses contratos.
+
+No caso desta família, faça a seguinte observação: Registre um plugin premium no catálogo e execute a política pelo contrato já usado pelo núcleo. Confira que o dispatcher não ganha um novo condicional.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe microkernel-plugin
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `microkernel-plugin`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "premium_available": false
+  },
+  "after": {
+    "premium_available": true,
+    "fee": 5.0,
+    "core_dispatch_branches_added": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Isolation, signing, lifecycle and dependency policy of untrusted plugins are not implemented.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="microservices" />
+
+## Microservices
+
+Serviços implantáveis separadamente possuem contratos de rede e limites de dados e operação próprios.
+
+No caso desta família, faça a seguinte observação: Execute o mesmo contrato de conta por duas operações e provoque uma falha no serviço vizinho. Confira que a leitura do dono da conta continua independente.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe service-boundaries
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `service-boundaries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_failure_stops_balance_read": true
+  },
+  "after": {
+    "balance_results": [
+      1100,
+      1100
+    ],
+    "read_after_other_service_failure": 1100,
+    "public_operations": [
+      "credit",
+      "read",
+      "read"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="modular-monolith" />
+
+## Modular Monolith
+
+Um processo e uma implantação contêm módulos de negócio com contratos e dependências controladas.
+
+No caso desta família, faça a seguinte observação: Execute a ordem pelo contrato público do módulo e atualize posições pelo contrato do outro módulo. Examine o agrupamento da validação, do handler e da persistência na fatia de ordens.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe module-public-contract
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `module-public-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_module_internal_writes": 1
+  },
+  "after": {
+    "cross_module_internal_writes": 0,
+    "public_calls": [
+      "orders.public.place",
+      "positions.public.project"
+    ],
+    "order_feature_parts": [
+      "validate",
+      "place",
+      "persist"
+    ],
+    "single_process": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="mvc" />
+
+## MVC
+
+Controller recebe o evento da view, altera ou consulta o model e encaminha a renderização.
+
+No caso desta família, faça a seguinte observação: Execute o crédito pelo controlador e confira que a apresentação recebe apenas os dados finais, sem realizar a escrita do modelo.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe mvc-controller-model-view
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `mvc-controller-model-view`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "view_writes": 1
+  },
+  "after": {
+    "view_writes": 0,
+    "controller_writes": 1,
+    "rendered": [
+      "Balance 1100"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. A local role model; routing, templates and a web framework are not implemented.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="mvp" />
+
+## MVP
+
+A view é passiva; encaminha ações ao presenter, que consulta o model e manda a view renderizar.
+
+No caso desta família, faça a seguinte observação: Substitua a view por uma lista que recebe chamadas do presenter. Confira quem lê o modelo e quem transforma a informação para apresentação.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe mvp-passive-view
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `mvp-passive-view`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "view_source_reads": 1,
+    "display": "1100"
+  },
+  "after": {
+    "view_source_reads": 0,
+    "presenter_source_reads": 1,
+    "display": "R$ 1100,00"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The recording view models the interface boundary rather than a full UI toolkit.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="mvvm" />
+
+## MVVM
+
+A view observa ou vincula um modelo de apresentação que expõe estado e comandos.
+
+No caso desta família, faça a seguinte observação: Altere a propriedade balance do view model e observe o callback de binding atualizar a apresentação sem uma chamada explícita de renderização no comando.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe mvvm-binding
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `mvvm-binding`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "view_after_plain_assignment": "1000"
+  },
+  "after": {
+    "view_after_bound_assignment": "1100",
+    "view_model_balance": 1100,
+    "binding_callbacks": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model covers one-way binding; validation, two-way binding and UI lifecycle remain outside it.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="observer" />
+
+## Observer
+
+Notifica interessados quando algo muda, sem o produtor chamar cada tela diretamente.
+
+No caso desta família, faça a seguinte observação: Registre um assinante, publique ORDER-1 e confira uma notificação recebida pelo callback.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Observer
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 0,
+  "after": 1
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="onion-architecture" />
+
+## Onion Architecture
+
+O modelo de domínio ocupa o centro; aplicação, infraestrutura e interface ficam em anéis externos e dependem para dentro.
+
+No caso desta família, faça a seguinte observação: Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe inward-ports-and-layers
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `inward-ports-and-layers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "domain_imports_storage_driver": true
+  },
+  "after": {
+    "domain_imports_storage_driver": false,
+    "saved_per_adapter": {
+      "memory-A": 1,
+      "memory-B": 1
+    },
+    "call_order": [
+      "presentation",
+      "application",
+      "domain"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="open-host-service" />
+
+## Open Host Service
+
+Open Host Service é um protocolo estável que um contexto oferece a diferentes consumidores, mantendo um contrato comum.
+
+No caso desta família, faça a seguinte observação: Altere o armazenamento interno para settled_cents e mantenha uma operação pública versionada para os dois clientes. Confira que a forma interna não vaza para o contrato público.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe open-host-service
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `open-host-service`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "clients_broken_by_internal_schema": 2
+  },
+  "after": {
+    "client_balances": [
+      1000.0,
+      1000.0
+    ],
+    "public_contract_version": 1,
+    "internal_field_exposed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Version governance, authentication and remote transport are not provided by this local contract exercise.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="pac" />
+
+## PAC
+
+Cada agente de interação reúne Presentation, Abstraction e Control; agentes se coordenam hierarquicamente e Presentation não acessa Abstraction diretamente.
+
+No caso desta família, faça a seguinte observação: Faça dois controles filhos atualizarem suas abstrações e peça ao controle pai para compor o total. Compare com a última escrita isolada de uma apresentação compartilhada.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe pac-agent-controls
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `pac-agent-controls`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_view_last_child_value": 50
+  },
+  "after": {
+    "parent_total": 150,
+    "parent_display": "150",
+    "controls_visited": [
+      "orders",
+      "fees",
+      "parent"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is a small hierarchical PAC model, not a recommendation to adopt PAC in MakersHub.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="polling" />
+
+## Polling
+
+O consumidor consulta periodicamente.
+
+No caso desta família, faça a seguinte observação: Consulte três vezes até a posição existir e compare com uma requisição que aguarda o evento de atualização antes de responder.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe poll-vs-long-poll
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `poll-vs-long-poll`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "periodic_requests_until_ready": 3,
+    "value": "position-ready"
+  },
+  "after": {
+    "long_poll_requests": 1,
+    "value": "position-ready"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The wait uses a local asyncio event, with no HTTP timeout, intermediary buffering or reconnect loop.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="prototype" />
+
+## Prototype
+
+Copia um objeto-base já configurado.
+
+No caso desta família, faça a seguinte observação: Copie o objeto-base e acrescente premium à lista da cópia; confira que a lista do original permanece vazia.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Prototype
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": [],
+  "after": [
+    "premium"
+  ]
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="proxy" />
+
+## Proxy
+
+Intermedeia acesso conservando uma interface conforme seu contrato.
+
+No caso desta família, faça a seguinte observação: Interponha a decisão de permissão antes da consulta da ordem. A chamada sem permissão recebe denied em vez de 100.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Proxy
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 100,
+  "after": "denied"
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="repository" />
+
+## Repository
+
+Um Repository oferece ao domínio/aplicação operações de coleção persistente em linguagem do modelo.
+
+No caso desta família, faça a seguinte observação: Troque o armazenamento entre dicionário e lista de linhas mantendo get/save e a entidade Account usados pela operação. Confira 1.100 nas duas implementações.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe repository-storage-contract
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `repository-storage-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "domain_storage_shapes": [
+      "dictionary",
+      "row-list"
+    ]
+  },
+  "after": {
+    "domain_account_type": "Account",
+    "balances_from_each_adapter": [
+      1100,
+      1100
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The adapters are local fakes, without SQL mapping, identity maps or unit-of-work concurrency.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="request-reply" />
+
+## Request/Reply
+
+Request/Reply liga uma solicitação à resposta da mesma operação.
+
+No caso desta família, faça a seguinte observação: Envie a operação reserve com seus parâmetros e correlacione a resposta com REQUEST-1. Diferencie esse contrato por operação da rota de recurso do exercício REST.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe rpc-operation-contract
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `rpc-operation-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unmatched_reply_request_id": "OTHER"
+  },
+  "after": {
+    "request_id": "REQUEST-1",
+    "reply_request_id": "REQUEST-1",
+    "result": {
+      "reserved_amount": 100
+    },
+    "operation": "reserve"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The finite request/reply dispatcher does not implement a remote transport, deadlines or an RPC framework.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="rest" />
+
+## REST
+
+Um estilo arquitetural organiza recursos e interação sob restrições, incluindo interface uniforme.
+
+No caso desta família, faça a seguinte observação: Leia o recurso por GET, crie outro por POST e tente um método não atendido. Confira a ausência de escrita no GET e os códigos 200, 201 e 405.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe rest-resource-methods
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `rest-resource-methods`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "GET_with_unconditional_write_calls": 1
+  },
+  "after": {
+    "GET_status": 200,
+    "GET_amount": 100,
+    "GET_writes": 0,
+    "POST_status": 201,
+    "total_writes": 1,
+    "unsupported_method_status": 405
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Requests are local dictionaries and function calls, without an HTTP server, caching intermediaries or complete REST constraints.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="reverse-proxy" />
+
+## Reverse Proxy
+
+Recebe pedidos e os encaminha a servidores do lado backend.
+
+No caso desta família, faça a seguinte observação: Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe gateway-route-offload
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `gateway-route-offload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unprotected_guest_backend_calls": 1
+  },
+  "after": {
+    "guest_status": 403,
+    "guest_backend_calls": 0,
+    "routed_backends": [
+      "orders",
+      "positions"
+    ],
+    "forwarded_method": "POST",
+    "forwarded_amount": 100,
+    "entry_auth_checks": 3,
+    "position_status": 200
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="rpc" />
+
+## RPC
+
+Invoca uma operação remota com argumentos e resposta definidos.
+
+No caso desta família, faça a seguinte observação: Envie a operação reserve com seus parâmetros e correlacione a resposta com REQUEST-1. Diferencie esse contrato por operação da rota de recurso do exercício REST.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe rpc-operation-contract
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `rpc-operation-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unmatched_reply_request_id": "OTHER"
+  },
+  "after": {
+    "request_id": "REQUEST-1",
+    "reply_request_id": "REQUEST-1",
+    "result": {
+      "reserved_amount": 100
+    },
+    "operation": "reserve"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The finite request/reply dispatcher does not implement a remote transport, deadlines or an RPC framework.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="separate-ways" />
+
+## Separate Ways
+
+Separate Ways é a decisão explícita de manter modelos sem uma relação de integração de domínio quando essa relação não oferece benefício suficiente.
+
+No caso desta família, faça a seguinte observação: Mude a política de taxa de um contexto e execute o outro. Compare o objeto compartilhado acidentalmente com contratos independentes sem integração.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe separate-ways-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `separate-ways-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "unrelated_context_fee_after_shared_mutation": 2.0
+  },
+  "after": {
+    "changed_context_fee": 2.0,
+    "independent_context_fee": 1.0,
+    "integration_edges": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Duplication has a maintenance cost; this fixture does not decide the real organizational boundary.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="server-sent-events" />
+
+## Server-Sent Events
+
+Um stream HTTP entrega eventos do servidor ao browser.
+
+No caso desta família, faça a seguinte observação: Codifique e leia registros id/event/data, desconecte depois do id 1 e retome com esse cursor. Confira que somente o id 2 é entregue de novo ao cliente.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe sse-event-resume
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `sse-event-resume`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "reconnect_without_cursor_events": 2
+  },
+  "after": {
+    "content_type": "text/event-stream",
+    "resumed_event_ids": [
+      2
+    ],
+    "resumed_balance": 1100,
+    "messages_are_server_to_client": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The record parser is local. HTTP streaming, browser EventSource, retry timing and proxy behavior are not executed.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="serverless" />
+
+## Serverless
+
+A plataforma administra provisionamento e escala da unidade de execução; a aplicação ainda define eventos, contratos, limites e observabilidade.
+
+No caso desta família, faça a seguinte observação: Inicie cada invocação com memória local nova e conserve o crédito pela porta externa. Confira que a segunda invocação vê 1.100 sem depender de um processo aquecido.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe serverless-invocation
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `serverless-invocation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "next_fresh_local_balance": 1000
+  },
+  "after": {
+    "invocation_balances": [
+      1100,
+      1100
+    ],
+    "local_counters": [
+      1,
+      1
+    ],
+    "state_owner": "external_port"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. No cloud runtime, billing, autoscaling or vendor-specific execution contract is simulated.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="service-mesh" />
+
+## Service Mesh
+
+Administra comunicação entre serviços conforme as funções configuradas.
+
+No caso desta família, faça a seguinte observação: Faça cada workload usar seu proxy de saída. Atualize a política nos dois proxies e confira identidade, versão e resposta sem alterar a operação de negócio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe sidecar-outbound-policy
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `sidecar-outbound-policy`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "old_policy_status": 403
+  },
+  "after": {
+    "updated_statuses": [
+      200,
+      200
+    ],
+    "identities": [
+      "order-service",
+      "position-service"
+    ],
+    "policy_versions": [
+      2,
+      2
+    ],
+    "workload_business_code_changed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="shared-kernel" />
+
+## Shared Kernel
+
+Shared Kernel é um subconjunto do modelo que dois contextos compartilham e precisam alterar de forma coordenada.
+
+No caso desta família, faça a seguinte observação: Execute os dois consumidores com a mesma regra compartilhada e altere o arredondamento do kernel. Observe que ambos mudam e precisam do mesmo acordo de versão.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe shared-kernel-impact
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `shared-kernel-impact`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_rounding_results": [
+      1,
+      2
+    ]
+  },
+  "after": {
+    "shared_results": [
+      1,
+      1
+    ],
+    "consumers_affected_by_shared_rule_change": 2,
+    "changed_results": [
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The rounding is synthetic. Joint ownership and release coordination are required rather than inferred from a common helper.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="sidecar" />
+
+## Sidecar
+
+Executa um componente auxiliar junto a outro numa fronteira de implantação definida.
+
+No caso desta família, faça a seguinte observação: Faça cada workload usar seu proxy de saída. Atualize a política nos dois proxies e confira identidade, versão e resposta sem alterar a operação de negócio.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe sidecar-outbound-policy
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `sidecar-outbound-policy`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "old_policy_status": 403
+  },
+  "after": {
+    "updated_statuses": [
+      200,
+      200
+    ],
+    "identities": [
+      "order-service",
+      "position-service"
+    ],
+    "policy_versions": [
+      2,
+      2
+    ],
+    "workload_business_code_changed": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="single-writer-principle" />
+
+## Single Writer Principle
+
+Um responsável possui a escrita de um estado delimitado.
+
+No caso desta família, faça a seguinte observação: Envie dois incrementos ao ator e deixe somente seu consumidor de mailbox escrever o estado. Compare com dois leitores que gravam a partir do mesmo valor antigo.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe actor-mailbox-writer
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `actor-mailbox-writer`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "counter_after_two_stale_writers": 1
+  },
+  "after": {
+    "counter": 2,
+    "mailbox_empty": true,
+    "state_writer_count": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The mailbox is local; supervision, distributed actors and message durability are not claimed.
+
+A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="singleton" />
+
+## Singleton
+
+Mantém uma única instância dentro de um escopo definido.
+
+No caso desta família, faça a seguinte observação: Compare duas instâncias independentes com duas consultas ao mesmo nome do registro local. Só a segunda condição conserva uma identidade no escopo deste processo.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Singleton
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 2,
+  "after": 1
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="soa" />
+
+## SOA
+
+Serviços de negócio com contratos interoperáveis são compartilhados por consumidores diferentes e podem ser coordenados por uma camada corporativa.
+
+No caso desta família, faça a seguinte observação: Execute o mesmo contrato de conta por duas operações e provoque uma falha no serviço vizinho. Confira que a leitura do dono da conta continua independente.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe service-boundaries
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `service-boundaries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "shared_failure_stops_balance_read": true
+  },
+  "after": {
+    "balance_results": [
+      1100,
+      1100
+    ],
+    "read_after_other_service_failure": 1100,
+    "public_operations": [
+      "credit",
+      "read",
+      "read"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="space-based-architecture" />
+
+## Space-Based Architecture
+
+Unidades de processamento executam perto de um conjunto de dados particionado e replicado em memória; persistência pode ocorrer de forma assíncrona.
+
+No caso desta família, faça a seguinte observação: Distribua as doze entradas pelo dono da chave e execute a alteração dentro de cada partição em memória. Confira a distribuição e a soma sem consultar um banco central.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe space-based-grid
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `space-based-grid`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "central_store_failure_processed": 0
+  },
+  "after": {
+    "grid_partitions": 3,
+    "processed": 12,
+    "value_sum": 90,
+    "per_partition": [
+      4,
+      4,
+      4
+    ],
+    "external_database_calls": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The grid is a finite local model, without durable replication, network partitions or a deployed distributed-cache product.
+
+A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="specification" />
+
+## Specification
+
+O conceito Specification é critério nomeado e reutilizável, que pode ser aplicado por memória ou consulta.
+
+No caso desta família, faça a seguinte observação: Aplique a mesma specification na seleção e na validação das três contas fictícias. Confira que a conta inativa deixa de aparecer como candidata em apenas um caminho.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe specification-reuse
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `specification-reuse`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "query_candidates": [
+      "A",
+      "B"
+    ],
+    "validator_candidates": [
+      "A"
+    ]
+  },
+  "after": {
+    "query_candidates": [
+      "A"
+    ],
+    "validator_candidates": [
+      "A"
+    ],
+    "same_predicate_result": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The threshold is a synthetic teaching rule, not an advisor or customer eligibility rule from Faz.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="state" />
+
+## State
+
+Muda o comportamento conforme um estado explícito.
+
+No caso desta família, faça a seguinte observação: Aceite a ordem uma vez e tente a transição novamente. O comportamento do estado accepted recusa a segunda aceitação.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept State
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": "accepted-twice",
+  "after": "second-transition-rejected"
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="strategy" />
+
+## Strategy
+
+Troca um algoritmo por outro por meio do mesmo contrato.
+
+No caso desta família, faça a seguinte observação: Mantenha a operação e a entrada 100, troque a função de taxa de 1% para 2% e confira 1 e 2.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Strategy
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 1.0,
+  "after": 2.0
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="template-method" />
+
+## Template Method
+
+Define a ordem estável de um processo e deixa etapas específicas para subclasses.
+
+No caso desta família, faça a seguinte observação: Conserve a sequência normalizar e calcular taxa; a subclasse premium muda somente o passo da taxa e o resultado passa de 101 para 100,5.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept 'Template Method'
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 101,
+  "after": 100.5
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="ubiquitous-language" />
+
+## Ubiquitous Language
+
+O conceito Ubiquitous Language é vocabulário compartilhado, validado por especialistas e expresso em conversa, documento e código.
+
+No caso desta família, faça a seguinte observação: Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe context-contract-change
+```
+
+O código desta observação está em `labs/architecture/models_domain.py`. O identificador do probe é `context-contract-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "uncoordinated_change_breaks_consumers": [
+      "portfolio-screen",
+      "order-check"
+    ],
+    "old_shared_available": 1000
+  },
+  "after": {
+    "portfolio_available": 1000,
+    "trading_order_900_allowed": false,
+    "trading_available": 800,
+    "impacted_consumers": [
+      "order-check",
+      "portfolio-screen",
+      "trading-adapter"
+    ],
+    "broken_after_context_adaptation": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="value-object" />
+
+## Value Object
+
+O conceito Value Object é definido pelos valores, sem identidade independente, e protege validade.
+
+No caso desta família, faça a seguinte observação: Construa dois valores monetários iguais em instâncias distintas, recuse um valor negativo e tente alterar o objeto congelado.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe value-object
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `value-object`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "negative_constructed": true,
+    "mutable": true
+  },
+  "after": {
+    "equal_values": true,
+    "distinct_instances": true,
+    "invalid_rejected": true,
+    "immutable": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Value Object; não implementa o padrão completo. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="vertical-slice-architecture" />
+
+## Vertical Slice Architecture
+
+O código se agrupa por funcionalidade executável, mantendo perto endpoint, entrada, validação, handler e persistência necessária.
+
+No caso desta família, faça a seguinte observação: Execute a ordem pelo contrato público do módulo e atualize posições pelo contrato do outro módulo. Examine o agrupamento da validação, do handler e da persistência na fatia de ordens.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe module-public-contract
+```
+
+O código desta observação está em `labs/architecture/models_architecture.py`. O identificador do probe é `module-public-contract`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "cross_module_internal_writes": 1
+  },
+  "after": {
+    "cross_module_internal_writes": 0,
+    "public_calls": [
+      "orders.public.place",
+      "positions.public.project"
+    ],
+    "order_feature_parts": [
+      "validate",
+      "place",
+      "persist"
+    ],
+    "single_process": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="visitor" />
+
+## Visitor
+
+Adiciona operações a uma estrutura de tipos estável, deixando cada tipo receber a visita.
+
+No caso desta família, faça a seguinte observação: Faça a ordem premium aceitar o visitante de taxa. A chamada escolhe visit_premium_order sem acrescentar essa operação ao fluxo que percorre as ordens.
+
+```sh
+python3 labs/architecture/object_patterns.py --concept Visitor
+```
+
+O código desta observação está em `labs/architecture/object_patterns.py`. O identificador do probe é `object-patterns`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": 0,
+  "after": 0.5
+}
+```
+
+O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
+
+A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="webhook" />
+
+## Webhook
+
+Um produtor chama um receptor HTTP quando ocorre um fato.
+
+No caso desta família, faça a seguinte observação: Receba o callback assinado, repita a mesma entrega e altere a assinatura. Confira um único efeito e a recusa 401 da mensagem que não passa na verificação.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe signed-webhook-callback
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `signed-webhook-callback`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "polling_receiver_callback_effects": 0
+  },
+  "after": {
+    "callback_status": 200,
+    "repeat_status": 200,
+    "invalid_signature_status": 401,
+    "effects": [
+      100
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. All keys and payloads are synthetic. Timestamp replay windows, secret distribution, TLS and a live callback server are not implemented.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+
+<span id="websocket" />
+
+## WebSocket
+
+Abre um canal bidirecional para mensagens.
+
+No caso desta família, faça a seguinte observação: Envie um frame de texto mascarado do cliente e um frame independente do servidor. Decodifique os dois sentidos sem criar uma nova consulta para a mensagem do servidor.
+
+```sh
+python3 labs/architecture/financial.py order-boundaries --probe websocket-duplex-frames
+```
+
+O código desta observação está em `labs/architecture/models_api.py`. O identificador do probe é `websocket-duplex-frames`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "server_push_requires_new_poll": true
+  },
+  "after": {
+    "client_to_server": "reserve:ORDER-1",
+    "server_to_client": "position:1100",
+    "client_frame_masked": true,
+    "new_client_poll_for_server_message": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only small unfragmented text frames are modeled, without the HTTP upgrade handshake, extensions, control frames or a production WebSocket implementation.
+
+A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
+

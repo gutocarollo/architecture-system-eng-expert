@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+.checkpoints/
+artifacts/
+deploy/easypanel/.build/
+public/downloads/early-refresh.zip
+**/__pycache__/
+**/.venv/
+**/node_modules/
+.env*

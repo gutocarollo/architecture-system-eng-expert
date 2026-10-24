@@ -1,0 +1,160 @@
+---
+title: Skills e projetos de referência
+description: Curadoria datada de skills, bibliotecas e aplicações open source.
+diataxis: reference
+---
+
+# Skills e projetos de referência
+
+Uma skill orienta o trabalho de um agente. Uma biblioteca ou framework fornece mecanismos para o programa. Uma aplicação de referência mostra esses mecanismos trabalhando juntos. O catálogo indica o papel de cada recurso, porque uma orientação bem escrita não implementa sozinha uma transação, uma fila ou uma eleição.
+
+A [curadoria dos 310 conceitos](/referencia/curadoria/) é a referência atual por item. Ela liga cada conceito a SKILL.md público, código de biblioteca ou framework, aplicação selecionada, revisão e licença. Também conserva a medição mensal da página GitHub Trending de 15/10/2026, com o universo observado e os limites da comparação. As tabelas desta página preservam os snapshots históricos de descoberta de 14/10, sem substituir essa matriz.
+
+Airbyte e outros projetos de código público podem ter condições source available nas revisões examinadas. A presença nesta descoberta não os classifica automaticamente como aplicação OSS. Para CDC, a matriz atual seleciona NiFi e mantém a licença ELv2 encontrada no Airbyte como motivo da substituição. As versões e licenças do código selecionado devem ser conferidas na entrada do conceito.
+
+## Como interpretar a curadoria
+
+As estrelas abaixo vieram de consultas à API oficial do GitHub em **14/10/2026, a partir de 17:12 UTC**. A ordem compara os repositórios consultados. Ela não constitui um ranking de todos os projetos de arquitetura nem uma série temporal de crescimento. O valor `pushed_at` informa a última atualização registrada pela API; ele não certifica qualidade, suporte ou uma release recente.
+
+A consulta à página GitHub Trending daily encontrou doze repositórios, sem interseção com os sessenta da seleção. `K-Dense-AI/scientific-agent-skills` apareceu naquela página, mas seu foco científico não o torna automaticamente uma escolha para Outbox ou CQRS. Relatos no Reddit e no Hacker News foram usados como sinal de interesse, com a verificação técnica feita em documentação e código do próprio projeto.
+
+Para escolher, confira o problema, a linguagem, a manutenção, a licença e o código do exemplo. O catálogo distingue uma aplicação didática (**REF**), um produto OSS e uma referência histórica. `NOASSERTION` é o resultado do campo de licença da API; consulte os arquivos de licença e a versão antes de decidir.
+
+## Skills para raciocinar e executar
+
+Os packs de método e os packs específicos cumprem papéis complementares. Superpowers orienta planejamento e execução; os packs de arquitetura ajudam a reconhecer fronteiras e escolher mecanismos. O curso também usa skills locais de cache, idempotência, CQRS, mensageria, resiliência, DDD e operação do Airflow. Um caminho local é um localizador do workspace; a referência pública aparece como URL do repositório quando foi verificada.
+
+| Repositório consultado | Estrelas | Licença informada | Último push | Arquivado |
+| --- | ---: | --- | --- | --- |
+| [obra/superpowers](https://github.com/obra/superpowers) | 299.042 | `MIT` | `2026-10-10T03:03:30Z` | Não |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 106.575 | `MIT` | `2026-10-13T20:24:07Z` | Não |
+| [wshobson/agents](https://github.com/wshobson/agents) | 40.732 | `MIT` | `2026-10-12T03:07:19Z` | Não |
+| [agentskills/agentskills](https://github.com/agentskills/agentskills) | 26.137 | `Apache-2.0` | `2026-08-09T20:36:04Z` | Não |
+| [wondelai/skills](https://github.com/wondelai/skills) | 2.420 | `MIT` | `2026-09-10T21:48:01Z` | Não |
+| [mblode/agent-skills](https://github.com/mblode/agent-skills) | 147 | `MIT` | `2026-10-10T22:50:38Z` | Não |
+| [j4flmao/agent-skills](https://github.com/j4flmao/agent-skills) | 33 | `MIT` | `2026-10-10T03:31:16Z` | Não |
+
+Os capítulos informam a skill pertinente e o que ela cobre. Quando não há skill específica verificada, uma skill geral é identificada como apoio. A presença de um pack na seleção não comprova competência específica para todo conceito.
+
+## Bibliotecas, frameworks e aplicações
+
+| Repositório consultado | Estrelas | Licença informada | Último push | Arquivado |
+| --- | ---: | --- | --- | --- |
+| [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes) | 128.212 | `Apache-2.0` | `2026-10-14T16:01:55Z` | Não |
+| [redis/redis](https://github.com/redis/redis) | 76.806 | `NOASSERTION` | `2026-10-14T15:18:03Z` | Não |
+| [apache/superset](https://github.com/apache/superset) | 75.141 | `Apache-2.0` | `2026-10-14T16:59:16Z` | Não |
+| [traefik/traefik](https://github.com/traefik/traefik) | 65.210 | `MIT` | `2026-10-14T08:10:33Z` | Não |
+| [etcd-io/etcd](https://github.com/etcd-io/etcd) | 52.359 | `Apache-2.0` | `2026-10-14T14:37:29Z` | Não |
+| [istio/istio](https://github.com/istio/istio) | 38.439 | `Apache-2.0` | `2026-10-14T16:46:12Z` | Não |
+| [apache/kafka](https://github.com/apache/kafka) | 33.951 | `Apache-2.0` | `2026-10-14T17:10:43Z` | Não |
+| [cockroachdb/cockroach](https://github.com/cockroachdb/cockroach) | 32.569 | `NOASSERTION` | `2026-10-03T00:18:28Z` | Não |
+| [facebook/rocksdb](https://github.com/facebook/rocksdb) | 32.198 | `GPL-2.0` | `2026-10-13T21:09:40Z` | Não |
+| [statelyai/xstate](https://github.com/statelyai/xstate) | 30.296 | `MIT` | `2026-10-14T14:25:58Z` | Não |
+| [envoyproxy/envoy](https://github.com/envoyproxy/envoy) | 29.072 | `Apache-2.0` | `2026-10-14T16:56:38Z` | Não |
+| [grafana/loki](https://github.com/grafana/loki) | 29.016 | `AGPL-3.0` | `2026-10-14T16:55:35Z` | Não |
+| [celery/celery](https://github.com/celery/celery) | 28.974 | `NOASSERTION` | `2026-10-14T17:09:28Z` | Não |
+| [dapr/dapr](https://github.com/dapr/dapr) | 26.139 | `Apache-2.0` | `2026-10-14T17:03:37Z` | Não |
+| [argoproj/argo-cd](https://github.com/argoproj/argo-cd) | 24.404 | `Apache-2.0` | `2026-10-14T16:10:10Z` | Não |
+| [temporalio/temporal](https://github.com/temporalio/temporal) | 23.703 | `MIT` | `2026-10-14T17:08:57Z` | Não |
+| [postgres/postgres](https://github.com/postgres/postgres) | 22.405 | `NOASSERTION` | `2026-10-14T12:54:11Z` | Não |
+| [airbytehq/airbyte](https://github.com/airbytehq/airbyte) | 22.222 | `NOASSERTION` | `2026-10-14T17:01:29Z` | Não |
+| [vitessio/vitess](https://github.com/vitessio/vitess) | 21.384 | `Apache-2.0` | `2026-10-14T15:25:08Z` | Não |
+| [nats-io/nats-server](https://github.com/nats-io/nats-server) | 20.875 | `Apache-2.0` | `2026-10-14T16:59:31Z` | Não |
+| [ben-manes/caffeine](https://github.com/ben-manes/caffeine) | 17.887 | `Apache-2.0` | `2026-10-13T03:37:39Z` | Não |
+| [apache/apisix](https://github.com/apache/apisix) | 17.220 | `Apache-2.0` | `2026-10-14T06:24:01Z` | Não |
+| [architecture-decision-record/architecture-decision-record](https://github.com/architecture-decision-record/architecture-decision-record) | 17.203 | `NOASSERTION` | `2026-10-14T15:06:45Z` | Não |
+| [tikv/tikv](https://github.com/tikv/tikv) | 16.908 | `Apache-2.0` | `2026-10-14T11:45:50Z` | Não |
+| [kgrzybek/modular-monolith-with-ddd](https://github.com/kgrzybek/modular-monolith-with-ddd) | 14.066 | `MIT` | `2024-06-04T17:51:26Z` | Não |
+| [rabbitmq/rabbitmq-server](https://github.com/rabbitmq/rabbitmq-server) | 13.924 | `NOASSERTION` | `2026-10-14T14:06:10Z` | Não |
+| [Unleash/unleash](https://github.com/Unleash/unleash) | 13.874 | `AGPL-3.0` | `2026-10-14T16:05:19Z` | Não |
+| [debezium/debezium](https://github.com/debezium/debezium) | 13.217 | `Apache-2.0` | `2026-10-14T13:27:57Z` | Não |
+| [redpanda-data/redpanda](https://github.com/redpanda-data/redpanda) | 12.614 | `None` | `2026-10-08T14:10:50Z` | Não |
+| [LuckyPennySoftware/MediatR](https://github.com/LuckyPennySoftware/MediatR) | 11.860 | `NOASSERTION` | `2026-07-02T13:51:06Z` | Não |
+| [mehdihadeli/awesome-software-architecture](https://github.com/mehdihadeli/awesome-software-architecture) | 11.718 | `CC0-1.0` | `2026-09-08T20:13:05Z` | Não |
+| [linkerd/linkerd2](https://github.com/linkerd/linkerd2) | 11.514 | `Apache-2.0` | `2026-10-14T14:09:06Z` | Não |
+| [dotnet/eShop](https://github.com/dotnet/eShop) | 10.954 | `MIT` | `2026-10-12T04:28:35Z` | Não |
+| [resilience4j/resilience4j](https://github.com/resilience4j/resilience4j) | 10.783 | `Apache-2.0` | `2026-10-07T12:54:23Z` | Não |
+| [ThreeDotsLabs/watermill](https://github.com/ThreeDotsLabs/watermill) | 9.915 | `MIT` | `2026-08-25T13:50:46Z` | Não |
+| [apache/beam](https://github.com/apache/beam) | 8.684 | `Apache-2.0` | `2026-10-14T16:58:48Z` | Não |
+| [hazelcast/hazelcast](https://github.com/hazelcast/hazelcast) | 6.620 | `NOASSERTION` | `2026-10-14T14:29:35Z` | Não |
+| [ThreeDotsLabs/wild-workouts-go-ddd-example](https://github.com/ThreeDotsLabs/wild-workouts-go-ddd-example) | 6.474 | `MIT` | `2026-08-27T08:28:31Z` | Não |
+| [ddd-by-examples/library](https://github.com/ddd-by-examples/library) | 5.873 | `MIT` | `2026-09-17T12:33:08Z` | Não |
+| [kurrent-io/KurrentDB](https://github.com/kurrent-io/KurrentDB) | 5.870 | `NOASSERTION` | `2026-10-14T15:54:08Z` | Não |
+| [hashicorp/memberlist](https://github.com/hashicorp/memberlist) | 4.117 | `MPL-2.0` | `2026-10-12T06:37:07Z` | Não |
+| [TNG/ArchUnit](https://github.com/TNG/ArchUnit) | 3.860 | `Apache-2.0` | `2026-10-13T07:34:35Z` | Não |
+| [oskardudycz/EventSourcing.NetCore](https://github.com/oskardudycz/EventSourcing.NetCore) | 3.686 | `CC-BY-SA-4.0` | `2026-09-17T14:54:46Z` | Não |
+| [AxonIQ/AxonFramework](https://github.com/AxonIQ/AxonFramework) | 3.625 | `Apache-2.0` | `2026-10-14T14:59:21Z` | Não |
+| [argoproj/argo-rollouts](https://github.com/argoproj/argo-rollouts) | 3.598 | `Apache-2.0` | `2026-10-14T11:19:31Z` | Não |
+| [JasperFx/marten](https://github.com/JasperFx/marten) | 3.465 | `MIT` | `2026-10-14T16:48:37Z` | Não |
+| [JasperFx/wolverine](https://github.com/JasperFx/wolverine) | 2.382 | `MIT` | `2026-10-14T17:10:10Z` | Não |
+| [spring-projects/spring-modulith](https://github.com/spring-projects/spring-modulith) | 1.198 | `Apache-2.0` | `2026-10-10T19:21:24Z` | Não |
+| [eventuate-tram/eventuate-tram-sagas](https://github.com/eventuate-tram/eventuate-tram-sagas) | 1.090 | `NOASSERTION` | `2026-08-29T05:40:07Z` | Não |
+| [argoproj/rollouts-demo](https://github.com/argoproj/rollouts-demo) | 249 | `None` | `2026-10-07T08:45:06Z` | Não |
+| [diagrid-labs/dapr-skills](https://github.com/diagrid-labs/dapr-skills) | 13 | `MIT` | `2026-10-14T10:07:27Z` | Não |
+| [redpanda-data/skills](https://github.com/redpanda-data/skills) | 8 | `Apache-2.0` | `2026-10-14T16:29:36Z` | Não |
+
+## Localizadores que exigem correção
+
+A consulta do caminho exato `vert-x3/vertical-slice-dotnet` retornou HTTP 404. O curso conserva esse recibo e usa referências de Vertical Slice com localização verificada nos capítulos. Um HTTP 404 desse caminho não permite concluir que toda a família de projetos está ausente.
+
+O snapshot integral está em `tasks/architecture-course-2026-10-14/evidence/github-snapshot.json`. A curadoria e a busca de interesse estão em `l6b-curation.md` no mesmo diretório. Cada entrada do snapshot preserva sua própria hora de consulta.
+
+Continue pelo [catálogo dos conceitos](/referencia/catalogo) ou pelos [Arquitetura na prática: Makershub](/referencia/prioritarios).
+
+## Packs oficiais e referências adicionais
+
+A consulta complementar à API oficial ocorreu em **14/10/2026 às 17:59:09 UTC**. Ela inclui um pack citado no texto inicial, a especificação aberta e os projetos oficiais encontrados para streaming e workflows.
+
+| Repositório | Estrelas medidas | Papel verificado |
+| --- | ---: | --- |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | 290.912 | Método de engenharia, revisão e definição de intenção. |
+| [redpanda-data/skills](https://github.com/redpanda-data/skills) | 8 | Skills oficiais dos produtos Redpanda, incluindo streaming e Connect. |
+| [diagrid-labs/dapr-skills](https://github.com/diagrid-labs/dapr-skills) | 13 | Skills para workflows e agentes duráveis com Dapr. |
+| [agentskills/agentskills](https://github.com/agentskills/agentskills) | 26.137 | Especificação e recursos do formato Agent Skills. |
+
+O pack oficial Redpanda tinha oito estrelas e o pack Diagrid tinha treze nessa consulta. Seu vínculo com o produto e a documentação pode ser mais pertinente a uma operação de streaming ou workflow que o número de estrelas de um pack geral. O snapshot complementar preserva os campos de licença, manutenção e hora em `github-snapshot-supplement.json`.
+
+## O contrato de uma skill de padrão
+
+O texto de origem propõe uma biblioteca em que o agente reconhece a dor e carrega a skill relevante. A estrutura abaixo descreve essa proposta; este curso não instalou nem criou um pack novo.
+
+```text
+architecture-skills/
+  foundations/
+    distributed-systems/
+    consistency/
+    ddd/
+    messaging/
+  patterns/
+    transactional-outbox/
+    saga/
+    cqrs/
+    cache-aside/
+    distributed-lock/
+  references/
+    temporal/
+    debezium/
+    eventuate/
+    etcd/
+```
+
+Cada `SKILL.md` precisa dizer quando o agente deve chegar ao recurso, quais fontes decidem a ação e como reconhecer a conclusão. Os catorze elementos propostos no texto têm os seguintes papéis:
+
+| Elemento | Informação que deve registrar |
+| --- | --- |
+| `Problem` | A dor concreta que o mecanismo resolve. |
+| `When to use` | As condições que justificam a escolha. |
+| `When NOT to use` | As condições em que o custo supera o benefício ou a garantia é insuficiente. |
+| `Failure modes` | As falhas, janelas de incerteza e formas de recuperação. |
+| `Decision tree` | As perguntas e os critérios que levam à opção apropriada. |
+| `Canonical implementation` | O contrato e o mecanismo comprovados na fonte escolhida. |
+| `Preferred OSS libraries` | As bibliotecas verificadas e o papel de cada uma. |
+| `Reference OSS implementations` | Os caminhos de aplicações que demonstram o padrão, com seu tipo de referência. |
+| `Alternatives/trade-offs` | Os benefícios e os custos das alternativas relevantes. |
+| `Testing strategy` | As propriedades e as falhas que a verificação deve distinguir. |
+| `Observability` | Os sinais que mostram execução, atraso, erro e recuperação. |
+| `Production checklist` | As pré-condições operacionais para o recorte autorizado. |
+| `Anti-patterns` | As formas de uso que oferecem uma garantia falsa ou escondem uma falha. |
+| `References` | As fontes, as versões e os localizadores usados. |
+
+O mecanismo de roteamento evita carregar uma biblioteca inteira para uma decisão pequena. Por exemplo, a operação que precisa preservar uma intenção após o commit pode carregar a referência de Outbox e idempotência. Uma discussão sobre a apresentação do seletor Manual/Automático pode carregar as referências de MVC, MVP e MVVM. A seleção depende da pergunta e da garantia necessária.

@@ -1,0 +1,1416 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: os escritórios deixam de conversar
+
+Este mapa conecta os conceitos ao mesmo problema. Uma corretora hipotética divide o serviço em três participantes: A, B e C. Uma falha de comunicação deixa A e B juntos e C sozinho. Se cada grupo se declarar autorizado a gravar, duas decisões incompatíveis podem aparecer. A prática permite somente ao grupo que reúne dois dos três participantes autorizar a escrita.
+
+Comece pela [jornada](/jornadas/consensus/), execute o [tutorial](/tutoriais/casos/consensus/) e use a [referência](/referencia/casos/consensus/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/consensus/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="active-active" />
+
+## Active/Active
+
+Active/active significa que participantes atendem trabalho ao mesmo tempo; o contrato especifica se são leituras ou escritas.
+
+No caso desta família, faça a seguinte observação: Aceite um crédito distinto em A e B. Compare a última substituição absoluta de saldo com a reconciliação das identidades dos dois créditos.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe multi-writer-reconcile
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `multi-writer-reconcile`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_absolute_balance_wins": 1050,
+    "lost_credit": 100
+  },
+  "after": {
+    "sites_accepting_writes": 2,
+    "merged_balance": 1150,
+    "unique_credits": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="active-passive" />
+
+## Active/Passive
+
+Um participante atende o papel ativo enquanto outro fica preparado para assumir.
+
+No caso desta família, faça a seguinte observação: Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe standby-recovery-work
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `standby-recovery-work`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "failed_primary_available": false
+  },
+  "after": {
+    "recovery_steps": {
+      "cold": [
+        "restore",
+        "start",
+        "catch-up",
+        "promote"
+      ],
+      "warm": [
+        "catch-up",
+        "promote"
+      ],
+      "hot": [
+        "promote"
+      ]
+    },
+    "all_promoted": true,
+    "all_versions": [
+      2,
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="asynchronous-replication" />
+
+## Asynchronous Replication
+
+A confirmação local não espera a condição remota de replicação.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Asynchronous Replication; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="automatic-failover" />
+
+## Automatic Failover
+
+O mecanismo detecta uma condição definida e inicia a troca sem uma pessoa executar cada passo.
+
+No caso desta família, faça a seguinte observação: Avance o relógio de 0 para 6 com prazo 5, detecte o heartbeat antigo e promova a cópia que já alcançou a versão necessária.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe automatic-failover-detection
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `automatic-failover-detection`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "primary_responded_at": 0,
+    "automatic_successor": null
+  },
+  "after": {
+    "heartbeat_stale": true,
+    "successor": "B",
+    "successor_version": 2,
+    "old_primary_healthy": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="cascading-replication" />
+
+## Cascading Replication
+
+Uma réplica encaminha alterações para outras cópias, formando uma cascata.
+
+No caso desta família, faça a seguinte observação: Aplique a versão de A em B e só depois replique B em C. Observe que C depende do intermediário, em vez de consultar diretamente A.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe cascading-replication
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `cascading-replication`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "C_before_B_relay": 1
+  },
+  "after": {
+    "A_version": 2,
+    "B_version": 2,
+    "C_version": 2,
+    "C_source": "B"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The model has one ordered update, no WAL streams, failover or network delay.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="cold-standby" />
+
+## Cold Standby
+
+O recurso de retomada permanece desligado ou exige restauração antes de atender.
+
+No caso desta família, faça a seguinte observação: Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe standby-recovery-work
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `standby-recovery-work`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "failed_primary_available": false
+  },
+  "after": {
+    "recovery_steps": {
+      "cold": [
+        "restore",
+        "start",
+        "catch-up",
+        "promote"
+      ],
+      "warm": [
+        "catch-up",
+        "promote"
+      ],
+      "hot": [
+        "promote"
+      ]
+    },
+    "all_promoted": true,
+    "all_versions": [
+      2,
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="consensus" />
+
+## Consensus
+
+Consenso estabelece acordo entre participantes sob propriedades e modelo de falhas definidos.
+
+No caso desta família, faça a seguinte observação: Separe A/B de C e conte quais grupos conseguem reunir dois dos três votos; observe o preço de recusar a escrita da minoria.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe majority-partition
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `majority-partition`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "leaders": 2
+  },
+  "after": {
+    "leaders": 1,
+    "minority_writes": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Consensus; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e035) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="eventual-consistency" />
+
+## Eventual Consistency
+
+Consistência eventual permite que representações convirjam após propagação bem-sucedida e pausa das mudanças relevantes.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Eventual Consistency; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="failover" />
+
+## Failover
+
+O atendimento ou a autoridade passa a outro participante após a indisponibilidade do anterior.
+
+No caso desta família, faça a seguinte observação: Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe standby-recovery-work
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `standby-recovery-work`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "failed_primary_available": false
+  },
+  "after": {
+    "recovery_steps": {
+      "cold": [
+        "restore",
+        "start",
+        "catch-up",
+        "promote"
+      ],
+      "warm": [
+        "catch-up",
+        "promote"
+      ],
+      "hot": [
+        "promote"
+      ]
+    },
+    "all_promoted": true,
+    "all_versions": [
+      2,
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="gossip-protocol" />
+
+## Gossip Protocol
+
+Gossip dissemina informação por trocas entre participantes.
+
+No caso desta família, faça a seguinte observação: Troque conjuntos de membros entre A/B e B/C por duas rodadas; confira que os três participantes conhecem A, B e C sem contar votos.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe gossip-membership
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `gossip-membership`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "known_members": {
+      "A": 1,
+      "B": 1,
+      "C": 1
+    }
+  },
+  "after": {
+    "known_members": {
+      "A": 3,
+      "B": 3,
+      "C": 3
+    },
+    "all_agree": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Gossip Protocol; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e038) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="heartbeat" />
+
+## Heartbeat
+
+Renova periodicamente um sinal de atividade.
+
+No caso desta família, faça a seguinte observação: Avance o relógio de 0 para 6 com prazo 5, detecte o heartbeat antigo e promova a cópia que já alcançou a versão necessária.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe automatic-failover-detection
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `automatic-failover-detection`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "primary_responded_at": 0,
+    "automatic_successor": null
+  },
+  "after": {
+    "heartbeat_stale": true,
+    "successor": "B",
+    "successor_version": 2,
+    "old_primary_healthy": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="hot-standby" />
+
+## Hot Standby
+
+Uma cópia atualizada permanece em condições de oferecer funções contratadas durante o acompanhamento da origem.
+
+No caso desta família, faça a seguinte observação: Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe standby-recovery-work
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `standby-recovery-work`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "failed_primary_available": false
+  },
+  "after": {
+    "recovery_steps": {
+      "cold": [
+        "restore",
+        "start",
+        "catch-up",
+        "promote"
+      ],
+      "warm": [
+        "catch-up",
+        "promote"
+      ],
+      "hot": [
+        "promote"
+      ]
+    },
+    "all_promoted": true,
+    "all_versions": [
+      2,
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="hybrid-logical-clock" />
+
+## Hybrid Logical Clock
+
+Um Hybrid Logical Clock combina tempo físico aproximado e contador lógico para acompanhar causalidade recebida.
+
+No caso desta família, faça a seguinte observação: Receba o evento 1010:3 com relógio físico em 1005 e relógio local em 1006:1. Confira a parte física máxima e o contador lógico que conserva a ordem causal.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe hybrid-clock-receive
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `hybrid-clock-receive`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "naive_physical_receive_time": 1005
+  },
+  "after": {
+    "hybrid_wall": 1010,
+    "hybrid_logical": 4,
+    "causal_order_preserved": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The one receive schedule does not synchronize physical clocks or prove a distributed implementation under every skew pattern.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e032) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="lamport-clock" />
+
+## Lamport Clock
+
+Um Lamport clock conserva uma ordem compatível com acontecimentos causalmente relacionados.
+
+No caso desta família, faça a seguinte observação: Receba o evento de clock 8 no participante de clock 3 e confira por que o próximo clock precisa ser 9.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe logical-clock
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `logical-clock`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "receive_clock": 4
+  },
+  "after": {
+    "receive_clock": 9
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e031) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="leader-election" />
+
+## Leader Election
+
+A eleição escolhe um participante para exercer um papel.
+
+No caso desta família, faça a seguinte observação: Faça B votar em A no termo 2 e depois receber C no mesmo termo. Confira que B não vota nos dois candidatos e que só A reúne a maioria.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe election-one-vote
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `election-one-vote`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "candidates_with_unrestricted_votes": 2
+  },
+  "after": {
+    "A_votes": 2,
+    "C_votes": 1,
+    "elected_candidates": 1,
+    "B_voted_for": "A"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The fixture does not implement log freshness, randomized timeouts, persistence or all election transitions.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e034) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="leader-follower" />
+
+## Leader/Follower
+
+Um líder exerce um papel coordenador e followers acompanham o estado conforme seu protocolo.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Leader/Follower; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="monotonic-reads" />
+
+## Monotonic Reads
+
+Monotonic reads impede que uma sessão perca alterações já vistas.
+
+No caso desta família, faça a seguinte observação: Exija a versão 2 já observada pela sessão. Recuse a réplica na versão 1 e escolha o dono que consegue responder sem regredir.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe session-read-version
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `session-read-version`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "read_version": 1,
+    "regressed": true
+  },
+  "after": {
+    "read_version": 2,
+    "regressed": false,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Monotonic Reads; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="multi-az" />
+
+## Multi-AZ
+
+Os componentes se distribuem entre zonas de disponibilidade com domínios de falha identificados.
+
+No caso desta família, faça a seguinte observação: Distribua as duas instâncias entre zonas e regiões distintas e remova uma zona ou região inteira. Compare as instâncias que sobrevivem aos mesmos domínios de falha.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe failure-domain-spread
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `failure-domain-spread`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "survivors_after_zone_A_loss": 0,
+    "survivors_after_region_R1_loss": 0
+  },
+  "after": {
+    "survivors_after_zone_A_loss": 1,
+    "survivors_after_region_R1_loss": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="multi-leader" />
+
+## Multi-Leader
+
+Em multi-leader, mais de uma origem aceita alterações e as mudanças circulam conforme o protocolo.
+
+No caso desta família, faça a seguinte observação: Aceite um crédito distinto em A e B. Compare a última substituição absoluta de saldo com a reconciliação das identidades dos dois créditos.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe multi-writer-reconcile
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `multi-writer-reconcile`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_absolute_balance_wins": 1050,
+    "lost_credit": 100
+  },
+  "after": {
+    "sites_accepting_writes": 2,
+    "merged_balance": 1150,
+    "unique_credits": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="multi-primary" />
+
+## Multi-Primary
+
+Multi-primary permite que mais de um participante aceite escritas sob um contrato de replicação e conflitos.
+
+No caso desta família, faça a seguinte observação: Aceite um crédito distinto em A e B. Compare a última substituição absoluta de saldo com a reconciliação das identidades dos dois créditos.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe multi-writer-reconcile
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `multi-writer-reconcile`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_absolute_balance_wins": 1050,
+    "lost_credit": 100
+  },
+  "after": {
+    "sites_accepting_writes": 2,
+    "merged_balance": 1150,
+    "unique_credits": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="multi-region" />
+
+## Multi-Region
+
+Os componentes se distribuem entre regiões identificadas, com contratos de dados e encaminhamento entre elas.
+
+No caso desta família, faça a seguinte observação: Distribua as duas instâncias entre zonas e regiões distintas e remova uma zona ou região inteira. Compare as instâncias que sobrevivem aos mesmos domínios de falha.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe failure-domain-spread
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `failure-domain-spread`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "survivors_after_zone_A_loss": 0,
+    "survivors_after_region_R1_loss": 0
+  },
+  "after": {
+    "survivors_after_zone_A_loss": 1,
+    "survivors_after_region_R1_loss": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="paxos" />
+
+## Paxos
+
+Paxos é uma família de protocolos de acordo com condições de segurança e progresso.
+
+No caso desta família, faça a seguinte observação: Prepare a rodada 8 em dois acceptors que já aceitaram ORDER-A na rodada 7. Proponha ORDER-B e confira por que o novo proposer precisa carregar o valor previamente aceito.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe paxos-accepted-carry
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `paxos-accepted-carry`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "new_round_proposal": "ORDER-B",
+    "would_replace_chosen_value": true
+  },
+  "after": {
+    "new_round_proposal": "ORDER-A",
+    "accepted_nodes": 2,
+    "ballot": 8
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. A finite single-decree Paxos schedule with reliable local messages; persistence, liveness and arbitrary faults are not implemented.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e037) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="peer-to-peer" />
+
+## Peer-to-Peer
+
+Pares podem consumir e fornecer recursos diretamente, formando uma rede sem servidor central obrigatório no caminho de cada troca.
+
+No caso desta família, faça a seguinte observação: Troque conjuntos de membros entre A/B e B/C por duas rodadas; confira que os três participantes conhecem A, B e C sem contar votos.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe gossip-membership
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `gossip-membership`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "known_members": {
+      "A": 1,
+      "B": 1,
+      "C": 1
+    }
+  },
+  "after": {
+    "known_members": {
+      "A": 3,
+      "B": 3,
+      "C": 3
+    },
+    "all_agree": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Peer-to-Peer; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="primary-replica" />
+
+## Primary/Replica
+
+Um primário recebe escritas e réplicas acompanham segundo o mecanismo escolhido.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Primary/Replica; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="quorum" />
+
+## Quorum
+
+Um protocolo exige concordância de uma quantidade definida de participantes.
+
+No caso desta família, faça a seguinte observação: Separe A/B de C e conte quais grupos conseguem reunir dois dos três votos; observe o preço de recusar a escrita da minoria.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe majority-partition
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `majority-partition`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "leaders": 2
+  },
+  "after": {
+    "leaders": 1,
+    "minority_writes": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Quorum; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="quorum-read-write" />
+
+## Quorum Read/Write
+
+No mesmo conjunto fixo de N réplicas, conjuntos R e W com soma maior que N têm interseção.
+
+No caso desta família, faça a seguinte observação: Calcule 2 + 2 − 3 = 1 membro comum e compare com duas decisões que consultam somente um membro.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe quorum-overlap
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `quorum-overlap`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "intersection_lower_bound": 0
+  },
+  "after": {
+    "intersection_lower_bound": 1
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e033) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="raft" />
+
+## Raft
+
+Raft organiza eleição, replicação de log e regras de segurança para consenso.
+
+No caso desta família, faça a seguinte observação: Envie AppendEntries com prevLogIndex=2 e prevLogTerm=3 para uma réplica cujo termo no índice 2 é 2. Confira a recusa e a repetição a partir do prefixo comum.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe raft-log-prefix
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `raft-log-prefix`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "blind_append_accepts_mismatched_prefix": true
+  },
+  "after": {
+    "mismatched_prefix_rejected": true,
+    "length_after_rejection": 2,
+    "retry_accepted": true,
+    "matches_leader": true,
+    "log_terms": [
+      1,
+      3,
+      3
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This isolates Raft log matching, without election, durable storage, commitment or a complete replicated state machine.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e036) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="read-replica" />
+
+## Read Replica
+
+Uma cópia replicada pode atender consultas segundo suas regras de recuperação e acesso.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Read Replica; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="read-your-writes" />
+
+## Read-your-writes
+
+Read-your-writes inclui alterações anteriores da sessão, embora uma escrita concorrente posterior possa ser observada.
+
+No caso desta família, faça a seguinte observação: Exija a versão 2 já observada pela sessão. Recuse a réplica na versão 1 e escolha o dono que consegue responder sem regredir.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe session-read-version
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `session-read-version`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "read_version": 1,
+    "regressed": true
+  },
+  "after": {
+    "read_version": 2,
+    "regressed": false,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Read-your-writes; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="replication" />
+
+## Replication
+
+Replicação propaga dados para cópias operacionais.
+
+No caso desta família, faça a seguinte observação: Atualize o primário para a versão 2, observe a réplica na versão 1 e aplique a atualização para que ela também chegue à versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe replica-lag
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replica-lag`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replica_version": 1,
+    "primary_version": 2
+  },
+  "after": {
+    "replica_version": 2,
+    "primary_version": 2,
+    "balance": 1100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Replication; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="split-brain-prevention" />
+
+## Split-Brain Prevention
+
+O desenho evita que participantes incompatíveis mantenham autoridade de escrita simultânea após uma divisão.
+
+No caso desta família, faça a seguinte observação: Separe A/B de C e conte quais grupos conseguem reunir dois dos três votos; observe o preço de recusar a escrita da minoria.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe majority-partition
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `majority-partition`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "leaders": 2
+  },
+  "after": {
+    "leaders": 1,
+    "minority_writes": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Split-Brain Prevention; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="stateless-services" />
+
+## Stateless Services
+
+O serviço pode ser substituído sem depender de um estado local durável exclusivo daquela instância.
+
+No caso desta família, faça a seguinte observação: Autentique a sessão fictícia na primeira instância e roteie a próxima consulta para a segunda. Compare o estado local ausente com a sessão obtida de seu dono compartilhado.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe stateless-request
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `stateless-request`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "second_worker_user": null
+  },
+  "after": {
+    "worker_users": [
+      "SYNTHETIC-USER",
+      "SYNTHETIC-USER"
+    ],
+    "local_session_counts": [
+      0,
+      0
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Stateless Services; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="strong-consistency" />
+
+## Strong Consistency
+
+O termo precisa indicar a propriedade exigida, como linearizabilidade, que respeita a ordem real de operações completadas.
+
+No caso desta família, faça a seguinte observação: Leia 1.000, conclua o crédito de 100 no dono serializado e faça outra leitura sem carregar um token de sessão. Confira a versão e a ordem das operações no histórico.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe owner-latest-read
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `owner-latest-read`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "read_from_uncoordinated_stale_replica_after_write": 1000
+  },
+  "after": {
+    "read_before_write": 1000,
+    "read_after_completed_write": 1100,
+    "latest_version": 2,
+    "ordered_history": [
+      [
+        "read",
+        1,
+        1000
+      ],
+      [
+        "write",
+        2,
+        1100
+      ],
+      [
+        "read",
+        2,
+        1100
+      ]
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is one serialized-owner history, not a universal linearizability proof or a distributed strong-consistency system under failures.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="synchronous-replication" />
+
+## Synchronous Replication
+
+A confirmação espera uma condição remota configurada.
+
+No caso desta família, faça a seguinte observação: Mantenha a réplica na versão 1 enquanto o primário está na 2. Confira que a confirmação sincronizada espera a aplicação e que a leitura dessa réplica após a confirmação vê a versão 2.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe synchronous-replica-ack
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `synchronous-replica-ack`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "writer_ack_before_replica_applied": true
+  },
+  "after": {
+    "ack_while_replica_behind": false,
+    "ack_after_replica_applied": true,
+    "read_version_after_ack": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This bounded primary/replica schedule does not alone prove linearizability, all replica routing or consistency under partitions.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="three-phase-commit-3pc" />
+
+## Three-Phase Commit / 3PC
+
+O 3PC acrescenta pré-commit entre votação e decisão final, dentro de um modelo de comunicação e falhas.
+
+No caso desta família, faça a seguinte observação: Faça os dois participantes reconhecerem canCommit e preCommit. Compare a decisão no modelo síncrono declarado com o caso em que uma partição ainda é possível.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe three-phase-precommit
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `three-phase-precommit`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "two_phase_prepared_timeout": "wait_for_coordinator"
+  },
+  "after": {
+    "phases_before_timeout": [
+      "canCommit",
+      "preCommit"
+    ],
+    "all_precommitted": true,
+    "decision_under_synchronous_no_partition_assumption": "commit",
+    "decision_if_partition_possible": "wait"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is not a partition-tolerant atomic commit implementation; the autonomous commit decision is not generalized outside those assumptions.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="two-phase-commit-2pc" />
+
+## Two-Phase Commit / 2PC
+
+Um coordenador pede preparação aos participantes e depois comunica commit ou abort.
+
+No caso desta família, faça a seguinte observação: Interrompa a comunicação após prepare e examine por que um participante não pode inventar commit ao vencer um tempo local.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe prepared-participant
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `prepared-participant`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "prepared_then_timeout": "commit_guessed"
+  },
+  "after": {
+    "prepared_then_timeout": "wait_for_decision"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Two-Phase Commit / 2PC; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="version-vector" />
+
+## Version Vector
+
+Um version vector conserva contadores por participante para distinguir causalidade e concorrência.
+
+No caso desta família, faça a seguinte observação: Compare os vetores A:1/B:0 e A:0/B:1 antes de escolher um vencedor; acompanhe a detecção de concorrência.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe causal-versions
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `causal-versions`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "last_write_only": "A",
+    "lost_branch": "B"
+  },
+  "after": {
+    "concurrent_detected": true,
+    "merged_vector": {
+      "A": 1,
+      "B": 1
+    }
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e030) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+
+<span id="warm-standby" />
+
+## Warm Standby
+
+Uma cópia é mantida com parte da preparação necessária para assumir, exigindo trabalho adicional na retomada.
+
+No caso desta família, faça a seguinte observação: Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.
+
+```sh
+python3 labs/architecture/financial.py consensus --probe standby-recovery-work
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `standby-recovery-work`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "failed_primary_available": false
+  },
+  "after": {
+    "recovery_steps": {
+      "cold": [
+        "restore",
+        "start",
+        "catch-up",
+        "promote"
+      ],
+      "warm": [
+        "catch-up",
+        "promote"
+      ],
+      "hot": [
+        "promote"
+      ]
+    },
+    "all_promoted": true,
+    "all_versions": [
+      2,
+      2,
+      2
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion.
+
+A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
+

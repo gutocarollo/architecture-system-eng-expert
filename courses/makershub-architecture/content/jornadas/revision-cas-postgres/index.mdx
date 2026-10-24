@@ -1,0 +1,27 @@
+---
+asIndexPage: true
+title: "Uma única versão atual ainda pode perder uma alteração"
+description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
+diataxis: explanation
+---
+
+# Uma única versão atual ainda pode perder uma alteração
+
+Dois escritores trabalham sobre o mesmo colaborador. O primeiro lê a linha atual. O segundo confirma uma alteração em azure_id. O primeiro ainda conserva a leitura antiga e tenta encerrar a versão para criar outra. Ter somente uma versão atual não impede que essa nova versão recoloque o valor antigo.
+
+Este recorte está ligado ao [card FBI-4924](https://fazcapital.atlassian.net/browse/FBI-4924) e ao [PR 630](https://bitbucket.org/fazcapital/makershub/pull-requests/630). A leitura histórica registrou o PR como **OPEN na leitura histórica registrada**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/3ad846049c32fedee09d458c8d685fb39b675b82/backend/app/repositories/employee_repository.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/c5e8efc5913355a8545b8a27b8b72e0828f77660/backend/app/repositories/employee_repository.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
+
+## Escolha seu próximo passo
+
+| Sua necessidade | Destino deste caso | Resultado |
+| --- | --- | --- |
+| Você quer entender a decisão. | [Explicação](/explicacoes/casos/revision-cas-postgres/) | Você reconhece o mecanismo e seu limite. |
+| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/revision-cas-postgres/) | Você faz uma cópia falhar, aplica o patch e repete o contrato. |
+| Você precisa investigar outro fluxo. | [Guia](/guias/casos/revision-cas-postgres/) | Você confere a mesma garantia em uma consulta semelhante. |
+| Você procura nomes e parâmetros. | [Referência](/referencia/casos/revision-cas-postgres/) | Você consulta os caminhos, as entradas e os limites. |
+
+## O que você observará
+
+A versão anterior termina com uma única linha atual, mas perde AZURE-CONFIRMED e conserva AZURE-OLD. O predicado alterado rejeita o escritor atrasado e preserva AZURE-CONFIRMED. Os identificadores deste exercício são sintéticos.
+
+A revisão baseada em xmin é opaca e transitória. Ela não é uma identidade durável nem um fencing token monotônico. O laboratório isola o predicado de encerramento, com uma atualização concorrente entre leitura e escrita; não executa o método inteiro, a API ou a integração Azure. O commit selecionado pertence a um PR cuja leitura histórica estava aberta; este material não afirma implantação em produção.

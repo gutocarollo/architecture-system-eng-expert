@@ -1,0 +1,43 @@
+---
+asIndexPage: true
+title: "Contrato: Uma única versão atual ainda pode perder uma alteração"
+description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
+diataxis: reference
+---
+
+# Contrato: Uma única versão atual ainda pode perder uma alteração
+
+[Retorne ao caso](/jornadas/revision-cas-postgres/), [entenda o mecanismo](/explicacoes/casos/revision-cas-postgres/), [aprenda fazendo](/tutoriais/casos/revision-cas-postgres/), [resolva a tarefa](/guias/casos/revision-cas-postgres/) ou [consulte o contrato](/referencia/casos/revision-cas-postgres/).
+
+| Contrato | Valor deste recorte |
+| --- | --- |
+| Caso | `revision-cas-postgres` |
+| Função | `update_employee_scd2_without_commit` |
+| Arquivo de origem | `backend/app/repositories/employee_repository.py` |
+| SHA anterior | `3ad846049c32fedee09d458c8d685fb39b675b82` |
+| SHA selecionado | `c5e8efc5913355a8545b8a27b8b72e0828f77660` |
+| Runner | `python3 labs/postgres-lineage/run.py --case revision` |
+| Candidato editável | `--candidate-revision caminho/candidate.sql` |
+| Fonte dos hashes | `labs/postgres-lineage/manifest.json` |
+| Patch | `labs/postgres-lineage/revision.patch` |
+| Garantia | O escritor atrasado não encerra a linha modificada e AZURE-CONFIRMED permanece na única versão atual. |
+
+O arquivo `revision-before.sql.template` e seu correspondente posterior contêm o SQL extraído da árvore sintática da fonte. Os snapshots `.function.txt` conservam a função completa. Os valores financeiros e identidades das fixtures foram inventados para a experiência.
+
+O runner substitui os parâmetros por literais controlados. No caso de granularidade, substitui somente o CTE de descoberta de familiares por uma conta sintética; a consulta posterior a esse CTE conserva o SQL selecionado. No caso de revisão, usa uma tabela mínima descartável com os mesmos nomes de colunas do predicado. As tabelas mínimas não reproduzem o esquema inteiro do MakersHub.
+
+## Saída delimitada
+
+```text
+revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True
+comparison=PASS isolation_verified=True temporary_server_stopped=True
+```
+
+A comparação padrão devolve código 0. Um candidato que ainda infringe o contrato devolve código 1. Uma dependência ausente ou SQL inválido também impede a conclusão; é preciso ler o erro antes de atribuí-lo ao mecanismo.
+
+A revisão baseada em xmin é opaca e transitória. Ela não é uma identidade durável nem um fencing token monotônico. O laboratório isola o predicado de encerramento, com uma atualização concorrente entre leitura e escrita; não executa o método inteiro, a API ou a integração Azure. O commit selecionado pertence a um PR cuja leitura histórica estava aberta; este material não afirma implantação em produção.
+
+Este recorte está ligado ao [card FBI-4924](https://fazcapital.atlassian.net/browse/FBI-4924) e ao [PR 630](https://bitbucket.org/fazcapital/makershub/pull-requests/630). A leitura histórica registrou o PR como **OPEN na leitura histórica registrada**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/3ad846049c32fedee09d458c8d685fb39b675b82/backend/app/repositories/employee_repository.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/c5e8efc5913355a8545b8a27b8b72e0828f77660/backend/app/repositories/employee_repository.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
+
+[Retorne ao caso](/jornadas/revision-cas-postgres/), [entenda o mecanismo](/explicacoes/casos/revision-cas-postgres/), [aprenda fazendo](/tutoriais/casos/revision-cas-postgres/), [resolva a tarefa](/guias/casos/revision-cas-postgres/) ou [consulte o contrato](/referencia/casos/revision-cas-postgres/).
+

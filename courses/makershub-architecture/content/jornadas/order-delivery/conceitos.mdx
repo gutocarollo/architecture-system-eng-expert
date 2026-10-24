@@ -1,0 +1,545 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: uma ordem repetida cobra de novo
+
+Este mapa conecta os conceitos ao mesmo problema. Ana envia a ordem fictícia ORDER-1 de R$ 100. A resposta se perde e o cliente a repete. ORDER-2 acrescenta R$ 50. O desenho anterior registra R$ 100 + R$ 100 + R$ 50 = R$ 250. A ordem repetida deveria conservar o mesmo efeito, totalizando R$ 150.
+
+Comece pela [jornada](/jornadas/order-delivery/), execute o [tutorial](/tutoriais/casos/order-delivery/) e use a [referência](/referencia/casos/order-delivery/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/order-delivery/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="at-least-once-delivery" />
+
+## At-Least-Once Delivery
+
+O transporte pode reentregar uma mensagem enquanto busca sua confirmação, portanto o consumidor precisa tolerar repetição.
+
+No caso desta família, faça a seguinte observação: Entregue EVENT-1 e perca somente sua confirmação. Repita até receber a confirmação e conte as duas entregas da mesma identidade.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe at-least-once-ack-retry
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `at-least-once-ack-retry`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "acknowledged": false,
+    "attempts": 1
+  },
+  "after": {
+    "acknowledged": true,
+    "attempts": 2,
+    "deliveries": 2,
+    "unique_event_ids": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Only this bounded acknowledgement-loss schedule is modeled; an exactly-once effect still needs the recipient transaction or idempotency mechanism.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="at-most-once-delivery" />
+
+## At-Most-Once Delivery
+
+O mecanismo não reentrega a ocorrência depois do envio, podendo perdê-la.
+
+No caso desta família, faça a seguinte observação: Perdida a confirmação, compare repetir sem deduplicação com fazer somente uma tentativa. Depois perca a própria entrega e observe que nenhuma tentativa adicional a recupera.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe at-most-once-loss
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `at-most-once-loss`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "retry_without_dedup_effects": 2
+  },
+  "after": {
+    "ack_lost_effects_without_retry": 1,
+    "delivery_lost_effects_without_retry": 0,
+    "maximum_attempts": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is a sender-attempt model, not a broker delivery guarantee or proof of the external effect.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="cdc-migration" />
+
+## CDC Migration
+
+A migração copia um estado inicial e acompanha mudanças registradas pela origem até a troca.
+
+No caso desta família, faça a seguinte observação: Atualize a origem dentro de uma transação que faz rollback e depois numa que faz commit. Leia o feed capturado e aplique o valor no destino da migração.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe cdc-committed-change
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `cdc-committed-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_target_cents_after_second_write_failure": 100000
+  },
+  "after": {
+    "captured_committed_changes": 1,
+    "rolled_back_changes": 0,
+    "target_cents": 110000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="change-data-capture-cdc" />
+
+## Change Data Capture (CDC)
+
+CDC acompanha mudanças confirmadas em uma fonte.
+
+No caso desta família, faça a seguinte observação: Atualize a origem dentro de uma transação que faz rollback e depois numa que faz commit. Leia o feed capturado e aplique o valor no destino da migração.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe cdc-committed-change
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `cdc-committed-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_target_cents_after_second_write_failure": 100000
+  },
+  "after": {
+    "captured_committed_changes": 1,
+    "rolled_back_changes": 0,
+    "target_cents": 110000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="compensating-transaction" />
+
+## Compensating Transaction
+
+Uma compensação aplica uma nova operação para corrigir semanticamente um passo confirmado.
+
+No caso desta família, faça a seguinte observação: Observe a alocação falhar depois do débito de R$ 100 e acompanhe o crédito que recompõe os R$ 1.000.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe compensate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `compensate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "balance_after_failed_allocation": 900
+  },
+  "after": {
+    "balance_after_failed_allocation": 1000
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="deduplication" />
+
+## Deduplication
+
+Deduplicação detecta ocorrências repetidas segundo uma identidade e política.
+
+No caso desta família, faça a seguinte observação: Entregue ORDER-1 duas vezes e ORDER-2 uma vez. Confira por que três entregas devem produzir dois efeitos e somar R$ 150.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe deduplicate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `deduplicate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "debit": 250,
+    "effects": 3
+  },
+  "after": {
+    "debit": 150,
+    "effects": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="dual-write" />
+
+## Dual Write
+
+Uma operação grava em sistemas que não compartilham a mesma decisão transacional.
+
+No caso desta família, faça a seguinte observação: Interrompa o modelo entre salvar e publicar. Compare a ordem isolada com a ordem e a intenção que a mesma transação SQLite conserva.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe commit-intention
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `commit-intention`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders": 1,
+    "published": 0
+  },
+  "after": {
+    "orders": 1,
+    "recoverable_events": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Dual Write; não implementa o padrão completo. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="dual-write-migration" />
+
+## Dual Write Migration
+
+A migração grava em duas representações durante uma transição.
+
+No caso desta família, faça a seguinte observação: Atualize a origem dentro de uma transação que faz rollback e depois numa que faz commit. Leia o feed capturado e aplique o valor no destino da migração.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe cdc-committed-change
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `cdc-committed-change`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "independent_target_cents_after_second_write_failure": 100000
+  },
+  "after": {
+    "captured_committed_changes": 1,
+    "rolled_back_changes": 0,
+    "target_cents": 110000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.
+
+A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="exactly-once-semantics" />
+
+## Exactly Once Semantics
+
+Exactly Once Semantics identifica um efeito lógico aplicado uma vez dentro da fronteira comprovada.
+
+No caso desta família, faça a seguinte observação: Entregue ORDER-1 duas vezes e ORDER-2 uma vez. A transação que une inbox e débito deve conservar duas linhas, dois efeitos e R$ 150.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe transactional-inbox
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `transactional-inbox`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "effects": 3,
+    "debit": 250
+  },
+  "after": {
+    "inbox_rows": 2,
+    "effects": 2,
+    "debit": 150
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Exactly Once Semantics; não implementa o padrão completo. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="idempotency" />
+
+## Idempotency
+
+Repetir a mesma intenção não acrescenta outro efeito relevante dentro da fronteira definida.
+
+No caso desta família, faça a seguinte observação: Entregue ORDER-1 duas vezes e ORDER-2 uma vez. Confira por que três entregas devem produzir dois efeitos e somar R$ 150.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe deduplicate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `deduplicate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "debit": 250,
+    "effects": 3
+  },
+  "after": {
+    "debit": 150,
+    "effects": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="orchestration-saga" />
+
+## Orchestration Saga
+
+Um coordenador acompanha o estado e comanda os passos da Saga.
+
+No caso desta família, faça a seguinte observação: Observe a alocação falhar depois do débito de R$ 100 e acompanhe o crédito que recompõe os R$ 1.000.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe compensate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `compensate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "balance_after_failed_allocation": 900
+  },
+  "after": {
+    "balance_after_failed_allocation": 1000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Orchestration Saga; não implementa o padrão completo. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="outbox-cdc" />
+
+## Outbox + CDC
+
+A aplicação registra a outbox, e um capturador de mudanças lê essas alterações confirmadas para publicá-las.
+
+No caso desta família, faça a seguinte observação: Grave a ordem e a outbox na mesma transação e acompanhe o capturador da outbox gerar EVENT-1 no feed com uma posição de retomada.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe outbox-cdc-feed
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `outbox-cdc-feed`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order_saved_external_delivery_intention_lost": true
+  },
+  "after": {
+    "captured_outbox_events": [
+      "EVENT-1"
+    ],
+    "resume_after_sequence": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The learning connector is a SQLite trigger plus feed query; transport, source-log offsets and recipient deduplication are not implemented.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="saga" />
+
+## Saga
+
+Uma Saga organiza commits locais de uma operação distribuída e suas compensações.
+
+No caso desta família, faça a seguinte observação: Observe a alocação falhar depois do débito de R$ 100 e acompanhe o crédito que recompõe os R$ 1.000.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe compensate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `compensate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "balance_after_failed_allocation": 900
+  },
+  "after": {
+    "balance_after_failed_allocation": 1000
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Saga; não implementa o padrão completo. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="tcc-try-confirm-cancel" />
+
+## TCC — Try/Confirm/Cancel
+
+Try valida e reserva; Confirm finaliza; Cancel libera a reserva.
+
+No caso desta família, faça a seguinte observação: Reserve dinheiro e unidade na fase Try. Siga uma cópia pela confirmação e outra pelo cancelamento; confira quais recursos ficam disponíveis em cada caminho.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe tcc-resource-states
+```
+
+O código desta observação está em `labs/architecture/models_distribution.py`. O identificador do probe é `tcc-resource-states`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "immediate_debit_after_peer_refusal": 900
+  },
+  "after": {
+    "cancelled_cash": 1000,
+    "cancelled_units": 1,
+    "confirmed": {
+      "cash": 900,
+      "units": 0,
+      "state": "confirmed"
+    }
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The two local outcomes model one reservation contract; distributed recovery, timeout races and idempotent callbacks remain separate obligations.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="transactional-inbox" />
+
+## Transactional Inbox
+
+Uma inbox registra a identidade recebida junto do efeito local na mesma transação.
+
+No caso desta família, faça a seguinte observação: Entregue ORDER-1 duas vezes e ORDER-2 uma vez. A transação que une inbox e débito deve conservar duas linhas, dois efeitos e R$ 150.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe transactional-inbox
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `transactional-inbox`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "effects": 3,
+    "debit": 250
+  },
+  "after": {
+    "inbox_rows": 2,
+    "effects": 2,
+    "debit": 150
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+
+<span id="transactional-outbox" />
+
+## Transactional Outbox
+
+Estado e intenção de integração são registrados na mesma transação local; um executor entrega o trabalho posteriormente.
+
+No caso desta família, faça a seguinte observação: Interrompa o modelo entre salvar e publicar. Compare a ordem isolada com a ordem e a intenção que a mesma transação SQLite conserva.
+
+```sh
+python3 labs/architecture/financial.py order-delivery --probe commit-intention
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `commit-intention`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "orders": 1,
+    "published": 0
+  },
+  "after": {
+    "orders": 1,
+    "recoverable_events": 1
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
+

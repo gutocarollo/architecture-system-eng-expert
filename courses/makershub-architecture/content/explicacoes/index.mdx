@@ -1,0 +1,39 @@
+---
+asIndexPage: true
+title: Entenda as decisões
+description: Dezoito capítulos organizados pelas dores que uma decisão de arquitetura resolve.
+diataxis: explanation
+---
+
+# Dezoito capítulos para entender as decisões
+
+Uma arquitetura é um conjunto de escolhas sobre responsabilidades, dados, comunicação e recuperação. Você aprende melhor quando consegue ligar uma escolha à consequência que uma pessoa sente ao usar o sistema. Por isso, cada capítulo começa por um problema e acompanha o caminho até o mecanismo que pode resolvê-lo.
+
+## Dê significado ao que o sistema faz
+
+1. [Entenda por que uma reserva correta no papel sai errada no sistema](/explicacoes/business-rules). Você vai distinguir identidade, elegibilidade, disponibilidade e regras do domínio.
+2. [Mude uma função sem precisar entender o backend inteiro](/explicacoes/code-boundaries). Você vai comparar módulos, camadas, serviços e modelos de apresentação.
+3. [Salve uma reunião sem perder nem duplicar sua integração](/explicacoes/reliable-integration). Você vai estudar transações locais, intenção durável e repetição segura.
+4. [Conclua uma operação quando uma etapa externa falha](/explicacoes/distributed-work). Você vai separar reserva, confirmação, compensação e avisos acessórios.
+5. [Entregue um fato aos interessados certos e recupere falhas](/explicacoes/messages). Você vai diferenciar distribuição de eventos, divisão de trabalho e reentrega.
+6. [Mostre indicadores com o mesmo significado dos fatos](/explicacoes/read-models). Você vai comparar comandos, consultas, projeções e histórico.
+
+## Preserve a resposta e a capacidade
+
+7. [Carregue indicadores rápido sem trocar o recorte ou o acesso](/explicacoes/cache). Você vai estudar chaves, validade, renovação e recomputação.
+8. [Impeça que dois pedidos ocupem o mesmo horário](/explicacoes/concurrency). Você vai entender versões, exclusividade e propriedade de uma operação.
+9. [Continue atendendo quando a carga ou uma dependência piora](/explicacoes/capacity). Você vai relacionar espera, limites, filas e isolamento.
+10. [Integre sistemas externos preservando seu contrato interno](/explicacoes/api-integration). Você vai comparar adaptadores, gateways e composição para a interface.
+11. [Recupere dados depois de uma queda ou exclusão indevida](/explicacoes/data-durability). Você vai distinguir log, réplica, backup e restauração.
+12. [Mantenha disponibilidade sem criar líderes conflitantes](/explicacoes/availability). Você vai entender coordenação, quórum e recuperação de serviços.
+
+## Evolua e investigue com controle
+
+13. [Distribua dados quando uma máquina deixa de ser suficiente](/explicacoes/data-distribution). Você vai comparar particionamento, sharding e hashing.
+14. [Troque versões preservando os consumidores antigos](/explicacoes/safe-change). Você vai estudar compatibilidade, migração gradual e liberação progressiva.
+15. [Permita a operação certa para a identidade certa](/explicacoes/security). Você vai relacionar autenticação, autorização e fronteiras de acesso.
+16. [Descubra onde uma operação ficou lenta ou incompleta](/explicacoes/observability). Você vai ligar logs, métricas e rastreamento a perguntas concretas.
+17. [Processe tarefas com estados e recuperação explícitos](/explicacoes/workflow). Você vai acompanhar DAGs, lotes, transformações e consumidores.
+18. [Mude comportamentos do código com os padrões GoF](/explicacoes/code-patterns). Você vai reconhecer padrões de construção, composição e colaboração entre objetos.
+
+Os [Arquitetura na prática: Makershub](/referencia/prioritarios) ajudam a escolher o próximo estudo. O [catálogo completo](/referencia/catalogo) conserva os outros conceitos do texto original e suas distinções.

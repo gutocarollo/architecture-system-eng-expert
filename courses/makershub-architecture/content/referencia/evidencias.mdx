@@ -1,0 +1,109 @@
+---
+title: Recibos dos exemplos
+description: Ambientes, consultas, valores agregados e limites dos casos usados na trilha.
+diataxis: reference
+---
+
+# Recibos dos exemplos
+
+Os números abaixo são medições datadas. Eles permitem reproduzir a leitura do exemplo e entender seu limite. Uma medição antiga continua sendo um registro histórico; ela não informa sozinha o estado de um serviço em outro momento.
+
+## PostgreSQL de negócio
+
+O MCP PostgreSQL confirmou `192.168.254.137/32`, porta `5432`, database `faz_capital` e role `augusto_carollo` na medição de 14/10/2026 às 15:54 UTC. A consulta foi `SELECT inet_server_addr(), inet_server_port(), current_database(), current_user`, acompanhada do horário do servidor.
+
+### Movimentos ajustados
+
+Consulta executada em 14/10/2026, com `measured_at_utc=2026-10-14 15:56:30.702110`:
+
+```sql
+SELECT
+    clock_timestamp() AT TIME ZONE 'UTC' AS measured_at_utc,
+    count(*) AS row_count,
+    count(DISTINCT movement_adjusted_sk) AS distinct_movement_keys,
+    min(movement_date) AS first_movement_date,
+    max(movement_date) AS latest_movement_date,
+    count(*) FILTER (
+        WHERE movement_date >= DATE '2026-10-01'
+          AND movement_date < DATE '2026-11-01'
+    ) AS october_row_count,
+    round(sum(brl_amount) FILTER (
+        WHERE movement_date >= DATE '2026-10-01'
+          AND movement_date < DATE '2026-11-01'
+    ), 2) AS october_signed_brl_sum
+FROM public.rpt_inflow__movement_adjusted;
+```
+
+| Campo | Resultado |
+| --- | --- |
+| `row_count` | `557731` |
+| `distinct_movement_keys` | `557731` |
+| `first_movement_date` | `2022-01-03` |
+| `latest_movement_date` | `2026-10-08` |
+| `october_row_count` | `3380` |
+| `october_signed_brl_sum` | `18742122.16` |
+
+A igualdade entre a contagem de linhas e a contagem das chaves mostra unicidade dessa chave no conjunto consultado. Ela não demonstra que toda operação externa ocorreu uma única vez. A soma de `brl_amount` preserva os sinais e o recorte; ela não é uma medida de receita ou um fechamento mensal. A consulta ao catálogo PostgreSQL retornou `relkind=r` em 14/10 às 16:07:16 UTC: o objeto é uma tabela comum.
+
+A conferência registrada em **15/10/2026 às 03:01:35 UTC** voltou a identificar o servidor `192.168.254.137:5432/faz_capital`, com role `augusto_carollo`. A consulta incluiu explicitamente `COUNT(DISTINCT movement_adjusted_sk)`: retornou **557.731 linhas e 557.731 chaves distintas**; o recorte de outubro conservou **3.380 movimentos** e a soma assinada de **R$ 18.742.122,16**. A consulta completa está no campo `sql` de `tasks/FBI-4991-arquitetura-nextra/execution/live-data-0301.json`, junto da identidade e do resultado do servidor. O mesmo recibo registra o grafo construído a partir do snapshot de **13/10 às 03:08:04 UTC**, marcado como antigo; ele não foi tratado como estado operacional atual.
+
+- [2026-10-15 03:01:35 UTC] `192.168.254.137:5432/faz_capital`, `public.rpt_inflow__movement_adjusted` — `COUNT(*), COUNT(DISTINCT movement_adjusted_sk)` no SQL completo do recibo `live-data-0301.json` → `row_count=557731; distinct_movement_keys=557731; october_movement_count=3380; october_signed_brl_amount=18742122.16`.
+
+### Registros de operações
+
+Na consulta agregada de 14/10/2026 às 16:08:02 UTC, `makershub._idempotency_key` retornou `status_counts={"done":4771}`. `makershub._pending_d1_routing` retornou `{"row_count":2574,"max_sf_sync_attempts":0,"pending_sf_sync_count":0}`.
+
+Os 4.771 registros locais de conclusão não comprovam 4.771 efeitos externos executados exatamente uma vez. As zero pendências no recorte D+1 não comprovam a sincronização de todas as oportunidades do Salesforce. As consultas completas estão no pacote interno `tasks/architecture-course-2026-10-14/evidence/s4-consistency.md`.
+
+### Configuração de WAL
+
+Em 14/10/2026 às 16:08:02 UTC, a consulta `current_setting('wal_level')` retornou `minimal`. Uma nova execução de `SHOW wal_level` pelo MCP retornou `minimal` às 16:30 UTC. O servidor informou PostgreSQL `16.13` e `in_recovery=false` na primeira consulta.
+
+O PostgreSQL continua usando WAL. Esse valor não permite tratar decodificação lógica ou streaming físico como capacidades habilitadas naquele servidor. A [documentação PostgreSQL 16](https://www.postgresql.org/docs/16/runtime-config-wal.html) descreve os níveis e seus requisitos.
+
+## Blast radius no FazGraph
+
+O MCP FazGraph respondeu com `graph_source=full`, `source_mode=built` e `graph_mtime_utc=2026-10-13T03:08:04+00:00`. O caminho físico dos dados foi `/Users/augustocarollo/Developer.noindex/fazgraph-canonical-v4/data`, correspondente ao endereço canônico resolvido no Mac.
+
+A chamada `blast_radius(node_id='public.rpt_inflow__movement_adjusted')`, conferida em 14/10, retornou:
+
+```text
+43 downstream table(s), 424 Metabase card(s), 27 endpoint(s).
+Direct on this table: 322 card(s), 3 endpoint(s).
+```
+
+Entre os nós listados estavam `makershub.rpt_goals__employee_kpi_scorecard_monthly`, `dbt.fct_captacao`, `makershub_endpoint.api:my_kpis` e `makershub_endpoint.api:kpi_scorecard`. Essas relações pertencem ao snapshot do grafo. Os números de `db_stats` e `airflow_runs` vieram marcados como antigos na resposta de `pipeline('captacao')` e não foram usados como medições atuais.
+
+## Código MakersHub
+
+Os exemplos de código foram vinculados ao checkout local `main@e233fb046ec333982cd1547171b0f0bd8d8d92ee`, com leituras entre 14/10 às 15:59 e 16:16 UTC. Os arquivos selecionados estavam sem diferenças locais nas verificações registradas. Isso descreve esses arquivos; não certifica o estado do restante do checkout nem o SHA de uma implantação.
+
+O censo inicial percorreu 12.686 commits alcançáveis pelas referências locais. Aprofundar um diff e inventariar metadados são operações diferentes. Os capítulos históricos informam o SHA, o pai e se o commit era ancestral do checkout estudado.
+
+## Airflow no Kubernetes
+
+Em 14/10/2026 às 16:12 UTC, o scheduler `airflow-scheduler-748ddbb5b8-d8kxh` retornou Airflow `3.2.2`, executor `LocalExecutor`, `parallelism=32` e SHA de DAGs `8f06738d7d3bc735c48c5c5450d5297b4dedc398`.
+
+O caminho resolvido foi `/opt/airflow/dags/.worktrees/8f06738d7d3bc735c48c5c5450d5297b4dedc398`. Cinco arquivos, incluindo as DAGs Salesforce, XP e áudio e dois helpers, tinham SHA-256 idêntico ao disco conferido no servidor `.70`. Essa comparação permite reutilizar o conteúdo estático desses cinco arquivos como fonte do cluster. Ela não demonstra uma execução recente das DAGs.
+
+Na medição Rancher de 14/10 às 16:10 UTC, o cluster `local` estava `active`, com RKE2 `v1.36.5+rke2r1` e três nós `Ready`. Os Deployments tinham API `2/2`, dag-processor `2/2`, triggerer `2/2` e scheduler `1/1`. O scheduler usava estratégia `Recreate`; os outros três usavam `RollingUpdate`.
+
+O scheduler Docker conferido em `.70` às 15:57 UTC usava `parallelism=5`. Esse valor pertence àquele container e não é o paralelismo do scheduler Kubernetes.
+
+## PostgreSQL de metadados do Airflow
+
+O scheduler Kubernetes apontava para `airflow-pg-rw.airflow.svc:5432/airflow`. Em 14/10 às 16:12:47 UTC, o primário `airflow-pg-2` retornou dois standbys em `streaming`, `quorum` e `lag_bytes=0`. Às 16:14 UTC, as consultas retornaram `synchronous_commit=on` e `synchronous_standby_names=ANY 1 ("airflow-pg-1","airflow-pg-3","airflow-pg-2")`. A configuração CNPG informou `dataDurability=required` e `number=1`.
+
+Esses resultados pertencem ao banco de metadados do Airflow. Eles não configuram replicação no PostgreSQL de negócio `.137`. Zero atraso naquele instante não define o comportamento sob toda falha. O CronJob de backup tinha `lastSuccessfulTime=2026-10-14T07:14:42Z`; restauração não foi executada nesta investigação.
+
+## Onde está a evidência detalhada
+
+Os comandos, consultas, paths, mtimes, hashes, vínculos de código e limites estão em `tasks/architecture-course-2026-10-14/evidence/`. Os pacotes S1–S6 identificam a autoria e o escopo de cada investigação. Os recibos de compilação, renderização e council pertencem à versão final dos arquivos; eles não substituem uma confirmação de deploy em outro sistema.
+
+## Leitura de metadados de áudio
+
+O FazGraph foi consultado com `pipeline("minio__call", max_matches=1)` antes da leitura SQL. Ele retornou três tabelas e sinalizou documentação com regras inferidas; essa documentação não foi promovida a regra de negócio confirmada. A consulta ao catálogo PostgreSQL confirmou quinze colunas de `public.fct_minio__call`. A leitura seguinte contou 81.292 linhas com zero paths vazios ou nulos, sem consultar clientes, chaves de objetos ou conteúdo dos áudios. Esses números orientam o [guia de recuperação](/guias/recuperar-pipeline), sem comprovar existência dos objetos.
+
+- [2026-10-14 19:08:26 UTC] `192.168.254.137:5432/faz_capital`, `public.fct_minio__call` — `SELECT count(*), count(*) FILTER (WHERE audio_file_path IS NULL OR audio_file_path = ''), max(updated_at)` → `metadata_row_count=81292; missing_path_row_count=0; latest_metadata_updated_at=2026-10-14 16:03:35.682549-03:00`.
+
+Os resultados completos ficam em `evidence/guide-minio-lineage.json`, `guide-minio-columns.json` e `guide-minio-readback.json`, na pasta da frente. O ensaio da consulta composta terminou em `COMMIT` e retornou `No results`; por isso, o recibo de valores usa a leitura isolada seguinte.

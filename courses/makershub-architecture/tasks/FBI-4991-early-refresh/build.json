@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-10-24T21:08:19.740494+00:00",
+  "command": "npm run build && npm test",
+  "build_exit_code": 0,
+  "html_pages": 184,
+  "indexed_pages": 181,
+  "tests": {
+    "total": 15,
+    "passed": 15,
+    "failed": 0
+  },
+  "versions": {
+    "next": "16.4.3",
+    "nextra": "4.6.1",
+    "nextra-theme-docs": "4.6.1",
+    "react": "19.3.0"
+  },
+  "pilot_html_sha256": {
+    "jornadas/early-refresh/": "a83b499b564a25af2729b8a5a27b05ac6e57bdd10a0a206eaaa0c66ddf78a7c5",
+    "explicacoes/casos/early-refresh/": "5e19c838e15a51bc690d1352ec5ccbbb06c3823934f98ec07992f5e1cdc8c09b",
+    "tutoriais/casos/early-refresh/": "2debba36c3bcc9d9e253354aa7edadbbe75c7d5c7fb270b90a838b8c33d445ae",
+    "guias/casos/early-refresh/": "2ccd7cdb4b1c1237b761532a525f04113e92713296c9fdd499b4069e488aeb1d",
+    "referencia/casos/early-refresh/": "7b285adc99c9b94b922eefcea8d91c5add859f6171bca8fe87271727de875841"
+  },
+  "download_sha256": "0cdbac56f7b1347d41beb4c95dcc8a7c254bbb4fcd65365f75e3eb28eda229b0"
+}

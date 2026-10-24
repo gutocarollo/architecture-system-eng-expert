@@ -1,0 +1,1327 @@
+{
+  "scope": "Each of the 310 concepts is adjudicated against the actual operation and observable fields. Omitted names remain specific-practice PENDING; a family or a runnable unrelated command cannot close the gap.",
+  "observations": [
+    {
+      "case": "single-flight-cancel",
+      "probe": "historical-cancellation",
+      "names": "Single Flight|Cache Stampede Protection|Async/Await|Futures/Promises|Mutex",
+      "basis": "The exact source coalesces five async callers through a local mutex and a shared task; cancellation and producer call counts are asserted."
+    },
+    {
+      "case": "early-refresh",
+      "probe": "historical-refresh",
+      "names": "Refresh Ahead",
+      "basis": "The exact historical source starts refresh at 0.6 while the TTL ends at 1.0; the refreshed value is available at 1.05."
+    },
+    {
+      "case": "date-only",
+      "probe": "historical-date",
+      "names": "Published Language",
+      "basis": "The same civil-date wire value is interpreted at the frontend boundary, and remains distinct from a timestamp."
+    },
+    {
+      "case": "opportunity-entry",
+      "probe": "historical-identity",
+      "names": "Entity|Domain Policy|Idempotency Key",
+      "basis": "The historical function preserves OPP identity, refuses won/lost states and contrasts per-request keys with a per-entity claim."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "deduplicate",
+      "names": "Idempotency|Deduplication",
+      "basis": "Repeated deliveries are explicit inputs. The local effect must remain two operations and a debit of 150. Exactly-once refers only to this finite effect counter."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "transactional-inbox",
+      "names": "Transactional Inbox|Exactly Once Semantics",
+      "basis": "SQLite atomically records the message key and debit; duplicate consumption leaves two inbox rows, two effects and debit 150."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "commit-intention",
+      "names": "Transactional Outbox|Dual Write",
+      "basis": "A crash window loses the second independent write; one local transaction preserves the order and its outbox intention."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "compensate",
+      "names": "Compensating Transaction|Saga|Orchestration Saga",
+      "basis": "The local orchestrator debits, encounters a failed allocation and conditionally issues an offsetting credit."
+    },
+    {
+      "case": "reservation",
+      "probe": "version-conflict",
+      "names": "Compare-and-Swap / CAS|Optimistic Concurrency Control",
+      "basis": "The version expected by a stale writer differs from the committed version; the reread preserves the earlier credit."
+    },
+    {
+      "case": "reservation",
+      "probe": "fence",
+      "names": "Fencing Token|Fencing",
+      "basis": "The destination compares ordered generations 101 and 102 and rejects the delayed lower generation."
+    },
+    {
+      "case": "reservation",
+      "probe": "resource-key",
+      "names": "Reservation Pattern",
+      "basis": "Two actors target the same advisor/slot key; only one local claim is admitted."
+    },
+    {
+      "case": "consensus",
+      "probe": "majority-partition",
+      "names": "Consensus|Quorum|Split-Brain Prevention",
+      "basis": "The finite partition model tests a necessary majority-authority property, not either complete protocol; minority writes remain zero."
+    },
+    {
+      "case": "consensus",
+      "probe": "quorum-overlap",
+      "names": "Quorum Read/Write",
+      "basis": "Two reads and two writes among three members have at least one common member; intersection does not alone prove linearizability."
+    },
+    {
+      "case": "consensus",
+      "probe": "causal-versions",
+      "names": "Version Vector",
+      "basis": "Incomparable vectors expose two concurrent branches before their pointwise merge."
+    },
+    {
+      "case": "consensus",
+      "probe": "logical-clock",
+      "names": "Lamport Clock",
+      "basis": "Receiving clock 8 at clock 3 advances the receiver to 9; no wall-clock claim is made."
+    },
+    {
+      "case": "consensus",
+      "probe": "prepared-participant",
+      "names": "Two-Phase Commit / 2PC",
+      "basis": "A prepared participant lacking the coordinator decision remains uncertain; it cannot guess commit after a local timeout. This tests the blocking condition only."
+    },
+    {
+      "case": "consensus",
+      "probe": "gossip-membership",
+      "names": "Gossip Protocol|Peer-to-Peer",
+      "basis": "Equal peers exchange membership sets repeatedly and all three converge; no majority decision is involved."
+    },
+    {
+      "case": "consensus",
+      "probe": "stateless-request",
+      "names": "Stateless Services",
+      "basis": "A request routed to another process loses local session state; an external session owner makes both instances resolve the same user."
+    },
+    {
+      "case": "consensus",
+      "probe": "replica-lag",
+      "names": "Replication|Asynchronous Replication|Read Replica|Primary/Replica|Leader/Follower|Eventual Consistency",
+      "basis": "A primary update precedes replica application; the older replica read changes only after replay of that update."
+    },
+    {
+      "case": "consensus",
+      "probe": "session-read-version",
+      "names": "Monotonic Reads|Read-your-writes",
+      "basis": "The session requires the version it already observed or wrote, rejecting a route to an older replica."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "route-enrich-aggregate",
+      "names": "Content-Based Router|Message Router|Message Enricher|Aggregator",
+      "basis": "Six typed messages are routed to two destinations, enriched with an account and counted by destination."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "message-filter",
+      "names": "Message Filter",
+      "basis": "The negative-amount message is removed; two valid messages remain, totaling 150."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "message-splitter",
+      "names": "Splitter",
+      "basis": "One envelope becomes two individual order messages with the same batch correlation and amount total 150."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "retry-dlq",
+      "names": "Retry|Retry Queue|Dead Letter Queue|Poison Message Handling|Message Queue|Job Queue",
+      "basis": "A deque is consumed, poison is re-enqueued with a budget, and its third failure routes it to a separate collection."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "priority-queue",
+      "names": "Priority Queue",
+      "basis": "A heap selects urgent before standard and low, changing the actual processing order."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "delayed-queue",
+      "names": "Delayed Queue",
+      "basis": "A not-before threshold prevents dispatch at clock 3 and allows it at clock 5."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "admission",
+      "names": "Load Shedding",
+      "basis": "The finite-capacity admission decision accepts 20 and explicitly rejects 100 of 120 requests."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "demand-backpressure",
+      "names": "Backpressure",
+      "basis": "The producer advances only when the consumer creates capacity; all six tasks finish without rejection and the buffer stays at two."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "rate-window",
+      "names": "Rate Limiting|Throttling",
+      "basis": "The controlled clock enforces at most two admitted requests in each window, independently of buffer capacity. Throttling here uses rejection, not delayed pacing."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "consumer-topology",
+      "names": "Competing Consumers|Producer/Consumer",
+      "basis": "Unique tasks are assigned once to one of two consumers; this is work division, not broadcast."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "subscription-fanout",
+      "names": "Publish/Subscribe|Fan-out",
+      "basis": "Both audit and risk subscriptions actually receive both events, totaling four deliveries rather than two divided tasks."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "event-payload",
+      "names": "Event Notification|Event-Carried State Transfer|Integration Event",
+      "basis": "An ID-only notification requires a source lookup; the carried-state payload provides the fields this consumer needs with zero lookups."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "resequence-state",
+      "names": "Resequencer|Finite State Machine|State Machine",
+      "basis": "Known sequence metadata restores accepted/reserved/settled order and the transition guard rejects settled as the initial transition."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "retry-budget",
+      "names": "Exponential Backoff|Jitter|Circuit Breaker|Fail Fast",
+      "basis": "The model computes delays 1/2/4, adds fixed learning jitter and opens its circuit after the third failure, refusing further iterations."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "timeout-boundary",
+      "names": "Timeout",
+      "basis": "A real asyncio wait on an unset event ends in TimeoutError within the configured bound."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "deadline-budget",
+      "names": "Deadline Propagation",
+      "basis": "The child receives the remaining three units of its parent's deadline instead of a fresh ten-unit budget."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "dag-dependencies",
+      "names": "DAG|Pipeline|Pipe and Filter|Orchestrator",
+      "basis": "The dependency loop makes transform eligible after extract and publish after transform; no durable engine is claimed."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "cache-aside",
+      "names": "Cache Aside",
+      "basis": "The first miss loads and stores the source value; two subsequent hits avoid additional source calls."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "negative-cache",
+      "names": "Negative Caching",
+      "basis": "A distinct cached-absence sentinel suppresses the second and third source lookups for a nonexistent key."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "cache-warming",
+      "names": "Cache Warming",
+      "basis": "A preloaded position removes the first request-path source fetch."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "cache-expiry",
+      "names": "TTL Cache",
+      "basis": "A value with expiration 10 is rejected at clock 11 and the decision returns to its producer."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "cache-levels",
+      "names": "Cache Invalidation|Local Cache|Two-Level Cache",
+      "basis": "The local copy is removed and reloaded from the owner; both levels then hold value 2."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "write-policy",
+      "names": "Write Through|Write Behind / Write Back",
+      "basis": "The simulated crash discards buffered memory and contrasts the acknowledged durable balance in each write order."
+    },
+    {
+      "case": "ledger-projection",
+      "probe": "replay-events",
+      "names": "Append-Only Log|Domain Event|Event Sourcing",
+      "basis": "Three financial facts are replayed as the source of the resulting balance 900; the event history is preserved in the fixture."
+    },
+    {
+      "case": "ledger-projection",
+      "probe": "cqrs-handlers",
+      "names": "CQRS|Command Handler|Query Handler|Write Model",
+      "basis": "The command handler validates and updates one model, while a separate query handler exposes a projection contract with an observable lag and catch-up."
+    },
+    {
+      "case": "ledger-projection",
+      "probe": "projection-checkpoint",
+      "names": "Projection|Read Model|Materialized View|Precomputation|Denormalization",
+      "basis": "The materialized position advances by two missing events from 1000 to 900; the query value is computed ahead of its later read."
+    },
+    {
+      "case": "ledger-projection",
+      "probe": "snapshot-replay",
+      "names": "Snapshotting",
+      "basis": "The position-2 snapshot plus the remaining debit reconstructs 900 with one event rather than three."
+    },
+    {
+      "case": "ledger-projection",
+      "probe": "durable-transaction",
+      "names": "Write-Ahead Log (WAL)",
+      "basis": "SQLite reports WAL mode and rollback preserves the prior committed cents. This is not PostgreSQL WAL recovery or a formal log-before-page-write trace."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "shard-route",
+      "names": "Sharding|Hash Sharding|Horizontal Partitioning",
+      "basis": "A modulo ownership rule divides rows by key and routes key 7 to one of three logical partitions."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "consistent-ring",
+      "names": "Consistent Hashing",
+      "basis": "The actual virtual-node ring reassigns only the keys whose successor becomes the new node, contrasting the modulo remap count."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "covering-index",
+      "names": "Indexing|Covering Index",
+      "basis": "The SQLite query plan changes from SCAN to SEARCH USING COVERING INDEX after adding the key-and-value index."
+    },
+    {
+      "case": "safe-release",
+      "probe": "expand-contract",
+      "names": "Expand/Contract",
+      "basis": "The old reader loses amount when it is removed; the expanded representation preserves both reader contracts."
+    },
+    {
+      "case": "safe-release",
+      "probe": "shadow-parity",
+      "names": "Shadow Traffic|Shadow Deployment|Parallel Run|Dark Launch",
+      "basis": "The primary result remains visible while a pure shadow computation executes and exposes the result mismatch; no side effect is delegated to the shadow."
+    },
+    {
+      "case": "safe-release",
+      "probe": "ab-cohorts",
+      "names": "A/B Deployment",
+      "basis": "Stable A/B cohorts actually receive different user-visible responses, rather than only running a hidden shadow."
+    },
+    {
+      "case": "safe-release",
+      "probe": "progressive-route",
+      "names": "Canary Release|Progressive Delivery|Feature Flags",
+      "basis": "A traffic predicate selects five of 100 requests for the new version and preserves an old route for rollback."
+    },
+    {
+      "case": "access-policy",
+      "probe": "object-authorization",
+      "names": "RBAC|ABAC|ReBAC|Policy-Based Access Control|Least Privilege",
+      "basis": "The fixture evaluates role, tenant attributes and the relationship to the specific account, rejecting the cross-tenant object."
+    },
+    {
+      "case": "access-policy",
+      "probe": "credential-boundary",
+      "names": "Short-Lived Credentials",
+      "basis": "The verifier rejects the expired credential and wrong audience. Signature authentication remains outside this unsigned claims model."
+    },
+    {
+      "case": "access-policy",
+      "probe": "least-network-path",
+      "names": "Network Segmentation|Defense in Depth",
+      "basis": "An explicit allowed-edge model rejects direct browser access to the ledger in addition to the object policy; no live firewall is claimed."
+    },
+    {
+      "case": "diagnostics",
+      "probe": "correlate-retries",
+      "names": "Correlation ID|Request ID|Structured Logging|Centralized Logging",
+      "basis": "Structured records carry separate request and operation identities, allowing three spans from two attempts to be correlated in one collected set."
+    },
+    {
+      "case": "diagnostics",
+      "probe": "measure-signals",
+      "names": "Metrics|RED Method (Rate, Errors, Duration)",
+      "basis": "The calculation uses request grain: three spans, two requests, one operation and one failed request; request error ratio is 1/2."
+    },
+    {
+      "case": "diagnostics",
+      "probe": "probe-business-path",
+      "names": "Health Check|Synthetic Monitoring",
+      "basis": "The process-level health result is compared to the controlled business-path result; healthy process does not imply a successful order path."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "value-object",
+      "names": "Value Object|Immutable Data",
+      "basis": "The frozen monetary type rejects negative construction, compares values by components and prevents mutation."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "message-translation",
+      "names": "Message Translator",
+      "basis": "An actual provider message is transformed into the consumer schema, renaming fields and converting cents into BRL."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "read-through",
+      "names": "Read Through",
+      "basis": "The cache read API invokes and stores a loader result; the caller only uses that cache API."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "provider-contract",
+      "names": "Anti-Corruption Layer",
+      "basis": "The adapter translates external AUTHORISED and integer cents into the local accepted state and BRL amount before domain processing."
+    },
+    {
+      "case": "access-policy",
+      "probe": "oauth-code-pkce",
+      "names": "OAuth2",
+      "basis": "The local authorization-code model binds verifier and redirect, permits one code redemption and issues an audience/scope-limited signed access token.",
+      "action": "Troque o código por token usando o verificador PKCE e a redirect URI vinculada. Antes da troca válida, tente os dois valores errados; depois tente reutilizar o código.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "A teaching model of RFC 6749/7636 message checks; it is not an authorization-server library, browser login, refresh flow or production OAuth security implementation."
+    },
+    {
+      "case": "access-policy",
+      "probe": "oidc-id-token-validation",
+      "names": "OIDC",
+      "basis": "The ID-token validation property checks issuer, audience, nonce, expiration and the configured HS256 signature before accepting the subject.",
+      "action": "Valide o ID token assinado e repita com nonce diferente, audience diferente e assinatura alterada. Confira que conhecer um sub no JSON não basta para aceitar a identidade.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "The synthetic client uses a preconfigured shared key. Discovery, JWKS, key negotiation, all claim rules and an actual OpenID Provider are not implemented."
+    },
+    {
+      "case": "access-policy",
+      "probe": "signed-key-rotation",
+      "names": "Secrets Rotation",
+      "basis": "A signed credential remains valid through the overlap and becomes inadmissible after its signing key is removed from trust.",
+      "action": "Emita tokens com old e new, aceite ambos na janela de sobreposição e retire old do verificador. Confira a validação criptográfica, a recusa do token antigo e a recusa da assinatura alterada.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "Keys are fixed synthetic HMAC material. Secret storage, asymmetric key distribution and coordinated live-service rotation are outside the experiment."
+    },
+    {
+      "case": "access-policy",
+      "probe": "signed-service-identity",
+      "names": "Service-to-Service Identity",
+      "basis": "The resource authenticates a signed service principal and validates its intended audience/scope rather than trusting a caller-supplied service label.",
+      "action": "Autentique o cliente de serviço antes de emitir a credencial e valide sua assinatura no recurso. Compare com aceitar um nome de serviço apenas declarado pelo chamador.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "Client secrets and tokens are synthetic; there is no real identity provider, protected key store or live service deployment."
+    },
+    {
+      "case": "access-policy",
+      "probe": "downscoped-token-exchange",
+      "names": "Token Exchange",
+      "basis": "The exchanged credential is bound to the target resource and a narrower delegated scope, preserving subject and actor identities.",
+      "action": "Valide o token destinado ao gateway e troque-o por uma credencial mais curta para order-api. Confira o usuário preservado, o ator do serviço e a redução de escopo.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "This is an RFC 8693-style claim transformation model, without a token-exchange endpoint or a complete delegation authorization policy."
+    },
+    {
+      "case": "access-policy",
+      "probe": "verify-internal-request",
+      "names": "Zero Trust",
+      "basis": "Network location does not replace per-request identity and resource-policy verification in the tested boundary.",
+      "action": "Marque os dois pedidos como internos. Recuse o serviço rogue mesmo com token assinado válido e aceite somente o principal e a permissão esperados para o recurso.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "This demonstrates one zero-trust access property, not an organization-wide zero-trust architecture, device posture or continuous risk engine."
+    },
+    {
+      "case": "access-policy",
+      "probe": "bastion-admin-hop",
+      "names": "Bastion Host",
+      "basis": "Administrative access is funneled through an authenticated jump boundary and direct access to the protected target is denied.",
+      "action": "Tente o acesso administrativo direto e depois os dois saltos permitidos via bastion. Repita o primeiro salto com uma pessoa sem papel administrativo.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "The graph executes authorization and routing decisions, not SSH, a real bastion host, firewall rules or session recording."
+    },
+    {
+      "case": "access-policy",
+      "probe": "mutual-tls-peer-certs",
+      "names": "mTLS",
+      "basis": "Real SSLContext handshakes reject a client missing its certificate when mutual verification is required and authenticate both trusted peers before exchanging data.",
+      "action": "Execute três handshakes TLS por socketpair: servidor sem exigir cliente, servidor exigindo cliente ausente e cliente com certificado confiável. Confira a autenticação dos dois pares e a troca de ORDER-1.",
+      "source_file": "labs/architecture/models_security.py",
+      "scope_limit": "Certificates and keys are generated only in a temporary directory and removed. No listening port, external connection, production CA or service configuration is changed."
+    },
+    {
+      "case": "cache-policy",
+      "probe": "distributed-cache-owner",
+      "names": "Distributed Cache",
+      "basis": "Different logical workers use the same partition owner and share its populated cache entry, unlike independent per-worker caches.",
+      "action": "Faça dois workers lógicos consultarem a mesma posição pelo dono da chave no cache compartilhado. Confira que a segunda leitura não volta à fonte.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The owners are local dictionaries; the experiment isolates shared-owner cache semantics without claiming a networked cache product or cross-machine durability."
+    },
+    {
+      "case": "consensus",
+      "probe": "paxos-accepted-carry",
+      "names": "Paxos",
+      "basis": "A prepare quorum reports accepted values; the proposer carries the value at the highest accepted ballot rather than inventing a different value.",
+      "action": "Prepare a rodada 8 em dois acceptors que já aceitaram ORDER-A na rodada 7. Proponha ORDER-B e confira por que o novo proposer precisa carregar o valor previamente aceito.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "A finite single-decree Paxos schedule with reliable local messages; persistence, liveness and arbitrary faults are not implemented."
+    },
+    {
+      "case": "consensus",
+      "probe": "raft-log-prefix",
+      "names": "Raft",
+      "basis": "The follower checks the previous index/term before appending; a retry from a matching prefix replaces conflicting suffix entries.",
+      "action": "Envie AppendEntries com prevLogIndex=2 e prevLogTerm=3 para uma réplica cujo termo no índice 2 é 2. Confira a recusa e a repetição a partir do prefixo comum.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This isolates Raft log matching, without election, durable storage, commitment or a complete replicated state machine."
+    },
+    {
+      "case": "consensus",
+      "probe": "election-one-vote",
+      "names": "Leader Election",
+      "basis": "A voter remembers its vote in the term and refuses a second different candidate in that term.",
+      "action": "Faça B votar em A no termo 2 e depois receber C no mesmo termo. Confira que B não vota nos dois candidatos e que só A reúne a maioria.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The fixture does not implement log freshness, randomized timeouts, persistence or all election transitions."
+    },
+    {
+      "case": "consensus",
+      "probe": "three-phase-precommit",
+      "names": "Three-Phase Commit / 3PC",
+      "basis": "The extra precommit state distinguishes the modeled 3PC decision from an uncertain 2PC prepare, under the explicit timing and no-partition assumptions.",
+      "action": "Faça os dois participantes reconhecerem canCommit e preCommit. Compare a decisão no modelo síncrono declarado com o caso em que uma partição ainda é possível.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This is not a partition-tolerant atomic commit implementation; the autonomous commit decision is not generalized outside those assumptions."
+    },
+    {
+      "case": "consensus",
+      "probe": "hybrid-clock-receive",
+      "names": "Hybrid Logical Clock",
+      "basis": "The receive rule combines the physical maximum with a logical counter when the received wall component wins.",
+      "action": "Receba o evento 1010:3 com relógio físico em 1005 e relógio local em 1006:1. Confira a parte física máxima e o contador lógico que conserva a ordem causal.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The one receive schedule does not synchronize physical clocks or prove a distributed implementation under every skew pattern."
+    },
+    {
+      "case": "consensus",
+      "probe": "synchronous-replica-ack",
+      "names": "Synchronous Replication",
+      "basis": "The writer acknowledgement is ordered after this replica applies the write, providing the tested after-ack visibility property.",
+      "action": "Mantenha a réplica na versão 1 enquanto o primário está na 2. Confira que a confirmação sincronizada espera a aplicação e que a leitura dessa réplica após a confirmação vê a versão 2.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This bounded primary/replica schedule does not alone prove linearizability, all replica routing or consistency under partitions."
+    },
+    {
+      "case": "consensus",
+      "probe": "cascading-replication",
+      "names": "Cascading Replication",
+      "basis": "Replication follows A to B to C, exposing the intermediate replica as the source of the final replica.",
+      "action": "Aplique a versão de A em B e só depois replique B em C. Observe que C depende do intermediário, em vez de consultar diretamente A.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The model has one ordered update, no WAL streams, failover or network delay."
+    },
+    {
+      "case": "consensus",
+      "probe": "multi-writer-reconcile",
+      "names": "Active/Active|Multi-Leader|Multi-Primary",
+      "basis": "Both sites accept writes and reconciliation preserves distinct additive credits instead of choosing one absolute snapshot.",
+      "action": "Aceite um crédito distinto em A e B. Compare a última substituição absoluta de saldo com a reconciliação das identidades dos dois créditos.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This merge is valid only for the declared independent credits; noncommutative debits and invariants need a business conflict policy."
+    },
+    {
+      "case": "consensus",
+      "probe": "owner-latest-read",
+      "names": "Strong Consistency",
+      "basis": "Every read in this single-owner schedule observes the latest preceding completed write, independently of a client session hint.",
+      "action": "Leia 1.000, conclua o crédito de 100 no dono serializado e faça outra leitura sem carregar um token de sessão. Confira a versão e a ordem das operações no histórico.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This is one serialized-owner history, not a universal linearizability proof or a distributed strong-consistency system under failures."
+    },
+    {
+      "case": "consensus",
+      "probe": "standby-recovery-work",
+      "names": "Cold Standby|Warm Standby|Hot Standby|Active/Passive|Failover",
+      "basis": "Standby readiness changes the restore/start/catch-up work required before the role transition.",
+      "action": "Recupere a mesma versão com uma cópia fria, uma morna e uma quente. Execute os passos que faltam em cada uma antes de promover seu papel para primário.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The steps are state transitions in a finite model, not measured RTO, restored backups or real database promotion."
+    },
+    {
+      "case": "consensus",
+      "probe": "automatic-failover-detection",
+      "names": "Automatic Failover|Heartbeat",
+      "basis": "A failure detector based on heartbeat age triggers the modeled role transition automatically.",
+      "action": "Avance o relógio de 0 para 6 com prazo 5, detecte o heartbeat antigo e promova a cópia que já alcançou a versão necessária.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition."
+    },
+    {
+      "case": "consensus",
+      "probe": "failure-domain-spread",
+      "names": "Multi-AZ|Multi-Region",
+      "basis": "Replica placement across different failure domains leaves one instance after the declared zone or region outage.",
+      "action": "Distribua as duas instâncias entre zonas e regiões distintas e remova uma zona ou região inteira. Compare as instâncias que sobrevivem aos mesmos domínios de falha.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count."
+    },
+    {
+      "case": "diagnostics",
+      "probe": "golden-use-resource-signals",
+      "names": "Golden Signals|USE Method (Utilization, Saturation, Errors)",
+      "basis": "The sample distinguishes healthy process status from traffic/latency/errors/saturation and from resource utilization/saturation/errors.",
+      "action": "Mantenha o processo saudável enquanto as duas vagas estão ocupadas e três pedidos aguardam. Calcule tráfego, duração, erros, utilização e saturação em seus grãos declarados.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "These are controlled sample measurements, not production percentiles, SLOs or a capacity benchmark."
+    },
+    {
+      "case": "diagnostics",
+      "probe": "opentelemetry-sdk-export",
+      "names": "OpenTelemetry|Distributed Tracing",
+      "basis": "The real SDK exports two parent/child spans in one trace, propagates context and records one failed span for one request.",
+      "action": "Execute o SDK OpenTelemetry fixado, injete e extraia traceparent entre gateway e provider e exporte para memória. Confira o mesmo trace, o parent span e o erro, sem confundir dois spans com duas requisições.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The exporter is in memory with SDK 1.45.1. There is no collector, network service or claim of production instrumentation."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvc-controller-model-view",
+      "names": "MVC",
+      "basis": "The controller changes the model and selects a view; the view renders a DTO and never owns the write.",
+      "action": "Execute o crédito pelo controlador e confira que a apresentação recebe apenas os dados finais, sem realizar a escrita do modelo.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "A local role model; routing, templates and a web framework are not implemented."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvp-passive-view",
+      "names": "MVP",
+      "basis": "The presenter loads and prepares the model result; a passive view only receives the display value.",
+      "action": "Substitua a view por uma lista que recebe chamadas do presenter. Confira quem lê o modelo e quem transforma a informação para apresentação.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The recording view models the interface boundary rather than a full UI toolkit."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "mvvm-binding",
+      "names": "MVVM",
+      "basis": "A binding propagates an observable view-model property change into the view.",
+      "action": "Altere a propriedade balance do view model e observe o callback de binding atualizar a apresentação sem uma chamada explícita de renderização no comando.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The model covers one-way binding; validation, two-way binding and UI lifecycle remain outside it."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "pac-agent-controls",
+      "names": "PAC",
+      "basis": "Each agent owns abstraction, presentation and control; parent control coordinates the child agents.",
+      "action": "Faça dois controles filhos atualizarem suas abstrações e peça ao controle pai para compor o total. Compare com a última escrita isolada de uma apresentação compartilhada.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "This is a small hierarchical PAC model, not a recommendation to adopt PAC in MakersHub."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "inward-ports-and-layers",
+      "names": "Layered / N-Tier|Clean Architecture|Onion Architecture|Hexagonal / Ports & Adapters",
+      "basis": "Ordered invocation exhibits layers; the domain depends on its port and two replaceable adapters implement that port, exhibiting the inward dependency property of Clean/Onion/Hexagonal designs.",
+      "action": "Siga presentation, application e domain e troque a implementação da porta de gravação entre dois adaptadores. Confira a regra e os imports do domínio.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "Only these boundary properties are modeled. The four styles have further distinctions not erased by sharing the exercise."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "module-public-contract",
+      "names": "Modular Monolith|Component-Based Architecture|Vertical Slice Architecture",
+      "basis": "Public component contracts separate modules in one process; the order feature groups the steps of one vertical use case.",
+      "action": "Execute a ordem pelo contrato público do módulo e atualize posições pelo contrato do outro módulo. Examine o agrupamento da validação, do handler e da persistência na fatia de ordens.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The model demonstrates module and feature boundaries, not automatic proof of a repository-wide architecture."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "microkernel-plugin",
+      "names": "Microkernel / Plugin Architecture",
+      "basis": "A stable kernel invokes a registered extension through a shared contract.",
+      "action": "Registre um plugin premium no catálogo e execute a política pelo contrato já usado pelo núcleo. Confira que o dispatcher não ganha um novo condicional.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "Isolation, signing, lifecycle and dependency policy of untrusted plugins are not implemented."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "blackboard-specialists",
+      "names": "Blackboard Architecture",
+      "basis": "Independent specialists read and contribute to a shared problem state until their prerequisites become available.",
+      "action": "Execute os especialistas na ordem em que alocação tenta agir antes de risco. Observe o quadro de fatos permitir que a próxima rodada conclua a alocação.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The fixture has monotonic facts and two rounds; conflict resolution and an unrestricted expert scheduler are outside it."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "actor-mailbox-writer",
+      "names": "Actor Model|Single Writer Principle",
+      "basis": "A private state owner serializes messages and provides a single writer for this actor.",
+      "action": "Envie dois incrementos ao ator e deixe somente seu consumidor de mailbox escrever o estado. Compare com dois leitores que gravam a partir do mesmo valor antigo.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The mailbox is local; supervision, distributed actors and message durability are not claimed."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "event-driven-handler",
+      "names": "Event-Driven Architecture",
+      "basis": "The producer emits a fact and a subscribed handler reacts to it asynchronously in the local schedule.",
+      "action": "Aceite o crédito no produtor e observe a projeção só avançar quando seu handler recebe o evento. Inspecione que o produtor não chama a projeção diretamente.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "Transport, delivery guarantees and cross-process execution are not part of this event-driven property model."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "service-boundaries",
+      "names": "Microservices|SOA",
+      "basis": "An explicit business service owns its store and operation contract; the other service failure does not mutate or prevent its operation in this controlled schedule.",
+      "action": "Execute o mesmo contrato de conta por duas operações e provoque uma falha no serviço vizinho. Confira que a leitura do dono da conta continua independente.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "serverless-invocation",
+      "names": "Serverless",
+      "basis": "The handler tolerates fresh invocation memory and keeps authoritative state outside that ephemeral environment.",
+      "action": "Inicie cada invocação com memória local nova e conserve o crédito pela porta externa. Confira que a segunda invocação vê 1.100 sem depender de um processo aquecido.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "No cloud runtime, billing, autoscaling or vendor-specific execution contract is simulated."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "space-based-grid",
+      "names": "Space-Based Architecture",
+      "basis": "A partitioned memory grid owns data and co-locates processing; the same owner partitions can serve shared cache reads to different logical workers.",
+      "action": "Distribua as doze entradas pelo dono da chave e execute a alteração dentro de cada partição em memória. Confira a distribuição e a soma sem consultar um banco central.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "The grid is a finite local model, without durable replication, network partitions or a deployed distributed-cache product."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "cell-failure-boundary",
+      "names": "Cell-Based Architecture",
+      "basis": "Independent cells contain one failure while the other cell completes its own request.",
+      "action": "Provoque a falha da célula A e continue o pedido destinado à célula B. Confira que a recuperação não redireciona silenciosamente dados de A para B.",
+      "source_file": "labs/architecture/models_architecture.py",
+      "scope_limit": "Capacity, routing safety, replication and failover between real regions remain outside this local failure-boundary experiment."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "aggregate-root-invariant",
+      "names": "Aggregate|Aggregate Root",
+      "basis": "The root owns the public mutation operation and checks the invariant spanning its children before accepting the next item.",
+      "action": "Tente acrescentar 50 e 80 a uma cesta com limite 100. Compare a escrita direta dos filhos com a única entrada pública da raiz, que preserva o total válido.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "domain-service-transfer",
+      "names": "Domain Service",
+      "basis": "A domain operation involving two entities preserves the stated transfer invariant without belonging naturally to either entity alone.",
+      "action": "Transfira 100 entre duas entidades pelo serviço de domínio e confira a conservação do total, em vez de creditar o destino isoladamente.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "Only an in-memory operation is executed; durable atomic transfer, fees and real financial rules are not claimed."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "repository-storage-contract",
+      "names": "Repository",
+      "basis": "The repository presents a domain collection contract while storage representation changes behind it.",
+      "action": "Troque o armazenamento entre dicionário e lista de linhas mantendo get/save e a entidade Account usados pela operação. Confira 1.100 nas duas implementações.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The adapters are local fakes, without SQL mapping, identity maps or unit-of-work concurrency."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "application-service-order",
+      "names": "Application Service",
+      "basis": "The application service coordinates the use case and calls domain behavior before persistence instead of embedding a write before validation.",
+      "action": "Envie um comando inválido ao serviço de aplicação. Siga carregamento, validação e rejeição e confira que ele não manda persistir uma operação recusada.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The ordering model does not supply an ORM transaction, authentication or a production application layer."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "domain-factory-validity",
+      "names": "Factory",
+      "basis": "A factory centralizes the valid construction of the domain object and rejects invalid combinations.",
+      "action": "Construa a transferência pela fábrica e tente repetir com valor negativo. Confira que uma transferência inválida não chega a existir pelo contrato público.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The construction rule belongs only to this hypothetical transfer fixture."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "specification-reuse",
+      "names": "Specification",
+      "basis": "One named criterion is reused across selection and validation, eliminating the duplicated inconsistent predicate in this fixture.",
+      "action": "Aplique a mesma specification na seleção e na validação das três contas fictícias. Confira que a conta inativa deixa de aparecer como candidata em apenas um caminho.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The threshold is a synthetic teaching rule, not an advisor or customer eligibility rule from Faz."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "context-contract-change",
+      "names": "Bounded Context|Context Map|DDD|Ubiquitous Language|Customer/Supplier",
+      "basis": "An actual schema change exposes affected consumers; bounded contexts give available different meanings, and the supplier/consumer agreement restores explicit contracts and a shared vocabulary within each context.",
+      "action": "Altere o contrato do fornecedor de available para settled_balance e reserved_balance. Execute os dois consumidores, identifique os quebrados no mapa e adapte os significados de disponibilidade em cada contexto.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The context map and language belong to this hypothetical business exercise. They do not assert the canonical Faz glossary or a historical organizational decision."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "conformist-contract",
+      "names": "Conformist",
+      "basis": "The downstream deliberately adopts the upstream vocabulary and schema, including its coupling cost.",
+      "action": "Adapte o consumidor para usar diretamente provider_state=AUTHORISED, sem criar tradução local. Compare essa escolha com o adaptador semântico do caso anterior.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The exercise demonstrates the relationship choice, not a recommendation to accept every provider concept."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "separate-ways-change",
+      "names": "Separate Ways",
+      "basis": "Choosing separate ways prevents an unrelated context from inheriting the other context change through a shared mutable object.",
+      "action": "Mude a política de taxa de um contexto e execute o outro. Compare o objeto compartilhado acidentalmente com contratos independentes sem integração.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "Duplication has a maintenance cost; this fixture does not decide the real organizational boundary."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "shared-kernel-impact",
+      "names": "Shared Kernel",
+      "basis": "The shared kernel makes a small domain rule genuinely shared and exposes the joint impact of changing it.",
+      "action": "Execute os dois consumidores com a mesma regra compartilhada e altere o arredondamento do kernel. Observe que ambos mudam e precisam do mesmo acordo de versão.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "The rounding is synthetic. Joint ownership and release coordination are required rather than inferred from a common helper."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "open-host-service",
+      "names": "Open Host Service",
+      "basis": "A stable public service contract supports multiple consumers while internal representation changes behind it.",
+      "action": "Altere o armazenamento interno para settled_cents e mantenha uma operação pública versionada para os dois clientes. Confira que a forma interna não vaza para o contrato público.",
+      "source_file": "labs/architecture/models_domain.py",
+      "scope_limit": "Version governance, authentication and remote transport are not provided by this local contract exercise."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "rest-resource-methods",
+      "names": "REST",
+      "basis": "Resource paths, method semantics and response status are explicit; GET does not become an operation that writes.",
+      "action": "Leia o recurso por GET, crie outro por POST e tente um método não atendido. Confira a ausência de escrita no GET e os códigos 200, 201 e 405.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "Requests are local dictionaries and function calls, without an HTTP server, caching intermediaries or complete REST constraints."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "rpc-operation-contract",
+      "names": "RPC|Request/Reply",
+      "basis": "The dispatcher invokes an explicit operation and returns its result to the matching requester.",
+      "action": "Envie a operação reserve com seus parâmetros e correlacione a resposta com REQUEST-1. Diferencie esse contrato por operação da rota de recurso do exercício REST.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "The finite request/reply dispatcher does not implement a remote transport, deadlines or an RPC framework."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "gateway-route-offload",
+      "names": "API Gateway|Gateway Routing|Gateway Offloading|Reverse Proxy|API Gateway Security",
+      "basis": "The entry point routes requests, offloads authentication checks and forwards the accepted method/payload to the selected backend.",
+      "action": "Tente uma chamada sem permissão e depois chamadas para ordens e posições. Confira que o gateway recusa antes do backend, escolhe a rota e preserva método, corpo e resposta no encaminhamento.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "This models gateway/proxy properties, not a deployed reverse proxy, token verification, TLS termination or every HTTP forwarding rule."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "bff-composed-view",
+      "names": "Backend for Frontend (BFF)|API Composition|Gateway Aggregation",
+      "basis": "A server-side composition calls two owners and returns a client-specific view, reducing client round trips without pretending the backend calls disappear.",
+      "action": "Monte a mesma visão a partir de posição e ordens para web e mobile. Observe uma chamada do cliente e os formatos distintos preparados no servidor.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "Partial failures, freshness and authorization of each constituent service need separate contracts."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "federated-entity-key",
+      "names": "GraphQL Federation",
+      "basis": "Entity-reference resolution joins fields owned by different subgraphs through the declared entity key instead of a display label.",
+      "action": "Passe a representação da entidade Account com sua chave aos dois subgraphs lógicos e componha balance e open_orders pelo mesmo identificador.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "This is the entity-key resolution property of federation. It does not include a GraphQL parser, supergraph schema, query planner or Apollo runtime."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "hypermedia-affordance",
+      "names": "HATEOAS",
+      "basis": "The representation exposes state-dependent action links and the client follows an available relation rather than hardcoding every transition.",
+      "action": "Mude a ordem de accepted para settled e deixe o cliente procurar a relação cancel na representação recebida. Confira que ele não inventa uma ação que o servidor deixou de oferecer.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "The exercise covers one affordance and not an entire hypermedia API or authorization policy."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "poll-vs-long-poll",
+      "names": "Polling|Long Polling",
+      "basis": "Polling issues repeated requests; long polling holds one request until the result becomes available.",
+      "action": "Consulte três vezes até a posição existir e compare com uma requisição que aguarda o evento de atualização antes de responder.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "The wait uses a local asyncio event, with no HTTP timeout, intermediary buffering or reconnect loop."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "sse-event-resume",
+      "names": "Server-Sent Events",
+      "basis": "SSE event records carry IDs and data; a server can honor the last received ID when selecting the resumed stream.",
+      "action": "Codifique e leia registros id/event/data, desconecte depois do id 1 e retome com esse cursor. Confira que somente o id 2 é entregue de novo ao cliente.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "The record parser is local. HTTP streaming, browser EventSource, retry timing and proxy behavior are not executed."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "websocket-duplex-frames",
+      "names": "WebSocket",
+      "basis": "Two independent text-frame directions share the duplex model; client frames are masked and server frames are decoded without a new poll.",
+      "action": "Envie um frame de texto mascarado do cliente e um frame independente do servidor. Decodifique os dois sentidos sem criar uma nova consulta para a mensagem do servidor.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "Only small unfragmented text frames are modeled, without the HTTP upgrade handshake, extensions, control frames or a production WebSocket implementation."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "signed-webhook-callback",
+      "names": "Webhook",
+      "basis": "The provider pushes the event to a callback; signature verification precedes the receiver effect and the event identity suppresses a repeat.",
+      "action": "Receba o callback assinado, repita a mesma entrega e altere a assinatura. Confira um único efeito e a recusa 401 da mensagem que não passa na verificação.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "All keys and payloads are synthetic. Timestamp replay windows, secret distribution, TLS and a live callback server are not implemented."
+    },
+    {
+      "case": "order-boundaries",
+      "probe": "sidecar-outbound-policy",
+      "names": "Sidecar|Ambassador|Service Mesh",
+      "basis": "A companion outbound proxy adds transport policy and identity; distributing the same policy to both companion proxies exhibits one mesh control/data-plane property.",
+      "action": "Faça cada workload usar seu proxy de saída. Atualize a política nos dois proxies e confira identidade, versão e resposta sem alterar a operação de negócio.",
+      "source_file": "labs/architecture/models_api.py",
+      "scope_limit": "The proxies are logical local companions, not separate pods or a deployed service mesh. mTLS has its own distinct experiment."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "tcc-resource-states",
+      "names": "TCC — Try/Confirm/Cancel",
+      "basis": "Try holds resources; Confirm consumes the hold, while Cancel releases the same held resources.",
+      "action": "Reserve dinheiro e unidade na fase Try. Siga uma cópia pela confirmação e outra pelo cancelamento; confira quais recursos ficam disponíveis em cada caminho.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The two local outcomes model one reservation contract; distributed recovery, timeout races and idempotent callbacks remain separate obligations."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "at-most-once-loss",
+      "names": "At-Most-Once Delivery",
+      "basis": "At most one attempt avoids repeat delivery in this fixture but can lose the operation entirely.",
+      "action": "Perdida a confirmação, compare repetir sem deduplicação com fazer somente uma tentativa. Depois perca a própria entrega e observe que nenhuma tentativa adicional a recupera.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This is a sender-attempt model, not a broker delivery guarantee or proof of the external effect."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "cdc-committed-change",
+      "names": "Change Data Capture (CDC)|CDC Migration|Dual Write Migration",
+      "basis": "A database trigger captures only the committed after-image visible to the feed reader, allowing a destination to catch up instead of relying on a second independent application write.",
+      "action": "Atualize a origem dentro de uma transação que faz rollback e depois numa que faz commit. Leia o feed capturado e aplique o valor no destino da migração.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "outbox-cdc-feed",
+      "names": "Outbox + CDC",
+      "basis": "The transactional outbox is the captured table, and its committed insert becomes the CDC feed item.",
+      "action": "Grave a ordem e a outbox na mesma transação e acompanhe o capturador da outbox gerar EVENT-1 no feed com uma posição de retomada.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The learning connector is a SQLite trigger plus feed query; transport, source-log offsets and recipient deduplication are not implemented."
+    },
+    {
+      "case": "order-delivery",
+      "probe": "at-least-once-ack-retry",
+      "names": "At-Least-Once Delivery",
+      "basis": "Retry after an ambiguous acknowledgement restores acknowledgement while admitting repeat delivery of the same event.",
+      "action": "Entregue EVENT-1 e perca somente sua confirmação. Repita até receber a confirmação e conte as duas entregas da mesma identidade.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "Only this bounded acknowledgement-loss schedule is modeled; an exactly-once effect still needs the recipient transaction or idempotency mechanism."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "bulkhead-independent-pools",
+      "names": "Bulkhead",
+      "basis": "A saturated dependency consumes only its own budget; the independent order pool retains capacity.",
+      "action": "Ocupe as duas vagas de cotações e tente executar uma ordem. Compare o pool global com os pools independentes de cotações e ordens.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The actual semaphore admissions are local. Memory, CPU and cross-process resource isolation require additional budgets."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "watchdog-restart",
+      "names": "Self-Healing|Watchdog",
+      "basis": "The supervisor detects the failed local state and rearms it through a replacement generation.",
+      "action": "Pare o serviço lógico e execute a supervisão. Confira que ela cria uma nova geração e que a leitura de saúde volta a responder.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fallback-limited-function",
+      "names": "Fallback|Graceful Degradation",
+      "basis": "The fallback preserves a deliberately reduced read function and labels the stale result instead of silently claiming full service.",
+      "action": "Provoque o timeout da fonte atual. Confira que a consulta limitada usa o último valor conhecido, sinaliza que ele não é atual e desabilita operações que exigiriam a informação fresca.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The cached value is synthetic; the acceptable age and permitted actions need the actual product contract."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "chaos-delivery-experiment",
+      "names": "Chaos Engineering",
+      "basis": "A declared steady-state invariant is observed before/after an intentional fault and recovery experiment.",
+      "action": "Declare uma ordem e um efeito como estado esperado, injete a perda da primeira entrega e execute a recuperação com repetição. Confira a violação inicial e a recuperação sem débito duplicado.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The fault is injected only in a controlled local model, not in a production system or distributed chaos platform."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "stream-offset-resume",
+      "names": "Event Streaming",
+      "basis": "An ordered event log and an explicit consumer position let the consumer resume the remaining events.",
+      "action": "Consuma o offset 0, interrompa e retome somente depois do checkpoint. Confira offsets 1 e 2 e a posição 130, sem repetir o crédito inicial.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The log is a local immutable fixture. Retention, partitioned offsets, broker transactions and durable checkpoint atomicity are separate concerns."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "batch-stream-emission",
+      "names": "Batch Processing|Stream Processing",
+      "basis": "Batch emits after the chosen finite input set completes; stream processing updates the result as each event arrives.",
+      "action": "Processe os três eventos como um lote completo e depois um por vez. Observe quando cada modelo produz uma posição e confira o mesmo total final.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The finite input demonstrates emission semantics rather than an unbounded engine, watermark or event-time guarantee."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "mapreduce-grouping",
+      "names": "MapReduce",
+      "basis": "The map/group/reduce stages aggregate values per key instead of confusing all partial values with one total.",
+      "action": "Mapeie as ordens para pares de tipo e valor, agrupe pela chave e reduza cada grupo. Confira buy=150 e sell=20.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "This is local grouping, not a distributed shuffle, combiner or fault-tolerant MapReduce runtime."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "lambda-disjoint-views",
+      "names": "Lambda Architecture",
+      "basis": "Batch and speed-layer views cover disjoint input positions before being merged, preventing double counting at their boundary.",
+      "action": "Defina o cutoff no offset 1, mantenha o lote até esse ponto e a visão rápida somente depois dele. Compare a soma sobreposta incorreta com 80 + 50 = 130.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The example models the Lambda view boundary, without two deployed engines, backfill orchestration or full event-time handling."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "kappa-one-log-replay",
+      "names": "Kappa Architecture",
+      "basis": "One retained event log and one processing path support replay and ongoing processing rather than a separate batch algorithm.",
+      "action": "Corrija a interpretação do débito e reexecute o mesmo processador sobre o log. Acrescente um evento e confira que a mesma lógica atende reconstrução e continuidade.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "Retention, reprocessing isolation and operational cutover of a new stream version are not implemented."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "choreographed-compensation",
+      "names": "Choreography|Choreography Saga",
+      "basis": "Local subscribers emit the next facts and a compensation handler reacts to the failure, exhibiting choreographed saga collaboration.",
+      "action": "Publique order-placed e deixe cada participante reagir ao fato que conhece. Observe funds-reserved, allocation-failed e compensated recomporem o saldo sem um coordenador que chame todos os passos.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fire-forget-return",
+      "names": "Fire-and-Forget",
+      "basis": "The caller does not await the later handler result, so its successful return does not prove eventual delivery or business completion.",
+      "action": "Retorne ao chamador depois de emitir a intenção e provoque a falha do worker mais tarde. Diferencie a confirmação da chamada da conclusão do trabalho.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The outgoing queue is not durable and no delivery guarantee is claimed."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "fanin-source-correlation",
+      "names": "Fan-in",
+      "basis": "Multiple input streams converge into one correlated output without discarding source ownership.",
+      "action": "Reúna o fluxo de ordens e o de liquidações preservando a origem de cada mensagem. Confira três entradas e as duas contagens por fonte.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The finite merge does not order independent clocks or wait for a distributed completeness barrier."
+    },
+    {
+      "case": "queue-workflow",
+      "probe": "durable-workflow-resume",
+      "names": "Workflow Engine",
+      "basis": "A persisted workflow identity and phase drive recovery after process-state loss, skipping the completed local step.",
+      "action": "Interrompa depois de persistir credited, feche a conexão e reabra o arquivo de progresso. Confira que a retomada executa a notificação e não repete o crédito já registrado.",
+      "source_file": "labs/architecture/models_workflow.py",
+      "scope_limit": "The local effects and checkpoints share SQLite transactions. External activity retries, timers, worker leasing and a full durable-workflow framework are not implemented."
+    },
+    {
+      "case": "reservation",
+      "probe": "lease-expiry-owner",
+      "names": "Lease",
+      "basis": "Expiry makes the abandoned authorization reclaimable, while owner comparison prevents an old owner from releasing the new lease.",
+      "action": "Avance o relógio além da validade de A, deixe B adquirir a autorização e tente liberar a lease com a identidade antiga de A.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The model uses a controlled clock; expiration is not destination fencing and does not stop an old external side effect."
+    },
+    {
+      "case": "reservation",
+      "probe": "shared-arbiter-lock",
+      "names": "Distributed Lock",
+      "basis": "Both participants use one atomic unique-key arbiter instead of independent local locks; ownership is checked at release.",
+      "action": "Use duas conexões independentes ao mesmo coordenador SQLite. Dispute a chave ORDER-1 e tente liberar a chave com o dono errado.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "SQLite is local to this machine. The experiment proves shared-arbiter coordination, not a networked lease service under partitions."
+    },
+    {
+      "case": "reservation",
+      "probe": "pessimistic-writer-lock",
+      "names": "Pessimistic Locking",
+      "basis": "The writer obtains exclusion before changing the record; the second writer cannot begin its write transaction until release.",
+      "action": "Mantenha BEGIN IMMEDIATE aberto no primeiro escritor. Confira a recusa imediata da segunda conexão, finalize a primeira e repita a segunda escrita.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This is SQLite database-writer exclusion, not PostgreSQL row locking or a recommendation to hold locks during network calls."
+    },
+    {
+      "case": "reservation",
+      "probe": "copy-on-write-snapshot",
+      "names": "Copy-on-Write",
+      "basis": "A writer changes a new copy instead of mutating the snapshot held by the old reader.",
+      "action": "Mantenha um leitor com o snapshot anterior, copie antes da escrita e altere a nova cópia. Confira que o leitor continua em 1.000 enquanto a cópia chega a 1.100.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The fixture is a flat dictionary; deep object graphs, memory reclamation and lock-free publication require additional contracts."
+    },
+    {
+      "case": "reservation",
+      "probe": "semaphore-permits",
+      "names": "Semaphore",
+      "basis": "A real asyncio semaphore bounds concurrent entry to two and releases its permits after each task.",
+      "action": "Execute quatro tarefas que cedem a execução enquanto seguram a permissão. Confira no máximo duas dentro da seção e quatro conclusões.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "The semaphore is local to this event loop and does not limit the producer buffer or sum capacity across processes."
+    },
+    {
+      "case": "reservation",
+      "probe": "reused-thread-workers",
+      "names": "Thread Pool|Worker Pool|Fork/Join|Scatter/Gather",
+      "basis": "The executor reuses two workers, forks four computations and joins their four results into one total.",
+      "action": "Submeta quatro tarefas a duas threads reutilizadas, aguarde as respostas e reúna os resultados parciais. Confira a quantidade de executores e o total composto.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "No process pool, distributed worker, work durability or network scatter/gather is claimed."
+    },
+    {
+      "case": "reservation",
+      "probe": "idle-worker-steal",
+      "names": "Work Stealing",
+      "basis": "An idle worker steals eligible queued work from another worker while task ownership changes exactly once in this schedule.",
+      "action": "Deixe B ocioso enquanto A tem duas tarefas. Faça B retirar uma tarefa elegível da outra ponta da fila de A e confira uma execução de cada tarefa.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "The deques are manipulated sequentially; a real concurrent deque requires its own atomicity and memory-order guarantees."
+    },
+    {
+      "case": "reservation",
+      "probe": "reader-writer-exclusion",
+      "names": "Reader/Writer Lock",
+      "basis": "Concurrent readers are compatible with each other and incompatible with an exclusive writer in the finite state model.",
+      "action": "Adquira duas leituras, tente a escrita, libere as leituras e depois tente ler durante a escrita. Confira as duas formas diferentes de exclusão.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "This is a serialized lock-state schedule, not a thread-safe RWLock implementation or a fairness proof."
+    },
+    {
+      "case": "reservation",
+      "probe": "spinlock-active-attempts",
+      "names": "Spinlock",
+      "basis": "The contender repeatedly tests the lock state without blocking, consuming execution steps while the owner is paused.",
+      "action": "Execute tentativas ativas enquanto a trava está ocupada e programe sua liberação depois da terceira tentativa. Conte quatro tentativas até a aquisição.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "The model uses serialized test-and-set steps, not a hardware spinlock, CPU benchmark or permission to spin while waiting for HTTP."
+    },
+    {
+      "case": "reservation",
+      "probe": "cas-system-progress",
+      "names": "Lock-Free",
+      "basis": "The CAS retry pattern permits system progress while one contender stalls; this schedule also shows why that is not a per-thread bounded completion guarantee.",
+      "action": "Faça A e B lerem o mesmo contador, deixe A ganhar o CAS e pause B depois de sua falha. Confira que A ainda consegue concluir outra operação.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "The CAS primitive is atomic by model assumption. This is a concrete progress/starvation schedule, not a universal proof for a native-memory implementation."
+    },
+    {
+      "case": "reservation",
+      "probe": "bounded-spsc-steps",
+      "names": "Wait-Free",
+      "basis": "With one producer, one consumer and atomic ordered index publication, each straight-line operation returns success/full/empty in at most four modeled steps without a retry loop.",
+      "action": "Preencha a fila SPSC de duas posições, tente a terceira inclusão e faça três retiradas. Confira que até a recusa por cheia e o resultado vazio terminam em até quatro passos do modelo.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "The bounded-step argument belongs to this SPSC atomic-index model; Python execution time, allocation, native memory ordering and multiple producers are not covered."
+    },
+    {
+      "case": "reservation",
+      "probe": "reactive-demand-contract",
+      "names": "Reactive Streams",
+      "basis": "Demand gates delivery and cancellation stops subsequent onNext-style emissions in this local publisher/subscriber contract.",
+      "action": "Solicite dois elementos e depois mais um. Cancele antes do quarto e confira que uma solicitação posterior não reativa a assinatura cancelada.",
+      "source_file": "labs/architecture/models_concurrency.py",
+      "scope_limit": "No Reactive Streams library, asynchronous serialization rule or full TCK conformance is claimed."
+    },
+    {
+      "case": "safe-release",
+      "probe": "rolling-recreate-capacity",
+      "names": "Rolling Deployment|Recreate Deployment",
+      "basis": "Recreate produces a zero-ready interval in this schedule, while a one-at-a-time rolling replacement preserves one ready instance.",
+      "action": "Troque as duas instâncias encerrando todas antes de criar as novas e depois uma por vez. Conte a menor capacidade pronta de cada sequência.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed."
+    },
+    {
+      "case": "safe-release",
+      "probe": "blue-green-route",
+      "names": "Blue/Green Deployment",
+      "basis": "Traffic changes between two already-provisioned environments and can return to the previous ready environment.",
+      "action": "Mantenha blue e green prontos, altere a rota para green e volte a blue. Confira as versões visíveis e a capacidade antiga que precisou permanecer disponível.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The route switch does not undo incompatible data written by the new environment; no deployment platform is contacted."
+    },
+    {
+      "case": "safe-release",
+      "probe": "versioned-desired-reconcile",
+      "names": "GitOps|Infrastructure as Code",
+      "basis": "A versioned desired-state source drives the plan and reconciliation instead of allowing manual runtime drift to become the desired source.",
+      "action": "Selecione a revisão 2 da fonte declarativa, calcule o plano e aplique-o. Depois introduza drift manual nas réplicas e reconcilie de novo pela mesma revisão.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The revision store is a local model, not actual Git commits, Terraform state, a cluster operator or deployment proof."
+    },
+    {
+      "case": "safe-release",
+      "probe": "immutable-replacement",
+      "names": "Immutable Infrastructure",
+      "basis": "The new infrastructure instance is created as a replacement while the prior instance remains unchanged.",
+      "action": "Crie a instância 2 com a imagem nova e altere o destino ativo, preservando a instância 1. Compare isso com editar a imagem do recurso existente.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation."
+    },
+    {
+      "case": "safe-release",
+      "probe": "strangler-abstraction-route",
+      "names": "Branch by Abstraction|Service Extraction|Strangler Fig|Transitional Architecture",
+      "basis": "An abstraction preserves the caller contract while routing one extracted capability to its new owner, leaving the rest on the legacy path during transition.",
+      "action": "Faça o cliente usar a fachada, migre somente /orders para a implementação nova e mantenha /positions na antiga. Confira os donos chamados e o contrato observado pelo cliente.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The services are logical functions. This does not implement independent deployment, a data migration or a transactional cutover."
+    },
+    {
+      "case": "safe-release",
+      "probe": "decomposed-data-owners",
+      "names": "Database Decomposition|Modularization",
+      "basis": "Data is split into stores with explicit capability owners, exposing the need for an integration contract between the formerly shared consumers.",
+      "action": "Extraia as linhas por dono, altere o armazenamento de ordens e confira que a posição não é reescrita pelo acesso direto à mesma tabela.",
+      "source_file": "labs/architecture/models_ops.py",
+      "scope_limit": "The stores are local maps; schema migrations, foreign-key removal and cross-database reconciliation are not executed."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "directory-shard",
+      "names": "Directory-Based Sharding",
+      "basis": "An explicit directory maps an entity key to its owning shard, independently of a hash function.",
+      "action": "Mude a localização da chave 7 para B no diretório e resolva o dono antes de consultar. Confira que adivinhar A não encontra a posição.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "Directory durability, stale entries and live moves are not modeled."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "range-boundary",
+      "names": "Range Sharding",
+      "basis": "Half-open ranges assign the boundary key to exactly one shard rather than overlapping owners.",
+      "action": "Procure a chave 100 nos intervalos 0 até antes de 100 e 100 até antes de 200. Confira que a borda pertence a um único shard.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "Range balancing, splits and hotspot control are separate concerns."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "geographic-owner",
+      "names": "Geographic Sharding",
+      "basis": "A geographic attribute chooses the data owner rather than a key hash.",
+      "action": "Use a região declarada da conta fictícia para escolher a partição e confira onde seu valor foi guardado.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The geography is hypothetical and is not a claim about a regulatory residency rule."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "vertical-attributes",
+      "names": "Vertical Partitioning",
+      "basis": "Vertical partitions divide attributes while preserving the key needed to reconstruct the logical entity.",
+      "action": "Separe os atributos de contato dos atributos de posição pela mesma chave. Confira quais colunas a consulta de posição precisa ler e reuna a linha somente quando necessário.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "The example models attribute ownership and does not measure physical page savings or authorization by itself."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "log-structured-latest",
+      "names": "Log Structured Storage",
+      "basis": "Updates append records and reads resolve the latest version, exposing the read/compaction work introduced by a log-structured representation.",
+      "action": "Acrescente a nova versão em vez de sobrescrever a antiga e resolva a leitura pelo registro mais recente da chave.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery."
+    },
+    {
+      "case": "storage-partitions",
+      "probe": "coalesced-snapshot-writes",
+      "names": "Write Amplification Control",
+      "basis": "Coalescing repeated overwrites of one snapshot reduces physical writes before the batch acknowledgement.",
+      "action": "Agrupe dez substituições do mesmo snapshot de posição antes de confirmar o lote e grave o último valor uma vez. Compare as escritas físicas necessárias.",
+      "source_file": "labs/architecture/models_distribution.py",
+      "scope_limit": "This applies to replaceable snapshots, not ten independent ledger facts. No per-update durability is promised before the batch flush."
+    }
+  ],
+  "pending_examples": {
+    "MVC": "Execute a controller calling an explicit model and selecting a view, then show the differing responsibilities when the order changes.",
+    "MVP": "Execute a presenter updating a passive view through its contract, independently of model changes.",
+    "MVVM": "Change a view-model value and observe binding update the view, with a separate command path back to the model.",
+    "Read Through": "Make the cache API own miss loading and show that the caller never orchestrates a source fetch or populate step.",
+    "Message Translator": "Transform an incoming message schema into a distinct consumer schema and validate both shapes.",
+    "Gossip Protocol": "Exchange peer state until the declared membership converges without invoking a majority decision.",
+    "OAuth2": "Exercise a grant/token flow and resource-server validation; an unsigned expiry check does not establish it.",
+    "OIDC": "Validate identity-token issuer, audience, signature and subject through an actual identity flow.",
+    "mTLS": "Demonstrate peer certificate authentication and rejection of an untrusted peer certificate.",
+    "GraphQL Federation": "Resolve one financial result through entity references across two actual subgraphs.",
+    "WebSocket": "Demonstrate bidirectional frames and connection lifecycle; mapping a provider status cannot show this mechanism.",
+    "Server-Sent Events": "Emit and consume ordered event-stream records, including an explicit resume or disconnect condition.",
+    "Value Object": "Construct an immutable civil-date or monetary value, reject an invalid value and show value equality without entity identity.",
+    "Three-Phase Commit / 3PC": "Exercise canCommit, preCommit and doCommit with the declared timing/failure assumptions, rather than showing a 2PC prepared participant alone.",
+    "Leader Election": "Execute votes and select a particular candidate in a term; counting eligible partitions is not an election.",
+    "Secrets Rotation": "Verify signatures before and after changing trusted signing keys, including overlap and retired-key rejection.",
+    "Bulkhead": "Block one dependency pool while another independently budgeted pool continues to process orders.",
+    "Worker Pool": "Assign and execute tasks across reused worker instances, observe concurrency capacity and task completion.",
+    "Pessimistic Locking": "Hold the protected record before changing it and show a second transaction waits or is refused until release.",
+    "Lock-Free": "Exercise an actual nonblocking algorithm and its system-progress property under the declared schedule.",
+    "Wait-Free": "Exercise an algorithm with a stated bounded-step per-operation argument; version rejection alone does not supply that guarantee."
+  }
+}

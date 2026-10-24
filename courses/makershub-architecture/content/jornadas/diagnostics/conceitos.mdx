@@ -1,0 +1,442 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: o processo responde, mas a ordem não terminou
+
+Este mapa conecta os conceitos ao mesmo problema. A ordem fictícia ORDER-1 passa por uma requisição que falha no provedor e por uma segunda tentativa. Ana vê um health endpoint verde e ainda não sabe onde o pedido parou. A prática reúne os dois request IDs sob um operation ID e separa tempo, erro e resultado do caminho de negócio.
+
+Comece pela [jornada](/jornadas/diagnostics/), execute o [tutorial](/tutoriais/casos/diagnostics/) e use a [referência](/referencia/casos/diagnostics/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/diagnostics/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="centralized-logging" />
+
+## Centralized Logging
+
+Reúne logs de diferentes componentes para consulta com retenção e acesso definidos.
+
+No caso desta família, faça a seguinte observação: Reúna REQUEST-1 e REQUEST-2 sob ORDER-1 e confira três spans sem confundir tentativa e operação.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe correlate-retries
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `correlate-retries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "trace_one_request_spans": 2
+  },
+  "after": {
+    "operation_spans": 3,
+    "requests": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Centralized Logging; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="correlation-id" />
+
+## Correlation ID
+
+Uma identidade compartilhada liga mensagens de uma conversa.
+
+No caso desta família, faça a seguinte observação: Reúna REQUEST-1 e REQUEST-2 sob ORDER-1 e confira três spans sem confundir tentativa e operação.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe correlate-retries
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `correlate-retries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "trace_one_request_spans": 2
+  },
+  "after": {
+    "operation_spans": 3,
+    "requests": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="distributed-tracing" />
+
+## Distributed Tracing
+
+Relaciona etapas causais por spans e contexto propagado.
+
+No caso desta família, faça a seguinte observação: Execute o SDK OpenTelemetry fixado, injete e extraia traceparent entre gateway e provider e exporte para memória. Confira o mesmo trace, o parent span e o erro, sem confundir dois spans com duas requisições.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe opentelemetry-sdk-export
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `opentelemetry-sdk-export`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "exported_spans": 0,
+    "traceparent_propagated": false
+  },
+  "after": {
+    "exported_spans": 2,
+    "failed_spans": 1,
+    "parent_matches": true,
+    "request_ids": 1,
+    "same_trace": true,
+    "span_names": [
+      "gateway",
+      "provider"
+    ],
+    "traceparent_propagated": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The exporter is in memory with SDK 1.45.1. There is no collector, network service or claim of production instrumentation.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="golden-signals" />
+
+## Golden Signals
+
+Reúnem latência, tráfego, erros e saturação para avaliar um serviço.
+
+No caso desta família, faça a seguinte observação: Mantenha o processo saudável enquanto as duas vagas estão ocupadas e três pedidos aguardam. Calcule tráfego, duração, erros, utilização e saturação em seus grãos declarados.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe golden-use-resource-signals
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `golden-use-resource-signals`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "process_health": "ok",
+    "resource_saturation_measured": false
+  },
+  "after": {
+    "traffic_requests_per_second": 2.0,
+    "maximum_duration_ms": 800,
+    "failed_requests": 1,
+    "queued_requests": 3,
+    "active_slots": 2,
+    "slot_capacity": 2,
+    "cpu_utilization": 0.8
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. These are controlled sample measurements, not production percentiles, SLOs or a capacity benchmark.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="health-check" />
+
+## Health Check
+
+Consulta uma condição de saúde definida.
+
+No caso desta família, faça a seguinte observação: Compare health ok com a prova sintética da ordem que detecta provider_failed.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe probe-business-path
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `probe-business-path`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "health_endpoint": "ok",
+    "order_path": "unmeasured"
+  },
+  "after": {
+    "health_endpoint": "ok",
+    "synthetic_order": "provider_failed"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Health Check; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="metrics" />
+
+## Metrics
+
+Medem quantidades ou distribuições de um comportamento.
+
+No caso desta família, faça a seguinte observação: Conte três entradas, um erro e a duração máxima 800 ms; diga qual sinal revela o trecho do provedor.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe measure-signals
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `measure-signals`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "looks_healthy_from_average_only": true
+  },
+  "after": {
+    "spans": 3,
+    "requests": 2,
+    "operations": 1,
+    "failed_requests": 1,
+    "max_span_duration_ms": 800,
+    "request_error_ratio": 0.5,
+    "observation_window_seconds": 1,
+    "request_rate_per_second": 2.0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Metrics; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="opentelemetry" />
+
+## OpenTelemetry
+
+Oferece APIs, SDKs e protocolos para instrumentar e transportar sinais.
+
+No caso desta família, faça a seguinte observação: Execute o SDK OpenTelemetry fixado, injete e extraia traceparent entre gateway e provider e exporte para memória. Confira o mesmo trace, o parent span e o erro, sem confundir dois spans com duas requisições.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe opentelemetry-sdk-export
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `opentelemetry-sdk-export`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "exported_spans": 0,
+    "traceparent_propagated": false
+  },
+  "after": {
+    "exported_spans": 2,
+    "failed_spans": 1,
+    "parent_matches": true,
+    "request_ids": 1,
+    "same_trace": true,
+    "span_names": [
+      "gateway",
+      "provider"
+    ],
+    "traceparent_propagated": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The exporter is in memory with SDK 1.45.1. There is no collector, network service or claim of production instrumentation.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="red-method-rate-errors-duration" />
+
+## RED Method (Rate, Errors, Duration)
+
+Observa taxa, erros e duração de operações.
+
+No caso desta família, faça a seguinte observação: Conte três entradas, um erro e a duração máxima 800 ms; diga qual sinal revela o trecho do provedor.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe measure-signals
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `measure-signals`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "looks_healthy_from_average_only": true
+  },
+  "after": {
+    "spans": 3,
+    "requests": 2,
+    "operations": 1,
+    "failed_requests": 1,
+    "max_span_duration_ms": 800,
+    "request_error_ratio": 0.5,
+    "observation_window_seconds": 1,
+    "request_rate_per_second": 2.0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a RED Method (Rate, Errors, Duration); não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="request-id" />
+
+## Request ID
+
+Identifica uma requisição.
+
+No caso desta família, faça a seguinte observação: Reúna REQUEST-1 e REQUEST-2 sob ORDER-1 e confira três spans sem confundir tentativa e operação.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe correlate-retries
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `correlate-retries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "trace_one_request_spans": 2
+  },
+  "after": {
+    "operation_spans": 3,
+    "requests": 2
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="structured-logging" />
+
+## Structured Logging
+
+Registra eventos com campos estáveis e consultáveis.
+
+No caso desta família, faça a seguinte observação: Reúna REQUEST-1 e REQUEST-2 sob ORDER-1 e confira três spans sem confundir tentativa e operação.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe correlate-retries
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `correlate-retries`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "trace_one_request_spans": 2
+  },
+  "after": {
+    "operation_spans": 3,
+    "requests": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Structured Logging; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="synthetic-monitoring" />
+
+## Synthetic Monitoring
+
+Executa uma operação controlada para observar um comportamento.
+
+No caso desta família, faça a seguinte observação: Compare health ok com a prova sintética da ordem que detecta provider_failed.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe probe-business-path
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `probe-business-path`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "health_endpoint": "ok",
+    "order_path": "unmeasured"
+  },
+  "after": {
+    "health_endpoint": "ok",
+    "synthetic_order": "provider_failed"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Synthetic Monitoring; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+
+<span id="use-method-utilization-saturation-errors" />
+
+## USE Method (Utilization, Saturation, Errors)
+
+Observa utilização, saturação e erros por recurso.
+
+No caso desta família, faça a seguinte observação: Mantenha o processo saudável enquanto as duas vagas estão ocupadas e três pedidos aguardam. Calcule tráfego, duração, erros, utilização e saturação em seus grãos declarados.
+
+```sh
+python3 labs/architecture/financial.py diagnostics --probe golden-use-resource-signals
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `golden-use-resource-signals`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "process_health": "ok",
+    "resource_saturation_measured": false
+  },
+  "after": {
+    "traffic_requests_per_second": 2.0,
+    "maximum_duration_ms": 800,
+    "failed_requests": 1,
+    "queued_requests": 3,
+    "active_slots": 2,
+    "slot_capacity": 2,
+    "cpu_utilization": 0.8
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. These are controlled sample measurements, not production percentiles, SLOs or a capacity benchmark.
+
+A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
+

@@ -1,0 +1,64 @@
+---
+asIndexPage: true
+title: "Contratos: um leitor cancela a busca"
+description: "Entradas, parâmetros, versões, resultados e limites do caso Cancelamento de uma busca compartilhada."
+diataxis: reference
+---
+
+# Contratos: um leitor cancela a busca
+
+Esta página reúne os contratos que a prática compara. Você aprenderá a identificar quem é dono de uma tarefa compartilhada e quem é apenas seu leitor. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+Para continuar o mesmo problema, [volte à jornada](/jornadas/single-flight-cancel/), [entenda o mecanismo](/explicacoes/casos/single-flight-cancel/), [execute o tutorial](/tutoriais/casos/single-flight-cancel/) ou [consulte o guia da tarefa](/guias/casos/single-flight-cancel/).
+
+## Entradas e ambiente
+
+Cinco leitores, uma resposta synthetic-online-call e dois eventos que controlam o início e a liberação do produtor.
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `single-flight-cancel`. |
+| Símbolos a consultar | `SingleFlightCache.get / _on_inflight_settled`. |
+| Comando completo | `python3 labs/architecture/single-flight-cancel/run.py`. |
+| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
+| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
+| Horário e escopo do recibo | `2026-10-15T01:35:29.888924+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+## Versões e fronteiras da reprodução
+
+Este caso vem do [card FBI-2331](https://fazcapital.atlassian.net/browse/FBI-2331) e do [PR 51](https://bitbucket.org/fazcapital/makershub/pull-requests/51). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/342de122cdbfccbe7659adec0e1fcb842b38fc83/backend/app/utils/single_flight.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/a304a4e56480648bdc60be96c00532c38d18df9f/backend/app/utils/single_flight.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+| Fase | Fonte histórica | SHA | Cópia do laboratório |
+| --- | --- | --- | --- |
+| Anterior | [backend/app/utils/single_flight.py](https://bitbucket.org/fazcapital/makershub/src/342de122cdbfccbe7659adec0e1fcb842b38fc83/backend/app/utils/single_flight.py) | `342de122cdbfccbe7659adec0e1fcb842b38fc83` | `labs/architecture/single-flight-cancel/before.py`. |
+| Posterior | [backend/app/utils/single_flight.py](https://bitbucket.org/fazcapital/makershub/src/a304a4e56480648bdc60be96c00532c38d18df9f/backend/app/utils/single_flight.py) | `a304a4e56480648bdc60be96c00532c38d18df9f` | `labs/architecture/single-flight-cancel/after.py`. |
+
+O diff preservado é `labs/architecture/single-flight-cancel/source.diff`; seu SHA-256 é `a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7`. As cópias possuem hashes no manifesto do mesmo diretório. Esses hashes identificam o recorte reproduzido; não certificam o checkout ou o deploy que alguém abrir em outra ocasião.
+
+## Resultados que o contrato compara
+
+O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma.
+
+A reprodução histórica emite o resultado completo abaixo. Os rótulos `before` e `after` distinguem as versões; `comparison=PASS` significa que as condições esperadas apareceram nos dois recortes.
+
+```text
+before: readers=5 cancelled=5 survivors=0 producer_calls=1
+after: readers=5 cancelled=1 survivors=4 producer_calls=1
+comparison=PASS before_defect_observed=True after_guarantee_observed=True
+```
+
+## Garantia, parâmetros e limites
+
+A espera passa por asyncio.shield. A liberação do slot e o cache do resultado passam para o callback da própria tarefa. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
+
+Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+## Recibo e rastreabilidade
+
+A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `single-flight-cancel`. O hash SHA-256 da saída capturada é `05cfb344616401c3b01996ee0f5177335546d7ad8a65fffd82886c551b0d9b87`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
+
+Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/single-flight-cancel/), [leia a explicação](/explicacoes/casos/single-flight-cancel/), [abra o tutorial](/tutoriais/casos/single-flight-cancel/) ou [consulte o guia](/guias/casos/single-flight-cancel/).

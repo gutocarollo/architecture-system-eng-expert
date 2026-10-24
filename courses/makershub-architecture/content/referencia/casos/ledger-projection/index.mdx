@@ -1,0 +1,97 @@
+---
+asIndexPage: true
+title: "Contratos: o saldo precisa explicar sua história"
+description: "Entradas, parâmetros, versões, resultados e limites do caso O histórico reconstrói a posição do cliente."
+diataxis: reference
+---
+
+# Contratos: o saldo precisa explicar sua história
+
+Esta página reúne os contratos que a prática compara. Você aprenderá a distinguir o fato registrado, a projeção para consulta e a recuperação local de uma transação incompleta. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+Para continuar o mesmo problema, [volte à jornada](/jornadas/ledger-projection/), [entenda o mecanismo](/explicacoes/casos/ledger-projection/), [execute o tutorial](/tutoriais/casos/ledger-projection/) ou [consulte o guia da tarefa](/guias/casos/ledger-projection/).
+
+## Entradas e ambiente
+
+Eventos credit/1000, credit/100 e debit/200; snapshot no evento 2; tabela SQLite temporária com 100.000 centavos.
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `ledger-projection`. |
+| Símbolos a consultar | `ledger_projection / replay-events / projection-checkpoint / durable-transaction`. |
+| Comando completo | `python3 labs/architecture/financial.py ledger-projection`. |
+| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
+| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
+| Horário e escopo do recibo | `2026-10-15T01:35:30.851025+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+## Fonte do modelo financeiro
+
+Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+A função `ledger_projection` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/ledger-projection.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
+
+## Resultados que o contrato compara
+
+O replay e a projeção chegam a R$ 900. O snapshot de R$ 1.100 mais o débito de R$ 200 chega ao mesmo saldo. O SQLite executa uma transação em journal_mode=wal e conserva 100.000 centavos após rollback.
+
+### `replay-events`
+
+A comparação permite executar a seguinte ação de estudo: Reproduza os fatos 1.000, +100 e −200 e conserve R$ 900 com a história que permite refazer a conta.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `mutable_balance_without_history` | `800` | O campo não é emitido nesta condição. |
+| `events` | O campo não é emitido nesta condição. | `3` |
+| `replayed_balance` | O campo não é emitido nesta condição. | `900` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/ledger-projection/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `projection-checkpoint`
+
+A comparação permite executar a seguinte ação de estudo: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `lag_events` | `2` | `0` |
+| `projection` | `1000` | `900` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/ledger-projection/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `durable-transaction`
+
+A comparação permite executar a seguinte ação de estudo: Execute UPDATE e rollback em SQLite com journal_mode=wal e confira o valor recuperado de 100.000 centavos.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `partial_update_visible` | `110000` | O campo não é emitido nesta condição. |
+| `rolled_back_cents` | O campo não é emitido nesta condição. | `100000` |
+| `sqlite_journal_mode` | O campo não é emitido nesta condição. | `"wal"` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/ledger-projection/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### `snapshot-replay`
+
+A comparação permite executar a seguinte ação de estudo: Recomece do snapshot do evento 2 e aplique só o débito restante, chegando aos mesmos R$ 900.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `events_to_replay` | `3` | `1` |
+| `balance` | O campo não é emitido nesta condição. | `900` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/ledger-projection/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+## Garantia, parâmetros e limites
+
+A projeção consome os fatos faltantes. Uma transação local pode fazer rollback. Um snapshot da posição 2 reduz o replay ao evento seguinte. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+## Recibo e rastreabilidade
+
+A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `ledger-projection`. O hash SHA-256 da saída capturada é `0ef4c7af45fa15eb564feeefb62c6a37feedfe6b042bcc2903d3f323bd16bd45`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
+
+Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/ledger-projection/), [leia a explicação](/explicacoes/casos/ledger-projection/), [abra o tutorial](/tutoriais/casos/ledger-projection/) ou [consulte o guia](/guias/casos/ledger-projection/).

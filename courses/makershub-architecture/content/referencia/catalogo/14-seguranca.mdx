@@ -1,0 +1,218 @@
+---
+title: "14. Segurança"
+description: "Os 17 conceitos de identidade, autorização, credenciais e proteção de comunicação."
+diataxis: reference
+---
+
+# Segurança
+
+Esta referência contém as 17 entradas do grupo 14. A captura Airflow de **14/10/2026 entre 16:10 e 16:15 UTC** sustenta exemplos de ServiceAccounts, RoleBindings e contexto de processo. OAuth/OIDC do Airflow, rotação efetiva e mTLS em cada ligação não foram confirmados. A rota Calendar é fonte de código no checkout MakersHub, sem prova de execução autenticada. A [explicação de segurança](/explicacoes/security/) conta os casos, e os [recibos](/referencia/evidencias/) delimitam a evidência.
+
+As bases de estudo são [RBAC Kubernetes](https://kubernetes.io/docs/reference/access-authn-authz/rbac/), [Keycloak Quickstarts](https://github.com/keycloak/keycloak-quickstarts), [OpenFGA sample-stores](https://github.com/openfga/sample-stores), [OPA HTTP authorization](https://www.openpolicyagent.org/docs/http-api-authorization) e [Istio Bookinfo](https://istio.io/latest/docs/examples/bookinfo/). Kubernetes é **PROD** no recorte; os outros são referências OSS **REF**, sem implantação presumida. As skills locais `backend-auth-patterns`, `security-and-hardening`, `k8s-security-policies`, `secrets-management` e `mtls-configuration`, em `~/.codex/skills/`, são apoio. A [curadoria](/referencia/skills-e-projetos/) distingue esse apoio de implementação.
+
+Os pares específicos abaixo foram verificados em fontes primárias em 14/10/2026 e têm links fixados à revisão capturada. **APP** identifica código ou contrato de um produto OSS; **REF** identifica uma aplicação-exemplo ou configuração reproduzível. Esses rótulos não afirmam implantação na Faz. O registro de captura conserva URL, revisão, SHA-256 e os símbolos examinados.
+
+<span id="g14-e001" />
+
+## Zero Trust
+
+O acesso depende de identidade, recurso e contexto verificados sob uma política explícita, inclusive dentro da rede. No blueprint Calendar, estar na LAN não basta para pedir qualquer agenda. O benefício é limitar confiança implícita; o custo é identidade, política e operação contínuas. Instalar um produto ou chamar a rede de privada não certifica esse desenho. O capítulo de [segurança](/explicacoes/security/) mostra a verificação da ação; OPA é referência **REF** de política.
+
+**Par de base e aplicação.** A base é [Go SSH](https://pkg.go.dev/golang.org/x/crypto/ssh). O produto OSS **APP Teleport** [autoriza a identidade do chamador em Authorize](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/authz/permissions.go) e documenta seu [proxy orientado a identidade](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/docs/pages/reference/architecture/proxy.mdx) para chegar aos recursos. O par mostra verificação de identidade/política no acesso, em vez de confiar apenas na localização de rede. Não constitui uma certificação de Zero Trust de todo ambiente.
+
+{/* current-curation:zero-trust */}
+
+A [curadoria de Zero Trust](/referencia/curadoria/14-seguranca/#zero-trust) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e002" />
+
+## Defense in Depth
+
+Camadas de proteção limitam consequências quando uma delas falha. Na captura, identidade de serviço e contexto do scheduler com escalada desabilitada fornecem exemplos de camadas distintas. O benefício é reduzir o alcance de uma falha; o custo é manter contratos e observar cada camada. Duas configurações presentes não provam proteção de todo o caminho. Kubernetes é a base **PROD** do exemplo; a skill `security-and-hardening` apoia sua avaliação.
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** [separa securityContext de Pod e containers](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/scheduler/scheduler-deployment.yaml) e oferece um [papel específico de leitura de logs](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/rbac/pod-log-reader-role.yaml). São camadas distintas ligadas a componentes reais do chart. Sua ativação depende dos valores renderizados, e o exemplo não é um veredicto de segurança completo.
+
+{/* current-curation:defense-in-depth */}
+
+A [curadoria de Defense in Depth](/referencia/curadoria/14-seguranca/#defense-in-depth) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e003" />
+
+## Least Privilege
+
+Um participante recebe apenas os direitos necessários à função definida. No blueprint, quem lê logs não recebe automaticamente permissão de alterar Deployments ou segredos. O benefício é limitar impacto; o custo é administrar direitos e necessidades reais. A presença de RoleBindings não prova direitos mínimos, e falta de permissão pode interromper uma tarefa legítima. [Práticas RBAC Kubernetes](https://kubernetes.io/docs/reference/access-authn-authz/rbac/); `k8s-security-policies` oferece apoio geral.
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** [permite get/list em pods e pods/log e acrescenta watch somente para pods](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/rbac/pod-log-reader-role.yaml) e [vincula esse papel à ServiceAccount da API](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/rbac/pod-log-reader-rolebinding.yaml). O par exemplifica direito por função com recursos e verbos explícitos. Ele não prova que todas as contas e papéis do namespace tenham o menor privilégio necessário.
+
+{/* current-curation:least-privilege */}
+
+A [curadoria de Least Privilege](/referencia/curadoria/14-seguranca/#least-privilege) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e004" />
+
+## RBAC
+
+A autorização relaciona papéis a direitos e participantes. No exercício de relatório, `viewer` da conta 42 permite a leitura naquela conta. O ganho é administrar papéis estáveis; o custo é evitar papéis demais e atribuições incorretas. O namespace Airflow tinha RoleBindings na captura, mas isso não classifica toda autorização do negócio como RBAC. Kubernetes é **PROD** nesse recorte; OpenFGA sample-stores é **REF** para o exemplo de contas.
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** tem [Role de leitura](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/rbac/pod-log-reader-role.yaml) e [RoleBinding do consumidor](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/rbac/pod-log-reader-rolebinding.yaml). A primeira parte define os direitos; a segunda associa o papel à identidade que executa a API. O par demonstra RBAC aplicado ao componente, sem classificar por ele todas as regras de negócio.
+
+{/* current-curation:rbac */}
+
+A [curadoria de RBAC](/referencia/curadoria/14-seguranca/#rbac) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e005" />
+
+## ABAC
+
+A política decide usando atributos do participante, recurso e pedido. No exercício, vínculo ativo e classificação do relatório entram na regra. O benefício é uma decisão precisa; o custo é manter atributos atualizados e explicar combinações. Uma regra correta com atributo stale pode negar ou permitir indevidamente. OPA é uma base OSS **REF** de decisão por política; sua presença na curadoria não comprova ABAC instalado na Faz.
+
+**Par de base e aplicação.** A base é [OpenFGA](https://github.com/openfga/openfga). A **REF executável** [abac-with-rebac do OpenFGA](https://github.com/openfga/sample-stores/blob/6802b4d859d2773eea72c2315b3a9f027a2893a0/stores/abac-with-rebac/store.fga.yaml) combina e-mail verificado e estado draft/published nas regras de leitura e edição. Esses atributos são representados por relações no modelo. O exemplo é explicitamente híbrido ABAC/ReBAC; ele não atribui atributos ou permissões desse modelo ao MakersHub.
+
+{/* current-curation:abac */}
+
+A [curadoria de ABAC](/referencia/curadoria/14-seguranca/#abac) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e006" />
+
+## ReBAC
+
+A autorização segue relações entre participantes e recursos. No exercício, Ana pertence à conta 42, que possui o relatório 7; o pedido precisa alcançar esse recurso pela relação permitida. O ganho é representar compartilhamento; o custo é manutenção dos vínculos e revogação. Uma relação existente não autoriza toda ação. [OpenFGA multi-tenant SaaS](https://openfga.dev/docs/use-cases/multi-tenant-saas) e sample-stores são referências OSS **REF**, sem implantação medida.
+
+**Par de base e aplicação.** A base é [OpenFGA](https://github.com/openfga/openfga). A **REF executável Calendar** [liga evento a calendário e calendário a organização](https://github.com/openfga/sample-stores/blob/6802b4d859d2773eea72c2315b3a9f027a2893a0/stores/calendar/model.fga). `can_view` percorre attendee, organização e direitos herdados. O arquivo mostra o modelo de uma aplicação concreta do catálogo OpenFGA, com recursos e ações próprios; não é somente o nome de uma biblioteca de autorização.
+
+{/* current-curation:rebac */}
+
+A [curadoria de ReBAC](/referencia/curadoria/14-seguranca/#rebac) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e007" />
+
+## Policy-Based Access Control
+
+Uma política explícita determina o direito de um pedido e a aplicação aplica essa decisão. No exemplo OPA, a API consulta `allow` antes de ler os dados. O benefício é tornar a regra revisável; o custo é versão, distribuição e tratamento da indisponibilidade da decisão. Consultar uma política sem aplicar sua negação não protege o recurso. [Aplicação HTTP de demonstração OPA](https://www.openpolicyagent.org/docs/http-api-authorization) é **REF**.
+
+**Par de base e aplicação.** A base é [OPA](https://github.com/open-policy-agent/opa). A **REF executável Flask/OPA** [consulta a política antes de responder à API](https://github.com/open-policy-agent/contrib/blob/5b21e4cb42b8b3893a3ade1cf33423336c6176e1/api_authz/docker/echo_server.py) e aplica a decisão `allow`. A [política HR](https://github.com/open-policy-agent/contrib/blob/5b21e4cb42b8b3893a3ade1cf33423336c6176e1/api_authz/docker/policy/example-hr.rego) verifica método, path e usuário. O par demonstra consumidor e regra de decisão; o código não foi executado neste reparo.
+
+{/* current-curation:policy-based-access-control */}
+
+A [curadoria de Policy-Based Access Control](/referencia/curadoria/14-seguranca/#policy-based-access-control) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e008" />
+
+## OAuth2
+
+OAuth 2.0 define contratos para obter e usar acesso delegado a recursos protegidos. O caminho Calendar lido obtém um token Azure e chama Graph; a captura de código não certifica seu fluxo de autenticação em produção. O benefício é delimitar acesso sem entregar a senha ao consumidor; o custo é grants, escopos, públicos e renovação. OAuth2 sozinho não define o contrato de identidade OIDC. Keycloak Quickstarts é aplicação **REF**; `backend-auth-patterns` apoia a distinção.
+
+**Par de base e aplicação.** A base é [keycloak-js](https://github.com/keycloak/keycloak-js). A **REF executável SPA** [inicializa Keycloak, usa o token de acesso e permite sua renovação](https://github.com/keycloak/keycloak-quickstarts/blob/0a172493a5797c3b5804bbfa0799f88c0f9d7331/js/spa/public/index.html). O adapter `keycloak-js` conecta a aplicação ao provedor; o próprio exemplo distingue access token e ID token. Isso demonstra a integração do cliente, sem certificar o fluxo Calendar em produção.
+
+{/* current-curation:oauth2 */}
+
+A [curadoria de OAuth2](/referencia/curadoria/14-seguranca/#oauth2) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e009" />
+
+## OIDC
+
+OpenID Connect acrescenta autenticação e identidade sobre OAuth 2.0. No blueprint, o cliente recebe a identidade autenticada e a API usa o token de acesso adequado ao seu público. O benefício é um contrato interoperável; o custo é validação de emissor, público, assinatura e prazo. Um token de ID não substitui qualquer token de acesso. [Microsoft Entra OIDC](https://learn.microsoft.com/en-us/entra/architecture/auth-oidc) é fonte de contrato, e Keycloak Quickstarts é **REF**; OIDC não foi confirmado no Airflow.
+
+**Par de base e aplicação.** A base é [keycloak-js](https://github.com/keycloak/keycloak-js). A **REF executável SPA** [usa login-required e lê idTokenParsed para apresentar a identidade](https://github.com/keycloak/keycloak-quickstarts/blob/0a172493a5797c3b5804bbfa0799f88c0f9d7331/js/spa/public/index.html). Ela mantém acesso e identidade em objetos distintos do adapter. O par mostra OIDC na aplicação do quickstart, sem trocar o auth manager FAB medido no Airflow por uma alegação de OIDC implantado.
+
+{/* current-curation:oidc */}
+
+A [curadoria de OIDC](/referencia/curadoria/14-seguranca/#oidc) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e010" />
+
+## Token Exchange
+
+Um servidor de autorização troca material de identidade ou acesso por um token apropriado ao próximo contexto, conforme política. No blueprint, a API solicita autoridade delimitada para chamar outro serviço em vez de reutilizar um token de público incorreto. O benefício é explicitar delegação; o custo é política e rastreio de quem age por quem. Troca não deve ampliar direitos silenciosamente. [RFC 8693](https://datatracker.ietf.org/doc/html/rfc8693) define o contrato; implantação não foi medida.
+
+**Par de base e aplicação.** A base é [SPI de Token Exchange do Keycloak](https://github.com/keycloak/keycloak/tree/main/server-spi-private/src/main/java/org/keycloak/protocol/oidc). O **APP Keycloak** [implementa StandardTokenExchangeProvider](https://github.com/keycloak/keycloak/blob/0b881862c6363c34ef8e08a336ae3af97628251b/services/src/main/java/org/keycloak/protocol/oidc/tokenexchange/StandardTokenExchangeProvider.java): verifica o subject token, valida audiência e constrói o token de acesso solicitado. Este é o nome efetivo do provider na revisão capturada; o arquivo candidato `DefaultTokenExchangeProvider` não foi usado como alias. O par acrescenta implementação concreta ao contrato da RFC.
+
+{/* current-curation:token-exchange */}
+
+A [curadoria de Token Exchange](/referencia/curadoria/14-seguranca/#token-exchange) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e011" />
+
+## Short-Lived Credentials
+
+Credenciais têm validade curta e precisam ser renovadas sob um contrato de acesso. No blueprint, um token expirado deixa de autorizar novas chamadas e a aplicação segue o fluxo de renovação permitido. O benefício é limitar a janela de uso de material exposto; o custo é renovação e dependência do emissor. Prazo curto não revoga efeitos realizados nem substitui proteção do segredo. A skill `secrets-management` apoia o ciclo; os prazos efetivos não foram medidos.
+
+**Par de base e aplicação.** A base é [SDK do Vault](https://github.com/hashicorp/vault/tree/v1.14.0/sdk). O produto OSS **APP Vault v1.14.0**, cuja fonte está em MPL-2.0, [calcula TTL, chama NewUser do plugin e devolve a Lease](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_creds_create.go) com TTL e MaxTTL. O [plugin PostgreSQL](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/plugins/database/postgresql/postgresql.go) implementa a criação e atualização do usuário. É o ciclo de credencial no código dessa versão, sem medição de prazo ou uso na Faz.
+
+{/* current-curation:short-lived-credentials */}
+
+A [curadoria de Short-Lived Credentials](/referencia/curadoria/14-seguranca/#short-lived-credentials) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e012" />
+
+## Secrets Rotation
+
+Rotação substitui o material de acesso e conduz consumidores ao novo contrato antes de retirar o antigo. No exercício, uma integração testa a credencial nova em ambiente separado e só retira a anterior depois da compatibilidade. O benefício é limitar uso de material antigo; o custo é coordenação e recuperação se um consumidor não atualizar. Criar uma chave nova não prova rotação concluída. `secrets-management` é apoio local; nenhuma credencial foi exposta ou rotacionada pelo curso.
+
+**Par de base e aplicação.** A base é [SDK do Vault](https://github.com/hashicorp/vault/tree/v1.14.0/sdk). O **APP Vault v1.14.0** [registra recuperação por WAL, chama UpdateUser e atualiza a configuração](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/builtin/logical/database/path_rotate_credentials.go); seu [plugin PostgreSQL](https://github.com/hashicorp/vault/blob/13a649f860186dffe3f3a4459814d87191efc321/plugins/database/postgresql/postgresql.go) executa `changeUserPassword`. Há produtor e consumidor concretos da rotação, incluindo o tratamento da etapa parcial. A referência é a fonte MPL-2.0 dessa tag, sem uma rotação realizada neste curso.
+
+{/* current-curation:secrets-rotation */}
+
+A [curadoria de Secrets Rotation](/referencia/curadoria/14-seguranca/#secrets-rotation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e013" />
+
+## mTLS
+
+Na autenticação TLS mútua, os dois participantes apresentam identidade de certificado conforme o contrato de confiança. No blueprint mesh, o serviço de destino verifica a identidade do chamador antes de encaminhar. O benefício é proteger transporte e reconhecer serviços; o custo é emissão, validade e rotação de certificados. Isso não decide o direito de uma pessoa sobre uma conta. Istio Bookinfo é **REF**; a skill `mtls-configuration` apoia o contrato. [Core 36](/explicacoes/availability/#pattern-36).
+
+**Par de base e aplicação.** A base é [go-spiffe](https://github.com/spiffe/go-spiffe). A **REF executável spiffe-http** configura [MTLSServerConfig e AuthorizeID](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/examples/spiffe-http/server/main.go) no servidor e [MTLSClientConfig e AuthorizeID](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/examples/spiffe-http/client/main.go) no cliente. Os dois lados usam X509Source da Workload API. O par mostra autenticação mútua e identidade permitida no transporte, sem concluir a autorização do relatório de negócio.
+
+{/* current-curation:mtls */}
+
+A [curadoria de mTLS](/referencia/curadoria/14-seguranca/#mtls) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e014" />
+
+## API Gateway Security
+
+A entrada da API aplica controles de transporte, identidade e uso antes de encaminhar o pedido. No blueprint, o gateway rejeita credenciais inadequadas e limita admissão; a API ainda verifica a ação sobre o recurso. O benefício é um controle comum de entrada; o custo é configuração e dependência desse caminho. Um reverse proxy não comprova todos esses controles. Envoy é base **REF**; [integração de APIs](/explicacoes/api-integration/) distingue os papéis.
+
+**Par de base e aplicação.** A base é [OpenResty](https://github.com/openresty/openresty). O produto OSS **APP APISIX** [valida assinatura e claims no plugin jwt-auth](https://github.com/apache/apisix/blob/2e43b6c605566d383378a45ef1f06f3debf48a42/apisix/plugins/jwt-auth.lua) durante o processamento OpenResty e retorna 401 nos ramos de falha. É um controle de autenticação realmente aplicado no gateway. A decisão de acesso a uma conta continua pertencendo ao contrato do recurso.
+
+{/* current-curation:api-gateway-security */}
+
+A [curadoria de API Gateway Security](/referencia/curadoria/14-seguranca/#api-gateway-security) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e015" />
+
+## Service-to-Service Identity
+
+O serviço se apresenta a outro com uma identidade verificável própria. A ServiceAccount do scheduler é um exemplo de identidade Kubernetes na captura; seu direito em sistemas externos precisa de um contrato separado. O benefício é atribuir permissões por participante; o custo é provisionamento e renovação. Compartilhar uma credencial entre todos perde essa distinção. [SPIFFE](https://spiffe.io/docs/latest/spiffe-about/overview/) é referência de identidade para workloads; sua implantação não foi medida.
+
+**Par de base e aplicação.** A base é [go-spiffe](https://github.com/spiffe/go-spiffe). A **REF executável spiffe-http** [exige o SPIFFE ID do cliente](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/examples/spiffe-http/server/main.go) e [exige o SPIFFE ID do servidor](https://github.com/spiffe/go-spiffe/blob/77c6d2e0c1203e36804e26a02faa8f893d72e7e5/examples/spiffe-http/client/main.go), usando `workloadapi.NewX509Source`. O par liga a biblioteca à identidade verificável de dois serviços concretos do exemplo, sem declarar SPIRE ou SPIFFE instalados na Faz.
+
+{/* current-curation:service-to-service-identity */}
+
+A [curadoria de Service-to-Service Identity](/referencia/curadoria/14-seguranca/#service-to-service-identity) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e016" />
+
+## Bastion Host
+
+Um ponto administrado de acesso permite chegar a recursos internos sob controles e registros definidos. No blueprint operacional, o acesso passa pela identidade autorizada e segue somente até os alvos permitidos. O benefício é concentrar administração de entrada; o custo é manter esse componente e limitar sua autoridade. Um bastion não substitui direitos no destino e pode ser uma dependência de recuperação. Sua presença não foi medida no recorte; `security-and-hardening` oferece apoio geral.
+
+**Par de base e aplicação.** A base é [Go SSH](https://pkg.go.dev/golang.org/x/crypto/ssh). O produto OSS **APP Teleport** [habilita modo de proxy SSH em SetProxyMode e encaminha o subsystem](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/lib/srv/regular/sshserver.go). Seu [contrato de Proxy Service](https://github.com/gravitational/teleport/blob/1283425b60ec5f60d509ba4c791183d452923ff7/docs/pages/reference/architecture/proxy.mdx) descreve acesso autenticado a recursos atrás de firewall por túneis. O par mostra um bastion com identidade e encaminhamento, sem atribuir sua presença à infraestrutura da Faz.
+
+{/* current-curation:bastion-host */}
+
+A [curadoria de Bastion Host](/referencia/curadoria/14-seguranca/#bastion-host) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g14-e017" />
+
+## Network Segmentation
+
+O desenho delimita quais participantes podem trocar tráfego e em quais condições. No blueprint, somente componentes autorizados alcançam o metadata. O benefício é reduzir caminhos de propagação; o custo é manter regras e diagnosticar bloqueios legítimos. A consulta de NetworkPolicies em `airflow` retornou lista vazia; isso não exclui ACL externa ou outro mecanismo de rede. [NetworkPolicy Kubernetes](https://kubernetes.io/docs/concepts/services-networking/network-policies/) é base **REF**; a skill `k8s-security-policies` apoia políticas, sem certificar isolamento real.
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). A **REF executável Online Boutique** tem [política deny-all](https://github.com/GoogleCloudPlatform/microservices-demo/blob/38e7348eb289eb5b87c0c6e8cb19ced0449dc389/kustomize/components/network-policies/network-policy-deny-all.yaml) e [permissões específicas do frontend](https://github.com/GoogleCloudPlatform/microservices-demo/blob/38e7348eb289eb5b87c0c6e8cb19ced0449dc389/kustomize/components/network-policies/network-policy-frontend.yaml), com selectors e destinos definidos. A biblioteca/API NetworkPolicy é aplicada aos componentes da aplicação. O efeito depende de um CNI que imponha essas regras; não altera o resultado vazio da consulta ao namespace airflow.
+
+{/* current-curation:network-segmentation */}
+
+A [curadoria de Network Segmentation](/referencia/curadoria/14-seguranca/#network-segmentation) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

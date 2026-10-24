@@ -1,0 +1,37 @@
+{
+  "jornadas/early-refresh/": [
+    "escolha-o-que-você-precisa-agora",
+    "antes-de-começar",
+    "o-resultado-que-conecta-a-jornada",
+    "conceitos-deste-caso"
+  ],
+  "explicacoes/casos/early-refresh/": [
+    "a-condição-anterior",
+    "o-mecanismo-que-muda-a-condição",
+    "o-benefício-o-custo-e-o-limite"
+  ],
+  "tutoriais/casos/early-refresh/": [
+    "1-prepare-o-ambiente-isolado",
+    "2-reconheça-a-entrada-que-será-repetida",
+    "3-execute-as-duas-condições",
+    "4-compare-a-saída",
+    "5-examine-a-mudança",
+    "7-reinicie-e-conclua"
+  ],
+  "guias/casos/early-refresh/": [
+    "antes-de-começar",
+    "1-fixe-o-contrato-e-a-fronteira",
+    "2-confira-quem-executa-a-decisão",
+    "3-repita-a-mesma-condição-em-isolamento",
+    "4-avalie-a-garantia-adquirida",
+    "5-feche-a-decisão-com-seu-limite",
+    "localizadores-de-consulta"
+  ],
+  "referencia/casos/early-refresh/": [
+    "entradas-e-ambiente",
+    "versões-e-fronteiras-da-reprodução",
+    "resultados-que-o-contrato-compara",
+    "garantia-parâmetros-e-limites",
+    "recibo-e-rastreabilidade"
+  ]
+}

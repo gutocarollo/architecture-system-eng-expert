@@ -1,0 +1,453 @@
+---
+title: "Curadoria: Banco de dados e armazenamento"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Banco de dados e armazenamento."
+diataxis: reference
+---
+
+# Curadoria: Banco de dados e armazenamento
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+<span id="active-active" />
+
+## Active/Active
+
+O identificador canônico é `active-active`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Bucardo aplica mudanças entre bases PostgreSQL e controla conflitos conforme a configuração de sincronização.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [bucardo/bucardo / Bucardo.pm @ d9919c80](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm); licença [BSD-2-Clause](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm#L3814-L3820). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#active-active). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="active-passive" />
+
+## Active/Passive
+
+O identificador canônico é `active-passive`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Patroni decide quando adquirir ou renovar liderança e quando promover um PostgreSQL standby.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [patroni/patroni / ha.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py#L613-L619). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#active-passive). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Append-Only Log
+
+O identificador canônico é `append-only-log`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A base PostgreSQL conserva o registro WAL; TiKV monta o motor RocksDB e o controle de persistência dos registros.
+
+A base de estudo é [postgres/postgres / xlog.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/xlog.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [tikv/tikv / engine.rs @ 67ffce0c](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/components/engine_rocks/src/engine.rs); licença [Apache-2.0](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/components/engine_rocks/src/engine.rs#L209-L215). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a ação e o probe deste conceito](/jornadas/ledger-projection/conceitos/#append-only-log). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Asynchronous Replication
+
+O identificador canônico é `asynchronous-replication`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#asynchronous-replication). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Cascading Replication
+
+O identificador canônico é `cascading-replication`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#cascading-replication). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Consistent Hashing
+
+O identificador canônico é `consistent-hashing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O Loki transforma tenant e labels em uma chave de 32 bits e pede ao anel os ingesters responsáveis. O Dskit procura o token seguinte por busca binária, percorre o anel com retorno ao início e escolhe donos distintos para as réplicas. Assim, a seleção usa posições estáveis no anel em vez de apenas calcular um hash sem resolver seu dono.
+
+A base de estudo é [grafana/dskit / util.go @ b6a53f6b](https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/ring/util.go); licença [Apache-2.0](https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/LICENSE); [grafana/dskit / ring.go @ b6a53f6b](https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/ring/ring.go); licença [Apache-2.0](https://github.com/grafana/dskit/blob/b6a53f6bee296a666061189f72aae0c87db2c2ea/LICENSE). A aplicação ou candidato de aplicação é [grafana/loki / go.mod @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/go.mod); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / ring.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/util/ring/ring.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE); [grafana/loki / distributor.go @ 5fcd99aa](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/pkg/distributor/distributor.go); licença [AGPL-3.0](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/grafana/loki/blob/5fcd99aa6dea4bc139097527901f6c25a52baca5/go.mod#L61-L66). O Loki fixa Dskit no pseudo-version que resolve ao SHA b6a53f6bee29 selecionado como base.
+
+O recorte é o caminho de ingestão por ingesters quando habilitado, sem confundir a alternativa Kafka/partition-ring. Saúde, fator de replicação e zonas podem ampliar ou filtrar os donos. A propriedade local do anel não é uma medição de balanceamento nem de percentual de dados movidos.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#consistent-hashing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Copy-on-Write
+
+O identificador canônico é `copy-on-write`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O listener de protocolo de cluster NiFi conserva seus handlers em CopyOnWriteArrayList. A inclusão ou remoção atualiza a coleção, enquanto o atendimento pode iterar a visão anterior sem percorrer um array que outro participante está modificando.
+
+A base de estudo é [openjdk/jdk / CopyOnWriteArrayList.java @ 44647eb7](https://github.com/openjdk/jdk/blob/44647eb7568534c7f99231da5e296b54e128280a/src/java.base/share/classes/java/util/concurrent/CopyOnWriteArrayList.java); licença [GPL-2.0](https://github.com/openjdk/jdk/blob/44647eb7568534c7f99231da5e296b54e128280a/LICENSE). A aplicação ou candidato de aplicação é [apache/nifi / SocketProtocolListener.java @ 9e6c1889](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-cluster-protocol/src/main/java/org/apache/nifi/cluster/protocol/impl/SocketProtocolListener.java); licença [Apache-2.0](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-framework-bundle/nifi-framework/nifi-framework-cluster-protocol/src/main/java/org/apache/nifi/cluster/protocol/impl/SocketProtocolListener.java#L66-L72). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A cópia protege a estrutura da lista de handlers, não o estado interno de cada handler nem toda a execução de rede. Alterações custam cópia e memória temporária; o padrão precisa de uma proporção de leituras e mudanças compatível.
+
+No curso, [abra o caso aplicado](/jornadas/reservation/) e [consulte a ação e o probe deste conceito](/jornadas/reservation/conceitos/#copy-on-write). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Covering Index
+
+O identificador canônico é `covering-index`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa limites de partições e operações de índice; IndexOnlyScan evita buscar no heap quando a visibilidade permite.
+
+A base de estudo é [postgres/postgres / partbounds.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/partitioning/partbounds.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / indexam.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/index/indexam.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / nodeIndexonlyscan.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeIndexonlyscan.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/index/indexam.c#L203-L209). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#covering-index). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Denormalization
+
+O identificador canônico é `denormalization`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Ao montar um pedido, o Medusa copia título do produto e SKU da variante para o item do pedido. O modelo guarda esses valores ao lado dos identificadores originais, e o serviço persiste os itens. Assim, o pedido conserva uma representação própria dos atributos que também existem no catálogo; sua leitura não depende de buscar novamente esses dois atributos no produto.
+
+A base de estudo é [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [medusajs/medusa / prepare-line-item-data.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/utils/prepare-line-item-data.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / create-order.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/order/workflows/create-order.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / line-item.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/models/line-item.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE); [medusajs/medusa / order-module-service.ts @ 0b97a96e](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/modules/order/src/services/order-module-service.ts); licença [MIT](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/medusajs/medusa/blob/0b97a96ea0d32ff3f4b18dbeeeeba9e763600a15/packages/core/core-flows/src/cart/utils/prepare-line-item-data.ts#L136-L165). A preparação copia título do produto e SKU da variante para campos próprios do item.
+
+Este é um snapshot de atributos do pedido, não uma afirmação de que toda a entidade Product foi duplicada ou de que todos os dados são imutáveis. O fallback usa valores explicitamente informados quando presentes. A base PostgreSQL mostra o armazenamento de uma representação calculada em separado, como alternativa comparativa; não é apresentada como implementação da cópia feita pelo Medusa.
+
+No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a ação e o probe deste conceito](/jornadas/ledger-projection/conceitos/#denormalization). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Directory-Based Sharding
+
+O identificador canônico é `directory-based-sharding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Vitess mapeia chaves de negócio para destinos por hash ou lookup. Faixas de keyspace ID definem o roteamento para shards.
+
+A base de estudo é [vitessio/vitess / hash.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/hash.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE). A aplicação ou candidato de aplicação é [vitessio/vitess / lookup.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go#L177-L183). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Hash, lookup e ranges são estratégias diferentes. Nenhuma delas distribui uma tabela só porque um índice comum foi criado.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#directory-based-sharding). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Geographic Sharding
+
+O identificador canônico é `geographic-sharding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Yugabyte associa partições SQL a tablespaces com políticas de colocação de réplicas. O gerenciador de tablespaces resolve a política da tabela e o master a usa ao organizar os tablets. Os campos de nuvem, região e zona delimitam onde a população correspondente pode ser colocada.
+
+A base de estudo é [yugabyte/yugabyte-db / common_net.proto @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/common/common_net.proto); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md). A aplicação ou candidato de aplicação é [yugabyte/yugabyte-db / ysql_tablespace_manager.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ysql_tablespace_manager.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / catalog_manager.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/catalog_manager.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / row-level-geo-partitioning.md @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/docs/content/stable/explore/multi-region-deployments/row-level-geo-partitioning.md); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / pg_ddl.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/yql/pggate/pg_ddl.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / ts_descriptor.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ts_descriptor.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / cluster_balance.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/cluster_balance.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / pg_ddl.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/yql/pggate/pg_ddl.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / ts_descriptor.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ts_descriptor.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md); [yugabyte/yugabyte-db / cluster_balance.cc @ 56b17330](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/cluster_balance.cc); licença [Apache-2.0](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/LICENSE.md).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/yugabyte/yugabyte-db/blob/56b173301ea13d0e90f10cf3ecfdf055c46f9241/src/yb/master/ysql_tablespace_manager.cc#L34-L40). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte mostra a ligação entre particionamento geográfico e política regional no servidor, com configuração primária de referência. Não mede latência, RPO, RTO ou residência efetiva dos dados de uma implantação. Réplicas e líderes precisam ser avaliados separadamente; uma string com o nome de uma região, sozinha, não seria prova de sharding geográfico.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#geographic-sharding). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Hash Sharding
+
+O identificador canônico é `hash-sharding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Vitess mapeia chaves de negócio para destinos por hash ou lookup. Faixas de keyspace ID definem o roteamento para shards.
+
+A base de estudo é [vitessio/vitess / hash.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/hash.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE). A aplicação ou candidato de aplicação é [vitessio/vitess / lookup.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go#L177-L183). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Hash, lookup e ranges são estratégias diferentes. Nenhuma delas distribui uma tabela só porque um índice comum foi criado.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#hash-sharding). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Horizontal Partitioning
+
+O identificador canônico é `horizontal-partitioning`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+As tabelas de logs PostHog separam linhas por expressões de data na cláusula PARTITION BY do ClickHouse. As colunas do registro continuam pertencendo à mesma tabela lógica; o critério decide em qual partição temporal uma linha fica.
+
+A base de estudo é [ClickHouse/ClickHouse / MergeTreePartition.cpp @ 16da7cdb](https://github.com/ClickHouse/ClickHouse/blob/16da7cdb08e2115800d033547d5eabacb1b8ed32/src/Storages/MergeTree/MergeTreePartition.cpp); licença [Apache-2.0](https://github.com/ClickHouse/ClickHouse/blob/16da7cdb08e2115800d033547d5eabacb1b8ed32/LICENSE). A aplicação ou candidato de aplicação é [PostHog/posthog / log_attributes.py @ 00c70a7b](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/posthog/clickhouse/logs/log_attributes.py); licença [MIT](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/LICENSE); [PostHog/posthog / log_attributes3.py @ 00c70a7b](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/posthog/clickhouse/logs/log_attributes3.py); licença [MIT](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/LICENSE); [PostHog/posthog / logs_billing_metrics.py @ 00c70a7b](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/posthog/clickhouse/logs/logs_billing_metrics.py); licença [MIT](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/PostHog/posthog/blob/00c70a7bd3e5746ccb02a01b62f47840c233ca18/posthog/clickhouse/logs/log_attributes.py#L27-L33). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte é particionamento horizontal temporal das tabelas de logs, não separação vertical de colunas. Ele não implica distribuição por múltiplos servidores, nem mede pruning de uma consulta. A licença considerada é a dos arquivos comunitários selecionados, não a do diretório enterprise.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#horizontal-partitioning). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Indexing
+
+O identificador canônico é `indexing`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa limites de partições e operações de índice; IndexOnlyScan evita buscar no heap quando a visibilidade permite.
+
+A base de estudo é [postgres/postgres / partbounds.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/partitioning/partbounds.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / indexam.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/index/indexam.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / nodeIndexonlyscan.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeIndexonlyscan.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/index/indexam.c#L203-L209). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#indexing). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="leader-follower" />
+
+## Leader/Follower
+
+O identificador canônico é `leader-follower`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O servidor etcd alimenta a máquina Raft, que representa líder, seguidores e decisões por quorum.
+
+A base de estudo é [etcd-io/raft / raft.go @ 638f4273](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go); licença [Apache-2.0](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/LICENSE). A aplicação ou candidato de aplicação é [etcd-io/etcd / raft.go @ d3c8a155](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); licença [Apache-2.0](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go#L124-L130). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#leader-follower). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Log Structured Storage
+
+O identificador canônico é `log-structured-storage`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+RocksDB escolhe compactações entre níveis; TiKV expõe configurações do motor que alteram compactação e amplificação de escrita.
+
+A base de estudo é [facebook/rocksdb / compaction_picker_level.cc @ df907495](https://github.com/facebook/rocksdb/blob/df90749560116e2c17d3a55667af6c397854e390/db/compaction/compaction_picker_level.cc); licença [GPL-2.0](https://github.com/facebook/rocksdb/blob/df90749560116e2c17d3a55667af6c397854e390/COPYING). A aplicação ou candidato de aplicação é [tikv/tikv / mod.rs @ 67ffce0c](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/src/config/mod.rs); licença [Apache-2.0](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/src/config/mod.rs#L305-L311). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#log-structured-storage). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Multi-Leader
+
+O identificador canônico é `multi-leader`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Bucardo aplica mudanças entre bases PostgreSQL e controla conflitos conforme a configuração de sincronização.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [bucardo/bucardo / Bucardo.pm @ d9919c80](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm); licença [BSD-2-Clause](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm#L3814-L3820). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#multi-leader). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Multi-Primary
+
+O identificador canônico é `multi-primary`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Bucardo aplica mudanças entre bases PostgreSQL e controla conflitos conforme a configuração de sincronização.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [bucardo/bucardo / Bucardo.pm @ d9919c80](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm); licença [BSD-2-Clause](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/bucardo/bucardo/blob/d9919c804d2c84a25e9bd8895908e80932609160/Bucardo.pm#L3814-L3820). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#multi-primary). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Precomputation
+
+O identificador canônico é `precomputation`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+No servidor PostgreSQL, CREATE ou REFRESH MATERIALIZED VIEW executa a consulta antes das leituras posteriores e guarda o resultado. A fase de cálculo preenche um heap; as consultas seguintes podem ler esse resultado já calculado. O trabalho é deslocado da leitura para a criação ou atualização da representação.
+
+A base de estudo é [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / utility.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / createas.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/createas.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / matview.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/commands/matview.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / nodeSeqscan.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/executor/nodeSeqscan.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/tcop/utility.c#L1679-L1698). O servidor PostgreSQL despacha CREATE TABLE AS e REFRESH MATERIALIZED VIEW para suas implementações reais.
+
+A aplicação escolhida é o próprio servidor PostgreSQL, um produto OSS de infraestrutura; a base são suas rotinas reutilizáveis de materialização. Os papéis são diferentes dentro do mesmo repositório. Não se afirma que uma aplicação financeira específica implantou esta view, que toda leitura usa SeqScan ou que o valor é atualizado automaticamente. REFRESH tem custo, locks e requisitos adicionais no modo concorrente; WITH NO DATA não produz um resultado consultável preenchido. O ganho de tempo de consulta depende da consulta, dos índices e do custo de atualização; nenhum benchmark foi feito.
+
+No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a ação e o probe deste conceito](/jornadas/ledger-projection/conceitos/#precomputation). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+<span id="primary-replica" />
+
+## Primary/Replica
+
+O identificador canônico é `primary-replica`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#primary-replica). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Range Sharding
+
+O identificador canônico é `range-sharding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+No VTGate do Vitess, o caminho between com vindex sequencial numeric transforma os limites da consulta em um intervalo de keyspace IDs ordenados. O resolver compara esse intervalo com os intervalos dos shards e mantém somente os que se cruzam. Para uma chave pontual, a seleção usa contenção no intervalo do shard.
+
+A base de estudo é [vitessio/vitess / key.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/key/key.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE); [vitessio/vitess / destination.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/key/destination.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE). A aplicação ou candidato de aplicação é [vitessio/vitess / numeric.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/numeric.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE); [vitessio/vitess / routing.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/engine/routing.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE); [vitessio/vitess / resolver.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/srvtopo/resolver.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/numeric.go#L112-L123). Numeric.RangeMap transforma limites numéricos em um intervalo de keyspace IDs.
+
+A prova vale para o vindex numeric/sequencial e para os intervalos do keyspace; não atribui essa propriedade a um vindex hash ou lookup. Os limites abertos e fechados seguem as funções KeyRange do Vitess. Não há claim de balanceamento, ausência de hotspots nem cluster implantado. Base de roteamento e produto VTGate ficam no mesmo repositório com papéis explícitos.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#range-sharding). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Read Replica
+
+O identificador canônico é `read-replica`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+PostgreSQL implementa o envio e a recepção de WAL; Patroni configura o PostgreSQL seguidor e a conexão com o upstream escolhido.
+
+A base de estudo é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / walsender.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [postgres/postgres / walreceiver.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walreceiver.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE); [patroni/patroni / config.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/config.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/walsender.c#L4047-L4053). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#read-replica). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Sharding
+
+O identificador canônico é `sharding`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Vitess mapeia chaves de negócio para destinos por hash ou lookup. Faixas de keyspace ID definem o roteamento para shards.
+
+A base de estudo é [vitessio/vitess / hash.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/hash.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE). A aplicação ou candidato de aplicação é [vitessio/vitess / lookup.go @ a9490fb9](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go); licença [Apache-2.0](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/vitessio/vitess/blob/a9490fb97b3a2c3bb784a6521a455a7eb3ad5d4e/go/vt/vtgate/vindexes/lookup.go#L177-L183). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Hash, lookup e ranges são estratégias diferentes. Nenhuma delas distribui uma tabela só porque um índice comum foi criado.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#sharding). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Synchronous Replication
+
+O identificador canônico é `synchronous-replication`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O servidor PostgreSQL espera confirmações conforme o nível e os membros síncronos configurados.
+
+A base de estudo é [postgres/postgres / syncrep.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/syncrep.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [postgres/postgres / syncrep.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/syncrep.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT); [patroni/patroni / sync.py @ dbee9c35](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/postgresql/sync.py); licença [MIT](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/replication/syncrep.c#L390-L396). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/consensus/) e [consulte a ação e o probe deste conceito](/jornadas/consensus/conceitos/#synchronous-replication). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Vertical Partitioning
+
+O identificador canônico é `vertical-partitioning`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Na versão histórica GitLab 16.11, BuildMetadata guarda atributos descartáveis, como opções e variáveis de configuração, em p_ci_builds_metadata. O modelo conserva a associação com o build e sua partição, permitindo reunir os atributos separados sem acrescentá-los todos à tabela principal de builds.
+
+A base de estudo é [spring-projects/spring-data-jpa / JpaRepository.java @ eb55201b](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/spring-data-jpa/src/main/java/org/springframework/data/jpa/repository/JpaRepository.java); licença [Apache-2.0](https://github.com/spring-projects/spring-data-jpa/blob/eb55201b2b73e7420a14cd4ccf9fce869dc6839d/LICENSE.txt). A aplicação ou candidato de aplicação é [gitlabhq/gitlabhq / build_metadata.rb @ 0454e1ac](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/app/models/ci/build_metadata.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/LICENSE); [gitlabhq/gitlabhq / build.rb @ 0454e1ac](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/app/models/ci/build.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/LICENSE); [gitlabhq/gitlabhq / processable.rb @ 0454e1ac](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/app/models/ci/processable.rb); licença [MIT](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/gitlabhq/gitlabhq/blob/0454e1accb3029c1ac3105c84db7bc531a5776de/app/models/ci/build_metadata.rb#L4-L10). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte mostra a separação vertical de grupos de atributos. O mesmo produto também usa partições horizontais, mas esse é outro mecanismo. A associação e as chaves precisam ser preservadas; não se afirma que a versão histórica seja a versão atual.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#vertical-partitioning). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Write Amplification Control
+
+O identificador canônico é `write-amplification-control`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+RocksDB escolhe compactações entre níveis; TiKV expõe configurações do motor que alteram compactação e amplificação de escrita.
+
+A base de estudo é [facebook/rocksdb / compaction_picker_level.cc @ df907495](https://github.com/facebook/rocksdb/blob/df90749560116e2c17d3a55667af6c397854e390/db/compaction/compaction_picker_level.cc); licença [GPL-2.0](https://github.com/facebook/rocksdb/blob/df90749560116e2c17d3a55667af6c397854e390/COPYING). A aplicação ou candidato de aplicação é [tikv/tikv / mod.rs @ 67ffce0c](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/src/config/mod.rs); licença [Apache-2.0](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/src/config/mod.rs#L305-L311). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/storage-partitions/) e [consulte a ação e o probe deste conceito](/jornadas/storage-partitions/conceitos/#write-amplification-control). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Write-Ahead Log (WAL)
+
+O identificador canônico é `write-ahead-log-wal`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A base PostgreSQL conserva o registro WAL; TiKV monta o motor RocksDB e o controle de persistência dos registros.
+
+A base de estudo é [postgres/postgres / xlog.c @ 3c6665bf](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/src/backend/access/transam/xlog.c); licença [PostgreSQL](https://github.com/postgres/postgres/blob/3c6665bf0266a7ae78117c3ed0299bfbd1f1331a/COPYRIGHT). A aplicação ou candidato de aplicação é [tikv/tikv / engine.rs @ 67ffce0c](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/components/engine_rocks/src/engine.rs); licença [Apache-2.0](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/database-design/skills/postgresql-table-design/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 4 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/tikv/tikv/blob/67ffce0c137b7c171405a76df8bc8e9f04a19ce6/components/engine_rocks/src/engine.rs#L209-L215). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/ledger-projection/) e [consulte a ação e o probe deste conceito](/jornadas/ledger-projection/conceitos/#write-ahead-log-wal). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

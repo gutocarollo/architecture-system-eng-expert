@@ -1,0 +1,312 @@
+---
+title: "Grupo 3 — Event-driven e Messaging"
+description: "As 25 ocorrências de mensageria, com contrato de entrega, transformação, recuperação e referências de aplicação."
+diataxis: reference
+---
+
+# Grupo 3 — Event-driven e Messaging
+
+Esta referência preserva as 25 ocorrências do grupo 3. **REF** identifica aplicações didáticas e samples; **PROD** identifica um produto OSS, sem afirmar implantação na Faz. Os exemplos que acrescentam mensagens à reatribuição do MakersHub são propostas: o código lido em `e233fb046ec333982cd1547171b0f0bd8d8d92ee` demonstra intenção por flag, sem broker confirmado por S4.
+
+O localizador comum das skills é `~/.codex/skills/<nome>/SKILL.md`, escrito como texto, sem link de filesystem. As fontes de frameworks e amostras foram consultadas pelos auxiliares em 14/10/2026; o corpus clonado não registra SHA upstream dessas aplicações. A explicação está em [mensagens](/explicacoes/messages/) e a fronteira transacional em [integração confiável](/explicacoes/reliable-integration/).
+
+<span id="g03-e001" />
+
+## Publish/Subscribe
+
+Uma publicação alcança assinaturas independentes. Na proposta de troca de responsável, CRM e auditoria poderiam receber a mesma ocorrência e acompanhar conclusões próprias.
+
+O custo é gerir consumidores e progresso por assinatura. Compartilhar um grupo entre workers divide trabalho; não entrega uma cópia a cada worker. A base é [Watermill](https://github.com/ThreeDotsLabs/watermill), com [consumer-groups](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/consumer-groups) como aplicação **REF** em Redis Streams. [Redis Pub/Sub](https://redis.io/docs/latest/develop/pubsub/) tem outro contrato, com perda possível. A skill é `backend-message-queue`.
+
+{/* current-curation:publish-subscribe */}
+
+A [curadoria de Publish/Subscribe](/referencia/curadoria/03-event-driven-messaging/#publish-subscribe) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e002" />
+
+## Message Queue
+
+Uma fila mantém unidades de trabalho para consumidores. Uma integração proposta pode guardar tarefas de sincronização até que algum executor as processe.
+
+O custo é retenção, confirmação e recuperação. Fila declarada durável não comprova, sozinha, persistência de cada mensagem e confirmação do produtor. A base **PROD** é [RabbitMQ](https://www.rabbitmq.com/docs/confirms); a aplicação **REF** é a [amostra AMQP Watermill](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/pubsubs/amqp). A skill é `backend-message-queue`.
+
+{/* current-curation:message-queue */}
+
+A [curadoria de Message Queue](/referencia/curadoria/03-event-driven-messaging/#message-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e003" />
+
+## Competing Consumers
+
+Consumidores da mesma fila ou grupo dividem trabalho por tentativa. No MakersHub lido, `claim_pending_for_bot` usa `FOR UPDATE SKIP LOCKED` e muda as linhas escolhidas para `BOT_PROCESSING`.
+
+O custo inclui coordenação e estados abandonados. O trecho não comprova recuperação completa após crash ou contagem de workers vivos. [Celery](https://docs.celeryq.dev/en/stable/) é a base e [Apache Superset](https://github.com/apache/superset/blob/master/docker-compose.yml) é aplicação **PROD** com workers no código do produto. A skill é `backend-message-queue`.
+
+{/* current-curation:competing-consumers */}
+
+A [curadoria de Competing Consumers](/referencia/curadoria/03-event-driven-messaging/#competing-consumers) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e004" />
+
+## Producer/Consumer
+
+O produtor disponibiliza uma unidade de trabalho e o consumidor aplica seu processamento. Na proposta, o recebimento da gravação produz trabalho que a transcrição consome depois.
+
+O custo é coordenar contratos e progresso. Sucesso no publish não confirma que o efeito de negócio terminou. A base e aplicação **REF** são [Watermill basic router](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/basic/3-router), com publicador e handlers. A skill é `backend-message-queue`.
+
+{/* current-curation:producer-consumer */}
+
+A [curadoria de Producer/Consumer](/referencia/curadoria/03-event-driven-messaging/#producer-consumer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e005" />
+
+## Request/Reply
+
+Request/Reply liga uma solicitação à resposta da mesma operação. A base é RabbitMQ/AMQP com o cliente Python Pika; a aplicação OSS **REF** é o [tutorial RPC oficial](https://github.com/rabbitmq/rabbitmq-tutorials/tree/main/python).
+
+[`rpc_client.py`](https://github.com/rabbitmq/rabbitmq-tutorials/blob/main/python/rpc_client.py) publica para `rpc_queue` com `reply_to` e `correlation_id`. [`rpc_server.py`](https://github.com/rabbitmq/rabbitmq-tutorials/blob/main/python/rpc_server.py) calcula a resposta e publica para o destino indicado, conservando a correlação. O custo é canal de resposta, espera e recuperação. A correlação não deduplica o comando; timeout do chamador não prova cancelamento ou ausência do efeito. Watermill `requestreply` é outra base de comparação, não uma dependência deste sample. As skills são `backend-message-queue` e `backend-idempotency`.
+
+{/* current-curation:request-reply */}
+
+A [curadoria de Request/Reply](/referencia/curadoria/03-event-driven-messaging/#request-reply) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e006" />
+
+## Fire-and-Forget
+
+O chamador envia sem aguardar a resposta de negócio. Uma notificação proposta pode informar disponibilidade enquanto o chamador segue seu trabalho.
+
+O custo é acompanhar resultados por outro caminho quando importam. Não esperar resposta de negócio não significa ignorar erros de publicação ou garantir entrega. A base Watermill tem [NotifyMiddleware no sample consumer-groups](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/consumer-groups/common), aplicação **REF**. A skill é `backend-message-queue`.
+
+{/* current-curation:fire-and-forget */}
+
+A [curadoria de Fire-and-Forget](/referencia/curadoria/03-event-driven-messaging/#fire-and-forget) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e007" />
+
+## Fan-out
+
+Uma ocorrência é distribuída para vários destinos independentes. No exemplo proposto, uma conversão interessa a auditoria e indicadores, com uma consequência por destino.
+
+O custo cresce com as consequências e suas falhas. Workers concorrentes da mesma fila não constituem uma cópia por destino. A aplicação **REF** [Watermill consumer-groups](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/consumer-groups) separa handlers de CRM e newsletter. A skill é `backend-message-queue`.
+
+{/* current-curation:fan-out */}
+
+A [curadoria de Fan-out](/referencia/curadoria/03-event-driven-messaging/#fan-out) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e008" />
+
+## Fan-in
+
+Fan-in reúne entradas de vários fluxos em um destino. A base de framework de comparação é [`FanIn` do Watermill](https://github.com/ThreeDotsLabs/watermill/blob/master/components/fanin/fanin.go); a aplicação OSS **PROD** é o Funnel do Apache NiFi.
+
+[`StandardFunnel`](https://github.com/apache/nifi/blob/main/nifi-framework-bundle/nifi-framework/nifi-framework-core-api/src/main/java/org/apache/nifi/controller/StandardFunnel.java) conserva várias conexões de entrada. Seu `onTrigger` obtém FlowFiles por `session.get` e os transfere pela relação de saída comum, com commit ou rollback da sessão. Uma proposta pode convergir canais de dois produtores nesse ponto. O custo é administrar carga e backpressure. O componente encaminha entradas sem aguardar um conjunto completo nem somar valores; isso exige um aggregator. Watermill e NiFi são implementações alternativas, não dependências entre si. A skill é `backend-message-queue`.
+
+{/* current-curation:fan-in */}
+
+A [curadoria de Fan-in](/referencia/curadoria/03-event-driven-messaging/#fan-in) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e009" />
+
+## Message Router
+
+Um roteador escolhe o canal de destino segundo uma regra. Uma proposta pode encaminhar mensagens para handlers distintos conforme seu tipo.
+
+O custo é manter regras e tratar um destino ausente. O exemplo de handler por tópico não comprova roteamento por conteúdo. A base é [Spring Integration routing](https://docs.spring.io/spring-integration/reference/message-routing.html); [Watermill basic router](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/basic/3-router) é aplicação **REF** de roteamento por canais. A skill é `backend-message-queue`.
+
+{/* current-curation:message-router */}
+
+A [curadoria de Message Router](/referencia/curadoria/03-event-driven-messaging/#message-router) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e010" />
+
+## Content-Based Router
+
+A regra de destino examina campos da mensagem. No loan broker didático, o conteúdo da solicitação ajuda a escolher o caminho de cotação.
+
+O custo é validar os campos e manter a regra de negócio. Campo ausente ou incompatível exige um caminho explícito. A base é [Spring Integration](https://docs.spring.io/spring-integration/reference/message-routing.html); o [loan broker descrito nos samples](https://docs.spring.io/spring-integration/reference/samples.html) é uma aplicação **REF** descrita pela fonte primária; sua ausência no clone local não limita a referência upstream. A skill é `backend-message-queue`.
+
+{/* current-curation:content-based-router */}
+
+A [curadoria de Content-Based Router](/referencia/curadoria/03-event-driven-messaging/#content-based-router) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e011" />
+
+## Message Filter
+
+Um filtro aceita ou descarta mensagens conforme um predicado. A base de framework é [`FilterProcessor` do Apache Camel](https://github.com/apache/camel/blob/main/core/camel-core-processor/src/main/java/org/apache/camel/processor/FilterProcessor.java), cujo `process` só chama o próximo processor quando o predicado coincide.
+
+A aplicação OSS **PROD** é Apache NiFi. [`RouteOnAttribute`](https://github.com/apache/nifi/blob/main/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/RouteOnAttribute.java) inclui um uso de filtro: conservar `matched` e terminar `unmatched`, conforme expressões configuradas. O custo é definir e observar o descarte. Terminar um FlowFile não fornece recuperação automática de uma mensagem necessária. Camel e NiFi são duas implementações do padrão; não se afirma que NiFi depende do Camel. A skill é `backend-message-queue`.
+
+{/* current-curation:message-filter */}
+
+A [curadoria de Message Filter](/referencia/curadoria/03-event-driven-messaging/#message-filter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e012" />
+
+## Message Translator
+
+Um tradutor converte uma representação para outro contrato. A base é o framework de records do NiFi, com RecordReader e RecordSetWriter; a aplicação OSS **PROD** é Apache NiFi.
+
+[`ConvertRecord`](https://github.com/apache/nifi/blob/main/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/ConvertRecord.java) usa [`AbstractRecordProcessor`](https://github.com/apache/nifi/blob/main/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/AbstractRecordProcessor.java) para ler records e escrever a saída pelo writer configurado. Converter a codificação mantém o papel distinto de resolver identidade de negócio. O custo é compatibilidade de schema e tratamento de campos ausentes; a escolha do writer pode descartar campos. A correspondência entre OwnerId Salesforce e uma chave interna não foi demonstrada por esse exemplo. A skill é `backend-message-queue`.
+
+{/* current-curation:message-translator */}
+
+A [curadoria de Message Translator](/referencia/curadoria/03-event-driven-messaging/#message-translator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e013" />
+
+## Message Enricher
+
+Um enriquecedor acrescenta contexto vindo de uma fonte definida. Uma proposta pode anexar um atributo autorizado antes de rotear a solicitação.
+
+O custo é consulta adicional, frescor e tratamento de indisponibilidade. O valor acrescentado não deve ser inventado quando a fonte falha. A base é Spring Integration e o [loan broker](https://docs.spring.io/spring-integration/reference/samples.html) é sample **REF** com enricher. A correspondência de chaves do caso Salesforce permanece não demonstrada. A skill é `backend-message-queue`.
+
+{/* current-curation:message-enricher */}
+
+A [curadoria de Message Enricher](/referencia/curadoria/03-event-driven-messaging/#message-enricher) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e014" />
+
+## Splitter
+
+Um splitter divide uma mensagem em partes identificadas. A base de framework é [`Splitter` do Apache Camel](https://github.com/apache/camel/blob/main/core/camel-core-processor/src/main/java/org/apache/camel/processor/Splitter.java), que avalia a expressão e produz partes para processamento.
+
+A aplicação OSS **PROD** é Apache NiFi. [`SplitText`](https://github.com/apache/nifi/blob/main/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/SplitText.java) divide texto por limites de linhas ou tamanho e adiciona `fragment.identifier`, `fragment.index` e `fragment.count`. Dez partes geradas ainda precisam de resultado próprio de processamento. O custo é coordenar correlação e falha parcial. Uma linha isolada maior que o limite pode gerar um fragmento maior segundo esse contrato. A skill é `backend-message-queue`.
+
+{/* current-curation:splitter */}
+
+A [curadoria de Splitter](/referencia/curadoria/03-event-driven-messaging/#splitter) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e015" />
+
+## Aggregator
+
+Um agregador combina partes relacionadas quando a regra de completude permite liberar um resultado. No loan broker didático, ele reúne respostas de cotações por solicitação.
+
+O custo é guardar estado e definir prazo, duplicatas e resultado parcial. Uma parte que nunca chega não pode bloquear indefinidamente sem política definida. A base é [Spring Integration](https://docs.spring.io/spring-integration/reference/message-routing.html); o [quote aggregator do loan broker](https://docs.spring.io/spring-integration/reference/samples.html) é aplicação **REF** documentada. A skill é `backend-message-queue`.
+
+{/* current-curation:aggregator */}
+
+A [curadoria de Aggregator](/referencia/curadoria/03-event-driven-messaging/#aggregator) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e016" />
+
+## Resequencer
+
+Um resequencer reorganiza entradas conforme uma sequência definida. A base de framework é [`Resequencer` do Apache Camel](https://github.com/apache/camel/blob/main/core/camel-core-processor/src/main/java/org/apache/camel/processor/Resequencer.java), que usa comparação e conjunto ordenado para seus lotes.
+
+A aplicação OSS **PROD** é Apache NiFi. [`EnforceOrder`](https://github.com/apache/nifi/blob/main/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/EnforceOrder.java) mantém a ordem por grupo e encaminha entradas para `success`, `wait`, `overtook` ou `skipped` conforme estado e prazo. O custo é estado, espera e recuperação de lacunas. O contrato é dentro de um nó; configurar a volta de `wait` e a decisão para atrasos faz parte do fluxo. Não é ordenação global de todo cluster. A skill é `backend-message-queue`.
+
+{/* current-curation:resequencer */}
+
+A [curadoria de Resequencer](/referencia/curadoria/03-event-driven-messaging/#resequencer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e017" />
+
+## Correlation ID
+
+Uma identidade compartilhada liga mensagens de uma conversa. Pedido, resultado e aviso de um processo proposto podem carregar o mesmo correlationId.
+
+O custo é propagar o contexto e definir seu escopo. Correlação não deduplica intenções repetidas nem confirma conclusão. A aplicação **REF** é [Watermill basic router](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/basic/3-router), com middleware de correlação. As skills são `backend-message-queue` e `observability-and-instrumentation` como apoio adjacente.
+
+{/* current-curation:correlation-id */}
+
+A [curadoria de Correlation ID](/referencia/curadoria/03-event-driven-messaging/#correlation-id) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e018" />
+
+## Dead Letter Queue
+
+Uma DLQ isola trabalho que saiu da recuperação automática comum. A base AMQP e a aplicação OSS **PROD** são RabbitMQ: [`rabbit_dead_letter:publish`](https://github.com/rabbitmq/rabbitmq-server/blob/main/deps/rabbit/src/rabbit_dead_letter.erl) republica conforme causa, exchange e routing key, seguindo o [contrato DLX](https://www.rabbitmq.com/docs/dlx).
+
+O plugin Management implementa inspeção por [`rabbit_mgmt_wm_queue_get`](https://github.com/rabbitmq/rabbitmq-server/blob/main/deps/rabbitmq_management/src/rabbit_mgmt_wm_queue_get.erl). O [Shovel AMQP](https://github.com/rabbitmq/rabbitmq-server/blob/main/deps/rabbitmq_shovel/src/rabbit_amqp091_shovel.erl) implementa `forward` e confirmação de publicação antes do ACK no modo `on_confirm`; ele pode transferir uma fila de quarentena para o destino decidido. Isso fornece uma implementação concreta de inspeção e transporte de replay, sem decidir a correção do payload. O custo é retenção e operação. DLX padrão pode perder mensagens; replay precisa preservar identidade e considerar efeitos já aplicados. As skills são `backend-message-queue` e `backend-idempotency`.
+
+{/* current-curation:dead-letter-queue */}
+
+A [curadoria de Dead Letter Queue](/referencia/curadoria/03-event-driven-messaging/#dead-letter-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e019" />
+
+## Retry Queue
+
+Uma fila de retry disponibiliza novamente trabalho falho após a espera definida. Uma sincronização proposta pode repetir falhas transitórias com intervalo crescente.
+
+O custo é manter tentativas e identidade. Repetir não corrige payload permanentemente inválido, e o estado da DAG Airflow não muda automaticamente. A aplicação **REF** é [Watermill delayed-requeue](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/delayed-requeue), com requeuer PostgreSQL. As skills são `backend-resilience-patterns` e `backend-idempotency`.
+
+{/* current-curation:retry-queue */}
+
+A [curadoria de Retry Queue](/referencia/curadoria/03-event-driven-messaging/#retry-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e020" />
+
+## Delayed Queue
+
+O mecanismo adia a disponibilidade de uma mensagem até um prazo. Um comando proposto de lembrete pode ser liberado depois do intervalo definido.
+
+O custo é guardar trabalho pendente e acompanhar o relógio e atrasos. O prazo de disponibilidade não garante execução exatamente naquele instante. A aplicação **REF** [Watermill delayed-messages](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/delayed-messages) usa publicador PostgreSQL; isso não prova a mesma capacidade em qualquer broker. As skills são `backend-message-queue` e `backend-resilience-patterns`.
+
+{/* current-curation:delayed-queue */}
+
+A [curadoria de Delayed Queue](/referencia/curadoria/03-event-driven-messaging/#delayed-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e021" />
+
+## Priority Queue
+
+Uma fila favorece mensagens conforme prioridades e política de agendamento. A base é o mecanismo de filas AMQP do RabbitMQ; a aplicação OSS **PROD** é o próprio broker.
+
+[`rabbit_priority_queue`](https://github.com/rabbitmq/rabbitmq-server/blob/main/deps/rabbit/src/rabbit_priority_queue.erl) lê a configuração de prioridades e escolhe subfilas em `publish` e `fetch`. A [documentação de prioridade](https://www.rabbitmq.com/docs/priority) distingue os comportamentos por tipo e versão de fila. Um trabalho interativo pode receber prioridade diferente de um lote. O custo é estado adicional e possível espera de classes menos prioritárias. Prioridade de mensagens prontas não preempta uma entrega já atribuída a um consumidor. A skill é `backend-message-queue`.
+
+{/* current-curation:priority-queue */}
+
+A [curadoria de Priority Queue](/referencia/curadoria/03-event-driven-messaging/#priority-queue) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e022" />
+
+## Poison Message Handling
+
+O tratamento de poison messages limita falhas repetidas e encaminha ou remove a mensagem segundo a política terminal. A base é o mecanismo de quorum queues do RabbitMQ, e a aplicação OSS **PROD** é o próprio broker.
+
+Em [`rabbit_fifo`](https://github.com/rabbitmq/rabbitmq-server/blob/main/deps/rabbit/src/rabbit_fifo.erl), o caminho de retorno compara o contador ao limite e chama `discard_or_dead_letter` com a causa `delivery_limit`. A [documentação](https://www.rabbitmq.com/docs/quorum-queues#poison-message-handling) delimita contadores e diferenças por versão. O custo é gerir limite e destino. Sem DLX configurada, a decisão pode descartar trabalho; repetir NACK não equivale universalmente a incrementar o mesmo contador em todas as versões. As skills são `backend-message-queue` e `backend-resilience-patterns`.
+
+{/* current-curation:poison-message-handling */}
+
+A [curadoria de Poison Message Handling](/referencia/curadoria/03-event-driven-messaging/#poison-message-handling) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e023" />
+
+## Event Notification
+
+O evento informa que algo aconteceu e deixa os detalhes para uma consulta. Uma proposta pode anunciar uma gravação disponível usando apenas sua identidade e versão.
+
+O custo é uma dependência posterior de consulta e seu frescor. Se a origem muda antes da leitura, o consumidor precisa conhecer a versão pretendida. A aplicação **REF** é [NotifyMiddleware do Watermill](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/real-world-examples/consumer-groups/common), que publica MessageReceived. A skill é `backend-message-queue`.
+
+{/* current-curation:event-notification */}
+
+A [curadoria de Event Notification](/referencia/curadoria/03-event-driven-messaging/#event-notification) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e024" />
+
+## Event-Carried State Transfer
+
+O evento transporta dados que o consumidor pode aplicar sem buscar cada atributo na origem. O UserSignedUp da amostra contém identidade e consentimentos para as reações previstas.
+
+O custo é manter contrato, versões e proteção dos campos replicados. O payload não é necessariamente todo o perfil nem uma cópia sempre atual. A aplicação **REF** é o [schema do Watermill consumer-groups](https://github.com/ThreeDotsLabs/watermill/blob/master/_examples/real-world-examples/consumer-groups/common/events.go). A skill é `backend-message-queue`.
+
+{/* current-curation:event-carried-state-transfer */}
+
+A [curadoria de Event-Carried State Transfer](/referencia/curadoria/03-event-driven-messaging/#event-carried-state-transfer) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g03-e025" />
+
+## Event Streaming
+
+Um log retido permite que consumidores acompanhem posições e retomem a leitura. Um consumidor proposto pode reprocessar uma projeção a partir do ponto definido.
+
+O custo é retenção, checkpoints e replay. Retomar posição não torna seguro repetir qualquer efeito externo. A base **PROD** é [NATS JetStream](https://docs.nats.io/learn/jetstream/pull-consumers); a aplicação **REF** é [Watermill JetStream](https://github.com/ThreeDotsLabs/watermill/tree/master/_examples/pubsubs/nats-jetstream), sem deduplicação habilitada na amostra selecionada. As skills são `data-streaming` e `backend-idempotency`.
+
+{/* current-curation:event-streaming */}
+
+A [curadoria de Event Streaming](/referencia/curadoria/03-event-driven-messaging/#event-streaming) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

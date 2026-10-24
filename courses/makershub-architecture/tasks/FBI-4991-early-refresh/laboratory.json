@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-10-24T20:51:31.378420+00:00",
+  "scope": "local synthetic laboratory; no production calls",
+  "command": "python3 -B labs/architecture/early-refresh/run.py",
+  "python": "Python 3.15.0",
+  "exit_code": 0,
+  "stdout": "before: early_started=False boundary_blocked=True result=calls-v2 producer_calls=2\nafter: early_started=True boundary_blocked=False result=calls-v2 producer_calls=2\ncomparison=PASS evolution=True slow_refresh_can_still_block_after_hard_ttl=True\n",
+  "stderr": "",
+  "stdout_sha256": "1201e28b8a9c207c67c6dabad6fd7a4be235fee7fa305dfabfede5d2aed8f9ac"
+}

@@ -1,0 +1,2896 @@
+diff --git a/backend/app/integrations/salesforce_integration.py b/backend/app/integrations/salesforce_integration.py
+index 1a0504e83..16a87669d 100644
+--- a/backend/app/integrations/salesforce_integration.py
++++ b/backend/app/integrations/salesforce_integration.py
+@@ -12,8 +12,10 @@ import time
+ import requests
+ import defusedxml.ElementTree as SafeET
+ from xml.sax.saxutils import escape as _xml_escape
++from dataclasses import dataclass, field
+ from typing import Dict, Any, Optional, List
+ from datetime import date, datetime, timedelta, timezone
++from zoneinfo import ZoneInfo
+ 
+ from app.core.r1_meeting import MEETING_DURATION
+ from app.core.timezone import add_real_minutes
+@@ -4046,6 +4048,188 @@ def _resolve_opportunity_record_type_id(sf: Salesforce, funnel: str) -> Optional
+     return None
+ 
+ 
++@dataclass(frozen=True)
++class ReusedOpportunityState:
++    """Fase, prazo e status de reunião da OPP de entrada antes da R1 (FBI-4719).
++
++    Campos como vêm do Salesforce (StageName, CloseDate em ISO,
++    DWStatusReunioesInvestimentos__c). None é desconhecido.
++    """
++
++    stage: Optional[str] = None
++    close_date: Optional[str] = None
++    meeting_status: Optional[str] = None
++    # RecordType.DeveloperName da OPP quando a requisição começou. Fora da comparação:
++    # a releitura não o traz; ele só diz qual regra do Flow da org se aplica a ela.
++    record_type: Optional[str] = field(default=None, compare=False)
++
++
++# FBI-4719: o que a R1 do Super R1 faz avançar numa OPP reaproveitada. A OPP
++# que já passou disso mantém a fase e o status de reunião (review do PR #594):
++# em Contatado (Apresentação da Estratégia, em consórcio) ou além, ou com R1
++# realizada, R2 ou R3.
++_STAGES_BEFORE_R1 = frozenset({"Nova oportunidade", "Qualificação"})
++_MEETING_STATUSES_BEFORE_R1 = frozenset(
++    {"", "R1 Não agendada", "R1 Agendada em aberto", "R1 Agendada e não realizada"}
++)
++
++
++_SP_TZ = ZoneInfo("America/Sao_Paulo")
++
++# Salesforce Flow `DWCompromissoAfterCreateAtualizaFaseOportunidadeComR1Marcada`
++# (fires for an Event of Type R1 on an Opportunity, unless the last modifier is one
++# excluded user): creating the R1 Event moves an Opportunity still in this stage
++# forward, by its RecordType as it is when the Event is created: Investimentos and
++# FinancialServices → Contatado; Consorcios, Seguros and Internacional → Apresentação
++# da Estratégia (live org, Flow version 6, read through the Tooling API). It is
++# the one change to the reused OPP that the booking itself causes.
++_STAGE_ADVANCED_BY_THE_R1_EVENT = "Nova oportunidade"
++_STAGE_SET_BY_THE_R1_EVENT_BY_RECORD_TYPE = {
++    "Investimentos": "Contatado",
++    "FinancialServices": "Contatado",
++    "Consorcios": "Apresentação da Estratégia",
++    "Seguros": "Apresentação da Estratégia",
++    "Internacional": "Apresentação da Estratégia",
++}
++
++
++def _is_the_r1_event_advancing_the_stage(
++    snapshot: ReusedOpportunityState, fresh: ReusedOpportunityState,
++) -> bool:
++    """True when the Flow of the org explains the change: "Nova oportunidade" turned
++    into exactly the stage the Flow sets for the RecordType the Opportunity had, with
++    nothing else different. A RecordType the Flow has no rule for (Family Office, for
++    example, or none at all), another stage, or any other field changed is not this. A person who
++    moves it to that very stage within the seconds of the booking cannot be told apart
++    (accepted, ADR 0095)."""
++    expected = _STAGE_SET_BY_THE_R1_EVENT_BY_RECORD_TYPE.get(snapshot.record_type or "")
++    return (
++        snapshot.stage == _STAGE_ADVANCED_BY_THE_R1_EVENT
++        and expected is not None
++        and fresh.stage == expected
++        and fresh.close_date == snapshot.close_date
++        and fresh.meeting_status == snapshot.meeting_status
++    )
++
++
++def _today_brt() -> date:
++    """Today on the Brasília calendar. `date.today()` is the day in the PROCESS time
++    zone: in a UTC container, between 21:00 and 24:00 in Brasília it is already the
++    next day."""
++    return datetime.now(_SP_TZ).date()
++
++
++def _is_past_date(iso_date: Optional[str]) -> bool:
++    """Prazo ISO já vencido. Ausente ou ilegível conta como desconhecido (False)."""
++    try:
++        return iso_date is not None and date.fromisoformat(iso_date) < _today_brt()
++    except ValueError:
++        logger.warning("CloseDate ilegível na OPP reaproveitada: %r", iso_date)
++        return False
++
++
++def _fresh_reused_opportunity_state(
++    sf: Salesforce, opportunity_id: str, snapshot: Optional[ReusedOpportunityState],
++) -> Optional[ReusedOpportunityState]:
++    """Stage, close date and meeting status of a reused OPP, read right now; None
++    when they cannot be confirmed.
++
++    `snapshot` was read when the request started; the PATCH that decides whether
++    stage and meeting status advance runs after the Account, Contact and Event
++    writes, seconds later. Anyone editing the OPP in Salesforce in between would
++    be overwritten by a decision made on stale state, so the decision is taken on
++    a re-read made immediately before the PATCH. The window that remains is the
++    round trip between this read and the PATCH.
++
++    A stage change that the Flow of the org explains (see
++    `_is_the_r1_event_advancing_the_stage`) is taken as the booking's own effect and
++    not as an edit by someone: it is decided on the state the SDR saw (`snapshot`).
++    Deciding on the re-read would leave a consórcio booking of an Investimentos
++    Opportunity in "Contatado", because the Flow runs before this flow switches the
++    RecordType; the update writes the stage it means.
++
++    A failed or empty read returns None, and the caller then decides NOTHING
++    that depends on the state (see `stage_state_unknown` in
++    `update_opportunity_after_conversion`) and reports a partial step, so the
++    booking that is already made never fails and a re-submission completes it.
++    Falling back to `snapshot` would be the unsafe guess: it is exactly the state
++    that may have gone stale.
++
++    `If-Unmodified-Since` on the PATCH is not used: it can only protect writes
++    that come after the precondition, and the Event created by this same flow can
++    touch the OPP, which would refuse the PATCH after the booking is already made.
++    """
++    try:
++        validated = _validate_sf_id(opportunity_id)
++        records = sf.query(  # type: ignore[attr-defined]
++            "SELECT StageName, CloseDate, DWStatusReunioesInvestimentos__c "
++            f"FROM Opportunity WHERE Id = '{validated}' AND IsDeleted = false"
++        ).get("records") or []
++    except Exception as exc:  # noqa: BLE001
++        logger.warning(
++            "Could not re-read reused opportunity %s before the update; stage, "
++            "meeting status and close date are left as they are: %s",
++            opportunity_id, exc,
++        )
++        return None
++    if not records:
++        logger.warning(
++            "Reused opportunity %s not found on re-read; stage, meeting status and "
++            "close date are left as they are", opportunity_id,
++        )
++        return None
++    record = records[0]
++    fresh = ReusedOpportunityState(
++        stage=record.get("StageName"),
++        close_date=record.get("CloseDate"),
++        meeting_status=record.get("DWStatusReunioesInvestimentos__c"),
++    )
++    if snapshot is not None and fresh != snapshot:
++        if _is_the_r1_event_advancing_the_stage(snapshot, fresh):
++            logger.info(
++                "Reused opportunity %s moved as the R1 Event Flow would move it (%s -> %s); "
++                "the update decides on the state the SDR saw",
++                opportunity_id, snapshot.stage, fresh.stage,
++            )
++            return snapshot
++        logger.warning(
++            "Reused opportunity %s changed in Salesforce while the booking ran "
++            "(%s -> %s); the update decides on the fresh state",
++            opportunity_id, snapshot, fresh,
++        )
++    return fresh
++
++
++def _advance_fields(
++    state: Optional[ReusedOpportunityState], *, is_consorcio: bool,
++) -> Dict[str, Any]:
++    """Stage and meeting status the R1 moves forward, each decided on its own.
++
++    `state` None is a new Opportunity (everything moves). A reused one moves only
++    what is still before the R1: a stage the Flow of the org already advanced is
++    left alone and the meeting status is still written."""
++    fields: Dict[str, Any] = {}
++    if state is None or state.stage is None or state.stage in _STAGES_BEFORE_R1:
++        fields["StageName"] = "Apresentação da Estratégia" if is_consorcio else "Contatado"
++    if state is None or (state.meeting_status or "") in _MEETING_STATUSES_BEFORE_R1:
++        fields["DWStatusReunioesInvestimentos__c"] = "R1 Agendada em aberto"
++    return fields
++
++
++def _renew_expired_close_date_fields(
++    state: Optional[ReusedOpportunityState],
++) -> Dict[str, Any]:
++    """The close date an open reused Opportunity gets when its own has passed.
++
++    A lost Opportunity never gets here (`opportunity_entry_refusal`). An open one
++    whose deadline already passed gets the close date of a new one (today in
++    Brasília + 90 days, as `execute_r1_from_opportunity_flow` gives the
++    Opportunity it creates); one still within its deadline keeps its own."""
++    if state is not None and _is_past_date(state.close_date):
++        return {"CloseDate": (_today_brt() + timedelta(days=90)).isoformat()}
++    return {}
++
++
+ def update_opportunity_after_conversion(
+     sf: Salesforce,
+     opportunity_id: str,
+@@ -4057,10 +4241,28 @@ def update_opportunity_after_conversion(
+     interesse_investimentos: str,
+     description: str,
+     is_consorcio: bool = False,
++    reused_opportunity: bool = False,
++    current_state: Optional[ReusedOpportunityState] = None,
++    stage_state_unknown: bool = False,
+ ) -> Dict[str, Any]:
+     """
+     Update the newly-created Opportunity with routing & lead data.
+ 
++    `reused_opportunity` (FBI-4719, entrada por OPP existente): a descrição é do
++    assessor e guarda o histórico da OPP, então fica como está. Os
++    demais campos são a requalificação que o SDR acabou de fazer e sobrescrevem.
++    `current_state` é a OPP antes da R1. Fase e status de reunião só avançam
++    (_STAGES_BEFORE_R1, _MEETING_STATUSES_BEFORE_R1), e o prazo é renovado
++    quando o da OPP aberta já venceu (a perdida nunca chega aqui:
++    `opportunity_entry_refusal`). `current_state=None` (sem leitura
++    do inicio) avança, como numa OPP nova; já `stage_state_unknown=True` (a
++    releitura imediatamente antes falhou) não decide nada disso.
++
++    `stage_state_unknown` (reused only): the state could not be re-read right
++    before this update, so nothing that depends on it is decided here. Stage,
++    meeting status and close date stay as they are in Salesforce: guessing from
++    a stale snapshot could send back an Opportunity that someone moved forward. Owner, patrimony and the SDR fields still go.
++
+     Confirmed fields (from salesforce_prod.stg_salesforce__opportunity):
+     - OwnerId                              → Advisor
+     - StageName                            → 'Contatado' (one step past default)
+@@ -4073,15 +4275,18 @@ def update_opportunity_after_conversion(
+     - DWDescricaoOportunidade__c            → "" (empty — advisor fills later)
+     Note: DWNomeAssessor__c is a formula field (read-only) — do NOT include it.
+     """
++    state = current_state if reused_opportunity else None
+     update_data: Dict[str, Any] = {
+         "OwnerId": advisor_salesforce_id,
+-        "StageName": "Apresentação da Estratégia" if is_consorcio else "Contatado",
+-        "DWStatusReunioesInvestimentos__c": "R1 Agendada em aberto",
+         "DWPatrimonioFinanceiroInformado__c": patrimony_value,
+         "DWValorInformadoPeloSDR__c": patrimony_value,
+         "DWNomeSDR__c": sdr_name,
+-        "DWDescricaoOportunidade__c": "",
+     }
++    hold_state = reused_opportunity and stage_state_unknown
++    if not hold_state:
++        update_data.update(_advance_fields(state, is_consorcio=is_consorcio))
++    if not reused_opportunity:
++        update_data["DWDescricaoOportunidade__c"] = ""
+ 
+     if not is_consorcio:
+         update_data["DWProfissao__c"] = profissao
+@@ -4124,6 +4329,11 @@ def update_opportunity_after_conversion(
+             logger.warning("Could not resolve Investimentos/FS RecordType for Opportunity: %s", e)
+     update_data = {k: v for k, v in update_data.items() if v is not None}
+ 
++    if reused_opportunity and not hold_state:
++        # OPP aberta com o prazo vencido ganha o prazo da OPP nova do caminho Conta
++        # (execute_r1_from_opportunity_flow). A perdida não entra (recusa na entrada).
++        update_data.update(_renew_expired_close_date_fields(state))
++
+     try:
+         sf.Opportunity.update(opportunity_id, update_data)  # type: ignore
+         logger.info(
+@@ -4147,6 +4357,13 @@ R1_EVENT_EXTERNAL_DESCRIPTION = (
+ )
+ 
+ 
++# `DWStatusReuniao__c` of an R1 whose meeting is still to happen. "Não realizada" is
++# the cancelled one (it frees the slot and the Opportunity) and "Concluída" the held
++# one. One owner: the Event is created with it, and the dedupe of a retry and the
++# Super R1 lookups of an existing R1 (`qualify_service`) filter by it.
++R1_EVENT_OPEN_STATUS = "Aberta"
++
++
+ def _format_salesforce_datetime(value: datetime) -> str:
+     """Serialize an aware datetime with its offset and preserve the naive legacy."""
+     if value.utcoffset() is None:
+@@ -4198,7 +4415,7 @@ def create_r1_event(
+     event_data: Dict[str, Any] = {
+         "Subject": "Reunião | Faz Capital",
+         "Type": "R1",
+-        "DWStatusReuniao__c": "Aberta",
++        "DWStatusReuniao__c": R1_EVENT_OPEN_STATUS,
+         "DWModalidade__c": modalidade,
+         "DWSincronizarOutlook__c": True,
+         "ShowAs": "Busy",
+@@ -4217,11 +4434,13 @@ def create_r1_event(
+     try:
+         # A converted Lead cannot be converted again. Retrying its post-conversion
+         # phase must therefore reuse an R1 already created before a later step
+-        # failed, instead of duplicating the calendar appointment.
++        # failed, instead of duplicating the calendar appointment. Only an OPEN R1
++        # counts: a cancelled one ("Não realizada") does not hold the slot.
+         existing = sf.query(
+             "SELECT Id FROM Event "
+             f"WHERE WhatId = '{_validate_sf_id(opportunity_id)}' "
+             "AND Type = 'R1' "
++            f"AND DWStatusReuniao__c = '{R1_EVENT_OPEN_STATUS}' "
+             f"AND OwnerId = '{_validate_sf_id(advisor_salesforce_id)}' "
+             f"AND StartDateTime = {start_str} "
+             "ORDER BY CreatedDate DESC LIMIT 1"
+@@ -4348,25 +4567,100 @@ def _get_sync_engine():
+     return _sync_engine
+ 
+ 
+-def insert_routing_history(
++# Resultados de uma tentativa de escrita do historico/notificacao (ver
++# _run_routing_history_insert). "exists" NAO e falha: a linha ja estava la
++# (retry do mesmo agendamento ou DAG Airflow que chegou primeiro).
++ROUTING_WRITE_INSERTED = "inserted"
++ROUTING_WRITE_EXISTS = "exists"
++ROUTING_WRITE_ADVISOR_MISSING = "advisor_missing"
++
++
++def _is_sf_sandbox() -> bool:
++    return os.getenv("SF_IS_SANDBOX", "false").lower() in ("true", "1", "yes")
++
++
++def record_routing_post_action_pending(
++    action: str,
++    opportunity_id: str,
++    payload: Dict[str, Any],
++    error: Optional[str],
++    attempt_at: Optional[Any] = None,
++) -> bool:
++    """Grava a pendencia duravel de uma escrita pos-agendamento que falhou.
++
++    Best-effort e sincrono: NUNCA levanta. Se ate a gravacao da pendencia falha,
++    loga em ERRO e devolve False (o agendamento ja foi dado como feito; o log e
++    o unico vestigio nesse caso). `payload` leva tudo que a funcao precisa para
++    repetir a chamada; "sandbox" marca em qual ambiente ela foi originada, para
++    o reprocessador nao misturar sandbox com producao.
++
++    `attempt_at` (so o historico de reroute): o instante, no relogio do BANCO, em
++    que a tentativa que falhou comecou (`_db_clock_now`). Vira o `payload_at` da
++    pendencia, contra o qual o reprocessador procura um roteamento mais novo.
++    """
++    from app.repositories import routing_post_action_repo
++
++    try:
++        full_payload = {**payload, "sandbox": _is_sf_sandbox()}
++        with _get_sync_engine().begin() as conn:
++            routing_post_action_repo.record_pending(
++                conn,
++                opportunity_id=opportunity_id,
++                action=action,
++                payload=full_payload,
++                error=(error or "")[:2000] or None,
++                attempt_at=attempt_at,
++            )
++        logger.warning(
++            "[routing-pending] Recorded: action=%s opp=%s error=%s",
++            action, opportunity_id, error,
++        )
++        return True
++    except Exception as pending_err:
++        # Classe, SQLSTATE e referencia, nunca a mensagem nem o traceback: a de uma
++        # falha de statement traz o SQL e os `[parameters: ...]`, e o payload desta
++        # pendencia tem o nome do cliente e o patrimonio.
++        logger.error(
++            "[routing-pending] COULD NOT record pending action=%s opp=%s "
++            "(original error: %s): %s",
++            action, opportunity_id, error,
++            routing_post_action_repo.error_reference(pending_err),
++        )
++        return False
++
++
++def _db_clock_now() -> Any:
++    """Hora do relogio do BANCO agora (`clock_timestamp()`), a mesma base de
++    `routed_at` e `payload_at`. Levanta se nao conseguir ler: quem chama NAO cai para
++    outro relogio (o do app, o da gravacao da pendencia), porque instantes de relogios
++    diferentes nao se comparam."""
++    with _get_sync_engine().connect() as conn:
++        return conn.execute(text("SELECT clock_timestamp()")).scalar_one()
++
++
++def _run_routing_history_insert(
+     opportunity_id: str,
+     advisor_salesforce_id: str,
+     patrimony_value: float,
+     routing_source: str = "super-r1",
+     opportunity_type: str = "lead",
+-) -> bool:
+-    """
+-    Insert a record into public.stg_salesforce__routing_history.
++    reroute: bool = False,
++    conn: Any = None,
++) -> str:
++    """Executa a escrita do historico e devolve ROUTING_WRITE_*; levanta em erro.
+ 
+-    This mirrors what the Airflow DAG (salesforce_opp_routing) does in
+-    `inserir_registros` — it records that an opportunity was routed to an
+-    advisor, with employee_id and level resolved from dim_employee_scd2.
++    Corpo de `insert_routing_history` sem o tratamento de falha: o reprocessador
++    (routing_post_action_service) precisa distinguir excecao, "ja existe" e
++    "assessor ausente em dim_employee_scd2", que o bool publico nao separa.
+ 
+-    Uses a synchronous DB connection because this runs inside the sync
+-    executor context of execute_r1_scheduling_flow.
++    `conn`: conexao de uma transacao ja aberta pelo chamador (o reprocessador, que
++    segura o lock por OPP, confere supersessao e marca a pendencia na mesma
++    transacao). Sem `conn`, abre e fecha a propria transacao.
+     """
++    from app.repositories import routing_post_action_repo
++
+     engine = _get_sync_engine()
+-    sf_is_sandbox = os.getenv("SF_IS_SANDBOX", "false").lower() in ("true", "1", "yes")
++    sf_is_sandbox = _is_sf_sandbox()
+     history_table = "makershub.sb_routing_history" if sf_is_sandbox else "public.stg_salesforce__routing_history"
+     dedup_table = history_table  # check duplicates against same table
+ 
+@@ -4386,7 +4680,7 @@ def insert_routing_history(
+             :owner_id,
+             de.employee_id,
+             de.level,
+-            NOW(),
++            clock_timestamp(),
+             :net_worth,
+             :routing_source,
+             :opportunity_type
+@@ -4397,38 +4691,221 @@ def insert_routing_history(
+               SELECT 1
+               FROM {dedup_table}
+               WHERE opportunity_id = :opportunity_id
++                AND (
++                    NOT :reroute
++                    OR (
++                        owner_id = :owner_id
++                        AND routed_at >= NOW() - INTERVAL '24 hours'
++                    )
++                )
+           )
+         LIMIT 1;
+     """)
+ 
+-    try:
+-        with engine.begin() as conn:
+-            result = conn.execute(stmt, {
+-                "opportunity_id": opportunity_id,
+-                "owner_id": advisor_salesforce_id,
+-                "net_worth": patrimony_value,
+-                "routing_source": routing_source,
+-                "opportunity_type": opportunity_type,
+-            })
+-            if result.rowcount > 0:
+-                logger.info(
+-                    "[routing-history] Inserted: opp=%s, advisor=%s, net_worth=%s",
+-                    opportunity_id, advisor_salesforce_id, patrimony_value,
+-                )
+-                return True
+-            else:
+-                logger.warning(
+-                    "[routing-history] No row inserted for opp=%s — "
+-                    "either already exists or advisor %s not found in dim_employee_scd2",
+-                    opportunity_id, advisor_salesforce_id,
++    production_reroute = reroute and not sf_is_sandbox
++    if production_reroute:
++        # Uma instrucao so: a CTE arquiva a linha antiga em
++        # makershub._routing_history_archive quando, e so quando, o DO UPDATE
++        # abaixo se aplicaria (mesma condicao do WHERE dele, e o assessor existe
++        # para o SELECT gerar a linha). Primeiro roteamento e retry do mesmo dono
++        # em menos de 24h nao arquivam nada. O lock por OPP (abaixo) torna
++        # leitura-da-linha-antiga + escrita atomicas sob concorrencia.
++        stmt = text(  # sql-inline-ok: a f-string interpola so os identificadores internos history_table/level_col/net_worth_col (constantes deste modulo, sem input de usuario); os valores vao por bind param.
++            f"""
++            WITH archived AS (
++                INSERT INTO makershub._routing_history_archive (
++                    opportunity_id, owner_id, employee_id, seniority_level, routed_at,
++                    declared_net_worth_amount, routing_source, opportunity_type,
++                    superseded_by_owner_id
+                 )
+-                return False
++                SELECT
++                    prev.opportunity_id, prev.owner_id, prev.employee_id, prev.{level_col},
++                    prev.routed_at, prev.{net_worth_col}, prev.routing_source,
++                    prev.opportunity_type, :owner_id
++                FROM {history_table} prev
++                WHERE prev.opportunity_id = :opportunity_id
++                  AND EXISTS (
++                      SELECT 1
++                      FROM public.dim_employee_scd2 adv
++                      WHERE adv.salesforce_user_id = :owner_id
++                        AND adv.is_current = true
++                  )
++                  AND (
++                      prev.owner_id IS DISTINCT FROM :owner_id
++                      OR prev.routed_at < NOW() - INTERVAL '24 hours'
++                  )
++            )
++            INSERT INTO {history_table} (
++                opportunity_id, owner_id, employee_id, {level_col}, routed_at, {net_worth_col},
++                routing_source, opportunity_type
++            )
++            SELECT
++                :opportunity_id,
++                :owner_id,
++                de.employee_id,
++                de.level,
++                clock_timestamp(),
++                :net_worth,
++                :routing_source,
++                :opportunity_type
++            FROM public.dim_employee_scd2 de
++            WHERE de.salesforce_user_id = :owner_id
++              AND de.is_current = true
++            LIMIT 1
++            ON CONFLICT (opportunity_id) DO UPDATE SET
++                owner_id = EXCLUDED.owner_id,
++                employee_id = EXCLUDED.employee_id,
++                {level_col} = EXCLUDED.{level_col},
++                routed_at = EXCLUDED.routed_at,
++                {net_worth_col} = EXCLUDED.{net_worth_col},
++                routing_source = EXCLUDED.routing_source,
++                opportunity_type = EXCLUDED.opportunity_type
++            WHERE {history_table}.owner_id IS DISTINCT FROM EXCLUDED.owner_id
++               OR {history_table}.routed_at < NOW() - INTERVAL '24 hours';
++            """
++        )
++
++    def _write(active_conn: Any) -> str:
++        if production_reroute:
++            routing_post_action_repo.lock_opportunity(active_conn, opportunity_id)
++        result = active_conn.execute(stmt, {
++            "opportunity_id": opportunity_id,
++            "owner_id": advisor_salesforce_id,
++            "net_worth": patrimony_value,
++            "routing_source": routing_source,
++            "opportunity_type": opportunity_type,
++            "reroute": reroute,
++        })
++        if result.rowcount > 0:
++            return ROUTING_WRITE_INSERTED
++        # Zero linhas: ou a OPP ja estava roteada (dedupe, nao e falha) ou o
++        # assessor nao tem linha vigente em dim_employee_scd2 (falha: sem isso o
++        # historico nunca sera escrito).
++        if routing_post_action_repo.advisor_is_current(active_conn, advisor_salesforce_id):
++            return ROUTING_WRITE_EXISTS
++        return ROUTING_WRITE_ADVISOR_MISSING
++
++    if conn is not None:
++        return _write(conn)
++    with engine.begin() as own_conn:
++        return _write(own_conn)
++
++
++def insert_routing_history(
++    opportunity_id: str,
++    advisor_salesforce_id: str,
++    patrimony_value: float,
++    routing_source: str = "super-r1",
++    opportunity_type: str = "lead",
++    reroute: bool = False,
++    *,
++    record_pending: bool = True,
++    exists_ok: bool = False,
++) -> bool:
++    """
++    Insert a record into public.stg_salesforce__routing_history.
++
++    This mirrors what the Airflow DAG (salesforce_opp_routing) does in
++    `inserir_registros` — it records that an opportunity was routed to an
++    advisor, with employee_id and level resolved from dim_employee_scd2.
++
++    Uses a synchronous DB connection because this runs inside the sync
++    executor context of execute_r1_scheduling_flow.
++
++    `reroute` (FBI-4719): uma OPP reaproveitada já tem a linha do
++    roteamento original, e a dedupe padrão — qualquer linha da OPP — pularia o
++    log do re-roteamento em silêncio. No re-roteamento a dedupe vira "a mesma
++    OPP já roteada para ESTE dono nas últimas 24h": cobre o retry do mesmo
++    agendamento (minutos depois) sem engolir um re-roteamento legítimo. A produção
++    tem a constraint uk_opportunity_id UNIQUE (opportunity_id), então o
++    re-roteamento usa UPSERT para atualizar essa linha, apenas quando o dono
++    muda ou o roteamento anterior tem mais de 24h. A sandbox não tem essa
++    constraint e mantém o INSERT com dedupe por dono e janela de 24h.
++
++    O UPSERT de produção arquiva a linha antiga em
++    makershub._routing_history_archive (insert-only) na mesma transação, antes de
++    sobrescrever: o histórico de todos os roteamentos de uma OPP fica
++    reconstruível.
++
++    Pendência durável (`record_pending`): quando a escrita falha por exceção, ou
++    não insere porque o assessor não está em dim_employee_scd2, grava uma linha
++    em makershub._routing_post_action_pending para o reprocessador repetir. "Já
++    existe" (dedupe) não é falha e não grava nada. O retorno continua sendo só o
++    bool de "inseriu"; o reprocessador usa _run_routing_history_insert, que
++    distingue os três desfechos.
++    """
++    from app.repositories import routing_post_action_repo
++
++    payload = {
++        "advisor_salesforce_id": advisor_salesforce_id,
++        "patrimony_value": patrimony_value,
++        "routing_source": routing_source,
++        "opportunity_type": opportunity_type,
++        "reroute": reroute,
++    }
++    # O reprocessador decide se um roteamento mais novo ja esta no historico
++    # comparando `routed_at` (relogio do banco na escrita) com o instante em que ESTA
++    # tentativa comecou, lido do mesmo relogio ANTES de escrever. So o reroute tem
++    # supersessao. Se a hora nao puder ser lida, a pendencia leva a marca
++    # `attempt_clock_unavailable` e o reprocessador nao a repete (fail-closed).
++    attempt_at = None
++    if reroute:
++        try:
++            attempt_at = _db_clock_now()
++        except Exception as clock_err:
++            logger.error(
++                "[routing-history] Could not read the database clock for opp=%s (%s); "
++                "a pending reroute will not be repeated automatically",
++                opportunity_id, type(clock_err).__name__,
++            )
++            payload["attempt_clock_unavailable"] = True
++    try:
++        outcome = _run_routing_history_insert(
++            opportunity_id, advisor_salesforce_id, patrimony_value,
++            routing_source, opportunity_type, reroute,
++        )
+     except Exception as e:
+-        logger.error("[routing-history] Insert failed: %s", e, exc_info=True)
++        # So classe, SQLSTATE e ref: a mensagem de um erro de SQL carrega os
++        # parametros (patrimonio) e o traceback repetiria a mensagem.
++        failure = routing_post_action_repo.safe_error(e)
++        logger.error("[routing-history] Insert failed: %s", failure)
++        if record_pending:
++            record_routing_post_action_pending(
++                "routing_history", opportunity_id, payload,
++                failure, attempt_at=attempt_at,
++            )
+         return False
+ 
++    if outcome == ROUTING_WRITE_INSERTED:
++        logger.info(
++            "[routing-history] Inserted: opp=%s, advisor=%s, net_worth=%s",
++            opportunity_id, advisor_salesforce_id, patrimony_value,
++        )
++        return True
++
++    if outcome == ROUTING_WRITE_EXISTS and exists_ok:
++        # The caller wants the row to be there and it is (a resend to the same
++        # advisor inside the window): nothing failed and nothing is pending.
++        logger.info(
++            "[routing-history] Already recorded: opp=%s, advisor=%s",
++            opportunity_id, advisor_salesforce_id,
++        )
++        return True
++    logger.warning(
++        "[routing-history] No row inserted for opp=%s — "
++        "either already exists or advisor %s not found in dim_employee_scd2",
++        opportunity_id, advisor_salesforce_id,
++    )
++    if outcome == ROUTING_WRITE_ADVISOR_MISSING and record_pending:
++        record_routing_post_action_pending(
++            "routing_history", opportunity_id, payload,
++            f"advisor {advisor_salesforce_id} not found in dim_employee_scd2",
++            attempt_at=attempt_at,
++        )
++    return False
+ 
+-def insert_routing_notification(
++
++def _run_routing_notification_insert(
+     opportunity_id: str,
+     advisor_salesforce_id: str,
+     client_name: str,
+@@ -4436,16 +4913,14 @@ def insert_routing_notification(
+     routed_at: str,
+     description: Optional[str] = None,
+     investment_interests: Optional[str] = None,
+-) -> bool:
+-    """
+-    Insert a routing notification into makershub._notification.
+-
+-    Mirrors what the Airflow DAG (routing_notifications) does in
+-    `create_notifications` — notifies the advisor that a new opportunity
+-    was routed to them.
++    reroute: bool = False,
++    conn: Any = None,
++) -> str:
++    """Executa a escrita da notificacao e devolve ROUTING_WRITE_*; levanta em erro.
+ 
+-    Uses a synchronous DB connection because this runs inside the sync
+-    executor context of execute_r1_scheduling_flow.
++    Corpo de `insert_routing_notification` sem o tratamento de falha, para o
++    reprocessador distinguir excecao, "ja existe" e "assessor ausente". `conn`
++    funciona como em `_run_routing_history_insert`.
+     """
+     import json
+ 
+@@ -4477,61 +4952,138 @@ def insert_routing_notification(
+             FROM makershub._notification
+             WHERE notification_type = 'routing'
+                 AND message::jsonb->>'opportunity_id' = :opportunity_id
++                AND (
++                    NOT :reroute
++                    OR (
++                        employee_id = :employee_id
++                        AND created_at >= NOW() - INTERVAL '24 hours'
++                    )
++                )
+         )
+     """)
+ 
+-    try:
+-        with engine.begin() as conn:
+-            row = conn.execute(resolve_stmt, {
+-                "salesforce_user_id": advisor_salesforce_id,
+-            }).fetchone()
++    def _write(conn: Any) -> str:
++        row = conn.execute(resolve_stmt, {
++            "salesforce_user_id": advisor_salesforce_id,
++        }).fetchone()
+ 
+-            if not row:
+-                logger.warning(
+-                    "[routing-notification] Advisor %s not found in dim_employee_scd2",
+-                    advisor_salesforce_id,
+-                )
+-                return False
++        if not row:
++            logger.warning(
++                "[routing-notification] Advisor %s not found in dim_employee_scd2",
++                advisor_salesforce_id,
++            )
++            return ROUTING_WRITE_ADVISOR_MISSING
+ 
+-            employee_id = row.employee_id
++        employee_id = row.employee_id
+ 
+-            message_json = json.dumps({
+-                "opportunity_id": opportunity_id,
+-                "client_name": client_name,
+-                "pl": patrimony_value,
+-                "routed_at": routed_at,
+-                "description": description,
+-                "investment_interests": investment_interests,
+-            })
++        message_json = json.dumps({
++            "opportunity_id": opportunity_id,
++            "client_name": client_name,
++            "pl": patrimony_value,
++            "routed_at": routed_at,
++            "description": description,
++            "investment_interests": investment_interests,
++        })
++
++        salesforce_link = (
++            f"https://fazcapital.my.site.com/portal/s/opportunity/{opportunity_id}/"
++        )
++
++        result = conn.execute(insert_stmt, {
++            "employee_id": employee_id,
++            "message_json": message_json,
++            "salesforce_link": salesforce_link,
++            "html_key": "routing_template",
++            "opportunity_id": opportunity_id,
++            "reroute": reroute,
++        })
+ 
+-            salesforce_link = (
+-                f"https://fazcapital.my.site.com/portal/s/opportunity/{opportunity_id}/"
++        if result.rowcount > 0:
++            logger.info(
++                "[routing-notification] Created: employee_id=%s, opp=%s",
++                employee_id, opportunity_id,
+             )
++            return ROUTING_WRITE_INSERTED
++        logger.warning(
++            "[routing-notification] No row inserted for opp=%s — "
++            "notification already exists",
++            opportunity_id,
++        )
++        return ROUTING_WRITE_EXISTS
+ 
+-            result = conn.execute(insert_stmt, {
+-                "employee_id": employee_id,
+-                "message_json": message_json,
+-                "salesforce_link": salesforce_link,
+-                "html_key": "routing_template",
+-                "opportunity_id": opportunity_id,
+-            })
++    if conn is not None:
++        return _write(conn)
++    with engine.begin() as own_conn:
++        return _write(own_conn)
+ 
+-            if result.rowcount > 0:
+-                logger.info(
+-                    "[routing-notification] Created: employee_id=%s, opp=%s",
+-                    employee_id, opportunity_id,
+-                )
+-                return True
+-            else:
+-                logger.warning(
+-                    "[routing-notification] No row inserted for opp=%s — "
+-                    "notification already exists",
+-                    opportunity_id,
+-                )
+-                return False
++
++def insert_routing_notification(
++    opportunity_id: str,
++    advisor_salesforce_id: str,
++    client_name: str,
++    patrimony_value: float,
++    routed_at: str,
++    description: Optional[str] = None,
++    investment_interests: Optional[str] = None,
++    reroute: bool = False,
++    *,
++    record_pending: bool = True,
++    exists_ok: bool = False,
++) -> bool:
++    """
++    Insert a routing notification into makershub._notification.
++
++    Mirrors what the Airflow DAG (routing_notifications) does in
++    `create_notifications` — notifies the advisor that a new opportunity
++    was routed to them.
++
++    Uses a synchronous DB connection because this runs inside the sync
++    executor context of execute_r1_scheduling_flow.
++
++    Quando a escrita falha por exceção, ou não acontece porque o assessor não
++    resolve em dim_employee_scd2, grava a pendência durável em
++    makershub._routing_post_action_pending (`record_pending`) para o
++    reprocessador repetir. "Já existe" (dedupe) devolve False, ou True com
++    `exists_ok` (quem chama quer a notificação lá e ela está: não é falha).
++    """
++    from app.repositories import routing_post_action_repo
++
++    payload = {
++        "advisor_salesforce_id": advisor_salesforce_id,
++        "client_name": client_name,
++        "patrimony_value": patrimony_value,
++        "routed_at": routed_at,
++        "description": description,
++        "investment_interests": investment_interests,
++        "reroute": reroute,
++    }
++    try:
++        outcome = _run_routing_notification_insert(
++            opportunity_id, advisor_salesforce_id, client_name, patrimony_value,
++            routed_at, description, investment_interests, reroute,
++        )
+     except Exception as e:
+-        logger.error("[routing-notification] Insert failed: %s", e, exc_info=True)
++        # So classe, SQLSTATE e ref: a mensagem de um erro de SQL carrega os
++        # parametros (nome do cliente, patrimonio) e o traceback a repetiria.
++        failure = routing_post_action_repo.safe_error(e)
++        logger.error("[routing-notification] Insert failed: %s", failure)
++        if record_pending:
++            record_routing_post_action_pending(
++                "routing_notification", opportunity_id, payload, failure,
++            )
+         return False
++    if outcome == ROUTING_WRITE_ADVISOR_MISSING and record_pending:
++        record_routing_post_action_pending(
++            "routing_notification", opportunity_id, payload,
++            f"advisor {advisor_salesforce_id} not found in dim_employee_scd2",
++        )
++    if outcome == ROUTING_WRITE_EXISTS and exists_ok:
++        logger.info(
++            "[routing-notification] Already recorded: opp=%s, advisor=%s",
++            opportunity_id, advisor_salesforce_id,
++        )
++        return True
++    return outcome == ROUTING_WRITE_INSERTED
+ 
+ 
+ def resolve_sandbox_lead_id(
+@@ -4774,6 +5326,35 @@ R1_CRITICAL_STEPS = frozenset({
+ # isso o histórico de roteamento entra no gate do finalize.
+ R1_FINALIZE_CRITICAL_STEPS = R1_CRITICAL_STEPS | {"routing_history_inserted"}
+ 
++# H-004 (PR #594): steps that do NOT fail the R1 (they stay out of
++# R1_CRITICAL_STEPS for the reason above) but whose absence the business feels:
++# the OPP keeps the new owner and Event together with the fields of the previous
++# qualification. When one of them fails AFTER the booking is done, the flow
++# result carries its stable name in `partial_steps` and `success` stays True.
++# The caller that builds the response decides whether re-submitting completes
++# it (only the Opportunity entry, where a re-submission reuses Event and advisor).
++PARTIAL_STEP_CONSORCIO_FIELDS = "consorcio_fields"
++# Reused OPP whose stage / meeting status could not be re-read before the PATCH:
++# they were left as they are in Salesforce (H-006).
++PARTIAL_STEP_OPPORTUNITY_STAGE = "opportunity_stage"
++
++
++def _mark_partial_step(
++    flow_result: Dict[str, Any], steps_completed: List[str], name: str
++) -> None:
++    """Record `name` in `flow_result["partial_steps"]` if the R1 is already booked.
++
++    "Booked" means the whole critical set is in the completed steps. Before that
++    the flow already fails by itself and a re-submission redoes everything; a
++    name in `partial_steps` there would describe a partial booking that does not
++    exist.
++    """
++    if not R1_CRITICAL_STEPS.issubset(set(steps_completed)):
++        return
++    partial: List[str] = flow_result.setdefault("partial_steps", [])
++    if name not in partial:
++        partial.append(name)
++
+ 
+ def _execute_post_opportunity_steps(
+     *,
+@@ -4807,6 +5388,9 @@ def _execute_post_opportunity_steps(
+     tomador_decisao: Optional[str] = None,
+     intuito_consorcio: Optional[str] = None,
+     interesses_consorcios: Optional[str] = None,
++    reused_opportunity: bool = False,
++    source_opp_state: Optional[ReusedOpportunityState] = None,
++    resuming_converted_lead: bool = False,
+ ) -> None:
+     """
+     Shared post-opportunity steps used by both Lead and Account flows.
+@@ -4814,6 +5398,14 @@ def _execute_post_opportunity_steps(
+     Executes: ownership transfer, event creation, opportunity update,
+     SDR team member fix, account team member (consórcio), consórcio fields,
+     routing history, and routing notification.
++
++    `reused_opportunity` (FBI-4719): a OPP veio de entrada e não foi criada
++    agora — preserva a descrição do assessor e grava o histórico como
++    re-roteamento (ver insert_routing_history).
++
++    `resuming_converted_lead`: the resend of a converted Lead resumes the Opportunity
++    whose history and notification the first attempt already wrote. As with a reused
++    Opportunity, "already exists" is the wanted state, not a failure (`exists_ok`).
+     """
+     # ─── EARLY: Resolve SDR + ensure SDR team member with role='SDR' BEFORE owner change ───
+     # The SDR team-member fix MUST happen before update_opportunity_after_conversion
+@@ -4912,6 +5504,11 @@ def _execute_post_opportunity_steps(
+     # ─── Update Opportunity (stage, owner, fields) ───
+     logger.info("POST-OPP: Updating opportunity %s...", opportunity_id)
+     try:
++        if reused_opportunity:
++            opp_state = _fresh_reused_opportunity_state(sf, opportunity_id, source_opp_state)
++            stage_state_unknown = opp_state is None
++        else:
++            opp_state, stage_state_unknown = source_opp_state, False
+         opp_res = update_opportunity_after_conversion(
+             sf=sf,
+             opportunity_id=opportunity_id,
+@@ -4923,9 +5520,14 @@ def _execute_post_opportunity_steps(
+             interesse_investimentos=interesse_investimentos,
+             description=description,
+             is_consorcio=is_consorcio,
++            reused_opportunity=reused_opportunity,
++            current_state=opp_state,
++            stage_state_unknown=stage_state_unknown,
+         )
+         if opp_res.get("success"):
+             steps_completed.append("opportunity_updated")
++            if stage_state_unknown:
++                _mark_partial_step(flow_result, steps_completed, PARTIAL_STEP_OPPORTUNITY_STAGE)
+             logger.info("POST-OPP: Opportunity %s updated (owner → %s)", opportunity_id, advisor_name)
+         else:
+             errors.append(f"Falha ao atualizar Opportunity: {opp_res.get('message')}")
+@@ -4954,6 +5556,7 @@ def _execute_post_opportunity_steps(
+         except Exception as e:
+             errors.append(f"Falha ao definir campos de consórcio: {e}")
+             logger.error("POST-OPP (consórcio fields) error: %s", e, exc_info=True)
++            _mark_partial_step(flow_result, steps_completed, PARTIAL_STEP_CONSORCIO_FIELDS)
+ 
+     # SDR team member was ensured early (before owner change). real_sdr_sf_id is in scope.
+     # ─── Add SDR as Account Team Member (consórcio only) ───
+@@ -5002,6 +5605,11 @@ def _execute_post_opportunity_steps(
+                 advisor_salesforce_id=advisor_salesforce_id,
+                 patrimony_value=patrimony_value,
+                 opportunity_type=opportunity_type,
++                reroute=reused_opportunity,
++                # A resend to the same advisor inside the window finds the row it
++                # wrote the first time: that is the state the caller wants, not an
++                # error (the confirmation screen would show a false pendency).
++                exists_ok=reused_opportunity or resuming_converted_lead,
+             )
+             if rh_ok:
+                 steps_completed.append("routing_history_inserted")
+@@ -5030,6 +5638,8 @@ def _execute_post_opportunity_steps(
+                     routed_at=datetime.now(timezone.utc).isoformat(),
+                     description=description,
+                     investment_interests=interesse_investimentos,
++                    reroute=reused_opportunity,
++                    exists_ok=reused_opportunity or resuming_converted_lead,
+                 )
+                 if notif_ok:
+                     steps_completed.append("routing_notification_inserted")
+@@ -5381,6 +5991,7 @@ def execute_r1_resume_converted_lead_flow(
+         flow_result=result,
+         steps_completed=steps_completed,
+         errors=errors,
++        resuming_converted_lead=True,
+     )
+     result["success"] = R1_CRITICAL_STEPS.issubset(set(steps_completed))
+     return result
+@@ -6112,6 +6723,8 @@ def execute_r1_from_opportunity_flow(
+     tomador_decisao: Optional[str] = None,
+     intuito_consorcio: Optional[str] = None,
+     interesses_consorcios: Optional[str] = None,
++    # Estado da OPP de entrada antes da R1 (só com source_opp_id).
++    source_opp_state: Optional[ReusedOpportunityState] = None,
+ ) -> Dict[str, Any]:
+     """
+     Execute the R1 scheduling flow from an existing Opportunity (SYNCHRONOUS).
+@@ -6119,6 +6732,10 @@ def execute_r1_from_opportunity_flow(
+     Instead of converting a Lead, creates a NEW Opportunity linked to the same
+     Account/Contact and performs the remaining steps on it.
+ 
++    With `source_opp_id` (FBI-4719, entrada por OPP existente) the creation step
++    is skipped: that Opportunity is reused and gets the same Event, owner and
++    field updates as a new one. Without it the flow creates, as before.
++
+     Must be called via run_in_executor from async context.
+     """
+     sf_is_sandbox = os.getenv("SF_IS_SANDBOX", "false").lower() in ("true", "1", "yes")
+@@ -6186,73 +6803,92 @@ def execute_r1_from_opportunity_flow(
+             sf.sf_instance,
+         )
+ 
+-    # ─── STEP 1: Create new Opportunity ───
+-    opp_name = f"{client_name} - {lead_source}" if lead_source else client_name
+-    close_date = (date.today() + timedelta(days=90)).isoformat()
+-
+-    logger.info("STEP 1: Creating new Opportunity for Account %s...", account_id)
+-
+-    # FBI-3061 (D4=Opção C) — mesmo contrato do site D+1 acima: fallback
+-    # user→admin com o MESMO payload quando o errorCode é reconhecido como
+-    # negação de sessão do operador. Mitigação causalmente agnóstica, causa
+-    # em aberto (ver tasks/sprint-16/FBI-3061-evidencia.md). Laço sobre
+-    # conexões, não 2a chamada literal — preserva `grep -c
+-    # 'Opportunity\.create('` == 2 no arquivo. A construção do payload
+-    # (inclusive os `_validate_sf_id`) fica DENTRO do try — um id malformado
+-    # tem de cair no mesmo caminho de erro gracioso de sempre, não escapar
+-    # cru (regressão que a Tarefa 9 quase introduziu: mover a validação para
+-    # fora do try faria um ID inválido virar exceção não tratada).
+-    create_result: Optional[Dict[str, Any]] = None
+-    create_error_texts: List[str] = []
+-    used_admin_fallback = False
+-    for attempt_idx, conn in enumerate((sf_write, sf)):
++    # ─── STEP 1: Opportunity — reaproveita a de entrada ou cria uma nova ───
++    # FBI-4719: a entrada por OPP existente roda o mesmo pacote do caminho
++    # Conta (evento, roteamento, dono e campos), sem a criação. A validação do
++    # id usa o mesmo retorno gracioso do create, então um id malformado vira
++    # erro no flow_result e não exceção crua.
++    reused_opportunity = bool(source_opp_id)
++    if source_opp_id:
+         try:
+-            new_opp_data = {
+-                "Name": opp_name,
+-                "AccountId": _validate_sf_id(account_id),
+-                "StageName": "Nova oportunidade",
+-                "OwnerId": _validate_sf_id(sdr_salesforce_id),
+-                "CloseDate": close_date,
+-            }
+-            create_result = conn.Opportunity.create(new_opp_data)  # type: ignore
+-            used_admin_fallback = attempt_idx == 1
+-            break
++            opportunity_id = _validate_sf_id(source_opp_id)
+         except Exception as e:
+-            create_error_texts.append(str(e))
+-            create_result = None
+-            if conn is sf or not is_sf_user_access_error(e):
++            errors.append(f"Opportunity de entrada inválida: {e}")
++            logger.error("STEP 1 (reuse opportunity) invalid id %r: %s", source_opp_id, e)
++            return flow_result
++        flow_result["opportunity_id"] = opportunity_id
++        steps_completed.append("opportunity_reused")
++        logger.info(
++            "STEP 1: Reusing existing Opportunity %s (Account=%s) — no create",
++            opportunity_id, account_id,
++        )
++    else:
++        opp_name = f"{client_name} - {lead_source}" if lead_source else client_name
++        close_date = (date.today() + timedelta(days=90)).isoformat()
++
++        logger.info("STEP 1: Creating new Opportunity for Account %s...", account_id)
++
++        # FBI-3061 (D4=Opção C) — mesmo contrato do site D+1 acima: fallback
++        # user→admin com o MESMO payload quando o errorCode é reconhecido como
++        # negação de sessão do operador. Mitigação causalmente agnóstica, causa
++        # em aberto (ver tasks/sprint-16/FBI-3061-evidencia.md). Laço sobre
++        # conexões, não 2a chamada literal — preserva `grep -c
++        # 'Opportunity\.create('` == 2 no arquivo. A construção do payload
++        # (inclusive os `_validate_sf_id`) fica DENTRO do try — um id malformado
++        # tem de cair no mesmo caminho de erro gracioso de sempre, não escapar
++        # cru (regressão que a Tarefa 9 quase introduziu: mover a validação para
++        # fora do try faria um ID inválido virar exceção não tratada).
++        create_result: Optional[Dict[str, Any]] = None
++        create_error_texts: List[str] = []
++        used_admin_fallback = False
++        for attempt_idx, conn in enumerate((sf_write, sf)):
++            try:
++                new_opp_data = {
++                    "Name": opp_name,
++                    "AccountId": _validate_sf_id(account_id),
++                    "StageName": "Nova oportunidade",
++                    "OwnerId": _validate_sf_id(sdr_salesforce_id),
++                    "CloseDate": close_date,
++                }
++                create_result = conn.Opportunity.create(new_opp_data)  # type: ignore
++                used_admin_fallback = attempt_idx == 1
+                 break
++            except Exception as e:
++                create_error_texts.append(str(e))
++                create_result = None
++                if conn is sf or not is_sf_user_access_error(e):
++                    break
++
++        if create_result is None:
++            errors.append(f"Erro ao criar Opportunity: {create_error_texts[0]}")
++            logger.error("STEP 1 (create opportunity) error: %s", create_error_texts[0])
++            if len(create_error_texts) > 1:
++                errors.append(
++                    f"Fallback admin também negado ao criar Opportunity: {create_error_texts[1]}"
++                )
++                logger.error(
++                    "STEP 1 (create opportunity) admin fallback also denied: %s",
++                    create_error_texts[1],
++                )
++            return flow_result
+ 
+-    if create_result is None:
+-        errors.append(f"Erro ao criar Opportunity: {create_error_texts[0]}")
+-        logger.error("STEP 1 (create opportunity) error: %s", create_error_texts[0])
+-        if len(create_error_texts) > 1:
+-            errors.append(
+-                f"Fallback admin também negado ao criar Opportunity: {create_error_texts[1]}"
+-            )
+-            logger.error(
+-                "STEP 1 (create opportunity) admin fallback also denied: %s",
+-                create_error_texts[1],
+-            )
+-        return flow_result
+-
+-    if not create_result.get("success"):
+-        opp_errors = create_result.get("errors", [])
+-        error_msg = "; ".join(str(e) for e in opp_errors) if opp_errors else "Erro desconhecido"
+-        errors.append(f"Falha ao criar Opportunity: {error_msg}")
+-        logger.error("STEP 1: Failed to create Opportunity: %s", error_msg)
+-        return flow_result
++        if not create_result.get("success"):
++            opp_errors = create_result.get("errors", [])
++            error_msg = "; ".join(str(e) for e in opp_errors) if opp_errors else "Erro desconhecido"
++            errors.append(f"Falha ao criar Opportunity: {error_msg}")
++            logger.error("STEP 1: Failed to create Opportunity: %s", error_msg)
++            return flow_result
+ 
+-    opportunity_id = _validate_sf_id(create_result["id"])
+-    flow_result["opportunity_id"] = opportunity_id
+-    steps_completed.append("opportunity_created")
+-    if used_admin_fallback:
+-        steps_completed.append("opportunity_created_admin_fallback")
+-    logger.info(
+-        "STEP 1: New Opportunity created: %s (Account=%s)%s",
+-        opportunity_id, account_id,
+-        " [admin fallback]" if used_admin_fallback else "",
+-    )
++        opportunity_id = _validate_sf_id(create_result["id"])
++        flow_result["opportunity_id"] = opportunity_id
++        steps_completed.append("opportunity_created")
++        if used_admin_fallback:
++            steps_completed.append("opportunity_created_admin_fallback")
++        logger.info(
++            "STEP 1: New Opportunity created: %s (Account=%s)%s",
++            opportunity_id, account_id,
++            " [admin fallback]" if used_admin_fallback else "",
++        )
+ 
+     # ─── Shared post-creation steps ───
+     _execute_post_opportunity_steps(
+@@ -6275,7 +6911,13 @@ def execute_r1_from_opportunity_flow(
+         duration_minutes=duration_minutes,
+         modalidade=modalidade,
+         is_consorcio=is_consorcio,
+-        opportunity_type="consorcio" if is_consorcio else "account",
++        # Os painéis do rodízio excluem só 'consorcio'; 'opportunity' marca a
++        # linha do re-roteamento sem tirá-la da conta da fila (FBI-4719).
++        opportunity_type=(
++            "consorcio" if is_consorcio
++            else "opportunity" if reused_opportunity
++            else "account"
++        ),
+         flow_result=flow_result,
+         steps_completed=steps_completed,
+         errors=errors,
+@@ -6286,11 +6928,13 @@ def execute_r1_from_opportunity_flow(
+         tomador_decisao=tomador_decisao,
+         intuito_consorcio=intuito_consorcio,
+         interesses_consorcios=interesses_consorcios,
++        reused_opportunity=reused_opportunity,
++        source_opp_state=source_opp_state,
+     )
+ 
+     # ─── Final ───
+     flow_result["success"] = (
+-        "opportunity_created" in steps_completed
++        bool({"opportunity_created", "opportunity_reused"} & set(steps_completed))
+         and R1_CRITICAL_STEPS.issubset(set(steps_completed))
+     )
+     logger.info(
+diff --git a/backend/app/services/qualify_service.py b/backend/app/services/qualify_service.py
+index 9cd372733..63f832cec 100644
+--- a/backend/app/services/qualify_service.py
++++ b/backend/app/services/qualify_service.py
+@@ -8,15 +8,24 @@ Flow selection (FBI-2925):
+   - Investimentos + D+1 + allows_d1_batch (100k-300k) → regular_d1
+   - else Investimentos → regular_d0 (sync pool pick; includes future dates for
+     Advisory2 / Closer / Consultoria)
++
++Record kind comes from the id prefix: Lead (00Q…), Account (001…) or, since
++FBI-4719, an existing open Opportunity (006…; a lost one is refused, the Account
++opens a new one). The Opportunity entry runs
++the Account package — same routing, Event, owner and field updates — on the
++Opportunity itself instead of creating one, and never enters the D+1 batch.
+ """
+ from __future__ import annotations
+ 
+ import asyncio
++import contextvars
+ import logging
+ import os
+-from dataclasses import dataclass
++import threading
++import uuid
++from dataclasses import dataclass, field
+ from datetime import datetime, timezone
+-from typing import Any, Optional
++from typing import Any, Awaitable, Callable, Optional
+ from zoneinfo import ZoneInfo
+ 
+ from fastapi import HTTPException, status
+@@ -27,7 +36,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
+ from app.core.config import GetSettings
+ from app.core.r1_meeting import MEETING_DURATION
+ from app.integrations.salesforce_integration import (
++    R1_EVENT_OPEN_STATUS,
++    ReusedOpportunityState,
++    UserLookupFailed,
++    _parse_sf_datetime,
+     account_has_consorcio_origin,
++    describe_users_by_ids,
+     execute_r1_from_opportunity_flow,
+     execute_r1_resume_converted_lead_flow,
+     execute_r1_partial_flow_from_account,
+@@ -67,8 +81,13 @@ from app.services.super_r1_service import (
+     allows_d1_batch,
+     get_pool_spec,
+     resolve_consorcio_pool,
+-    is_account_id,
++    RecordKind,
+     is_d1_or_later,
++    entry_contact_id,
++    classify_record_id,
++    lost_opportunity_refusal,
++    opportunity_entry_refusal,
++    record_type_developer_name,
+     patrimony_to_categoria,
+ )
+ 
+@@ -78,6 +97,11 @@ logger = logging.getLogger(__name__)
+ _SP_TZ = ZoneInfo("America/Sao_Paulo")
+ _RECOVERY_IDEMPOTENCY_SCOPE = "super_r1_converted_lead_recovery"
+ _RECOVERY_IDEMPOTENCY_ACTOR = "system@super-r1-recovery"
++# FBI-4719: in-flight lock for anything that books an Opportunity. Fixed actor, like
++# the converted-Lead recovery: the claim is PER OPP, not per user or Idempotency-Key,
++# so two SDRs (or two tabs) on the same OPP see each other.
++_OPPORTUNITY_ENTRY_IDEMPOTENCY_SCOPE = "super_r1_opportunity_entry"
++_OPPORTUNITY_ENTRY_IDEMPOTENCY_ACTOR = "system@super-r1-opportunity-entry"
+ 
+ 
+ @dataclass(frozen=True)
+@@ -135,6 +159,34 @@ _PATRIMONY_RANGE_LABELS: dict[str, str] = {
+ # ── shared setup ─────────────────────────────────────────────────────────
+ 
+ 
++def unexpected_error_http_exception(
++    exc: BaseException, *, context: str, doing: str = "processar o agendamento",
++) -> HTTPException:
++    """The 500 for an exception that escaped a Super R1 route (FBI-4719, H-009).
++
++    Used by /qualify (internal and external) and by the other Super R1 routes
++    that answered 500 with ``str(exc)`` (availability, consórcio advisor).
++
++    The body never carries ``str(exc)``: it can hold SOQL, ids, e-mails or the
++    Salesforce error payload. The full exception goes to the server log with a
++    correlation id, and the SDR gets the same id in the message, so support can
++    find the line without the user ever seeing the cause. Domain refusals
++    (409/422/4xx) are HTTPException already and never reach this.
++    """
++    correlation_id = uuid.uuid4().hex[:12]
++    logger.error(
++        "%s failed | correlation_id=%s | %s: %s",
++        context, correlation_id, type(exc).__name__, exc, exc_info=exc,
++    )
++    return HTTPException(
++        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
++        detail=(
++            f"Erro interno ao {doing}. Se o problema persistir, "
++            f"informe o código {correlation_id} ao suporte."
++        ),
++    )
++
++
+ async def _resolve_sf_connections(user_email: str) -> tuple[Any, Any]:
+     """Resolve (admin_sf, per_user_sf). 503 if JWT misconfigured, 403 if user lacks SF auth."""
+     if not is_jwt_flow_configured():
+@@ -200,13 +252,53 @@ async def _fetch_lead(sf: Any, lead_id: str) -> dict[str, Any]:
+     return records[0]
+ 
+ 
+-async def _fetch_account(sf: Any, account_id: str) -> dict[str, Any]:
++async def _refuse_lost_converted_opportunity(sf: Any, lead: dict[str, Any]) -> None:
++    """409 when the Opportunity a converted Lead points to is lost (FBI-4719).
++
++    A converted Lead is resumed on its Opportunity (`_run_converted_lead_recovery`)
++    and the update moves that Opportunity to Contatado: the reuse of a lost
++    Opportunity that the entry by OPP refuses (owner decision: it is never reused,
++    the Account opens a new one). Runs right after the Lead is read, before the
++    lock, the draw and any write. A Lead that is not converted, or converted without
++    an Opportunity, has nothing to check. A failed lookup raises (no write happens):
++    the retry is safe, a guess is not.
++    """
++    opportunity_id = lead.get("ConvertedOpportunityId")
++    if not lead.get("IsConverted") or not opportunity_id:
++        return
++    from app.api.v1.leads import _validate_sf_id
++
++    validated = _validate_sf_id(str(opportunity_id))
++    loop = asyncio.get_event_loop()
++    result = await loop.run_in_executor(
++        None,
++        lambda: sf.query(
++            "SELECT Id, StageName, AccountId FROM Opportunity "
++            f"WHERE Id = '{validated}' AND IsDeleted = false"
++        ),
++    )
++    if result.get("totalSize", 0) == 0:
++        return
++    opportunity = result["records"][0]
++    refusal = lost_opportunity_refusal(
++        opportunity, str(opportunity.get("AccountId") or lead.get("ConvertedAccountId") or ""),
++    )
++    if refusal:
++        refusal_status, refusal_detail = refusal
++        raise HTTPException(status_code=refusal_status, detail=refusal_detail)
++
++
++async def _fetch_account(
++    sf: Any, account_id: str, *, with_consorcio_origin: bool = True,
++) -> dict[str, Any]:
++    """Account with its oldest Contact. `with_consorcio_origin=False` skips the
++    origin lookup (one more SOQL) for the callers that only show the Account."""
+     from app.api.v1.leads import _validate_sf_id
+ 
+     validated = _validate_sf_id(account_id)
+     loop = asyncio.get_event_loop()
+     fields = (
+-        "Id, Name, OwnerId, Owner.Name, AccountSource, CreatedDate, "
++        "Id, Name, Phone, OwnerId, Owner.Name, AccountSource, CreatedDate, "
+         "(SELECT Id, Email, Phone FROM Contacts ORDER BY CreatedDate LIMIT 1)"
+     )
+     record = await loop.run_in_executor(
+@@ -221,7 +313,8 @@ async def _fetch_account(sf: Any, account_id: str) -> dict[str, Any]:
+             detail=f"Account {account_id} não encontrado",
+         )
+     acct = record["records"][0]
+-    acct["_consorcio_origin"] = await _account_consorcio_origin(sf, validated)
++    if with_consorcio_origin:
++        acct["_consorcio_origin"] = await _account_consorcio_origin(sf, validated)
+     return acct
+ 
+ 
+@@ -235,6 +328,62 @@ async def _account_consorcio_origin(sf: Any, account_id: str) -> bool:
+     )
+ 
+ 
++async def _fetch_opportunity(
++    sf: Any, opportunity_id: str,
++    authorize: Optional[Callable[[dict[str, Any]], Awaitable[bool]]] = None,
++) -> dict[str, Any]:
++    """Opportunity de entrada (FBI-4719), aberta, com a Conta dela.
++
++    ``authorize`` (H-009) decide, com o registro na mão, se quem chama pode ver
++    esta OPP; roda ANTES da recusa por regra de entrada, para que um id proibido
++    responda o mesmo 404 de um id que não existe (sem confirmar existência nem
++    fase). Sem ``authorize`` nada é conferido: só os testes de unidade chamam
++    assim.
++
++    A Conta vem do mesmo `_fetch_account` do caminho Conta — contatos e origem
++    consórcio têm uma fonte só — e fica em `_account`. `_contact_id` é o
++    contato da própria OPP e, sem ele (comum no org), o mesmo contato que o
++    caminho Conta usaria.
++
++    Recusa antes de qualquer escrita no Salesforce, pela regra única de
++    `opportunity_entry_refusal` (OPP ganha ou perdida, RecordType fora do Super
++    R1, OPP sem Conta). A perdida nunca é reaproveitada: a Conta abre outra.
++    """
++    from app.api.v1.leads import _validate_sf_id
++
++    validated = _validate_sf_id(opportunity_id)
++    soql = (
++        "SELECT Id, Name, StageName, IsWon, CloseDate, AccountId, "
++        "ContactId, OwnerId, DWStatusReunioesInvestimentos__c, DWNomeSDR__c, "
++        "RecordType.DeveloperName FROM Opportunity "
++        f"WHERE Id = '{validated}' AND IsDeleted = false"
++    )
++    loop = asyncio.get_event_loop()
++    result = await loop.run_in_executor(None, lambda: sf.query(soql))  # type: ignore
++    if result.get("totalSize", 0) == 0:
++        raise HTTPException(
++            status_code=status.HTTP_404_NOT_FOUND,
++            detail=f"Oportunidade {opportunity_id} não encontrada",
++        )
++    opp = result["records"][0]
++    if authorize is not None and not await authorize(opp):
++        logger.warning("opportunity entry denied: opportunity=%s", validated)
++        raise HTTPException(
++            status_code=status.HTTP_404_NOT_FOUND,
++            detail=f"Oportunidade {opportunity_id} não encontrada",
++        )
++    refusal = opportunity_entry_refusal(opp)
++    if refusal:
++        refusal_status, refusal_detail = refusal
++        raise HTTPException(status_code=refusal_status, detail=refusal_detail)
++
++    account = await _fetch_account(sf, opp["AccountId"])
++    account_contacts = (account.get("Contacts") or {}).get("records", [])
++    opp["_account"] = account
++    opp["_contact_id"] = entry_contact_id(opp, account_contacts)
++    return opp
++
++
+ async def _resolve_converted_lead_advisor(
+     sf: Any, record: dict[str, Any], request: QualifyRequest, sdr_sf_id: str,
+ ) -> ConsorcioAdvisor:
+@@ -501,8 +650,19 @@ async def _run_converted_lead_recovery(
+     return response
+ 
+ 
++def _account_package_target(kind: RecordKind, record: dict[str, Any]) -> dict[str, Any]:
++    """Target of the Account package for an Account or Opportunity entry.
++
++    The Account the booking lands on and, for an Opportunity entry, the
++    Opportunity it reuses (FBI-4719). One place for what both dispatchers and the
++    request validation used to spell out with the same pair of ternaries."""
++    if kind is RecordKind.OPPORTUNITY:
++        return {"account_record": record["_account"], "existing_opportunity": record}
++    return {"account_record": record, "existing_opportunity": None}
++
++
+ def _resolve_is_consorcio(
+-    *, is_account: bool, request: QualifyRequest, record: dict[str, Any]
++    *, kind: RecordKind, request: QualifyRequest, record: dict[str, Any],
+ ) -> bool:
+     """
+     Consórcio routing decision.
+@@ -512,14 +672,23 @@ def _resolve_is_consorcio(
+     latter pins the FBI-2386 invariant so a converted consórcio lead can't
+     silently fall back to investimentos via the Account route's defaulted
+     service_type.
++
++    Opportunity (FBI-4719): the SDR intent OR the Opportunity's own RecordType,
++    which is more specific than the Account's origin — the origin only decides
++    when the Opportunity has no RecordType.
+     """
+-    if is_account:
++    if kind is RecordKind.OPPORTUNITY:
++        if request.service_type == "consorcio":
++            return True
++        sf_rt = record_type_developer_name(record)
++        if sf_rt:
++            return sf_rt == "Consorcios"
++        return (record.get("_account") or {}).get("_consorcio_origin") is True
++    if kind is RecordKind.ACCOUNT:
+         if request.service_type == "consorcio":
+             return True
+         return record.get("_consorcio_origin") is True
+-    rt = record.get("RecordType")
+-    sf_rt = rt.get("DeveloperName") if isinstance(rt, dict) else None
+-    return sf_rt == "Consorcios"
++    return record_type_developer_name(record) == "Consorcios"
+ 
+ 
+ def _patrimony_range_label(categoria: Optional[str], passed: Optional[str]) -> str:
+@@ -585,6 +754,64 @@ async def _eligible_advisor_ids_for_categoria(
+         return ids
+ 
+ 
++async def _drop_unschedulable_advisors(
++    session: AsyncSession, sf: Any, pool_ids: list[int],
++) -> list[int]:
++    """The pool minus the advisors the booking could never be written to.
++
++    Dropped BEFORE the draw (FBI-4719, H-005): an advisor with no Salesforce
++    User id, or whose Salesforce User is inactive, cannot own the Opportunity,
++    the Account or the R1 Event. Refusing after the draw (the old behavior)
++    kept the same advisor at the head of the queue, so one stale registration
++    refused every booking of the band; skipping them lets the rotation go on
++    with the next advisor and the queue pointer move only for the one who gets
++    the meeting.
++
++    Cost: one batched DB read for the ids and ONE Salesforce query for the
++    whole pool (``describe_users_by_ids`` with an ``Id IN (...)`` list), per
++    booking. There is no cache: activation changes in Salesforce out of band
++    and a stale "active" is exactly the failure this prevents.
++
++    Fail-open on a failed Salesforce query, as ``filter_active_user_ids`` and
++    ``verify_slot`` do: losing the check must not block a booking whose target
++    is fine. It is logged as a warning so the blind spot is visible; the
++    advisors with no id are dropped regardless (that needs no Salesforce).
++    """
++    sf_ids = await RoutingRepository().get_advisor_salesforce_ids_by_ids(session, pool_ids)
++    missing = [i for i in pool_ids if i not in sf_ids]
++    if missing:
++        logger.error(
++            "action=super_r1_pool_candidate_dropped | reason=no_salesforce_user_id | "
++            "employee_ids=%s", sorted(missing),
++        )
++    candidates = [i for i in pool_ids if i in sf_ids]
++    if not candidates:
++        return []
++
++    loop = asyncio.get_event_loop()
++    try:
++        described = await loop.run_in_executor(
++            None, lambda: describe_users_by_ids(sf, [sf_ids[i] for i in candidates]),
++        )
++    except UserLookupFailed as exc:
++        logger.warning(
++            "action=super_r1_pool_active_check_failed_open | candidates=%s | error=%s",
++            candidates, exc,
++        )
++        return candidates
++
++    schedulable = [
++        i for i in candidates if described.get(sf_ids[i], {}).get("isActive")
++    ]
++    inactive = sorted(set(candidates) - set(schedulable))
++    if inactive:
++        logger.error(
++            "action=super_r1_pool_candidate_dropped | reason=inactive_in_salesforce | "
++            "employee_ids=%s", inactive,
++        )
++    return schedulable
++
++
+ async def _narrow_pool_to_selected_slot(
+     session: AsyncSession,
+     pool_ids: list[int],
+@@ -686,14 +913,13 @@ async def _lock_selected_slot(
+     that gap hits this call site raw, ``UndefinedTable`` (42P01, wrapped by
+     SQLAlchemy's asyncpg dialect as ``ProgrammingError`` — confirmed against
+     PostgreSQL 16.14) propagates as HTTP 500 from OUTSIDE the try/except that
+-    wraps the Salesforce flow in ``_qualify_regular_d0``, and by that point
+-    ``confirm_routing`` has already committed the round-robin queue advance
+-    for the very advisor whose booking just 500'd — the rotation moves on to
+-    someone who was never scheduled. Degrading to ``True`` (book without a
+-    ledger row, the pre-FBI-2987 behavior) trades a temporarily-unenforced
+-    double-booking guard for not burning a queue slot on a deploy-ordering
+-    accident; B1(b)'s kill switch gives ops the same degrade on demand if the
+-    ledger itself is the problem instead.
++    wraps the Salesforce flow in ``_qualify_regular_d0``: the SDR gets a 500 and
++    no booking, for a reason that has nothing to do with the advisor.
++    Degrading to ``True`` (book without a ledger row, the pre-FBI-2987 behavior)
++    trades a temporarily-unenforced double-booking guard for not failing every
++    booking on a deploy-ordering accident; B1(b)'s kill switch gives ops the
++    same degrade on demand if the ledger itself is the problem instead. (The
++    round-robin queue no longer moves before this call, FBI-4719.)
+     """
+     if not _slot_lock_enabled():
+         logger.warning(
+@@ -851,6 +1077,33 @@ async def _resolve_blocked_pool_fallback(
+ 
+ 
+ 
++def _validate_lead_flow_request(request: QualifyRequest, *, is_consorcio: bool) -> None:
++    """Slot and request data of the Lead path, before any write (422).
++
++    `_run_d0_lead_flow` calls this at its start; the regular D+0 dispatcher
++    calls it before it draws an advisor (FBI-4719, H-005), because after the
++    draw the round-robin has moved and, in the consórcio path, the calendar is
++    reserved when the 422 shows up.
++    """
++    if not request.scheduled_date or not request.scheduled_time:
++        raise HTTPException(
++            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
++            detail="scheduled_date and scheduled_time are required for this flow",
++        )
++    validation_errors = validate_lead_update_data(
++        patrimony_value=request.patrimony_value or 0,
++        profissao=request.profissao,
++        interesse=_interest_to_string(request.interesse_investimentos),
++        description=request.description,
++        is_consorcio=is_consorcio,
++    )
++    if validation_errors:
++        raise HTTPException(
++            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
++            detail={"message": "Dados inválidos", "errors": validation_errors},
++        )
++
++
+ async def _run_d0_lead_flow(
+     *,
+     request: QualifyRequest, sf_user: Any,
+@@ -870,30 +1123,12 @@ async def _run_d0_lead_flow(
+     from app.api.v1.leads import _sf_record_to_lead_info
+ 
+     lead_data = _sf_record_to_lead_info(lead_record)
+-    if not request.scheduled_date or not request.scheduled_time:
+-        raise HTTPException(
+-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+-            detail="scheduled_date and scheduled_time are required for this flow",
+-        )
++    _validate_lead_flow_request(request, is_consorcio=is_consorcio)
+     event_dt = _event_datetime_brt(request.scheduled_date, request.scheduled_time)
+     range_label = _patrimony_range_label(categoria, request.patrimony_range)
+     interest_str = _interest_to_string(request.interesse_investimentos)
+     consorcio_interest_str = _consorcio_interests_to_string(request.interesses_consorcios)
+ 
+-    validation_errors = validate_lead_update_data(
+-        patrimony_value=request.patrimony_value or 0,
+-        profissao=request.profissao,
+-        interesse=interest_str,
+-        description=request.description,
+-        is_consorcio=is_consorcio,
+-    )
+-    if validation_errors:
+-        raise HTTPException(
+-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+-            detail={"message": "Dados inválidos", "errors": validation_errors},
+-        )
+-
+-    loop = asyncio.get_event_loop()
+     if lead_record.get("IsConverted"):
+         converted_opp = lead_record.get("ConvertedOpportunityId")
+         converted_account = lead_record.get("ConvertedAccountId")
+@@ -952,7 +1187,7 @@ async def _run_d0_lead_flow(
+                 intuito_consorcio=request.intuito_consorcio,
+                 interesses_consorcios=consorcio_interest_str,
+             )
+-    result = await loop.run_in_executor(None, flow)
++    result = await _run_sf_writes(flow)
+     success = bool(result.get("success"))
+ 
+     advisor_payload = QualifiedAdvisor(
+@@ -965,10 +1200,11 @@ async def _run_d0_lead_flow(
+         for k, v in advisor_payload_overrides.items():
+             setattr(advisor_payload, k, v)
+ 
++    partial_steps = list(result.get("partial_steps", []))
+     return QualifyResponse(
+         success=success,
+         flow_taken=flow_label,
+-        message=("R1 agendada" if success else "Falha no agendamento R1"),
++        message=_booking_message(success, partial_steps, resubmit_completes=False),
+         lead_id=lead_data.id,
+         account_id=result.get("account_id"),
+         contact_id=result.get("contact_id"),
+@@ -979,42 +1215,37 @@ async def _run_d0_lead_flow(
+         scheduled_for=event_dt.isoformat(),
+         categoria=categoria,
+         steps_completed=list(result.get("steps_completed", [])),
++        partial_steps=partial_steps,
+         errors=list(result.get("errors", [])),
+         sandbox_mode=bool(result.get("sandbox_mode")),
+         raw_result=result,
+     )
+ 
+ 
+-async def _run_d0_account_flow(
+-    *,
+-    request: QualifyRequest, sf_user: Any,
+-    user_email: str, sdr_sf_id: str, sdr_sf_name: str,
+-    account_record: dict[str, Any],
+-    advisor_sf_id: str, advisor_name: str,
+-    is_consorcio: bool,
+-    categoria: Optional[str],
+-    flow_label: FlowTaken,
+-    cluster: Optional[str],
+-) -> QualifyResponse:
+-    """Common D+0 Account path — invokes execute_r1_from_opportunity_flow."""
++def _validate_account_flow_request(
++    request: QualifyRequest, *, is_consorcio: bool,
++    existing_opportunity: Optional[dict[str, Any]], account_record: dict[str, Any],
++) -> None:
++    """Slot and request data, before any write (422).
++
++    Restore parity with legacy /account/{id}/schedule-r1 (raise via
++    _schedule_r1_validation_detail): validate business data before any SF
++    write so the SDR gets a clean 422 instead of a downstream SF
++    validation-rule error. Mirrors the call site in _run_d0_lead_flow.
++
++    `_run_d0_account_flow` calls this at its start; the Opportunity entry
++    (FBI-4719) calls it before choosing the advisor, because by then the
++    round-robin has advanced and the calendar is reserved when the 422 shows up.
++    """
+     if not request.scheduled_date or not request.scheduled_time:
+         raise HTTPException(
+             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+             detail="scheduled_date and scheduled_time are required for this flow",
+         )
+-    event_dt = _event_datetime_brt(request.scheduled_date, request.scheduled_time)
+-    range_label = _patrimony_range_label(categoria, request.patrimony_range)
+-    interest_str = _interest_to_string(request.interesse_investimentos)
+-    consorcio_interest_str = _consorcio_interests_to_string(request.interesses_consorcios)
+-
+-    # Restore parity with legacy /account/{id}/schedule-r1 (raise via
+-    # _schedule_r1_validation_detail): validate business data before any SF
+-    # write so the SDR gets a clean 422 instead of a downstream SF
+-    # validation-rule error. Mirrors the call site in _run_d0_lead_flow.
+     validation_errors = validate_lead_update_data(
+         patrimony_value=request.patrimony_value or 0,
+         profissao=request.profissao,
+-        interesse=interest_str,
++        interesse=_interest_to_string(request.interesse_investimentos),
+         description=request.description,
+         is_consorcio=is_consorcio,
+     )
+@@ -1027,6 +1258,7 @@ async def _run_d0_account_flow(
+         # service_type.
+         consorcio_from_origin = (
+             is_consorcio
++            and existing_opportunity is None
+             and request.service_type != "consorcio"
+             and account_record.get("_consorcio_origin") is True
+         )
+@@ -1037,14 +1269,52 @@ async def _run_d0_account_flow(
+             ),
+         )
+ 
+-    contacts = (account_record.get("Contacts") or {}).get("records", [])
+-    contact_id = contacts[0]["Id"] if contacts else None
+ 
+-    loop = asyncio.get_event_loop()
+-    result = await loop.run_in_executor(
+-        None,
++async def _run_d0_account_flow(
++    *,
++    request: QualifyRequest, sf_user: Any,
++    user_email: str, sdr_sf_id: str, sdr_sf_name: str,
++    account_record: dict[str, Any],
++    advisor_sf_id: str, advisor_name: str,
++    is_consorcio: bool,
++    categoria: Optional[str],
++    flow_label: FlowTaken,
++    cluster: Optional[str],
++    existing_opportunity: Optional[dict[str, Any]] = None,
++) -> QualifyResponse:
++    """Common D+0 Account path — invokes execute_r1_from_opportunity_flow.
++
++    With `existing_opportunity` (a `_fetch_opportunity` record, FBI-4719) the
++    flow reuses that Opportunity instead of creating one on the Account.
++    """
++    _validate_account_flow_request(
++        request, is_consorcio=is_consorcio,
++        existing_opportunity=existing_opportunity, account_record=account_record,
++    )
++    event_dt = _event_datetime_brt(request.scheduled_date, request.scheduled_time)
++    range_label = _patrimony_range_label(categoria, request.patrimony_range)
++    interest_str = _interest_to_string(request.interesse_investimentos)
++    consorcio_interest_str = _consorcio_interests_to_string(request.interesses_consorcios)
++
++    source_opp_state: Optional[ReusedOpportunityState] = None
++    if existing_opportunity is not None:
++        source_opp_id: Optional[str] = existing_opportunity["Id"]
++        source_opp_state = ReusedOpportunityState(
++            stage=existing_opportunity.get("StageName"),
++            close_date=existing_opportunity.get("CloseDate"),
++            meeting_status=existing_opportunity.get("DWStatusReunioesInvestimentos__c"),
++            record_type=record_type_developer_name(existing_opportunity),
++        )
++        contact_id = existing_opportunity.get("_contact_id")
++    else:
++        source_opp_id = None
++        contacts = (account_record.get("Contacts") or {}).get("records", [])
++        contact_id = contacts[0]["Id"] if contacts else None
++
++    result = await _run_sf_writes(
+         lambda: execute_r1_from_opportunity_flow(
+-            source_opp_id=None,
++            source_opp_id=source_opp_id,
++            source_opp_state=source_opp_state,
+             account_id=account_record["Id"],
+             contact_id=contact_id,
+             client_name=account_record.get("Name") or "Cliente",
+@@ -1073,10 +1343,14 @@ async def _run_d0_account_flow(
+         ),
+     )
+     success = bool(result.get("success"))
++    partial_steps = list(result.get("partial_steps", []))
+     return QualifyResponse(
+         success=success,
+         flow_taken=flow_label,
+-        message=("R1 agendada" if success else "Falha no agendamento R1"),
++        message=_booking_message(
++            success, partial_steps,
++            resubmit_completes=existing_opportunity is not None,
++        ),
+         account_id=account_record["Id"],
+         contact_id=contact_id or result.get("contact_id"),
+         opportunity_id=result.get("opportunity_id"),
+@@ -1091,6 +1365,7 @@ async def _run_d0_account_flow(
+         scheduled_for=event_dt.isoformat(),
+         categoria=categoria,
+         steps_completed=list(result.get("steps_completed", [])),
++        partial_steps=partial_steps,
+         errors=list(result.get("errors", [])),
+         sandbox_mode=bool(result.get("sandbox_mode")),
+         raw_result=result,
+@@ -1147,11 +1422,11 @@ async def _triage_owner_routing(
+ async def _qualify_regular_d0(
+     *, request: QualifyRequest, sf: Any, sf_user: Any,
+     user_email: str, sdr_sf_id: str, sdr_sf_name: str,
+-    session: AsyncSession, is_account: bool, record: dict[str, Any],
++    session: AsyncSession, kind: RecordKind, record: dict[str, Any],
+     categoria: str,
+ ) -> QualifyResponse:
+     """Regular cluster D+0: cluster + advisor pick, then SF schedule."""
+-    if not is_account and record.get("IsConverted"):
++    if kind is RecordKind.LEAD and record.get("IsConverted"):
+         return await _run_converted_lead_recovery(
+             request=request, sf=sf, sf_user=sf_user, user_email=user_email,
+             sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name, session=session,
+@@ -1164,6 +1439,10 @@ async def _qualify_regular_d0(
+     spec = get_pool_spec(categoria)
+     # Narrowed once so the type checker carries the proof into every use below.
+     triage_spec = spec if spec is not None and spec.triage_level is not None else None
++    # The round-robin queue the pick belongs to, set only on the rotation branch.
++    # The pick does NOT move the queue (see `advance_queue=False` below): it is
++    # advanced further down, once every deterministic refusal has been ruled out.
++    rotation: Optional[tuple[Any, str]] = None
+     if triage_spec is not None:
+         routing_result = await _triage_owner_routing(session, triage_spec, categoria)
+         fallback_from_cluster = None
+@@ -1187,23 +1466,38 @@ async def _qualify_regular_d0(
+             )
+         )
+ 
++        # FBI-4719 (H-005): out of the pool before the draw, never refused after it.
++        pool_ids = await _drop_unschedulable_advisors(session, sf, pool_ids)
++        if not pool_ids:
++            raise HTTPException(
++                status_code=status.HTTP_409_CONFLICT,
++                detail=f"Nenhum assessor elegível para a categoria {categoria}.",
++            )
++
+         routing = RoutingService(RoutingRepository(), session)
+         sandbox = GetSettings().sfIsSandbox
+         # FBI-2946: the meeting date drives the absence filter. This is D+0, so it
+         # is normally today — but passing it explicitly keeps the D+0 and D+1 paths
+         # on the same contract and covers the edge where a same-day booking is made
+         # right after the advisor's vacation starts.
++        #
++        # FBI-4719 (H-005): `advance_queue=False` — the pick only READS the
++        # queue. Advancing it here, before the Salesforce id, the active check
++        # and the calendar lock, let any of those refusals spend the position
++        # of an advisor who never got the meeting.
+         routing_result = await routing.confirm_routing(
+             categoria=routing_categoria,
+             available_advisor_ids=pool_ids,
+             sandbox_mode=sandbox,
+             target_date=request.scheduled_date,
++            advance_queue=False,
+         )
+         if not routing_result or not routing_result.selected_advisor:
+             raise HTTPException(
+                 status_code=status.HTTP_409_CONFLICT,
+                 detail=f"Falha ao selecionar assessor para a categoria {categoria}.",
+             )
++        rotation = (routing, routing_categoria)
+     sel = routing_result.selected_advisor
+     # SelectedAdvisorInfo declara employee_id (FBI-2722); `sel.advisor_id` era
+     # AttributeError vivo — o D+0 morria aqui mesmo com o routing saudavel.
+@@ -1215,9 +1509,11 @@ async def _qualify_regular_d0(
+             status_code=status.HTTP_400_BAD_REQUEST,
+             detail=f"Salesforce ID não encontrado para {sel.full_name}",
+         )
+-    await _require_active_advisor(
+-        sf=sf, advisor_sf_id=advisor_sf_id, advisor_name=sel.full_name,
+-    )
++    if rotation is None:
++        # Triage owner: never went through the pool filter above.
++        await _require_active_advisor(
++            sf=sf, advisor_sf_id=advisor_sf_id, advisor_name=sel.full_name,
++        )
+ 
+     if fallback_from_cluster:
+         logger.warning(
+@@ -1241,15 +1537,20 @@ async def _qualify_regular_d0(
+ 
+     # FBI-2987 GAP 2: reserve the picked advisor's calendar before the SF write.
+     #
+-    # Comment correction (item L1 audit): confirm_routing above committed only
+-    # the QUEUE position update. It does NOT commit a deficit update for any
+-    # of the 4 live categorias — all four have a PoolSpec (get_pool_spec),
+-    # so confirm_routing always delegates to confirm_pool_routing, whose body
+-    # calls update_advisor_queue_position_for_queue and NEVER calls
++    # Comment correction (item L1 audit): the queue move is the QUEUE position
++    # update only. It does NOT commit a deficit update for any of the 4 live
++    # categorias — all four have a PoolSpec (get_pool_spec), so confirm_routing
++    # always delegates to confirm_pool_routing, whose body never calls
+     # update_deficits. update_deficits only runs from confirm_routing's
+-    # non-pool legacy branch, which no live categoria reaches today. A prior
+-    # version of this comment claimed "queue/deficit updates" — that second
+-    # half was false and is corrected here.
++    # non-pool legacy branch, which no live categoria reaches today.
++    #
++    # FBI-4719 (H-005) order, rotation branch: pick (read) -> Salesforce id ->
++    # active check -> calendar lock -> advance the queue -> Salesforce flow.
++    # Every deterministic refusal sits BEFORE the advance, and so does the lock
++    # race; the advance comes right after the lock so the pick-to-advance window
++    # stays as short as the checks allow (the queue head is read without a row
++    # lock, so two concurrent bookings of one queue can still draw the same
++    # advisor; that race predates this ordering and is reported, not solved).
+     #
+     # The lock is taken here — on the single advisor actually chosen. It is
+     # settled only from an explicit Event outcome; exceptions/cancellation
+@@ -1292,31 +1593,19 @@ async def _qualify_regular_d0(
+         if not isinstance(lock_acquisition, SlotLockAcquisition):
+             lock_acquisition = SlotLockAcquisition(acquired=bool(lock_acquisition))
+     if not lock_acquisition:
+-        # No retry with the next pool advisor on purpose: re-running
+-        # confirm_routing would increment the round-robin queue a second time
+-        # for the advisor that just lost the race, skewing the rotation for
+-        # every later lead. Losing this race means two SDRs booked the same
+-        # advisor and slot within the same instant, so a 409 asking for
+-        # another slot is the honest answer. Consórcio can fall through to the
+-        # next candidate because its pick has no queue side effect.
++        # No retry with the next pool advisor on purpose: re-drawing would pick
++        # the advisor that just lost the race again or hand the lead to the next
++        # one without the SDR having chosen a slot for them. Losing this race
++        # means two SDRs booked the same advisor and slot within the same
++        # instant, so a 409 asking for another slot is the honest answer.
++        # Consórcio can fall through to the next candidate because its pick has
++        # no queue side effect.
+         #
+-        # TODO(FBI-2987 item L1, reported not implemented): the queue
+-        # position for (sel.employee_id, categoria, routing_result.
+-        # selected_cluster) stays advanced by +1 here even though this
+-        # advisor never got the meeting — confirm_pool_routing's
+-        # update_advisor_queue_position_for_queue call above already
+-        # committed before this lock was even attempted, and there is no
+-        # transaction spanning both to roll back. Measured rate ~0.1% (1 in
+-        # ~1000 bookings). The correct fix is a decrement counterpart in
+-        # RoutingRepository — e.g. `decrement_advisor_queue_position_for_
+-        # queue(session, advisor_id, categoria, cluster)`, symmetric to
+-        # `update_advisor_queue_position_for_queue` (same UPSERT key,
+-        # `queue_position - 1` floored at 0) — called right here, before the
+-        # raise. That method does not exist today and routing_repo.py is out
+-        # of scope for this task (edited by another agent in this PR), so it
+-        # is intentionally NOT added in this file. Whoever owns
+-        # routing_repo.py next needs to add it and this call site needs to
+-        # invoke it.
++        # The queue has NOT moved here (FBI-4719, H-005): the advance below runs
++        # only after the lock is held, so this refusal costs the advisor no
++        # position. This closes the L1 gap (position +1 for an advisor who never
++        # got the meeting, measured ~0.1% of bookings) that needed a decrement
++        # counterpart in RoutingRepository; ordering made the decrement moot.
+         raise HTTPException(
+             status_code=status.HTTP_409_CONFLICT,
+             detail=_slot_conflict_detail(
+@@ -1326,13 +1615,40 @@ async def _qualify_regular_d0(
+             ),
+         )
+ 
++    if rotation is not None:
++        routing, queue_categoria = rotation
++        advanced = await routing.advance_pool_queue(
++            employee_id=sel.employee_id,
++            categoria=queue_categoria,
++            cluster=routing_result.selected_cluster,
++        )
++        if not advanced:
++            # The lock is already committed (try_lock_slot commits on purpose),
++            # so it needs a terminal fact: nothing was sent to Salesforce.
++            if scheduled_at:
++                await _settle_slot_lock(
++                    session,
++                    handle=lock_acquisition.handle,
++                    response=QualifyResponse(
++                        success=False, flow_taken="regular_d0",
++                        message="Fila do rodízio não avançou",
++                        event_write_outcome="event_not_attempted",
++                    ),
++                    actor_email=user_email,
++                    source="qualify_regular_d0",
++                )
++            raise HTTPException(
++                status_code=status.HTTP_409_CONFLICT,
++                detail=f"Falha ao selecionar assessor para a categoria {categoria}.",
++            )
++
+     try:
+-        if is_account:
+-            # account path
++        if kind.books_on_account:
++            # account path; an Opportunity entry reuses that Opp (FBI-4719)
+             response = await _run_d0_account_flow(
+                 request=request, sf_user=sf_user,
+                 user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
+-                account_record=record,
++                **_account_package_target(kind, record),
+                 advisor_sf_id=advisor_sf_id, advisor_name=sel.full_name,
+                 is_consorcio=False, categoria=categoria,
+                 flow_label="regular_d0", cluster=routing_result.selected_cluster,
+@@ -1607,7 +1923,7 @@ async def drop_inactive_consorcio_advisors(
+ async def _qualify_consorcio(
+     *, request: QualifyRequest, sf: Any, sf_user: Any,
+     user_email: str, sdr_sf_id: str, sdr_sf_name: str,
+-    session: AsyncSession, is_account: bool, record: dict[str, Any],
++    session: AsyncSession, kind: RecordKind, record: dict[str, Any],
+ ) -> QualifyResponse:
+     """
+     Consórcio — PL-tier advisor pool, no cluster routing (FBI-2387).
+@@ -1622,7 +1938,7 @@ async def _qualify_consorcio(
+     Who each tier routes to is configuration, read from the database (admin page
+     Gerenciamento → Config Super R1) with the env as fallback — FBI-2903.
+     """
+-    if not is_account and record.get("IsConverted"):
++    if kind is RecordKind.LEAD and record.get("IsConverted"):
+         return await _run_converted_lead_recovery(
+             request=request, sf=sf, sf_user=sf_user, user_email=user_email,
+             sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name, session=session,
+@@ -1687,11 +2003,11 @@ async def _qualify_consorcio(
+         else None
+     )
+     try:
+-        if is_account:
++        if kind.books_on_account:
+             response = await _run_d0_account_flow(
+                 request=request, sf_user=sf_user,
+                 user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
+-                account_record=record,
++                **_account_package_target(kind, record),
+                 advisor_sf_id=advisor.sf_id, advisor_name=advisor.name,
+                 is_consorcio=True, categoria=None,
+                 flow_label="consorcio_d0", cluster=None,
+@@ -1723,7 +2039,7 @@ async def _qualify_consorcio(
+ async def _qualify_regular_d1(
+     *, request: QualifyRequest, sf: Any, sf_user: Any,
+     user_email: str, sdr_sf_id: str, sdr_sf_name: str,
+-    session: AsyncSession, is_account: bool, record: dict[str, Any],
++    session: AsyncSession, kind: RecordKind, record: dict[str, Any],
+     categoria: str,
+ ) -> QualifyResponse:
+     """
+@@ -1731,6 +2047,10 @@ async def _qualify_regular_d1(
+     write a `pending_d1_routings` row, partially convert Lead/Account so
+     the Opp exists at submission. The 21:00 BRT batch picks the advisor.
+     """
++    if kind is RecordKind.OPPORTUNITY:
++        # Fail closed: `qualify()` never sends an Opportunity entry here (it routes
++        # synchronously, FBI-4719), and this flow would convert it as a Lead.
++        raise ValueError("an Opportunity entry never enters the D+1 batch")
+     if not request.scheduled_date or not request.scheduled_time:
+         raise HTTPException(
+             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+@@ -1744,7 +2064,7 @@ async def _qualify_regular_d1(
+     # 409-forever chain this flow's D+0 sibling resumes out of. Rejecting before
+     # the pending row and the SF write keeps the Account route as the only way
+     # to open a new Opp for an already converted Lead.
+-    if not is_account and record.get("IsConverted"):
++    if kind is RecordKind.LEAD and record.get("IsConverted"):
+         converted_acct = record.get("ConvertedAccountId")
+         raise HTTPException(
+             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+@@ -1795,7 +2115,7 @@ async def _qualify_regular_d1(
+     initial_lead_id: str = ""
+     initial_account_id: Optional[str] = None
+     ld = None
+-    if is_account:
++    if kind is RecordKind.ACCOUNT:
+         initial_account_id = record["Id"]
+     else:
+         from app.api.v1.leads import _sf_record_to_lead_info
+@@ -1817,7 +2137,7 @@ async def _qualify_regular_d1(
+     pending_id = await repo.insert_pending_d1_routing(
+         session=session,
+         lead_id=initial_lead_id,
+-        lead_type="account" if is_account else "lead",
++        lead_type=kind.value,
+         is_consortium=False,
+         categoria=categoria,
+         cluster=best_cluster,
+@@ -1850,7 +2170,7 @@ async def _qualify_regular_d1(
+         )
+ 
+     loop = asyncio.get_event_loop()
+-    if is_account:
++    if kind is RecordKind.ACCOUNT:
+         contacts = (record.get("Contacts") or {}).get("records", [])
+         contact_id = contacts[0]["Id"] if contacts else None
+         result = await loop.run_in_executor(
+@@ -2053,6 +2373,71 @@ def _is_resumable_converted_lead_failure(response: QualifyResponse) -> bool:
+     return bool(not response.success and response.lead_id and response.opportunity_id)
+ 
+ 
++# H-004 (PR #594): human label of each `partial_steps` name, for the message.
++_PARTIAL_STEP_LABELS = {
++    "consorcio_fields": "os campos de consórcio na Opportunity",
++    "opportunity_stage": "a fase e o status de reunião da Opportunity",
++}
++
++
++def _booking_message(
++    success: bool, partial_steps: list[str], *, resubmit_completes: bool
++) -> str:
++    """Message of a D+0 booking. A booked R1 with `partial_steps` still says it
++    was booked, then says what is missing and what the SDR can do about it.
++
++    `resubmit_completes` is true only when sending the same request again
++    provably reapplies the missing step without a second Event, Opportunity or
++    round-robin draw (the Opportunity entry: `_booked_r1_advisor` reuses the
++    advisor that already holds the slot). Where it is not true the message must
++    not promise it."""
++    if not success:
++        return "Falha no agendamento R1"
++    if not partial_steps:
++        return "R1 agendada"
++    missing = " e ".join(
++        _PARTIAL_STEP_LABELS.get(name, name) for name in partial_steps
++    )
++    if resubmit_completes:
++        return (
++            f"R1 agendada, mas faltou gravar {missing}. Reenvie o mesmo pedido "
++            "para completar: a reunião não será duplicada."
++        )
++    return (
++        f"R1 agendada, mas faltou gravar {missing}. Preencha direto no "
++        "Salesforce: reenviar o pedido aqui não completa e pode duplicar a reunião."
++    )
++
++
++def _is_resumable_partial(response: QualifyResponse, *, opportunity_entry: bool) -> bool:
++    """A booked R1 that is missing a step AND whose re-submission completes it.
++
++    Only the Opportunity entry qualifies: the retry finds the Event at the slot,
++    keeps its advisor and reapplies the whole post-booking package on the same
++    Opportunity. The Account path creates a NEW Opportunity per request, so
++    letting its Idempotency-Key re-run would duplicate the client funnel; the
++    Lead paths copy the consórcio fields at conversion and the resume flow takes
++    none, so a re-run there would not reapply anything."""
++    return bool(response.success and response.partial_steps and opportunity_entry)
++
++
++def _idempotency_actor(principal: dict[str, Any], attribution_email: str) -> str:
++    """Who OWNS an Idempotency-Key claim: the AUTHENTICATED principal.
++
++    Not the attribution e-mail (``user_email``): on the external route that is the
++    ``sdr_email`` the caller names, identical for every API key, so a response
++    cached for one principal was replayed to another one before the object gate
++    ran (FBI-4719, N1). An API key adds its client id, so the cache is scoped to
++    "this API client" as the route documents. Without ``api_client`` (the internal
++    route) the actor is the authenticated e-mail, which is the attribution e-mail
++    whenever the body does not name another SDR. The same actor goes to claim,
++    heartbeat, finish and release; the fingerprint keeps ``sdr_email`` of the body.
++    """
++    email = (principal.get("email") or "").strip() or attribution_email
++    client_id = (principal.get("api_client") or {}).get("id")
++    return f"{email}|api_client:{client_id}" if client_id is not None else email
++
++
+ def _qualify_request_fingerprint(request: QualifyRequest, user_email: str) -> str:
+     """Fingerprint of the fields that define 'the same R1 operation'. Excludes
+     derived/display fields (patrimony_range, sdr_name) so a retry that omits or
+@@ -2119,16 +2504,332 @@ async def _stop_heartbeat(task: Optional[asyncio.Task]) -> None:
+         pass
+ 
+ 
++@dataclass
++class _SfWriter:
++    """One Salesforce/Postgres write block running in a worker thread."""
++
++    started: threading.Event = field(default_factory=threading.Event)
++    finished: threading.Event = field(default_factory=threading.Event)
++
++
++# Writers started under the current per-OPP lock. Cancelling the coroutine that
++# awaits `run_in_executor` does NOT stop a worker thread that already started: it
++# keeps writing to Salesforce. The lock therefore has to outlive the cancellation
++# until these threads end (see `_release_opportunity_entry_when_idle`).
++_OPPORTUNITY_WRITERS: contextvars.ContextVar[Optional[list[_SfWriter]]] = (
++    contextvars.ContextVar("super_r1_opportunity_writers", default=None)
++)
++# A write thread that outlives this many seconds is an incident, not a reason to
++# release: freeing the OPP with a live writer lets the next booking start a second
++# one (two R1 Events, two owners). The lock is held until the thread ends, and this
++# only raises the alarm. A thread stuck for good keeps ONLY this OPP answering 409
++# until it ends or the process restarts; that availability cost is chosen on purpose.
++_WRITER_OVERRUN_ALERT_SECONDS = 300.0
++# Cancelling can also cancel the executor job before its thread ever started. A
++# writer that has not started within this window is treated as never starting.
++_WRITER_START_GRACE_SECONDS = 2.0
++_RELEASE_TASKS: set[asyncio.Task] = set()
++
++
++async def _run_sf_writes(work: Callable[[], Any]) -> Any:
++    """Run a Salesforce/Postgres write block in the default executor, tracked.
++
++    Under a per-OPP lock the thread is registered so that the lock is not released
++    while it is alive; outside one (plain Lead/Account flows) this is exactly
++    `run_in_executor(None, work)`.
++    """
++    writer = _SfWriter()
++    writers = _OPPORTUNITY_WRITERS.get()
++    if writers is not None:
++        writers.append(writer)
++
++    def tracked() -> Any:
++        writer.started.set()
++        try:
++            return work()
++        finally:
++            writer.finished.set()
++
++    return await asyncio.get_event_loop().run_in_executor(None, tracked)
++
++
++def _writer_alive(writer: _SfWriter, now: float, grace_until: float) -> bool:
++    if writer.finished.is_set():
++        return False
++    return writer.started.is_set() or now < grace_until
++
++
++async def _claim_opportunity_entry(opportunity_id: str) -> tuple[str, asyncio.Task]:
++    """Take the per-OPP in-flight lock (FBI-4719): one booking per OPP at a time.
++
++    Before this card every booking created a NEW Opportunity, so two bookings of
++    the same OPP did not exist. Reusing the OPP they do, and the `qualify` claim
++    (user + Idempotency-Key) does not see them: each SDR draws an advisor and
++    creates their own R1 Event. This is the lock the converted-Lead recovery
++    already uses, per OPP, but only IN FLIGHT: the flow releases it when it ends,
++    successful or not, so a legitimate reschedule right after is not blocked.
++
++    Returns the owner token and the heartbeat task; release with
++    `_release_opportunity_entry_when_idle`.
++    """
++    claim = await idempotency_store.claim_or_replay(
++        _OPPORTUNITY_ENTRY_IDEMPOTENCY_SCOPE,
++        _OPPORTUNITY_ENTRY_IDEMPOTENCY_ACTOR,
++        opportunity_id,
++    )
++    if claim.outcome != idempotency_store.OWN:
++        logger.info("qualify opportunity entry busy opp=%s outcome=%s", opportunity_id, claim.outcome)
++        raise HTTPException(
++            status_code=status.HTTP_409_CONFLICT,
++            detail=(
++                "Já existe um agendamento em andamento para esta Oportunidade. "
++                "Confira a agenda antes de repetir."
++            ),
++            # No Retry-After on purpose: the frontend (parseQualifyErrorBody) takes
++            # that header as the idempotency-store BUSY signal and replaces this text
++            # with "...para este lead. Aguarde alguns segundos...", which is wrong
++            # for an Opportunity and for a lock that outlives a cancelled request.
++        )
++    token = claim.owner_token or ""
++    heartbeat = asyncio.create_task(
++        _idempotency_heartbeat(
++            _OPPORTUNITY_ENTRY_IDEMPOTENCY_ACTOR,
++            opportunity_id,
++            token,
++            scope=_OPPORTUNITY_ENTRY_IDEMPOTENCY_SCOPE,
++        )
++    )
++    return token, heartbeat
++
++
++async def _release_opportunity_entry(
++    heartbeat: Optional[asyncio.Task], opportunity_id: str, token: str,
++) -> None:
++    await _stop_heartbeat(heartbeat)
++    try:
++        await idempotency_store.release(
++            _OPPORTUNITY_ENTRY_IDEMPOTENCY_SCOPE,
++            _OPPORTUNITY_ENTRY_IDEMPOTENCY_ACTOR,
++            opportunity_id,
++            token,
++        )
++    except Exception as exc:  # noqa: BLE001
++        # Without the release the claim expires with its lease; failing here must
++        # not replace the result the SDR already has from Salesforce.
++        logger.warning("Failed to release opportunity entry claim opp=%s: %s", opportunity_id, exc)
++
++
++async def _release_after_writers(
++    heartbeat: Optional[asyncio.Task], opportunity_id: str, token: str,
++    writers: list[_SfWriter],
++) -> None:
++    loop = asyncio.get_event_loop()
++    start = loop.time()
++    grace_until = start + _WRITER_START_GRACE_SECONDS
++    alert_at = start + _WRITER_OVERRUN_ALERT_SECONDS
++    alerted = False
++    try:
++        while any(_writer_alive(w, loop.time(), grace_until) for w in writers):
++            if not alerted and loop.time() >= alert_at:
++                alerted = True
++                logger.error(
++                    "opportunity entry lock opp=%s: write thread still alive after "
++                    "%ss; the lock stays held and a new booking of this OPP keeps "
++                    "getting 409 until it ends", opportunity_id,
++                    _WRITER_OVERRUN_ALERT_SECONDS,
++                )
++            await asyncio.sleep(0.25)
++    except BaseException:
++        # Cancelled (shutdown) or an unexpected fault while waiting. The heartbeat
++        # must never keep renewing the lease without a deadline, so stop it: the
++        # claim then expires with its lease. Release only when every writer has
++        # ended; a live writer is never released on the strength of a monitor fault.
++        await _stop_heartbeat(heartbeat)
++        if all(w.finished.is_set() for w in writers):
++            await _release_opportunity_entry(None, opportunity_id, token)
++        raise
++    await _release_opportunity_entry(heartbeat, opportunity_id, token)
++
++
++async def _release_opportunity_entry_when_idle(
++    heartbeat: Optional[asyncio.Task], opportunity_id: str, token: str,
++    writers: list[_SfWriter],
++) -> None:
++    """Release the per-OPP lock, but not while one of its writer threads is alive.
++
++    A cancelled request (client gone) abandons the awaiting coroutine, not the
++    thread: it keeps writing to Salesforce. Releasing then would let a retry start
++    a second writer on the same OPP, which is what the lock exists to prevent. In
++    that case the heartbeat keeps renewing the lease and the release is handed to a
++    background task that waits for the thread, however long it takes.
++    """
++    loop = asyncio.get_event_loop()
++    now = loop.time()
++    grace_until = now + _WRITER_START_GRACE_SECONDS
++    if not any(_writer_alive(w, now, grace_until) for w in writers):
++        await _release_opportunity_entry(heartbeat, opportunity_id, token)
++        return
++    logger.warning(
++        "opportunity entry opp=%s: request ended while its write thread is still "
++        "running; keeping the lock until it ends", opportunity_id,
++    )
++    task = asyncio.create_task(
++        _release_after_writers(heartbeat, opportunity_id, token, writers)
++    )
++    _RELEASE_TASKS.add(task)
++    task.add_done_callback(_RELEASE_TASKS.discard)
++
++
++async def _booked_r1_advisor(
++    sf: Any, opportunity_id: str, request: QualifyRequest,
++) -> Optional[ConsorcioAdvisor]:
++    """Advisor that ALREADY holds this OPP's R1 at the requested slot, if any.
++
++    The R1 Event is deduplicated by OwnerId (`create_r1_event`): another advisor at
++    the same slot is a NEW Event. On a retry after a partial failure the first
++    attempt's advisor looks busy precisely because that attempt booked their
++    calendar, and drawing again hands the meeting to someone else and duplicates
++    the R1. `_resolve_converted_lead_advisor` avoids the same risk for a converted
++    Lead.
++
++    It only looks at the OPEN Event (`DWStatusReuniao__c` = "Aberta") at the exact
++    slot, of any owner: a cancelled R1 ("Não realizada") frees the slot, so the
++    booking draws and creates a new Event. Without a slot in
++    the request there is nothing to look for (the flow refuses with 422). An owner
++    detected as inactive refuses with 409: putting a second advisor on the same slot
++    is what this lookup exists to prevent.
++    """
++    if not request.scheduled_date or not request.scheduled_time:
++        return None
++    from app.api.v1.leads import _validate_sf_id
++
++    validated = _validate_sf_id(opportunity_id)
++    event_dt = _event_datetime_brt(request.scheduled_date, request.scheduled_time)
++    event_start_utc = event_dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
++    loop = asyncio.get_event_loop()
++    events = await loop.run_in_executor(
++        None,
++        lambda: sf.query(
++            "SELECT OwnerId, Owner.Name, Owner.Email FROM Event "
++            f"WHERE WhatId = '{validated}' AND Type = 'R1' "
++            f"AND DWStatusReuniao__c = '{R1_EVENT_OPEN_STATUS}' "
++            f"AND StartDateTime = {event_start_utc} ORDER BY CreatedDate DESC LIMIT 1"
++        ),
++    )
++    if events.get("totalSize", 0) == 0:
++        return None
++    row = events["records"][0]
++    owner_id = row.get("OwnerId")
++    if not owner_id:
++        return None
++    active = await loop.run_in_executor(None, lambda: filter_active_user_ids(sf, [owner_id]))
++    if owner_id not in active:
++        raise HTTPException(
++            status_code=status.HTTP_409_CONFLICT,
++            detail=(
++                "O assessor que já tem a R1 marcada neste horário está inativo no "
++                "Salesforce. Escolha outro horário."
++            ),
++        )
++    owner = row.get("Owner") or {}
++    return ConsorcioAdvisor(
++        sf_id=owner_id,
++        name=owner.get("Name") or owner_id,
++        email=owner.get("Email") or f"{owner_id}@salesforce.invalid",
++    )
++
++
++async def _refuse_open_r1_at_another_time(
++    sf: Any, opportunity_id: str, request: QualifyRequest,
++) -> None:
++    """409 when the OPP already has an open R1 in the FUTURE at another time.
++
++    Booking a different time would leave two open R1s on the same Opportunity (the
++    old one with its advisor, the new one with the drawn advisor) and the answer
++    would say "R1 agendada" without warning. The SDR has to close the old one
++    ("Não realizada" in Salesforce) or book the same time (the retry, which
++    `_booked_r1_advisor` resolves). Runs before the draw, so the queue does not
++    move. Only an R1 with `DWStatusReuniao__c` = "Aberta" and `StartDateTime` after
++    now counts: the org has thousands of old R1s that were never closed, and a
++    cancelled one ("Não realizada") frees the OPP.
++    """
++    if not request.scheduled_date or not request.scheduled_time:
++        return
++    from app.api.v1.leads import _validate_sf_id
++
++    validated = _validate_sf_id(opportunity_id)
++    requested = _event_datetime_brt(request.scheduled_date, request.scheduled_time)
++    requested_utc = requested.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
++    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
++    loop = asyncio.get_event_loop()
++    events = await loop.run_in_executor(
++        None,
++        lambda: sf.query(
++            "SELECT StartDateTime FROM Event "
++            f"WHERE WhatId = '{validated}' AND Type = 'R1' "
++            f"AND DWStatusReuniao__c = '{R1_EVENT_OPEN_STATUS}' "
++            f"AND StartDateTime > {now_utc} AND StartDateTime != {requested_utc} "
++            "ORDER BY StartDateTime ASC LIMIT 1"
++        ),
++    )
++    if events.get("totalSize", 0) == 0:
++        return
++    start = _parse_sf_datetime(events["records"][0]["StartDateTime"]).astimezone(_SP_TZ)
++    raise HTTPException(
++        status_code=status.HTTP_409_CONFLICT,
++        detail=(
++            f"A oportunidade já tem uma R1 aberta marcada para "
++            f"{start.strftime('%d/%m/%Y')} às {start.strftime('%H:%M')} (horário de "
++            "Brasília). Marque a anterior como 'Não realizada' no Salesforce ou "
++            "agende no mesmo horário dela."
++        ),
++    )
++
++
++async def _rebook_opportunity_with_booked_advisor(
++    *, request: QualifyRequest, sf_user: Any,
++    user_email: str, sdr_sf_id: str, sdr_sf_name: str,
++    record: dict[str, Any], advisor: ConsorcioAdvisor,
++    is_consorcio: bool, categoria: Optional[str],
++) -> QualifyResponse:
++    """Resume the OPP booking with the advisor who already holds the R1 at the slot.
++
++    Skips the pool draw: neither the round-robin queue advances a second time nor is
++    the calendar reserved again (the first attempt did both). The rest is the same
++    Account-path package: the existing Event is reused (same owner and slot), and
++    the OPP, Account and Contact go to that advisor.
++    """
++    response = await _run_d0_account_flow(
++        request=request, sf_user=sf_user,
++        user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
++        account_record=record["_account"], existing_opportunity=record,
++        advisor_sf_id=advisor.sf_id, advisor_name=advisor.name,
++        is_consorcio=is_consorcio, categoria=categoria,
++        flow_label="consorcio_d0" if is_consorcio else "regular_d0", cluster=None,
++    )
++    if response.advisor:
++        response.advisor.email = advisor.email
++    return response
++
++
+ async def qualify(
+     *,
+     session: AsyncSession,
+     current_user: dict[str, Any],
+     request: QualifyRequest,
+     idempotency_key: Optional[str] = None,
++    authorizing_user: Optional[dict[str, Any]] = None,
+ ) -> QualifyResponse:
+     """
+     Single dispatcher for every Super R1 flow.
+ 
++    ``authorizing_user`` is the AUTHENTICATED principal whose scope the object
++    authorization (Opportunity entry) is evaluated for. It defaults to
++    ``current_user``, which is right for the internal route. A route that lets
++    the caller declare another identity for ATTRIBUTION (the external API's
++    ``sdr_email``, which replaces ``current_user``) must pass the principal it
++    authenticated, because an identity the caller names cannot authorize itself.
++
+     If `idempotency_key` is supplied, the response is cached for 24h so
+     AI-agent retries on transient timeouts return the original outcome
+     instead of producing a duplicate Lead conversion.
+@@ -2141,10 +2842,15 @@ async def qualify(
+             detail="Email do SDR não disponível na sessão.",
+         )
+ 
++    # The authenticated principal (see `authorizing_user`): it authorizes the
++    # Opportunity entry AND owns the idempotency claim; `user_email` attributes.
++    principal = authorizing_user if authorizing_user is not None else current_user
++    idempotency_actor = _idempotency_actor(principal, user_email)
++
+     owner_token: Optional[str] = None
+     if idempotency_key:
+         claim = await idempotency_store.claim_or_replay(
+-            _IDEMPOTENCY_SCOPE, user_email, idempotency_key,
++            _IDEMPOTENCY_SCOPE, idempotency_actor, idempotency_key,
+             request_hash=_qualify_request_fingerprint(request, user_email),
+         )
+         if claim.outcome == idempotency_store.HIT:
+@@ -2174,27 +2880,50 @@ async def qualify(
+ 
+     hb_task = (
+         asyncio.create_task(
+-            _idempotency_heartbeat(user_email, idempotency_key, owner_token)
++            _idempotency_heartbeat(idempotency_actor, idempotency_key, owner_token)
+         )
+         if owner_token else None
+     )
++    # FBI-4719: in-flight lock on the Opportunity being booked, released when the
++    # flow ends or on any exit by exception (the `except` below), and never while a
++    # write thread of this request is still alive.
++    opportunity_lock_key: Optional[str] = None
++    opportunity_lock_token: Optional[str] = None
++    opportunity_lock_hb: Optional[asyncio.Task] = None
++    # Own writer scope per call (also for flows that take no lock), restored when the
++    # call ends: otherwise a later call in the same context would register its
++    # thread on this call's list and prolong a lock that should already be gone.
++    opportunity_lock_writers: list[_SfWriter] = []
++    writers_scope = _OPPORTUNITY_WRITERS.set(opportunity_lock_writers)
+     try:
+         sf, sf_user = await _resolve_sf_connections(user_email)
+         sdr_sf_id, sdr_sf_name = await _resolve_sdr_identity(sf, user_email, user_name_override)
+ 
+-        is_account = is_account_id(request.record_id)
+-        record = (
+-            await _fetch_account(sf, request.record_id)
+-            if is_account
+-            else await _fetch_lead(sf, request.record_id)
+-        )
++        kind = classify_record_id(request.record_id)
++        if kind is RecordKind.OPPORTUNITY:
++            # Object authorization (H-009), with the rule of the "Oportunidades"
++            # list, for the AUTHENTICATED principal (never `request.sdr_email`,
++            # and never the identity a route substituted for attribution): before
++            # the entry refusal, any lock, any draw or any write.
++            from app.api.v1.leads import user_can_access_opportunity
++
++            async def _can_enter(opp: dict[str, Any]) -> bool:
++                return await user_can_access_opportunity(
++                    session, principal, opp.get("DWNomeSDR__c")
++                )
++
++            record = await _fetch_opportunity(sf, request.record_id, authorize=_can_enter)
++        elif kind is RecordKind.ACCOUNT:
++            record = await _fetch_account(sf, request.record_id)
++        else:
++            record = await _fetch_lead(sf, request.record_id)
++            await _refuse_lost_converted_opportunity(sf, record)
+ 
+         # Lead recordType in SF is the source of truth for consórcio routing.
+         # Accounts have no consórcio recordType of their own, so SDR intent OR
+-        # the converting Lead's RecordType decides (FBI-2386).
+-        is_consorcio = _resolve_is_consorcio(
+-            is_account=is_account, request=request, record=record
+-        )
++        # the converting Lead's RecordType decides (FBI-2386). An Opportunity
++        # entry decides by its own RecordType (FBI-4719).
++        is_consorcio = _resolve_is_consorcio(kind=kind, request=request, record=record)
+         categoria: Optional[str] = None
+         if not is_consorcio:
+             categoria = patrimony_to_categoria(request.patrimony_value)
+@@ -2212,37 +2941,110 @@ async def qualify(
+         # AMB / Mesa Hunter Investimentos paths removed.
+         # Only Advisory 3 (100k-300k) may enter the D+1 batch; other bands stay sync
+         # even when the meeting date is in the future.
+-        if is_consorcio:
++        #
++        # FBI-4719: an Opportunity entry never enters the batch either. The
++        # finalize (execute_r1_finalize_flow) gates on `routing_history_inserted`
++        # and its insert_routing_history call dedups on opportunity_id ever. A
++        # reused Opportunity already has the row of its first routing, so it
++        # would be stamped sf_error on every run. It routes now, same pool.
++        #
++        # Also FBI-4719: whatever books an Opportunity takes the per-OPP in-flight
++        # lock before it picks anyone, and a retry whose slot already has an R1 keeps
++        # that advisor instead of drawing a new one (second R1 on the same OPP). A
++        # converted Lead is recovered on its Opportunity (`_run_converted_lead_
++        # recovery`), so it takes the SAME lock: otherwise an SDR on the Lead and
++        # another on the Opportunity write to it together.
++        booked_advisor: Optional[ConsorcioAdvisor] = None
++        lock_opportunity_id: Optional[str] = None
++        # Request data first, before the lock, the R1 lookup or any draw: without
++        # this the flow validates it only after the round-robin has advanced and
++        # the calendar is reserved. Every synchronous (D+0) flow, whatever the
++        # record kind (FBI-4719, H-005). The D+1 batch keeps its own checks.
++        goes_to_d1_batch = (
++            not is_consorcio and deferred and allows_d1_batch(categoria)
++            and kind is not RecordKind.OPPORTUNITY
++        )
++        if not goes_to_d1_batch:
++            if kind.books_on_account:
++                _validate_account_flow_request(
++                    request, is_consorcio=is_consorcio,
++                    **_account_package_target(kind, record),
++                )
++            else:
++                _validate_lead_flow_request(request, is_consorcio=is_consorcio)
++        if kind is RecordKind.OPPORTUNITY:
++            lock_opportunity_id = str(record["Id"])
++        elif (
++            kind is RecordKind.LEAD
++            and record.get("IsConverted") and record.get("ConvertedOpportunityId")
++        ):
++            lock_opportunity_id = str(record["ConvertedOpportunityId"])
++        if lock_opportunity_id:
++            opportunity_lock_key = lock_opportunity_id
++            opportunity_lock_token, opportunity_lock_hb = await _claim_opportunity_entry(
++                opportunity_lock_key
++            )
++        if kind is RecordKind.OPPORTUNITY:
++            booked_advisor = await _booked_r1_advisor(sf, opportunity_lock_key or "", request)
++            if booked_advisor is None:
++                # A different time with an open R1 ahead is refused BEFORE the draw
++                # (the same time is the retry above).
++                await _refuse_open_r1_at_another_time(sf, opportunity_lock_key or "", request)
++        elif lock_opportunity_id:
++            # A converted Lead is resumed on its Opportunity: an open R1 ahead at
++            # another time refuses here too, before the recovery books a second one
++            # (the same time is the retry the recovery resolves itself).
++            await _refuse_open_r1_at_another_time(sf, opportunity_lock_key or "", request)
++        if booked_advisor is not None:
++            response = await _rebook_opportunity_with_booked_advisor(
++                request=request, sf_user=sf_user,
++                user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
++                record=record, advisor=booked_advisor,
++                is_consorcio=is_consorcio, categoria=categoria,
++            )
++        elif is_consorcio:
+             response = await _qualify_consorcio(
+                 request=request, sf=sf, sf_user=sf_user,
+                 user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
+-                session=session, is_account=is_account, record=record,
++                session=session, kind=kind, record=record,
+             )
+-        elif deferred and allows_d1_batch(categoria):
++        elif goes_to_d1_batch:
+             response = await _qualify_regular_d1(
+                 request=request, sf=sf, sf_user=sf_user,
+                 user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
+-                session=session, is_account=is_account, record=record,
++                session=session, kind=kind, record=record,
+                 categoria=categoria or "",
+             )
+         else:
+             response = await _qualify_regular_d0(
+                 request=request, sf=sf, sf_user=sf_user,
+                 user_email=user_email, sdr_sf_id=sdr_sf_id, sdr_sf_name=sdr_sf_name,
+-                session=session, is_account=is_account, record=record,
++                session=session, kind=kind, record=record,
+                 categoria=categoria or "",
+             )
++        if opportunity_lock_token and opportunity_lock_key:
++            token, opportunity_lock_token = opportunity_lock_token, None
++            await _release_opportunity_entry_when_idle(
++                opportunity_lock_hb, opportunity_lock_key, token, opportunity_lock_writers
++            )
+     except BaseException:
+         await _stop_heartbeat(hb_task)
++        if opportunity_lock_token and opportunity_lock_key:
++            await _release_opportunity_entry_when_idle(
++                opportunity_lock_hb, opportunity_lock_key, opportunity_lock_token,
++                opportunity_lock_writers,
++            )
++        _OPPORTUNITY_WRITERS.reset(writers_scope)
+         if owner_token:
+             try:
+                 await idempotency_store.release(
+-                    _IDEMPOTENCY_SCOPE, user_email, idempotency_key, owner_token
++                    _IDEMPOTENCY_SCOPE, idempotency_actor, idempotency_key, owner_token
+                 )
+             except Exception as exc:  # noqa: BLE001
+                 logger.warning("Failed to release qualify idempotency claim: %s", exc)
+         raise
+ 
++    _OPPORTUNITY_WRITERS.reset(writers_scope)
+     await _stop_heartbeat(hb_task)
+ 
+     # Um roteamento que falhou tem que ficar VISÍVEL (FBI-2903). O D+1 já grava a
+@@ -2264,13 +3066,23 @@ async def qualify(
+             # permanently unretryable. The retry path below reuses the linked
+             # ConvertedOpportunityId and is idempotent for the R1 Event.
+             resumable_converted_lead = _is_resumable_converted_lead_failure(response)
+-            if _is_transient_qualify_error(response) or resumable_converted_lead:
++            # H-004: a booked R1 that is missing a step is not a final answer
++            # when re-sending completes it. Caching it would replay "partial"
++            # forever and make the missing step unrecoverable under this key.
++            resumable_partial = _is_resumable_partial(
++                response, opportunity_entry=kind is RecordKind.OPPORTUNITY
++            )
++            if (
++                _is_transient_qualify_error(response)
++                or resumable_converted_lead
++                or resumable_partial
++            ):
+                 await idempotency_store.release(
+-                    _IDEMPOTENCY_SCOPE, user_email, idempotency_key, owner_token
++                    _IDEMPOTENCY_SCOPE, idempotency_actor, idempotency_key, owner_token
+                 )
+             else:
+                 await idempotency_store.finish(
+-                    _IDEMPOTENCY_SCOPE, user_email, idempotency_key, owner_token,
++                    _IDEMPOTENCY_SCOPE, idempotency_actor, idempotency_key, owner_token,
+                     response.model_dump(mode="json"),
+                 )
+         except Exception as exc:  # noqa: BLE001
+diff --git a/backend/app/services/super_r1_service.py b/backend/app/services/super_r1_service.py
+index 7727f023c..49abe7dec 100644
+--- a/backend/app/services/super_r1_service.py
++++ b/backend/app/services/super_r1_service.py
+@@ -13,7 +13,8 @@ from __future__ import annotations
+ 
+ from dataclasses import dataclass
+ from datetime import date, datetime, timedelta, timezone
+-from typing import Optional
++from enum import Enum
++from typing import Any, Optional, Sequence
+ 
+ from pydantic import BaseModel, Field
+ 
+@@ -53,6 +54,15 @@ OPP_RT_SOQL_CANDIDATES: dict[str, tuple[str, ...]] = {
+     FUNNEL_FINANCIAL_SERVICES: ("FinancialServices",),
+ }
+ 
++# FBI-4719: RecordTypes que o Super R1 aceita reaproveitar na entrada por OPP.
++# São os que ele mesmo grava (funis acima + Consórcios). Uma OPP de
++# Seguros, Internacional ou Family Office teria o RecordType trocado para
++# Investimentos/FS por update_opportunity_after_conversion e sairia do funil
++# dela; essas seguem fora do roteamento do Super R1.
++SUPER_R1_OPPORTUNITY_RECORD_TYPES: frozenset[str] = frozenset(
++    {rt for rts in OPP_RT_SOQL_CANDIDATES.values() for rt in rts} | {"Consorcios"}
++)
++
+ 
+ @dataclass(frozen=True)
+ class PoolSpec:
+@@ -439,6 +449,137 @@ def is_account_id(record_id: str) -> bool:
+     return record_id.upper().startswith("001")
+ 
+ 
++def is_opportunity_id(record_id: str) -> bool:
++    if not record_id:
++        return False
++    return record_id.upper().startswith("006")
++
++
++class RecordKind(str, Enum):
++    """What a Super R1 `record_id` points at, decided once from its id prefix.
++
++    One value instead of two booleans (`is_account`, `is_opportunity`) travelling
++    through every dispatcher: a Lead converts, an Account and an Opportunity entry
++    run the Account package (the Opportunity entry reuses its Opportunity), and the
++    D+1 batch only ever sees a Lead or an Account.
++    """
++
++    LEAD = "lead"
++    ACCOUNT = "account"
++    OPPORTUNITY = "opportunity"
++
++    @property
++    def books_on_account(self) -> bool:
++        """True when the booking runs the Account package (Account or Opportunity)."""
++        return self is not RecordKind.LEAD
++
++
++def classify_record_id(record_id: str) -> RecordKind:
++    """`006…` = Opportunity, `001…` = Account, anything else = Lead."""
++    if is_opportunity_id(record_id):
++        return RecordKind.OPPORTUNITY
++    if is_account_id(record_id):
++        return RecordKind.ACCOUNT
++    return RecordKind.LEAD
++
++
++def record_type_developer_name(record: dict[str, Any]) -> Optional[str]:
++    """`RecordType.DeveloperName` of a Salesforce row, or None when the row has none."""
++    rt = record.get("RecordType")
++    return rt.get("DeveloperName") if isinstance(rt, dict) else None
++
++
++def entry_contact_id(
++    opportunity: dict[str, Any], account_contacts: Sequence[dict[str, Any]],
++) -> Optional[str]:
++    """Contact an Opportunity entry works with (FBI-4719): the Opportunity's own,
++    else the Account's oldest (the first row of its `Contacts ORDER BY CreatedDate`
++    subquery). One owner for the rule: /qualify books against this contact and the
++    detail screen shows its e-mail and phone."""
++    return opportunity.get("ContactId") or (
++        account_contacts[0].get("Id") if account_contacts else None
++    )
++
++
++_STAND_BY_LOSS_REASON = "Stand By"
++
++
++def _lost_opportunity_refusal(opportunity: dict[str, Any], account_id: str) -> str:
++    """pt-BR text for a lost Opportunity (always 409): schedule through the Account.
++
++    The Stand By reopening date is cited only when the record already carries it
++    (`DWMotivoPerda__c` = Stand By and `DWDataReaberturaStandby__c`, a text field in
++    the org). The entry queries do not select those columns on purpose: the text
++    is generic when they are absent."""
++    opportunity_id = opportunity.get("Id")
++    text = (
++        f"A oportunidade {opportunity_id} está perdida e não é reaberta pelo "
++        f"Super R1. Agende pela Conta {account_id}: ela abre uma nova oportunidade."
++    )
++    reopening = str(opportunity.get("DWDataReaberturaStandby__c") or "").strip()
++    if reopening and opportunity.get("DWMotivoPerda__c") == _STAND_BY_LOSS_REASON:
++        try:
++            reopening = date.fromisoformat(reopening[:10]).strftime("%d/%m/%Y")
++        except ValueError:
++            reopening = reopening[:40]
++        text += f" Ela está em Stand By, com reabertura prevista para {reopening}."
++    return text
++
++
++def lost_opportunity_refusal(
++    opportunity: dict[str, Any], account_id: str,
++) -> Optional[tuple[int, str]]:
++    """(409, pt-BR text) when the Opportunity is lost, else None.
++
++    One owner for "a lost Opportunity is never reused" (owner decision, FBI-4719):
++    the entry by OPP reaches it through `opportunity_entry_refusal` and the entry by
++    a converted Lead, which resumes on its Opportunity, calls it directly."""
++    if opportunity.get("StageName") != "Perdida":
++        return None
++    return 409, _lost_opportunity_refusal(opportunity, account_id)
++
++
++def opportunity_entry_refusal(opportunity: dict[str, Any]) -> Optional[tuple[int, str]]:
++    """Why an Opportunity cannot enter the Super R1 (FBI-4719), or None.
++
++    `opportunity` is the Salesforce row (IsWon, StageName, AccountId, RecordType).
++    Returns (HTTP status, pt-BR message). One owner for the rule: the `/qualify`
++    dispatcher refuses with it and the detail endpoint shows it to the SDR before
++    the form is filled. Only an open Opportunity enters, from any campaign
++    (review of PR #594); refused:
++
++      - Won: reopening it as "Contatado" would erase the win; the Account is
++        still the way to open a new cycle.
++      - Lost (`StageName` = "Perdida", whatever the reason, Stand By included):
++        a lost Opportunity is never reused; the Account opens a new one (owner
++        decision, FBI-4719).
++      - RecordType outside the Super R1: the update would switch it to
++        Investimentos/FS and take it out of its own funnel (Seguros etc.).
++    """
++    opportunity_id = opportunity.get("Id")
++    account_id = opportunity.get("AccountId")
++    if opportunity.get("IsWon"):
++        reopen = (
++            f" Agende pela Conta {account_id} para abrir uma nova oportunidade."
++            if account_id else ""
++        )
++        return 409, (
++            f"A oportunidade {opportunity_id} está ganha e não é reaberta pelo "
++            f"Super R1.{reopen}"
++        )
++    record_type = record_type_developer_name(opportunity)
++    if record_type and record_type not in SUPER_R1_OPPORTUNITY_RECORD_TYPES:
++        return 422, (
++            f"Oportunidade do tipo {record_type} não é roteada pelo Super R1 "
++            f"(aceita: {', '.join(sorted(SUPER_R1_OPPORTUNITY_RECORD_TYPES))})."
++        )
++    if not account_id:
++        return 409, (
++            f"Oportunidade {opportunity_id} sem Conta vinculada; acione o suporte."
++        )
++    return lost_opportunity_refusal(opportunity, account_id)
++
++
+ def today_brt() -> date:
+     return datetime.now(_SP_TZ).date()
+ 

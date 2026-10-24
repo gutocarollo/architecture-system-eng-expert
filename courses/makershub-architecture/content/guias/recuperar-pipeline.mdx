@@ -1,0 +1,111 @@
+---
+title: "Como preparar a recuperação de um pipeline"
+description: "Identifique a tentativa, a fonte e o efeito que falta com comandos somente de leitura antes de retomar trabalho."
+diataxis: how-to
+---
+
+# Como preparar a recuperação de um pipeline
+
+Este guia produz uma decisão de recuperação rastreável: qual tentativa foi afetada, qual efeito foi confirmado, qual falta e que verificação permite concluir o trabalho. Os procedimentos abaixo são somente de leitura. A retomada executável deve seguir o contrato operacional da DAG e do negócio; este guia não dispara runs, limpa tasks, altera estados ou apaga objetos.
+
+## Antes de começar
+
+Tenha o identificador da DAG e da tentativa investigada, acesso autorizado ao ambiente correspondente e uma conexão PostgreSQL protegida para leitura. Use as credenciais pelo mecanismo já configurado, sem copiá-las para comandos ou documentos. Conheça o resultado esperado: uma task `success` não substitui a conferência do efeito que o usuário precisa encontrar.
+
+O exemplo usa as fontes medidas em 14/10/2026. O Kubernetes consumia `main` via git-sync; `.70` tinha o checkout `airflow-prod`. Os nomes e revisões precisam de outra conferência no momento da sua investigação. Guarde somente identificadores técnicos e agregados; os paths de áudio podem conter dados de pessoas.
+
+## 1. Confirme qual ambiente está lendo
+
+No terminal que já possui o kubeconfig autorizado, confira o contexto e as réplicas. Não imprima o conteúdo do kubeconfig.
+
+```bash
+date -u '+%Y-%m-%d %H:%M:%S UTC'
+kubectl config current-context
+kubectl -n airflow get deployments -o custom-columns='NAME:.metadata.name,DESIRED:.spec.replicas,READY:.status.readyReplicas,STRATEGY:.spec.strategy.type'
+kubectl -n airflow get pods -o custom-columns='NAME:.metadata.name,PHASE:.status.phase,NODE:.spec.nodeName'
+```
+
+Escolha explicitamente o pod do scheduler a partir dessa leitura. Substitua o valor do exemplo pelo nome conferido, sem selecionar automaticamente o primeiro pod.
+
+```bash
+PIPELINE_SCHEDULER_POD='replace-with-verified-scheduler-pod'
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow version
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow config get-value core executor
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow config get-value core parallelism
+```
+
+O nome de container `scheduler` deve existir no pod escolhido. Se a descrição do pod usar outro nome, empregue o nome conferido. No recibo de 14/10, o Kubernetes respondeu Airflow 3.2.2, LocalExecutor e 32; Docker `.70` respondeu LocalExecutor e 5. Seus resultados atuais podem diferir e precisam de um novo horário e escopo.
+
+## 2. Confira o código que sustenta o efeito
+
+Para investigar a fonte `.70`, leia os arquivos em disco e seus mtimes. O comando abaixo não troca branch nem consulta uma versão histórica como se fosse o arquivo atual.
+
+```bash
+ssh airflow-70 'date -u "+%Y-%m-%d %H:%M:%S UTC"; cd /home/fazcapital/airflow/airflow-dags && git branch --show-current && git rev-parse HEAD && TZ=UTC ls -l --time-style=long-iso dags/recordings__nextbilling__api_to_stg__audio.py && sed -n "715,782p" dags/recordings__nextbilling__api_to_stg__audio.py'
+```
+
+Se o incidente pertence ao cluster, confira o arquivo no pod antes de transportar essa conclusão para Kubernetes. A paridade de cinco arquivos medida em 14/10 não cobre todo o repositório, o modelo dbt ou todas as dependências. Para a DAG de áudio, a leitura registrada contém `ON CONFLICT(nextbilling_call_id)`; uma retomada precisa preservar a identidade que a escrita usa.
+
+## 3. Localize a tentativa sem executar o trabalho
+
+Leia as instâncias no ambiente confirmado. Use a ajuda da CLI instalada para conferir seus argumentos; a leitura de lista não dispara a DAG.
+
+```bash
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow dags list-runs --help
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow tasks states-for-dag-run --help
+```
+
+Escolha o intervalo afetado nos valores de exemplo e use o identificador da DAG como argumento posicional, conforme a [CLI do Airflow 3.2.2](https://airflow.apache.org/docs/apache-airflow/3.2.2/cli-and-env-variables-ref.html). Depois, copie o run identificado para a consulta de estados.
+
+```bash
+PIPELINE_START_UTC='2026-10-14T00:00:00+00:00'
+PIPELINE_END_UTC='2026-10-15T00:00:00+00:00'
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow dags list-runs --start-date "$PIPELINE_START_UTC" --end-date "$PIPELINE_END_UTC" recordings__nextbilling__api_to_stg__audio
+PIPELINE_RUN_ID='replace-with-verified-run-id'
+kubectl -n airflow exec "$PIPELINE_SCHEDULER_POD" -c scheduler -- airflow tasks states-for-dag-run recordings__nextbilling__api_to_stg__audio "$PIPELINE_RUN_ID"
+```
+
+Registre estados e horários das quatro tasks: `extract_recordings`, `enrich_with_salesforce_data`, `download_and_upload`, `load_metadata`. Uma ausência nesse recorte não comprova ausência global de execução: confira o metadata, o identificador e o período consultados. Se a CLI ou a política local impedir a leitura, registre a lacuna e use a interface autorizada do mesmo ambiente.
+
+## 4. Confira o efeito com dados agregados
+
+Antes de consultar o PostgreSQL de negócio, use o FazGraph para orientar a tabela: `pipeline("minio__call", max_matches=1)`. Confira a data do grafo e trate seu snapshot de execução como histórico. A consulta abaixo só lê o contrato de metadados identificado no código e não retorna identidades ou paths de clientes.
+
+Execute-a pela conexão PostgreSQL autorizada. O tempo máximo evita que uma investigação sem limite ocupe o banco por tempo indefinido.
+
+```sql
+BEGIN TRANSACTION READ ONLY;
+SET LOCAL statement_timeout = '5s';
+
+SELECT
+    clock_timestamp() AT TIME ZONE 'UTC' AS measured_at_utc,
+    inet_server_addr() AS server_addr,
+    inet_server_port() AS server_port,
+    current_database() AS database_name;
+
+SELECT
+    count(*) AS metadata_row_count,
+    count(*) FILTER (
+        WHERE audio_file_path IS NULL OR audio_file_path = ''
+    ) AS missing_path_row_count,
+    max(updated_at) AS latest_metadata_updated_at
+FROM public.fct_minio__call;
+
+COMMIT;
+```
+
+Na leitura isolada realizada em 14/10/2026 às 19:08:26 UTC, o PostgreSQL de negócio devolveu **81.292 registros de metadados**, **zero paths ausentes** e `max(updated_at)` de `2026-10-14 16:03:35.682549-03:00`. O catálogo vivo confirmou as quinze colunas da tabela, incluindo `nextbilling_call_id`, `audio_file_path` e `updated_at`. A conta permite dizer que 81.292 de 81.292 linhas tinham um path preenchido naquela consulta; ela não diz que os 81.292 objetos existem ou têm o conteúdo esperado. Essa diferença é o motivo de conferir separadamente banco e armazenamento.
+
+O agregado ajuda a orientar a investigação, mas não confirma o objeto de uma tentativa específica. Para esse vínculo, use uma identidade técnica autorizada e o cliente do endpoint efetivamente identificado. Consulte somente metadados do objeto, como existência, tamanho ou checksum esperado, conforme o contrato. Se o endpoint ou a chave esperada não estiverem confirmados, mantenha essa parte como desconhecida. Não conclua a partir do nome “MinIO” da classe ou do prefixo `s3://`.
+
+## 5. Registre a ação que completa o trabalho
+
+Use os efeitos confirmados para preparar uma decisão. Quando o objeto foi confirmado e o metadado falta, avalie concluir a gravação do metadado com a mesma identidade. Quando não há confirmação do objeto, primeiro resolva a existência e a identidade. Quando a operação deixou de ser desejada, confira a compensação prevista pelo contrato de negócio. As [histórias de recuperação](/explicacoes/distributed-work/) explicam essas alternativas.
+
+Para XP, registre se o arquivo local correto existe, se os bytes originais foram arquivados e se o teste de prontidão foi atendido. Pareamento por data não comprova completude. Para Salesforce, registre a chave, a marca incremental e a janela retrospectiva do modelo aplicado, com seu ambiente. Nenhuma contagem de Task dividida por calls produz a verificação desses contratos.
+
+## Critério de conclusão
+
+O registro está pronto quando identifica ambiente, DAG, run, código com revisão e mtime, estado observado, efeito confirmado e efeito pendente. Ele deve indicar a identidade que será preservada, o passo previsto para retomar e o read-back que confirmará o resultado. Se uma dessas fontes puder mudar a decisão e estiver ausente, declare a recuperação ainda não decidida.
+
+Esta etapa conclui a preparação. Após uma retomada autorizada pelo contrato operacional, a comprovação exige nova leitura do estado e do efeito no mesmo ambiente; enviar uma solicitação ou ver uma task verde não prova sozinho que o produto ficou disponível. Consulte a [referência de workflows](/referencia/catalogo/16-workflow-e-processamento/) para termos e a [explicação dos pipelines](/explicacoes/workflow/) para os caminhos usados neste guia.

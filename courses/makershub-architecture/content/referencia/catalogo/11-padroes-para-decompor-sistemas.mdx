@@ -1,0 +1,170 @@
+---
+title: "11. Padrões para decompor sistemas"
+description: "Os 13 conceitos de substituição gradual e migração de responsabilidades."
+diataxis: reference
+---
+
+# Padrões para decompor sistemas
+
+Esta referência contém as 13 entradas do grupo 11. Os casos de migração são **propostas**, baseadas em fronteiras reais de código e dados do curso. Eles não descrevem uma migração ativa medida. **REF** identifica uma aplicação OSS para estudo, sem implantação presumida. A [explicação de mudanças](/explicacoes/safe-change/) desenvolve os casos e diagramas.
+
+As bases de comparação são roteadores Envoy/Traefik, migrações Flyway/Liquibase, CDC Debezium e flags Unleash. O [front proxy Envoy](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/front_proxy), o [GitLab e suas migrações](https://docs.gitlab.com/development/database/avoiding_downtime_in_migrations/) e [Debezium examples](https://github.com/debezium/debezium-examples) são referências OSS **REF** dos mecanismos. Esses exemplos não demonstram a execução de uma migração inteira da Faz. As skills locais `deprecation-and-migration` e `database-migration`, em `~/.codex/skills/`, oferecem apoio; a [curadoria](/referencia/skills-e-projetos/) explica seus papéis.
+
+Os pares específicos abaixo foram verificados em fontes primárias em 14/10/2026 e têm links fixados à revisão capturada. **APP** identifica código ou contrato de um produto OSS; **REF** identifica uma aplicação-exemplo ou configuração reproduzível. Esses rótulos não afirmam implantação na Faz. O registro de captura conserva URL, revisão, SHA-256 e os símbolos examinados.
+
+<span id="g11-e001" />
+
+## Strangler Fig
+
+Uma implementação nova assume responsabilidades delimitadas enquanto o caminho anterior continua atendendo. No exercício de qualificação, o roteador transfere uma operação por vez e mantém um único escritor para cada efeito. Isso reduz o tamanho da troca, com custo de operar dois caminhos e retirar dependências antigas. Uma tabela compartilhada pode manter o acoplamento. Envoy é a base de roteamento **REF**; [core 23](/explicacoes/safe-change/#pattern-23) desenvolve o contrato e seus limites.
+
+**Par de base e aplicação.** A base é [Next.js](https://github.com/vercel/next.js) e a biblioteca [httpxy](https://github.com/unjs/httpxy). O **APP Next.js** [verifica rotas locais antes do fallback](https://github.com/vercel/next.js/blob/58f4af6ab2d9142acb3d20e1b070359f608f7b35/packages/next/src/server/lib/router-utils/resolve-routes.ts#L101-L115) e usa [httpxy para encaminhar a URL externa](https://github.com/vercel/next.js/blob/58f4af6ab2d9142acb3d20e1b070359f608f7b35/packages/next/src/server/lib/router-utils/proxy-request.ts#L24-L33). A [configuração oficial de adoção incremental](https://github.com/vercel/next.js/blob/58f4af6ab2d9142acb3d20e1b070359f608f7b35/docs/01-app/03-api-reference/05-config/01-next-config-js/rewrites.mdx) declara a migração página a página para o site novo, preservando o site existente para o restante. Isso demonstra o mecanismo Strangler declarado no produto, sem afirmar uma migração realizada na Faz.
+
+{/* current-curation:strangler-fig */}
+
+A [curadoria de Strangler Fig](/referencia/curadoria/11-padroes-para-decompor-sistemas/#strangler-fig) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e002" />
+
+## Branch by Abstraction
+
+Uma interface comum permite substituir uma implementação aos poucos dentro do sistema. No exercício Calendar, os consumidores chamariam um contrato de agenda enquanto a implementação externa muda. O benefício é continuar publicando durante a substituição; o custo é manter a interface e a paridade das implementações. Criar a interface sem preservar significado não garante compatibilidade. [Descrição de Fowler](https://martinfowler.com/bliki/BranchByAbstraction.html); a skill `deprecation-and-migration` apoia a retirada posterior.
+
+**Par de base e aplicação.** A base é [redis-rb](https://github.com/redis/redis-rb). O **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173) mantém a mesma API para o armazenamento atual e o destino; `default_store` escolhe um deles por flag. O [Wrapper](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/wrapper.rb) cria o cliente Redis usado pela aplicação. A fonte declara a transição entre stores e implementa a seleção; o fato não foi deduzido somente do nome da classe.
+
+{/* current-curation:branch-by-abstraction */}
+
+A [curadoria de Branch by Abstraction](/referencia/curadoria/11-padroes-para-decompor-sistemas/#branch-by-abstraction) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e003" />
+
+## Parallel Run
+
+Dois caminhos calculam sobre entradas comparáveis, e a equipe confronta seus resultados antes da troca. No exercício XP, versões de transformação usam arquivos sintéticos idênticos e produzem tabelas separadas de comparação. O ganho é revelar diferenças; o custo é processamento duplicado e adjudicação da diferença. Horários, parâmetros e versões precisam ser equivalentes. Somente um resultado é publicado como produto oficial; executar ambos com efeitos reais não é uma comparação segura.
+
+**Par de base e aplicação.** A base é [redis-rb](https://github.com/redis/redis-rb). O **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L439-L457) executa `pipelined_both`, compara `result_non_default` com `result_default` e registra `PipelinedDiffError` quando diferem. O resultado padrão continua sendo retornado. É um caso concreto de rodar e comparar os dois caminhos; as chamadas do trecho são sequenciais, e a fonte pressupõe que o bloco seja idempotente.
+
+{/* current-curation:parallel-run */}
+
+A [curadoria de Parallel Run](/referencia/curadoria/11-padroes-para-decompor-sistemas/#parallel-run) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e004" />
+
+## Shadow Traffic
+
+O sistema copia entradas para um caminho candidato enquanto o caminho atual continua fornecendo a resposta. No exercício de qualificação, a sombra calcula sem gravar, notificar ou chamar outro sistema com efeitos. Isso permite observar diferenças com custo de capacidade e proteção das entradas copiadas. A rota real lida no MakersHub persiste uma intenção: repetir seu POST como sombra poderia duplicar efeitos. O [core 23](/explicacoes/safe-change/#pattern-23) mostra a fronteira proposta.
+
+**Par de base e aplicação.** A base é [Istio](https://github.com/istio/istio), com proxies Envoy. A **REF executável** [httpbin v1/v2 do Istio](https://github.com/istio/istio.io/blob/25007a0c275dcbdd41cadcad8569f1e9cb447d82/content/en/docs/tasks/traffic-management/mirroring/index.md#L273-L309) implanta dois destinos e configura `route` para v1 e `mirror` para v2. A resposta principal vem de v1; a cópia fica fora desse caminho. O exemplo usa requisições HTTP de demonstração e não autoriza duplicar um POST de qualificação com efeitos.
+
+{/* current-curation:shadow-traffic */}
+
+A [curadoria de Shadow Traffic](/referencia/curadoria/11-padroes-para-decompor-sistemas/#shadow-traffic) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e005" />
+
+## Dark Launch
+
+Uma capacidade é implantada e exercitada por controles internos antes de ficar disponível às pessoas. No exercício, a nova função de resumo processa dados sintéticos sem aparecer no frontend. O ganho é observar o comportamento; o custo é manter acesso interno e telemetria. Estar escondida na tela não impede efeitos nem substitui autorização. A base de controle **REF** é Unleash; [Feature Flags](/explicacoes/safe-change/#pattern-27) desenvolve a ativação.
+
+**Par de base e aplicação.** A base é [Flipper](https://github.com/flippercloud/flipper). O **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173) permite ativar gravações no store de destino enquanto as leituras da pessoa continuam no store atual. A flag de troca do store padrão é outra etapa. Esse lançamento interno da capacidade nova é concreto no código de migração; não prova uma ativação observada e inclui o risco explícito de duas gravações.
+
+{/* current-curation:dark-launch */}
+
+A [curadoria de Dark Launch](/referencia/curadoria/11-padroes-para-decompor-sistemas/#dark-launch) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e006" />
+
+## Feature Toggle
+
+Uma condição seleciona um comportamento do código. No exercício, a condição escolhe a regra anterior ou a nova depois de verificar autorização. O benefício é controlar a ativação; o custo é testar combinações e remover condições temporárias. Uma chave não desfaz distribuições realizadas e não concede direitos. Unleash é a base **REF**, e `backend-feature-flags`, em `~/.codex/skills/`, apoia seu ciclo de vida. [Core 27](/explicacoes/safe-change/#pattern-27).
+
+**Par de base e aplicação.** A base é [Flipper](https://github.com/flippercloud/flipper). O **APP** [GitLab — Feature](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/feature.rb) envolve Flipper em `enabled?`, `enable`, `disable` e ativação por porcentagem de atores. O [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L284-L303) usa esses resultados para selecionar seu caminho. O par mostra uma chave realmente consumida pela aplicação, sem tratá-la como direito de acesso.
+
+{/* current-curation:feature-flags */}
+
+A [curadoria de Feature Flags](/referencia/curadoria/11-padroes-para-decompor-sistemas/#feature-flags) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e007" />
+
+## Expand/Contract
+
+A mudança acrescenta um contrato compatível, migra consumidores e retira o contrato antigo após observar que ele deixou de ser necessário. No exercício, API, frontend e DAG passam por versões distintas sem dois valores independentes para o mesmo conceito. O benefício é publicação gradual; o custo é compatibilidade temporária e limpeza. A retirada com um leitor antigo ainda ativo rompe esse leitor. GitLab é referência OSS de prática; [core 24](/explicacoes/safe-change/#pattern-24).
+
+**Par de base e aplicação.** A base é [ActiveRecord](https://github.com/rails/rails/tree/main/activerecord). O **APP GitLab** tem etapas pareadas para `bulk_import_entities.source_xid`: [expansão](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/migrate/20260114180938_initialize_conversion_of_bulk_import_entities_source_xid_to_bigint.rb), [backfill](https://github.com/gitlabhq/gitlabhq/blob/39f78019749fcb2458260e65c987c59ca7a37a2c/db/post_migrate/20260114180943_backfill_bulk_import_entities_source_xid_for_bigint_conversion.rb), [validação do término](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093419_finalize_bulk_import_entities_source_xid_bigint_conversion.rb), [troca das colunas](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260429093420_swap_columns_for_bulk_import_entities_source_xid_bigint_conversion.rb) e [limpeza da conversão](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/db/post_migrate/20260518124649_clean_up_bigint_conversion_for_bulk_import_entities.rb). As duas primeiras fontes são da tag v18.10.0; as demais pertencem à revisão fixada da captura. O [adaptador de migration](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/database/migration.rb) deriva de ActiveRecord.
+
+{/* current-curation:expand-contract */}
+
+A [curadoria de Expand/Contract](/referencia/curadoria/11-padroes-para-decompor-sistemas/#expand-contract) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e008" />
+
+## Transitional Architecture
+
+Uma arquitetura temporária liga o estado inicial ao destino e recebe um plano explícito de retirada. No exercício, um adaptador traduz o contrato antigo enquanto os consumidores migram. Ele reduz o risco da troca, mas acrescenta operação e dívida durante a transição. Sem dono e condição de saída, a ponte pode virar dependência permanente. A skill `deprecation-and-migration` apoia esse contrato; a [camada semântica](/explicacoes/api-integration/#pattern-37) mostra uma fronteira relacionada.
+
+**Par de base e aplicação.** A base é [redis-rb](https://github.com/redis/redis-rb). O **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L163-L173) declara uma ponte temporária: operar no store atual, escrever nos dois, tornar o destino padrão e parar o uso duplo. As flags e `default_store` implementam essas etapas atrás da mesma interface. A fonte demonstra o mecanismo de transição, sem atribuir uma data de conclusão ou retirada total da ponte.
+
+{/* current-curation:transitional-architecture */}
+
+A [curadoria de Transitional Architecture](/referencia/curadoria/11-padroes-para-decompor-sistemas/#transitional-architecture) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e009" />
+
+## Modularization
+
+Modularizar estabelece responsabilidades e dependências explícitas dentro de um sistema. No exercício, qualificação, persistência e integração Salesforce recebem interfaces e owners antes de qualquer separação de processos. O ganho é reduzir mudança espalhada; o custo é definir fronteiras e contratos. Pastas com nomes diferentes não comprovam isolamento. A [explicação de fronteiras de código](/explicacoes/code-boundaries/) desenvolve módulos e bases OSS **REF**; `architecture-patterns` é apoio local.
+
+**Par de base e aplicação.** A base é [Autofac](https://github.com/autofac/Autofac) e MediatR. A aplicação OSS **REF** [MyMeetings — MeetingsModule](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/91c8ef24b4cb6ef558c95d8267fa07d68c7059f8/src/Modules/Meetings/Infrastructure/MeetingsModule.cs) implementa `IMeetingsModule`, abre um scope Autofac e envia consultas pelo `IMediator`. O [contrato de módulos](https://github.com/kgrzybek/modular-monolith-with-ddd/blob/91c8ef24b4cb6ef558c95d8267fa07d68c7059f8/README.md#L343-L351) declara interfaces próprias, encapsulamento e dados separados. São relações declaradas e implementadas da aplicação; não uma classificação inferida dos nomes de pastas.
+
+{/* current-curation:modularization */}
+
+A [curadoria de Modularization](/referencia/curadoria/11-padroes-para-decompor-sistemas/#modularization) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e010" />
+
+## Service Extraction
+
+Uma responsabilidade delimitada passa a executar e publicar de forma independente. No exercício, extrair uma integração exige explicitar chamadas, credenciais, dados e falhas que antes eram locais. Isso pode permitir evolução separada, com custo de rede, versões e operação adicional. Mover código sem resolver acesso compartilhado ao banco preserva o acoplamento. A [integração de APIs](/explicacoes/api-integration/) e a skill `deprecation-and-migration` apoiam a comparação.
+
+**Par de base e aplicação.** A base é [gRPC](https://github.com/grpc/grpc). O **APP GitLab** [encaminha criação e exclusão de tags ao serviço Gitaly](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/gitaly_client/operation_service.rb) por `gitaly_client_call`, construindo requests e tratando `GRPC::BadStatus`. O par mostra uma responsabilidade de repositório atrás de um contrato de serviço. A leitura não determina o momento histórico da extração nem garante independência de todos os dados.
+
+{/* current-curation:service-extraction */}
+
+A [curadoria de Service Extraction](/referencia/curadoria/11-padroes-para-decompor-sistemas/#service-extraction) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e011" />
+
+## Database Decomposition
+
+Decompor o banco distribui propriedade de dados entre fronteiras definidas. No exercício, cada domínio decide suas gravações e oferece um contrato para quem precisa de leitura. O ganho é reduzir disputas e dependência de schema; o custo é tratar consultas e consistência que atravessam fronteiras. Separar schemas ou servidores não define sozinho autoridade de escrita. A [consistência](/explicacoes/distributed-work/) e a skill `database-migration` apoiam o planejamento.
+
+**Par de base e aplicação.** A base é [ActiveRecord](https://github.com/rails/rails/tree/main/activerecord). O **APP GitLab** [declara a decomposição dos bancos main, ci e sec](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/doc/development/database/multiple_databases.md) e impõe classes-base por domínio. O [Ci::ApplicationRecord da tag v16.0.0](https://github.com/gitlabhq/gitlabhq/blob/917d3f7ad12438a8ec7177d32114073ec479998a/app/models/ci/application_record.rb) usa `connects_to` para a conexão `ci`. A documentação descreve a separação e o código mostra o binding; isso não é apenas criar nomes de schemas.
+
+{/* current-curation:database-decomposition */}
+
+A [curadoria de Database Decomposition](/referencia/curadoria/11-padroes-para-decompor-sistemas/#database-decomposition) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e012" />
+
+## CDC Migration
+
+A migração copia um estado inicial e acompanha mudanças registradas pela origem até a troca. No exercício de staging, o destino precisa aplicar alterações em ordem contratada, alcançar a origem e passar por reconciliação antes de receber autoridade. O ganho é reduzir a janela da carga final; o custo é log, retenção e operação do conector. CDC depende da configuração da origem: `wal_level=minimal` medido no banco de negócio `.137` não prova logical CDC disponível. [Mensagens e CDC](/explicacoes/messages/) desenvolve Debezium **REF**.
+
+**Par de base e aplicação.** A base é [mysql-replication](https://pypi.org/project/mysql-replication/). O produto OSS **APP pg_chameleon** [faz init_replica e lê BinLogStreamReader](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/mysql_lib.py) e possui [detach_replica](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/pg_chameleon/lib/pg_lib.py), que prepara o PostgreSQL para operar separado da origem. O [contrato do produto](https://github.com/the4thdoctor/pg_chameleon/blob/5458575165565b4593d33af912e7fdbeb4db49f8/README.rst) declara suporte à migração e suas restrições. O par cobre cópia, acompanhamento e destacamento, sem presumir CDC disponível no banco .137.
+
+{/* current-curation:cdc-migration */}
+
+A [curadoria de CDC Migration](/referencia/curadoria/11-padroes-para-decompor-sistemas/#cdc-migration) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g11-e013" />
+
+## Dual Write Migration
+
+A migração grava em duas representações durante uma transição. No exercício proposto, uma gravação pode funcionar e a outra falhar, deixando destinos diferentes. O benefício pretendido é manter ambos atualizados; o custo é reconciliação, repetição e autoridade explícita. Duas chamadas sequenciais não formam uma transação distribuída. O [capítulo de integração confiável](/explicacoes/reliable-integration/) compara Outbox e outras alternativas; a skill `backend-transactional-outbox` apoia o contrato local.
+
+**Par de base e aplicação.** A base é [redis-rb](https://github.com/redis/redis-rb). No **APP** [GitLab — MultiStore](https://github.com/gitlabhq/gitlabhq/blob/2b79d1b09471e0f43ace3d37ff417919a5fe7092/lib/gitlab/redis/multi_store.rb#L425-L457), `write_both` grava primeiro no store padrão e depois no outro. Se a segunda escrita falha, a aplicação registra o erro e preserva o resultado padrão. É uma aplicação concreta de dual write na migração, incluindo sua janela de divergência; não é uma transação atômica entre stores.
+
+{/* current-curation:dual-write-migration */}
+
+A [curadoria de Dual Write Migration](/referencia/curadoria/11-padroes-para-decompor-sistemas/#dual-write-migration) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

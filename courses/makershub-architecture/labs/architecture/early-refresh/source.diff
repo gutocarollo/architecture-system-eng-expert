@@ -1,0 +1,106 @@
+diff --git a/backend/app/utils/single_flight.py b/backend/app/utils/single_flight.py
+index 671ea3fc3..fc8a63402 100644
+--- a/backend/app/utils/single_flight.py
++++ b/backend/app/utils/single_flight.py
+@@ -10,6 +10,12 @@ once (cache stampede). This combines two protections so that does not happen:
+     upstream call.
+   * **micro-cache** — a *successful* result is reused for ``ttl`` seconds, so
+     repeat calls inside the window don't touch the producer at all.
++  * **early refresh** (opt-in) — past ``early_ttl`` (but before ``ttl``) the
++    still-valid value is served *immediately* while a single background fetch
++    refreshes it. No caller ever blocks on the producer at the expiry boundary,
++    so a slow upstream (NextBilling tail latency) never stalls a poll — the
++    stale-but-serveable value covers the refresh. Disabled by default
++    (``early_ttl == ttl``), which keeps the plain single-flight behaviour.
+ 
+ Scope is per-process (one instance per gunicorn worker): coalescing needs a
+ shared in-process future, so it cannot span workers — with W workers the
+@@ -38,26 +44,46 @@ class SingleFlightCache(Generic[T]):
+             client poll interval so freshness never regresses.
+         is_error: optional predicate; when it returns True for a result, that
+             result is returned to callers but NOT cached (so failures retry).
++        early_ttl_seconds: optional early-refresh threshold (seconds). Past it,
++            but before ``ttl``, the value is served immediately while a single
++            background fetch refreshes it — so no caller blocks on a slow
++            producer at the expiry boundary. Must be <= ttl; defaults to ttl
++            (early refresh disabled — plain single-flight + micro-cache).
+     """
+ 
+     def __init__(
+         self,
+         ttl_seconds: float,
+         is_error: Optional[Callable[[T], bool]] = None,
++        early_ttl_seconds: Optional[float] = None,
+     ) -> None:
+         self._ttl = max(0.0, ttl_seconds)
++        # Early-refresh window. Default (None) == ttl => disabled: the early
++        # branch in get() is never reached, so behaviour is the plain TTL cache.
++        self._early_ttl = (
++            self._ttl
++            if early_ttl_seconds is None
++            else max(0.0, min(early_ttl_seconds, self._ttl))
++        )
+         self._is_error = is_error
+         self._value: Optional[T] = None
+         self._expires_at: float = 0.0
++        self._early_expires_at: float = 0.0
+         self._inflight: "Optional[asyncio.Task[T]]" = None
+         self._lock = asyncio.Lock()
+ 
+     async def get(self, producer: Callable[[], Awaitable[T]]) -> T:
+         """Return a fresh cached value, or coalesce onto a single in-flight
+         call of ``producer`` if there is no fresh value."""
+-        # Fast path: a fresh value needs no lock.
+-        if self._value is not None and time.monotonic() < self._expires_at:
+-            return self._value
++        # Fast path: a still-valid value needs no lock.
++        value = self._value
++        if value is not None and time.monotonic() < self._expires_at:
++            # Past the early-refresh threshold (and only if enabled): serve the
++            # still-valid value now and kick off ONE background fetch. The caller
++            # does NOT await it, so a slow producer never stalls this poll.
++            if time.monotonic() >= self._early_expires_at:
++                self._start_background_refresh(producer)
++            return value
+ 
+         async with self._lock:
+             # Re-check under the lock — another caller may have just refreshed.
+@@ -79,6 +105,22 @@ class SingleFlightCache(Generic[T]):
+         # the cancelled caller raises; the rest still get the upstream result.
+         return await asyncio.shield(task)
+ 
++    def _start_background_refresh(self, producer: Callable[[], Awaitable[T]]) -> None:
++        """Launch a fire-and-forget, single-flighted refresh of the value.
++
++        Used only on the early-refresh path, where the caller already has a
++        serveable value and does NOT await this task — so there is no awaiter to
++        cancel and the ``shield`` cancellation-isolation concern simply does not
++        arise here. Single-flighted via the shared ``_inflight`` slot: if a fetch
++        (foreground or background) is already running, this is a no-op. The
++        check-and-set is atomic under asyncio (no await between), and the same
++        done-callback caches the result.
++        """
++        if self._inflight is None:
++            task = asyncio.create_task(producer())
++            task.add_done_callback(self._on_inflight_settled)
++            self._inflight = task
++
+     def _on_inflight_settled(self, task: "asyncio.Task[T]") -> None:
+         """Done-callback for the shared in-flight task.
+ 
+@@ -106,11 +148,14 @@ class SingleFlightCache(Generic[T]):
+             except Exception:
+                 is_error = False
+         if not is_error:
++            settled_at = time.monotonic()
+             self._value = result
+-            self._expires_at = time.monotonic() + self._ttl
++            self._expires_at = settled_at + self._ttl
++            self._early_expires_at = settled_at + self._early_ttl
+ 
+     def invalidate(self) -> None:
+         """Drop the cached value (next call refetches). Does not cancel an
+         in-flight fetch."""
+         self._value = None
+         self._expires_at = 0.0
++        self._early_expires_at = 0.0

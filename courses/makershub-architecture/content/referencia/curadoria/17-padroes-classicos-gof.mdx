@@ -1,0 +1,335 @@
+---
+title: "Curadoria: Padrões clássicos GoF"
+description: "Fontes, skills, versões, licenças e lacunas dos conceitos de Padrões clássicos GoF."
+diataxis: reference
+---
+
+# Curadoria: Padrões clássicos GoF
+
+Esta página conserva os conceitos canônicos desta família, com links diretos para as fontes. A contagem de estrelas compara os packs candidatos identificados em cada item. O [método e o recorte datado de tendência](/referencia/curadoria/#como-comparamos-skills) explicam o universo e o período; uma orientação de apoio não implementa o padrão no programa.
+
+Uma correspondência autoral registra a seleção do mecanismo e de suas fontes. A situação independente vem do parecer real vinculado a cada item e vale para o recorte e os limites declarados. Uma pendência continua sendo requisito aberto; nenhum conceito recebeu dispensa por não se aplicar.
+
+## Abstract Factory
+
+O identificador canônico é `abstract-factory`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O módulo gráfico OBS fornece uma família de construtores de texturas, buffers e shaders pelo backend escolhido. O contrato Qt de integração de plataforma permite comparar a criação de famílias compatíveis.
+
+A base de estudo é [qt/qtbase / qplatformintegration.h @ bb0131e5](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/gui/kernel/qplatformintegration.h); licença [LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/gui/painting/qpaintengine.h#L1-L2). A aplicação ou candidato de aplicação é [obsproject/obs-studio / graphics.c @ 1ad61101](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs/graphics/graphics.c); licença [GPL-2.0](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/COPYING); [obsproject/obs-studio / gl-subsystem.c @ 1ad61101](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs-opengl/gl-subsystem.c); licença [GPL-2.0](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/COPYING).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs/graphics/graphics.c#L3007-L3013). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Os produtos de um backend gráfico precisam conservar compatibilidade com o mesmo dispositivo. O exemplo compara a família do backend, sem atribuir ao projeto a intenção histórica de aplicar um rótulo GoF.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#abstract-factory). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Bridge
+
+O identificador canônico é `bridge`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A API gráfica OBS mantém as operações públicas independentes da escolha do backend. gs_draw delega por uma tabela de funções a device_draw do dispositivo escolhido. QPaintEngine fornece uma base comparável para separar a abstração de pintura de seu motor concreto.
+
+A base de estudo é [qt/qtbase / qpaintengine.h @ bb0131e5](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/gui/painting/qpaintengine.h); licença [LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/gui/painting/qpaintengine.h#L1-L2). A aplicação ou candidato de aplicação é [obsproject/obs-studio / graphics.c @ 1ad61101](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs/graphics/graphics.c); licença [GPL-2.0](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/COPYING); [obsproject/obs-studio / gl-subsystem.c @ 1ad61101](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs-opengl/gl-subsystem.c); licença [GPL-2.0](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/COPYING).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/obsproject/obs-studio/blob/1ad6110186096e0bef0c269120fd14f7b6d4b183/libobs/graphics/graphics.c#L1937-L1943). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O elo é a composição entre a API gráfica e o backend. O recorte mostra essa separação no código e não atribui ao projeto uma decisão histórica GoF que não foi documentada.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#bridge). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Builder
+
+O identificador canônico é `builder`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O Builder de uma coleção Guava reúne valores e produz a estrutura final usada no estado de análise Trino.
+
+A base de estudo é [google/guava / ImmutableList.java @ dea49844](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/collect/ImmutableList.java); licença [Apache-2.0](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/LICENSE). A aplicação ou candidato de aplicação é [trinodb/trino / Analysis.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/analyzer/Analysis.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/analyzer/Analysis.java#L2654-L2660). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#builder). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Chain of Responsibility
+
+O identificador canônico é `chain-of-responsibility`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+A cadeia distribui responsabilidades entre componentes que podem encaminhar o pedido ou responder sem continuar. O FastAPI constrói essa cadeia envolvendo o próximo aplicativo em cada middleware. O middleware CORS do Starlette delega os pedidos comuns, mas responde ao preflight de OPTIONS e retorna antes de chamar o próximo componente. A API real do Airflow registra esses middlewares; seu middleware de log captura o envio da resposta e chama o próximo aplicativo ASGI para continuar o processamento.
+
+A base de estudo é [fastapi/fastapi / applications.py @ 49a09a0d](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/applications.py); licença [MIT](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE); [fastapi/fastapi / cors.py @ 49a09a0d](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/fastapi/middleware/cors.py); licença [MIT](https://github.com/fastapi/fastapi/blob/49a09a0d4e876b4e7d6d87fc049710263aaeaa7e/LICENSE); [Kludex/starlette / applications.py @ 7b2948fe](https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/applications.py); licença [BSD-3-Clause](https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md); [Kludex/starlette / cors.py @ 7b2948fe](https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/starlette/middleware/cors.py); licença [BSD-3-Clause](https://github.com/Kludex/starlette/blob/7b2948fe7b7fff28bb018607d54cd4dfa518910e/LICENSE.md). A aplicação ou candidato de aplicação é [apache/airflow / app.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / app.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/core_api/app.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE); [apache/airflow / http_access_log.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/common/http_access_log.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/airflow-core/src/airflow/api_fastapi/app.py#L26-L40). actual application imports FastAPI middleware initializer
+
+O FastAPI possui seu próprio build_middleware_stack, por isso a prova usa sua implementação concreta e não presume que ele execute a implementação homônima do Starlette. O módulo CORS do FastAPI reexporta a classe do Starlette. O Airflow registra CORS quando há configuração correspondente; o recorte não demonstra uma configuração ativa, uma requisição de produção ou uma execução de DAG. Os commits das bibliotecas são referências fixas de implementação e não uma medição das versões instaladas em algum ambiente Airflow.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#chain-of-responsibility). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Command
+
+O identificador canônico é `command`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+MediatR 12.4.1 despacha pedidos para handlers; Fineract coordena comandos no serviço de escrita de empréstimos.
+
+A base de estudo é [LuckyPennySoftware/MediatR / Mediator.cs @ fb309026](https://github.com/LuckyPennySoftware/MediatR/blob/fb309026775ef953a64fb5339d074426c1ad2c37/src/MediatR/Mediator.cs); licença [Apache-2.0](https://github.com/LuckyPennySoftware/MediatR/blob/fb309026775ef953a64fb5339d074426c1ad2c37/LICENSE). A aplicação ou candidato de aplicação é [apache/fineract / LoanWritePlatformServiceJpaRepositoryImpl.java @ d4ef4069](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java); licença [Apache-2.0](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/LICENSE_RELEASE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/fineract/blob/d4ef4069547fba99400871877ceefadb62ad585b/fineract-provider/src/main/java/org/apache/fineract/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java#L302-L308). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A versão MediatR escolhida é histórica sob Apache-2.0. O serviço Fineract usa seu próprio encaminhamento: a relação Mediator permanece pendente de um consumidor OSS desse contrato.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#command). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Composite
+
+O identificador canônico é `composite`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Na árvore SQL do Trino, tanto a folha Identifier quanto a expressão composta LogicalExpression são nós e expõem getChildren. A folha devolve uma lista vazia, enquanto o composto conserva e devolve suas expressões filhas. Isso permite percorrer a árvore pelo mesmo contrato sem exigir que o consumidor trate toda folha como uma estrutura diferente. O JavaParser mostra uma base reutilizável que mantém os vínculos e realiza uma operação recursiva.
+
+A base de estudo é [javaparser/javaparser / Node.java @ c4fb5365](https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/javaparser-core/src/main/java/com/github/javaparser/ast/Node.java); licença [Apache-2.0](https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/LICENSE.APACHE). A aplicação ou candidato de aplicação é [trinodb/trino / Node.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/Node.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / LogicalExpression.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/LogicalExpression.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE); [trinodb/trino / Identifier.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/Identifier.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/Node.java#L21-L49). O nó comum define a operação getChildren para os nós da árvore SQL.
+
+O recorte é a estrutura da AST. Visitor pode complementar essa árvore, mas não é usado sozinho como prova de Composite. JavaParser é uma base comparativa, não uma dependência declarada do Trino. Foi escolhida a alternativa Apache-2.0 que o grant dual do JavaParser permite.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#composite). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Decorator
+
+O identificador canônico é `decorator`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O logger Superset envolve funções com um wrapper que conserva a chamada e acrescenta o registro do evento. functools fornece os contratos e a preservação dos metadados da função.
+
+A base de estudo é [python/cpython / functools.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/functools.py); licença [Python-2.0](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / log.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/utils/log.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/utils/log.py#L398-L404). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O wrapper acrescenta uma responsabilidade à função. A existência do log não prova entrega de auditoria nem observabilidade distribuída.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#decorator). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Factory Method
+
+O identificador canônico é `factory-method`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Os delegates Calibre redefinem createEditor para construir o editor próprio de cada célula. O fluxo da view usa o contrato do delegate, sem criar diretamente cada widget concreto.
+
+A base de estudo é [qt/qtbase / qabstractitemdelegate.h @ bb0131e5](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/widgets/itemviews/qabstractitemdelegate.h); licença [LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only](https://github.com/qt/qtbase/blob/bb0131e59e36bbf02fb4aa5c26cb9702563c5417/src/gui/painting/qpaintengine.h#L1-L2). A aplicação ou candidato de aplicação é [kovidgoyal/calibre / delegates.py @ 4393136b](https://github.com/kovidgoyal/calibre/blob/4393136bd30b133e95ee07dec674c71d6c57c3a1/src/calibre/gui2/library/delegates.py); licença [GPL-3.0](https://github.com/kovidgoyal/calibre/blob/4393136bd30b133e95ee07dec674c71d6c57c3a1/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/kovidgoyal/calibre/blob/4393136bd30b133e95ee07dec674c71d6c57c3a1/src/calibre/gui2/library/delegates.py#L108-L114). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O exemplo comprova o método de criação extensível do editor. Ele não é uma conclusão sobre a arquitetura de todo o Calibre.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#factory-method). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Flyweight
+
+O identificador canônico é `flyweight`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Hadoop usa interners para compartilhar representações String iguais e reduzir objetos duplicados.
+
+A base de estudo é [google/guava / Interners.java @ dea49844](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/guava/src/com/google/common/collect/Interners.java); licença [Apache-2.0](https://github.com/google/guava/blob/dea4984457cdce41842d3bec8d04fb469e776981/LICENSE). A aplicação ou candidato de aplicação é [apache/hadoop / StringInterner.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/util/StringInterner.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-common-project/hadoop-common/src/main/java/org/apache/hadoop/util/StringInterner.java#L53-L59). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O estado compartilhado precisa ser imutável. Esse ganho depende da quantidade de valores repetidos e do custo de manter o interner.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#flyweight). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Interpreter
+
+O identificador canônico é `interpreter`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O avaliador Trino visita expressões IR e calcula o resultado segundo o tipo de nó e os valores disponíveis no contexto. ANTLR fornece uma base de interpretação da gramática para comparar responsabilidades.
+
+A base de estudo é [antlr/antlr4 / ParserInterpreter.java @ 594cf95e](https://github.com/antlr/antlr4/blob/594cf95e5460435c7521e80618666741e33e4d91/runtime/Java/src/org/antlr/v4/runtime/ParserInterpreter.java); licença [BSD-3-Clause](https://github.com/antlr/antlr4/blob/594cf95e5460435c7521e80618666741e33e4d91/LICENSE.txt). A aplicação ou candidato de aplicação é [trinodb/trino / IrExpressionEvaluator.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/ir/optimizer/IrExpressionEvaluator.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-main/src/main/java/io/trino/sql/ir/optimizer/IrExpressionEvaluator.java#L220-L226). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Interpretar a gramática e avaliar a expressão são etapas distintas. O produto citado demonstra a avaliação das expressões delimitadas pelo seu IR, não qualquer linguagem arbitrária.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#interpreter). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Iterator
+
+O identificador canônico é `iterator`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O iterador dos chunks XOR Prometheus expõe Next e At para percorrer as amostras comprimidas sem expor a representação interna ao chamador.
+
+A base de estudo é [golang/go / iter.go @ 45c2e356](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/src/iter/iter.go); licença [BSD-3-Clause](https://github.com/golang/go/blob/45c2e356255fba62e03b03d02897e58509ab7ed2/LICENSE). A aplicação ou candidato de aplicação é [prometheus/prometheus / xor.go @ 6e69e843](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/tsdb/chunkenc/xor.go); licença [Apache-2.0](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/prometheus/prometheus/blob/6e69e843b38d22ded60a13e0163f6326136f59fa/tsdb/chunkenc/xor.go#L101-L107). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O contrato preserva o percurso e os erros. Ele não torna os dados imutáveis nem garante que qualquer iterador aceite mudança concorrente.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#iterator). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Mediator
+
+O identificador canônico é `mediator`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+CommandService recebe o identificador de comando e executa o handler registrado, conservando a mediação entre quem pede a ação e quem a implementa. MediatR é uma base alternativa de despacho mediado.
+
+A base de estudo é [LuckyPennySoftware/MediatR / Mediator.cs @ fb309026](https://github.com/LuckyPennySoftware/MediatR/blob/fb309026775ef953a64fb5339d074426c1ad2c37/src/MediatR/Mediator.cs); licença [Apache-2.0](https://github.com/LuckyPennySoftware/MediatR/blob/fb309026775ef953a64fb5339d074426c1ad2c37/LICENSE). A aplicação ou candidato de aplicação é [microsoft/vscode / commandService.ts @ 5bed87aa](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/services/commands/common/commandService.ts); licença [MIT](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/services/commands/common/commandService.ts#L20-L26). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O recorte é a mediação de comandos no editor. A referência não diz que VS Code usa MediatR nem transforma toda publicação de evento em Mediator.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#mediator). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Memento
+
+O identificador canônico é `memento`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O editor VS Code salva sua posição e seleção em um estado de apresentação e aceita esse estado para restaurar a visão. A máquina XState fornece a operação de snapshot persistido para comparar o contrato de capturar e restaurar.
+
+A base de estudo é [statelyai/xstate / StateMachine.ts @ 858273e5](https://github.com/statelyai/xstate/blob/858273e52d10de3661fa84188b93f6b6e2cf3eab/packages/core/src/StateMachine.ts); licença [MIT](https://github.com/statelyai/xstate/blob/858273e52d10de3661fa84188b93f6b6e2cf3eab/LICENSE). A aplicação ou candidato de aplicação é [microsoft/vscode / editor.ts @ 5bed87aa](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/browser/parts/editor/editor.ts); licença [MIT](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/LICENSE.txt); [microsoft/vscode / codeEditorWidget.ts @ 5bed87aa](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/editor/browser/widget/codeEditor/codeEditorWidget.ts); licença [MIT](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/microsoft/vscode/blob/5bed87aa91125b32d112d47a5594f500a88916bb/src/vs/workbench/browser/parts/editor/editor.ts#L148-L154). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+O estado conserva a visão do editor; ele não é um backup do arquivo nem o log de undo das alterações do documento.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#memento). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Observer
+
+O identificador canônico é `observer`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Jellyfin mantém consumidores de eventos e os invoca quando o evento correspondente é publicado.
+
+A base de estudo é [python/cpython / __init__.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/logging/__init__.py); licença [Python-2.0](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [jellyfin/jellyfin / EventManager.cs @ aec42b34](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Jellyfin.Server.Implementations/Events/EventManager.cs); licença [GPL-2.0](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/Jellyfin.Server.Implementations/Events/EventManager.cs#L38-L44). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#observer). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Prototype
+
+O identificador canônico é `prototype`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Airflow copia operadores para construir variantes sem reconstruir toda a configuração inicial.
+
+A base de estudo é [python/cpython / copy.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/copy.py); licença [Python-2.0](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/airflow / operator.py @ 42945d62](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/task-sdk/src/airflow/sdk/bases/operator.py); licença [Apache-2.0](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/airflow/blob/42945d62b1f6ecbb8255b306c9becf7c2900dfef/task-sdk/src/airflow/sdk/bases/operator.py#L138-L144). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#prototype). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Singleton
+
+O identificador canônico é `singleton`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O módulo Superset monta extensões compartilhadas para a aplicação, como cache e configuração.
+
+A base de estudo é [python/cpython / __init__.py @ a6b4aa68](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/Lib/logging/__init__.py); licença [Python-2.0](https://github.com/python/cpython/blob/a6b4aa687cd9f8f95e3b940e6314ac8f2a85fbbb/LICENSE). A aplicação ou candidato de aplicação é [apache/superset / __init__.py @ 54d2421d](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/extensions/__init__.py); licença [Apache-2.0](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/superset/blob/54d2421ded3572dc2ae328b7d4fd698acec48c11/superset/extensions/__init__.py#L146-L152). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Uma variável global de módulo não prova unicidade entre processos. A fronteira é a instância carregada em um processo Python.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#singleton). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## State
+
+O identificador canônico é `state`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O NameNode guarda um campo HAState que pode conter ActiveState ou StandbyState. O contexto encaminha checkOperation para o objeto atual. ActiveState aceita operações, enquanto StandbyState recusa as operações que não passam pelas condições de leitura permitida. Ao trocar de estado, HAState executa a saída do objeto atual, atualiza o objeto guardado pelo contexto e chama a entrada do próximo objeto. O comportamento muda pela delegação ao mesmo contrato abstrato.
+
+A base de estudo é [apache/hadoop / HAState.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/HAState.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/hadoop / NameNode.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt); [apache/hadoop / ActiveState.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/ActiveState.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt); [apache/hadoop / StandbyState.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/ha/StandbyState.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt); [apache/hadoop / FSNamesystem.java @ 6f3d71bc](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/FSNamesystem.java); licença [Apache-2.0](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/LICENSE.txt).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/server/namenode/NameNode.java#L452-L464). O produto mantém os objetos concretos, delega a troca e encaminha operações ao estado atual.
+
+A interpretação GoF vale para o subsistema de alta disponibilidade do NameNode. As fontes chamam HAState de base para state machine; não se atribui ao projeto uma declaração textual de adesão ao catálogo GoF. StandbyState também representa observer mediante uma flag; o exemplo didático deve se limitar a ativo e standby e preservar a exceção de leituras obsoletas permitidas.
+
+A decisão pública que sustenta esta leitura está na [fonte do responsável pelo produto](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/build/source/hadoop-hdfs-project/hadoop-hdfs/target/api/org/apache/hadoop/hdfs/server/namenode/ha/HAState.html). Contexto primário de suporte.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#state). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Strategy
+
+O identificador canônico é `strategy`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+MergeContent escolhe uma estratégia de união conforme a configuração. O contrato Camel permite comparar estratégias que substituem o algoritmo.
+
+A base de estudo é [apache/camel / AggregationStrategy.java @ cd2ce899](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/core/camel-api/src/main/java/org/apache/camel/AggregationStrategy.java); licença [Apache-2.0](https://github.com/apache/camel/blob/cd2ce899764e3c482bdebfc1695e971afd2a962c/LICENSE.txt). A aplicação ou candidato de aplicação é [apache/nifi / MergeContent.java @ 9e6c1889](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/MergeContent.java); licença [Apache-2.0](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/apache/nifi/blob/9e6c18893f1b1df713dac55d98c2b2944d235844/nifi-extension-bundles/nifi-standard-bundle/nifi-standard-processors/src/main/java/org/apache/nifi/processors/standard/MergeContent.java#L214-L220). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+A leitura prova o mecanismo no código citado. Ela não prova execução, implantação no MakersHub nem superioridade sobre outras alternativas.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#strategy). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Template Method
+
+O identificador canônico é `template-method`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+Um método de template organiza uma sequência comum e chama etapas que uma subclasse pode especializar. No Spring, refresh prepara o contexto e o bean factory, chama o hook postProcessBeanFactory e continua com os processadores, os listeners e a inicialização dos objetos. A subclasse web implementa esse hook para registrar recursos do ambiente servlet. No Jellyfin, o fluxo comum de configuração chama a propriedade virtual ConfigurationFileName ao montar o caminho e chama SaveConfiguration durante a atualização ou a criação da configuração padrão.
+
+A base de estudo é [spring-projects/spring-framework / AbstractApplicationContext.java @ 4dea36c5](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java); licença [Apache-2.0](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt); [spring-projects/spring-framework / AbstractRefreshableWebApplicationContext.java @ 4dea36c5](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/spring-web/src/main/java/org/springframework/web/context/support/AbstractRefreshableWebApplicationContext.java); licença [Apache-2.0](https://github.com/spring-projects/spring-framework/blob/4dea36c5872b3ad9ac9357a9cd8a077264f88a39/LICENSE.txt). A aplicação ou candidato de aplicação é [jellyfin/jellyfin / BasePluginOfT.cs @ aec42b34](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs); licença [GPL-2.0](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/jellyfin/jellyfin/blob/aec42b345e1a7da25ee5492183f12209338df688/MediaBrowser.Common/Plugins/BasePluginOfT.cs#L102-L118). common configuration getter invokes loader
+
+Spring e Jellyfin são exemplos independentes; não há afirmação de que o Jellyfin use Spring. A prova do padrão está na sequência comum chamando hooks efetivos, e não no nome da classe ou na presença isolada de um método virtual. O recorte do Jellyfin demonstra os pontos de extensão e suas chamadas, sem atribuir a um plugin específico uma implementação que não foi citada. Ele não demonstra Factory Method nem Abstract Factory.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#template-method). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+## Visitor
+
+O identificador canônico é `visitor`. **A revisão independente aceitou este recorte delimitado.** O mecanismo e os limites abaixo foram conferidos; as observações da revisão continuam nos recibos vinculados ao item.
+
+O AST Trino expõe visita dos nós que compõem a árvore sintática. JavaParser fornece uma base alternativa de visitor.
+
+A base de estudo é [javaparser/javaparser / GenericVisitorAdapter.java @ c4fb5365](https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/javaparser-core/src/main/java/com/github/javaparser/ast/visitor/GenericVisitorAdapter.java); licença [NOASSERTION](https://github.com/javaparser/javaparser/blob/c4fb5365836e8c5a579687c9a78251059d489d47/LICENSE). A aplicação ou candidato de aplicação é [trinodb/trino / AstVisitor.java @ 5706548d](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/AstVisitor.java); licença [Apache-2.0](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/LICENSE).
+
+A orientação pública selecionada é [wshobson/agents / SKILL.md @ 46891e7e](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/plugins/python-development/skills/python-design-patterns/SKILL.md); licença [MIT](https://github.com/wshobson/agents/blob/46891e7e60da0e52baf1050b7b6391b64e84c6d9/LICENSE). Seu pack tinha **40776 estrelas** na consulta `2026-10-15T01:26:22.222353Z`. Ele ocupa a primeira posição por estrelas entre as 2 candidatas de assunto selecionadas para este item; esse recorte não é um ranking de todas as skills existentes.
+
+Para conferir o mecanismo no produto, comece por [este trecho do código](https://github.com/trinodb/trino/blob/5706548dade9b1dc81144af6850c5dde9a356713/core/trino-parser/src/main/java/io/trino/sql/tree/AstVisitor.java#L35-L41). O localizador textual ajuda a encontrar o fluxo; ele não substitui a leitura do mecanismo e de seus limites.
+
+Árvore, visitor, iterator e interpreter são responsabilidades diferentes. O AST prova composição e visita; interpretação e iteração devem apontar ao executor e ao percurso correspondentes.
+
+No curso, [abra o caso aplicado](/jornadas/order-boundaries/) e [consulte a ação e o probe deste conceito](/jornadas/order-boundaries/conceitos/#visitor). A prática local ensina o recorte declarado; ela não substitui o código OSS nem comprova uma implantação na nossa stack.
+
+Volte à [matriz completa da curadoria](/referencia/curadoria/).

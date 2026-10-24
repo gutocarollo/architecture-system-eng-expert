@@ -1,0 +1,2034 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: a fila cresce durante uma dependência lenta
+
+Este mapa conecta os conceitos ao mesmo problema. Ana importa 120 solicitações fictícias em uma corretora. O consumidor só consegue manter 20 na fila escolhida para a prática. Ao mesmo tempo, uma mensagem inválida falha sempre. O desenho anterior cresce sem limite e repete a mensagem inválida; a versão protegida limita a entrada e separa a mensagem que já gastou três tentativas.
+
+Comece pela [jornada](/jornadas/queue-workflow/), execute o [tutorial](/tutoriais/casos/queue-workflow/) e use a [referência](/referencia/casos/queue-workflow/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/queue-workflow/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="aggregator" />
+
+## Aggregator
+
+Um agregador combina partes relacionadas quando a regra de completude permite liberar um resultado.
+
+No caso desta família, faça a seguinte observação: Roteie seis entradas pelo tipo, acrescente a conta sintética e reúna as contagens; separe os mecanismos que alteram conteúdo daqueles que alteram destino.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe route-enrich-aggregate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `route-enrich-aggregate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_untyped_batch": 6
+  },
+  "after": {
+    "trade": 3,
+    "statement": 3,
+    "enriched": 6
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="backpressure" />
+
+## Backpressure
+
+A capacidade do consumidor controla o fluxo recebido.
+
+No caso desta família, faça a seguinte observação: Ofereça seis tarefas e deixe o produtor avançar somente quando existir vaga. Confira seis conclusões, nenhuma recusa e buffer máximo de duas.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe demand-backpressure
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `demand-backpressure`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "maximum_buffer": 6,
+    "processed": 6
+  },
+  "after": {
+    "maximum_buffer": 2,
+    "processed": 6,
+    "rejected": 0
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="batch-processing" />
+
+## Batch Processing
+
+O processamento em lote trabalha sobre uma entrada finita identificada e termina uma execução para esse conjunto.
+
+No caso desta família, faça a seguinte observação: Processe os três eventos como um lote completo e depois um por vez. Observe quando cada modelo produz uma posição e confira o mesmo total final.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe batch-stream-emission
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `batch-stream-emission`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "batch_outputs_at_end": [
+      130
+    ]
+  },
+  "after": {
+    "incremental_outputs": [
+      100,
+      80,
+      130
+    ],
+    "final_position": 130,
+    "updates_before_last_event": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The finite input demonstrates emission semantics rather than an unbounded engine, watermark or event-time guarantee.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="bulkhead" />
+
+## Bulkhead
+
+Separa ou reserva recursos para conter a saturação de uma classe de trabalho.
+
+No caso desta família, faça a seguinte observação: Ocupe as duas vagas de cotações e tente executar uma ordem. Compare o pool global com os pools independentes de cotações e ordens.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe bulkhead-independent-pools
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `bulkhead-independent-pools`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order_allowed_while_quotes_fill_global_pool": false
+  },
+  "after": {
+    "order_allowed_with_separate_pool": true,
+    "quote_capacity": 2,
+    "order_capacity": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The actual semaphore admissions are local. Memory, CPU and cross-process resource isolation require additional budgets.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="chaos-engineering" />
+
+## Chaos Engineering
+
+Aplica uma falha controlada para investigar uma hipótese sobre o sistema e observar recuperação.
+
+No caso desta família, faça a seguinte observação: Declare uma ordem e um efeito como estado esperado, injete a perda da primeira entrega e execute a recuperação com repetição. Confira a violação inicial e a recuperação sem débito duplicado.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe chaos-delivery-experiment
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `chaos-delivery-experiment`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "effects_after_injected_drop": 0
+  },
+  "after": {
+    "injected_faults": [
+      "delivery_dropped"
+    ],
+    "orders": 1,
+    "effects_after_recovery": 1,
+    "debit": 100,
+    "steady_invariant_restored": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The fault is injected only in a controlled local model, not in a production system or distributed chaos platform.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="choreography" />
+
+## Choreography
+
+Na coreografia, participantes reagem a eventos contratados e publicam os próximos fatos sem um coordenador conhecer cada consequência.
+
+No caso desta família, faça a seguinte observação: Publique order-placed e deixe cada participante reagir ao fato que conhece. Observe funds-reserved, allocation-failed e compensated recomporem o saldo sem um coordenador que chame todos os passos.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe choreographed-compensation
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `choreographed-compensation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "debit_without_reaction_to_failed_allocation": 900
+  },
+  "after": {
+    "final_balance": 1000,
+    "event_trace": [
+      "order-placed",
+      "funds-reserved",
+      "allocation-failed",
+      "compensated"
+    ],
+    "top_level_step_coordinator": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="choreography-saga" />
+
+## Choreography Saga
+
+Participantes de uma Saga reagem a eventos e decidem localmente os próximos passos.
+
+No caso desta família, faça a seguinte observação: Publique order-placed e deixe cada participante reagir ao fato que conhece. Observe funds-reserved, allocation-failed e compensated recomporem o saldo sem um coordenador que chame todos os passos.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe choreographed-compensation
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `choreographed-compensation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "debit_without_reaction_to_failed_allocation": 900
+  },
+  "after": {
+    "final_balance": 1000,
+    "event_trace": [
+      "order-placed",
+      "funds-reserved",
+      "allocation-failed",
+      "compensated"
+    ],
+    "top_level_step_coordinator": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography.
+
+A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="circuit-breaker" />
+
+## Circuit Breaker
+
+Recusa novas chamadas conforme uma política de falha e recuperação.
+
+No caso desta família, faça a seguinte observação: Observe as esperas 1, 2 e 4, o jitter fixo e a abertura do circuito após três falhas; diferencie tempo de espera, admissão e isolamento.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-budget
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-budget`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "attempt_times": [
+      0,
+      0,
+      0
+    ],
+    "final": "overload"
+  },
+  "after": {
+    "delays": [
+      1,
+      2,
+      4
+    ],
+    "jittered_delays": [
+      1.1,
+      2.2,
+      4.3
+    ],
+    "attempts": 3,
+    "final": "open-circuit"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Circuit Breaker; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="competing-consumers" />
+
+## Competing Consumers
+
+Consumidores da mesma fila ou grupo dividem trabalho por tentativa.
+
+No caso desta família, faça a seguinte observação: Compare executar toda a lista em cada worker com atribuir cada identidade uma vez e publicar também para a assinatura de auditoria.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe consumer-topology
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `consumer-topology`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "workers_each_execute_all": 6
+  },
+  "after": {
+    "shared_queue_effects": 2,
+    "worker_effects": [
+      1,
+      1
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Competing Consumers; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="content-based-router" />
+
+## Content-Based Router
+
+A regra de destino examina campos da mensagem.
+
+No caso desta família, faça a seguinte observação: Roteie seis entradas pelo tipo, acrescente a conta sintética e reúna as contagens; separe os mecanismos que alteram conteúdo daqueles que alteram destino.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe route-enrich-aggregate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `route-enrich-aggregate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_untyped_batch": 6
+  },
+  "after": {
+    "trade": 3,
+    "statement": 3,
+    "enriched": 6
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="dag" />
+
+## DAG
+
+Um grafo dirigido acíclico representa dependências entre unidades de trabalho e impede ciclos dentro desse grafo.
+
+No caso desta família, faça a seguinte observação: Tente publicar antes da transformação e acompanhe o escalonamento extract, transform e publish pelas dependências.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe dag-dependencies
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `dag-dependencies`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order": [
+      "publish",
+      "extract",
+      "transform"
+    ]
+  },
+  "after": {
+    "order": [
+      "extract",
+      "transform",
+      "publish"
+    ]
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="dead-letter-queue" />
+
+## Dead Letter Queue
+
+Uma DLQ isola trabalho que saiu da recuperação automática comum.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="deadline-propagation" />
+
+## Deadline Propagation
+
+Transporta o prazo ou orçamento restante da operação entre etapas.
+
+No caso desta família, faça a seguinte observação: No instante 2, propague o deadline 5 do pai. Confira que o filho recebe somente três unidades, em vez de abrir um prazo novo de dez.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe deadline-budget
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `deadline-budget`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "child_budget": 10,
+    "overruns_parent": true
+  },
+  "after": {
+    "child_budget": 3,
+    "overruns_parent": false
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Deadline Propagation; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="delayed-queue" />
+
+## Delayed Queue
+
+O mecanismo adia a disponibilidade de uma mensagem até um prazo.
+
+No caso desta família, faça a seguinte observação: Tente despachar no relógio 3 uma tarefa que só pode sair no relógio 5. Confira a espera e o instante de elegibilidade.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe delayed-queue
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `delayed-queue`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "dispatched_before_due": true
+  },
+  "after": {
+    "dispatched_before_due": false,
+    "dispatch_time": 5
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Delayed Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="event-notification" />
+
+## Event Notification
+
+O evento informa que algo aconteceu e deixa os detalhes para uma consulta.
+
+No caso desta família, faça a seguinte observação: Compare a notificação que contém só o ID com o evento que carrega amount e status. Conte uma consulta à fonte no primeiro caso e zero no segundo.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe event-payload
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `event-payload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "source_lookups": 1,
+    "amount": 100
+  },
+  "after": {
+    "source_lookups": 0,
+    "amount": 100,
+    "status": "accepted"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event Notification; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="event-streaming" />
+
+## Event Streaming
+
+Um log retido permite que consumidores acompanhem posições e retomem a leitura.
+
+No caso desta família, faça a seguinte observação: Consuma o offset 0, interrompa e retome somente depois do checkpoint. Confira offsets 1 e 2 e a posição 130, sem repetir o crédito inicial.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe stream-offset-resume
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `stream-offset-resume`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "replay_all_after_first_effect": 230
+  },
+  "after": {
+    "resume_offsets": [
+      1,
+      2
+    ],
+    "position_after_resume": 130,
+    "last_offset": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The log is a local immutable fixture. Retention, partitioned offsets, broker transactions and durable checkpoint atomicity are separate concerns.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e025) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="event-carried-state-transfer" />
+
+## Event-Carried State Transfer
+
+O evento transporta dados que o consumidor pode aplicar sem buscar cada atributo na origem.
+
+No caso desta família, faça a seguinte observação: Compare a notificação que contém só o ID com o evento que carrega amount e status. Conte uma consulta à fonte no primeiro caso e zero no segundo.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe event-payload
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `event-payload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "source_lookups": 1,
+    "amount": 100
+  },
+  "after": {
+    "source_lookups": 0,
+    "amount": 100,
+    "status": "accepted"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event-Carried State Transfer; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e024) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="exponential-backoff" />
+
+## Exponential Backoff
+
+Aumenta a espera segundo uma progressão exponencial, normalmente com teto.
+
+No caso desta família, faça a seguinte observação: Observe as esperas 1, 2 e 4, o jitter fixo e a abertura do circuito após três falhas; diferencie tempo de espera, admissão e isolamento.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-budget
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-budget`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "attempt_times": [
+      0,
+      0,
+      0
+    ],
+    "final": "overload"
+  },
+  "after": {
+    "delays": [
+      1,
+      2,
+      4
+    ],
+    "jittered_delays": [
+      1.1,
+      2.2,
+      4.3
+    ],
+    "attempts": 3,
+    "final": "open-circuit"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Exponential Backoff; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="fail-fast" />
+
+## Fail Fast
+
+Recusa cedo uma execução que já não pode cumprir seu contrato.
+
+No caso desta família, faça a seguinte observação: Observe as esperas 1, 2 e 4, o jitter fixo e a abertura do circuito após três falhas; diferencie tempo de espera, admissão e isolamento.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-budget
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-budget`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "attempt_times": [
+      0,
+      0,
+      0
+    ],
+    "final": "overload"
+  },
+  "after": {
+    "delays": [
+      1,
+      2,
+      4
+    ],
+    "jittered_delays": [
+      1.1,
+      2.2,
+      4.3
+    ],
+    "attempts": 3,
+    "final": "open-circuit"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Fail Fast; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="fallback" />
+
+## Fallback
+
+Devolve uma alternativa permitida quando o caminho principal falha.
+
+No caso desta família, faça a seguinte observação: Provoque o timeout da fonte atual. Confira que a consulta limitada usa o último valor conhecido, sinaliza que ele não é atual e desabilita operações que exigiriam a informação fresca.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe fallback-limited-function
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `fallback-limited-function`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "dependency_failure_result": "error"
+  },
+  "after": {
+    "response": {
+      "balance": 1000,
+      "fresh": false,
+      "writes_enabled": false
+    },
+    "source": "last-known-cache"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The cached value is synthetic; the acceptable age and permitted actions need the actual product contract.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="fan-in" />
+
+## Fan-in
+
+Fan-in reúne entradas de vários fluxos em um destino.
+
+No caso desta família, faça a seguinte observação: Reúna o fluxo de ordens e o de liquidações preservando a origem de cada mensagem. Confira três entradas e as duas contagens por fonte.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe fanin-source-correlation
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `fanin-source-correlation`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "single_source_messages": 2
+  },
+  "after": {
+    "merged_messages": 3,
+    "source_counts": {
+      "orders": 2,
+      "settlements": 1
+    },
+    "identities": [
+      "ORDER-1",
+      "ORDER-2",
+      "SETTLEMENT-1"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The finite merge does not order independent clocks or wait for a distributed completeness barrier.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="fan-out" />
+
+## Fan-out
+
+Uma ocorrência é distribuída para vários destinos independentes.
+
+No caso desta família, faça a seguinte observação: Publique dois eventos para auditoria e risco. Confira dois eventos em cada assinatura e quatro entregas totais, sem dividir os eventos entre as assinaturas.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe subscription-fanout
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `subscription-fanout`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_shared_queue_total_deliveries": 2
+  },
+  "after": {
+    "audit": [
+      "EVENT-1",
+      "EVENT-2"
+    ],
+    "risk": [
+      "EVENT-1",
+      "EVENT-2"
+    ],
+    "total_deliveries": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Fan-out; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="finite-state-machine" />
+
+## Finite State Machine
+
+Uma máquina de estados finitos usa um conjunto finito de estados e de transições.
+
+No caso desta família, faça a seguinte observação: Receba settled antes de reserved e accepted, reconstrua a ordem conhecida e confira cada transição permitida.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe resequence-state
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `resequence-state`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "states": [
+      "settled",
+      "reserved",
+      "accepted"
+    ],
+    "invalid_first": "settled"
+  },
+  "after": {
+    "states": [
+      "accepted",
+      "reserved",
+      "settled"
+    ],
+    "final": "settled",
+    "invalid_first_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Finite State Machine; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="fire-and-forget" />
+
+## Fire-and-Forget
+
+O chamador envia sem aguardar a resposta de negócio.
+
+No caso desta família, faça a seguinte observação: Retorne ao chamador depois de emitir a intenção e provoque a falha do worker mais tarde. Diferencie a confirmação da chamada da conclusão do trabalho.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe fire-forget-return
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `fire-forget-return`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "caller_waiting_for_failed_handler": true
+  },
+  "after": {
+    "caller_result": "accepted",
+    "trace": [
+      "caller-returned",
+      "worker-failed"
+    ],
+    "caller_completed_before_failure": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The outgoing queue is not durable and no delivery guarantee is claimed.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="graceful-degradation" />
+
+## Graceful Degradation
+
+Mantém parte útil do serviço e explicita o que está incompleto.
+
+No caso desta família, faça a seguinte observação: Provoque o timeout da fonte atual. Confira que a consulta limitada usa o último valor conhecido, sinaliza que ele não é atual e desabilita operações que exigiriam a informação fresca.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe fallback-limited-function
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `fallback-limited-function`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "dependency_failure_result": "error"
+  },
+  "after": {
+    "response": {
+      "balance": 1000,
+      "fresh": false,
+      "writes_enabled": false
+    },
+    "source": "last-known-cache"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The cached value is synthetic; the acceptable age and permitted actions need the actual product contract.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="integration-event" />
+
+## Integration Event
+
+Um integration event publica um contrato para consumidores de outro contexto.
+
+No caso desta família, faça a seguinte observação: Compare a notificação que contém só o ID com o evento que carrega amount e status. Conte uma consulta à fonte no primeiro caso e zero no segundo.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe event-payload
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `event-payload`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "source_lookups": 1,
+    "amount": 100
+  },
+  "after": {
+    "source_lookups": 0,
+    "amount": 100,
+    "status": "accepted"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Integration Event; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="jitter" />
+
+## Jitter
+
+Varia a espera para reduzir retorno simultâneo de clientes.
+
+No caso desta família, faça a seguinte observação: Observe as esperas 1, 2 e 4, o jitter fixo e a abertura do circuito após três falhas; diferencie tempo de espera, admissão e isolamento.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-budget
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-budget`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "attempt_times": [
+      0,
+      0,
+      0
+    ],
+    "final": "overload"
+  },
+  "after": {
+    "delays": [
+      1,
+      2,
+      4
+    ],
+    "jittered_delays": [
+      1.1,
+      2.2,
+      4.3
+    ],
+    "attempts": 3,
+    "final": "open-circuit"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Jitter; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="job-queue" />
+
+## Job Queue
+
+Uma fila de trabalho mantém unidades pendentes até que um consumidor possa executá-las.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Job Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="kappa-architecture" />
+
+## Kappa Architecture
+
+Esse estilo mantém uma lógica de processamento contínuo e busca reconstruir resultados pelo replay de um log de eventos preservado.
+
+No caso desta família, faça a seguinte observação: Corrija a interpretação do débito e reexecute o mesmo processador sobre o log. Acrescente um evento e confira que a mesma lógica atende reconstrução e continuidade.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe kappa-one-log-replay
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `kappa-one-log-replay`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "buggy_projection_before_replay": 170
+  },
+  "after": {
+    "replayed_position": 130,
+    "position_after_new_event": 140,
+    "processing_implementations": 1,
+    "log_offsets": [
+      0,
+      1,
+      2,
+      3
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. Retention, reprocessing isolation and operational cutover of a new stream version are not implemented.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="lambda-architecture" />
+
+## Lambda Architecture
+
+Esse estilo mantém um caminho batch para reconstrução completa e outro stream para resultados rápidos, reunindo suas visões para consumo.
+
+No caso desta família, faça a seguinte observação: Defina o cutoff no offset 1, mantenha o lote até esse ponto e a visão rápida somente depois dele. Compare a soma sobreposta incorreta com 80 + 50 = 130.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe lambda-disjoint-views
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `lambda-disjoint-views`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "batch_plus_overlapping_all_stream": 210
+  },
+  "after": {
+    "batch_cutoff_offset": 1,
+    "batch_value": 80,
+    "speed_after_cutoff": 50,
+    "merged_position": 130
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The example models the Lambda view boundary, without two deployed engines, backfill orchestration or full event-time handling.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="load-shedding" />
+
+## Load Shedding
+
+Recusa ou descarta carga para preservar recursos.
+
+No caso desta família, faça a seguinte observação: Ofereça 120 solicitações a uma capacidade de 20 e confira os 100 itens recusados antes de ocuparem o buffer.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe admission
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `admission`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "buffered": 120,
+    "rejected": 0
+  },
+  "after": {
+    "buffered": 20,
+    "rejected": 100
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Load Shedding; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="mapreduce" />
+
+## MapReduce
+
+O processamento mapeia entradas para pares de chave e valor, reúne valores da mesma chave e aplica uma redução.
+
+No caso desta família, faça a seguinte observação: Mapeie as ordens para pares de tipo e valor, agrupe pela chave e reduza cada grupo. Confira buy=150 e sell=20.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe mapreduce-grouping
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `mapreduce-grouping`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "ungrouped_partial_values": [
+      100,
+      20,
+      50
+    ]
+  },
+  "after": {
+    "grouped_totals": {
+      "buy": 150,
+      "sell": 20
+    },
+    "mapped_records": 3
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. This is local grouping, not a distributed shuffle, combiner or fault-tolerant MapReduce runtime.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="message-enricher" />
+
+## Message Enricher
+
+Um enriquecedor acrescenta contexto vindo de uma fonte definida.
+
+No caso desta família, faça a seguinte observação: Roteie seis entradas pelo tipo, acrescente a conta sintética e reúna as contagens; separe os mecanismos que alteram conteúdo daqueles que alteram destino.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe route-enrich-aggregate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `route-enrich-aggregate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_untyped_batch": 6
+  },
+  "after": {
+    "trade": 3,
+    "statement": 3,
+    "enriched": 6
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="message-filter" />
+
+## Message Filter
+
+Um filtro aceita ou descarta mensagens conforme um predicado.
+
+No caso desta família, faça a seguinte observação: Envie os valores 100, −20 e 50. Observe a retirada da entrada negativa e confira duas mensagens válidas, que somam 150.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe message-filter
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `message-filter`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "accepted": 3,
+    "invalid_accepted": 1
+  },
+  "after": {
+    "accepted": 2,
+    "invalid_accepted": 0,
+    "valid_amount": 150
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="message-queue" />
+
+## Message Queue
+
+Uma fila mantém unidades de trabalho para consumidores.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Message Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="message-router" />
+
+## Message Router
+
+Um roteador escolhe o canal de destino segundo uma regra.
+
+No caso desta família, faça a seguinte observação: Roteie seis entradas pelo tipo, acrescente a conta sintética e reúna as contagens; separe os mecanismos que alteram conteúdo daqueles que alteram destino.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe route-enrich-aggregate
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `route-enrich-aggregate`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_untyped_batch": 6
+  },
+  "after": {
+    "trade": 3,
+    "statement": 3,
+    "enriched": 6
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Message Router; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="orchestrator" />
+
+## Orchestrator
+
+Um coordenador decide quando cada passo pode avançar e acompanha seus resultados.
+
+No caso desta família, faça a seguinte observação: Tente publicar antes da transformação e acompanhe o escalonamento extract, transform e publish pelas dependências.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe dag-dependencies
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `dag-dependencies`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order": [
+      "publish",
+      "extract",
+      "transform"
+    ]
+  },
+  "after": {
+    "order": [
+      "extract",
+      "transform",
+      "publish"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Orchestrator; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="pipe-and-filter" />
+
+## Pipe and Filter
+
+Pipe and Filter organiza transformações em etapas com contratos de entrada e saída.
+
+No caso desta família, faça a seguinte observação: Tente publicar antes da transformação e acompanhe o escalonamento extract, transform e publish pelas dependências.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe dag-dependencies
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `dag-dependencies`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order": [
+      "publish",
+      "extract",
+      "transform"
+    ]
+  },
+  "after": {
+    "order": [
+      "extract",
+      "transform",
+      "publish"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Pipe and Filter; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="pipeline" />
+
+## Pipeline
+
+Um pipeline leva entradas por etapas até uma saída definida, como extração, transformação, validação e carga.
+
+No caso desta família, faça a seguinte observação: Tente publicar antes da transformação e acompanhe o escalonamento extract, transform e publish pelas dependências.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe dag-dependencies
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `dag-dependencies`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "order": [
+      "publish",
+      "extract",
+      "transform"
+    ]
+  },
+  "after": {
+    "order": [
+      "extract",
+      "transform",
+      "publish"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Pipeline; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="poison-message-handling" />
+
+## Poison Message Handling
+
+O tratamento de poison messages limita falhas repetidas e encaminha ou remove a mensagem segundo a política terminal.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="priority-queue" />
+
+## Priority Queue
+
+Uma fila favorece mensagens conforme prioridades e política de agendamento.
+
+No caso desta família, faça a seguinte observação: Insira standard, urgent e low nessa ordem; acompanhe o heap selecionando urgent, standard e low pelas prioridades.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe priority-queue
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `priority-queue`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "processing_order": [
+      "standard",
+      "urgent",
+      "low"
+    ]
+  },
+  "after": {
+    "processing_order": [
+      "urgent",
+      "standard",
+      "low"
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Priority Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="producer-consumer" />
+
+## Producer/Consumer
+
+O produtor disponibiliza uma unidade de trabalho e o consumidor aplica seu processamento.
+
+No caso desta família, faça a seguinte observação: Compare executar toda a lista em cada worker com atribuir cada identidade uma vez e publicar também para a assinatura de auditoria.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe consumer-topology
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `consumer-topology`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "workers_each_execute_all": 6
+  },
+  "after": {
+    "shared_queue_effects": 2,
+    "worker_effects": [
+      1,
+      1
+    ]
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Producer/Consumer; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="publish-subscribe" />
+
+## Publish/Subscribe
+
+Uma publicação alcança assinaturas independentes.
+
+No caso desta família, faça a seguinte observação: Publique dois eventos para auditoria e risco. Confira dois eventos em cada assinatura e quatro entregas totais, sem dividir os eventos entre as assinaturas.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe subscription-fanout
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `subscription-fanout`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "one_shared_queue_total_deliveries": 2
+  },
+  "after": {
+    "audit": [
+      "EVENT-1",
+      "EVENT-2"
+    ],
+    "risk": [
+      "EVENT-1",
+      "EVENT-2"
+    ],
+    "total_deliveries": 4
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Publish/Subscribe; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="rate-limiting" />
+
+## Rate Limiting
+
+Restringe frequência por identidade e intervalo.
+
+No caso desta família, faça a seguinte observação: Ofereça três chamadas no segundo 0 e uma no segundo 1. Com limite de duas por segundo, confira três admissões e uma recusa.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe rate-window
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `rate-window`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "accepted": 4,
+    "rejected": 0
+  },
+  "after": {
+    "accepted": 3,
+    "rejected": 1,
+    "per_second_limit": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Rate Limiting; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="resequencer" />
+
+## Resequencer
+
+Um resequencer reorganiza entradas conforme uma sequência definida.
+
+No caso desta família, faça a seguinte observação: Receba settled antes de reserved e accepted, reconstrua a ordem conhecida e confira cada transição permitida.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe resequence-state
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `resequence-state`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "states": [
+      "settled",
+      "reserved",
+      "accepted"
+    ],
+    "invalid_first": "settled"
+  },
+  "after": {
+    "states": [
+      "accepted",
+      "reserved",
+      "settled"
+    ],
+    "final": "settled",
+    "invalid_first_rejected": true
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="retry" />
+
+## Retry
+
+Repete uma tentativa sob critérios e orçamento definidos.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Retry; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="retry-queue" />
+
+## Retry Queue
+
+Uma fila de retry disponibiliza novamente trabalho falho após a espera definida.
+
+No caso desta família, faça a seguinte observação: Acompanhe a mensagem poison até a terceira tentativa e confira sua retirada da fila normal sem perder o item válido.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe retry-dlq
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `retry-dlq`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "poison_attempts": 6,
+    "dead_letters": 0
+  },
+  "after": {
+    "poison_attempts": 3,
+    "dead_letters": 1,
+    "delivered": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Retry Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="self-healing" />
+
+## Self-Healing
+
+Tenta recuperar automaticamente um componente, por reconexão, reinício ou substituição segundo política.
+
+No caso desta família, faça a seguinte observação: Pare o serviço lógico e execute a supervisão. Confira que ela cria uma nova geração e que a leitura de saúde volta a responder.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe watchdog-restart
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `watchdog-restart`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "healthy": false,
+    "generation": 1
+  },
+  "after": {
+    "healthy_after_restart": true,
+    "generation": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="splitter" />
+
+## Splitter
+
+Um splitter divide uma mensagem em partes identificadas.
+
+No caso desta família, faça a seguinte observação: Envie um envelope com duas ordens; confira duas mensagens individuais, soma 150 e preservação de BATCH-1 em ambas.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe message-splitter
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `message-splitter`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "handler_items": 1,
+    "individual_orders": 0
+  },
+  "after": {
+    "handler_items": 2,
+    "individual_orders": 2,
+    "amount": 150,
+    "batch_ids": [
+      "BATCH-1"
+    ]
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="state-machine" />
+
+## State Machine
+
+Uma máquina de estados define as situações possíveis de uma operação, os eventos que permitem transições e as condições para aceitar cada transição.
+
+No caso desta família, faça a seguinte observação: Receba settled antes de reserved e accepted, reconstrua a ordem conhecida e confira cada transição permitida.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe resequence-state
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `resequence-state`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "states": [
+      "settled",
+      "reserved",
+      "accepted"
+    ],
+    "invalid_first": "settled"
+  },
+  "after": {
+    "states": [
+      "accepted",
+      "reserved",
+      "settled"
+    ],
+    "final": "settled",
+    "invalid_first_rejected": true
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a State Machine; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="stream-processing" />
+
+## Stream Processing
+
+O processamento contínuo recebe eventos ao longo do tempo e constrói resultados com políticas de janela, ordem e atraso.
+
+No caso desta família, faça a seguinte observação: Processe os três eventos como um lote completo e depois um por vez. Observe quando cada modelo produz uma posição e confira o mesmo total final.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe batch-stream-emission
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `batch-stream-emission`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "batch_outputs_at_end": [
+      130
+    ]
+  },
+  "after": {
+    "incremental_outputs": [
+      100,
+      80,
+      130
+    ],
+    "final_position": 130,
+    "updates_before_last_event": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The finite input demonstrates emission semantics rather than an unbounded engine, watermark or event-time guarantee.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="throttling" />
+
+## Throttling
+
+Reduz o ritmo de uma atividade, podendo atrasar execuções.
+
+No caso desta família, faça a seguinte observação: Ofereça três chamadas no segundo 0 e uma no segundo 1. Com limite de duas por segundo, confira três admissões e uma recusa.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe rate-window
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `rate-window`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "accepted": 4,
+    "rejected": 0
+  },
+  "after": {
+    "accepted": 3,
+    "rejected": 1,
+    "per_second_limit": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Throttling; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="timeout" />
+
+## Timeout
+
+Limita uma espera definida.
+
+No caso desta família, faça a seguinte observação: Aguarde um evento asyncio que nunca é liberado e confira que o prazo encerra a espera com TimeoutError.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe timeout-boundary
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `timeout-boundary`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "waiting_state": "pending_without_bound"
+  },
+  "after": {
+    "waiting_state": "timeout"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Timeout; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="watchdog" />
+
+## Watchdog
+
+Um supervisor observa ausência de sinal ou progresso e aciona uma reação.
+
+No caso desta família, faça a seguinte observação: Pare o serviço lógico e execute a supervisão. Confira que ela cria uma nova geração e que a leitura de saúde volta a responder.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe watchdog-restart
+```
+
+O código desta observação está em `labs/architecture/models_ops.py`. O identificador do probe é `watchdog-restart`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "healthy": false,
+    "generation": 1
+  },
+  "after": {
+    "healthy_after_restart": true,
+    "generation": 2
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.
+
+A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+
+<span id="workflow-engine" />
+
+## Workflow Engine
+
+Um motor de workflow interpreta um contrato de passos e administra sua execução, dependências e progresso.
+
+No caso desta família, faça a seguinte observação: Interrompa depois de persistir credited, feche a conexão e reabra o arquivo de progresso. Confira que a retomada executa a notificação e não repete o crédito já registrado.
+
+```sh
+python3 labs/architecture/financial.py queue-workflow --probe durable-workflow-resume
+```
+
+O código desta observação está em `labs/architecture/models_workflow.py`. O identificador do probe é `durable-workflow-resume`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "restart_from_beginning_credit_attempts": 2
+  },
+  "after": {
+    "phase_loaded_after_reopen": "credited",
+    "final_phase": "complete",
+    "effect_keys": [
+      "credit:ORDER-1",
+      "notify:ORDER-1"
+    ],
+    "credit_effects": 1
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. The local effects and checkpoints share SQLite transactions. External activity retries, timers, worker leasing and a full durable-workflow framework are not implemented.
+
+A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
+

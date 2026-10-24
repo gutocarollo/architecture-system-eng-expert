@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-10-24T21:06:04.111584+00:00",
+  "scope": "local static export preview",
+  "flows": [
+    "overview to explanation to tutorial to guide to reference via case navigation",
+    "keyboard Tab and Shift+Tab moved within local navigation; Enter opened tutorial",
+    "direct reference fragment reached guarantee heading",
+    "Pagefind early_ttl_seconds returned explanation, reference and guide with distinct titles and section URLs",
+    "Pagefind boundary_blocked returned reference Results and tutorial Compare output section URLs"
+  ],
+  "mobile": {
+    "css_width": 390,
+    "css_height": 844,
+    "navigation_width": 358.00347900390625,
+    "navigation_scroll_width": 357,
+    "navigation_top": 71.99652862548828,
+    "navigation_bottom": 231.26737213134768,
+    "fragment_heading_top_after_smooth_scroll": 303.8194580078125
+  },
+  "limitations": "automated browser walkthrough; no independent learner usability study"
+}

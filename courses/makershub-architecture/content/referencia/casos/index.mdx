@@ -1,0 +1,41 @@
+---
+asIndexPage: true
+title: Contratos dos casos
+diataxis: reference
+---
+
+# Contratos dos casos
+
+Cada contrato conserva a identidade da jornada, as entradas, as garantias e os limites observados. Consulte também as [jornadas por caso](/jornadas/).
+
+
+## Contratos dos percursos
+
+| Caso | Contrato para consulta |
+| --- | --- |
+| Cancelamento de uma busca compartilhada | [Entradas, garantias e limites](/referencia/casos/single-flight-cancel/) |
+| A lista continua disponível durante a renovação | [Entradas, garantias e limites](/referencia/casos/early-refresh/) |
+| A emissão continua no mesmo dia em São Paulo | [Entradas, garantias e limites](/referencia/casos/date-only/) |
+| A oportunidade existente conserva sua identidade | [Entradas, garantias e limites](/referencia/casos/opportunity-entry/) |
+| Uma ordem atravessa fronteiras sem espalhar regras | [Entradas, garantias e limites](/referencia/casos/order-boundaries/) |
+| A repetição de uma ordem produz um único efeito | [Entradas, garantias e limites](/referencia/casos/order-delivery/) |
+| Dois operadores disputam a mesma reserva | [Entradas, garantias e limites](/referencia/casos/reservation/) |
+| Uma partição separa os escritórios da corretora | [Entradas, garantias e limites](/referencia/casos/consensus/) |
+| Uma fila absorve trabalho e recupera falhas | [Entradas, garantias e limites](/referencia/casos/queue-workflow/) |
+| A consulta de posição envelhece de forma controlada | [Entradas, garantias e limites](/referencia/casos/cache-policy/) |
+| O histórico reconstrói a posição do cliente | [Entradas, garantias e limites](/referencia/casos/ledger-projection/) |
+| A posição cresce e a consulta precisa encontrar seus dados | [Entradas, garantias e limites](/referencia/casos/storage-partitions/) |
+| A corretora troca uma versão sem perder o contrato | [Entradas, garantias e limites](/referencia/casos/safe-release/) |
+| A permissão acompanha a ordem e a identidade | [Entradas, garantias e limites](/referencia/casos/access-policy/) |
+| A equipe descobre onde a ordem parou | [Entradas, garantias e limites](/referencia/casos/diagnostics/) |
+
+
+## Dois casos executados no PostgreSQL
+
+- [A comissão de R$ 100 aparece como R$ 200](/referencia/casos/query-grain-postgres/). O caso conserva o SQL histórico, o patch e o contrato de uma execução isolada.
+- [Uma única versão atual ainda pode perder uma alteração](/referencia/casos/revision-cas-postgres/). O caso conserva o SQL histórico, o patch e o contrato de uma execução isolada.
+
+
+## Uma mudança histórica do Airflow
+
+- [Uma falha de lock derruba a tarefa do Airflow](/referencia/casos/airflow-lock-retry/). Você executa a função Python com respostas externas controladas e confere quais erros recebem uma nova tentativa.

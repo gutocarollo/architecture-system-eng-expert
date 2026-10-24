@@ -1,0 +1,218 @@
+---
+title: "13. Alta disponibilidade"
+description: "Os 17 conceitos de réplicas, liderança, retomada e domínios de falha."
+diataxis: reference
+---
+
+# Alta disponibilidade
+
+Esta referência contém as 17 entradas do grupo 13. O caso **PROD** é a captura Airflow/RKE2 de **14/10/2026 entre 16:10 e 16:16 UTC**. Ela mede configuração e estado, sem ensaio de falha, rollout ou restore. Três nós Ready não comprovam três zonas nem três hosts físicos independentes. O [capítulo de disponibilidade](/explicacoes/availability/) explica a topologia, e os [recibos](/referencia/evidencias/) fixam o escopo.
+
+As bases OSS são Kubernetes/etcd e PostgreSQL/CloudNativePG, presentes no recorte **PROD**. [Leases Kubernetes](https://kubernetes.io/docs/concepts/architecture/leases/), [etcd](https://etcd.io/docs/v3.6/faq/) e [replicação PostgreSQL](https://www.postgresql.org/docs/17/warm-standby.html) documentam os mecanismos. As skills locais `backend-distributed-locking`, em `~/.codex/skills/`, e `rancher-api`/`k8s-observability-api`, em `~/.agents/skills/`, apoiam leitura e coordenação. A [curadoria](/referencia/skills-e-projetos/) distingue método e produto.
+
+Os pares específicos abaixo foram verificados em fontes primárias em 14/10/2026 e têm links fixados à revisão capturada. **APP** identifica código ou contrato de um produto OSS; **REF** identifica uma aplicação-exemplo ou configuração reproduzível. Esses rótulos não afirmam implantação na Faz. O registro de captura conserva URL, revisão, SHA-256 e os símbolos examinados.
+
+<span id="g13-e001" />
+
+## Active/Active
+
+Mais de uma instância participa ativamente do atendimento. Na captura, o Service da API Airflow tinha dois endpoints Ready em nós distintos, exemplo de réplicas ativas de aplicação. O ganho é capacidade e alternativas para encaminhamento; o custo é manter estado compartilhado e compatibilidade. Isso não prova banco multi-writer ou disponibilidade de todo o caminho. Kubernetes é a base **PROD**; [topologia](/explicacoes/availability/).
+
+**Par de base e aplicação.** A base é [Kubernetes](https://github.com/kubernetes/kubernetes). O **APP Airflow** [configura réplicas do Deployment da API](https://github.com/apache/airflow/blob/df5cf9ecb567ea5752224d8376201c2c3046b64a/chart/templates/api-server/api-server-deployment.yaml#L54-L61), e a captura S6 liga duas réplicas Ready aos dois endpoints do Service. O par framework/aplicação é concreto para réplicas ativas de API. Ele não descreve um banco multi-writer nem certifica todas as dependências.
+
+{/* current-curation:active-active */}
+
+A [curadoria de Active/Active](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-active) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e002" />
+
+## Active/Passive
+
+Uma instância exerce a função enquanto outra fica preparada para assumir sob um contrato de retomada. No blueprint, um serviço reserva capacidade e define como a instância passiva recebe autoridade. O benefício é simplificar quem atua; o custo é capacidade ociosa e tempo de troca. É necessário impedir que o antigo ativo continue escrevendo. O papel de primário/standby CNPG ajuda a comparar funções, sem provar um serviço completo Active/Passive ensaiado.
+
+**Par de base e aplicação.** A base é [PostgreSQL](https://github.com/postgres/postgres). O produto OSS **APP Patroni** [processa o cluster conforme a posse do lock](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py) em `process_healthy_cluster`: conserva ou assume o papel de primário e faz o participante sem autoridade seguir outro nó. O código mostra os papéis ativo e seguidor; não é uma alegação de Patroni instalado na Faz.
+
+{/* current-curation:active-passive */}
+
+A [curadoria de Active/Passive](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#active-passive) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e003" />
+
+## Hot Standby
+
+Uma cópia atualizada permanece em condições de oferecer funções contratadas durante o acompanhamento da origem. PostgreSQL permite consultas de leitura em hot standby quando configurado. Os streams CNPG medidos mostram acompanhamento de WAL; o curso não ensaiou consultas nessas réplicas nem sua promoção. O ganho pretendido é retomada mais pronta e possível leitura; o custo é manter cópia e tratar atraso. [Contrato PostgreSQL](https://www.postgresql.org/docs/17/hot-standby.html).
+
+**Par de base e aplicação.** A base é [PostgreSQL](https://github.com/postgres/postgres). O servidor OSS **APP PostgreSQL** [mantém o estado SharedHotStandbyActive](https://github.com/postgres/postgres/blob/91b1872ff2de16cd353598edbc650a185e649226/src/backend/access/transam/xlogrecovery.c) dentro da recuperação WAL e o habilita após atingir as condições de consistência do protocolo. O par fornece o mecanismo do produto para consulta durante recuperação, sem afirmar que as réplicas da captura foram consultadas.
+
+{/* current-curation:hot-standby */}
+
+A [curadoria de Hot Standby](/referencia/curadoria/13-alta-disponibilidade/#hot-standby) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e004" />
+
+## Warm Standby
+
+Uma cópia é mantida com parte da preparação necessária para assumir, exigindo trabalho adicional na retomada. No blueprint, dados e configuração estão preparados, mas o serviço ainda precisa iniciar ou ser promovido. O benefício é menor custo que manter todo atendimento ativo; o custo é tempo de recuperação. O significado exato de “warm” depende do sistema. Configurar uma cópia não mede seu RTO; essa alternativa não foi ensaiada na captura.
+
+**Par de base e aplicação.** A base é [PostgreSQL](https://github.com/postgres/postgres). No **APP PostgreSQL**, [standby.signal seleciona StandbyModeRequested](https://github.com/postgres/postgres/blob/91b1872ff2de16cd353598edbc650a185e649226/src/backend/access/transam/xlogrecovery.c) e a recuperação continua aguardando WAL. A habilitação de hot standby é um controle próprio; com ela desligada, a cópia recupera sem oferecer as consultas desse modo. Esse é o caso concreto de standby em recuperação, com prontidão diferente de uma cópia ativa.
+
+{/* current-curation:warm-standby */}
+
+A [curadoria de Warm Standby](/referencia/curadoria/13-alta-disponibilidade/#warm-standby) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e005" />
+
+## Cold Standby
+
+O recurso de retomada permanece desligado ou exige restauração antes de atender. No exercício, a recuperação cria a instância e restaura uma cópia preservada. O ganho é reduzir capacidade continuamente ativa; o custo é um caminho de recuperação maior. A existência de um backup não comprova que ele restaura ou que o tempo é aceitável. O CronJob Airflow teve sucesso, mas o curso não executou esse restore. [Durabilidade](/explicacoes/data-durability/).
+
+**Par de base e aplicação.** A base é [CloudNativePG](https://github.com/cloudnative-pg/cloudnative-pg) e PostgreSQL. A **REF de configuração** [cluster-restore do CNPG](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/docs/src/samples/cluster-example-bis-restore.yaml) cria um cluster novo com `bootstrap.recovery.volumeSnapshots`, apontando os snapshots de dados e WAL. O operador e a recuperação PostgreSQL são a base do retorno de uma cópia que precisa ser materializada. O manifesto mostra o caminho de cold recovery, sem um restore aprovado ou RTO medido.
+
+{/* current-curation:cold-standby */}
+
+A [curadoria de Cold Standby](/referencia/curadoria/13-alta-disponibilidade/#cold-standby) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e006" />
+
+## Multi-AZ
+
+Os componentes se distribuem entre zonas de disponibilidade com domínios de falha identificados. No blueprint, perder uma zona preserva capacidade e conectividade nas outras. O benefício é suportar falhas da zona; o custo é replicação e dependências entre zonas. Os três nós RKE2 medidos não tinham labels de zona/região, portanto não comprovam esse desenho. A skill `multi-cloud-architecture`, em `~/.codex/skills/`, oferece apoio de comparação, sem substituir a prova do domínio físico.
+
+**Par de base e aplicação.** A base é [Cluster API](https://github.com/kubernetes-sigs/cluster-api). O produto OSS **APP CAPA** [publica FailureDomains a partir das zonas das subnets](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/controllers/awscluster_controller.go) para o Cluster API. Sua [configuração declarada](https://github.com/kubernetes-sigs/cluster-api-provider-aws/blob/5ffa11af3b508eff794fba48a673cda2bbed03d6/docs/book/src/topics/failure-domains/control-planes.md) inclui subnets públicas/privadas em `us-west-2a`, `2b` e `2c` e explica a distribuição do controle. É um mecanismo de Multi-AZ do provider, sem atribuí-lo aos três nós RKE2 da captura.
+
+{/* current-curation:multi-az */}
+
+A [curadoria de Multi-AZ](/referencia/curadoria/13-alta-disponibilidade/#multi-az) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e007" />
+
+## Multi-Region
+
+Os componentes se distribuem entre regiões identificadas, com contratos de dados e encaminhamento entre elas. No blueprint, a região sobrevivente precisa reconhecer identidade, dados e autoridade necessários para atender. O benefício é tratar perda regional; o custo é latência, operação e consistência entre locais. Uma cópia remota isolada não comprova capacidade de atendimento. Nenhum desenho Multi-Region foi medido nesta captura; a skill `multi-cloud-architecture` apoia as alternativas.
+
+**Par de base e aplicação.** A base é [PostgreSQL](https://github.com/postgres/postgres). O produto OSS **APP Patroni** [declara standby cluster em outro datacenter, chamado também de região](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/docs/standby_cluster.rst), usando `standby_cluster.host` para acompanhar o primário remoto. O [código HA](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/patroni/ha.py) distingue o standby cluster do primário, e o [contrato para dois datacenters](https://github.com/patroni/patroni/blob/dbee9c3523540db23232871479ddc5698a3b9435/docs/ha_multi_dc.rst) requer promoção manual. O par demonstra uma aplicação geográfica concreta, sem prometer failover global automático.
+
+{/* current-curation:multi-region */}
+
+A [curadoria de Multi-Region](/referencia/curadoria/13-alta-disponibilidade/#multi-region) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e008" />
+
+## Leader/Follower
+
+Participantes recebem papéis distintos: um líder coordena determinado avanço e seguidores acompanham o protocolo. No etcd medido, `.75` liderava o termo Raft 8; no CNPG, `airflow-pg-2` era primário e havia dois standbys. São protocolos e funções diferentes. O ganho é explicitar autoridade; o custo é detecção de falha, troca de papel e atraso. A eleição de um papel não autoriza automaticamente efeitos em outro sistema. [Core 28](/explicacoes/availability/#pattern-28).
+
+**Par de base e aplicação.** A base é [biblioteca Raft do etcd](https://github.com/etcd-io/raft). O **APP etcd** [executa a biblioteca Raft em raftNode](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/raft.go); o [estado Raft](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go) implementa a transição `becomeFollower` e os papéis de liderança. O par mostra o loop consumidor e a implementação dos papéis, sem transferir a liderança desse protocolo ao scheduler Airflow.
+
+{/* current-curation:leader-follower */}
+
+A [curadoria de Leader/Follower](/referencia/curadoria/05-banco-de-dados-e-armazenamento/#leader-follower) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e009" />
+
+## Quorum
+
+Um protocolo exige concordância de uma quantidade definida de participantes. No etcd com três votantes, a maioria é `floor(3/2)+1=2`. Uma perda deixa dois votos se eles ainda se comunicarem; duas perdas deixam um. O benefício é preservar acordo sob o contrato; o custo é espera e perda de avanço sem a quantidade necessária. O `ANY 1` PostgreSQL é uma condição síncrona própria, sem transformar esse banco no mesmo protocolo Raft.
+
+**Par de base e aplicação.** A base é [biblioteca Raft do etcd](https://github.com/etcd-io/raft). O **APP etcd** [instancia o nó Raft](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/bootstrap.go) e a biblioteca [implementa MajorityConfig.VoteResult e CommittedIndex](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/quorum/majority.go). São os pontos que calculam concordância de maioria e avanço por confirmações. A fonte de quórum é específica; a conta não equivale à condição `ANY 1` do PostgreSQL.
+
+{/* current-curation:quorum */}
+
+A [curadoria de Quorum](/referencia/curadoria/13-alta-disponibilidade/#quorum) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e010" />
+
+## Failover
+
+O atendimento ou a autoridade passa a outro participante após a indisponibilidade do anterior. No blueprint CNPG, a troca exige promoção, encaminhamento e proteção contra a continuação do antigo primário. O ganho é retomar o serviço; o custo é o intervalo e a possível diferença entre cópias. Ter três instâncias saudáveis não mede o resultado da troca. A captura não executou failover; [replicação](/explicacoes/availability/#pattern-30) delimita os dados observados.
+
+**Par de base e aplicação.** A base é [CloudNativePG](https://github.com/cloudnative-pg/cloudnative-pg) e PostgreSQL. O produto OSS **APP CloudNativePG** [seleciona outro TargetPrimary](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/replicas.go) em `reconcileTargetPrimaryForNonReplicaCluster`, sinaliza o primário anterior e espera a condição dos WAL receivers. O par mostra o fluxo de retomada no operador. Ele é código upstream fixado, sem provar um failover da versão implantada na captura.
+
+{/* current-curation:failover */}
+
+A [curadoria de Failover](/referencia/curadoria/13-alta-disponibilidade/#failover) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e011" />
+
+## Automatic Failover
+
+O mecanismo detecta uma condição definida e inicia a troca sem uma pessoa executar cada passo. No blueprint, critérios de saúde e autoridade determinam quando promover. O benefício é reduzir a espera por intervenção; o custo é lidar com diagnóstico equivocado e recuperação parcial. A configuração do operador CNPG não comprova que um ensaio de failover foi aprovado. O tempo e a perda aceitáveis precisam de medição específica.
+
+**Par de base e aplicação.** A base é [CloudNativePG](https://github.com/cloudnative-pg/cloudnative-pg) e PostgreSQL. O **APP CloudNativePG** [aplica enforceFailoverDelay e reconcilia a promoção](https://github.com/cloudnative-pg/cloudnative-pg/blob/0a1b0627e774f5be022e81106eb6ac90dcef7e3a/internal/controller/replicas.go) a partir do estado das instâncias, sem uma pessoa selecionar cada passo do loop. O mecanismo automático é implementado no controller. Os parâmetros e resultados do ambiente precisam de seus próprios recibos; este reparo não executou falhas.
+
+{/* current-curation:automatic-failover */}
+
+A [curadoria de Automatic Failover](/referencia/curadoria/13-alta-disponibilidade/#automatic-failover) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e012" />
+
+## Split-Brain Prevention
+
+O desenho evita que participantes incompatíveis mantenham autoridade de escrita simultânea após uma divisão. No exercício, a partição minoritária não pode agir como primário independente. O benefício é preservar uma história coerente; o custo pode ser interromper escrita quando a autoridade não pode ser estabelecida. O campo CNPG `failoverQuorum=false` lido não descreve sozinho todas as proteções. A captura não ensaiou partição; consenso, promoção e fencing precisam de contratos próprios.
+
+**Par de base e aplicação.** A base é [biblioteca Raft do etcd](https://github.com/etcd-io/raft). O **APP etcd** [configura CheckQuorum=true](https://github.com/etcd-io/etcd/blob/d3c8a155909211c6681f3075802a4aacf11528b4/server/etcdserver/bootstrap.go#L564-L583); a [biblioteca Raft](https://github.com/etcd-io/raft/blob/638f42739b77572b5708eb0d8a776a272ade71ed/raft.go) usa o controle de atividade do quórum e pode retornar o participante ao papel de follower. O par demonstra proteção dentro do consenso. Isso não fornece fencing para uma escrita que ocorra fora desse protocolo.
+
+{/* current-curation:split-brain-prevention */}
+
+A [curadoria de Split-Brain Prevention](/referencia/curadoria/13-alta-disponibilidade/#split-brain-prevention) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e013" />
+
+## Fencing
+
+O destino da escrita rejeita um participante cuja autoridade expirou ou foi substituída. No exercício, a geração 43 é aceita e uma tentativa antiga com 42 é negada. O ganho é impedir efeitos atrasados; o custo é manter e verificar a autoridade no recurso protegido. Uma Lease sem essa verificação não fornece a garantia. O [client-go](https://raw.githubusercontent.com/kubernetes/client-go/master/tools/leaderelection/leaderelection.go) declara esse limite; [concorrência](/explicacoes/concurrency/) desenvolve o mecanismo proposto.
+
+**Par de base e aplicação.** A base é [Quorum Journal Manager do Hadoop](https://github.com/apache/hadoop/tree/trunk/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/client). O **APP HDFS JournalNode** [rejeita a época antiga no Journal](https://github.com/apache/hadoop/blob/6f3d71bc35f5eaab0487283533e6057c58038ae4/hadoop-hdfs-project/hadoop-hdfs/src/main/java/org/apache/hadoop/hdfs/qjournal/server/Journal.java#L482-L520): compara `reqInfo.getEpoch()` com a época prometida e com a do escritor atual antes de aceitar a escrita. O recurso protegido aplica a rejeição, oferecendo uma aplicação concreta de fencing. O exemplo não depende de assumir que uma Lease bloqueia efeitos externos.
+
+{/* current-curation:fencing */}
+
+A [curadoria de Fencing](/referencia/curadoria/13-alta-disponibilidade/#fencing) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e014" />
+
+## Heartbeat
+
+Um participante renova periodicamente um sinal para indicar atividade dentro de um prazo contratado. As Leases Kubernetes lidas tinham `renewTime` recente no horário da captura. O ganho é ajudar a detectar ausência; o custo é escolher frequência e prazo sob atrasos de rede. Não receber o sinal não distingue sozinho queda de processo, pausa ou partição. O heartbeat não comprova autorização de um escritor depois da retomada.
+
+**Par de base e aplicação.** A base é [client-go](https://github.com/kubernetes/client-go). O **APP Kubelet** [cria nodeLeaseController e executa seu Run](https://github.com/kubernetes/kubernetes/blob/2fb87b41a29b74e95c06b70fb61ba318fb580bf3/pkg/kubelet/kubelet.go) para manter a Lease do nó. É o consumidor concreto do mecanismo de renovação periódica. A leitura do código não elimina o limite do detector: atraso e partição podem ser interpretados como ausência.
+
+{/* current-curation:heartbeat */}
+
+A [curadoria de Heartbeat](/referencia/curadoria/07-resiliencia/#heartbeat) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e015" />
+
+## Leader Election
+
+A eleição escolhe quem exerce uma função do protocolo. O líder etcd e o holder de `plndr-cp-lock` medidos eram participantes diferentes porque coordenavam papéis distintos. O benefício é administrar autoridade; o custo é membership, prazos e troca de líder. A eleição client-go não garante fencing de efeitos externos. Kubernetes/etcd são referências **PROD** neste recorte; [core 28](/explicacoes/availability/#pattern-28) desenvolve a conta e o exemplo de retomada.
+
+**Par de base e aplicação.** A base é [client-go](https://github.com/kubernetes/client-go). O **APP kube-controller-manager** [chama leaderelection.RunOrDie e fornece OnStartedLeading](https://github.com/kubernetes/kubernetes/blob/2fb87b41a29b74e95c06b70fb61ba318fb580bf3/cmd/kube-controller-manager/app/controllermanager.go). A biblioteca controla quando iniciar o trabalho do líder e quando encerrar o papel. O par mostra uma eleição realmente integrada à aplicação, mantendo o limite de que client-go não garante fencing.
+
+{/* current-curation:leader-election */}
+
+A [curadoria de Leader Election](/referencia/curadoria/02-sistemas-distribuidos-e-consistencia/#leader-election) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e016" />
+
+## Replication
+
+Replicação propaga dados para cópias operacionais. O metadata Airflow tinha dois streams com atraso de replay zero naquele instante, e confirmação `ANY 1` com durabilidade requerida. O ganho é outra cópia sob o contrato; o custo é rede, armazenamento, espera e observação de atraso. Zero agora não define RPO universal, e a cópia pode receber uma exclusão incorreta. PostgreSQL/CNPG são **PROD**; [core 30](/explicacoes/availability/#pattern-30) distingue replicação, backup e restore.
+
+**Par de base e aplicação.** A base é [PostgreSQL](https://github.com/postgres/postgres). O **APP PostgreSQL** implementa [WalSndLoop/XLogSendPhysical](https://github.com/postgres/postgres/blob/91b1872ff2de16cd353598edbc650a185e649226/src/backend/replication/walsender.c) e [WalReceiverMain, escrita e flush do WAL recebido](https://github.com/postgres/postgres/blob/91b1872ff2de16cd353598edbc650a185e649226/src/backend/replication/walreceiver.c). O par oferece os dois lados da propagação no produto. A confirmação síncrona e o resultado de recovery continuam sujeitos à configuração e às medições específicas.
+
+{/* current-curation:replication */}
+
+A [curadoria de Replication](/referencia/curadoria/13-alta-disponibilidade/#replication) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+
+<span id="g13-e017" />
+
+## Stateless Services
+
+O serviço pode ser substituído sem depender de um estado local durável exclusivo daquela instância. No blueprint, o progresso importante fica em sistemas externos com contratos próprios. Isso facilita reposição e réplicas; o custo é depender de banco, sessão, arquivos ou coordenação externos. Um Deployment com duas réplicas não prova esse contrato completo. O scheduler com LocalExecutor também administra tarefas no seu processo, exigindo cuidado ao discutir sua reposição.
+
+**Par de base e aplicação.** A base é [Go HTTP](https://pkg.go.dev/net/http) e gRPC. A **REF executável Online Boutique** [encaminha o carrinho a CART_SERVICE_ADDR e mantém a identidade da sessão em cookie](https://github.com/GoogleCloudPlatform/microservices-demo/blob/38e7348eb289eb5b87c0c6e8cb19ced0449dc389/src/frontend/main.go); o [contrato da aplicação](https://github.com/GoogleCloudPlatform/microservices-demo/blob/38e7348eb289eb5b87c0c6e8cb19ced0449dc389/README.md) atribui a persistência do carrinho ao cartservice/Redis. É um caso de estado durável fora do frontend. Isso não prova que todo componente do sistema seja stateless.
+
+{/* current-curation:stateless-services */}
+
+A [curadoria de Stateless Services](/referencia/curadoria/13-alta-disponibilidade/#stateless-services) reúne a skill pública, o código da base e da aplicação, as versões, as licenças e os limites deste conceito.
+

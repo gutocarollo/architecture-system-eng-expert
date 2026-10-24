@@ -1,0 +1,91 @@
+---
+asIndexPage: true
+title: "Experimente: o dia da emissão muda no caminho"
+description: "Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface."
+diataxis: tutorial
+---
+
+# Experimente: o dia da emissão muda no caminho
+
+Continue o mesmo caso: [volte ao caso](/jornadas/date-only/); [entenda o mecanismo](/explicacoes/casos/date-only/); [resolva a tarefa](/guias/casos/date-only/); [consulte contratos e fontes](/referencia/casos/date-only/).
+
+Você concluirá uma experiência local e previsível. Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface. Este caso vem do [card FBI-4840](https://fazcapital.atlassian.net/browse/FBI-4840) e do [PR 585](https://bitbucket.org/fazcapital/makershub/pull-requests/585). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/eca3f89e0e703316b807018b7947fbbb2043c806/frontend/app/_utils/isoDate.ts) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/7101d3a4babe95081b0b41d35ec305c08bf8a577/frontend/app/_utils/isoDate.ts). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+
+## 1. Prepare o ambiente isolado
+
+Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior. Execute `npm ci --prefix labs/architecture` para instalar a versão do TypeScript fixada no lock dos laboratórios. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+
+```sh
+pwd
+python3 --version
+```
+
+O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
+
+```sh
+python3 labs/architecture/setup_labs.py
+```
+
+Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
+
+## 2. Reconheça a entrada que será repetida
+
+A data 2026-10-05 e o timestamp 2026-10-05T00:00:00Z, com TZ=America/Sao_Paulo. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+## 3. Execute as duas condições
+
+```sh
+TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs
+```
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+## 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:17.688827+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+```text
+zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=05/10/26
+timestamp=2026-10-05T00:00:00Z after=04/10/26 preserves_instant=true
+comparison=PASS date_only_and_instant_are_distinct=True
+```
+
+A data simples aparece como 05/10/26. O timestamp 2026-10-05T00:00:00Z continua aparecendo como 04/10/26, pois o instante não foi alterado.
+
+## 5. Examine a mudança
+
+Abra `labs/architecture/date-only/source.diff` e os snapshots before/after. O runner lê os módulos ou os corpos das funções desses snapshots; a correção estudada já está preservada em after. Identifique a operação descrita na explicação e compare as mesmas entradas. Não é preciso trocar a branch de origem nem alterar o MakersHub.
+
+## 6. Corrija uma cópia sua e repita a condição
+
+Agora você aplicará a mudança em um arquivo descartável. Crie a cópia anterior e execute o contrato corrigido contra ela:
+
+```sh
+learning_candidate_dir=$(mktemp -d)
+cp labs/architecture/date-only/candidate-before.ts "$learning_candidate_dir/candidate.ts"
+TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs --candidate "$learning_candidate_dir/candidate.ts"
+```
+
+A última execução deve terminar com código 1. A saída mostra a condição anterior e a verificação recusa o resultado: O formatter anterior converte 2026-10-05 para 04/10/26 em America/Sao_Paulo. Esse fracasso esperado confirma que a sua cópia ainda não possui a proteção.
+
+Abra a cópia e localize o construtor `new Date(dateStr)` que trata a string de data como instante. Leia o patch histórico e aplique-o somente à sua cópia:
+
+```sh
+cat labs/architecture/date-only/candidate.patch
+patch "$learning_candidate_dir/candidate.ts" < labs/architecture/date-only/candidate.patch
+TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs --candidate "$learning_candidate_dir/candidate.ts"
+```
+
+Agora a execução deve terminar com código 0. A data simples aparece como 05/10/26. O timestamp 2026-10-05T00:00:00Z continua aparecendo como 04/10/26, pois o instante não foi alterado. Você alterou a cópia que estava falhando e repetiu a mesma condição. A referência do caso conserva o recibo desta atividade.
+
+A pasta temporária pode ser deixada para inspeção. Para iniciar a atividade novamente, crie outra com `mktemp -d`; nenhuma limpeza de sistema externo é necessária.
+
+## 7. Reinicie e conclua
+
+Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+O roteiro executa o helper e o formatter extraído, com Node e Typescript. Ele não consulta Salesforce, não renderiza o card e não prova a versão frontend de produção.
+
+Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/date-only/); [entenda o mecanismo](/explicacoes/casos/date-only/); [resolva a tarefa](/guias/casos/date-only/); [consulte contratos e fontes](/referencia/casos/date-only/).
+
+O [mapa de conceitos deste caso](/jornadas/date-only/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

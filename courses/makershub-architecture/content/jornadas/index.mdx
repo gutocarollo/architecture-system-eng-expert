@@ -1,0 +1,83 @@
+---
+asIndexPage: true
+title: "Aprenda pelo problema que você reconhece"
+description: "Dezoito casos ligam explicação, tutorial, guia e referência."
+diataxis: explanation
+---
+
+# Aprenda pelo problema que você reconhece
+
+Escolha a dor que você quer compreender. Cada caso oferece uma experiência com entradas conhecidas, conserva a mesma identidade ao mudar de destino e informa o próximo passo. Sete casos usam versões históricas do MakersHub. Os onze modelos financeiros hipotéticos apresentam mecanismos que ainda não têm uma linhagem interna completa nesta trilha.
+
+## [Cancelamento de uma busca compartilhada](/jornadas/single-flight-cancel/)
+
+Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a tarefa compartilhada e derrubava os cinco leitores. A reprodução usa cinco participantes fictícios e a mesma classe das duas versões.
+
+## [A lista continua disponível durante a renovação](/jornadas/early-refresh/)
+
+A lista de chamadas é consultada repetidamente. A versão anterior mantém o valor até o TTL, mas a primeira leitura após o vencimento espera a resposta do produtor. FBI-2331 acrescentou uma janela de renovação antecipada para que a consulta seguinte pudesse encontrar o valor novo. Esta história trata de uma evolução documentada.
+
+## [A emissão continua no mesmo dia em São Paulo](/jornadas/date-only/)
+
+A coluna Emissão recebe a string 2026-10-05. O commit FBI-4840 documenta que a interface mostrava o dia 04 em São Paulo. O valor representa um dia do calendário; o construtor anterior o interpretava como meia-noite UTC, que ainda corresponde ao dia 04 no fuso UTC−3.
+
+## [A oportunidade existente conserva sua identidade](/jornadas/opportunity-entry/)
+
+Um SDR entra pelo identificador de uma oportunidade aberta. A evolução FBI-4719 precisa executar o pacote de agendamento nessa mesma oportunidade. Ao chamar a função anterior com a mesma entrada, a reprodução observa uma criação de oportunidade nova; a função posterior conserva o identificador de entrada.
+
+## [Uma ordem atravessa fronteiras sem espalhar regras](/jornadas/order-boundaries/)
+
+Ana é uma operadora fictícia de uma corretora. O provedor envia uma autorização como AUTHORISED e o produto espera accepted. Se cada tela interpretar o contrato sozinha, a mesma ordem pode parecer recusada em um lugar e aceita em outro. O exemplo concentra a tradução e deixa a regra financeira dentro da operação.
+
+## [A repetição de uma ordem produz um único efeito](/jornadas/order-delivery/)
+
+Ana envia a ordem fictícia ORDER-1 de R$ 100. A resposta se perde e o cliente a repete. ORDER-2 acrescenta R$ 50. O desenho anterior registra R$ 100 + R$ 100 + R$ 50 = R$ 250. A ordem repetida deveria conservar o mesmo efeito, totalizando R$ 150.
+
+## [Dois operadores disputam a mesma reserva](/jornadas/reservation/)
+
+Ana e Bruno são operadores fictícios que leem R$ 1.000 na versão 7. Ana registra um crédito de R$ 100 e chega à versão 8. Bruno ainda calcula seu débito de R$ 200 sobre a versão 7. Sem conferir a versão, ele grava R$ 800 e perde o crédito de Ana; ao reler o saldo, o resultado correto da intenção permitida é R$ 900.
+
+## [Uma partição separa os escritórios da corretora](/jornadas/consensus/)
+
+Uma corretora hipotética divide o serviço em três participantes: A, B e C. Uma falha de comunicação deixa A e B juntos e C sozinho. Se cada grupo se declarar autorizado a gravar, duas decisões incompatíveis podem aparecer. A prática permite somente ao grupo que reúne dois dos três participantes autorizar a escrita.
+
+## [Uma fila absorve trabalho e recupera falhas](/jornadas/queue-workflow/)
+
+Ana importa 120 solicitações fictícias em uma corretora. O consumidor só consegue manter 20 na fila escolhida para a prática. Ao mesmo tempo, uma mensagem inválida falha sempre. O desenho anterior cresce sem limite e repete a mensagem inválida; a versão protegida limita a entrada e separa a mensagem que já gastou três tentativas.
+
+## [A consulta de posição envelhece de forma controlada](/jornadas/cache-policy/)
+
+Ana consulta a posição fictícia do tenant A. Depois, Bruno consulta a posição do tenant B. Uma chave que contém apenas position entrega a Bruno o valor de Ana. O mesmo caso permite observar o que acontece quando um valor vence, quando o cache local envelhece e quando uma escrita em memória é perdida numa queda.
+
+## [O histórico reconstrói a posição do cliente](/jornadas/ledger-projection/)
+
+Uma posição fictícia recebe crédito de R$ 1.000, crédito de R$ 100 e débito de R$ 200. Um saldo mutável sem histórico pode perder uma alteração. A trilha de eventos permite refazer a conta: 1.000 + 100 − 200 = R$ 900, inclusive quando o modelo de consulta ainda não consumiu os dois últimos eventos.
+
+## [A posição cresce e a consulta precisa encontrar seus dados](/jornadas/storage-partitions/)
+
+A corretora hipotética cresce e divide as posições por chave. Ana procura a posição 7. Uma regra de roteamento permite buscar uma das três partições, enquanto uma junção com registros filhos pode multiplicar os valores financeiros. A prática usa doze posições e duas contas para tornar esses efeitos visíveis.
+
+## [A corretora troca uma versão sem perder o contrato](/jornadas/safe-release/)
+
+A corretora hipotética troca amount por amount_cents. A interface antiga ainda lê amount. Remover o campo antigo na primeira implantação faz a consulta retornar vazio. A prática conserva os dois campos durante a transição e expõe a versão nova a cinco das cem requisições fictícias.
+
+## [A permissão acompanha a ordem e a identidade](/jornadas/access-policy/)
+
+Ana é uma assessora fictícia do tenant A, ligada à conta SYNTHETIC-1. Uma ordem pertence ao tenant B e à conta SYNTHETIC-2. Conferir apenas o papel advisor permite que Ana a abra. A prática acrescenta a relação com o objeto e ainda mostra como audience, vencimento e retirada de chave alteram uma decisão.
+
+## [A equipe descobre onde a ordem parou](/jornadas/diagnostics/)
+
+A ordem fictícia ORDER-1 passa por uma requisição que falha no provedor e por uma segunda tentativa. Ana vê um health endpoint verde e ainda não sabe onde o pedido parou. A prática reúne os dois request IDs sob um operation ID e separa tempo, erro e resultado do caminho de negócio.
+
+A [matriz dos 310 conceitos](/jornadas/matriz/) informa o caso, o mecanismo, a observação e o limite de cada vínculo. A quantidade de vínculos não prova uma implementação integral de todos os padrões.
+
+
+## Dois casos executados no PostgreSQL
+
+- [A comissão de R$ 100 aparece como R$ 200](/jornadas/query-grain-postgres/). O caso conserva o SQL histórico, o patch e o contrato de uma execução isolada.
+- [Uma única versão atual ainda pode perder uma alteração](/jornadas/revision-cas-postgres/). O caso conserva o SQL histórico, o patch e o contrato de uma execução isolada.
+
+
+## Uma mudança histórica do Airflow
+
+- [Uma falha de lock derruba a tarefa do Airflow](/jornadas/airflow-lock-retry/). Você executa a função Python com respostas externas controladas e confere quais erros recebem uma nova tentativa.

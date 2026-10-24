@@ -1,0 +1,29 @@
+{
+  "case_id": "single-flight-cancel",
+  "source_repository": "/Users/augustocarollo/Developer/makershub",
+  "before_sha": "342de122cdbfccbe7659adec0e1fcb842b38fc83",
+  "after_sha": "a304a4e56480648bdc60be96c00532c38d18df9f",
+  "snapshots": [
+    {
+      "phase": "before",
+      "sha": "342de122cdbfccbe7659adec0e1fcb842b38fc83",
+      "source_path": "backend/app/utils/single_flight.py",
+      "local_path": "labs/architecture/single-flight-cancel/before.py",
+      "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a"
+    },
+    {
+      "phase": "after",
+      "sha": "a304a4e56480648bdc60be96c00532c38d18df9f",
+      "source_path": "backend/app/utils/single_flight.py",
+      "local_path": "labs/architecture/single-flight-cancel/after.py",
+      "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c"
+    }
+  ],
+  "diff_sha256": "a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7",
+  "inputs": "SYNTHETIC",
+  "historical_lineage_gate": "SOURCE_PR_JIRA_PRESENT_MATCHED_TO_LOCAL_SNAPSHOTS",
+  "runtime_scope": "LOCAL_LEARNING_ONLY",
+  "historical_source_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-source.json",
+  "historical_pr_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-remote.json",
+  "historical_jira_receipt": "tasks/FBI-4991-arquitetura-nextra/execution/history/cases-visible-jira.json"
+}

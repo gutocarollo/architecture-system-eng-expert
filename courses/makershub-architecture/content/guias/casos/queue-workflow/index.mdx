@@ -1,0 +1,49 @@
+---
+asIndexPage: true
+title: "Verifique a proteção: a fila cresce durante uma dependência lenta"
+description: "Você aprenderá a distinguir admissão, divisão de trabalho, publicação de fatos e recuperação de uma etapa."
+diataxis: how-to
+---
+
+# Verifique a proteção: a fila cresce durante uma dependência lenta
+
+Continue o mesmo caso: [volte ao caso](/jornadas/queue-workflow/); [entenda o mecanismo](/explicacoes/casos/queue-workflow/); [execute a experiência](/tutoriais/casos/queue-workflow/); [consulte contratos e fontes](/referencia/casos/queue-workflow/).
+
+Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+
+## Antes de começar
+
+Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+
+## 1. Fixe o contrato e a fronteira
+
+Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: Seis ordens tipadas, mensagens valid/poison, 120 entradas, capacidade 20 e uma DAG de três passos. Registre a versão anterior, a versão proposta e o localizador `queue_workflow / retry-dlq / admission / dag-dependencies`.
+
+## 2. Confira quem executa a decisão
+
+A admissão guarda 20 e recusa 100. Após três tentativas, a mensagem vai para a DLQ. Roteamento, metadados de sequência e dependências da DAG orientam cada etapa. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
+
+## 3. Repita a mesma condição em isolamento
+
+```sh
+python3 labs/architecture/financial.py queue-workflow
+```
+
+Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
+
+## 4. Avalie a garantia adquirida
+
+A prática entrega o item válido, conserva o inválido fora da fila normal e processa extract, transform e publish nessa ordem. Workers compartilham tarefas; a assinatura de auditoria recebe seus próprios fatos. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
+
+## 5. Feche a decisão com seu limite
+
+A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
+
+## Localizadores de consulta
+
+- `labs/architecture/financial.py::queue_workflow` contém o modelo executável.
+- `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/queue-workflow.json` registra a busca delimitada e seus limites.
+
+Continue o mesmo caso: [volte ao caso](/jornadas/queue-workflow/); [entenda o mecanismo](/explicacoes/casos/queue-workflow/); [execute a experiência](/tutoriais/casos/queue-workflow/); [consulte contratos e fontes](/referencia/casos/queue-workflow/).
+
+O [mapa de conceitos deste caso](/jornadas/queue-workflow/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

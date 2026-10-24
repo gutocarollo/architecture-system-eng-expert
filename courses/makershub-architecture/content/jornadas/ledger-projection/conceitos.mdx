@@ -1,0 +1,483 @@
+---
+title: "Conceitos deste caso"
+description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
+diataxis: explanation
+---
+
+# Conceitos: o saldo precisa explicar sua história
+
+Este mapa conecta os conceitos ao mesmo problema. Uma posição fictícia recebe crédito de R$ 1.000, crédito de R$ 100 e débito de R$ 200. Um saldo mutável sem histórico pode perder uma alteração. A trilha de eventos permite refazer a conta: 1.000 + 100 − 200 = R$ 900, inclusive quando o modelo de consulta ainda não consumiu os dois últimos eventos.
+
+Comece pela [jornada](/jornadas/ledger-projection/), execute o [tutorial](/tutoriais/casos/ledger-projection/) e use a [referência](/referencia/casos/ledger-projection/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/ledger-projection/).
+
+Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
+
+<span id="append-only-log" />
+
+## Append-Only Log
+
+Um append-only log acrescenta registros na ordem definida segundo seu contrato de retenção e correção.
+
+No caso desta família, faça a seguinte observação: Reproduza os fatos 1.000, +100 e −200 e conserve R$ 900 com a história que permite refazer a conta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe replay-events
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replay-events`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "mutable_balance_without_history": 800
+  },
+  "after": {
+    "replayed_balance": 900,
+    "events": 3
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Append-Only Log; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="command-handler" />
+
+## Command Handler
+
+Um command handler processa uma intenção e aplica suas regras.
+
+No caso desta família, faça a seguinte observação: Execute o comando de crédito pelo command handler. Leia a projeção separada pelo query handler antes e depois de consumir o evento; confira sua versão e seu contrato de consulta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe cqrs-handlers
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cqrs-handlers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_balance": 1100,
+    "query_balance": 1000,
+    "query_version": 1
+  },
+  "after": {
+    "write_balance": 1100,
+    "query_balance": 1100,
+    "query_version": 2,
+    "query_contract": "display_balance,position_version"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Command Handler; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="cqrs" />
+
+## CQRS
+
+CQRS separa modelos e operações de alteração dos de consulta.
+
+No caso desta família, faça a seguinte observação: Execute o comando de crédito pelo command handler. Leia a projeção separada pelo query handler antes e depois de consumir o evento; confira sua versão e seu contrato de consulta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe cqrs-handlers
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cqrs-handlers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_balance": 1100,
+    "query_balance": 1000,
+    "query_version": 1
+  },
+  "after": {
+    "write_balance": 1100,
+    "query_balance": 1100,
+    "query_version": 2,
+    "query_contract": "display_balance,position_version"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a CQRS; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="denormalization" />
+
+## Denormalization
+
+A desnormalização reúne ou repete informações para servir uma leitura.
+
+No caso desta família, faça a seguinte observação: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `projection-checkpoint`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection": 1000,
+    "lag_events": 2
+  },
+  "after": {
+    "projection": 900,
+    "lag_events": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Denormalization; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e028) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="domain-event" />
+
+## Domain Event
+
+Um evento de domínio descreve um fato relevante dentro de um contexto.
+
+No caso desta família, faça a seguinte observação: Reproduza os fatos 1.000, +100 e −200 e conserve R$ 900 com a história que permite refazer a conta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe replay-events
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replay-events`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "mutable_balance_without_history": 800
+  },
+  "after": {
+    "replayed_balance": 900,
+    "events": 3
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Domain Event; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="event-sourcing" />
+
+## Event Sourcing
+
+Event Sourcing usa eventos como fonte de verdade do estado modelado.
+
+No caso desta família, faça a seguinte observação: Reproduza os fatos 1.000, +100 e −200 e conserve R$ 900 com a história que permite refazer a conta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe replay-events
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `replay-events`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "mutable_balance_without_history": 800
+  },
+  "after": {
+    "replayed_balance": 900,
+    "events": 3
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event Sourcing; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="materialized-view" />
+
+## Materialized View
+
+Uma materialized view nativa do PostgreSQL persiste o resultado de uma consulta definida.
+
+No caso desta família, faça a seguinte observação: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `projection-checkpoint`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection": 1000,
+    "lag_events": 2
+  },
+  "after": {
+    "projection": 900,
+    "lag_events": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Materialized View; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="precomputation" />
+
+## Precomputation
+
+O pré-cálculo executa trabalho antes da consulta que o utiliza.
+
+No caso desta família, faça a seguinte observação: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `projection-checkpoint`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection": 1000,
+    "lag_events": 2
+  },
+  "after": {
+    "projection": 900,
+    "lag_events": 0
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Precomputation; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e029) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="projection" />
+
+## Projection
+
+Uma projeção deriva uma representação de leitura a partir de uma fonte definida.
+
+No caso desta família, faça a seguinte observação: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `projection-checkpoint`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection": 1000,
+    "lag_events": 2
+  },
+  "after": {
+    "projection": 900,
+    "lag_events": 0
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="query-handler" />
+
+## Query Handler
+
+Um query handler responde uma pergunta sem aplicar a alteração de negócio em questão.
+
+No caso desta família, faça a seguinte observação: Execute o comando de crédito pelo command handler. Leia a projeção separada pelo query handler antes e depois de consumir o evento; confira sua versão e seu contrato de consulta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe cqrs-handlers
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cqrs-handlers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_balance": 1100,
+    "query_balance": 1000,
+    "query_version": 1
+  },
+  "after": {
+    "write_balance": 1100,
+    "query_balance": 1100,
+    "query_version": 2,
+    "query_contract": "display_balance,position_version"
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="read-model" />
+
+## Read Model
+
+Um read model representa dados conforme as perguntas atendidas.
+
+No caso desta família, faça a seguinte observação: Observe dois eventos de atraso e avance o modelo de consulta de R$ 1.000 para R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe projection-checkpoint
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `projection-checkpoint`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "projection": 1000,
+    "lag_events": 2
+  },
+  "after": {
+    "projection": 900,
+    "lag_events": 0
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="snapshotting" />
+
+## Snapshotting
+
+Um snapshot guarda estado associado ao progresso do stream para reduzir a reconstrução.
+
+No caso desta família, faça a seguinte observação: Recomece do snapshot do evento 2 e aplique só o débito restante, chegando aos mesmos R$ 900.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe snapshot-replay
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `snapshot-replay`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "events_to_replay": 3
+  },
+  "after": {
+    "events_to_replay": 1,
+    "balance": 900
+  }
+}
+```
+
+O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="write-model" />
+
+## Write Model
+
+Um write model organiza regras para aceitar alterações.
+
+No caso desta família, faça a seguinte observação: Execute o comando de crédito pelo command handler. Leia a projeção separada pelo query handler antes e depois de consumir o evento; confira sua versão e seu contrato de consulta.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe cqrs-handlers
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `cqrs-handlers`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "write_balance": 1100,
+    "query_balance": 1000,
+    "query_version": 1
+  },
+  "after": {
+    "write_balance": 1100,
+    "query_balance": 1100,
+    "query_version": 2,
+    "query_contract": "display_balance,position_version"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Write Model; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+
+<span id="write-ahead-log-wal" />
+
+## Write-Ahead Log (WAL)
+
+O motor registra informações de alteração no log antes de persistir as páginas correspondentes.
+
+No caso desta família, faça a seguinte observação: Execute UPDATE e rollback em SQLite com journal_mode=wal e confira o valor recuperado de 100.000 centavos.
+
+```sh
+python3 labs/architecture/financial.py ledger-projection --probe durable-transaction
+```
+
+O código desta observação está em `labs/architecture/financial.py`. O identificador do probe é `durable-transaction`.
+
+Confira os valores do contrato antes e depois, e não apenas se as duas saídas são diferentes:
+
+```json
+{
+  "before": {
+    "partial_update_visible": 110000
+  },
+  "after": {
+    "rolled_back_cents": 100000,
+    "sqlite_journal_mode": "wal"
+  }
+}
+```
+
+O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Write-Ahead Log (WAL); não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
+
+A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
+

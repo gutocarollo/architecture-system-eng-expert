@@ -1,0 +1,20 @@
+{
+  "reviewer": "/root/implementation_review",
+  "model": "gpt-6.1-sol",
+  "effort": "xhigh",
+  "verdict": "PASS",
+  "material_blockers": 0,
+  "scope": "current pilot code and local evidence; publication verified separately",
+  "evidence": {
+    "tests": {
+      "total": 15,
+      "passed": 15,
+      "failed": 0
+    },
+    "preserved_fragments": 25,
+    "internal_pilot_links_checked": 47,
+    "source_snapshots": "hashes matched",
+    "download": "5 files matched canonical source"
+  },
+  "css_git_blob": "f0f7405cf96b35650bef297de2c6e0f54a26d80c"
+}

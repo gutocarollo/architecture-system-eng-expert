@@ -1,0 +1,28 @@
+{
+  "name": "fazcapital-architecture-course",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "postbuild": "pagefind --site out --output-path out/_pagefind",
+    "start": "next start",
+    "postinstall": "patch-package",
+    "prebuild": "python3 scripts/package-early-refresh.py",
+    "test": "node --test tests/early-refresh.test.mjs"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "nextra": "4.6.1",
+    "nextra-theme-docs": "4.6.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.12.0",
+    "jsdom": "30.1.2",
+    "pagefind": "1.5.2",
+    "patch-package": "8.0.1"
+  }
+}

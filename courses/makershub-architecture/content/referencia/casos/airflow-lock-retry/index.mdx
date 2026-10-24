@@ -1,0 +1,44 @@
+---
+asIndexPage: true
+title: "Contrato do retry histórico do Airflow"
+description: "Aprenda quando repetir uma falha transitória e quando propagá-la."
+diataxis: reference
+---
+
+# Contrato do retry histórico do Airflow
+
+[Retorne ao caso](/jornadas/airflow-lock-retry/), [entenda o mecanismo](/explicacoes/casos/airflow-lock-retry/), [aprenda fazendo](/tutoriais/casos/airflow-lock-retry/), [resolva a tarefa](/guias/casos/airflow-lock-retry/) ou [consulte o contrato](/referencia/casos/airflow-lock-retry/).
+
+| Contrato | Valor selecionado |
+| --- | --- |
+| Repositório | `fazcapital/airflow` |
+| Arquivo | `dags/inflow__xp__stg_to_fct.py` |
+| Função | `task_run_60_days_rule_hs` |
+| Versão anterior | `febaf1be978aad59c29f38d1bd74f357f8e942b5` |
+| Versão selecionada | `55dfe8acb362e6854d1af4e7dd7d17e6497af9bd` |
+| Condição repetida | `returncode != 0` e `55P03` no stderr |
+| Cota | Duas novas tentativas, três tentativas totais |
+| Espera | Fixa, trinta segundos; sem backoff exponencial ou jitter |
+| Timeout | Trezentos segundos por chamada do processo |
+| Runner | `python3 labs/airflow-lock-retry/run.py` |
+| Desafio | `python3 labs/airflow-lock-retry/check_challenge.py` |
+
+Os snapshots `before.py` e `after.py` conservam o corpo da função, seus comentários históricos e os imports. O normalizador retira somente a indentação do wrapper da DAG. O manifesto registra o hash do arquivo de origem inteiro, seu blob e as linhas selecionadas, além do hash de cada snapshot executável.
+
+O runner injeta `os`, a conexão, o logger e os módulos `subprocess`, `resource` e `time`. JSON e escape de URI continuam usando a biblioteca padrão. A chamada externa recebe argumentos e timeout iguais aos históricos, mas o double retorna as respostas escolhidas; ele não executa processos. Os contratos cobrem erro transitório, erro diferente, cota esgotada, timeout do processo e sucesso inicial.
+
+```text
+transient_lock: before_attempts=1 failure=True after_attempts=2 success=True waits=[30]
+permanent_error: before_attempts=1 after_attempts=1 failure_preserved=True
+lock_budget: before_attempts=1 after_attempts=3 waits=[30, 30] failure_preserved=True
+process_timeout: before_attempts=1 after_attempts=1 timeout_preserved=True
+comparison=PASS real_subprocesses=0 real_database_connections=0 real_sleep_seconds=0
+```
+
+O laboratório executa a função Python histórica com substitutos locais controlados (doubles). Ele não inicia uma DAG, não executa o binário Haskell, não conecta ao PostgreSQL e não faz esperas reais. A atomicidade e a idempotência do motor Haskell são premissas relatadas pelo PR e continuam fora desta prova. O código procura 55P03 no stderr; isso também não identifica qual consulta segurava o lock.
+
+O pacote `tasks/FBI-4991-arquitetura-nextra/execution/history/airflow` registra a leitura das fontes e sua divergência de topologia. O censo da fonte declarada tem 914 commits alcançáveis em 155 refs locais; ele não representa todo o histórico remoto nem comprova o estado de produção no Rancher/RKE2.
+
+Este caso vem do [Bug FBI-4797](https://fazcapital.atlassian.net/browse/FBI-4797) e do [PR 161 do Airflow](https://bitbucket.org/fazcapital/airflow/pull-requests/161). A investigação leu o campo visível `customfield_10047`, o relato do PR e as [versões anterior](https://bitbucket.org/fazcapital/airflow/src/febaf1be978aad59c29f38d1bd74f357f8e942b5/dags/inflow__xp__stg_to_fct.py) e [selecionada](https://bitbucket.org/fazcapital/airflow/src/55dfe8acb362e6854d1af4e7dd7d17e6497af9bd/dags/inflow__xp__stg_to_fct.py). O relato registra um timeout de lock; o bloqueador original não foi identificado nessa fonte. O código selecionado é histórico. A prática não mede a versão atualmente implantada.
+
+[Retorne ao caso](/jornadas/airflow-lock-retry/), [entenda o mecanismo](/explicacoes/casos/airflow-lock-retry/), [aprenda fazendo](/tutoriais/casos/airflow-lock-retry/), [resolva a tarefa](/guias/casos/airflow-lock-retry/) ou [consulte o contrato](/referencia/casos/airflow-lock-retry/).

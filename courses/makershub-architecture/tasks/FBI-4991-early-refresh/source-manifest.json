@@ -1,0 +1,1190 @@
+{
+  "source_commit": "26e8cd6418305f7140ff19afce0feeb2f36a780c",
+  "source_export_sha256": "7bb4b097674187cadd63b483c8e0505829966142312cef339a31c6478fc60a34",
+  "files": [
+    {
+      "path": "app/[[...mdxPath]]/page.jsx",
+      "sha256": "5300d7527b498e2703aa5532573bc88d8a0f7949b223d2f10c5f61ba907e5c09"
+    },
+    {
+      "path": "app/course.css",
+      "sha256": "c1afdec9fdff5f2a3fb3a2b9d0d169ae5daba459e71ada557912f1432a8fcb34"
+    },
+    {
+      "path": "app/layout.jsx",
+      "sha256": "8b494e263e622be6ce16f02fc373e64d2e958f3e761f1b98dee2aff1f88ca9d8"
+    },
+    {
+      "path": "content/_meta.js",
+      "sha256": "b9ebeb17bc0a049776f1b11fd6d1fe657142564a99b54e281702c7839245c8b9"
+    },
+    {
+      "path": "content/explicacoes/_meta.js",
+      "sha256": "6686fc51142b99625d5146a34fdc59953e8ef20c5b9a3f7bb00afc67aeee8e3a"
+    },
+    {
+      "path": "content/explicacoes/api-integration/index.mdx",
+      "sha256": "1793fc3b63e395feeb5080ff5e441787894029983294c5acd9da21482c43ab5c"
+    },
+    {
+      "path": "content/explicacoes/availability/index.mdx",
+      "sha256": "409f379d9030f55a6a8c97716ee74c09e12960d0c72320328dba5f9a8b5e5bae"
+    },
+    {
+      "path": "content/explicacoes/business-rules/index.mdx",
+      "sha256": "bfe1d18886229153fd16887faf9a1deece89888ed4568882d6d2be579b8c40d2"
+    },
+    {
+      "path": "content/explicacoes/cache/index.mdx",
+      "sha256": "148332fda8bc60edf70162c27a1af5c023f9c3d796ae77c42cbbf8c289520975"
+    },
+    {
+      "path": "content/explicacoes/capacity/index.mdx",
+      "sha256": "408824430542ef7fdc0769f7ecb2f08fa0dd0b6de09b7a6caccdaafdebf12a51"
+    },
+    {
+      "path": "content/explicacoes/casos/_meta.js",
+      "sha256": "bb54b385595c3dc6b857c7f98e8dcb29fc434b1c21376e6cad4437d0d9c7c47b"
+    },
+    {
+      "path": "content/explicacoes/casos/access-policy/index.mdx",
+      "sha256": "0860ed0bbfcbe74c2548b431472a18063a628ff4c0b8da6f4c611165eacdce0d"
+    },
+    {
+      "path": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "sha256": "f1ebc8801696793cda09b404c35f03341bc34b286303dba97d66cd0f45a36ef2"
+    },
+    {
+      "path": "content/explicacoes/casos/cache-policy/index.mdx",
+      "sha256": "3c5406fae572c1121b5549648f87392b94afe53d74a6776bc0b913672c0e2878"
+    },
+    {
+      "path": "content/explicacoes/casos/consensus/index.mdx",
+      "sha256": "98f672311f91bd349af9ebe13e13f7b038cc55a48598660e427372e60f069ea3"
+    },
+    {
+      "path": "content/explicacoes/casos/date-only/index.mdx",
+      "sha256": "9a35bafcf602cff7cede3e76b9ae09747dd68bb0aa0802c801c259dbca8befbd"
+    },
+    {
+      "path": "content/explicacoes/casos/diagnostics/index.mdx",
+      "sha256": "f6e9e726409b21b40c43f6e2e530e675835d4e42431072e44945a7fbda18686b"
+    },
+    {
+      "path": "content/explicacoes/casos/early-refresh/index.mdx",
+      "sha256": "39f380205ed3096bd398ff8ad0da9c0c626d3e00400a88ec1cfa53cff17cf980"
+    },
+    {
+      "path": "content/explicacoes/casos/index.mdx",
+      "sha256": "c314d127b6477c6b0ced94e74a0ab9b46ccbea05db8aceee8977288492e02e16"
+    },
+    {
+      "path": "content/explicacoes/casos/ledger-projection/index.mdx",
+      "sha256": "ca27bcb87f5db0e56229246363fa95089a4c149f0311ce5cb333874aa79bac96"
+    },
+    {
+      "path": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "sha256": "8b40f91cc2ed4fe32cd729b028370aa81bc6b3aa332d26d5c1946540d41ee870"
+    },
+    {
+      "path": "content/explicacoes/casos/order-boundaries/index.mdx",
+      "sha256": "92047fc177ad981795b7db43526553c461de655b5cc1aa1f389ef2af2b8b4a9b"
+    },
+    {
+      "path": "content/explicacoes/casos/order-delivery/index.mdx",
+      "sha256": "68afde4a116318917dc8c5c64858e13b129a498d56cb81e4f6d51e280822a70c"
+    },
+    {
+      "path": "content/explicacoes/casos/query-grain-postgres/index.mdx",
+      "sha256": "a8944fe7e858347df6ccc553f85d8bcd38efd8e532375859608792b160060474"
+    },
+    {
+      "path": "content/explicacoes/casos/queue-workflow/index.mdx",
+      "sha256": "6e76b2497d31eea62d2380d3823bfa452644a1ea0e3d04c735cd49e06dcc4c3b"
+    },
+    {
+      "path": "content/explicacoes/casos/reservation/index.mdx",
+      "sha256": "47172f163cb7d7aab19f775f90532c409f2cebf1ff91189441816b787155a092"
+    },
+    {
+      "path": "content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "sha256": "3131de631209ae0e5b4dd970c7865ddadab880a51b610a255a0b238d3e7a5afe"
+    },
+    {
+      "path": "content/explicacoes/casos/safe-release/index.mdx",
+      "sha256": "46af10c79e7d397f827d9f8ac3a12ae6af68e5d9792f7546c03e2c26bb07dc32"
+    },
+    {
+      "path": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "sha256": "d6f64b1fbcf165b32ee6cd21a9e8c72dd3de608dff34ea5d16df55e1a2d28c43"
+    },
+    {
+      "path": "content/explicacoes/casos/storage-partitions/index.mdx",
+      "sha256": "a1906fc13c43cea9e240b5f2e6c3d016532160773ca09cdf93acbd8bd219da23"
+    },
+    {
+      "path": "content/explicacoes/code-boundaries/index.mdx",
+      "sha256": "5aa217fbea47b56903a0956df0370668efe2830820e955eaa75627a95880f32e"
+    },
+    {
+      "path": "content/explicacoes/code-patterns/index.mdx",
+      "sha256": "5344e740f90e1289651a0b3076fcf450c120e12be4b0c637a728a4ad046f924a"
+    },
+    {
+      "path": "content/explicacoes/concurrency/index.mdx",
+      "sha256": "4fb2d9c02e03ace1bccd17da1f307cb33c6ee1b71df7e55cef8da27001e635a6"
+    },
+    {
+      "path": "content/explicacoes/data-distribution/index.mdx",
+      "sha256": "ce28d6418323c68efd992167aad7f4ae0925d2d0c4318a972112c2bdb46b065a"
+    },
+    {
+      "path": "content/explicacoes/data-durability/index.mdx",
+      "sha256": "3f164cb603e58befdd826ac3340f140c27b73f905ea3d1c682f6254d7620e7e5"
+    },
+    {
+      "path": "content/explicacoes/distributed-work/index.mdx",
+      "sha256": "dddbb9a9ce1947975b625e39ac4d3fc632aba4d6c6eec15557a3633fd74271ae"
+    },
+    {
+      "path": "content/explicacoes/index.mdx",
+      "sha256": "3d00822d85053a261ad86abc68a9b6b5bc2b77d833d3fab53c0bb620aa649f0a"
+    },
+    {
+      "path": "content/explicacoes/messages/index.mdx",
+      "sha256": "acd89298b39f7d6e934f9c5654bfec2bd09a7a3164d8f5a0863746a07c2f006f"
+    },
+    {
+      "path": "content/explicacoes/observability/index.mdx",
+      "sha256": "61efdebfe9377f8dde065e2257bab69500fdd57e67604da9113b58d58784dd2a"
+    },
+    {
+      "path": "content/explicacoes/read-models/index.mdx",
+      "sha256": "7431af1dd4030aa3070d429f6da8ec86f9e9cb9327fcffd79d761e6d380d9d62"
+    },
+    {
+      "path": "content/explicacoes/reliable-integration/index.mdx",
+      "sha256": "61cf1268833af9f3debba3f2ee2e9242689a0fc7c14ff97128b3d53bf43a4ad4"
+    },
+    {
+      "path": "content/explicacoes/safe-change/index.mdx",
+      "sha256": "981ded386f6320b4f86f7eb45be376f9e5277bb9c9cf5c13a745f859d3de857c"
+    },
+    {
+      "path": "content/explicacoes/security/index.mdx",
+      "sha256": "2a94f583d90849b5cec17414f2228904e57bf1987c579c06c7338d2148815016"
+    },
+    {
+      "path": "content/explicacoes/workflow/index.mdx",
+      "sha256": "9c44d5578c7bff5cb7ed2f1ba821391b44544c70501579eab1110f46a1277454"
+    },
+    {
+      "path": "content/guias/_meta.js",
+      "sha256": "5575a380c9285128bb60b5a3fc17b057102c2ee5fbde34cc567e0f349e633bc6"
+    },
+    {
+      "path": "content/guias/casos/_meta.js",
+      "sha256": "bb54b385595c3dc6b857c7f98e8dcb29fc434b1c21376e6cad4437d0d9c7c47b"
+    },
+    {
+      "path": "content/guias/casos/access-policy/index.mdx",
+      "sha256": "64973c8f3a3eada8084d940544db7bdc3307b7320a6618dc7b9ea4efc79f315f"
+    },
+    {
+      "path": "content/guias/casos/airflow-lock-retry/index.mdx",
+      "sha256": "3157bc184c7760e09e1bc6edc70f4b5977c9d20f32ae84af5f1ac1b3435b4c94"
+    },
+    {
+      "path": "content/guias/casos/cache-policy/index.mdx",
+      "sha256": "020db3f65bf9f7d3f4914e27ea0cb18aa45dad42d8cfb2e14819a675861c9ff1"
+    },
+    {
+      "path": "content/guias/casos/consensus/index.mdx",
+      "sha256": "27ce8ae36a774e4db1d6718732def2a5d9e14c1a826d0b6caad04510f371b97b"
+    },
+    {
+      "path": "content/guias/casos/date-only/index.mdx",
+      "sha256": "1a3cc5b929e0558b056f57b97166bfc7c3c40fda4870288d99a84c41cfb3aacf"
+    },
+    {
+      "path": "content/guias/casos/diagnostics/index.mdx",
+      "sha256": "b949525fb6dcf16c50ed473828267355b42c3112e4ea51479167939921a97d6b"
+    },
+    {
+      "path": "content/guias/casos/early-refresh/index.mdx",
+      "sha256": "7ef03fcbb1d4f960c23f15acc9f9eb14f61e2bc702ef490b9d7c6ea52966ae93"
+    },
+    {
+      "path": "content/guias/casos/index.mdx",
+      "sha256": "1037c4f6905bf949fddd40f46c609c64de46805907e0551ceb782eba61814be7"
+    },
+    {
+      "path": "content/guias/casos/ledger-projection/index.mdx",
+      "sha256": "e812e5efc6b4d0d6ab0e4474bf605fbb0232161618e98e719a7fd927fac506b3"
+    },
+    {
+      "path": "content/guias/casos/opportunity-entry/index.mdx",
+      "sha256": "5700afe7076e96ad68b35b137b752d2fffbee93a4e748453c8e56201a648bbc4"
+    },
+    {
+      "path": "content/guias/casos/order-boundaries/index.mdx",
+      "sha256": "31ac4b26e15b05ce392e8c390b2e20f35eececbda33f68455ef5b790b8c2a367"
+    },
+    {
+      "path": "content/guias/casos/order-delivery/index.mdx",
+      "sha256": "2046cbc94a7c1a346de22613472a48a02823ed857baf0b0ed8400d3afb9ca9c0"
+    },
+    {
+      "path": "content/guias/casos/query-grain-postgres/index.mdx",
+      "sha256": "6287a86222d6f41597d6ed947f6114f4f6122d34ff9457c6903692956eab3383"
+    },
+    {
+      "path": "content/guias/casos/queue-workflow/index.mdx",
+      "sha256": "835ee012d24450c9e04df5037d9769dd0ff84f31e00d742f8f19970df9f504aa"
+    },
+    {
+      "path": "content/guias/casos/reservation/index.mdx",
+      "sha256": "b42ce771e112d70f20642b956ae81570a27f330ad1c44469e4ae57a168b5f1f0"
+    },
+    {
+      "path": "content/guias/casos/revision-cas-postgres/index.mdx",
+      "sha256": "e20697c95697e1f5ce48b69281ab84af884a8caa5d370ee44bc43ef7b758eb15"
+    },
+    {
+      "path": "content/guias/casos/safe-release/index.mdx",
+      "sha256": "fc68d85fd8d33a56823978455c36fa6585eed8013f911ff955b79b62a6723f27"
+    },
+    {
+      "path": "content/guias/casos/single-flight-cancel/index.mdx",
+      "sha256": "8ea65bf8856d8bb14f2e93d664d44f8dff9043395a48931584e38549822ec883"
+    },
+    {
+      "path": "content/guias/casos/storage-partitions/index.mdx",
+      "sha256": "8f2a9e2a3d9cc255d94f26b3dbc44dc8bb565e0c9128e182e32bba4a50f04662"
+    },
+    {
+      "path": "content/guias/index.mdx",
+      "sha256": "89c26481a81e2cf8de4a3448eb35c0efb6a4c3b4efebff1c9bd407c5fc363e3c"
+    },
+    {
+      "path": "content/guias/investigar-impacto.mdx",
+      "sha256": "6a936ddbbe4b3fe330ddc1654b3c8520f103d61bd18144b769e9507b8a70324c"
+    },
+    {
+      "path": "content/guias/recuperar-pipeline.mdx",
+      "sha256": "b7bebd9830f6e0f0d155a6c29bb4f980aa68b3f9a10ef4a3dc0b01f296207bd6"
+    },
+    {
+      "path": "content/index.mdx",
+      "sha256": "1d6e6728e34d302fe8ffe1ee459f580e8a00f02ed8b8504cfc0729acde3415ad"
+    },
+    {
+      "path": "content/jornadas/_meta.js",
+      "sha256": "75b6c4e24ec22785c395b0cd895454927e320971c914963f31c67a43fa75276a"
+    },
+    {
+      "path": "content/jornadas/access-policy/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/access-policy/conceitos.mdx",
+      "sha256": "a7a63705312c5b9ad8b5fe21ea1557dab5cf38ea301f80b4ac21a2da8c7a068a"
+    },
+    {
+      "path": "content/jornadas/access-policy/index.mdx",
+      "sha256": "6bef2b8c316bc00f9eb64e730191f308fc49efed8095566aa2bf31a134a35feb"
+    },
+    {
+      "path": "content/jornadas/airflow-lock-retry/index.mdx",
+      "sha256": "b286bf1f0b40e9d525e9cc07d3e5d3868b7dc7b243b85eb30a55139cde583d3b"
+    },
+    {
+      "path": "content/jornadas/cache-policy/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/cache-policy/conceitos.mdx",
+      "sha256": "7039b4a1aa3a3ceb6b8d8b966844b7271dfee3e251db87286007b615cb109a16"
+    },
+    {
+      "path": "content/jornadas/cache-policy/index.mdx",
+      "sha256": "8c8fb7870c1bdaa79d6b09eddaba87ab0ba994229a0ce7c846e688d86d3ebc10"
+    },
+    {
+      "path": "content/jornadas/consensus/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/consensus/conceitos.mdx",
+      "sha256": "59131bfc619796b31621b381a93842e51a1919ab593ac640e23583a9c7d05a06"
+    },
+    {
+      "path": "content/jornadas/consensus/index.mdx",
+      "sha256": "f497fb56620bbfa8d36070e75d0da70fe9d72e3da2fe6a15c5e80f0f1803491c"
+    },
+    {
+      "path": "content/jornadas/date-only/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/date-only/conceitos.mdx",
+      "sha256": "5197bea00377b84219c51bef5552dfef49f93a16759d12f69bcf8ff57437b214"
+    },
+    {
+      "path": "content/jornadas/date-only/index.mdx",
+      "sha256": "ba17f39b4813f5f7b5538a8b1b02a6e61e17ab4b35d5dd5595cf24c3f48d8875"
+    },
+    {
+      "path": "content/jornadas/diagnostics/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/diagnostics/conceitos.mdx",
+      "sha256": "9d89f7c51124902578fd7a5da6cec94c50418aaa9a071e863be232a42e97af32"
+    },
+    {
+      "path": "content/jornadas/diagnostics/index.mdx",
+      "sha256": "df6c69faa00dc28cfa726abc24f0dce7e7f1dd794eb9ef4a23c0d40ad6fa6cad"
+    },
+    {
+      "path": "content/jornadas/early-refresh/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/early-refresh/conceitos.mdx",
+      "sha256": "77fcb21e14f27931cfe7137bcf53426eae9d2e96036619991839dfe7db770266"
+    },
+    {
+      "path": "content/jornadas/early-refresh/index.mdx",
+      "sha256": "757efcae0061369a7d0285a313f5023d931a1ce34d2c196f25df6221ffef7660"
+    },
+    {
+      "path": "content/jornadas/index.mdx",
+      "sha256": "95446dc4f6c97955d670606fe680e4871f98d705c5c300a11dee8a373b0cd065"
+    },
+    {
+      "path": "content/jornadas/ledger-projection/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/ledger-projection/conceitos.mdx",
+      "sha256": "05c166cecbbb21b0f64729b3c8512bbaf36a48112abae86a87a13411fa53f13b"
+    },
+    {
+      "path": "content/jornadas/ledger-projection/index.mdx",
+      "sha256": "b7bb5190f3c6b4f47ad614a7d9d27741fe51365f21db14a3044e6363c4bcceea"
+    },
+    {
+      "path": "content/jornadas/matriz.mdx",
+      "sha256": "2717f03c639963b64c034b4a1c805438c5a77b02db4bcc8b3e8b9d14e6d348cf"
+    },
+    {
+      "path": "content/jornadas/opportunity-entry/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/opportunity-entry/conceitos.mdx",
+      "sha256": "14e9bf8388edb5f76718ea43bc928979bccf3b4875b1092487d8abdefe51852d"
+    },
+    {
+      "path": "content/jornadas/opportunity-entry/index.mdx",
+      "sha256": "df3d90e25afd6947877d8e9eea45d381d8139fa565e583adf47459a84f5de492"
+    },
+    {
+      "path": "content/jornadas/order-boundaries/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/order-boundaries/conceitos.mdx",
+      "sha256": "c1e9ebcb051fc51dcdc8a2560b2783cbb8fcbc20414acba626014c24b298e0c1"
+    },
+    {
+      "path": "content/jornadas/order-boundaries/index.mdx",
+      "sha256": "114d6653f5303f7d88f9f3729a758c4bf2c62aa99e23e01d61374dd18174cfb5"
+    },
+    {
+      "path": "content/jornadas/order-delivery/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/order-delivery/conceitos.mdx",
+      "sha256": "373b3ad82a70f1d542a80fff2505883424e04866c7fe4b61604ad438d40ddd93"
+    },
+    {
+      "path": "content/jornadas/order-delivery/index.mdx",
+      "sha256": "90bfc29823c6970a7ec66683e353dda66ba30d6145f25ca9aaf1895a5ccaed54"
+    },
+    {
+      "path": "content/jornadas/query-grain-postgres/index.mdx",
+      "sha256": "ef9b6200f2263f6972328b1907c5316e59ebbf39dd35d3db22388e50462d12ef"
+    },
+    {
+      "path": "content/jornadas/queue-workflow/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/queue-workflow/conceitos.mdx",
+      "sha256": "1e7b0b7609b00bce3212fd9a138778fd32096f657a493187cb813231692514c0"
+    },
+    {
+      "path": "content/jornadas/queue-workflow/index.mdx",
+      "sha256": "ed018cf2f8c86948f46f38dcd68c7caaa8afe126bed4fb4573d53c76faaa766f"
+    },
+    {
+      "path": "content/jornadas/reservation/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/reservation/conceitos.mdx",
+      "sha256": "fb845e12796e8fbe6f94dfcda729b5775eabb28458f6620f65f647028ff633d9"
+    },
+    {
+      "path": "content/jornadas/reservation/index.mdx",
+      "sha256": "2e3a1ea467ce3c9ebdce7d4cbc6e59a90297fd59084edac015bc59f1a039c9c4"
+    },
+    {
+      "path": "content/jornadas/revision-cas-postgres/index.mdx",
+      "sha256": "a3f9657954374e693766611cdaae5a2c9abf6d42a068525a99f26b1bbe82996c"
+    },
+    {
+      "path": "content/jornadas/safe-release/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/safe-release/conceitos.mdx",
+      "sha256": "820a8dc4eacf4fa6b363d053bdb8eb910a53a9d6ce25d3d13e31d960685927fa"
+    },
+    {
+      "path": "content/jornadas/safe-release/index.mdx",
+      "sha256": "abd3fa39d9ec5e17565f264ed02a4dc70e8f3364bb25e1c522505db6310d8a1a"
+    },
+    {
+      "path": "content/jornadas/single-flight-cancel/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/single-flight-cancel/conceitos.mdx",
+      "sha256": "e4aac23d665903dc6e4134b7243252c3e286c8ff06b5bb94719b97ea952023fc"
+    },
+    {
+      "path": "content/jornadas/single-flight-cancel/index.mdx",
+      "sha256": "7c07d2470f9bb8caa2f1f38868bddc476d6847c2983c351ba67b89f1a5dff69f"
+    },
+    {
+      "path": "content/jornadas/storage-partitions/_meta.js",
+      "sha256": "22112f2ae00f3fda824b99ffee1937bf70e774c02dc0fb67f047d22fca616f4a"
+    },
+    {
+      "path": "content/jornadas/storage-partitions/conceitos.mdx",
+      "sha256": "e9e0816322747fee188b665a14d4d8606ed3ce697d5ef36fe5950f8cdcba6778"
+    },
+    {
+      "path": "content/jornadas/storage-partitions/index.mdx",
+      "sha256": "0208022fa3e94f212e013691c4539dedd1bfb2a0c1ae1b3501619f6b88fe0088"
+    },
+    {
+      "path": "content/referencia/_meta.js",
+      "sha256": "895a7644baa3ce5bb9e60f422b20bb048002071a34896e6601a1091bae3bba9f"
+    },
+    {
+      "path": "content/referencia/casos/_meta.js",
+      "sha256": "bb54b385595c3dc6b857c7f98e8dcb29fc434b1c21376e6cad4437d0d9c7c47b"
+    },
+    {
+      "path": "content/referencia/casos/access-policy/index.mdx",
+      "sha256": "3cff2ea8341c92a8112d2247f143efa32995f6049f4c12367a0ef36d206b83cc"
+    },
+    {
+      "path": "content/referencia/casos/airflow-lock-retry/index.mdx",
+      "sha256": "6e98c80f66a662c870c580df52ef416d9ee5d8b357ec5e295c0a366276df47a6"
+    },
+    {
+      "path": "content/referencia/casos/cache-policy/index.mdx",
+      "sha256": "ca33a287ba28f53c6d54c29a17fdb79b3e1c2203cdc31dbbcad3ebe6d7ea3f82"
+    },
+    {
+      "path": "content/referencia/casos/consensus/index.mdx",
+      "sha256": "7452831a6d02d77bc5f11ea8191ad70155ea6a29c779936a55c925caa6d493e0"
+    },
+    {
+      "path": "content/referencia/casos/date-only/index.mdx",
+      "sha256": "f5d84853c254c56645683fd883284c8d5e5e0b4c12d1528ca3815d8064e98306"
+    },
+    {
+      "path": "content/referencia/casos/diagnostics/index.mdx",
+      "sha256": "fcd12df98920ff604b92d693c4cc00ae56acd1d9ca72f25069002e9c93319280"
+    },
+    {
+      "path": "content/referencia/casos/early-refresh/index.mdx",
+      "sha256": "8cf3b48ce28ee5b21bdfc9dfba6cb1a4479d274ae648d4686635aca254582835"
+    },
+    {
+      "path": "content/referencia/casos/index.mdx",
+      "sha256": "1c0da4b6d39c2ff1c4971559be7628e915d3765133b33878ae90c83e9a03c420"
+    },
+    {
+      "path": "content/referencia/casos/ledger-projection/index.mdx",
+      "sha256": "7717cbfe5076e091cc1cdad630a73b0066fab72724bee8b633ee0119edc2a4a7"
+    },
+    {
+      "path": "content/referencia/casos/opportunity-entry/index.mdx",
+      "sha256": "4fd80c3e282db004fe74c2cdfd5703a119ae82240ea0a9522f109fe1028e2cd0"
+    },
+    {
+      "path": "content/referencia/casos/order-boundaries/index.mdx",
+      "sha256": "b9a2a9f766affbcfc4e66daf80cb7de56560a5766c117ea8aa77dfb127a575e0"
+    },
+    {
+      "path": "content/referencia/casos/order-delivery/index.mdx",
+      "sha256": "6723936cc5d89c53cd29f1061a9ddd882e69070a7f7f7e68b831fa656876e481"
+    },
+    {
+      "path": "content/referencia/casos/query-grain-postgres/index.mdx",
+      "sha256": "0a6a51f309a0de24444b9c7e962896a39039d8b9e4a6fec86d50674ea70ec9fc"
+    },
+    {
+      "path": "content/referencia/casos/queue-workflow/index.mdx",
+      "sha256": "9f0ef05645abcddcc352494f022e6f912b6d377b7e637b07d02988b801d6ae91"
+    },
+    {
+      "path": "content/referencia/casos/reservation/index.mdx",
+      "sha256": "a5265321ceeb4bb294533b879c01a32bd2882349967d9f347df03f5efac9c433"
+    },
+    {
+      "path": "content/referencia/casos/revision-cas-postgres/index.mdx",
+      "sha256": "bc8bd9ba6110a3f801c08e0b5cd5ea0e9416cae22b34df9994eeefd449f15e15"
+    },
+    {
+      "path": "content/referencia/casos/safe-release/index.mdx",
+      "sha256": "9ebce57c1de24f1e920415702a15cffd640048e3af2580fa22640a802b199810"
+    },
+    {
+      "path": "content/referencia/casos/single-flight-cancel/index.mdx",
+      "sha256": "718269cf1668493b1d52fa45de4c8b7b2efd91bf7e59f8a2832731c4b399989f"
+    },
+    {
+      "path": "content/referencia/casos/storage-partitions/index.mdx",
+      "sha256": "2ab0b55bbed32d53d90eab74e6bb04b3763a022727d63838eb84be7f82857155"
+    },
+    {
+      "path": "content/referencia/catalogo/01-arquiteturas-de-aplicacao.mdx",
+      "sha256": "2cb483d556683bedc96477783f6cb20ca055e765340dca39f4342931e10ff010"
+    },
+    {
+      "path": "content/referencia/catalogo/02-sistemas-distribuidos-e-consistencia.mdx",
+      "sha256": "03a077bbe1c7513faf3eb1bdb93a2e0d371ed73b9f75dfe56cd04fef57e9472c"
+    },
+    {
+      "path": "content/referencia/catalogo/03-event-driven-messaging.mdx",
+      "sha256": "fc5fa85e90c4698f701aa217a2a2b5e326f5e9a324537dd0ffe91175115aa45b"
+    },
+    {
+      "path": "content/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "sha256": "adf81a0a5d84a13349c0a352541406ee986e80188ca5cc086a593a188c843650"
+    },
+    {
+      "path": "content/referencia/catalogo/05-banco-de-dados-e-armazenamento.mdx",
+      "sha256": "869d146f32190c9d0cbdc2578e8c0f68dcf7f7444b7d81e96f43185671c4cfec"
+    },
+    {
+      "path": "content/referencia/catalogo/06-cache.mdx",
+      "sha256": "da2a7bb5ca7f63a6d5b83c3533a49535602bd9c1b0052a432aac02005d5fe173"
+    },
+    {
+      "path": "content/referencia/catalogo/07-resiliencia.mdx",
+      "sha256": "c74b29cc35c8111bc966075c5278823c55fcaefe27adae92ba5bca6b03c6c01f"
+    },
+    {
+      "path": "content/referencia/catalogo/08-concorrencia.mdx",
+      "sha256": "4d05aadfee88512db670fe632a9f177676feebe23cf0d89318a24a84c32e957f"
+    },
+    {
+      "path": "content/referencia/catalogo/09-apis-e-integracao.mdx",
+      "sha256": "6745932e92e48e5e59bcaefb933d49b25060b84b4dbee1e03dbd6041be1be71e"
+    },
+    {
+      "path": "content/referencia/catalogo/10-ddd-domain-driven-design.mdx",
+      "sha256": "21792731583d43b26825be9cc45957ffad46636841489d129844c6ad6876f033"
+    },
+    {
+      "path": "content/referencia/catalogo/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "d9c057d7c90ced20f64c76b3ce9def1d08f322f4191097f69496e0c15d0f797e"
+    },
+    {
+      "path": "content/referencia/catalogo/12-deploy-e-releases.mdx",
+      "sha256": "f7a65931bb9056a48f9fb3fee50a5b672481d38d2f36c9ffcc2940d7c386b763"
+    },
+    {
+      "path": "content/referencia/catalogo/13-alta-disponibilidade.mdx",
+      "sha256": "5764d953aa4bbad2b7e82dc4250b1db506ef6c5892d8069877ad523f8c459740"
+    },
+    {
+      "path": "content/referencia/catalogo/14-seguranca.mdx",
+      "sha256": "2603d2c069f96dd7c2e6810184483baeceebd635c16b3bb7223ce996ea92917a"
+    },
+    {
+      "path": "content/referencia/catalogo/15-observabilidade.mdx",
+      "sha256": "cb5b73b412737066257f5f0884b85c56799832472756890ca4aad9fadfb33298"
+    },
+    {
+      "path": "content/referencia/catalogo/16-workflow-e-processamento.mdx",
+      "sha256": "f0e9183c0245d552be01a691ef69bd7363f7c50e88f5b5511ba50d9da7b40679"
+    },
+    {
+      "path": "content/referencia/catalogo/17-padroes-classicos-gof.mdx",
+      "sha256": "efb2b527bbcf5f373ea322cae55f02fa170d8b894dd07c25a97792b3242caa5e"
+    },
+    {
+      "path": "content/referencia/catalogo/_meta.js",
+      "sha256": "52e7fffcbb9abb132a2ea9e130bd2651573d2fe4fcd8e8b6c6f8e6d6aff6d568"
+    },
+    {
+      "path": "content/referencia/catalogo/index.mdx",
+      "sha256": "8805f99123b8383e6926745c53bdf6e9e0679d7e3d1e804f4d7e40aceaa42e13"
+    },
+    {
+      "path": "content/referencia/curadoria/01-arquiteturas-de-aplicacao.mdx",
+      "sha256": "9f146fc66abef78fab8269e8387f68a6e196a96a917742d2420e9544c848ce1d"
+    },
+    {
+      "path": "content/referencia/curadoria/02-sistemas-distribuidos-e-consistencia.mdx",
+      "sha256": "a1712443c78a284b4a0603e843bd02ea41b87a316d8931d2939149c2bbc8c0c5"
+    },
+    {
+      "path": "content/referencia/curadoria/03-event-driven-messaging.mdx",
+      "sha256": "c7839614e76afe23a8e6b3b7edb348fc111245bf3b24c791aa861a58a6a15745"
+    },
+    {
+      "path": "content/referencia/curadoria/04-cqrs-event-sourcing-e-modelos-de-leitura.mdx",
+      "sha256": "9aec2074e65bc6e1c4aa8d89f36bb01335454cbc1ba6c8bddeedae04d93f9745"
+    },
+    {
+      "path": "content/referencia/curadoria/05-banco-de-dados-e-armazenamento.mdx",
+      "sha256": "f68e3fc2edb6ebadc570fa480fa11c253c06c8020400d3b39fe21b3534991578"
+    },
+    {
+      "path": "content/referencia/curadoria/06-cache.mdx",
+      "sha256": "7f200581fe1d66b887281210ee54eb60dd59b065542f022d0425d73716c3528d"
+    },
+    {
+      "path": "content/referencia/curadoria/07-resiliencia.mdx",
+      "sha256": "bd320dc5b080c6e56cfdd9ca725d2b708a529610d3c9b13f5654e1d7eb9bc3c0"
+    },
+    {
+      "path": "content/referencia/curadoria/08-concorrencia.mdx",
+      "sha256": "7041d6af9b0e83f17072f5b1622426733700b5b1a0b122881b974c1e6be337d9"
+    },
+    {
+      "path": "content/referencia/curadoria/09-apis-e-integracao.mdx",
+      "sha256": "1ed46b4f76f9a4db6b36b58150d81aad7246ea6cd63643de9621cc84cf926ff8"
+    },
+    {
+      "path": "content/referencia/curadoria/10-ddd-domain-driven-design.mdx",
+      "sha256": "2a8d22100748bb06e7e2453757a5ab62afe4ab528f819a5cc1085ffaf5cad58a"
+    },
+    {
+      "path": "content/referencia/curadoria/11-padroes-para-decompor-sistemas.mdx",
+      "sha256": "13e9b0d05bb0dc35908e4e0a1fd372962fdfb085c2b3c8d3ef13197cf11fd429"
+    },
+    {
+      "path": "content/referencia/curadoria/12-deploy-e-releases.mdx",
+      "sha256": "86a81ff74433bc7faa47192146e6eb0e2f6728c0c2a88ee2d3923cbd9789cf1f"
+    },
+    {
+      "path": "content/referencia/curadoria/13-alta-disponibilidade.mdx",
+      "sha256": "b720bbc8d270351dcbbcc0d3e059cf8d7da9bbfda5d314221969f169395d2b89"
+    },
+    {
+      "path": "content/referencia/curadoria/14-seguranca.mdx",
+      "sha256": "3f6aa3ad0f848a4905c95c032583123e0ee38991b0ef9092d48c7057600b2b05"
+    },
+    {
+      "path": "content/referencia/curadoria/15-observabilidade.mdx",
+      "sha256": "4cf1f9b030dcc4bc79e68172ff6e62a27e28a9a3ccf3a44f6c6cb964264032bb"
+    },
+    {
+      "path": "content/referencia/curadoria/16-workflow-e-processamento.mdx",
+      "sha256": "bd16a86611830682685e017087d8329c1d79b8a2c3f74641373e4b77c3daf362"
+    },
+    {
+      "path": "content/referencia/curadoria/17-padroes-classicos-gof.mdx",
+      "sha256": "7d5ebd0138fb7c48f43bf2e8b1853deb0da8427f3dc8f2d758d93cae21ca0a86"
+    },
+    {
+      "path": "content/referencia/curadoria/_meta.js",
+      "sha256": "bd3c6dbfbbe991b9ff08a1ca1e98b2c2ff2104e1600dad75419e60a0097417a9"
+    },
+    {
+      "path": "content/referencia/curadoria/index.mdx",
+      "sha256": "ee8a93622c2daceb3b5d7c8c77c6daf48d47e359feeb88ca41ad0711c06db118"
+    },
+    {
+      "path": "content/referencia/evidencias.mdx",
+      "sha256": "27c4abe67c866c60cd231e3637243af4ddbdd63407f7b5410fab1eabb3a5b7bc"
+    },
+    {
+      "path": "content/referencia/index.mdx",
+      "sha256": "c895117edd067b985bdef2104de6d89a663df99e3d3db60268edcd307b554d66"
+    },
+    {
+      "path": "content/referencia/prioritarios.mdx",
+      "sha256": "3a7f14a648ea1fe2cc78778b069d553b58d680f96c749303c6cdae9c53661416"
+    },
+    {
+      "path": "content/referencia/skills-e-projetos.mdx",
+      "sha256": "90784547b53e61cba92f8448919a2d5673a93e66521b9f465c276780fc043a50"
+    },
+    {
+      "path": "content/tutoriais/_meta.js",
+      "sha256": "19de2385b012ac28e44253f74e6c5baaaad0fca120b03862264458ebc469d3eb"
+    },
+    {
+      "path": "content/tutoriais/casos/_meta.js",
+      "sha256": "bb54b385595c3dc6b857c7f98e8dcb29fc434b1c21376e6cad4437d0d9c7c47b"
+    },
+    {
+      "path": "content/tutoriais/casos/access-policy/index.mdx",
+      "sha256": "d3e389cbbb3c43c5950ded686802f4117f56aea6b1413709a82fbb67b75b8243"
+    },
+    {
+      "path": "content/tutoriais/casos/airflow-lock-retry/index.mdx",
+      "sha256": "08b6edac2e2077a951b9fe18c861446a45674fc9b0dbdce4cc646276f7b38d07"
+    },
+    {
+      "path": "content/tutoriais/casos/cache-policy/index.mdx",
+      "sha256": "f4eae0f3a92cc12c99f2e97f58c174d5d4de746fe04fca853e10352e33b88ad1"
+    },
+    {
+      "path": "content/tutoriais/casos/consensus/index.mdx",
+      "sha256": "0a5adf0aa558dbb098ce3ccc6b60f589cfa968c39e866bb331571f6b90380e1d"
+    },
+    {
+      "path": "content/tutoriais/casos/date-only/index.mdx",
+      "sha256": "ce7a70ae7e8e464d82eb8de78825642a9db24d972a6ba4cf02cfcaf69e317947"
+    },
+    {
+      "path": "content/tutoriais/casos/diagnostics/index.mdx",
+      "sha256": "f7ae15f7540cd22faacf4681f2228c7bd1828c542069244c8f5951477734b39f"
+    },
+    {
+      "path": "content/tutoriais/casos/early-refresh/index.mdx",
+      "sha256": "17a0e589098788550708be1c700abf737a53a2ab9276a47875f501311c3d1c1b"
+    },
+    {
+      "path": "content/tutoriais/casos/index.mdx",
+      "sha256": "36eedbcf8106f76a633bb6796910986aed1f285723d43a2fb65573b77a651ba9"
+    },
+    {
+      "path": "content/tutoriais/casos/ledger-projection/index.mdx",
+      "sha256": "e0652b3b1d8b8feb6efeeaa121eceac296b4ac96dbf87f39b3cd90c80996025c"
+    },
+    {
+      "path": "content/tutoriais/casos/opportunity-entry/index.mdx",
+      "sha256": "ef9101ed146f4ee1ac1c7a3199d0c6b56e3414bd21f46b54f13cefab64b85d0b"
+    },
+    {
+      "path": "content/tutoriais/casos/order-boundaries/index.mdx",
+      "sha256": "5d035b9bc065da37346339a010700c0bc767356978b8f6e1ae40e51331200062"
+    },
+    {
+      "path": "content/tutoriais/casos/order-delivery/index.mdx",
+      "sha256": "3e50fc22a8d2487cc66bfaeb9d67ea1699b28d34f95eb003370c55e008eaf7b1"
+    },
+    {
+      "path": "content/tutoriais/casos/query-grain-postgres/index.mdx",
+      "sha256": "f7c9283e7c642704d5dfd27cbd1212068bcd2b72e9a401ff551336a6f85a13cf"
+    },
+    {
+      "path": "content/tutoriais/casos/queue-workflow/index.mdx",
+      "sha256": "559c3ce5ab58b30e3a4ef15ad0ceaac4bbd9edaaf9aa58c0027188059f8df694"
+    },
+    {
+      "path": "content/tutoriais/casos/reservation/index.mdx",
+      "sha256": "d425bc83317e44dee75eff9e601e05e44e47ee661f6601cd2b72753dd4d1cb0b"
+    },
+    {
+      "path": "content/tutoriais/casos/revision-cas-postgres/index.mdx",
+      "sha256": "536c852350b953ca28fa6916de48c0ef0b8cd3cd92334ba0d6c0f204aa9df169"
+    },
+    {
+      "path": "content/tutoriais/casos/safe-release/index.mdx",
+      "sha256": "325f606ecd346e3bd407bf71fb4a565a2a081f4cffbab50b8f3dae79229785c8"
+    },
+    {
+      "path": "content/tutoriais/casos/single-flight-cancel/index.mdx",
+      "sha256": "514baf6f6fdfbd48db7bd1c2afe2370c359d195df92abcecfcff7ee6ff7b1b37"
+    },
+    {
+      "path": "content/tutoriais/casos/storage-partitions/index.mdx",
+      "sha256": "1ffd9dca7036fcbb79f3da8d498183eb70ec337ddd754b370dc938b12bd7c880"
+    },
+    {
+      "path": "content/tutoriais/idempotency.mdx",
+      "sha256": "210373c740ca4f7cfab7101c695e29439e63ce37038e33f7dc5d59bd3119938b"
+    },
+    {
+      "path": "content/tutoriais/index.mdx",
+      "sha256": "ba6af9856b66357c0da618f15f0d10922977de234b8490193715a4fa8872c3c8"
+    },
+    {
+      "path": "content/tutoriais/optimistic-concurrency.mdx",
+      "sha256": "f8de20c0e3249b2bcf075f4cc4765581f810feff6e3a94f4430d1e5ae3f580ec"
+    },
+    {
+      "path": "content/tutoriais/outbox.mdx",
+      "sha256": "dbdd3a555486f0f957b893192d5d40d38667fe3ae68771866f3259e18969df09"
+    },
+    {
+      "path": "content/tutoriais/read-projection.mdx",
+      "sha256": "5821c113f9b8fa07790b34a8efa0748742d024b4e6ce5ec49bc4a194aea63fd7"
+    },
+    {
+      "path": "content/tutoriais/single-flight.mdx",
+      "sha256": "11cabe78ebcfe33c953413f7b56b2ead6bf090f42fd781b666dabe0be5dcadcc"
+    },
+    {
+      "path": "content/tutoriais/state-machine.mdx",
+      "sha256": "2b174b3488d04994be136f1d4652dae9baff8c964c4bfc508bce6695a62db985"
+    },
+    {
+      "path": "labs/airflow-lock-retry/README.md",
+      "sha256": "81a209bd948b4993930bcf2753b029ef89057a1ca65841097557e710ec1d300b"
+    },
+    {
+      "path": "labs/airflow-lock-retry/after.py",
+      "sha256": "3aca09f1bfc1783de847aa349e589d1535d35352a8078a17206c1f3dd38c6731"
+    },
+    {
+      "path": "labs/airflow-lock-retry/before.py",
+      "sha256": "3d07e99ef91f60205e06466e6468674e4713482f0d52d163ee06079c3bde7753"
+    },
+    {
+      "path": "labs/airflow-lock-retry/check_challenge.py",
+      "sha256": "779d2edcb15ca38dafeed5d9969c20041859c0c566d7981b6aaa6f4582407ad7"
+    },
+    {
+      "path": "labs/airflow-lock-retry/manifest.json",
+      "sha256": "0379d1dc7b6cb0a5ee437e6e0b7bc6043aa56419acca6d4bb8559c95621356f4"
+    },
+    {
+      "path": "labs/airflow-lock-retry/run.py",
+      "sha256": "33ac4ba4f4b92a7fe9e05e58f5cec942312636fb85482f9d62091737ccf7d399"
+    },
+    {
+      "path": "labs/airflow-lock-retry/source.patch",
+      "sha256": "fa066a220e430488c8c6f8ebeca77cd2fc25e6439ad51485d95204a08d5126e3"
+    },
+    {
+      "path": "labs/architecture/.gitignore",
+      "sha256": "57a8ad0e62346f7b0f2e261d59a7b90f1310043424bcb9d229208f183f1940d9"
+    },
+    {
+      "path": "labs/architecture/README.md",
+      "sha256": "a253df88964b66372b79de42b6e17cdb2a16f054fae8fb89caac4643d276ab62"
+    },
+    {
+      "path": "labs/architecture/additional_observations.py",
+      "sha256": "1f8f4305e639bd6d0e92ef38515be21b9a8210a1297ec95584ce4d0d056661c6"
+    },
+    {
+      "path": "labs/architecture/author_learning.py",
+      "sha256": "68b1b021c70fabeaaa8e6d1b9230af4afe9ec6744ad55c835a319970ad5ed1bb"
+    },
+    {
+      "path": "labs/architecture/case_diagrams.json",
+      "sha256": "f81a8c73e65b329cd73399cba9bd9b8bfca3e52281b51d0167347d966debab5e"
+    },
+    {
+      "path": "labs/architecture/check_challenges.py",
+      "sha256": "c36057e1a6f106f472e4b0744382c112b6c9bd196d0a92a4fab62daf54eb2a89"
+    },
+    {
+      "path": "labs/architecture/check_invariants.py",
+      "sha256": "48b465f116f607dc6a87c93a86a5be4d8807c5b3acd8a8c052106b9100a7fe1a"
+    },
+    {
+      "path": "labs/architecture/check_matrix.py",
+      "sha256": "3c8e707c41ff903792345b97245b3843c936915b85509b42497f3ed74a5a6aca"
+    },
+    {
+      "path": "labs/architecture/check_mdx.mjs",
+      "sha256": "535652b6283b1a8951ffedb5faf9d31f8e912408a5502e6a7f1c6585d81dc772"
+    },
+    {
+      "path": "labs/architecture/date-only/after-card.tsx",
+      "sha256": "7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d"
+    },
+    {
+      "path": "labs/architecture/date-only/after.ts",
+      "sha256": "4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5"
+    },
+    {
+      "path": "labs/architecture/date-only/before-card.tsx",
+      "sha256": "a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d"
+    },
+    {
+      "path": "labs/architecture/date-only/before.ts",
+      "sha256": "926797824e276c2c2d45da6ea48b6feb091decb7d79e7317d1a12ddf8379365d"
+    },
+    {
+      "path": "labs/architecture/date-only/candidate-before.ts",
+      "sha256": "4c84f8a6517f98776b5ec2b74ff96dd50e1c201b8813b87f19c6eeaec0930ba0"
+    },
+    {
+      "path": "labs/architecture/date-only/candidate.patch",
+      "sha256": "5ec0736ceee01a39260c3cb4ea173b01feccf359db72702729c67e0332cb125e"
+    },
+    {
+      "path": "labs/architecture/date-only/manifest.json",
+      "sha256": "4a30abeb13f0d537c6be9e3ac34f52cf66579207ea9a1194d2fbdcd9138a2334"
+    },
+    {
+      "path": "labs/architecture/date-only/run.mjs",
+      "sha256": "deefda8305166e88f720e542436aa9b0f9b301b5c45d51b03d02cc0d6bdc24d3"
+    },
+    {
+      "path": "labs/architecture/date-only/source.diff",
+      "sha256": "5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59"
+    },
+    {
+      "path": "labs/architecture/early-refresh/after.py",
+      "sha256": "c514e5776d4086374090c99d011edf68d94ffd650902b7bdc9dce5d5c0ac7cf7"
+    },
+    {
+      "path": "labs/architecture/early-refresh/before.py",
+      "sha256": "48b7e1c814452eaf495e52ff137d877d363472a2100c52fd9c4abca06da5f406"
+    },
+    {
+      "path": "labs/architecture/early-refresh/manifest.json",
+      "sha256": "253a249254008a4bdc20a4a7f619e9d1624735fdbc31f7d191206788b84e1f4e"
+    },
+    {
+      "path": "labs/architecture/early-refresh/run.py",
+      "sha256": "c913b8a165ce85a1306133d83bf5770fd23245d5b7ee92db31510ed5fcab78d3"
+    },
+    {
+      "path": "labs/architecture/early-refresh/source.diff",
+      "sha256": "d84ce17866a9d7581e62effae42271cc214fbba567f19a5d23bd55a71250b5ab"
+    },
+    {
+      "path": "labs/architecture/extract_historical.py",
+      "sha256": "6ee5dddb995af8d25a542f791c3fe040960d19e84f3372d10183f9494cb33121"
+    },
+    {
+      "path": "labs/architecture/financial.py",
+      "sha256": "116e75cf1d434977b3bb5ca48f627e1ffde19f1209a4bf83fbc60e2cb36bdc01"
+    },
+    {
+      "path": "labs/architecture/financial_contracts.json",
+      "sha256": "a6a32f68ab6e9d032f9e1f52c05300c30e5a1a4ee85e3876fc0fb62c480d5edf"
+    },
+    {
+      "path": "labs/architecture/freeze_learning.py",
+      "sha256": "9ec7606e4c0dff6623757301c55487e791f13c7051bc6021dba8b911e6ab0132"
+    },
+    {
+      "path": "labs/architecture/invariants.py",
+      "sha256": "2e47b0bcd180ba62732ee9b626f22c3d017c1a04d7f88d2364fbe5a349a9938d"
+    },
+    {
+      "path": "labs/architecture/map_concepts.py",
+      "sha256": "d908d26b73da9ce821d05b0ea1766b73c2866aeb3b255a56a65019a7c12a9ef9"
+    },
+    {
+      "path": "labs/architecture/mapping_decisions.json",
+      "sha256": "efa53e89e87dafbff5a7367a39006c323419aa36f8e4424c5deb8d9c244964bc"
+    },
+    {
+      "path": "labs/architecture/merge_observations.py",
+      "sha256": "4f50c5c1d34b32d8fb21d4c6c500cca324f469a4dfebd8737117f2861509939e"
+    },
+    {
+      "path": "labs/architecture/models_api.py",
+      "sha256": "f818b57f978b1c8570231fa491d9d0344fffad0a220712c7f2fcdbccf6ed06b6"
+    },
+    {
+      "path": "labs/architecture/models_architecture.py",
+      "sha256": "11eef231d3e995f2147d21ae0401d2cf40eecdd0b5919f99d7b37543295dffe4"
+    },
+    {
+      "path": "labs/architecture/models_concurrency.py",
+      "sha256": "317cbc953f2f40e4fddee20ce1ae02e3b3aa551bb7da2281d70f33d4c1a60587"
+    },
+    {
+      "path": "labs/architecture/models_distribution.py",
+      "sha256": "1c75c77111047bcd9a386087d135311b4186f2f22ff62f3b5edf832337de674b"
+    },
+    {
+      "path": "labs/architecture/models_domain.py",
+      "sha256": "d8413c42c6f64ca8d1e7e72ade5dee48e8330e695beb1c8bd6e2cfe8d56d164a"
+    },
+    {
+      "path": "labs/architecture/models_ops.py",
+      "sha256": "276366d04c47cf4efffc743c563dce8f7f45907fbe49b26e7b39c4640229db7e"
+    },
+    {
+      "path": "labs/architecture/models_security.py",
+      "sha256": "0acc775d560f1a633502d278b3b2e8498a72238353250d04f3e5abee6ecc98dd"
+    },
+    {
+      "path": "labs/architecture/models_workflow.py",
+      "sha256": "dc7a47bc1a6c3d0d2eaca84def5a0ad775a22edf5939085d4c39ddf3ece66cfa"
+    },
+    {
+      "path": "labs/architecture/object_contracts.json",
+      "sha256": "84d4a2a2c50223bd6d5e81f9b8818d163f8a5444cbd286750d448bef068ca6aa"
+    },
+    {
+      "path": "labs/architecture/object_patterns.py",
+      "sha256": "4a1f126e49dc9c5c99e4e5dc12b806d07569a33d92787e2b410b2ac41e40d2b8"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after-integration.py",
+      "sha256": "63a2beb75f1306b3294cb618630d8f5a69903dbcbe5ae2a17fff794cc6f08d05"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after-qualify.py",
+      "sha256": "ae18625c61faee04b6a0255ea204f29d46ddcc5dba2367e25d4dfb77dd3d5cd0"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/after.py",
+      "sha256": "81964f5798fcfe87b8f37d6d5c3a5f866f3aa86944731954754dc9a73330d365"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/before-integration.py",
+      "sha256": "96444ce4213436cb2245d42760b6c7c8bf49acea538e18d2034aad0343328d38"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/before-qualify.py",
+      "sha256": "9b7942171f29c0aba293241ea52f04d787ef6a6c16e145a3a5186f387e9a7872"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/before.py",
+      "sha256": "19d2e9051189fc83b10f922e57504fa5f006f67c8101fe4e27dc15dffd6c588a"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/manifest.json",
+      "sha256": "23e8bb520f93959edf5ac886df89fac4428442087284a435b4b2b1a29ed6fa51"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/run.py",
+      "sha256": "3524d109a5fc7d6bd0728122eea40d78faf17756a8f0cf15c37799116594f7af"
+    },
+    {
+      "path": "labs/architecture/opportunity-entry/source.diff",
+      "sha256": "78d961e87d0d26a7a6d67b17a86bbb2fce6cf762e849fd8b2c95426bc52476f7"
+    },
+    {
+      "path": "labs/architecture/otel_probe.py",
+      "sha256": "1dbee9c0e890b3d7b5c4c2012a220a8dd1948fbfce33f96fe99c86a2c0c283d8"
+    },
+    {
+      "path": "labs/architecture/package-lock.json",
+      "sha256": "feb33c991125ef1830a1bceba027775de360dfc8a34f47c41e3196ad2da50d5f"
+    },
+    {
+      "path": "labs/architecture/package.json",
+      "sha256": "8baa3177ed15eae46554674f2770a2884dcc3a7036c0370de45dc67a6e2f9ef3"
+    },
+    {
+      "path": "labs/architecture/requirements-lock.txt",
+      "sha256": "841785a57c311269ea748d6792000931c8f78367fde0e0736c41d5b9545ad66b"
+    },
+    {
+      "path": "labs/architecture/requirements.txt",
+      "sha256": "d88166e8ed230773fc922977daa60bd77e7904ed889ead983cbc8eb1465e9dd7"
+    },
+    {
+      "path": "labs/architecture/run_all.py",
+      "sha256": "91a3129096765b64db14cf1eb08551b14d0d2d2510ca735c17331a5c626c49b3"
+    },
+    {
+      "path": "labs/architecture/setup_labs.py",
+      "sha256": "73305142deec61c2ae9b1cab8a4ee268f8a377c4a5fa702a79a15004433584d7"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/after.py",
+      "sha256": "2997fe1c0b5726a30b280e8a75c8e3ed9eb688cbe6df2859014369cd2596627c"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/before.py",
+      "sha256": "e1862d31918c8acdd44fba21694ca3960ec619116ee30ca565e7108eba1f141a"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/manifest.json",
+      "sha256": "27fdcfe9e6cc29cca20d99c44a6a5628ffbe02ccfff6278f3e481604292628bf"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/run.py",
+      "sha256": "98fd3c8a312c8edf4b9686de9446168364a4afe8288de01da817283b4eae5595"
+    },
+    {
+      "path": "labs/architecture/single-flight-cancel/source.diff",
+      "sha256": "a98325fe7dbe7cc7d0013d688f247a00386b36541f4e5562b3e852dc02582cd7"
+    },
+    {
+      "path": "labs/postgres-lineage/README.md",
+      "sha256": "a118a6986aa44402a3c9341886c4a374f1966b12de77e0cfb0460dbb8885c024"
+    },
+    {
+      "path": "labs/postgres-lineage/check_challenges.py",
+      "sha256": "f65748a7c058d122670301b838aa3d34bc3b42242d1eabb45736175c78652f0b"
+    },
+    {
+      "path": "labs/postgres-lineage/extract.py",
+      "sha256": "c82faef1289e434be41508f485a83db87ced925b604ee8602f62ffdfacf55953"
+    },
+    {
+      "path": "labs/postgres-lineage/grain-after.function.txt",
+      "sha256": "d92e7aaf53db51580fb41c3275c2e51762ab7dd1c021c362802f5dfba9cbd08f"
+    },
+    {
+      "path": "labs/postgres-lineage/grain-after.sql.template",
+      "sha256": "5763e281efee82243efd47520d27432fe59913720a0bb2ef2b5a25a147d13874"
+    },
+    {
+      "path": "labs/postgres-lineage/grain-before.function.txt",
+      "sha256": "0a47c70b894c3142ac19331c60fa572ace46d9594c72b3f4132a76eee3b1a892"
+    },
+    {
+      "path": "labs/postgres-lineage/grain-before.sql.template",
+      "sha256": "5d5e8c0c94f62ec4ef61d437e51afc43c258956e77b3a297d4dfa6ca339329c8"
+    },
+    {
+      "path": "labs/postgres-lineage/grain.patch",
+      "sha256": "3dda3d79b0965db4fd26801e46005838c9977e264560161fa6176a8628ad080a"
+    },
+    {
+      "path": "labs/postgres-lineage/manifest.json",
+      "sha256": "8c7214540cc8e33994bf3ed81f6221dbcce97eb94119a3fcea6e203a0a233927"
+    },
+    {
+      "path": "labs/postgres-lineage/revision-after.function.txt",
+      "sha256": "5a91ba4db434e6c3d58be4019d7b2a602a629ce2f396e96e8a07d41024979fd7"
+    },
+    {
+      "path": "labs/postgres-lineage/revision-after.sql.template",
+      "sha256": "7705f280f959ae8bcf09016a9f1085d0ceb4918a78777c666e54143e7a7e34de"
+    },
+    {
+      "path": "labs/postgres-lineage/revision-before.function.txt",
+      "sha256": "333d61dedda0e92adddd6f1a424fab2a49c1d4c50c9ec1a22908f5762cde9979"
+    },
+    {
+      "path": "labs/postgres-lineage/revision-before.sql.template",
+      "sha256": "290e9ade7894a339e5086b2ce6e81744f080b306aa2f4ad7059f67c3ea28c3a9"
+    },
+    {
+      "path": "labs/postgres-lineage/revision.patch",
+      "sha256": "8ce30561d2668b24001346fe1ed1de5aa452bdbc71850813eef305975f1902b8"
+    },
+    {
+      "path": "labs/postgres-lineage/run.py",
+      "sha256": "a79184d888323292944974208d846f41f6ec2971f4116f2a30d189fa1e54babb"
+    },
+    {
+      "path": "patches/nextra-theme-docs+4.6.1.patch",
+      "sha256": "91997cc001618fed04170cbfa449c465143928c7e52299dfed5ce84e9ca52cad"
+    }
+  ]
+}

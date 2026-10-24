@@ -1,0 +1,22 @@
+{
+  "next_before": "16.4.0",
+  "next_after": "16.4.3",
+  "after_patch_next_advisory": false,
+  "build_dependency_residual_counts": {
+    "info": 0,
+    "low": 8,
+    "moderate": 1,
+    "high": 1,
+    "critical": 0,
+    "total": 10
+  },
+  "runtime_counts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "scope": "build tree contains existing xmldom/KaTeX findings; deployed runtime has Hono packages only, not Next"
+}
