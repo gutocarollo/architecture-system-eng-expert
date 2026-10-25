@@ -1,6 +1,11 @@
 import { earlyRefresh } from '../case-content/early-refresh.js'
 
-export function CaseNavigation({ current }) {
+function destinationFor(facet, withinPage) {
+  const fragment = `#${facet.id}`
+  return withinPage ? fragment : `${earlyRefresh.facets[0].href}${fragment}`
+}
+
+export function CaseNavigation({ current, withinPage = false }) {
   const active = earlyRefresh.facets.find(facet => facet.id === current)
   if (!active) throw new Error(`Unknown early-refresh facet: ${current}`)
 
@@ -18,7 +23,7 @@ export function CaseNavigation({ current }) {
       <ul>
         {earlyRefresh.facets.map(facet => (
           <li key={facet.id}>
-            <a href={facet.href} aria-current={facet.id === current ? 'page' : undefined}>
+            <a href={destinationFor(facet, withinPage)} aria-current={!withinPage && facet.id === current ? 'location' : undefined}>
               {facet.label}
             </a>
           </li>
@@ -28,7 +33,7 @@ export function CaseNavigation({ current }) {
   )
 }
 
-export function CaseNext({ current }) {
+export function CaseNext({ current, withinPage = false }) {
   const destinations = {
     overview: ['explanation', 'reference'],
     explanation: ['tutorial', 'reference'],
@@ -41,13 +46,13 @@ export function CaseNext({ current }) {
       <p>Continue neste caso:</p>
       {destinations[current].map(id => {
         const facet = earlyRefresh.facets.find(item => item.id === id)
-        return <a key={id} href={facet.href}>{facet.label}</a>
+        return <a key={id} href={destinationFor(facet, withinPage)}>{facet.label}</a>
       })}
     </div>
   )
 }
 
-export function CaseChoices() {
+export function CaseChoices({ withinPage = false }) {
   const purposes = {
     explanation: ['Você quer entender por que acontece.', 'Você identifica o mecanismo e o limite da proteção.'],
     tutorial: ['Você quer aprender fazendo.', 'Você repete entradas conhecidas e compara as duas condições.'],
@@ -61,7 +66,7 @@ export function CaseChoices() {
         {earlyRefresh.facets.filter(facet => facet.id !== 'overview').map(facet => (
           <tr key={facet.id}>
             <td>{purposes[facet.id][0]}</td>
-            <td><a href={facet.href}>{facet.label}</a></td>
+            <td><a href={destinationFor(facet, withinPage)}>{facet.label}</a></td>
             <td>{purposes[facet.id][1]}</td>
           </tr>
         ))}

@@ -10,7 +10,7 @@
     "start": "next start",
     "postinstall": "patch-package",
     "prebuild": "python3 scripts/package-early-refresh.py",
-    "test": "node --test tests/early-refresh.test.mjs"
+    "test": "node --test tests/early-refresh*.test.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

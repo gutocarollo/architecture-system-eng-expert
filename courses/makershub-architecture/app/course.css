@@ -93,7 +93,7 @@ main :is(th, td) {
   text-decoration: none;
 }
 
-.case-navigation a[aria-current='page'] {
+.case-navigation a[aria-current='location'] {
   border-color: currentColor;
   background: color-mix(in srgb, currentColor 10%, transparent);
   font-weight: 700;
@@ -110,8 +110,16 @@ main :is(th, td) {
   outline-offset: 3px;
 }
 
-main:has(.case-navigation) :is(h2, h3, h4, h5, h6) {
+main:has(.case-navigation) :is(h2, h3, h4, h5, h6, .case-legacy-anchor) {
   scroll-margin-top: calc(var(--nextra-navbar-height) + 11rem);
+}
+
+.case-legacy-anchor {
+  display: block;
+}
+
+main section[data-case-facet] {
+  padding-block: 1rem;
 }
 
 .case-next {

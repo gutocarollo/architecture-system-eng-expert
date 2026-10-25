@@ -2,7 +2,7 @@
 
 Esta pasta contém a fonte editorial, a aplicação Nextra e os laboratórios do curso publicado em https://hub-makershub-architecture-course.6bv96u.easypanel.host. A pasta do Git não aparece nas URLs do site.
 
-O piloto early-refresh reúne a jornada, a explicação, o tutorial, o guia e a referência pela navegação do próprio caso. As cinco páginas conservam suas finalidades e seus endereços. Os outros casos mantêm o conteúdo importado da versão publicada.
+O piloto early-refresh apresenta explicação, tutorial, guia e referência completos na página da jornada, com sumário local. Os quatro textos têm uma única fonte em `case-content/early-refresh/`. Os endereços antigos conservam o acesso aos mesmos corpos, mas o percurso do caso acontece numa única página. Os outros casos mantêm o conteúdo importado da versão publicada.
 
 Para construir o curso, use Node compatível com o lock e Python 3.11 ou posterior:
 

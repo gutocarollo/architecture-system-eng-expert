@@ -9,7 +9,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const htmlRoot = process.env.EARLY_REFRESH_HTML_ROOT || path.join(root, 'out')
 const legacyAnchors = JSON.parse(await readFile(path.join(root, 'tests/legacy-anchors.json'), 'utf8'))
 const routes = Object.keys(legacyAnchors)
-const expectedLinks = routes.map(route => `/${route}`)
+const facetIds = ['overview', 'explanation', 'tutorial', 'guide', 'reference']
+const canonicalPath = '/jornadas/early-refresh/'
 
 async function documentFor(route) {
   const html = await readFile(path.join(htmlRoot, route, 'index.html'), 'utf8')
@@ -17,15 +18,17 @@ async function documentFor(route) {
 }
 
 for (const route of routes) {
-  test(`${route} offers every facet and identifies the current page`, async () => {
+  test(`${route} reaches every facet of the complete case`, async () => {
     const document = await documentFor(route)
     const navigation = document.querySelector('main nav[data-case-navigation="early-refresh"]')
     assert.ok(navigation, 'The reader needs case navigation inside the article')
     assert.match(navigation.textContent, /A lista continua disponível durante a renovação/)
+    const withinPage = route === 'jornadas/early-refresh/'
+    const expectedLinks = facetIds.map(id => `${withinPage ? '' : canonicalPath}#${id}`)
     assert.deepEqual([...navigation.querySelectorAll('a')].map(link => link.getAttribute('href')), expectedLinks)
-    const active = navigation.querySelectorAll('[aria-current="page"]')
-    assert.equal(active.length, 1)
-    assert.equal(active[0].getAttribute('href'), `/${route}`)
+    const active = navigation.querySelectorAll('[aria-current="location"]')
+    assert.equal(active.length, withinPage ? 0 : 1)
+    if (!withinPage) assert.equal(active[0].getAttribute('href'), `${canonicalPath}#${facetIds[routes.indexOf(route)]}`)
     assert.equal(navigation.getAttribute('aria-label'), 'Navegação do caso early-refresh')
   })
 

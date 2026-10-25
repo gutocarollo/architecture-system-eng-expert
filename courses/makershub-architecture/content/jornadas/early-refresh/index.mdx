@@ -5,12 +5,19 @@ description: "Você aprenderá a separar a idade do valor, a renovação em anda
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/early-refresh/explanation.mdx'
+import Tutorial from '../../../case-content/early-refresh/tutorial.mdx'
+import Guide from '../../../case-content/early-refresh/guide.mdx'
+import Reference from '../../../case-content/early-refresh/reference.mdx'
+
 import { CaseNavigation, CaseNext, CaseChoices } from '../../../components/CaseNavigation.jsx'
 import { EarlyRefreshFact, EarlyRefreshOutput, EarlyRefreshProvenance, EarlyRefreshSources, EarlyRefreshCommand } from '../../../components/EarlyRefreshFacts.jsx'
 
-<CaseNavigation current="overview" />
+<span id="overview" className="case-legacy-anchor" />
 
 # A lista continua disponível durante a renovação
+
+<CaseNavigation current="overview" withinPage />
 
 A lista de chamadas é consultada repetidamente. A versão anterior mantém o valor até o TTL, mas a primeira leitura após o vencimento espera a resposta do produtor. FBI-2331 acrescentou uma janela de renovação antecipada para que a consulta seguinte pudesse encontrar o valor novo. Esta história trata de uma evolução documentada.
 
@@ -18,7 +25,7 @@ A lista de chamadas é consultada repetidamente. A versão anterior mantém o va
 
 ## Escolha o que você precisa agora
 
-<CaseChoices />
+<CaseChoices withinPage />
 
 ## Antes de começar
 
@@ -30,6 +37,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 <EarlyRefreshFact name="limits" />
 
+<section data-case-facet="explanation">
+
+## Explicação — por que renovar a lista antes do vencimento [#explanation]
+
+<Explanation />
+
+<CaseNext current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial — execute a comparação [#tutorial]
+
+<Tutorial />
+
+<CaseNext current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia — avalie uma mudança [#guide]
+
+<Guide />
+
+<CaseNext current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência — parâmetros, fontes e limites [#reference]
+
+<Reference />
+
+<CaseNext current="reference" withinPage />
+
+</section>
+
 Depois de concluir este caso, você pode escolher outro: [A posição rápida pertence ao outro recorte](/jornadas/cache-policy/).
 
 ## Conceitos deste caso
@@ -37,5 +84,3 @@ Depois de concluir este caso, você pode escolher outro: [A posição rápida pe
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne um conceito no [mapa de mecanismos e práticas](/jornadas/early-refresh/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
-
-<CaseNext current="overview" />

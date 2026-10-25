@@ -1,0 +1,48 @@
+import { EarlyRefreshFact, EarlyRefreshOutput, EarlyRefreshProvenance, EarlyRefreshSources, EarlyRefreshCommand } from '../../components/EarlyRefreshFacts.jsx'
+
+Você concluirá uma experiência local e previsível. Você aprenderá a separar a idade do valor, a renovação em andamento e o vencimento que obriga o leitor a esperar.
+
+### 1. Prepare o ambiente isolado
+
+Baixe o [laboratório deste caso](/downloads/early-refresh.zip) e descompacte o arquivo. Abra um terminal na pasta `early-refresh-lab` criada pela extração. Ela contém `labs/architecture/early-refresh`, com as duas versões e o programa que as compara.
+
+Confira Python 3.11 ou posterior. Este caso usa somente a biblioteca padrão do Python; não precisa instalar pacotes, preparar outro laboratório ou acessar um sistema externo.
+
+```sh
+pwd
+python3 --version
+```
+
+Se você já clonou o repositório de estudo, use a pasta `courses/makershub-architecture` como raiz. O comando da prática é igual nas duas formas de obtenção. Os efeitos deste caso ficam em memória.
+
+### 2. Reconheça a entrada que será repetida
+
+<EarlyRefreshFact name="inputs" />
+
+Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
+
+### 3. Execute as duas condições
+
+<EarlyRefreshCommand />
+
+O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
+
+### 4. Compare a saída
+
+A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:17.531499+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
+
+<EarlyRefreshOutput />
+
+<EarlyRefreshFact name="outcome" />
+
+### 5. Examine a mudança
+
+Abra `labs/architecture/early-refresh/source.diff` e os snapshots before/after. O runner lê os módulos ou os corpos das funções desses snapshots; a correção estudada já está preservada em after. Identifique a operação descrita na explicação e compare as mesmas entradas. Não é preciso trocar a branch de origem nem alterar o MakersHub.
+
+### 6. Reinicie e conclua [#7-reinicie-e-conclua]
+
+Execute o mesmo comando outra vez. Cada processo começa com um cache e um relógio controlado novos. Não há dados persistidos para limpar. Não existe comando de limpeza contra banco, cache ou serviço externo.
+
+<EarlyRefreshFact name="limits" />
+
+O [mapa de conceitos deste caso](/jornadas/early-refresh/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.

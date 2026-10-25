@@ -1,0 +1,44 @@
+import { EarlyRefreshFact, EarlyRefreshOutput, EarlyRefreshProvenance, EarlyRefreshSources, EarlyRefreshCommand, EarlyRefreshCommandInline } from '../../components/EarlyRefreshFacts.jsx'
+
+Esta página reúne os contratos que a prática compara. Você aprenderá a separar a idade do valor, a renovação em andamento e o vencimento que obriga o leitor a esperar. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+### Entradas e ambiente
+
+<EarlyRefreshFact name="inputs" />
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `early-refresh`. |
+| Símbolos a consultar | `SingleFlightCache.get / _start_background_refresh`. |
+| Comando completo | <EarlyRefreshCommandInline />. |
+| Dados e efeito externo | As entradas são sintéticas; os efeitos deste caso ficam em memória. |
+| Pré-requisito deste caso | Python 3.11 ou posterior, somente biblioteca padrão. |
+| Horário e escopo do recibo | `2026-10-15T02:34:17.531499+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+### Versões e fronteiras da reprodução
+
+<EarlyRefreshSources />
+
+### Resultados que o contrato compara
+
+<EarlyRefreshFact name="outcome" />
+
+A reprodução histórica emite o resultado completo abaixo. Os rótulos `before` e `after` distinguem as versões; `comparison=PASS` significa que as condições esperadas apareceram nos dois recortes.
+
+<EarlyRefreshOutput />
+
+### Garantia, parâmetros e limites
+
+<EarlyRefreshFact name="mechanism" />
+
+<EarlyRefreshFact name="limits" />
+
+Uma repetição deste caso usa a mesma entrada conhecida. Seus parâmetros e o produtor controlado estão no runner; o comando não recebe `--probe`.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+### Recibo e rastreabilidade
+
+O registro histórico original é `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na fonte anterior. A execução desta entrega fica em `tasks/FBI-4991-early-refresh/laboratory.json` neste checkout. O hash SHA-256 da saída capturada é `1201e28b8a9c207c67c6dabad6fd7a4be235fee7fa305dfabfede5d2aed8f9ac`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.

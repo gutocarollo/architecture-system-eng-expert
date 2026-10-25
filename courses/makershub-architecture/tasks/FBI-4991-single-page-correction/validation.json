@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-10-25T03:44:24.768198+00:00",
+  "baseline_commit": "c0230de87e0a392169ccfdfe141ffc6c6dd72ae6",
+  "red": {
+    "tests": 7,
+    "passed": 0,
+    "failed": 7
+  },
+  "green": {
+    "tests": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "build": {
+    "html_pages": 184,
+    "indexed_pages": 177
+  },
+  "single_page": {
+    "canonical_path": "/jornadas/early-refresh/",
+    "full_facets": [
+      "explanation",
+      "tutorial",
+      "guide",
+      "reference"
+    ],
+    "facet_characters": [
+      2046,
+      3043,
+      3309,
+      3418
+    ],
+    "legacy_fragments_preserved": 25,
+    "all_navigation_targets_are_fragments": true,
+    "single_h1": true,
+    "toc_subheadings": 21
+  },
+  "browser": {
+    "four_clicks_changed_only_hash": true,
+    "pathname_after_each_click": "/jornadas/early-refresh/",
+    "mobile_css_width": 390,
+    "mobile_css_height": 844,
+    "nav_width": 358.00347900390625,
+    "nav_scroll_width": 357,
+    "keyboard_tab_target": "Aplicar",
+    "keyboard_enter_hash": "#guide",
+    "search_results_path": "/jornadas/early-refresh/"
+  },
+  "review": {
+    "agent": "/root/same_page_review",
+    "native_type": "default",
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "verdict": "PASS",
+    "material_blockers": 0,
+    "normalized_bodies_equal_to_previous_content": true
+  },
+  "source_sha256": {
+    "case-content/early-refresh/explanation.mdx": "ee04cbeff9610ccdf74061a54066e6509071d83378ac68147336d5a5d788c551",
+    "case-content/early-refresh/guide.mdx": "dffb46dcd4a6b487430fea48538305e84cd054d4b1f70d6c45da91bab14c68b7",
+    "case-content/early-refresh/reference.mdx": "3e860fe7882b77186487ad8b1359e8872a43f6d4a687b616dc41aaa2fcc2c0ca",
+    "case-content/early-refresh/tutorial.mdx": "ae754038905da437f4b96540397d1538634de9f8aaef67862c1d5d0a388b6fd2"
+  }
+}

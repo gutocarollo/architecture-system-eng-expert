@@ -1,0 +1,16 @@
+{
+  "observed_at": "2026-10-25T03:42:09.355422+00:00",
+  "results": [
+    {
+      "mutation": "remove_reference_facet",
+      "exit_code": 1,
+      "failed_tests": 3
+    },
+    {
+      "mutation": "leave_single_page",
+      "exit_code": 1,
+      "failed_tests": 1
+    }
+  ],
+  "scope": "copies of export; source and final export unchanged"
+}

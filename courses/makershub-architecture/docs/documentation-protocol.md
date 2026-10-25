@@ -1,10 +1,10 @@
 # Protocolo documental do curso
 
-Cada página atende a uma necessidade: a explicação apresenta causas e limites; o tutorial conduz uma experiência conhecida; o guia orienta uma tarefa de quem já conhece o assunto; a referência permite consultar contratos e fontes. A jornada identifica o caso e oferece esses caminhos sem obrigar todo leitor a seguir a mesma ordem.
+Cada faceta atende a uma necessidade: a explicação apresenta causas e limites; o tutorial conduz uma experiência conhecida; o guia orienta uma tarefa de quem já conhece o assunto; a referência permite consultar contratos e fontes. A jornada de early-refresh compõe as quatro facetas completas em seções identificadas da mesma página, sem obrigar todo leitor a seguir a mesma ordem.
 
-O piloto early-refresh mantém sua identidade nas cinco páginas e usa uma navegação local compartilhada. O menu geral continua disponível, mas não é necessário para atravessar as facetas. Os caminhos publicados e os fragmentos antigos são contratos de compatibilidade.
+O sumário de early-refresh aponta para fragmentos da própria jornada. O leitor deve conseguir entender, praticar, aplicar e consultar sem trocar de página. As rotas antigas reutilizam os corpos canônicos e preservam os fragmentos publicados; são entradas de compatibilidade e não cópias de edição. Somente a jornada completa é indexada para evitar resultados repetidos dessas quatro entradas.
 
-A fonte editorial fica nesta pasta. Fatos repetidos do piloto usam `case-content/early-refresh.js` e o manifesto do laboratório; as narrativas conservam sua finalidade. Downloads, HTML, busca e imagens são derivados dessa fonte. Não edite um export para corrigir texto.
+A fonte editorial fica nesta pasta. Os quatro corpos canônicos estão em `case-content/early-refresh/*.mdx`. Fatos repetidos do piloto usam `case-content/early-refresh.js` e o manifesto do laboratório; as narrativas conservam sua finalidade. Downloads, HTML, busca e imagens são derivados dessa fonte. Não edite um export para corrigir texto.
 
 Uma afirmação histórica conserva SHA, localizador e fronteira. Uma prática local não certifica o estado de produção. Um exemplo hipotético continua identificado como tal. Os localizadores de auditorias anteriores em `tasks/...` descrevem os registros históricos na fonte original; não significam que todo esse acervo foi transportado para este checkout.
 

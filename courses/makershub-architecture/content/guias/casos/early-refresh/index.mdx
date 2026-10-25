@@ -3,57 +3,23 @@ asIndexPage: true
 title: "Verifique a proteção: a lista precisa continuar disponível"
 description: "Você aprenderá a separar a idade do valor, a renovação em andamento e o vencimento que obriga o leitor a esperar."
 diataxis: how-to
+searchable: false
 ---
 
+import CaseBody from '../../../../case-content/early-refresh/guide.mdx'
 import { CaseNavigation, CaseNext } from '../../../../components/CaseNavigation.jsx'
-import { EarlyRefreshFact, EarlyRefreshOutput, EarlyRefreshProvenance, EarlyRefreshSources, EarlyRefreshCommand } from '../../../../components/EarlyRefreshFacts.jsx'
+import { EarlyRefreshProvenance } from '../../../../components/EarlyRefreshFacts.jsx'
 
 <CaseNavigation current="guide" />
 
 # Verifique a proteção: a lista precisa continuar disponível
 
-Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+<EarlyRefreshProvenance />
 
-## Antes de começar
+## Guia
 
-Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Obtenha o laboratório pelo tutorial e confira Python 3.11 ou posterior. Este caso usa somente a biblioteca padrão do Python. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+<span id="antes-de-começar" className="case-legacy-anchor" />
 
-## 1. Fixe o contrato e a fronteira
-
-Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use:
-
-<EarlyRefreshFact name="inputs" />
-
-Registre a versão anterior, a versão proposta e o localizador `SingleFlightCache.get / _start_background_refresh`.
-
-## 2. Confira quem executa a decisão
-
-<EarlyRefreshFact name="mechanism" />
-
-Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
-
-## 3. Repita a mesma condição em isolamento
-
-<EarlyRefreshCommand />
-
-Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
-
-## 4. Avalie a garantia adquirida
-
-<EarlyRefreshFact name="outcome" />
-
-Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
-
-## 5. Feche a decisão com seu limite
-
-<EarlyRefreshFact name="limits" />
-
-Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
-
-## Localizadores de consulta
-
-<EarlyRefreshSources />
-
-O [mapa de conceitos deste caso](/jornadas/early-refresh/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.
+<CaseBody />
 
 <CaseNext current="guide" />
