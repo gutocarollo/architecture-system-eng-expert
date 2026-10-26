@@ -3,47 +3,23 @@ asIndexPage: true
 title: "Verifique a proteção: o saldo precisa explicar sua história"
 description: "Você aprenderá a distinguir o fato registrado, a projeção para consulta e a recuperação local de uma transação incompleta."
 diataxis: how-to
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/ledger-projection/guide.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="ledger-projection" current="guide" />
 
 # Verifique a proteção: o saldo precisa explicar sua história
 
-Continue o mesmo caso: [volte ao caso](/jornadas/ledger-projection/); [entenda o mecanismo](/explicacoes/casos/ledger-projection/); [execute a experiência](/tutoriais/casos/ledger-projection/); [consulte contratos e fontes](/referencia/casos/ledger-projection/).
+<CaseNavigation caseId="ledger-projection" current="guide" />
 
-Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+## Guia
 
-## Antes de começar
+<CaseBody components={legacyCaseHeadings} />
 
-Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+<CaseNext caseId="ledger-projection" current="guide" />
 
-## 1. Fixe o contrato e a fronteira
-
-Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: Eventos credit/1000, credit/100 e debit/200; snapshot no evento 2; tabela SQLite temporária com 100.000 centavos. Registre a versão anterior, a versão proposta e o localizador `ledger_projection / replay-events / projection-checkpoint / durable-transaction`.
-
-## 2. Confira quem executa a decisão
-
-A projeção consome os fatos faltantes. Uma transação local pode fazer rollback. Um snapshot da posição 2 reduz o replay ao evento seguinte. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
-
-## 3. Repita a mesma condição em isolamento
-
-```sh
-python3 labs/architecture/financial.py ledger-projection
-```
-
-Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
-
-## 4. Avalie a garantia adquirida
-
-O replay e a projeção chegam a R$ 900. O snapshot de R$ 1.100 mais o débito de R$ 200 chega ao mesmo saldo. O SQLite executa uma transação em journal_mode=wal e conserva 100.000 centavos após rollback. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
-
-## 5. Feche a decisão com seu limite
-
-Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
-
-## Localizadores de consulta
-
-- `labs/architecture/financial.py::ledger_projection` contém o modelo executável.
-- `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/ledger-projection.json` registra a busca delimitada e seus limites.
-
-Continue o mesmo caso: [volte ao caso](/jornadas/ledger-projection/); [entenda o mecanismo](/explicacoes/casos/ledger-projection/); [execute a experiência](/tutoriais/casos/ledger-projection/); [consulte contratos e fontes](/referencia/casos/ledger-projection/).
-
-O [mapa de conceitos deste caso](/jornadas/ledger-projection/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.
+<CaseSequence caseId="ledger-projection" current="guide" />

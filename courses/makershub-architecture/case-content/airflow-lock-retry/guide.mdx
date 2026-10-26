@@ -1,0 +1,24 @@
+Use este guia quando você já entende retry e precisa conferir uma tarefa semelhante. O resultado procurado é uma regra explícita de erro elegível, tentativas e propagação, sustentada pelo efeito da operação.
+
+### Fixe o contrato da repetição
+
+Localize a operação em `dags/inflow__xp__stg_to_fct.py`, função `task_run_60_days_rule_hs`. Compare os SHAs da referência. Leia a condição que seleciona 55P03; confira o retorno diferente de zero, a cota de duas novas tentativas e os trinta segundos de espera fixa.
+
+### Repita as mesmas condições
+
+```sh
+python3 labs/airflow-lock-retry/run.py
+python3 labs/airflow-lock-retry/check_challenge.py
+```
+
+Conserve controles que falham cedo para outro erro, propagam o timeout do processo e encerram a repetição persistente. O tutorial permite alterar uma cópia e repetir esses contratos.
+
+### Confira as premissas antes de adaptar
+
+Determine onde a operação confirma seus efeitos e por que a mesma intenção pode ser tentada novamente. A premissa de transação atômica relatada no PR precisa ser conferida no motor Haskell e no ambiente relevante antes de autorizar outra operação a seguir a mesma política. Este laboratório não produz essa prova.
+
+Some as tentativas e esperas dentro do prazo total. Repetição em outra camada pode multiplicar o trabalho; o limite deste loop não prova o limite de toda a DAG. Depois, investigue a origem da contenção usando as fontes autorizadas daquele incidente.
+
+Este caso vem do [Bug FBI-4797](https://fazcapital.atlassian.net/browse/FBI-4797) e do [PR 161 do Airflow](https://bitbucket.org/fazcapital/airflow/pull-requests/161). A investigação leu o campo visível `customfield_10047`, o relato do PR e as [versões anterior](https://bitbucket.org/fazcapital/airflow/src/febaf1be978aad59c29f38d1bd74f357f8e942b5/dags/inflow__xp__stg_to_fct.py) e [selecionada](https://bitbucket.org/fazcapital/airflow/src/55dfe8acb362e6854d1af4e7dd7d17e6497af9bd/dags/inflow__xp__stg_to_fct.py). O relato registra um timeout de lock; o bloqueador original não foi identificado nessa fonte. O código selecionado é histórico. A prática não mede a versão atualmente implantada.
+
+O laboratório executa a função Python histórica com substitutos locais controlados (doubles). Ele não inicia uma DAG, não executa o binário Haskell, não conecta ao PostgreSQL e não faz esperas reais. A atomicidade e a idempotência do motor Haskell são premissas relatadas pelo PR e continuam fora desta prova. O código procura 55P03 no stderr; isso também não identifica qual consulta segurava o lock.

@@ -1,0 +1,73 @@
+Esta página reúne os contratos que a prática compara. Você aprenderá a separar a entrega repetida do efeito de negócio e preservar a intenção de integrar depois do commit. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+
+
+
+### Entradas e ambiente
+
+As entregas ORDER-1/100, ORDER-1/100 e ORDER-2/50, mais uma interrupção controlada antes da publicação externa.
+
+| Contrato | Valor do caso |
+| --- | --- |
+| Identidade do caso | `order-delivery`. |
+| Símbolos a consultar | `order_delivery / deduplicate / commit-intention / compensate`. |
+| Comando completo | `python3 labs/architecture/financial.py order-delivery`. |
+| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
+| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
+| Horário e escopo do recibo | `2026-10-15T01:35:30.501294+00:00`, no laboratório local. |
+
+O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
+
+### Fonte do modelo financeiro
+
+Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
+
+A função `order_delivery` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/order-delivery.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
+
+### Resultados que o contrato compara
+
+As três entregas produzem dois efeitos de R$ 150 no total. A queda deixa uma ordem e uma intenção recuperável. A compensação devolve o saldo fictício de R$ 900 para R$ 1.000.
+
+#### `deduplicate`
+
+A comparação permite executar a seguinte ação de estudo: Entregue ORDER-1 duas vezes e ORDER-2 uma vez. Confira por que três entregas devem produzir dois efeitos e somar R$ 150.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `debit` | `250` | `150` |
+| `effects` | `3` | `2` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/order-delivery/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+#### `commit-intention`
+
+A comparação permite executar a seguinte ação de estudo: Interrompa o modelo entre salvar e publicar. Compare a ordem isolada com a ordem e a intenção que a mesma transação SQLite conserva.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `orders` | `1` | `1` |
+| `published` | `0` | O campo não é emitido nesta condição. |
+| `recoverable_events` | O campo não é emitido nesta condição. | `1` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/order-delivery/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+#### `compensate`
+
+A comparação permite executar a seguinte ação de estudo: Observe a alocação falhar depois do débito de R$ 100 e acompanhe o crédito que recompõe os R$ 1.000.
+
+| Campo de saída | Condição anterior | Condição posterior |
+| --- | --- | --- |
+| `balance_after_failed_allocation` | `900` | `1000` |
+
+Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/order-delivery/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
+
+### Garantia, parâmetros e limites
+
+A identidade semântica da ordem elimina a repetição no inbox. Uma transação SQLite grava a ordem e a intenção na outbox. Uma falha posterior de alocação produz um crédito compensatório. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
+
+Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
+
+Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
+
+### Recibo e rastreabilidade
+
+A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `order-delivery`. O hash SHA-256 da saída capturada é `149288db1a083996418ffbba67dce4c8db29e224a4a6529344a8208f76850dba`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.

@@ -33,7 +33,7 @@ test('the journey navigation and continuation links stay on the current page', (
   assert.ok(navigation)
   assert.deepEqual([...navigation.querySelectorAll('a')].map(link => link.getAttribute('href')),
     ['#overview', '#explanation', '#tutorial', '#guide', '#reference'])
-  for (const link of document.querySelectorAll('main nav a, main .case-next a')) {
+  for (const link of document.querySelectorAll('main nav[data-case-navigation] a, main .case-next a')) {
     const href = link.getAttribute('href')
     assert.ok(href.startsWith('#'), `This case must not require changing pages: ${href}`)
     assert.ok(document.getElementById(href.slice(1)), `Missing destination: ${href}`)

@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="queue-workflow" current="concepts" />
+
 # Conceitos: a fila cresce durante uma dependência lenta
+
+<CaseNavigation caseId="queue-workflow" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Ana importa 120 solicitações fictícias em uma corretora. O consumidor só consegue manter 20 na fila escolhida para a prática. Ao mesmo tempo, uma mensagem inválida falha sempre. O desenho anterior cresce sem limite e repete a mensagem inválida; a versão protegida limita a entrada e separa a mensagem que já gastou três tentativas.
 
-Comece pela [jornada](/jornadas/queue-workflow/), execute o [tutorial](/tutoriais/casos/queue-workflow/) e use a [referência](/referencia/casos/queue-workflow/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/queue-workflow/).
+Comece pela [jornada](/jornadas/queue-workflow/), execute o [tutorial](/jornadas/queue-workflow/#tutorial) e use a [referência](/jornadas/queue-workflow/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/queue-workflow/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="aggregator" />
 
 ## Aggregator
 
@@ -45,8 +49,6 @@ O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o c
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="backpressure" />
-
 ## Backpressure
 
 A capacidade do consumidor controla o fluxo recebido.
@@ -78,8 +80,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="batch-processing" />
 
 ## Batch Processing
 
@@ -118,8 +118,6 @@ O vínculo é uma comparação executável de princípio. The finite input demon
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="bulkhead" />
-
 ## Bulkhead
 
 Separa ou reserva recursos para conter a saturação de uma classe de trabalho.
@@ -150,8 +148,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The actual semaphore admissions are local. Memory, CPU and cross-process resource isolation require additional budgets.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="chaos-engineering" />
 
 ## Chaos Engineering
 
@@ -187,8 +183,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The fault is injected only in a controlled local model, not in a production system or distributed chaos platform.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="choreography" />
 
 ## Choreography
 
@@ -226,8 +220,6 @@ O vínculo é uma comparação executável de princípio. Delivery, duplicate ev
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="choreography-saga" />
-
 ## Choreography Saga
 
 Participantes de uma Saga reagem a eventos e decidem localmente os próximos passos.
@@ -263,8 +255,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Delivery, duplicate events, distributed recovery and cycles are not solved by this in-memory choreography.
 
 A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="circuit-breaker" />
 
 ## Circuit Breaker
 
@@ -311,8 +301,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="competing-consumers" />
-
 ## Competing Consumers
 
 Consumidores da mesma fila ou grupo dividem trabalho por tentativa.
@@ -346,8 +334,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="content-based-router" />
-
 ## Content-Based Router
 
 A regra de destino examina campos da mensagem.
@@ -378,8 +364,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="dag" />
 
 ## DAG
 
@@ -418,8 +402,6 @@ O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o c
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="dead-letter-queue" />
-
 ## Dead Letter Queue
 
 Uma DLQ isola trabalho que saiu da recuperação automática comum.
@@ -452,8 +434,6 @@ O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o c
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="deadline-propagation" />
-
 ## Deadline Propagation
 
 Transporta o prazo ou orçamento restante da operação entre etapas.
@@ -485,8 +465,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="delayed-queue" />
-
 ## Delayed Queue
 
 O mecanismo adia a disponibilidade de uma mensagem até um prazo.
@@ -516,8 +494,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Delayed Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="event-notification" />
 
 ## Event Notification
 
@@ -550,8 +526,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event Notification; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="event-streaming" />
 
 ## Event Streaming
 
@@ -587,8 +561,6 @@ O vínculo é uma comparação executável de princípio. The log is a local imm
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e025) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="event-carried-state-transfer" />
-
 ## Event-Carried State Transfer
 
 O evento transporta dados que o consumidor pode aplicar sem buscar cada atributo na origem.
@@ -620,8 +592,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event-Carried State Transfer; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e024) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="exponential-backoff" />
 
 ## Exponential Backoff
 
@@ -668,8 +638,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="fail-fast" />
-
 ## Fail Fast
 
 Recusa cedo uma execução que já não pode cumprir seu contrato.
@@ -715,8 +683,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="fallback" />
-
 ## Fallback
 
 Devolve uma alternativa permitida quando o caminho principal falha.
@@ -750,8 +716,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The cached value is synthetic; the acceptable age and permitted actions need the actual product contract.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="fan-in" />
 
 ## Fan-in
 
@@ -791,8 +755,6 @@ O vínculo é uma comparação executável de princípio. The finite merge does 
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="fan-out" />
-
 ## Fan-out
 
 Uma ocorrência é distribuída para vários destinos independentes.
@@ -829,8 +791,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Fan-out; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="finite-state-machine" />
 
 ## Finite State Machine
 
@@ -872,8 +832,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="fire-and-forget" />
-
 ## Fire-and-Forget
 
 O chamador envia sem aguardar a resposta de negócio.
@@ -907,8 +865,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The outgoing queue is not durable and no delivery guarantee is claimed.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="graceful-degradation" />
 
 ## Graceful Degradation
 
@@ -944,8 +900,6 @@ O vínculo é uma comparação executável de princípio. The cached value is sy
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="integration-event" />
-
 ## Integration Event
 
 Um integration event publica um contrato para consumidores de outro contexto.
@@ -977,8 +931,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Integration Event; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="jitter" />
 
 ## Jitter
 
@@ -1025,8 +977,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="job-queue" />
-
 ## Job Queue
 
 Uma fila de trabalho mantém unidades pendentes até que um consumidor possa executá-las.
@@ -1058,8 +1008,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Job Queue; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="kappa-architecture" />
 
 ## Kappa Architecture
 
@@ -1098,8 +1046,6 @@ O vínculo é uma comparação executável de princípio. Retention, reprocessin
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="lambda-architecture" />
-
 ## Lambda Architecture
 
 Esse estilo mantém um caminho batch para reconstrução completa e outro stream para resultados rápidos, reunindo suas visões para consumo.
@@ -1132,8 +1078,6 @@ O vínculo é uma comparação executável de princípio. The example models the
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="load-shedding" />
-
 ## Load Shedding
 
 Recusa ou descarta carga para preservar recursos.
@@ -1164,8 +1108,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Load Shedding; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="mapreduce" />
 
 ## MapReduce
 
@@ -1204,8 +1146,6 @@ O vínculo é uma comparação executável de princípio. This is local grouping
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="message-enricher" />
-
 ## Message Enricher
 
 Um enriquecedor acrescenta contexto vindo de uma fonte definida.
@@ -1236,8 +1176,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="message-filter" />
 
 ## Message Filter
 
@@ -1271,8 +1209,6 @@ O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o c
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="message-queue" />
-
 ## Message Queue
 
 Uma fila mantém unidades de trabalho para consumidores.
@@ -1305,8 +1241,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="message-router" />
-
 ## Message Router
 
 Um roteador escolhe o canal de destino segundo uma regra.
@@ -1337,8 +1271,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Message Router; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="orchestrator" />
 
 ## Orchestrator
 
@@ -1377,8 +1309,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="pipe-and-filter" />
-
 ## Pipe and Filter
 
 Pipe and Filter organiza transformações em etapas com contratos de entrada e saída.
@@ -1415,8 +1345,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Pipe and Filter; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="pipeline" />
 
 ## Pipeline
 
@@ -1455,8 +1383,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="poison-message-handling" />
-
 ## Poison Message Handling
 
 O tratamento de poison messages limita falhas repetidas e encaminha ou remove a mensagem segundo a política terminal.
@@ -1488,8 +1414,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="priority-queue" />
 
 ## Priority Queue
 
@@ -1602,8 +1526,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="rate-limiting" />
-
 ## Rate Limiting
 
 Restringe frequência por identidade e intervalo.
@@ -1635,8 +1557,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Rate Limiting; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="resequencer" />
 
 ## Resequencer
 
@@ -1678,8 +1598,6 @@ O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o c
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="retry" />
-
 ## Retry
 
 Repete uma tentativa sob critérios e orçamento definidos.
@@ -1711,8 +1629,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Retry; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="retry-queue" />
 
 ## Retry Queue
 
@@ -1746,8 +1662,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="self-healing" />
-
 ## Self-Healing
 
 Tenta recuperar automaticamente um componente, por reconexão, reinício ou substituição segundo política.
@@ -1778,8 +1692,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="splitter" />
 
 ## Splitter
 
@@ -1815,8 +1727,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="state-machine" />
 
 ## State Machine
 
@@ -1858,8 +1768,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="stream-processing" />
-
 ## Stream Processing
 
 O processamento contínuo recebe eventos ao longo do tempo e constrói resultados com políticas de janela, ordem e atraso.
@@ -1897,8 +1805,6 @@ O vínculo é uma comparação executável de princípio. The finite input demon
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="throttling" />
-
 ## Throttling
 
 Reduz o ritmo de uma atividade, podendo atrasar execuções.
@@ -1931,8 +1837,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
-<span id="timeout" />
-
 ## Timeout
 
 Limita uma espera definida.
@@ -1961,8 +1865,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Timeout; não implementa o padrão completo. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="watchdog" />
 
 ## Watchdog
 
@@ -1994,8 +1896,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. It is a finite restart model, without a real container, crash loop budget or a guarantee that every restart repairs the underlying cause.
 
 A [explicação do capítulo](/explicacoes/capacity/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
-
-<span id="workflow-engine" />
 
 ## Workflow Engine
 
@@ -2032,3 +1932,4 @@ O vínculo é uma comparação executável de princípio. The local effects and 
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/queue-workflow/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="queue-workflow" />

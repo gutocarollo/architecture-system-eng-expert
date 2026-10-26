@@ -3,36 +3,23 @@ asIndexPage: true
 title: "Como investigar: Uma única versão atual ainda pode perder uma alteração"
 description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
 diataxis: how-to
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/revision-cas-postgres/guide.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="revision-cas-postgres" current="guide" />
 
 # Como investigar: Uma única versão atual ainda pode perder uma alteração
 
-[Retorne ao caso](/jornadas/revision-cas-postgres/), [entenda o mecanismo](/explicacoes/casos/revision-cas-postgres/), [aprenda fazendo](/tutoriais/casos/revision-cas-postgres/), [resolva a tarefa](/guias/casos/revision-cas-postgres/) ou [consulte o contrato](/referencia/casos/revision-cas-postgres/).
+<CaseNavigation caseId="revision-cas-postgres" current="guide" />
 
-Use este guia quando você já entende o mecanismo e precisa conferir uma consulta semelhante. Seu resultado procurado é: O escritor atrasado não encerra a linha modificada e AZURE-CONFIRMED permanece na única versão atual.
+## Guia
 
-## Fixe a fonte e a condição
+<CaseBody components={legacyCaseHeadings} />
 
-Registre o SHA, a função e os valores de entrada. Comece pelo kernel `update_employee_scd2_without_commit` em `backend/app/repositories/employee_repository.py`. Reproduza com dados sintéticos em um banco descartável; preserve as descrições de PR e Jira como contexto, separadas da prova de execução.
+<CaseNext caseId="revision-cas-postgres" current="guide" />
 
-## Verifique a garantia
-
-```sh
-python3 labs/postgres-lineage/run.py --case revision
-```
-
-Compare o predicado do UPDATE nos dois templates. A alteração acrescenta a comparação com `:source_revision` e devolve as linhas encerradas com `RETURNING _employee_id`. O exercício produz a alteração concorrente antes desse UPDATE e verifica o valor preservado.
-
-Troque somente a cópia candidata e repita o mesmo invariante. O tutorial apresenta o roteiro editável completo. Para conferir automaticamente os dois desafios, use `python3 labs/postgres-lineage/check_challenges.py`.
-
-## Decida o que pode concluir
-
-A versão anterior termina com uma única linha atual, mas perde AZURE-CONFIRMED e conserva AZURE-OLD. O predicado alterado rejeita o escritor atrasado e preserva AZURE-CONFIRMED. Os identificadores deste exercício são sintéticos.
-
-A revisão baseada em xmin é opaca e transitória. Ela não é uma identidade durável nem um fencing token monotônico. O laboratório isola o predicado de encerramento, com uma atualização concorrente entre leitura e escrita; não executa o método inteiro, a API ou a integração Azure. O commit selecionado pertence a um PR cuja leitura histórica estava aberta; este material não afirma implantação em produção.
-
-Antes de adaptar a mudança a outro fluxo, confirme o contrato dos dados e os chamadores desse fluxo. O resultado local não substitui essa investigação.
-
-Este recorte está ligado ao [card FBI-4924](https://fazcapital.atlassian.net/browse/FBI-4924) e ao [PR 630](https://bitbucket.org/fazcapital/makershub/pull-requests/630). A leitura histórica registrou o PR como **OPEN na leitura histórica registrada**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/3ad846049c32fedee09d458c8d685fb39b675b82/backend/app/repositories/employee_repository.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/c5e8efc5913355a8545b8a27b8b72e0828f77660/backend/app/repositories/employee_repository.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
-
-[Retorne ao caso](/jornadas/revision-cas-postgres/), [entenda o mecanismo](/explicacoes/casos/revision-cas-postgres/), [aprenda fazendo](/tutoriais/casos/revision-cas-postgres/), [resolva a tarefa](/guias/casos/revision-cas-postgres/) ou [consulte o contrato](/referencia/casos/revision-cas-postgres/).
+<CaseSequence caseId="revision-cas-postgres" current="guide" />

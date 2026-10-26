@@ -5,7 +5,19 @@ description: "Você aprenderá a distinguir admissão, divisão de trabalho, pub
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/queue-workflow/explanation.mdx'
+import Tutorial from '../../../case-content/queue-workflow/tutorial.mdx'
+import Guide from '../../../case-content/queue-workflow/guide.mdx'
+import Reference from '../../../case-content/queue-workflow/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="queue-workflow" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # Uma fila absorve trabalho e recupera falhas
+
+<CaseNavigation caseId="queue-workflow" withinPage />
 
 Ana importa 120 solicitações fictícias em uma corretora. O consumidor só consegue manter 20 na fila escolhida para a prática. Ao mesmo tempo, uma mensagem inválida falha sempre. O desenho anterior cresce sem limite e repete a mensagem inválida; a versão protegida limita a entrada e separa a mensagem que já gastou três tentativas.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="queue-workflow">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/queue-workflow/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/queue-workflow/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/queue-workflow/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/queue-workflow/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 A prática entrega o item válido, conserva o inválido fora da fila normal e processa extract, transform e publish nessa ordem. Workers compartilham tarefas; a assinatura de auditoria recebe seus próprios fatos. A fila está em memória. A DLQ, o circuito e as dependências são modelos limitados, sem broker, Airflow, durable workflow, promessa de exactly-once ou temporização de rede.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="queue-workflow" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="queue-workflow" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="queue-workflow" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="queue-workflow" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [O processo responde, mas a ordem não terminou](/jornadas/diagnostics/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [O processo r
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 55 conceitos no [mapa de mecanismos e práticas](/jornadas/queue-workflow/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="queue-workflow" withinPage />

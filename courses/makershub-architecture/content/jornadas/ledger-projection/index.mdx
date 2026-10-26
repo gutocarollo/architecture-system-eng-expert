@@ -5,7 +5,19 @@ description: "Você aprenderá a distinguir o fato registrado, a projeção para
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/ledger-projection/explanation.mdx'
+import Tutorial from '../../../case-content/ledger-projection/tutorial.mdx'
+import Guide from '../../../case-content/ledger-projection/guide.mdx'
+import Reference from '../../../case-content/ledger-projection/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="ledger-projection" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # O histórico reconstrói a posição do cliente
+
+<CaseNavigation caseId="ledger-projection" withinPage />
 
 Uma posição fictícia recebe crédito de R$ 1.000, crédito de R$ 100 e débito de R$ 200. Um saldo mutável sem histórico pode perder uma alteração. A trilha de eventos permite refazer a conta: 1.000 + 100 − 200 = R$ 900, inclusive quando o modelo de consulta ainda não consumiu os dois últimos eventos.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="ledger-projection">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/ledger-projection/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/ledger-projection/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/ledger-projection/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/ledger-projection/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 O replay e a projeção chegam a R$ 900. O snapshot de R$ 1.100 mais o débito de R$ 200 chega ao mesmo saldo. O SQLite executa uma transação em journal_mode=wal e conserva 100.000 centavos após rollback. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="ledger-projection" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="ledger-projection" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="ledger-projection" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="ledger-projection" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A consulta cresce e a soma muda de significado](/jornadas/storage-partitions/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A consulta c
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 14 conceitos no [mapa de mecanismos e práticas](/jornadas/ledger-projection/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="ledger-projection" withinPage />

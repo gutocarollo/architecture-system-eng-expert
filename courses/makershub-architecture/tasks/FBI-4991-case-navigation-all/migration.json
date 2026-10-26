@@ -1,0 +1,728 @@
+{
+  "baseline_commit": "ef5bd78bd0224571ccfde49873ac1b16489b59c1",
+  "cases": 18,
+  "facets": 72,
+  "files_written": 197,
+  "facets_checked": [
+    {
+      "case_id": "single-flight-cancel",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/single-flight-cancel/index.mdx",
+      "body": "case-content/single-flight-cancel/explanation.mdx",
+      "source_sha256": "d6f64b1fbcf165b32ee6cd21a9e8c72dd3de608dff34ea5d16df55e1a2d28c43",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "single-flight-cancel",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/single-flight-cancel/index.mdx",
+      "body": "case-content/single-flight-cancel/tutorial.mdx",
+      "source_sha256": "514baf6f6fdfbd48db7bd1c2afe2370c359d195df92abcecfcff7ee6ff7b1b37",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "single-flight-cancel",
+      "facet": "guide",
+      "source": "content/guias/casos/single-flight-cancel/index.mdx",
+      "body": "case-content/single-flight-cancel/guide.mdx",
+      "source_sha256": "8ea65bf8856d8bb14f2e93d664d44f8dff9043395a48931584e38549822ec883",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "single-flight-cancel",
+      "facet": "reference",
+      "source": "content/referencia/casos/single-flight-cancel/index.mdx",
+      "body": "case-content/single-flight-cancel/reference.mdx",
+      "source_sha256": "718269cf1668493b1d52fa45de4c8b7b2efd91bf7e59f8a2832731c4b399989f",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "early-refresh",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/early-refresh/index.mdx",
+      "body": "case-content/early-refresh/explanation.mdx",
+      "source_sha256": "759257b9d84d54cffe89f57308637eb5158acd4e2ea9417e57ae4a926b807bcb",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "early-refresh",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/early-refresh/index.mdx",
+      "body": "case-content/early-refresh/tutorial.mdx",
+      "source_sha256": "d23781cfe1134e2706e280cb1163efc2dee362421090edf1a176c66abfb01ac3",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "early-refresh",
+      "facet": "guide",
+      "source": "content/guias/casos/early-refresh/index.mdx",
+      "body": "case-content/early-refresh/guide.mdx",
+      "source_sha256": "3650cc5ebf2d575c748e1ee0cba01617c7eee46a03b7bbe696d28b24f55e8b38",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "early-refresh",
+      "facet": "reference",
+      "source": "content/referencia/casos/early-refresh/index.mdx",
+      "body": "case-content/early-refresh/reference.mdx",
+      "source_sha256": "2437a6c9345373e5bcc8e1bf08f3b6602222342b75e8ca44cf5501ba0cf346c4",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "date-only",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/date-only/index.mdx",
+      "body": "case-content/date-only/explanation.mdx",
+      "source_sha256": "9a35bafcf602cff7cede3e76b9ae09747dd68bb0aa0802c801c259dbca8befbd",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "date-only",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/date-only/index.mdx",
+      "body": "case-content/date-only/tutorial.mdx",
+      "source_sha256": "ce7a70ae7e8e464d82eb8de78825642a9db24d972a6ba4cf02cfcaf69e317947",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "date-only",
+      "facet": "guide",
+      "source": "content/guias/casos/date-only/index.mdx",
+      "body": "case-content/date-only/guide.mdx",
+      "source_sha256": "1a3cc5b929e0558b056f57b97166bfc7c3c40fda4870288d99a84c41cfb3aacf",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "date-only",
+      "facet": "reference",
+      "source": "content/referencia/casos/date-only/index.mdx",
+      "body": "case-content/date-only/reference.mdx",
+      "source_sha256": "f5d84853c254c56645683fd883284c8d5e5e0b4c12d1528ca3815d8064e98306",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "opportunity-entry",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/opportunity-entry/index.mdx",
+      "body": "case-content/opportunity-entry/explanation.mdx",
+      "source_sha256": "8b40f91cc2ed4fe32cd729b028370aa81bc6b3aa332d26d5c1946540d41ee870",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "opportunity-entry",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/opportunity-entry/index.mdx",
+      "body": "case-content/opportunity-entry/tutorial.mdx",
+      "source_sha256": "ef9101ed146f4ee1ac1c7a3199d0c6b56e3414bd21f46b54f13cefab64b85d0b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "opportunity-entry",
+      "facet": "guide",
+      "source": "content/guias/casos/opportunity-entry/index.mdx",
+      "body": "case-content/opportunity-entry/guide.mdx",
+      "source_sha256": "5700afe7076e96ad68b35b137b752d2fffbee93a4e748453c8e56201a648bbc4",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "opportunity-entry",
+      "facet": "reference",
+      "source": "content/referencia/casos/opportunity-entry/index.mdx",
+      "body": "case-content/opportunity-entry/reference.mdx",
+      "source_sha256": "4fd80c3e282db004fe74c2cdfd5703a119ae82240ea0a9522f109fe1028e2cd0",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-boundaries",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/order-boundaries/index.mdx",
+      "body": "case-content/order-boundaries/explanation.mdx",
+      "source_sha256": "92047fc177ad981795b7db43526553c461de655b5cc1aa1f389ef2af2b8b4a9b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-boundaries",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/order-boundaries/index.mdx",
+      "body": "case-content/order-boundaries/tutorial.mdx",
+      "source_sha256": "5d035b9bc065da37346339a010700c0bc767356978b8f6e1ae40e51331200062",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-boundaries",
+      "facet": "guide",
+      "source": "content/guias/casos/order-boundaries/index.mdx",
+      "body": "case-content/order-boundaries/guide.mdx",
+      "source_sha256": "31ac4b26e15b05ce392e8c390b2e20f35eececbda33f68455ef5b790b8c2a367",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-boundaries",
+      "facet": "reference",
+      "source": "content/referencia/casos/order-boundaries/index.mdx",
+      "body": "case-content/order-boundaries/reference.mdx",
+      "source_sha256": "b9a2a9f766affbcfc4e66daf80cb7de56560a5766c117ea8aa77dfb127a575e0",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-delivery",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/order-delivery/index.mdx",
+      "body": "case-content/order-delivery/explanation.mdx",
+      "source_sha256": "68afde4a116318917dc8c5c64858e13b129a498d56cb81e4f6d51e280822a70c",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-delivery",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/order-delivery/index.mdx",
+      "body": "case-content/order-delivery/tutorial.mdx",
+      "source_sha256": "3e50fc22a8d2487cc66bfaeb9d67ea1699b28d34f95eb003370c55e008eaf7b1",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-delivery",
+      "facet": "guide",
+      "source": "content/guias/casos/order-delivery/index.mdx",
+      "body": "case-content/order-delivery/guide.mdx",
+      "source_sha256": "2046cbc94a7c1a346de22613472a48a02823ed857baf0b0ed8400d3afb9ca9c0",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "order-delivery",
+      "facet": "reference",
+      "source": "content/referencia/casos/order-delivery/index.mdx",
+      "body": "case-content/order-delivery/reference.mdx",
+      "source_sha256": "6723936cc5d89c53cd29f1061a9ddd882e69070a7f7f7e68b831fa656876e481",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "reservation",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/reservation/index.mdx",
+      "body": "case-content/reservation/explanation.mdx",
+      "source_sha256": "47172f163cb7d7aab19f775f90532c409f2cebf1ff91189441816b787155a092",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "reservation",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/reservation/index.mdx",
+      "body": "case-content/reservation/tutorial.mdx",
+      "source_sha256": "d425bc83317e44dee75eff9e601e05e44e47ee661f6601cd2b72753dd4d1cb0b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "reservation",
+      "facet": "guide",
+      "source": "content/guias/casos/reservation/index.mdx",
+      "body": "case-content/reservation/guide.mdx",
+      "source_sha256": "b42ce771e112d70f20642b956ae81570a27f330ad1c44469e4ae57a168b5f1f0",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "reservation",
+      "facet": "reference",
+      "source": "content/referencia/casos/reservation/index.mdx",
+      "body": "case-content/reservation/reference.mdx",
+      "source_sha256": "a5265321ceeb4bb294533b879c01a32bd2882349967d9f347df03f5efac9c433",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "consensus",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/consensus/index.mdx",
+      "body": "case-content/consensus/explanation.mdx",
+      "source_sha256": "98f672311f91bd349af9ebe13e13f7b038cc55a48598660e427372e60f069ea3",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "consensus",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/consensus/index.mdx",
+      "body": "case-content/consensus/tutorial.mdx",
+      "source_sha256": "0a5adf0aa558dbb098ce3ccc6b60f589cfa968c39e866bb331571f6b90380e1d",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "consensus",
+      "facet": "guide",
+      "source": "content/guias/casos/consensus/index.mdx",
+      "body": "case-content/consensus/guide.mdx",
+      "source_sha256": "27ce8ae36a774e4db1d6718732def2a5d9e14c1a826d0b6caad04510f371b97b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "consensus",
+      "facet": "reference",
+      "source": "content/referencia/casos/consensus/index.mdx",
+      "body": "case-content/consensus/reference.mdx",
+      "source_sha256": "7452831a6d02d77bc5f11ea8191ad70155ea6a29c779936a55c925caa6d493e0",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "queue-workflow",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/queue-workflow/index.mdx",
+      "body": "case-content/queue-workflow/explanation.mdx",
+      "source_sha256": "6e76b2497d31eea62d2380d3823bfa452644a1ea0e3d04c735cd49e06dcc4c3b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "queue-workflow",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/queue-workflow/index.mdx",
+      "body": "case-content/queue-workflow/tutorial.mdx",
+      "source_sha256": "559c3ce5ab58b30e3a4ef15ad0ceaac4bbd9edaaf9aa58c0027188059f8df694",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "queue-workflow",
+      "facet": "guide",
+      "source": "content/guias/casos/queue-workflow/index.mdx",
+      "body": "case-content/queue-workflow/guide.mdx",
+      "source_sha256": "835ee012d24450c9e04df5037d9769dd0ff84f31e00d742f8f19970df9f504aa",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "queue-workflow",
+      "facet": "reference",
+      "source": "content/referencia/casos/queue-workflow/index.mdx",
+      "body": "case-content/queue-workflow/reference.mdx",
+      "source_sha256": "9f0ef05645abcddcc352494f022e6f912b6d377b7e637b07d02988b801d6ae91",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "cache-policy",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/cache-policy/index.mdx",
+      "body": "case-content/cache-policy/explanation.mdx",
+      "source_sha256": "3c5406fae572c1121b5549648f87392b94afe53d74a6776bc0b913672c0e2878",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "cache-policy",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/cache-policy/index.mdx",
+      "body": "case-content/cache-policy/tutorial.mdx",
+      "source_sha256": "f4eae0f3a92cc12c99f2e97f58c174d5d4de746fe04fca853e10352e33b88ad1",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "cache-policy",
+      "facet": "guide",
+      "source": "content/guias/casos/cache-policy/index.mdx",
+      "body": "case-content/cache-policy/guide.mdx",
+      "source_sha256": "020db3f65bf9f7d3f4914e27ea0cb18aa45dad42d8cfb2e14819a675861c9ff1",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "cache-policy",
+      "facet": "reference",
+      "source": "content/referencia/casos/cache-policy/index.mdx",
+      "body": "case-content/cache-policy/reference.mdx",
+      "source_sha256": "ca33a287ba28f53c6d54c29a17fdb79b3e1c2203cdc31dbbcad3ebe6d7ea3f82",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "ledger-projection",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/ledger-projection/index.mdx",
+      "body": "case-content/ledger-projection/explanation.mdx",
+      "source_sha256": "ca27bcb87f5db0e56229246363fa95089a4c149f0311ce5cb333874aa79bac96",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "ledger-projection",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/ledger-projection/index.mdx",
+      "body": "case-content/ledger-projection/tutorial.mdx",
+      "source_sha256": "e0652b3b1d8b8feb6efeeaa121eceac296b4ac96dbf87f39b3cd90c80996025c",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "ledger-projection",
+      "facet": "guide",
+      "source": "content/guias/casos/ledger-projection/index.mdx",
+      "body": "case-content/ledger-projection/guide.mdx",
+      "source_sha256": "e812e5efc6b4d0d6ab0e4474bf605fbb0232161618e98e719a7fd927fac506b3",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "ledger-projection",
+      "facet": "reference",
+      "source": "content/referencia/casos/ledger-projection/index.mdx",
+      "body": "case-content/ledger-projection/reference.mdx",
+      "source_sha256": "7717cbfe5076e091cc1cdad630a73b0066fab72724bee8b633ee0119edc2a4a7",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "storage-partitions",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/storage-partitions/index.mdx",
+      "body": "case-content/storage-partitions/explanation.mdx",
+      "source_sha256": "a1906fc13c43cea9e240b5f2e6c3d016532160773ca09cdf93acbd8bd219da23",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "storage-partitions",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/storage-partitions/index.mdx",
+      "body": "case-content/storage-partitions/tutorial.mdx",
+      "source_sha256": "1ffd9dca7036fcbb79f3da8d498183eb70ec337ddd754b370dc938b12bd7c880",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "storage-partitions",
+      "facet": "guide",
+      "source": "content/guias/casos/storage-partitions/index.mdx",
+      "body": "case-content/storage-partitions/guide.mdx",
+      "source_sha256": "8f2a9e2a3d9cc255d94f26b3dbc44dc8bb565e0c9128e182e32bba4a50f04662",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "storage-partitions",
+      "facet": "reference",
+      "source": "content/referencia/casos/storage-partitions/index.mdx",
+      "body": "case-content/storage-partitions/reference.mdx",
+      "source_sha256": "2ab0b55bbed32d53d90eab74e6bb04b3763a022727d63838eb84be7f82857155",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "safe-release",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/safe-release/index.mdx",
+      "body": "case-content/safe-release/explanation.mdx",
+      "source_sha256": "46af10c79e7d397f827d9f8ac3a12ae6af68e5d9792f7546c03e2c26bb07dc32",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "safe-release",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/safe-release/index.mdx",
+      "body": "case-content/safe-release/tutorial.mdx",
+      "source_sha256": "325f606ecd346e3bd407bf71fb4a565a2a081f4cffbab50b8f3dae79229785c8",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "safe-release",
+      "facet": "guide",
+      "source": "content/guias/casos/safe-release/index.mdx",
+      "body": "case-content/safe-release/guide.mdx",
+      "source_sha256": "fc68d85fd8d33a56823978455c36fa6585eed8013f911ff955b79b62a6723f27",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "safe-release",
+      "facet": "reference",
+      "source": "content/referencia/casos/safe-release/index.mdx",
+      "body": "case-content/safe-release/reference.mdx",
+      "source_sha256": "9ebce57c1de24f1e920415702a15cffd640048e3af2580fa22640a802b199810",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "access-policy",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/access-policy/index.mdx",
+      "body": "case-content/access-policy/explanation.mdx",
+      "source_sha256": "0860ed0bbfcbe74c2548b431472a18063a628ff4c0b8da6f4c611165eacdce0d",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "access-policy",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/access-policy/index.mdx",
+      "body": "case-content/access-policy/tutorial.mdx",
+      "source_sha256": "d3e389cbbb3c43c5950ded686802f4117f56aea6b1413709a82fbb67b75b8243",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "access-policy",
+      "facet": "guide",
+      "source": "content/guias/casos/access-policy/index.mdx",
+      "body": "case-content/access-policy/guide.mdx",
+      "source_sha256": "64973c8f3a3eada8084d940544db7bdc3307b7320a6618dc7b9ea4efc79f315f",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "access-policy",
+      "facet": "reference",
+      "source": "content/referencia/casos/access-policy/index.mdx",
+      "body": "case-content/access-policy/reference.mdx",
+      "source_sha256": "3cff2ea8341c92a8112d2247f143efa32995f6049f4c12367a0ef36d206b83cc",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "diagnostics",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/diagnostics/index.mdx",
+      "body": "case-content/diagnostics/explanation.mdx",
+      "source_sha256": "f6e9e726409b21b40c43f6e2e530e675835d4e42431072e44945a7fbda18686b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "diagnostics",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/diagnostics/index.mdx",
+      "body": "case-content/diagnostics/tutorial.mdx",
+      "source_sha256": "f7ae15f7540cd22faacf4681f2228c7bd1828c542069244c8f5951477734b39f",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "diagnostics",
+      "facet": "guide",
+      "source": "content/guias/casos/diagnostics/index.mdx",
+      "body": "case-content/diagnostics/guide.mdx",
+      "source_sha256": "b949525fb6dcf16c50ed473828267355b42c3112e4ea51479167939921a97d6b",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "diagnostics",
+      "facet": "reference",
+      "source": "content/referencia/casos/diagnostics/index.mdx",
+      "body": "case-content/diagnostics/reference.mdx",
+      "source_sha256": "fcd12df98920ff604b92d693c4cc00ae56acd1d9ca72f25069002e9c93319280",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "query-grain-postgres",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/query-grain-postgres/index.mdx",
+      "body": "case-content/query-grain-postgres/explanation.mdx",
+      "source_sha256": "a8944fe7e858347df6ccc553f85d8bcd38efd8e532375859608792b160060474",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "query-grain-postgres",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/query-grain-postgres/index.mdx",
+      "body": "case-content/query-grain-postgres/tutorial.mdx",
+      "source_sha256": "f7c9283e7c642704d5dfd27cbd1212068bcd2b72e9a401ff551336a6f85a13cf",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "query-grain-postgres",
+      "facet": "guide",
+      "source": "content/guias/casos/query-grain-postgres/index.mdx",
+      "body": "case-content/query-grain-postgres/guide.mdx",
+      "source_sha256": "6287a86222d6f41597d6ed947f6114f4f6122d34ff9457c6903692956eab3383",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "query-grain-postgres",
+      "facet": "reference",
+      "source": "content/referencia/casos/query-grain-postgres/index.mdx",
+      "body": "case-content/query-grain-postgres/reference.mdx",
+      "source_sha256": "0a6a51f309a0de24444b9c7e962896a39039d8b9e4a6fec86d50674ea70ec9fc",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "revision-cas-postgres",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/revision-cas-postgres/index.mdx",
+      "body": "case-content/revision-cas-postgres/explanation.mdx",
+      "source_sha256": "3131de631209ae0e5b4dd970c7865ddadab880a51b610a255a0b238d3e7a5afe",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "revision-cas-postgres",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/revision-cas-postgres/index.mdx",
+      "body": "case-content/revision-cas-postgres/tutorial.mdx",
+      "source_sha256": "536c852350b953ca28fa6916de48c0ef0b8cd3cd92334ba0d6c0f204aa9df169",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "revision-cas-postgres",
+      "facet": "guide",
+      "source": "content/guias/casos/revision-cas-postgres/index.mdx",
+      "body": "case-content/revision-cas-postgres/guide.mdx",
+      "source_sha256": "e20697c95697e1f5ce48b69281ab84af884a8caa5d370ee44bc43ef7b758eb15",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "revision-cas-postgres",
+      "facet": "reference",
+      "source": "content/referencia/casos/revision-cas-postgres/index.mdx",
+      "body": "case-content/revision-cas-postgres/reference.mdx",
+      "source_sha256": "bc8bd9ba6110a3f801c08e0b5cd5ea0e9416cae22b34df9994eeefd449f15e15",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "airflow-lock-retry",
+      "facet": "explanation",
+      "source": "content/explicacoes/casos/airflow-lock-retry/index.mdx",
+      "body": "case-content/airflow-lock-retry/explanation.mdx",
+      "source_sha256": "f1ebc8801696793cda09b404c35f03341bc34b286303dba97d66cd0f45a36ef2",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "airflow-lock-retry",
+      "facet": "tutorial",
+      "source": "content/tutoriais/casos/airflow-lock-retry/index.mdx",
+      "body": "case-content/airflow-lock-retry/tutorial.mdx",
+      "source_sha256": "08b6edac2e2077a951b9fe18c861446a45674fc9b0dbdce4cc646276f7b38d07",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "airflow-lock-retry",
+      "facet": "guide",
+      "source": "content/guias/casos/airflow-lock-retry/index.mdx",
+      "body": "case-content/airflow-lock-retry/guide.mdx",
+      "source_sha256": "3157bc184c7760e09e1bc6edc70f4b5977c9d20f32ae84af5f1ac1b3435b4c94",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    },
+    {
+      "case_id": "airflow-lock-retry",
+      "facet": "reference",
+      "source": "content/referencia/casos/airflow-lock-retry/index.mdx",
+      "body": "case-content/airflow-lock-retry/reference.mdx",
+      "source_sha256": "6e98c80f66a662c870c580df52ef416d9ee5d8b357ec5e295c0a366276df47a6",
+      "normalized_content_equal": true,
+      "code_blocks_unchanged": true,
+      "tables_unchanged": true
+    }
+  ]
+}

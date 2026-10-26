@@ -1,3 +1,9 @@
 export default {
-  "conceitos": "Conceitos e prática"
+  "conceitos": {
+    "title": "Conceitos e prática",
+    "theme": {
+      "breadcrumb": false,
+      "pagination": false
+    }
+  }
 }

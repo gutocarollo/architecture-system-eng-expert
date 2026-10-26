@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="storage-partitions" current="concepts" />
+
 # Conceitos: a consulta cresce e a soma muda de significado
+
+<CaseNavigation caseId="storage-partitions" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. A corretora hipotética cresce e divide as posições por chave. Ana procura a posição 7. Uma regra de roteamento permite buscar uma das três partições, enquanto uma junção com registros filhos pode multiplicar os valores financeiros. A prática usa doze posições e duas contas para tornar esses efeitos visíveis.
 
-Comece pela [jornada](/jornadas/storage-partitions/), execute o [tutorial](/tutoriais/casos/storage-partitions/) e use a [referência](/referencia/casos/storage-partitions/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/storage-partitions/).
+Comece pela [jornada](/jornadas/storage-partitions/), execute o [tutorial](/jornadas/storage-partitions/#tutorial) e use a [referência](/jornadas/storage-partitions/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/storage-partitions/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="consistent-hashing" />
 
 ## Consistent Hashing
 
@@ -46,8 +50,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
-<span id="covering-index" />
-
 ## Covering Index
 
 O índice inclui os atributos necessários à consulta, podendo evitar buscar determinados dados da tabela.
@@ -76,8 +78,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e027) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="directory-based-sharding" />
 
 ## Directory-Based Sharding
 
@@ -108,8 +108,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Directory durability, stale entries and live moves are not modeled.
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="geographic-sharding" />
 
 ## Geographic Sharding
 
@@ -142,8 +140,6 @@ O vínculo é uma comparação executável de princípio. The geography is hypot
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
-<span id="hash-sharding" />
-
 ## Hash Sharding
 
 Uma função hash transforma a chave para localizar sua shard.
@@ -173,8 +169,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Hash Sharding; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="horizontal-partitioning" />
 
 ## Horizontal Partitioning
 
@@ -206,8 +200,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
-<span id="indexing" />
-
 ## Indexing
 
 Um índice oferece uma estrutura de acesso aos valores ou relações necessários.
@@ -236,8 +228,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e026) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="log-structured-storage" />
 
 ## Log Structured Storage
 
@@ -269,8 +259,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. This is a tiny append-log model, not an LSM tree with SSTables, bloom filters or crash recovery.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="range-sharding" />
 
 ## Range Sharding
 
@@ -307,8 +295,6 @@ O vínculo é uma comparação executável de princípio. Range balancing, split
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
-<span id="sharding" />
-
 ## Sharding
 
 Sharding distribui subconjuntos entre unidades de armazenamento com uma regra de localização.
@@ -338,8 +324,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Sharding; não implementa o padrão completo. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
-
-<span id="vertical-partitioning" />
 
 ## Vertical Partitioning
 
@@ -382,8 +366,6 @@ O vínculo é uma comparação executável de princípio. The example models att
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
-<span id="write-amplification-control" />
-
 ## Write Amplification Control
 
 Controlar amplificação de escrita significa gerir bytes fisicamente escritos em relação à alteração lógica.
@@ -415,3 +397,4 @@ O vínculo é uma comparação executável de princípio. This applies to replac
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/storage-partitions/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="storage-partitions" />

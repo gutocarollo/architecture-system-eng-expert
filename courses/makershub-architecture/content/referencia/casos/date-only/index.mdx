@@ -3,64 +3,23 @@ asIndexPage: true
 title: "Contratos: o dia da emissão muda no caminho"
 description: "Entradas, parâmetros, versões, resultados e limites do caso A emissão continua no mesmo dia em São Paulo."
 diataxis: reference
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/date-only/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="date-only" current="reference" />
 
 # Contratos: o dia da emissão muda no caminho
 
-Esta página reúne os contratos que a prática compara. Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+<CaseNavigation caseId="date-only" current="reference" />
 
-Para continuar o mesmo problema, [volte à jornada](/jornadas/date-only/), [entenda o mecanismo](/explicacoes/casos/date-only/), [execute o tutorial](/tutoriais/casos/date-only/) ou [consulte o guia da tarefa](/guias/casos/date-only/).
+## Referência
 
-## Entradas e ambiente
+<CaseBody components={legacyCaseHeadings} />
 
-A data 2026-10-05 e o timestamp 2026-10-05T00:00:00Z, com TZ=America/Sao_Paulo.
+<CaseNext caseId="date-only" current="reference" />
 
-| Contrato | Valor do caso |
-| --- | --- |
-| Identidade do caso | `date-only`. |
-| Símbolos a consultar | `InsuranceProposalsAnalysisCard.formatDate / formatBrDate / parseIsoLocal`. |
-| Comando completo | `TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs`. |
-| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
-| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
-| Horário e escopo do recibo | `2026-10-15T01:35:30.065277+00:00`, no laboratório local. |
-
-O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
-
-## Versões e fronteiras da reprodução
-
-Este caso vem do [card FBI-4840](https://fazcapital.atlassian.net/browse/FBI-4840) e do [PR 585](https://bitbucket.org/fazcapital/makershub/pull-requests/585). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/eca3f89e0e703316b807018b7947fbbb2043c806/frontend/app/_utils/isoDate.ts) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/7101d3a4babe95081b0b41d35ec305c08bf8a577/frontend/app/_utils/isoDate.ts). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
-
-| Fase | Fonte histórica | SHA | Cópia do laboratório |
-| --- | --- | --- | --- |
-| Anterior | [frontend/app/_utils/isoDate.ts](https://bitbucket.org/fazcapital/makershub/src/eca3f89e0e703316b807018b7947fbbb2043c806/frontend/app/_utils/isoDate.ts) | `eca3f89e0e703316b807018b7947fbbb2043c806` | `labs/architecture/date-only/before.ts`. |
-| Posterior | [frontend/app/_utils/isoDate.ts](https://bitbucket.org/fazcapital/makershub/src/7101d3a4babe95081b0b41d35ec305c08bf8a577/frontend/app/_utils/isoDate.ts) | `7101d3a4babe95081b0b41d35ec305c08bf8a577` | `labs/architecture/date-only/after.ts`. |
-| Anterior | [frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx](https://bitbucket.org/fazcapital/makershub/src/eca3f89e0e703316b807018b7947fbbb2043c806/frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx) | `eca3f89e0e703316b807018b7947fbbb2043c806` | `labs/architecture/date-only/before-card.tsx`. |
-| Posterior | [frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx](https://bitbucket.org/fazcapital/makershub/src/7101d3a4babe95081b0b41d35ec305c08bf8a577/frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx) | `7101d3a4babe95081b0b41d35ec305c08bf8a577` | `labs/architecture/date-only/after-card.tsx`. |
-
-O diff preservado é `labs/architecture/date-only/source.diff`; seu SHA-256 é `5c4db66afdb6c9aa837a5215862d10299f17d123d3b9ed1045f924016ce7af59`. As cópias possuem hashes no manifesto do mesmo diretório. Esses hashes identificam o recorte reproduzido; não certificam o checkout ou o deploy que alguém abrir em outra ocasião.
-
-## Resultados que o contrato compara
-
-A data simples aparece como 05/10/26. O timestamp 2026-10-05T00:00:00Z continua aparecendo como 04/10/26, pois o instante não foi alterado.
-
-A reprodução histórica emite o resultado completo abaixo. Os rótulos `before` e `after` distinguem as versões; `comparison=PASS` significa que as condições esperadas apareceram nos dois recortes.
-
-```text
-zone=America/Sao_Paulo input=2026-10-05 before=04/10/26 after=05/10/26
-timestamp=2026-10-05T00:00:00Z after=04/10/26 preserves_instant=true
-comparison=PASS date_only_and_instant_are_distinct=True
-```
-
-## Garantia, parâmetros e limites
-
-formatBrDate reconhece a string inteira YYYY-MM-DD e usa parseIsoLocal. Uma string com hora e Z continua sendo um instante. O roteiro executa o helper e o formatter extraído, com Node e Typescript. Ele não consulta Salesforce, não renderiza o card e não prova a versão frontend de produção.
-
-Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
-
-Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
-
-## Recibo e rastreabilidade
-
-A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `date-only`. O hash SHA-256 da saída capturada é `c7703032f7e51081a7a0bbed43f89fd9974411c617263c6d2aac681e66d0cc81`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
-
-Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/date-only/), [leia a explicação](/explicacoes/casos/date-only/), [abra o tutorial](/tutoriais/casos/date-only/) ou [consulte o guia](/guias/casos/date-only/).
+<CaseSequence caseId="date-only" current="reference" />

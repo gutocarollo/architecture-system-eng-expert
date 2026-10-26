@@ -5,7 +5,19 @@ description: "Você aprenderá a definir o dono, o recorte, a validade e a ordem
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/cache-policy/explanation.mdx'
+import Tutorial from '../../../case-content/cache-policy/tutorial.mdx'
+import Guide from '../../../case-content/cache-policy/guide.mdx'
+import Reference from '../../../case-content/cache-policy/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="cache-policy" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # A consulta de posição envelhece de forma controlada
+
+<CaseNavigation caseId="cache-policy" withinPage />
 
 Ana consulta a posição fictícia do tenant A. Depois, Bruno consulta a posição do tenant B. Uma chave que contém apenas position entrega a Bruno o valor de Ana. O mesmo caso permite observar o que acontece quando um valor vence, quando o cache local envelhece e quando uma escrita em memória é perdida numa queda.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="cache-policy">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/cache-policy/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/cache-policy/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/cache-policy/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/cache-policy/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 O tenant B recebe seu próprio valor. O instante 11 já ultrapassou o vencimento 10. O crédito de R$ 100 permanece no armazenamento no modelo que confirmou a escrita durável. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="cache-policy" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="cache-policy" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="cache-policy" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="cache-policy" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A lista precisa continuar disponível](/jornadas/early-refresh/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A lista prec
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 11 conceitos no [mapa de mecanismos e práticas](/jornadas/cache-policy/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="cache-policy" withinPage />

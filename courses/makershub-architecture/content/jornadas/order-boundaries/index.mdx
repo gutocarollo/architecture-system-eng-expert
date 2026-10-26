@@ -5,7 +5,19 @@ description: "Você aprenderá a localizar a tradução do provedor, a regra da 
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/order-boundaries/explanation.mdx'
+import Tutorial from '../../../case-content/order-boundaries/tutorial.mdx'
+import Guide from '../../../case-content/order-boundaries/guide.mdx'
+import Reference from '../../../case-content/order-boundaries/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="order-boundaries" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # Uma ordem atravessa fronteiras sem espalhar regras
+
+<CaseNavigation caseId="order-boundaries" withinPage />
 
 Ana é uma operadora fictícia de uma corretora. O provedor envia uma autorização como AUTHORISED e o produto espera accepted. Se cada tela interpretar o contrato sozinha, a mesma ordem pode parecer recusada em um lugar e aceita em outro. O exemplo concentra a tradução e deixa a regra financeira dentro da operação.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="order-boundaries">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/order-boundaries/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/order-boundaries/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/order-boundaries/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/order-boundaries/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 A ordem passa a ser reconhecida, R$ 100,00 vêm de 10.000 centavos, as políticas retornam taxas diferentes e a ordem negativa não gera escrita. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="order-boundaries" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="order-boundaries" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="order-boundaries" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="order-boundaries" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [Uma ordem repetida cobra de novo](/jornadas/order-delivery/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [Uma ordem re
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 85 conceitos no [mapa de mecanismos e práticas](/jornadas/order-boundaries/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="order-boundaries" withinPage />

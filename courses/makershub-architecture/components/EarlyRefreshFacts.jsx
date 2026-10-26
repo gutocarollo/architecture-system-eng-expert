@@ -1,5 +1,8 @@
 import { earlyRefresh } from '../case-content/early-refresh.js'
 import manifest from '../labs/architecture/early-refresh/manifest.json'
+import { useMDXComponents as getThemeComponents } from 'nextra-theme-docs'
+
+const CourseLink = getThemeComponents().a
 
 export function EarlyRefreshFact({ name }) {
   if (!['inputs', 'before', 'mechanism', 'outcome', 'limits'].includes(name)) {
@@ -29,7 +32,7 @@ export function EarlyRefreshSources() {
           {manifest.snapshots.map(snapshot => (
             <tr key={snapshot.phase}>
               <td>{snapshot.phase === 'before' ? 'Anterior' : 'Posterior'}</td>
-              <td><a href={snapshot.phase === 'before' ? earlyRefresh.beforeUrl : earlyRefresh.afterUrl}>{snapshot.source_path}</a></td>
+              <td><CourseLink href={snapshot.phase === 'before' ? earlyRefresh.beforeUrl : earlyRefresh.afterUrl}>{snapshot.source_path}</CourseLink></td>
               <td><code>{snapshot.sha}</code></td>
               <td><code>{snapshot.local_path}</code></td>
             </tr>
@@ -47,11 +50,11 @@ export function EarlyRefreshSources() {
 export function EarlyRefreshProvenance() {
   return (
     <p data-case-fact="provenance">
-      Este caso vem do <a href={earlyRefresh.issueUrl}>card FBI-2331</a> e do{' '}
-      <a href={earlyRefresh.pullRequestUrl}>PR 51</a>. A investigação leu o conteúdo visível do card,
+      Este caso vem do <CourseLink href={earlyRefresh.issueUrl}>card FBI-2331</CourseLink> e do{' '}
+      <CourseLink href={earlyRefresh.pullRequestUrl}>PR 51</CourseLink>. A investigação leu o conteúdo visível do card,
       a descrição e os comentários pertinentes do PR. Você pode comparar a{' '}
-      <a href={earlyRefresh.beforeUrl}>versão anterior</a> com a{' '}
-      <a href={earlyRefresh.afterUrl}>versão alterada</a>. A prática executa esse recorte em isolamento;
+      <CourseLink href={earlyRefresh.beforeUrl}>versão anterior</CourseLink> com a{' '}
+      <CourseLink href={earlyRefresh.afterUrl}>versão alterada</CourseLink>. A prática executa esse recorte em isolamento;
       o estado de produção não foi medido por ela.
     </p>
   )

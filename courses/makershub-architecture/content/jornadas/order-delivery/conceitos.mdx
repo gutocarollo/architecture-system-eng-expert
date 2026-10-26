@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="order-delivery" current="concepts" />
+
 # Conceitos: uma ordem repetida cobra de novo
+
+<CaseNavigation caseId="order-delivery" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Ana envia a ordem fictícia ORDER-1 de R$ 100. A resposta se perde e o cliente a repete. ORDER-2 acrescenta R$ 50. O desenho anterior registra R$ 100 + R$ 100 + R$ 50 = R$ 250. A ordem repetida deveria conservar o mesmo efeito, totalizando R$ 150.
 
-Comece pela [jornada](/jornadas/order-delivery/), execute o [tutorial](/tutoriais/casos/order-delivery/) e use a [referência](/referencia/casos/order-delivery/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/order-delivery/).
+Comece pela [jornada](/jornadas/order-delivery/), execute o [tutorial](/jornadas/order-delivery/#tutorial) e use a [referência](/jornadas/order-delivery/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/order-delivery/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="at-least-once-delivery" />
 
 ## At-Least-Once Delivery
 
@@ -47,8 +51,6 @@ O vínculo é uma comparação executável de princípio. Only this bounded ackn
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e018) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="at-most-once-delivery" />
-
 ## At-Most-Once Delivery
 
 O mecanismo não reentrega a ocorrência depois do envio, podendo perdê-la.
@@ -79,8 +81,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. This is a sender-attempt model, not a broker delivery guarantee or proof of the external effect.
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
-
-<span id="cdc-migration" />
 
 ## CDC Migration
 
@@ -113,8 +113,6 @@ O vínculo é uma comparação executável de princípio. Trigger-based CDC in S
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="change-data-capture-cdc" />
-
 ## Change Data Capture (CDC)
 
 CDC acompanha mudanças confirmadas em uma fonte.
@@ -146,8 +144,6 @@ O vínculo é uma comparação executável de princípio. Trigger-based CDC in S
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="compensating-transaction" />
-
 ## Compensating Transaction
 
 Uma compensação aplica uma nova operação para corrigir semanticamente um passo confirmado.
@@ -176,8 +172,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
 
 A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
-
-<span id="deduplication" />
 
 ## Deduplication
 
@@ -210,8 +204,6 @@ O vínculo é um mecanismo local executado. A atomicidade demonstrada é local a
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="dual-write" />
-
 ## Dual Write
 
 Uma operação grava em sistemas que não compartilham a mesma decisão transacional.
@@ -243,8 +235,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="dual-write-migration" />
-
 ## Dual Write Migration
 
 A migração grava em duas representações durante uma transição.
@@ -275,8 +265,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Trigger-based CDC in SQLite is not WAL decoding, Debezium or a cross-database atomic transaction; cutover still requires reconciliation.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
-
-<span id="exactly-once-semantics" />
 
 ## Exactly Once Semantics
 
@@ -310,8 +298,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="idempotency" />
-
 ## Idempotency
 
 Repetir a mesma intenção não acrescenta outro efeito relevante dentro da fronteira definida.
@@ -342,8 +328,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A atomicidade demonstrada é local ao SQLite. O envio externo ainda pode repetir, e o destino também precisa deduplicar. Compensar cria uma nova ação e não apaga o histórico.
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
-
-<span id="orchestration-saga" />
 
 ## Orchestration Saga
 
@@ -407,8 +391,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The learning connector is a SQLite trigger plus feed query; transport, source-log offsets and recipient deduplication are not implemented.
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
-
-<span id="saga" />
 
 ## Saga
 
@@ -476,8 +458,6 @@ O vínculo é uma comparação executável de princípio. The two local outcomes
 
 A [explicação do capítulo](/explicacoes/distributed-work/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="transactional-inbox" />
-
 ## Transactional Inbox
 
 Uma inbox registra a identidade recebida junto do efeito local na mesma transação.
@@ -510,8 +490,6 @@ O vínculo é um mecanismo local executado. A atomicidade demonstrada é local a
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
-<span id="transactional-outbox" />
-
 ## Transactional Outbox
 
 Estado e intenção de integração são registrados na mesma transação local; um executor entrega o trabalho posteriormente.
@@ -543,3 +521,4 @@ O vínculo é um mecanismo local executado. A atomicidade demonstrada é local a
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-delivery/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="order-delivery" />

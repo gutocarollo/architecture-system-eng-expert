@@ -5,7 +5,19 @@ description: "Você aprenderá a relacionar uma operação a suas tentativas e m
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/diagnostics/explanation.mdx'
+import Tutorial from '../../../case-content/diagnostics/tutorial.mdx'
+import Guide from '../../../case-content/diagnostics/guide.mdx'
+import Reference from '../../../case-content/diagnostics/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="diagnostics" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # A equipe descobre onde a ordem parou
+
+<CaseNavigation caseId="diagnostics" withinPage />
 
 A ordem fictícia ORDER-1 passa por uma requisição que falha no provedor e por uma segunda tentativa. Ana vê um health endpoint verde e ainda não sabe onde o pedido parou. A prática reúne os dois request IDs sob um operation ID e separa tempo, erro e resultado do caminho de negócio.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="diagnostics">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/diagnostics/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/diagnostics/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/diagnostics/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/diagnostics/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 Uma operação reúne três spans e duas requisições. O trecho do provedor dura 800 ms e tem erro. Há duas requisições, uma com falha: 1 ÷ 2 = 50% de requisições com erro. Os três spans continuam sendo uma contagem distinta. O processo responde ao health endpoint, enquanto a prova da ordem detecta provider_failed. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="diagnostics" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="diagnostics" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="diagnostics" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="diagnostics" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [Uma ordem repetida cobra de novo](/jornadas/order-delivery/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [Uma ordem re
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 12 conceitos no [mapa de mecanismos e práticas](/jornadas/diagnostics/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="diagnostics" withinPage />

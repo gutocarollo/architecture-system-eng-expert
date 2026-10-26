@@ -3,70 +3,23 @@ asIndexPage: true
 title: "Experimente: a oportunidade existente conserva sua identidade"
 description: "Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação."
 diataxis: tutorial
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/opportunity-entry/tutorial.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="opportunity-entry" current="tutorial" />
 
 # Experimente: a oportunidade existente conserva sua identidade
 
-Continue o mesmo caso: [volte ao caso](/jornadas/opportunity-entry/); [entenda o mecanismo](/explicacoes/casos/opportunity-entry/); [resolva a tarefa](/guias/casos/opportunity-entry/); [consulte contratos e fontes](/referencia/casos/opportunity-entry/).
+<CaseNavigation caseId="opportunity-entry" current="tutorial" />
 
-Você concluirá uma experiência local e previsível. Você aprenderá a separar a identidade do objeto da identidade da requisição e conservar essa identidade ao reutilizar uma operação. Este caso vem do [card FBI-4719](https://fazcapital.atlassian.net/browse/FBI-4719) e do [PR 594](https://bitbucket.org/fazcapital/makershub/pull-requests/594). A investigação leu o conteúdo visível do card, a descrição e os comentários pertinentes do PR. Você pode comparar a [versão anterior](https://bitbucket.org/fazcapital/makershub/src/3958ac9ee407f6dc2fe1a6905c475befa69cf9cf/backend/app/services/super_r1_service.py) com a [versão alterada](https://bitbucket.org/fazcapital/makershub/src/8206752f9b1bc8650d0a4572f4a0d64566260b83/backend/app/services/super_r1_service.py). A prática abaixo executa esse recorte em isolamento; o estado de produção não foi medido por ela.
+## Tutorial
 
-## 1. Prepare o ambiente isolado
+<CaseBody components={legacyCaseHeadings} />
 
-Abra um terminal na raiz deste repositório de estudo. Confira Python 3.11 ou posterior. Para o caso de data, você também precisa de Node 20.9 ou posterior. Execute `npm ci --prefix labs/architecture` para instalar a versão do TypeScript fixada no lock dos laboratórios. O recibo desta autoria usou Python 3.14.8 e Node v26.8.1.
+<CaseNext caseId="opportunity-entry" current="tutorial" />
 
-```sh
-pwd
-python3 --version
-```
-
-O diretório precisa conter `labs/architecture`. Prepare os laboratórios com o comando abaixo. Ele cria uma virtualenv local e instala o SDK OpenTelemetry fixado pelo lock; o caso de mTLS usa a CLI OpenSSL 3.x. Confira `openssl version`; o recibo desta versão usou OpenSSL 3.6.5.
-
-```sh
-python3 labs/architecture/setup_labs.py
-```
-
-Os programas trabalham em memória ou em uma pasta temporária criada pelo Python. Eles usam somente identidades e chaves sintéticas. A instalação baixa os pacotes do lock. As práticas não fazem requisições externas nem gravam nos sistemas de produção; mTLS usa pares de sockets locais sem abrir porta de escuta.
-
-## 2. Reconheça a entrada que será repetida
-
-Uma OPP aberta fictícia, uma Conta fictícia, dois operadores com chaves diferentes e fixtures de estágio Contatado/Ganha/Perdida. Você repetirá a mesma entrada entre as condições comparadas; os eventos e relógios controlados eliminam a necessidade de acertar um intervalo manualmente.
-
-## 3. Execute as duas condições
-
-```sh
-python3 labs/architecture/opportunity-entry/run.py
-```
-
-O programa executa a condição anterior, executa a posterior e termina com `comparison=PASS` quando suas verificações passam. PASS neste roteiro significa que a falha ou diferença esperada apareceu antes e a garantia delimitada apareceu depois. A condição anterior deve mostrar o problema; portanto, observar seu sintoma é parte do resultado correto do exercício.
-
-## 4. Compare a saída
-
-A saída abaixo foi capturada na execução local registrada em `2026-10-15T02:34:17.982850+00:00`. Para repetir, use o comando acima; uma execução futura recebe seu próprio horário.
-
-```text
-before: create_calls=1 opportunity_id=006SYNTHETICNEW1 downstream=double
-after: create_calls=0 opportunity_id=006SYNTHETICOPEN downstream=double
-before-claim: two_actor_keys_own=2
-after-claim: shared_opportunity_second_status=409
-after-policy: stage=Contatado status=0
-after-policy: stage=Ganha status=409
-after-policy: stage=Perdida status=409
-comparison=PASS scope=historical_function_bodies_with_adapter_doubles
-```
-
-A criação muda de uma chamada para zero. O identificador continua 006SYNTHETICOPEN. O segundo claim recebe 409. As funções históricas também recusam oportunidades ganhas ou perdidas.
-
-## 5. Examine a mudança
-
-Abra `labs/architecture/opportunity-entry/source.diff` e os snapshots before/after. O runner lê os módulos ou os corpos das funções desses snapshots; a correção estudada já está preservada em after. Identifique a operação descrita na explicação e compare as mesmas entradas. Não é preciso trocar a branch de origem nem alterar o MakersHub.
-
-## 7. Reinicie e conclua
-
-Execute o mesmo comando outra vez. Cada processo começa com fixtures novas; as pastas SQLite temporárias são removidas pelo próprio programa. Não existe comando de limpeza contra banco, cache ou serviço externo.
-
-Os corpos das funções são históricos, mas Salesforce e o armazenamento de claims são doubles locais explícitos. Não se executaram agendamentos, leases PostgreSQL, heartbeat de rede ou liberação depois de writer threads. A regra aceita somente oportunidade aberta; oportunidade perdida segue pela Conta para abrir um ciclo novo.
-
-Você já observou a diferença. Continue o mesmo caso: [volte ao caso](/jornadas/opportunity-entry/); [entenda o mecanismo](/explicacoes/casos/opportunity-entry/); [resolva a tarefa](/guias/casos/opportunity-entry/); [consulte contratos e fontes](/referencia/casos/opportunity-entry/).
-
-O [mapa de conceitos deste caso](/jornadas/opportunity-entry/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.
+<CaseSequence caseId="opportunity-entry" current="tutorial" />

@@ -5,7 +5,19 @@ description: "Você aprenderá a relacionar quorum, disponibilidade, ordem causa
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/consensus/explanation.mdx'
+import Tutorial from '../../../case-content/consensus/tutorial.mdx'
+import Guide from '../../../case-content/consensus/guide.mdx'
+import Reference from '../../../case-content/consensus/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="consensus" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # Uma partição separa os escritórios da corretora
+
+<CaseNavigation caseId="consensus" withinPage />
 
 Uma corretora hipotética divide o serviço em três participantes: A, B e C. Uma falha de comunicação deixa A e B juntos e C sozinho. Se cada grupo se declarar autorizado a gravar, duas decisões incompatíveis podem aparecer. A prática permite somente ao grupo que reúne dois dos três participantes autorizar a escrita.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="consensus">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/consensus/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/consensus/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/consensus/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/consensus/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 O modelo aceita um líder no grupo de dois e nenhuma escrita na minoria. Duas leituras e duas escritas em três membros têm pelo menos 2 + 2 − 3 = 1 participante comum. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="consensus" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="consensus" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="consensus" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="consensus" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A versão nova chega a quem ainda usa a antiga](/jornadas/safe-release/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A versão no
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 38 conceitos no [mapa de mecanismos e práticas](/jornadas/consensus/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="consensus" withinPage />

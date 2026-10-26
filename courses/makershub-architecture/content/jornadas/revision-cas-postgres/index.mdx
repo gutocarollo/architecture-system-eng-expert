@@ -5,7 +5,19 @@ description: "Uma experiência com SQL histórico e um PostgreSQL descartável."
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/revision-cas-postgres/explanation.mdx'
+import Tutorial from '../../../case-content/revision-cas-postgres/tutorial.mdx'
+import Guide from '../../../case-content/revision-cas-postgres/guide.mdx'
+import Reference from '../../../case-content/revision-cas-postgres/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="revision-cas-postgres" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # Uma única versão atual ainda pode perder uma alteração
+
+<CaseNavigation caseId="revision-cas-postgres" withinPage />
 
 Dois escritores trabalham sobre o mesmo colaborador. O primeiro lê a linha atual. O segundo confirma uma alteração em azure_id. O primeiro ainda conserva a leitura antiga e tenta encerrar a versão para criar outra. Ter somente uma versão atual não impede que essa nova versão recoloque o valor antigo.
 
@@ -13,15 +25,61 @@ Este recorte está ligado ao [card FBI-4924](https://fazcapital.atlassian.net/br
 
 ## Escolha seu próximo passo
 
+<div data-case-choices="revision-cas-postgres">
+
 | Sua necessidade | Destino deste caso | Resultado |
 | --- | --- | --- |
-| Você quer entender a decisão. | [Explicação](/explicacoes/casos/revision-cas-postgres/) | Você reconhece o mecanismo e seu limite. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/revision-cas-postgres/) | Você faz uma cópia falhar, aplica o patch e repete o contrato. |
-| Você precisa investigar outro fluxo. | [Guia](/guias/casos/revision-cas-postgres/) | Você confere a mesma garantia em uma consulta semelhante. |
-| Você procura nomes e parâmetros. | [Referência](/referencia/casos/revision-cas-postgres/) | Você consulta os caminhos, as entradas e os limites. |
+| Você quer entender a decisão. | [Explicação](#explanation) | Você reconhece o mecanismo e seu limite. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você faz uma cópia falhar, aplica o patch e repete o contrato. |
+| Você precisa investigar outro fluxo. | [Guia](#guide) | Você confere a mesma garantia em uma consulta semelhante. |
+| Você procura nomes e parâmetros. | [Referência](#reference) | Você consulta os caminhos, as entradas e os limites. |
+
+</div>
 
 ## O que você observará
 
 A versão anterior termina com uma única linha atual, mas perde AZURE-CONFIRMED e conserva AZURE-OLD. O predicado alterado rejeita o escritor atrasado e preserva AZURE-CONFIRMED. Os identificadores deste exercício são sintéticos.
 
 A revisão baseada em xmin é opaca e transitória. Ela não é uma identidade durável nem um fencing token monotônico. O laboratório isola o predicado de encerramento, com uma atualização concorrente entre leitura e escrita; não executa o método inteiro, a API ou a integração Azure. O commit selecionado pertence a um PR cuja leitura histórica estava aberta; este material não afirma implantação em produção.
+
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="revision-cas-postgres" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="revision-cas-postgres" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="revision-cas-postgres" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="revision-cas-postgres" current="reference" withinPage />
+
+</section>
+
+<CaseSequence caseId="revision-cas-postgres" withinPage />

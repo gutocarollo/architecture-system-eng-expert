@@ -1,0 +1,29 @@
+| Contrato | Valor deste recorte |
+| --- | --- |
+| Caso | `query-grain-postgres` |
+| Função | `get_family_revenue_by_period` |
+| Arquivo de origem | `backend/app/repositories/account.py` |
+| SHA anterior | `b1df42295ce42d593ae14f0a8a9092c28d1b410d` |
+| SHA selecionado | `05b2cacdddd59b968641b12d8d124bad1888392f` |
+| Runner | `python3 labs/postgres-lineage/run.py --case grain` |
+| Candidato editável | `--candidate-grain caminho/candidate.sql` |
+| Fonte dos hashes | `labs/postgres-lineage/manifest.json` |
+| Patch | `labs/postgres-lineage/grain.patch` |
+| Garantia | Uma conta e um mês produzem uma linha com comissão total de R$ 100; a junção não pode alterar essa soma. |
+
+O arquivo `grain-before.sql.template` e seu correspondente posterior contêm o SQL extraído da árvore sintática da fonte. Os snapshots `.function.txt` conservam a função completa. Os valores financeiros e identidades das fixtures foram inventados para a experiência.
+
+O runner substitui os parâmetros por literais controlados. No caso de granularidade, substitui somente o CTE de descoberta de familiares por uma conta sintética; a consulta posterior a esse CTE conserva o SQL selecionado. No caso de revisão, usa uma tabela mínima descartável com os mesmos nomes de colunas do predicado. As tabelas mínimas não reproduzem o esquema inteiro do MakersHub.
+
+### Saída delimitada
+
+```text
+grain: before_rows=2 before_commission=200 after_rows=1 after_commission=100
+comparison=PASS isolation_verified=True temporary_server_stopped=True
+```
+
+A comparação padrão devolve código 0. Um candidato que ainda infringe o contrato devolve código 1. Uma dependência ausente ou SQL inválido também impede a conclusão; é preciso ler o erro antes de atribuí-lo ao mecanismo.
+
+O uso de MAX depende do contrato deste recorte: a custódia da conta está repetida por assessor. MAX não é uma receita geral para somar patrimônios distintos. O exercício isola a cardinalidade da junção e não valida a fórmula financeira de ROA nem o caminho completo da tela.
+
+Este recorte está ligado ao [card FBI-4604](https://fazcapital.atlassian.net/browse/FBI-4604) e ao [PR 507](https://bitbucket.org/fazcapital/makershub/pull-requests/507). A leitura histórica registrou o PR como **MERGED**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/b1df42295ce42d593ae14f0a8a9092c28d1b410d/backend/app/repositories/account.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/05b2cacdddd59b968641b12d8d124bad1888392f/backend/app/repositories/account.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.

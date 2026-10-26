@@ -1,0 +1,155 @@
+{
+  "observed_at": "2026-10-26T18:03:21.842982+00:00",
+  "baseline_commit": "ef5bd78bd0224571ccfde49873ac1b16489b59c1",
+  "cases": 18,
+  "facets": 72,
+  "concept_maps": 15,
+  "routes_audited": 105,
+  "legacy_fragments_captured": 801,
+  "tests": {
+    "total": 77,
+    "passed": 77,
+    "failed": 0
+  },
+  "before": {
+    "tests": 54,
+    "passed": 3,
+    "failed": 51
+  },
+  "build": {
+    "html_pages": 184,
+    "indexed_pages": 109
+  },
+  "review": {
+    "agent": "/root/all_case_navigation_review",
+    "native_type": "default",
+    "model": "gpt-6.1-sol",
+    "effort": "xhigh",
+    "first_pass": "PASS",
+    "R1_recheck": "PASS",
+    "facets_compared": 72,
+    "code_blocks_preserved": 129,
+    "tables_preserved": 65,
+    "material_blockers": 0
+  },
+  "R1": {
+    "legacy_navigation_paragraphs_removed": 112,
+    "concept_links_retargeted": 45,
+    "remaining_own_legacy_facet_links": 0
+  },
+  "browser": {
+    "representative_cases": [
+      "opportunity-entry",
+      "date-only"
+    ],
+    "entry": "direct explanation then next tutorial in the complete journey",
+    "footer_labels": [
+      "Explicação",
+      "Tutorial",
+      "Guia",
+      "Referência"
+    ],
+    "mobile_css_width": 390,
+    "mobile_css_height": 844,
+    "nav_width": 341.3368225097656,
+    "nav_scroll_width": 340,
+    "keyboard_tab": "Consultar",
+    "keyboard_enter_hash": "#reference",
+    "computed_link_styles": {
+      "breadcrumb": {
+        "color": "rgb(0, 107, 230)",
+        "decoration": "underline",
+        "cursor": "pointer"
+      },
+      "navigation": {
+        "color": "rgb(0, 107, 230)",
+        "decoration": "underline",
+        "cursor": "pointer"
+      },
+      "choices": {
+        "color": "rgb(0, 107, 230)",
+        "decoration": "underline",
+        "cursor": "pointer"
+      },
+      "footer": {
+        "color": "rgb(0, 107, 230)",
+        "decoration": "underline",
+        "cursor": "pointer"
+      }
+    }
+  },
+  "canonical_body_hashes": {
+    "case-content/access-policy/explanation.mdx": "671dbe414440f062d8350121f0bc44f5610b45f0a599ae56bd221d1a5f91de3f",
+    "case-content/access-policy/guide.mdx": "8385820cdcefd8c2b25942a4c1c2736337a1adb2fc6badab59f6f2474c832167",
+    "case-content/access-policy/reference.mdx": "c83962298de523aa1c7134eb041541802d810ddf7bc7bbaae3667b2363007f48",
+    "case-content/access-policy/tutorial.mdx": "5518bbd0d9b01cb968546831c32982eca21fedc1e60e833f91157288705769cd",
+    "case-content/airflow-lock-retry/explanation.mdx": "a7881b2caa7bc64257f4b1c47e7ac8ed658ef8cb6181738dfe3aa90087d1dc2e",
+    "case-content/airflow-lock-retry/guide.mdx": "7bd01ad22cdfd9c979100688e82b6c09e17a57576c1a0c17b2f246d4e77ed508",
+    "case-content/airflow-lock-retry/reference.mdx": "344b20d8e36cb2f4a2d96b500079df011dbe28a4feac1fc63caef8264ebc71c0",
+    "case-content/airflow-lock-retry/tutorial.mdx": "4bbadc0ddcaab226317c385ff5858be45d7d97ec23c6473e2cc44f73a10be90b",
+    "case-content/cache-policy/explanation.mdx": "9bb050fa8bbc38f24afecbf6fa11e414799387434395d11bc31e6841a0bbe880",
+    "case-content/cache-policy/guide.mdx": "f0fca0a1622e6709d886f084519d4135354748f9fa0cf6867c25b2ee4b39cd7f",
+    "case-content/cache-policy/reference.mdx": "938027e5927b8c0977a90e83fa7e39c3a01062a2953f096305b9fbf75ddddc11",
+    "case-content/cache-policy/tutorial.mdx": "84ef2bd659d03c96c89dd8d2baff25358025155d6e322e40b43f5eeb85a7ddf5",
+    "case-content/consensus/explanation.mdx": "ff9077513ce7a52f9133df775e4ec12492a4b84f33d0496417a5bc8c623a1673",
+    "case-content/consensus/guide.mdx": "167320bd9e9720701aeb367a29dfb367637f7db87a0575d6c8d464d90e076cb4",
+    "case-content/consensus/reference.mdx": "9d866ace30c099b2398f3e11f2a60e5f5463f9be87267d4e20d06591e648443e",
+    "case-content/consensus/tutorial.mdx": "1e0aba835229633f645443a18db74a4ddfa46c4214de23abcf548ead499e521c",
+    "case-content/date-only/explanation.mdx": "4e6dd70ba8b46be55fd34a0380276bf1a01932231fe1cd8f4adfccb1105fd7c7",
+    "case-content/date-only/guide.mdx": "bfdeca9d4f2b0455ed1257354502b5a9175137288d36f7fc55f5c5f8cc7aa5ba",
+    "case-content/date-only/reference.mdx": "6647ecabca5da17fd146d5c4d7afffe00bf5e48d35365ccbfaeea61a9dc4dc9b",
+    "case-content/date-only/tutorial.mdx": "96e1702ede2a377316db123884e39968c1f8fbd228104b575563ccb393d09458",
+    "case-content/diagnostics/explanation.mdx": "3e91adf5ee30fea6545078c5048434191b66911554d0a594afa716dba8eab07e",
+    "case-content/diagnostics/guide.mdx": "7b807089215091c0ccc212f315c6559c3964dfc3d2ad66faa49ed21c94b43ebf",
+    "case-content/diagnostics/reference.mdx": "d2ad919fe1689a358ce309c33c2d5a86228418f4757fc7da4899afa51e20525f",
+    "case-content/diagnostics/tutorial.mdx": "5a7819f5b0a5e134c94605c2bd18772085d3091842c1de2b63e0409f5d95a79a",
+    "case-content/early-refresh/explanation.mdx": "ee04cbeff9610ccdf74061a54066e6509071d83378ac68147336d5a5d788c551",
+    "case-content/early-refresh/guide.mdx": "dffb46dcd4a6b487430fea48538305e84cd054d4b1f70d6c45da91bab14c68b7",
+    "case-content/early-refresh/reference.mdx": "3e860fe7882b77186487ad8b1359e8872a43f6d4a687b616dc41aaa2fcc2c0ca",
+    "case-content/early-refresh/tutorial.mdx": "ae754038905da437f4b96540397d1538634de9f8aaef67862c1d5d0a388b6fd2",
+    "case-content/ledger-projection/explanation.mdx": "7a3b1f31ff5a5e80695123dc81c3ee8ba09330550d2c564a9cff1e519ad6d630",
+    "case-content/ledger-projection/guide.mdx": "9f10f40b8001e289551cf4d5d869c9bf7637a054c5c5ecb1e936e699fbc9e199",
+    "case-content/ledger-projection/reference.mdx": "1eeca276d239c05c8b3bbe95d31e72d3ffdce609a80d4dde19d1654378306a6f",
+    "case-content/ledger-projection/tutorial.mdx": "b4cf7130687f6fb86d59f7914adb8f1011ed4dd54b8a0a86d13b558802b5f20b",
+    "case-content/opportunity-entry/explanation.mdx": "b4353175494caba3d7c2e08d64acaea96cdbed8ab91963243fd3d7703ac047ab",
+    "case-content/opportunity-entry/guide.mdx": "d43326050d77c09e5500cadf256cb32286a9b3c1d07034064ce124e4e56683fc",
+    "case-content/opportunity-entry/reference.mdx": "b32cf68dd3f14f13eefee05e841496e379224ecedd0b7554f680b2ded657e2cf",
+    "case-content/opportunity-entry/tutorial.mdx": "970990795ce6fc1fd332a2ececc9019386ea58cf42f65d1ecaf37e48397f7c25",
+    "case-content/order-boundaries/explanation.mdx": "6f748313f611dc8468d804e1f1b9fbf35d72f02c178416e35975374640019707",
+    "case-content/order-boundaries/guide.mdx": "fc126324be4b7025aa3308f041f19ec2a965dd9e27247a63c7f01c06d5b47a31",
+    "case-content/order-boundaries/reference.mdx": "5eb44ccc461b06ada9cf2355bfa1a92573c67a868dd553e18cd49c1e5d16f59d",
+    "case-content/order-boundaries/tutorial.mdx": "a4c23a502da5e0b8ed69aece913544c1132b11a9ddc7628cffc133d4ba69eb1f",
+    "case-content/order-delivery/explanation.mdx": "5f567ac43ef6e695d813ee206ff2b47f57479983466886d28036adedda8168b4",
+    "case-content/order-delivery/guide.mdx": "078dd0262eb5c06c27500952e091c284cda98106321c12cca34bfd178447ae19",
+    "case-content/order-delivery/reference.mdx": "0714b6a2f85fddbe8873e185c6e7ac3df542fb022d6077f5da5850b73b3f52f0",
+    "case-content/order-delivery/tutorial.mdx": "66e7b06809c6408de0936ede5d0ea0256f8ac6e4c2924d4d00c1f528bf1a153e",
+    "case-content/query-grain-postgres/explanation.mdx": "e114dea42798a51343dbe6ec079375a5defe7be7d7355145b9c7150b07c9304f",
+    "case-content/query-grain-postgres/guide.mdx": "2d11e4b8303bc047ccf59faf1bb2cece1b217b0b01a684507df68c8f92d0bc00",
+    "case-content/query-grain-postgres/reference.mdx": "d98260061342a1df091b9a49a6b60bd0807818fac0177e2a9d0ac138275f340d",
+    "case-content/query-grain-postgres/tutorial.mdx": "d20775c8c378bed57cb1fab0c33ba25d316dbac0e9e4c14c252674e631982432",
+    "case-content/queue-workflow/explanation.mdx": "34530a06e215bb83bcbe41e82d1ba36efcc9f09aa3cdf4eacc00c59e83ece62e",
+    "case-content/queue-workflow/guide.mdx": "5bd70e6aac6bb4cd2ff8837bd0ee5de939f6b14c4b0a7f5e388ee090e0f1ab50",
+    "case-content/queue-workflow/reference.mdx": "21d3fbd97d0377a943a1afff9b4c5e28e979aedb5aa7a0d74f4e0d1de31f2af4",
+    "case-content/queue-workflow/tutorial.mdx": "b48e0c93f4ac1d0a8fac8bcc3019a04f535742a050a65b2d9261ce10f5a174d8",
+    "case-content/reservation/explanation.mdx": "35cac21b9e6b9dad4a250743a2d08e9b3a80e21bc72fd312631949347b2c70fa",
+    "case-content/reservation/guide.mdx": "19fb46fde586885c40ba04a4c6da22bfcc06bb74d0ebb27a5c18d03d8fff8297",
+    "case-content/reservation/reference.mdx": "420b4a37038fed51aac46a8d8a1d30110c16c17a9bbda3d5c02de664ffc88fae",
+    "case-content/reservation/tutorial.mdx": "d8ad72dd651d5c368eef9f5834c74b8700da9ba51719ceec8c7b85b976eb35de",
+    "case-content/revision-cas-postgres/explanation.mdx": "4f7c51dbc3fa889cb4b34b50e5915a4ee7f67cdd7c6d72fe76a16a03920fefca",
+    "case-content/revision-cas-postgres/guide.mdx": "dd1231845b5ba403c461350af6724a664846105bca9ba8788b16a3fb17cd3625",
+    "case-content/revision-cas-postgres/reference.mdx": "c7b8764c16fe6f8ac2681bdcb79091c36a773843074c698f08751b056b62c855",
+    "case-content/revision-cas-postgres/tutorial.mdx": "c3d9fbfc2ccf279f244326c56d9d34866399a5cdfa49508450cb192641ef81fb",
+    "case-content/safe-release/explanation.mdx": "c03a9ade9dea6bb635d0c5b1321c043e623f708a288bda1e1aa9fe7a9bb50fab",
+    "case-content/safe-release/guide.mdx": "65bd58cbb525d61a6b42d9652083db98e560fdd273fcba5342c397779a3b7262",
+    "case-content/safe-release/reference.mdx": "7f656a63f918fc9a81d4f6ac9c603af2a6b5243adbb330859505c24848fc9df6",
+    "case-content/safe-release/tutorial.mdx": "d6caffe860491f68191b01a593abaa746b950ee01ef1f9cbaa3bf92f75bf8328",
+    "case-content/single-flight-cancel/explanation.mdx": "0df3f20fb23b22d8d1f9ece18ec14c8919e40469fce2ab90d929f3ef76011282",
+    "case-content/single-flight-cancel/guide.mdx": "f20c09e055515379c1aba700011d112039849a73e7efaa5df897953dbbc1b7d6",
+    "case-content/single-flight-cancel/reference.mdx": "76337c5b3c542024379ed23b42badd06f11919281426d7cda5306762e201590d",
+    "case-content/single-flight-cancel/tutorial.mdx": "7d8a5ca1565819f21f7c9452a2ecae934976ccb80881745e08fd73ceabd2b59a",
+    "case-content/storage-partitions/explanation.mdx": "65b1d70a7f2253b41bc35c1d3fe796a19e30c7a443be1d7d5c165b882bcb29af",
+    "case-content/storage-partitions/guide.mdx": "73cfe6b69c40eff421ff08a2f557746d8f18a5ddc5078a8dbd44c8ebc5e66da9",
+    "case-content/storage-partitions/reference.mdx": "5eee587a77c2dfc9e5baa449baf39ae32dcfca4cb930e7282fb54c7116939926",
+    "case-content/storage-partitions/tutorial.mdx": "769723291205a4e85fb9aed1313c9d1ed38d8ce6bec47e7d3b7e80336148c7c4"
+  }
+}

@@ -3,85 +3,23 @@ asIndexPage: true
 title: "Contratos: dois operadores disputam o mesmo recurso"
 description: "Entradas, parâmetros, versões, resultados e limites do caso Dois operadores disputam a mesma reserva."
 diataxis: reference
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/reservation/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="reservation" current="reference" />
 
 # Contratos: dois operadores disputam o mesmo recurso
 
-Esta página reúne os contratos que a prática compara. Você aprenderá a escolher o recurso protegido e reconhecer uma decisão tomada sobre uma versão antiga. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+<CaseNavigation caseId="reservation" current="reference" />
 
-Para continuar o mesmo problema, [volte à jornada](/jornadas/reservation/), [entenda o mecanismo](/explicacoes/casos/reservation/), [execute o tutorial](/tutoriais/casos/reservation/) ou [consulte o guia da tarefa](/guias/casos/reservation/).
+## Referência
 
-## Entradas e ambiente
+<CaseBody components={legacyCaseHeadings} />
 
-Saldo 1.000, versão 7, crédito 100, débito 200, gerações 101/102 e um mesmo horário fictício.
+<CaseNext caseId="reservation" current="reference" />
 
-| Contrato | Valor do caso |
-| --- | --- |
-| Identidade do caso | `reservation`. |
-| Símbolos a consultar | `reservation / version-conflict / fence / resource-key`. |
-| Comando completo | `python3 labs/architecture/financial.py reservation`. |
-| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
-| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
-| Horário e escopo do recibo | `2026-10-15T01:35:30.570814+00:00`, no laboratório local. |
-
-O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
-
-## Fonte do modelo financeiro
-
-Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
-
-A função `reservation` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/reservation.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
-
-## Resultados que o contrato compara
-
-A escrita antiga é detectada. Depois de reler e revalidar a intenção, o saldo fica em R$ 900. A geração 101 é recusada, e apenas uma reserva do mesmo horário é aceita.
-
-### `version-conflict`
-
-A comparação permite executar a seguinte ação de estudo: Compare a escrita baseada na versão 7 com a versão 8 já gravada. Releia e refaça 1.100 − 200 = R$ 900.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `balance` | `800` | O campo não é emitido nesta condição. |
-| `lost_credit` | `100` | O campo não é emitido nesta condição. |
-| `balance_after_reread` | O campo não é emitido nesta condição. | `900` |
-| `stale_rejected` | O campo não é emitido nesta condição. | `true` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/reservation/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `fence`
-
-A comparação permite executar a seguinte ação de estudo: Faça a geração 101 voltar depois da 102 e confira a rejeição no destino, em vez de confiar somente na expiração do coordenador.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `last_writer` | `"expired-A"` | `"B"` |
-| `value` | `101` | `102` |
-| `stale_101_rejected` | O campo não é emitido nesta condição. | `true` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/reservation/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `resource-key`
-
-A comparação permite executar a seguinte ação de estudo: Envie dois operadores para o mesmo assessor e horário; compare a identidade do usuário com a identidade do recurso disputado.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `accepted_with_actor_keys` | `2` | O campo não é emitido nesta condição. |
-| `accepted_with_slot_key` | O campo não é emitido nesta condição. | `1` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/reservation/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-## Garantia, parâmetros e limites
-
-A gravação confere a versão esperada; o destino recusa uma geração menor; a identidade da reserva usa o assessor e o horário, independentemente do operador. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
-
-Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
-
-Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
-
-## Recibo e rastreabilidade
-
-A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `reservation`. O hash SHA-256 da saída capturada é `b74d68b515cee3ca2d5224509425b5cfb1d52137cebe172c9ad02b0e6dda9c87`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
-
-Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/reservation/), [leia a explicação](/explicacoes/casos/reservation/), [abra o tutorial](/tutoriais/casos/reservation/) ou [consulte o guia](/guias/casos/reservation/).
+<CaseSequence caseId="reservation" current="reference" />

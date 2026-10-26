@@ -4,11 +4,17 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="reservation" current="concepts" />
+
 # Conceitos: dois operadores disputam o mesmo recurso
+
+<CaseNavigation caseId="reservation" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Ana e Bruno são operadores fictícios que leem R$ 1.000 na versão 7. Ana registra um crédito de R$ 100 e chega à versão 8. Bruno ainda calcula seu débito de R$ 200 sobre a versão 7. Sem conferir a versão, ele grava R$ 800 e perde o crédito de Ana; ao reler o saldo, o resultado correto da intenção permitida é R$ 900.
 
-Comece pela [jornada](/jornadas/reservation/), execute o [tutorial](/tutoriais/casos/reservation/) e use a [referência](/referencia/casos/reservation/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/reservation/).
+Comece pela [jornada](/jornadas/reservation/), execute o [tutorial](/jornadas/reservation/#tutorial) e use a [referência](/jornadas/reservation/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/reservation/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
 
@@ -45,8 +51,6 @@ O vínculo é um mecanismo local executado. A conferência é um modelo determin
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e029) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="copy-on-write" />
-
 ## Copy-on-Write
 
 O mecanismo grava novas versões de blocos ou estruturas antes de alterar referências, preservando versões existentes conforme suas regras.
@@ -77,8 +81,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The fixture is a flat dictionary; deep object graphs, memory reclamation and lock-free publication require additional contracts.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="distributed-lock" />
 
 ## Distributed Lock
 
@@ -111,8 +113,6 @@ O vínculo é uma comparação executável de princípio. SQLite is local to thi
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e026) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="fencing" />
-
 ## Fencing
 
 O destino da escrita rejeita um participante cuja autoridade expirou ou foi substituída.
@@ -144,8 +144,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Fencing; não implementa o padrão completo. A conferência é um modelo determinístico local. Ela não prova um lock distribuído, um algoritmo lock-free ou wait-free, justiça de um RWLock ou atomicidade entre processos.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="fencing-token" />
 
 ## Fencing Token
 
@@ -218,8 +216,6 @@ O vínculo é uma comparação executável de princípio. No process pool, distr
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="lease" />
-
 ## Lease
 
 Uma lease concede autoridade por um prazo renovável.
@@ -251,8 +247,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The model uses a controlled clock; expiration is not destination fencing and does not stop an old external side effect.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e027) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="lock-free" />
 
 ## Lock-Free
 
@@ -286,8 +280,6 @@ O vínculo é uma comparação executável de princípio. The CAS primitive is a
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="optimistic-concurrency-control" />
-
 ## Optimistic Concurrency Control
 
 A atualização é aceita se a versão ou condição esperada ainda coincide.
@@ -319,8 +311,6 @@ O vínculo é um mecanismo local executado. A conferência é um modelo determin
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e024) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="pessimistic-locking" />
-
 ## Pessimistic Locking
 
 Um lock reserva acesso incompatível antes de concluir a operação.
@@ -350,8 +340,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. This is SQLite database-writer exclusion, not PostgreSQL row locking or a recommendation to hold locks during network calls.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e025) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="reactive-streams" />
 
 ## Reactive Streams
 
@@ -426,8 +414,6 @@ O vínculo é uma comparação executável de princípio. This is a serialized l
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="reservation-pattern" />
-
 ## Reservation Pattern
 
 Uma reserva torna um recurso temporariamente indisponível antes da conclusão definitiva.
@@ -496,8 +482,6 @@ O vínculo é uma comparação executável de princípio. No process pool, distr
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/16-workflow-e-processamento/) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="semaphore" />
-
 ## Semaphore
 
 Permite um número definido de executantes.
@@ -529,8 +513,6 @@ O vínculo é uma comparação executável de princípio. The semaphore is local
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="spinlock" />
-
 ## Spinlock
 
 Tenta adquirir uma proteção com repetição ativa, podendo combinar espera conforme a implementação.
@@ -561,8 +543,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The model uses serialized test-and-set steps, not a hardware spinlock, CPU benchmark or permission to spin while waiting for HTTP.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="thread-pool" />
 
 ## Thread Pool
 
@@ -600,8 +580,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. No process pool, distributed worker, work durability or network scatter/gather is claimed.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="wait-free" />
 
 ## Wait-Free
 
@@ -642,8 +620,6 @@ O vínculo é uma comparação executável de princípio. The bounded-step argum
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
-<span id="work-stealing" />
-
 ## Work Stealing
 
 Um executor ocioso retira trabalho elegível de outra fila.
@@ -679,8 +655,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The deques are manipulated sequentially; a real concurrent deque requires its own atomicity and memory-order guarantees.
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
-
-<span id="worker-pool" />
 
 ## Worker Pool
 
@@ -719,3 +693,4 @@ O vínculo é uma comparação executável de princípio. No process pool, distr
 
 A [explicação do capítulo](/explicacoes/workflow/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/reservation/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="reservation" />

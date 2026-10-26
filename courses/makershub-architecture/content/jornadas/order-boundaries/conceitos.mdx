@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="order-boundaries" current="concepts" />
+
 # Conceitos: a regra se espalha pelo produto
+
+<CaseNavigation caseId="order-boundaries" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Ana é uma operadora fictícia de uma corretora. O provedor envia uma autorização como AUTHORISED e o produto espera accepted. Se cada tela interpretar o contrato sozinha, a mesma ordem pode parecer recusada em um lugar e aceita em outro. O exemplo concentra a tradução e deixa a regra financeira dentro da operação.
 
-Comece pela [jornada](/jornadas/order-boundaries/), execute o [tutorial](/tutoriais/casos/order-boundaries/) e use a [referência](/referencia/casos/order-boundaries/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/order-boundaries/).
+Comece pela [jornada](/jornadas/order-boundaries/), execute o [tutorial](/jornadas/order-boundaries/#tutorial) e use a [referência](/jornadas/order-boundaries/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/order-boundaries/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="abstract-factory" />
 
 ## Abstract Factory
 
@@ -45,8 +49,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="actor-model" />
-
 ## Actor Model
 
 Cada actor mantém estado próprio, processa uma mensagem por vez e conversa com outros actors por mensagens assíncronas.
@@ -78,8 +80,6 @@ O vínculo é uma comparação executável de princípio. The mailbox is local; 
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="adapter" />
-
 ## Adapter
 
 Converte uma interface para o contrato esperado pelo chamador.
@@ -104,8 +104,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="aggregate" />
 
 ## Aggregate
 
@@ -139,8 +137,6 @@ O vínculo é uma comparação executável de princípio. The aggregate is in me
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="aggregate-root" />
-
 ## Aggregate Root
 
 O conceito Aggregate Root é o único ponto público que protege invariantes do agregado.
@@ -172,8 +168,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The aggregate is in memory; Python private attributes are a convention and distributed transaction boundaries are not established.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="ambassador" />
 
 ## Ambassador
 
@@ -216,8 +210,6 @@ O vínculo é uma comparação executável de princípio. The proxies are logica
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="anti-corruption-layer" />
-
 ## Anti-Corruption Layer
 
 Traduz o modelo externo para o significado do contexto local.
@@ -247,8 +239,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Anti-Corruption Layer; não implementa o padrão completo. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="api-composition" />
 
 ## API Composition
 
@@ -284,8 +274,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Partial failures, freshness and authorization of each constituent service need separate contracts.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="api-gateway" />
 
 ## API Gateway
 
@@ -325,8 +313,6 @@ O vínculo é uma comparação executável de princípio. This models gateway/pr
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="api-gateway-security" />
-
 ## API Gateway Security
 
 A entrada da API aplica controles de transporte, identidade e uso antes de encaminhar o pedido.
@@ -365,8 +351,6 @@ O vínculo é uma comparação executável de princípio. This models gateway/pr
 
 A [explicação do capítulo](/explicacoes/security/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/14-seguranca/#g14-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="application-service" />
-
 ## Application Service
 
 Um Application Service coordena um caso de uso, suas dependências e persistência; não deve esconder toda a regra no fluxo.
@@ -401,8 +385,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The ordering model does not supply an ORM transaction, authentication or a production application layer.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="backend-for-frontend-bff" />
 
 ## Backend for Frontend (BFF)
 
@@ -439,8 +421,6 @@ O vínculo é uma comparação executável de princípio. Partial failures, fres
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="blackboard-architecture" />
-
 ## Blackboard Architecture
 
 Uma arquitetura Blackboard reúne um estado compartilhado, participantes especializados que leem e acrescentam conhecimento e um controle que escolhe quais participantes podem agir.
@@ -471,8 +451,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The fixture has monotonic facts and two rounds; conflict resolution and an unrestricted expert scheduler are outside it.
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="bounded-context" />
 
 ## Bounded Context
 
@@ -515,8 +493,6 @@ O vínculo é uma comparação executável de princípio. The context map and la
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="bridge" />
-
 ## Bridge
 
 Separa duas dimensões que variam independentemente.
@@ -553,8 +529,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="builder" />
-
 ## Builder
 
 Monta um objeto complexo em etapas nomeadas.
@@ -579,8 +553,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="cell-based-architecture" />
 
 ## Cell-Based Architecture
 
@@ -614,8 +586,6 @@ O vínculo é uma comparação executável de princípio. Capacity, routing safe
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="chain-of-responsibility" />
-
 ## Chain of Responsibility
 
 Passa uma solicitação por verificações independentes até uma aceitar ou recusar.
@@ -640,8 +610,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="clean-architecture" />
 
 ## Clean Architecture
 
@@ -681,8 +649,6 @@ O vínculo é uma comparação executável de princípio. Only these boundary pr
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="command" />
-
 ## Command
 
 Empacota uma ação e seus dados para que outro componente possa executá-la.
@@ -707,8 +673,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="component-based-architecture" />
 
 ## Component-Based Architecture
 
@@ -749,8 +713,6 @@ O vínculo é uma comparação executável de princípio. The model demonstrates
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="composite" />
-
 ## Composite
 
 Permite tratar um item e um grupo de itens pelo mesmo contrato.
@@ -775,8 +737,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="conformist" />
 
 ## Conformist
 
@@ -807,8 +767,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The exercise demonstrates the relationship choice, not a recommendation to accept every provider concept.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="context-map" />
 
 ## Context Map
 
@@ -894,8 +852,6 @@ O vínculo é uma comparação executável de princípio. The context map and la
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="ddd" />
-
 ## DDD
 
 DDD organiza a linguagem e as regras do domínio segundo os limites do negócio.
@@ -937,8 +893,6 @@ O vínculo é uma comparação executável de princípio. The context map and la
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="decorator" />
-
 ## Decorator
 
 Envolve um objeto e acrescenta comportamento, mantendo o mesmo contrato.
@@ -963,8 +917,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="domain-service" />
 
 ## Domain Service
 
@@ -997,8 +949,6 @@ O vínculo é uma comparação executável de princípio. Only an in-memory oper
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="event-driven-architecture" />
-
 ## Event-Driven Architecture
 
 Um produtor publica fatos de negócio por contrato; consumidores reagem sem o produtor executar cada consequência diretamente.
@@ -1030,8 +980,6 @@ O vínculo é uma comparação executável de princípio. Transport, delivery gu
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="facade" />
-
 ## Facade
 
 Oferece uma interface simplificada para um conjunto de operações.
@@ -1059,8 +1007,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="factory" />
 
 ## Factory
 
@@ -1094,8 +1040,6 @@ O vínculo é uma comparação executável de princípio. The construction rule 
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="factory-method" />
-
 ## Factory Method
 
 Deixa uma implementação concreta decidir qual produto criar por um método definido no contrato.
@@ -1121,8 +1065,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="flyweight" />
-
 ## Flyweight
 
 Compartilha dados imutáveis repetidos para economizar memória.
@@ -1147,8 +1089,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="gateway-aggregation" />
 
 ## Gateway Aggregation
 
@@ -1184,8 +1124,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Partial failures, freshness and authorization of each constituent service need separate contracts.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="gateway-offloading" />
 
 ## Gateway Offloading
 
@@ -1225,8 +1163,6 @@ O vínculo é uma comparação executável de princípio. This models gateway/pr
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="gateway-routing" />
-
 ## Gateway Routing
 
 Escolhe um serviço de destino segundo o pedido.
@@ -1265,8 +1201,6 @@ O vínculo é uma comparação executável de princípio. This models gateway/pr
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="graphql-federation" />
-
 ## GraphQL Federation
 
 Compõe schemas de subgraphs para consulta sob um contrato de entidades e campos.
@@ -1304,8 +1238,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. This is the entity-key resolution property of federation. It does not include a GraphQL parser, supergraph schema, query planner or Apollo runtime.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="hateoas" />
 
 ## HATEOAS
 
@@ -1378,8 +1310,6 @@ O vínculo é uma comparação executável de princípio. Only these boundary pr
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="immutable-data" />
-
 ## Immutable Data
 
 Uma representação não muda depois de criada.
@@ -1413,8 +1343,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="interpreter" />
-
 ## Interpreter
 
 Representa uma gramática pequena como objetos que avaliam partes de uma expressão.
@@ -1439,8 +1367,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="iterator" />
 
 ## Iterator
 
@@ -1512,8 +1438,6 @@ O vínculo é uma comparação executável de princípio. Only these boundary pr
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="long-polling" />
-
 ## Long Polling
 
 O servidor segura um pedido até haver resultado ou atingir o prazo, e o cliente pode abrir outro.
@@ -1545,8 +1469,6 @@ O vínculo é uma comparação executável de princípio. The wait uses a local 
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="mediator" />
-
 ## Mediator
 
 Um coordenador recebe ações e organiza a conversa entre componentes que não devem conhecer uns aos outros.
@@ -1572,8 +1494,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="memento" />
-
 ## Memento
 
 Guarda um retrato privado para restaurar um estado depois.
@@ -1598,8 +1518,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="message-translator" />
 
 ## Message Translator
 
@@ -1667,8 +1585,6 @@ O vínculo é uma comparação executável de princípio. Isolation, signing, li
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="microservices" />
-
 ## Microservices
 
 Serviços implantáveis separadamente possuem contratos de rede e limites de dados e operação próprios.
@@ -1706,8 +1622,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Services are logical local participants. Network independence, deployment, discovery and distributed transactions are not proven.
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="modular-monolith" />
 
 ## Modular Monolith
 
@@ -1748,8 +1662,6 @@ O vínculo é uma comparação executável de princípio. The model demonstrates
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="mvc" />
-
 ## MVC
 
 Controller recebe o evento da view, altera ou consulta o model e encaminha a renderização.
@@ -1783,8 +1695,6 @@ O vínculo é uma comparação executável de princípio. A local role model; ro
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="mvp" />
-
 ## MVP
 
 A view é passiva; encaminha ações ao presenter, que consulta o model e manda a view renderizar.
@@ -1817,8 +1727,6 @@ O vínculo é uma comparação executável de princípio. The recording view mod
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="mvvm" />
-
 ## MVVM
 
 A view observa ou vincula um modelo de apresentação que expõe estado e comandos.
@@ -1850,8 +1758,6 @@ O vínculo é uma comparação executável de princípio. The model covers one-w
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="observer" />
-
 ## Observer
 
 Notifica interessados quando algo muda, sem o produtor chamar cada tela diretamente.
@@ -1876,8 +1782,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="onion-architecture" />
 
 ## Onion Architecture
 
@@ -1917,8 +1821,6 @@ O vínculo é uma comparação executável de princípio. Only these boundary pr
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="open-host-service" />
-
 ## Open Host Service
 
 Open Host Service é um protocolo estável que um contexto oferece a diferentes consumidores, mantendo um contrato comum.
@@ -1952,8 +1854,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Version governance, authentication and remote transport are not provided by this local contract exercise.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="pac" />
 
 ## PAC
 
@@ -1990,8 +1890,6 @@ O vínculo é uma comparação executável de princípio. This is a small hierar
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="polling" />
-
 ## Polling
 
 O consumidor consulta periodicamente.
@@ -2023,8 +1921,6 @@ O vínculo é uma comparação executável de princípio. The wait uses a local 
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="prototype" />
-
 ## Prototype
 
 Copia um objeto-base já configurado.
@@ -2052,8 +1948,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="proxy" />
-
 ## Proxy
 
 Intermedeia acesso conservando uma interface conforme seu contrato.
@@ -2078,8 +1972,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="repository" />
 
 ## Repository
 
@@ -2153,8 +2045,6 @@ O vínculo é uma comparação executável de princípio. The finite request/rep
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="rest" />
-
 ## REST
 
 Um estilo arquitetural organiza recursos e interação sob restrições, incluindo interface uniforme.
@@ -2188,8 +2078,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Requests are local dictionaries and function calls, without an HTTP server, caching intermediaries or complete REST constraints.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="reverse-proxy" />
 
 ## Reverse Proxy
 
@@ -2229,8 +2117,6 @@ O vínculo é uma comparação executável de princípio. This models gateway/pr
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="rpc" />
-
 ## RPC
 
 Invoca uma operação remota com argumentos e resposta definidos.
@@ -2265,8 +2151,6 @@ O vínculo é uma comparação executável de princípio. The finite request/rep
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="separate-ways" />
-
 ## Separate Ways
 
 Separate Ways é a decisão explícita de manter modelos sem uma relação de integração de domínio quando essa relação não oferece benefício suficiente.
@@ -2297,8 +2181,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Duplication has a maintenance cost; this fixture does not decide the real organizational boundary.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="server-sent-events" />
 
 ## Server-Sent Events
 
@@ -2333,8 +2215,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The record parser is local. HTTP streaming, browser EventSource, retry timing and proxy behavior are not executed.
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="serverless" />
 
 ## Serverless
 
@@ -2372,8 +2252,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. No cloud runtime, billing, autoscaling or vendor-specific execution contract is simulated.
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="service-mesh" />
 
 ## Service Mesh
 
@@ -2416,8 +2294,6 @@ O vínculo é uma comparação executável de princípio. The proxies are logica
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="shared-kernel" />
-
 ## Shared Kernel
 
 Shared Kernel é um subconjunto do modelo que dois contextos compartilham e precisam alterar de forma coordenada.
@@ -2457,8 +2333,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The rounding is synthetic. Joint ownership and release coordination are required rather than inferred from a common helper.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="sidecar" />
 
 ## Sidecar
 
@@ -2501,8 +2375,6 @@ O vínculo é uma comparação executável de princípio. The proxies are logica
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="single-writer-principle" />
-
 ## Single Writer Principle
 
 Um responsável possui a escrita de um estado delimitado.
@@ -2534,8 +2406,6 @@ O vínculo é uma comparação executável de princípio. The mailbox is local; 
 
 A [explicação do capítulo](/explicacoes/concurrency/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/08-concorrencia/#g08-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="singleton" />
-
 ## Singleton
 
 Mantém uma única instância dentro de um escopo definido.
@@ -2560,8 +2430,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="soa" />
 
 ## SOA
 
@@ -2601,8 +2469,6 @@ O vínculo é uma comparação executável de princípio. Services are logical l
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="space-based-architecture" />
-
 ## Space-Based Architecture
 
 Unidades de processamento executam perto de um conjunto de dados particionado e replicado em memória; persistência pode ocorrer de forma assíncrona.
@@ -2639,8 +2505,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The grid is a finite local model, without durable replication, network partitions or a deployed distributed-cache product.
 
 A [explicação do capítulo](/explicacoes/data-distribution/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="specification" />
 
 ## Specification
 
@@ -2683,8 +2547,6 @@ O vínculo é uma comparação executável de princípio. The threshold is a syn
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="state" />
-
 ## State
 
 Muda o comportamento conforme um estado explícito.
@@ -2709,8 +2571,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="strategy" />
 
 ## Strategy
 
@@ -2737,8 +2597,6 @@ O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. 
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="template-method" />
-
 ## Template Method
 
 Define a ordem estável de um processo e deixa etapas específicas para subclasses.
@@ -2763,8 +2621,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="ubiquitous-language" />
 
 ## Ubiquitous Language
 
@@ -2807,8 +2663,6 @@ O vínculo é uma comparação executável de princípio. The context map and la
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="value-object" />
-
 ## Value Object
 
 O conceito Value Object é definido pelos valores, sem identidade independente, e protege validade.
@@ -2841,8 +2695,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Value Object; não implementa o padrão completo. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="vertical-slice-architecture" />
 
 ## Vertical Slice Architecture
 
@@ -2883,8 +2735,6 @@ O vínculo é uma comparação executável de princípio. The model demonstrates
 
 A [explicação do capítulo](/explicacoes/code-boundaries/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/01-arquiteturas-de-aplicacao/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="visitor" />
-
 ## Visitor
 
 Adiciona operações a uma estrutura de tipos estável, deixando cada tipo receber a visita.
@@ -2909,8 +2759,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O caso é financeiro e hipotético. Os exemplos de objetos mostram mecanismos pequenos. Eles não provam que todo padrão seja adequado à mesma ordem nem implementam microserviços, Kubernetes ou uma arquitetura interna da XP.
 
 A [explicação do capítulo](/explicacoes/code-patterns/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/17-padroes-classicos-gof/) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
-
-<span id="webhook" />
 
 ## Webhook
 
@@ -2946,8 +2794,6 @@ O vínculo é uma comparação executável de princípio. All keys and payloads 
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
-<span id="websocket" />
-
 ## WebSocket
 
 Abre um canal bidirecional para mensagens.
@@ -2980,3 +2826,4 @@ O vínculo é uma comparação executável de princípio. Only small unfragmente
 
 A [explicação do capítulo](/explicacoes/api-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/09-apis-e-integracao/#g09-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/order-boundaries/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="order-boundaries" />

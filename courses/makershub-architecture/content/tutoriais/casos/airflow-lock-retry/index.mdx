@@ -3,66 +3,23 @@ asIndexPage: true
 title: "Experimente: repita o erro de lock com uma cota"
 description: "Aprenda quando repetir uma falha transitória e quando propagá-la."
 diataxis: tutorial
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/airflow-lock-retry/tutorial.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="airflow-lock-retry" current="tutorial" />
 
 # Experimente: repita o erro de lock com uma cota
 
-[Retorne ao caso](/jornadas/airflow-lock-retry/), [entenda o mecanismo](/explicacoes/casos/airflow-lock-retry/), [aprenda fazendo](/tutoriais/casos/airflow-lock-retry/), [resolva a tarefa](/guias/casos/airflow-lock-retry/) ou [consulte o contrato](/referencia/casos/airflow-lock-retry/).
+<CaseNavigation caseId="airflow-lock-retry" current="tutorial" />
 
-Você usará Python 3.11 ou posterior e a CLI `patch`. Abra o terminal na raiz deste repositório. Nenhum SDK Airflow, binário Haskell ou servidor de banco é necessário.
+## Tutorial
 
-## 1. Reconheça a entrada
+<CaseBody components={legacyCaseHeadings} />
 
-A primeira sequência contém uma resposta fictícia 55P03 e depois um sucesso. A segunda contém 23505. A terceira repete 55P03 além da cota. A quarta provoca um timeout do processo. Uma quinta sequência começa com sucesso. Todos os valores e a conexão `learning.invalid` são sintéticos.
+<CaseNext caseId="airflow-lock-retry" current="tutorial" />
 
-## 2. Execute as condições históricas
-
-```sh
-python3 labs/airflow-lock-retry/run.py
-```
-
-A saída esperada é:
-
-```text
-transient_lock: before_attempts=1 failure=True after_attempts=2 success=True waits=[30]
-permanent_error: before_attempts=1 after_attempts=1 failure_preserved=True
-lock_budget: before_attempts=1 after_attempts=3 waits=[30, 30] failure_preserved=True
-process_timeout: before_attempts=1 after_attempts=1 timeout_preserved=True
-comparison=PASS real_subprocesses=0 real_database_connections=0 real_sleep_seconds=0
-```
-
-O pedido de espera de trinta segundos aparece no recibo, mas o double só o registra. Você não precisa aguardar. O PASS exige os cinco contratos; uma mudança qualquer entre dois objetos não é suficiente.
-
-## 3. Faça uma cópia anterior falhar
-
-```sh
-learning_retry_dir=$(mktemp -d)
-cp labs/airflow-lock-retry/before.py "$learning_retry_dir/candidate.py"
-python3 labs/airflow-lock-retry/run.py --candidate "$learning_retry_dir/candidate.py"
-```
-
-A última execução deve terminar com código 1 e informar `transient_lock: after violates retry contract`. Sua cópia ainda para na primeira resposta 55P03.
-
-## 4. Aplique o patch histórico
-
-```sh
-cat labs/airflow-lock-retry/source.patch
-patch -p0 -d "$learning_retry_dir" < labs/airflow-lock-retry/source.patch
-python3 labs/airflow-lock-retry/run.py --candidate "$learning_retry_dir/candidate.py"
-```
-
-Agora a mesma verificação deve passar com código 0. Abra a cópia e localize a condição `lock_timeout`, a cota `lock_retries` e a espera fixa. Confira também o caminho que continua propagando outro erro.
-
-## 5. Verifique e reinicie
-
-```sh
-python3 labs/airflow-lock-retry/check_challenge.py
-```
-
-Esse comando automatiza a cópia anterior, a falha esperada, a aplicação do patch e o sucesso posterior. Cada execução cria fixtures novas. Para reiniciar o roteiro manual, crie outra pasta temporária e copie novamente `before.py`; nenhuma limpeza de sistema externo é necessária.
-
-O laboratório executa a função Python histórica com substitutos locais controlados (doubles). Ele não inicia uma DAG, não executa o binário Haskell, não conecta ao PostgreSQL e não faz esperas reais. A atomicidade e a idempotência do motor Haskell são premissas relatadas pelo PR e continuam fora desta prova. O código procura 55P03 no stderr; isso também não identifica qual consulta segurava o lock.
-
-Este caso vem do [Bug FBI-4797](https://fazcapital.atlassian.net/browse/FBI-4797) e do [PR 161 do Airflow](https://bitbucket.org/fazcapital/airflow/pull-requests/161). A investigação leu o campo visível `customfield_10047`, o relato do PR e as [versões anterior](https://bitbucket.org/fazcapital/airflow/src/febaf1be978aad59c29f38d1bd74f357f8e942b5/dags/inflow__xp__stg_to_fct.py) e [selecionada](https://bitbucket.org/fazcapital/airflow/src/55dfe8acb362e6854d1af4e7dd7d17e6497af9bd/dags/inflow__xp__stg_to_fct.py). O relato registra um timeout de lock; o bloqueador original não foi identificado nessa fonte. O código selecionado é histórico. A prática não mede a versão atualmente implantada.
-
-[Retorne ao caso](/jornadas/airflow-lock-retry/), [entenda o mecanismo](/explicacoes/casos/airflow-lock-retry/), [aprenda fazendo](/tutoriais/casos/airflow-lock-retry/), [resolva a tarefa](/guias/casos/airflow-lock-retry/) ou [consulte o contrato](/referencia/casos/airflow-lock-retry/).
+<CaseSequence caseId="airflow-lock-retry" current="tutorial" />

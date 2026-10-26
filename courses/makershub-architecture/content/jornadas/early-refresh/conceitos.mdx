@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="early-refresh" current="concepts" />
+
 # Conceitos: a lista precisa continuar disponível
+
+<CaseNavigation caseId="early-refresh" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. A lista de chamadas é consultada repetidamente. A versão anterior mantém o valor até o TTL, mas a primeira leitura após o vencimento espera a resposta do produtor. FBI-2331 acrescentou uma janela de renovação antecipada para que a consulta seguinte pudesse encontrar o valor novo. Esta história trata de uma evolução documentada.
 
-Comece pela [jornada](/jornadas/early-refresh/), execute o [tutorial](/tutoriais/casos/early-refresh/) e use a [referência](/referencia/casos/early-refresh/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/early-refresh/).
+Comece pela [jornada](/jornadas/early-refresh/), execute o [tutorial](/jornadas/early-refresh/#tutorial) e use a [referência](/jornadas/early-refresh/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/early-refresh/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="refresh-ahead" />
 
 ## Refresh Ahead
 
@@ -30,3 +34,4 @@ O vínculo é um mecanismo local executado. O relógio e o produtor são control
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/early-refresh/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="early-refresh" />

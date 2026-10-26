@@ -7,19 +7,22 @@ searchable: false
 ---
 
 import CaseBody from '../../../../case-content/early-refresh/guide.mdx'
-import { CaseNavigation, CaseNext } from '../../../../components/CaseNavigation.jsx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
 import { EarlyRefreshProvenance } from '../../../../components/EarlyRefreshFacts.jsx'
 
-<CaseNavigation current="guide" />
+<CaseBreadcrumb caseId="early-refresh" current="guide" />
 
 # Verifique a proteção: a lista precisa continuar disponível
+
+<CaseNavigation caseId="early-refresh" current="guide" />
 
 <EarlyRefreshProvenance />
 
 ## Guia
 
-<span id="antes-de-começar" className="case-legacy-anchor" />
+<CaseBody components={legacyCaseHeadings} />
 
-<CaseBody />
+<CaseNext caseId="early-refresh" current="guide" />
 
-<CaseNext current="guide" />
+<CaseSequence caseId="early-refresh" current="guide" />

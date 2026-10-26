@@ -7,17 +7,22 @@ searchable: false
 ---
 
 import CaseBody from '../../../../case-content/early-refresh/reference.mdx'
-import { CaseNavigation, CaseNext } from '../../../../components/CaseNavigation.jsx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
 import { EarlyRefreshProvenance } from '../../../../components/EarlyRefreshFacts.jsx'
 
-<CaseNavigation current="reference" />
+<CaseBreadcrumb caseId="early-refresh" current="reference" />
 
 # Contratos: a lista precisa continuar disponível
+
+<CaseNavigation caseId="early-refresh" current="reference" />
 
 <EarlyRefreshProvenance />
 
 ## Referência
 
-<CaseBody />
+<CaseBody components={legacyCaseHeadings} />
 
-<CaseNext current="reference" />
+<CaseNext caseId="early-refresh" current="reference" />
+
+<CaseSequence caseId="early-refresh" current="reference" />

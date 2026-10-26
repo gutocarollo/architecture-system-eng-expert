@@ -5,7 +5,19 @@ description: "Você aprenderá a separar a compatibilidade do contrato, a popula
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/safe-release/explanation.mdx'
+import Tutorial from '../../../case-content/safe-release/tutorial.mdx'
+import Guide from '../../../case-content/safe-release/guide.mdx'
+import Reference from '../../../case-content/safe-release/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="safe-release" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # A corretora troca uma versão sem perder o contrato
+
+<CaseNavigation caseId="safe-release" withinPage />
 
 A corretora hipotética troca amount por amount_cents. A interface antiga ainda lê amount. Remover o campo antigo na primeira implantação faz a consulta retornar vazio. A prática conserva os dois campos durante a transição e expõe a versão nova a cinco das cem requisições fictícias.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="safe-release">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/safe-release/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/safe-release/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/safe-release/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/safe-release/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 Ambos os leitores encontram o campo que conhecem. A exposição inicial fica em 5/100 = 5%. A comparação shadow detecta a diferença entre 10 e 1.000 antes de trocar a saída. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="safe-release" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="safe-release" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="safe-release" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="safe-release" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [O processo responde, mas a ordem não terminou](/jornadas/diagnostics/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [O processo r
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 21 conceitos no [mapa de mecanismos e práticas](/jornadas/safe-release/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="safe-release" withinPage />

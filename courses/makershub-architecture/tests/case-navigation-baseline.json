@@ -1,0 +1,1579 @@
+{
+  "source_commit": "ef5bd78bd0224571ccfde49873ac1b16489b59c1",
+  "cases": [
+    {
+      "id": "single-flight-cancel",
+      "title": "Cancelamento de uma busca compartilhada",
+      "facets": [
+        {
+          "route": "explicacoes/casos/single-flight-cancel/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/single-flight-cancel/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "6-corrija-uma-cópia-sua-e-repita-a-condição",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/single-flight-cancel/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/single-flight-cancel/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "versões-e-fronteiras-da-reprodução",
+            "resultados-que-o-contrato-compara",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/single-flight-cancel/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/single-flight-cancel/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "asyncawait",
+            "cache-stampede-protection",
+            "futurespromises",
+            "mutex",
+            "single-flight"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "early-refresh",
+      "title": "A lista continua disponível durante a renovação",
+      "facets": [
+        {
+          "route": "explicacoes/casos/early-refresh/",
+          "kind": "facet",
+          "fragments": [
+            "explicação",
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/early-refresh/",
+          "kind": "facet",
+          "fragments": [
+            "tutorial",
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/early-refresh/",
+          "kind": "facet",
+          "fragments": [
+            "guia",
+            "antes-de-começar",
+            "guide-before-start",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/early-refresh/",
+          "kind": "facet",
+          "fragments": [
+            "referência",
+            "entradas-e-ambiente",
+            "versões-e-fronteiras-da-reprodução",
+            "resultados-que-o-contrato-compara",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/early-refresh/",
+          "kind": "journey",
+          "fragments": [
+            "overview",
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "explanation",
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite",
+            "tutorial",
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua",
+            "guide",
+            "guide-before-start",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta",
+            "reference",
+            "entradas-e-ambiente",
+            "versões-e-fronteiras-da-reprodução",
+            "resultados-que-o-contrato-compara",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/early-refresh/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "refresh-ahead"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "date-only",
+      "title": "A emissão continua no mesmo dia em São Paulo",
+      "facets": [
+        {
+          "route": "explicacoes/casos/date-only/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/date-only/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "6-corrija-uma-cópia-sua-e-repita-a-condição",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/date-only/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/date-only/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "versões-e-fronteiras-da-reprodução",
+            "resultados-que-o-contrato-compara",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/date-only/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/date-only/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "published-language"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "opportunity-entry",
+      "title": "A oportunidade existente conserva sua identidade",
+      "facets": [
+        {
+          "route": "explicacoes/casos/opportunity-entry/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/opportunity-entry/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/opportunity-entry/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/opportunity-entry/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "versões-e-fronteiras-da-reprodução",
+            "resultados-que-o-contrato-compara",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/opportunity-entry/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/opportunity-entry/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "domain-policy",
+            "entity",
+            "idempotency-key"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "order-boundaries",
+      "title": "Uma ordem atravessa fronteiras sem espalhar regras",
+      "facets": [
+        {
+          "route": "explicacoes/casos/order-boundaries/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/order-boundaries/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/order-boundaries/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/order-boundaries/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "provider-contract",
+            "replace-policy",
+            "validate-before-side-effect",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/order-boundaries/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/order-boundaries/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "abstract-factory",
+            "actor-model",
+            "adapter",
+            "aggregate",
+            "aggregate-root",
+            "ambassador",
+            "anti-corruption-layer",
+            "api-composition",
+            "api-gateway",
+            "api-gateway-security",
+            "application-service",
+            "backend-for-frontend-bff",
+            "blackboard-architecture",
+            "bounded-context",
+            "bridge",
+            "builder",
+            "cell-based-architecture",
+            "chain-of-responsibility",
+            "clean-architecture",
+            "command",
+            "component-based-architecture",
+            "composite",
+            "conformist",
+            "context-map",
+            "customersupplier",
+            "ddd",
+            "decorator",
+            "domain-service",
+            "event-driven-architecture",
+            "facade",
+            "factory",
+            "factory-method",
+            "flyweight",
+            "gateway-aggregation",
+            "gateway-offloading",
+            "gateway-routing",
+            "graphql-federation",
+            "hateoas",
+            "hexagonal--ports--adapters",
+            "immutable-data",
+            "interpreter",
+            "iterator",
+            "layered--n-tier",
+            "long-polling",
+            "mediator",
+            "memento",
+            "message-translator",
+            "microkernel--plugin-architecture",
+            "microservices",
+            "modular-monolith",
+            "mvc",
+            "mvp",
+            "mvvm",
+            "observer",
+            "onion-architecture",
+            "open-host-service",
+            "pac",
+            "polling",
+            "prototype",
+            "proxy",
+            "repository",
+            "requestreply",
+            "rest",
+            "reverse-proxy",
+            "rpc",
+            "separate-ways",
+            "server-sent-events",
+            "serverless",
+            "service-mesh",
+            "shared-kernel",
+            "sidecar",
+            "single-writer-principle",
+            "singleton",
+            "soa",
+            "space-based-architecture",
+            "specification",
+            "state",
+            "strategy",
+            "template-method",
+            "ubiquitous-language",
+            "value-object",
+            "vertical-slice-architecture",
+            "visitor",
+            "webhook",
+            "websocket"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "order-delivery",
+      "title": "A repetição de uma ordem produz um único efeito",
+      "facets": [
+        {
+          "route": "explicacoes/casos/order-delivery/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/order-delivery/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/order-delivery/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/order-delivery/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "deduplicate",
+            "commit-intention",
+            "compensate",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/order-delivery/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/order-delivery/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "at-least-once-delivery",
+            "at-most-once-delivery",
+            "cdc-migration",
+            "change-data-capture-cdc",
+            "compensating-transaction",
+            "deduplication",
+            "dual-write",
+            "dual-write-migration",
+            "exactly-once-semantics",
+            "idempotency",
+            "orchestration-saga",
+            "outbox--cdc",
+            "saga",
+            "tcc--tryconfirmcancel",
+            "transactional-inbox",
+            "transactional-outbox"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reservation",
+      "title": "Dois operadores disputam a mesma reserva",
+      "facets": [
+        {
+          "route": "explicacoes/casos/reservation/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/reservation/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/reservation/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/reservation/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "version-conflict",
+            "fence",
+            "resource-key",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/reservation/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/reservation/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "compare-and-swap--cas",
+            "copy-on-write",
+            "distributed-lock",
+            "fencing",
+            "fencing-token",
+            "forkjoin",
+            "lease",
+            "lock-free",
+            "optimistic-concurrency-control",
+            "pessimistic-locking",
+            "reactive-streams",
+            "readerwriter-lock",
+            "reservation-pattern",
+            "scattergather",
+            "semaphore",
+            "spinlock",
+            "thread-pool",
+            "wait-free",
+            "work-stealing",
+            "worker-pool"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "consensus",
+      "title": "Uma partição separa os escritórios da corretora",
+      "facets": [
+        {
+          "route": "explicacoes/casos/consensus/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/consensus/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/consensus/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/consensus/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "majority-partition",
+            "quorum-overlap",
+            "causal-versions",
+            "logical-clock",
+            "prepared-participant",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/consensus/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/consensus/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "activeactive",
+            "activepassive",
+            "asynchronous-replication",
+            "automatic-failover",
+            "cascading-replication",
+            "cold-standby",
+            "consensus",
+            "eventual-consistency",
+            "failover",
+            "gossip-protocol",
+            "heartbeat",
+            "hot-standby",
+            "hybrid-logical-clock",
+            "lamport-clock",
+            "leader-election",
+            "leaderfollower",
+            "monotonic-reads",
+            "multi-az",
+            "multi-leader",
+            "multi-primary",
+            "multi-region",
+            "paxos",
+            "peer-to-peer",
+            "primaryreplica",
+            "quorum",
+            "quorum-readwrite",
+            "raft",
+            "read-replica",
+            "read-your-writes",
+            "replication",
+            "split-brain-prevention",
+            "stateless-services",
+            "strong-consistency",
+            "synchronous-replication",
+            "three-phase-commit--3pc",
+            "two-phase-commit--2pc",
+            "version-vector",
+            "warm-standby"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "queue-workflow",
+      "title": "Uma fila absorve trabalho e recupera falhas",
+      "facets": [
+        {
+          "route": "explicacoes/casos/queue-workflow/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/queue-workflow/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/queue-workflow/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/queue-workflow/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "route-enrich-aggregate",
+            "retry-dlq",
+            "admission",
+            "consumer-topology",
+            "resequence-state",
+            "retry-budget",
+            "dag-dependencies",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/queue-workflow/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/queue-workflow/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "aggregator",
+            "backpressure",
+            "batch-processing",
+            "bulkhead",
+            "chaos-engineering",
+            "choreography",
+            "choreography-saga",
+            "circuit-breaker",
+            "competing-consumers",
+            "content-based-router",
+            "dag",
+            "dead-letter-queue",
+            "deadline-propagation",
+            "delayed-queue",
+            "event-notification",
+            "event-streaming",
+            "event-carried-state-transfer",
+            "exponential-backoff",
+            "fail-fast",
+            "fallback",
+            "fan-in",
+            "fan-out",
+            "finite-state-machine",
+            "fire-and-forget",
+            "graceful-degradation",
+            "integration-event",
+            "jitter",
+            "job-queue",
+            "kappa-architecture",
+            "lambda-architecture",
+            "load-shedding",
+            "mapreduce",
+            "message-enricher",
+            "message-filter",
+            "message-queue",
+            "message-router",
+            "orchestrator",
+            "pipe-and-filter",
+            "pipeline",
+            "poison-message-handling",
+            "priority-queue",
+            "producerconsumer",
+            "publishsubscribe",
+            "rate-limiting",
+            "resequencer",
+            "retry",
+            "retry-queue",
+            "self-healing",
+            "splitter",
+            "state-machine",
+            "stream-processing",
+            "throttling",
+            "timeout",
+            "watchdog",
+            "workflow-engine"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cache-policy",
+      "title": "A consulta de posição envelhece de forma controlada",
+      "facets": [
+        {
+          "route": "explicacoes/casos/cache-policy/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/cache-policy/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/cache-policy/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/cache-policy/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "cache-key",
+            "cache-expiry",
+            "write-policy",
+            "cache-levels",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/cache-policy/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/cache-policy/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "cache-aside",
+            "cache-invalidation",
+            "cache-warming",
+            "distributed-cache",
+            "local-cache",
+            "negative-caching",
+            "read-through",
+            "ttl-cache",
+            "two-level-cache",
+            "write-behind--write-back",
+            "write-through"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ledger-projection",
+      "title": "O histórico reconstrói a posição do cliente",
+      "facets": [
+        {
+          "route": "explicacoes/casos/ledger-projection/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/ledger-projection/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/ledger-projection/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/ledger-projection/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "replay-events",
+            "projection-checkpoint",
+            "durable-transaction",
+            "snapshot-replay",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/ledger-projection/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/ledger-projection/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "append-only-log",
+            "command-handler",
+            "cqrs",
+            "denormalization",
+            "domain-event",
+            "event-sourcing",
+            "materialized-view",
+            "precomputation",
+            "projection",
+            "query-handler",
+            "read-model",
+            "snapshotting",
+            "write-model",
+            "write-ahead-log-wal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "storage-partitions",
+      "title": "A posição cresce e a consulta precisa encontrar seus dados",
+      "facets": [
+        {
+          "route": "explicacoes/casos/storage-partitions/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/storage-partitions/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/storage-partitions/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/storage-partitions/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "shard-route",
+            "grain-join",
+            "hash-remap",
+            "covering-index",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/storage-partitions/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/storage-partitions/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "consistent-hashing",
+            "covering-index",
+            "directory-based-sharding",
+            "geographic-sharding",
+            "hash-sharding",
+            "horizontal-partitioning",
+            "indexing",
+            "log-structured-storage",
+            "range-sharding",
+            "sharding",
+            "vertical-partitioning",
+            "write-amplification-control"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safe-release",
+      "title": "A corretora troca uma versão sem perder o contrato",
+      "facets": [
+        {
+          "route": "explicacoes/casos/safe-release/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/safe-release/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/safe-release/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/safe-release/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "expand-contract",
+            "progressive-route",
+            "shadow-parity",
+            "desired-state",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/safe-release/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/safe-release/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "ab-deployment",
+            "bluegreen-deployment",
+            "branch-by-abstraction",
+            "canary-release",
+            "dark-launch",
+            "database-decomposition",
+            "expandcontract",
+            "feature-flags",
+            "gitops",
+            "immutable-infrastructure",
+            "infrastructure-as-code",
+            "modularization",
+            "parallel-run",
+            "progressive-delivery",
+            "recreate-deployment",
+            "rolling-deployment",
+            "service-extraction",
+            "shadow-deployment",
+            "shadow-traffic",
+            "strangler-fig",
+            "transitional-architecture"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "access-policy",
+      "title": "A permissão acompanha a ordem e a identidade",
+      "facets": [
+        {
+          "route": "explicacoes/casos/access-policy/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/access-policy/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/access-policy/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/access-policy/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "object-authorization",
+            "credential-boundary",
+            "rotate-key",
+            "least-network-path",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/access-policy/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/access-policy/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "abac",
+            "bastion-host",
+            "defense-in-depth",
+            "least-privilege",
+            "mtls",
+            "network-segmentation",
+            "oauth2",
+            "oidc",
+            "policy-based-access-control",
+            "rbac",
+            "rebac",
+            "secrets-rotation",
+            "service-to-service-identity",
+            "short-lived-credentials",
+            "token-exchange",
+            "zero-trust"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "title": "A equipe descobre onde a ordem parou",
+      "facets": [
+        {
+          "route": "explicacoes/casos/diagnostics/",
+          "kind": "facet",
+          "fragments": [
+            "a-condição-anterior",
+            "o-mecanismo-que-muda-a-condição",
+            "o-benefício-o-custo-e-o-limite"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/diagnostics/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente-isolado",
+            "2-reconheça-a-entrada-que-será-repetida",
+            "3-execute-as-duas-condições",
+            "4-compare-a-saída",
+            "5-examine-a-mudança",
+            "7-reinicie-e-conclua"
+          ]
+        },
+        {
+          "route": "guias/casos/diagnostics/",
+          "kind": "facet",
+          "fragments": [
+            "antes-de-começar",
+            "1-fixe-o-contrato-e-a-fronteira",
+            "2-confira-quem-executa-a-decisão",
+            "3-repita-a-mesma-condição-em-isolamento",
+            "4-avalie-a-garantia-adquirida",
+            "5-feche-a-decisão-com-seu-limite",
+            "localizadores-de-consulta"
+          ]
+        },
+        {
+          "route": "referencia/casos/diagnostics/",
+          "kind": "facet",
+          "fragments": [
+            "entradas-e-ambiente",
+            "fonte-do-modelo-financeiro",
+            "resultados-que-o-contrato-compara",
+            "correlate-retries",
+            "measure-signals",
+            "probe-business-path",
+            "garantia-parâmetros-e-limites",
+            "recibo-e-rastreabilidade"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/diagnostics/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-o-que-você-precisa-agora",
+            "antes-de-começar",
+            "o-resultado-que-conecta-a-jornada",
+            "conceitos-deste-caso"
+          ]
+        },
+        {
+          "route": "jornadas/diagnostics/conceitos/",
+          "kind": "concepts",
+          "fragments": [
+            "centralized-logging",
+            "correlation-id",
+            "distributed-tracing",
+            "golden-signals",
+            "health-check",
+            "metrics",
+            "opentelemetry",
+            "red-method-rate-errors-duration",
+            "request-id",
+            "structured-logging",
+            "synthetic-monitoring",
+            "use-method-utilization-saturation-errors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "query-grain-postgres",
+      "title": "A comissão de R$ 100 aparece como R$ 200",
+      "facets": [
+        {
+          "route": "explicacoes/casos/query-grain-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "o-que-muda-no-código",
+            "até-onde-essa-conclusão-vale"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/query-grain-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente",
+            "2-veja-as-duas-condições",
+            "3-comece-com-uma-cópia-que-ainda-falha",
+            "4-examine-e-aplique-a-alteração",
+            "5-conclua-e-repita"
+          ]
+        },
+        {
+          "route": "guias/casos/query-grain-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "fixe-a-fonte-e-a-condição",
+            "verifique-a-garantia",
+            "decida-o-que-pode-concluir"
+          ]
+        },
+        {
+          "route": "referencia/casos/query-grain-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "saída-delimitada"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/query-grain-postgres/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-seu-próximo-passo",
+            "o-que-você-observará"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "revision-cas-postgres",
+      "title": "Uma única versão atual ainda pode perder uma alteração",
+      "facets": [
+        {
+          "route": "explicacoes/casos/revision-cas-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "o-que-muda-no-código",
+            "até-onde-essa-conclusão-vale"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/revision-cas-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "1-prepare-o-ambiente",
+            "2-veja-as-duas-condições",
+            "3-comece-com-uma-cópia-que-ainda-falha",
+            "4-examine-e-aplique-a-alteração",
+            "5-conclua-e-repita"
+          ]
+        },
+        {
+          "route": "guias/casos/revision-cas-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "fixe-a-fonte-e-a-condição",
+            "verifique-a-garantia",
+            "decida-o-que-pode-concluir"
+          ]
+        },
+        {
+          "route": "referencia/casos/revision-cas-postgres/",
+          "kind": "facet",
+          "fragments": [
+            "saída-delimitada"
+          ]
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/revision-cas-postgres/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-seu-próximo-passo",
+            "o-que-você-observará"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "airflow-lock-retry",
+      "title": "Uma falha de lock derruba a tarefa do Airflow",
+      "facets": [
+        {
+          "route": "explicacoes/casos/airflow-lock-retry/",
+          "kind": "facet",
+          "fragments": [
+            "o-caminho-real-da-função",
+            "por-que-a-cota-importa",
+            "o-que-a-prática-não-resolve"
+          ]
+        },
+        {
+          "route": "tutoriais/casos/airflow-lock-retry/",
+          "kind": "facet",
+          "fragments": [
+            "1-reconheça-a-entrada",
+            "2-execute-as-condições-históricas",
+            "3-faça-uma-cópia-anterior-falhar",
+            "4-aplique-o-patch-histórico",
+            "5-verifique-e-reinicie"
+          ]
+        },
+        {
+          "route": "guias/casos/airflow-lock-retry/",
+          "kind": "facet",
+          "fragments": [
+            "fixe-o-contrato-da-repetição",
+            "repita-as-mesmas-condições",
+            "confira-as-premissas-antes-de-adaptar"
+          ]
+        },
+        {
+          "route": "referencia/casos/airflow-lock-retry/",
+          "kind": "facet",
+          "fragments": []
+        }
+      ],
+      "supportingPages": [
+        {
+          "route": "jornadas/airflow-lock-retry/",
+          "kind": "journey",
+          "fragments": [
+            "escolha-seu-próximo-passo",
+            "o-que-muda"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,19 @@ description: "Você aprenderá a conservar o grão monetário e distinguir local
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/storage-partitions/explanation.mdx'
+import Tutorial from '../../../case-content/storage-partitions/tutorial.mdx'
+import Guide from '../../../case-content/storage-partitions/guide.mdx'
+import Reference from '../../../case-content/storage-partitions/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="storage-partitions" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # A posição cresce e a consulta precisa encontrar seus dados
+
+<CaseNavigation caseId="storage-partitions" withinPage />
 
 A corretora hipotética cresce e divide as posições por chave. Ana procura a posição 7. Uma regra de roteamento permite buscar uma das três partições, enquanto uma junção com registros filhos pode multiplicar os valores financeiros. A prática usa doze posições e duas contas para tornar esses efeitos visíveis.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="storage-partitions">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/storage-partitions/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/storage-partitions/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/storage-partitions/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/storage-partitions/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 A posição 7 é encontrada em uma partição. A soma no grão correto fica em R$ 300. O plano SQLite muda de SCAN para SEARCH com COVERING INDEX. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="storage-partitions" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="storage-partitions" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="storage-partitions" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="storage-partitions" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A versão nova chega a quem ainda usa a antiga](/jornadas/safe-release/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A versão no
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 12 conceitos no [mapa de mecanismos e práticas](/jornadas/storage-partitions/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="storage-partitions" withinPage />

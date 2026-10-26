@@ -2,7 +2,7 @@
 
 Esta pasta contém a fonte editorial, a aplicação Nextra e os laboratórios do curso publicado em https://hub-makershub-architecture-course.6bv96u.easypanel.host. A pasta do Git não aparece nas URLs do site.
 
-O piloto early-refresh apresenta explicação, tutorial, guia e referência completos na página da jornada, com sumário local. Os quatro textos têm uma única fonte em `case-content/early-refresh/`. Os endereços antigos conservam o acesso aos mesmos corpos, mas o percurso do caso acontece numa única página. Os outros casos mantêm o conteúdo importado da versão publicada.
+Os 18 casos apresentam explicação, tutorial, guia e referência completos na página de sua jornada, com sumário local. Cada texto tem uma única fonte em `case-content/<caso>/`. Os 72 endereços de facetas conservam o acesso aos mesmos corpos e aos fragmentos antigos. Todas as entradas mostram o caso, links do tema e o percurso Explicação → Tutorial → Guia → Referência.
 
 Para construir o curso, use Node compatível com o lock e Python 3.11 ou posterior:
 
@@ -23,7 +23,9 @@ python3 labs/architecture/early-refresh/run.py
 
 O download específico disponível no tutorial mantém essa mesma estrutura de diretórios. Ele não exige TypeScript, OpenTelemetry, OpenSSL ou acesso ao MakersHub. Os demais laboratórios conservam seus próprios pré-requisitos. Os scripts históricos de autoria e extração não fazem parte do build; eles podem reescrever páginas e precisam de uma mudança específica antes de serem reutilizados.
 
-A navegação está em `components/CaseNavigation.jsx`. Os fatos repetidos do piloto ficam em `case-content/early-refresh.js`, e seus snapshots são identificados pelo manifesto do laboratório. O protocolo e os critérios de entrega estão em `docs/documentation-protocol.md` e `tasks/FBI-4991-early-refresh/`.
+A navegação está em `components/CaseNavigation.jsx`, e o catálogo dos casos fica em `case-content/cases.js`. Os fatos repetidos de early-refresh ficam em `case-content/early-refresh.js`, e seus snapshots são identificados pelo manifesto do laboratório. O protocolo e os critérios de entrega estão em `docs/documentation-protocol.md` e `tasks/FBI-4991-case-navigation-all/`.
+
+`scripts/compose-all-case-pages.mjs` registra a migração inicial e recusa uma segunda execução. Ele não faz parte do build. Depois da migração, edite os corpos canônicos; as páginas antigas são wrappers de compatibilidade. Os testes inventariam todos os casos, verificam suas etapas e preservam os fragmentos capturados antes da mudança.
 
 Para congelar um contexto Docker depois dos testes:
 

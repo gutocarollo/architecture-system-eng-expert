@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="cache-policy" current="concepts" />
+
 # Conceitos: a posição rápida pertence ao outro recorte
+
+<CaseNavigation caseId="cache-policy" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Ana consulta a posição fictícia do tenant A. Depois, Bruno consulta a posição do tenant B. Uma chave que contém apenas position entrega a Bruno o valor de Ana. O mesmo caso permite observar o que acontece quando um valor vence, quando o cache local envelhece e quando uma escrita em memória é perdida numa queda.
 
-Comece pela [jornada](/jornadas/cache-policy/), execute o [tutorial](/tutoriais/casos/cache-policy/) e use a [referência](/referencia/casos/cache-policy/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/cache-policy/).
+Comece pela [jornada](/jornadas/cache-policy/), execute o [tutorial](/jornadas/cache-policy/#tutorial) e use a [referência](/jornadas/cache-policy/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/cache-policy/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="cache-aside" />
 
 ## Cache Aside
 
@@ -55,8 +59,6 @@ O vínculo é um mecanismo local executado. Os níveis são dicionários locais.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="cache-invalidation" />
-
 ## Cache Invalidation
 
 Remove ou torna inacessível uma representação que deixou de ser reutilizável.
@@ -88,8 +90,6 @@ O vínculo é um mecanismo local executado. Os níveis são dicionários locais.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e014) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="cache-warming" />
-
 ## Cache Warming
 
 Pré-carrega entradas escolhidas antes de quem as pedirá.
@@ -120,8 +120,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Cache Warming; não implementa o padrão completo. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e013) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
-
-<span id="distributed-cache" />
 
 ## Distributed Cache
 
@@ -157,8 +155,6 @@ O vínculo é uma comparação executável de princípio. The owners are local d
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="local-cache" />
-
 ## Local Cache
 
 A representação pertence à memória de um processo.
@@ -189,8 +185,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
-
-<span id="negative-caching" />
 
 ## Negative Caching
 
@@ -233,8 +227,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="read-through" />
-
 ## Read Through
 
 O cache usa um loader para buscar a origem quando a entrada falta.
@@ -272,8 +264,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="ttl-cache" />
-
 ## TTL Cache
 
 A entrada tem validade temporal.
@@ -303,8 +293,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. Os níveis são dicionários locais. Não se executou Redis, cache distribuído, política de eviction ou medição de desempenho. O caso histórico de single-flight oferece uma execução distinta do cancelamento e da renovação.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
-
-<span id="two-level-cache" />
 
 ## Two-Level Cache
 
@@ -368,8 +356,6 @@ O vínculo é um mecanismo local executado. Os níveis são dicionários locais.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
-<span id="write-through" />
-
 ## Write Through
 
 A escrita passa por uma camada que atualiza a origem de forma síncrona conforme seu contrato.
@@ -399,3 +385,4 @@ O vínculo é um mecanismo local executado. Os níveis são dicionários locais.
 
 A [explicação do capítulo](/explicacoes/cache/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/06-cache/#g06-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/cache-policy/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="cache-policy" />

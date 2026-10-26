@@ -1,0 +1,36 @@
+{
+  "observed_at": "2026-10-26T17:58:50.422Z",
+  "scope": "mutated temporary export copies",
+  "results": [
+    {
+      "mutation": "remove_breadcrumb",
+      "exit_code": 1,
+      "failed_tests": 1,
+      "killed": true
+    },
+    {
+      "mutation": "remove_blue_affordance",
+      "exit_code": 1,
+      "failed_tests": 1,
+      "killed": true
+    },
+    {
+      "mutation": "skip_guide",
+      "exit_code": 1,
+      "failed_tests": 1,
+      "killed": true
+    },
+    {
+      "mutation": "remove_reference",
+      "exit_code": 1,
+      "failed_tests": 1,
+      "killed": true
+    },
+    {
+      "mutation": "restore_old_facet_link",
+      "exit_code": 1,
+      "failed_tests": 1,
+      "killed": true
+    }
+  ]
+}

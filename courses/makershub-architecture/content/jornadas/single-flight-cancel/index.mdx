@@ -5,7 +5,19 @@ description: "Você aprenderá a identificar quem é dono de uma tarefa comparti
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/single-flight-cancel/explanation.mdx'
+import Tutorial from '../../../case-content/single-flight-cancel/tutorial.mdx'
+import Guide from '../../../case-content/single-flight-cancel/guide.mdx'
+import Reference from '../../../case-content/single-flight-cancel/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="single-flight-cancel" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # Cancelamento de uma busca compartilhada
+
+<CaseNavigation caseId="single-flight-cancel" withinPage />
 
 Um assessor deixa de aguardar a lista de chamadas enquanto outros quatro continuam esperando. O commit de FBI-2331 relata que cancelar um participante cancelava a tarefa compartilhada e derrubava os cinco leitores. A reprodução usa cinco participantes fictícios e a mesma classe das duas versões.
 
@@ -13,12 +25,16 @@ Este caso vem do [card FBI-2331](https://fazcapital.atlassian.net/browse/FBI-233
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="single-flight-cancel">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/single-flight-cancel/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/single-flight-cancel/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/single-flight-cancel/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/single-flight-cancel/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 O leitor que desistiu recebe o cancelamento; quatro leitores recebem a resposta. A quantidade de chamadas ao produtor continua sendo uma. A garantia vale para a instância local de SingleFlightCache. Ela não reúne workers diferentes, não mede a NextBilling e não demonstra o código que está em produção.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="single-flight-cancel" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="single-flight-cancel" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="single-flight-cancel" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="single-flight-cancel" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A lista precisa continuar disponível](/jornadas/early-refresh/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A lista prec
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 5 conceitos no [mapa de mecanismos e práticas](/jornadas/single-flight-cancel/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="single-flight-cancel" withinPage />

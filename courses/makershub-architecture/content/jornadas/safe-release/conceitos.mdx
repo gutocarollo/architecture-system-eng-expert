@@ -4,11 +4,17 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="safe-release" current="concepts" />
+
 # Conceitos: a versão nova chega a quem ainda usa a antiga
+
+<CaseNavigation caseId="safe-release" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. A corretora hipotética troca amount por amount_cents. A interface antiga ainda lê amount. Remover o campo antigo na primeira implantação faz a consulta retornar vazio. A prática conserva os dois campos durante a transição e expõe a versão nova a cinco das cem requisições fictícias.
 
-Comece pela [jornada](/jornadas/safe-release/), execute o [tutorial](/tutoriais/casos/safe-release/) e use a [referência](/referencia/casos/safe-release/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/safe-release/).
+Comece pela [jornada](/jornadas/safe-release/), execute o [tutorial](/jornadas/safe-release/#tutorial) e use a [referência](/jornadas/safe-release/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/safe-release/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
 
@@ -95,8 +101,6 @@ O vínculo é uma comparação executável de princípio. The route switch does 
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="branch-by-abstraction" />
-
 ## Branch by Abstraction
 
 Uma interface comum permite substituir uma implementação aos poucos dentro do sistema.
@@ -143,8 +147,6 @@ O vínculo é uma comparação executável de princípio. The services are logic
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="canary-release" />
-
 ## Canary Release
 
 A versão candidata recebe uma participação delimitada do tráfego, ampliada após critérios de observação.
@@ -175,8 +177,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="dark-launch" />
-
 ## Dark Launch
 
 Uma capacidade é implantada e exercitada por controles internos antes de ficar disponível às pessoas.
@@ -206,8 +206,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Dark Launch; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="database-decomposition" />
 
 ## Database Decomposition
 
@@ -274,8 +272,6 @@ O vínculo é um mecanismo local executado. Esta é uma simulação de contratos
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="feature-flags" />
-
 ## Feature Flags
 
 Uma condição seleciona um comportamento do código.
@@ -305,8 +301,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Feature Flags; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="gitops" />
 
 ## GitOps
 
@@ -352,8 +346,6 @@ O vínculo é uma comparação executável de princípio. The revision store is 
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="immutable-infrastructure" />
-
 ## Immutable Infrastructure
 
 Uma mudança substitui uma unidade identificada em vez de alterá-la manualmente em execução.
@@ -385,8 +377,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Instance identity and images are logical fixtures, without a cloud API, image build or real infrastructure mutation.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="infrastructure-as-code" />
 
 ## Infrastructure as Code
 
@@ -432,8 +422,6 @@ O vínculo é uma comparação executável de princípio. The revision store is 
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="modularization" />
-
 ## Modularization
 
 Modularizar estabelece responsabilidades e dependências explícitas dentro de um sistema.
@@ -467,8 +455,6 @@ O vínculo é uma comparação executável de princípio. The stores are local m
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="parallel-run" />
-
 ## Parallel Run
 
 Dois caminhos calculam sobre entradas comparáveis, e a equipe confronta seus resultados antes da troca.
@@ -499,8 +485,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="progressive-delivery" />
-
 ## Progressive Delivery
 
 A entrega amplia exposição por etapas e usa critérios para avançar, interromper ou retornar tráfego.
@@ -530,8 +514,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Progressive Delivery; não implementa o padrão completo. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="recreate-deployment" />
 
 ## Recreate Deployment
 
@@ -575,8 +557,6 @@ O vínculo é uma comparação executável de princípio. Readiness and resource
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="rolling-deployment" />
-
 ## Rolling Deployment
 
 A troca substitui réplicas progressivamente sob limites de capacidade e indisponibilidade.
@@ -618,8 +598,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Readiness and resource capacity are assumed by the fixture; Kubernetes scheduling and actual service availability are not executed.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="service-extraction" />
 
 ## Service Extraction
 
@@ -667,8 +645,6 @@ O vínculo é uma comparação executável de princípio. The services are logic
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="shadow-deployment" />
-
 ## Shadow Deployment
 
 Uma implantação candidata recebe entradas para comparação sem fornecer a resposta principal.
@@ -699,8 +675,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/12-deploy-e-releases/#g12-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="shadow-traffic" />
-
 ## Shadow Traffic
 
 O sistema copia entradas para um caminho candidato enquanto o caminho atual continua fornecendo a resposta.
@@ -730,8 +704,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. Esta é uma simulação de contratos e rotas em memória. Não houve deploy, Kubernetes, GitOps ou Terraform. Desviar tráfego não desfaz dados incompatíveis já gravados.
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
-
-<span id="strangler-fig" />
 
 ## Strangler Fig
 
@@ -779,8 +751,6 @@ O vínculo é uma comparação executável de princípio. The services are logic
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
-<span id="transitional-architecture" />
-
 ## Transitional Architecture
 
 Uma arquitetura temporária liga o estado inicial ao destino e recebe um plano explícito de retirada.
@@ -827,3 +797,4 @@ O vínculo é uma comparação executável de princípio. The services are logic
 
 A [explicação do capítulo](/explicacoes/safe-change/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/11-padroes-para-decompor-sistemas/#g11-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/safe-release/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="safe-release" />

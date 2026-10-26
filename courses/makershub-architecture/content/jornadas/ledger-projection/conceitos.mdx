@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="ledger-projection" current="concepts" />
+
 # Conceitos: o saldo precisa explicar sua história
+
+<CaseNavigation caseId="ledger-projection" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Uma posição fictícia recebe crédito de R$ 1.000, crédito de R$ 100 e débito de R$ 200. Um saldo mutável sem histórico pode perder uma alteração. A trilha de eventos permite refazer a conta: 1.000 + 100 − 200 = R$ 900, inclusive quando o modelo de consulta ainda não consumiu os dois últimos eventos.
 
-Comece pela [jornada](/jornadas/ledger-projection/), execute o [tutorial](/tutoriais/casos/ledger-projection/) e use a [referência](/referencia/casos/ledger-projection/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/ledger-projection/).
+Comece pela [jornada](/jornadas/ledger-projection/), execute o [tutorial](/jornadas/ledger-projection/#tutorial) e use a [referência](/jornadas/ledger-projection/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/ledger-projection/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="append-only-log" />
 
 ## Append-Only Log
 
@@ -43,8 +47,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Append-Only Log; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
-
-<span id="command-handler" />
 
 ## Command Handler
 
@@ -80,8 +82,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="cqrs" />
-
 ## CQRS
 
 CQRS separa modelos e operações de alteração dos de consulta.
@@ -116,8 +116,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="denormalization" />
-
 ## Denormalization
 
 A desnormalização reúne ou repete informações para servir uma leitura.
@@ -149,8 +147,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e028) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="domain-event" />
-
 ## Domain Event
 
 Um evento de domínio descreve um fato relevante dentro de um contexto.
@@ -181,8 +177,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="event-sourcing" />
-
 ## Event Sourcing
 
 Event Sourcing usa eventos como fonte de verdade do estado modelado.
@@ -212,8 +206,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Event Sourcing; não implementa o padrão completo. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
-
-<span id="materialized-view" />
 
 ## Materialized View
 
@@ -246,8 +238,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="precomputation" />
-
 ## Precomputation
 
 O pré-cálculo executa trabalho antes da consulta que o utiliza.
@@ -279,8 +269,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e029) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="projection" />
-
 ## Projection
 
 Uma projeção deriva uma representação de leitura a partir de uma fonte definida.
@@ -311,8 +299,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
-
-<span id="query-handler" />
 
 ## Query Handler
 
@@ -348,8 +334,6 @@ O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL me
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="read-model" />
-
 ## Read Model
 
 Um read model representa dados conforme as perguntas atendidas.
@@ -381,8 +365,6 @@ O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL me
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="snapshotting" />
-
 ## Snapshotting
 
 Um snapshot guarda estado associado ao progresso do stream para reduzir a reconstrução.
@@ -412,8 +394,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. Os eventos são fictícios. O WAL medido é do SQLite; ele não prova recovery PostgreSQL. Uma outbox, um log de auditoria ou uma projeção sozinha não transforma qualquer sistema em Event Sourcing.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
-
-<span id="write-model" />
 
 ## Write Model
 
@@ -449,8 +429,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/04-cqrs-event-sourcing-e-modelos-de-leitura/#g04-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
-<span id="write-ahead-log-wal" />
-
 ## Write-Ahead Log (WAL)
 
 O motor registra informações de alteração no log antes de persistir as páginas correspondentes.
@@ -481,3 +459,4 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e019) descreve o conceito para consulta. A [jornada do caso](/jornadas/ledger-projection/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="ledger-projection" />

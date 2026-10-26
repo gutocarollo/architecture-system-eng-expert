@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="diagnostics" current="concepts" />
+
 # Conceitos: o processo responde, mas a ordem não terminou
+
+<CaseNavigation caseId="diagnostics" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. A ordem fictícia ORDER-1 passa por uma requisição que falha no provedor e por uma segunda tentativa. Ana vê um health endpoint verde e ainda não sabe onde o pedido parou. A prática reúne os dois request IDs sob um operation ID e separa tempo, erro e resultado do caminho de negócio.
 
-Comece pela [jornada](/jornadas/diagnostics/), execute o [tutorial](/tutoriais/casos/diagnostics/) e use a [referência](/referencia/casos/diagnostics/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/diagnostics/).
+Comece pela [jornada](/jornadas/diagnostics/), execute o [tutorial](/jornadas/diagnostics/#tutorial) e use a [referência](/jornadas/diagnostics/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/diagnostics/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="centralized-logging" />
 
 ## Centralized Logging
 
@@ -44,8 +48,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="correlation-id" />
-
 ## Correlation ID
 
 Uma identidade compartilhada liga mensagens de uma conversa.
@@ -75,8 +77,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
 A [explicação do capítulo](/explicacoes/messages/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/03-event-driven-messaging/#g03-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
-
-<span id="distributed-tracing" />
 
 ## Distributed Tracing
 
@@ -117,8 +117,6 @@ O vínculo é uma comparação executável de princípio. The exporter is in mem
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="golden-signals" />
-
 ## Golden Signals
 
 Reúnem latência, tráfego, erros e saturação para avaliar um serviço.
@@ -155,8 +153,6 @@ O vínculo é uma comparação executável de princípio. These are controlled s
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="health-check" />
-
 ## Health Check
 
 Consulta uma condição de saúde definida.
@@ -187,8 +183,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Health Check; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e015) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
-
-<span id="metrics" />
 
 ## Metrics
 
@@ -225,8 +219,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Metrics; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
-
-<span id="opentelemetry" />
 
 ## OpenTelemetry
 
@@ -267,8 +259,6 @@ O vínculo é uma comparação executável de princípio. The exporter is in mem
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="red-method-rate-errors-duration" />
-
 ## RED Method (Rate, Errors, Duration)
 
 Observa taxa, erros e duração de operações.
@@ -305,8 +295,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="request-id" />
-
 ## Request ID
 
 Identifica uma requisição.
@@ -336,8 +324,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
-
-<span id="structured-logging" />
 
 ## Structured Logging
 
@@ -369,8 +355,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
-<span id="synthetic-monitoring" />
-
 ## Synthetic Monitoring
 
 Executa uma operação controlada para observar um comportamento.
@@ -401,8 +385,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Synthetic Monitoring; não implementa o padrão completo. O conjunto é sintético e pequeno. Ele não prova instrumentação OpenTelemetry real, percentil, SLO, causa de incidente ou capacidade de produção.
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
-
-<span id="use-method-utilization-saturation-errors" />
 
 ## USE Method (Utilization, Saturation, Errors)
 
@@ -440,3 +422,4 @@ O vínculo é uma comparação executável de princípio. These are controlled s
 
 A [explicação do capítulo](/explicacoes/observability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/15-observabilidade/#g15-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/diagnostics/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="diagnostics" />

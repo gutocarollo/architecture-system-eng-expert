@@ -3,89 +3,23 @@ asIndexPage: true
 title: "Contratos: a consulta cresce e a soma muda de significado"
 description: "Entradas, parâmetros, versões, resultados e limites do caso A posição cresce e a consulta precisa encontrar seus dados."
 diataxis: reference
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/storage-partitions/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="storage-partitions" current="reference" />
 
 # Contratos: a consulta cresce e a soma muda de significado
 
-Esta página reúne os contratos que a prática compara. Você aprenderá a conservar o grão monetário e distinguir localização de dados, índice e remapeamento. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+<CaseNavigation caseId="storage-partitions" current="reference" />
 
-Para continuar o mesmo problema, [volte à jornada](/jornadas/storage-partitions/), [entenda o mecanismo](/explicacoes/casos/storage-partitions/), [execute o tutorial](/tutoriais/casos/storage-partitions/) ou [consulte o guia da tarefa](/guias/casos/storage-partitions/).
+## Referência
 
-## Entradas e ambiente
+<CaseBody components={legacyCaseHeadings} />
 
-Doze posições, três shards, contas A/B com valores 100/200 e 2/3 filhos, mais mil linhas SQLite sintéticas.
+<CaseNext caseId="storage-partitions" current="reference" />
 
-| Contrato | Valor do caso |
-| --- | --- |
-| Identidade do caso | `storage-partitions`. |
-| Símbolos a consultar | `storage_partitions / shard-route / grain-join / covering-index`. |
-| Comando completo | `python3 labs/architecture/financial.py storage-partitions`. |
-| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
-| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
-| Horário e escopo do recibo | `2026-10-15T01:35:30.928161+00:00`, no laboratório local. |
-
-O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
-
-## Fonte do modelo financeiro
-
-Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
-
-A função `storage_partitions` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/storage-partitions.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
-
-## Resultados que o contrato compara
-
-A posição 7 é encontrada em uma partição. A soma no grão correto fica em R$ 300. O plano SQLite muda de SCAN para SEARCH com COVERING INDEX.
-
-### `shard-route`
-
-A comparação permite executar a seguinte ação de estudo: Encontre a chave 7 pela regra de propriedade e compare uma partição consultada com a varredura das três.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `partitions_scanned` | `3` | `1` |
-| `row_7_amount` | O campo não é emitido nesta condição. | `70` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/storage-partitions/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `grain-join`
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `sum_after_one_to_many_join` | `800` | O campo não é emitido nesta condição. |
-| `sum_at_account_grain` | O campo não é emitido nesta condição. | `300` |
-
-### `hash-remap`
-
-A comparação permite executar a seguinte ação de estudo: Acrescente um quarto shard ao módulo anterior e conte as chaves remapeadas; use esse custo para comparar uma alternativa de hashing consistente.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `moved_keys` | `0` | O campo não é emitido nesta condição. |
-| `shards` | `3` | `4` |
-| `modulo_moved_keys` | O campo não é emitido nesta condição. | `76` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/storage-partitions/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `covering-index`
-
-A comparação permite executar a seguinte ação de estudo: Leia o EXPLAIN QUERY PLAN SQLite antes e depois do índice que contém account_key e cents.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `query_plan` | `"SCAN position"` | `"SEARCH position USING COVERING INDEX position_lookup (account_key=?)"` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/storage-partitions/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-## Garantia, parâmetros e limites
-
-A chave orienta o destino. A soma usa o grão de conta. Um índice SQLite inclui a chave e o valor; a consulta passa a usar um índice de cobertura. O roteamento usa módulo, não consistent hashing. O remapeamento quantifica sua fragilidade ao acrescentar um shard. O laboratório não implementa replicação geográfica, consenso de réplicas ou uma topologia PostgreSQL.
-
-Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
-
-Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
-
-## Recibo e rastreabilidade
-
-A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `storage-partitions`. O hash SHA-256 da saída capturada é `61d0121a0475bef3eff397c6f24cd59f115b30adbb97ac403a6216c459444884`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
-
-Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/storage-partitions/), [leia a explicação](/explicacoes/casos/storage-partitions/), [abra o tutorial](/tutoriais/casos/storage-partitions/) ou [consulte o guia](/guias/casos/storage-partitions/).
+<CaseSequence caseId="storage-partitions" current="reference" />

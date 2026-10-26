@@ -4,15 +4,19 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="date-only" current="concepts" />
+
 # Conceitos: o dia da emissão muda no caminho
+
+<CaseNavigation caseId="date-only" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. A coluna Emissão recebe a string 2026-10-05. O commit FBI-4840 documenta que a interface mostrava o dia 04 em São Paulo. O valor representa um dia do calendário; o construtor anterior o interpretava como meia-noite UTC, que ainda corresponde ao dia 04 no fuso UTC−3.
 
-Comece pela [jornada](/jornadas/date-only/), execute o [tutorial](/tutoriais/casos/date-only/) e use a [referência](/referencia/casos/date-only/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/date-only/).
+Comece pela [jornada](/jornadas/date-only/), execute o [tutorial](/jornadas/date-only/#tutorial) e use a [referência](/jornadas/date-only/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/date-only/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
-
-<span id="published-language" />
 
 ## Published Language
 
@@ -30,3 +34,4 @@ O vínculo é uma transferência semântica a partir do código histórico. O c�
 
 A [explicação do capítulo](/explicacoes/business-rules/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/10-ddd-domain-driven-design/) descreve o conceito para consulta. A [jornada do caso](/jornadas/date-only/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="date-only" />

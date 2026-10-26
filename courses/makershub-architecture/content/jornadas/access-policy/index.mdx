@@ -5,7 +5,19 @@ description: "Você aprenderá a distinguir autenticação, autorização de um 
 diataxis: explanation
 ---
 
+import Explanation from '../../../case-content/access-policy/explanation.mdx'
+import Tutorial from '../../../case-content/access-policy/tutorial.mdx'
+import Guide from '../../../case-content/access-policy/guide.mdx'
+import Reference from '../../../case-content/access-policy/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence, CaseChoices } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="access-policy" />
+
+<span id="overview" className="case-legacy-anchor" />
+
 # A permissão acompanha a ordem e a identidade
+
+<CaseNavigation caseId="access-policy" withinPage />
 
 Ana é uma assessora fictícia do tenant A, ligada à conta SYNTHETIC-1. Uma ordem pertence ao tenant B e à conta SYNTHETIC-2. Conferir apenas o papel advisor permite que Ana a abra. A prática acrescenta a relação com o objeto e ainda mostra como audience, vencimento e retirada de chave alteram uma decisão.
 
@@ -13,12 +25,16 @@ Este é um caso financeiro hipotético com participantes e dados fictícios. Uma
 
 ## Escolha o que você precisa agora
 
+<div data-case-choices="access-policy">
+
 | Sua necessidade | Destino deste mesmo caso | O que você obterá |
 | --- | --- | --- |
-| Você quer entender por que acontece. | [Explicação](/explicacoes/casos/access-policy/) | Você identifica o mecanismo e o limite da proteção. |
-| Você quer aprender fazendo. | [Tutorial](/tutoriais/casos/access-policy/) | Você repete entradas conhecidas e compara as duas condições. |
-| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](/guias/casos/access-policy/) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
-| Você procura nomes, parâmetros e contratos. | [Referência](/referencia/casos/access-policy/) | Você consulta os localizadores e as garantias de cada probe. |
+| Você quer entender por que acontece. | [Explicação](#explanation) | Você identifica o mecanismo e o limite da proteção. |
+| Você quer aprender fazendo. | [Tutorial](#tutorial) | Você repete entradas conhecidas e compara as duas condições. |
+| Você já conhece o assunto e precisa resolver a tarefa. | [Guia](#guide) | Você prepara o recorte, coleta a prova e decide se a proteção atende o problema. |
+| Você procura nomes, parâmetros e contratos. | [Referência](#reference) | Você consulta os localizadores e as garantias de cada probe. |
+
+</div>
 
 ## Antes de começar
 
@@ -28,6 +44,46 @@ Você precisa saber abrir um terminal e ler uma saída de programa. O tutorial a
 
 O acesso entre tenants é recusado. O token com validade 10 já expirou no instante 11. A rota direta entre browser e ledger não pertence às ligações permitidas. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
 
+<section data-case-facet="explanation">
+
+## Explicação [#explanation]
+
+<Explanation />
+
+<CaseNext caseId="access-policy" current="explanation" withinPage />
+
+</section>
+
+<section data-case-facet="tutorial">
+
+## Tutorial [#tutorial]
+
+<Tutorial />
+
+<CaseNext caseId="access-policy" current="tutorial" withinPage />
+
+</section>
+
+<section data-case-facet="guide">
+
+## Guia [#guide]
+
+<Guide />
+
+<CaseNext caseId="access-policy" current="guide" withinPage />
+
+</section>
+
+<section data-case-facet="reference">
+
+## Referência [#reference]
+
+<Reference />
+
+<CaseNext caseId="access-policy" current="reference" withinPage />
+
+</section>
+
 Quando terminar a prática e consultar seus contratos, continue em [A regra se espalha pelo produto](/jornadas/order-boundaries/).
 
 ## Conceitos deste caso
@@ -35,3 +91,5 @@ Quando terminar a prática e consultar seus contratos, continue em [A regra se e
 A [matriz completa de conceitos](/jornadas/matriz/) informa quais observações são pertinentes e quais práticas específicas ainda estão pendentes. Um exercício de outro mecanismo não substitui a experiência ausente.
 
 Este caso reúne 16 conceitos no [mapa de mecanismos e práticas](/jornadas/access-policy/conceitos/). Cada entrada informa se a prática específica está disponível ou pendente e conserva sua fronteira de conclusão.
+
+<CaseSequence caseId="access-policy" withinPage />

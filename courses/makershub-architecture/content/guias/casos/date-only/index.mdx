@@ -3,49 +3,23 @@ asIndexPage: true
 title: "Verifique a proteção: o dia da emissão muda no caminho"
 description: "Você aprenderá a conservar o significado de uma data ao atravessar o contrato entre backend e interface."
 diataxis: how-to
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/date-only/guide.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="date-only" current="guide" />
 
 # Verifique a proteção: o dia da emissão muda no caminho
 
-Continue o mesmo caso: [volte ao caso](/jornadas/date-only/); [entenda o mecanismo](/explicacoes/casos/date-only/); [execute a experiência](/tutoriais/casos/date-only/); [consulte contratos e fontes](/referencia/casos/date-only/).
+<CaseNavigation caseId="date-only" current="guide" />
 
-Este guia serve a quem já conhece o mecanismo e precisa avaliar uma mudança que apresenta a mesma condição do caso. O resultado é um recorte reproduzível com uma decisão sustentada por fonte e execução.
+## Guia
 
-## Antes de começar
+<CaseBody components={legacyCaseHeadings} />
 
-Você precisa do comportamento esperado, do recurso protegido e da autorização para ler o código que pretende avaliar. Prepare o ambiente local com `python3 labs/architecture/setup_labs.py`, conforme o tutorial; ele instala apenas as dependências fixadas na virtualenv do laboratório. Use o ambiente de aprendizado para praticar. Uma escrita no seu sistema real exige o plano e a autorização próprios daquela mudança.
+<CaseNext caseId="date-only" current="guide" />
 
-## 1. Fixe o contrato e a fronteira
-
-Escreva qual entrada produz a condição e qual saída deveria conservar o significado do negócio. Para este caso, use: A data 2026-10-05 e o timestamp 2026-10-05T00:00:00Z, com TZ=America/Sao_Paulo. Registre a versão anterior, a versão proposta e o localizador `InsuranceProposalsAnalysisCard.formatDate / formatBrDate / parseIsoLocal`.
-
-## 2. Confira quem executa a decisão
-
-formatBrDate reconhece a string inteira YYYY-MM-DD e usa parseIsoLocal. Uma string com hora e Z continua sendo um instante. Confira se a decisão ocorre no recurso que recebe a alteração, na tarefa compartilhada ou no adaptador adequado. Um nome de padrão no título não comprova que essa fronteira foi protegida.
-
-## 3. Repita a mesma condição em isolamento
-
-```sh
-TZ=America/Sao_Paulo node labs/architecture/date-only/run.mjs
-```
-
-Conserve a saída completa, o horário, as versões do runtime e os hashes dos arquivos. Se o resultado não coincidir com o tutorial, registre a entrada que divergiu e inspecione esse recorte antes de ampliar as tentativas.
-
-## 4. Avalie a garantia adquirida
-
-A data simples aparece como 05/10/26. O timestamp 2026-10-05T00:00:00Z continua aparecendo como 04/10/26, pois o instante não foi alterado. Confira uma falha relevante além do caminho feliz: cancelamento de leitor, retorno atrasado, duplicidade, estágio recusado, vencimento ou versão antiga, conforme a tarefa. O tutorial e a referência mostram quais dessas condições foram efetivamente executadas aqui.
-
-## 5. Feche a decisão com seu limite
-
-O roteiro executa o helper e o formatter extraído, com Node e Typescript. Ele não consulta Salesforce, não renderiza o card e não prova a versão frontend de produção. Quando sua mudança exigir uma garantia que o modelo não mede, conserve essa necessidade como pendência e acrescente uma prova naquele recurso. O recibo local não substitui a leitura de deploy, configuração efetiva ou dado real.
-
-## Localizadores de consulta
-
-- `frontend/app/_utils/isoDate.ts` foi preservado em `labs/architecture/date-only/before.ts`, na versão `eca3f89e0e703316b807018b7947fbbb2043c806`, com SHA-256 `926797824e276c2c2d45da6ea48b6feb091decb7d79e7317d1a12ddf8379365d`.
-- `frontend/app/_utils/isoDate.ts` foi preservado em `labs/architecture/date-only/after.ts`, na versão `7101d3a4babe95081b0b41d35ec305c08bf8a577`, com SHA-256 `4fd3ae0a4793bbc8a49395aa458826b043d3d5addf56bcd6d9161570e54274b5`.
-- `frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx` foi preservado em `labs/architecture/date-only/before-card.tsx`, na versão `eca3f89e0e703316b807018b7947fbbb2043c806`, com SHA-256 `a4a92481780ecbb2b8d5b7e32ae3840781ee295425a8a8b05d1f2d019bdc0b5d`.
-- `frontend/app/(pages)/insurance/InsuranceProposalsAnalysisCard.tsx` foi preservado em `labs/architecture/date-only/after-card.tsx`, na versão `7101d3a4babe95081b0b41d35ec305c08bf8a577`, com SHA-256 `7d077d43cd99e52af424ba036a725ba7a6a8e7ed2d14506e84c71e17cee0be8d`.
-
-Continue o mesmo caso: [volte ao caso](/jornadas/date-only/); [entenda o mecanismo](/explicacoes/casos/date-only/); [execute a experiência](/tutoriais/casos/date-only/); [consulte contratos e fontes](/referencia/casos/date-only/).
-
-O [mapa de conceitos deste caso](/jornadas/date-only/conceitos/) informa qual observação cada conceito compartilha com a prática e o que ela não comprova.
+<CaseSequence caseId="date-only" current="guide" />

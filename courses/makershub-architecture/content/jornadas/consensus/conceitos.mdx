@@ -4,11 +4,17 @@ description: "Mecanismos, comandos e limites de cada conceito ligado ao caso."
 diataxis: explanation
 ---
 
+import { CaseBreadcrumb, CaseNavigation, CaseSequence } from '../../../components/CaseNavigation.jsx'
+
+<CaseBreadcrumb caseId="consensus" current="concepts" />
+
 # Conceitos: os escritórios deixam de conversar
+
+<CaseNavigation caseId="consensus" current="concepts" />
 
 Este mapa conecta os conceitos ao mesmo problema. Uma corretora hipotética divide o serviço em três participantes: A, B e C. Uma falha de comunicação deixa A e B juntos e C sozinho. Se cada grupo se declarar autorizado a gravar, duas decisões incompatíveis podem aparecer. A prática permite somente ao grupo que reúne dois dos três participantes autorizar a escrita.
 
-Comece pela [jornada](/jornadas/consensus/), execute o [tutorial](/tutoriais/casos/consensus/) e use a [referência](/referencia/casos/consensus/) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/guias/casos/consensus/).
+Comece pela [jornada](/jornadas/consensus/), execute o [tutorial](/jornadas/consensus/#tutorial) e use a [referência](/jornadas/consensus/#reference) para consultar parâmetros. Para resolver sua própria tarefa, siga o [guia](/jornadas/consensus/#guide).
 
 Cada entrada informa se você observa um mecanismo local ou se compara um princípio que uma implementação completa também precisaria atender. O segundo caso conserva a distância entre um modelo finito e um protocolo ou produto real.
 
@@ -97,8 +103,6 @@ O vínculo é uma comparação executável de princípio. The steps are state tr
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="asynchronous-replication" />
-
 ## Asynchronous Replication
 
 A confirmação local não espera a condição remota de replicação.
@@ -130,8 +134,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Asynchronous Replication; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="automatic-failover" />
 
 ## Automatic Failover
 
@@ -166,8 +168,6 @@ O vínculo é uma comparação executável de princípio. A timeout suspects fai
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e011) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="cascading-replication" />
-
 ## Cascading Replication
 
 Uma réplica encaminha alterações para outras cópias, formando uma cascata.
@@ -199,8 +199,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. The model has one ordered update, no WAL streams, failover or network delay.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e008) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="cold-standby" />
 
 ## Cold Standby
 
@@ -251,8 +249,6 @@ O vínculo é uma comparação executável de princípio. The steps are state tr
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e005) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="consensus" />
-
 ## Consensus
 
 Consenso estabelece acordo entre participantes sob propriedades e modelo de falhas definidos.
@@ -282,8 +278,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Consensus; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e035) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="eventual-consistency" />
 
 ## Eventual Consistency
 
@@ -316,8 +310,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Eventual Consistency; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e020) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="failover" />
 
 ## Failover
 
@@ -368,8 +360,6 @@ O vínculo é uma comparação executável de princípio. The steps are state tr
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e010) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="gossip-protocol" />
-
 ## Gossip Protocol
 
 Gossip dissemina informação por trocas entre participantes.
@@ -408,8 +398,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e038) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="heartbeat" />
-
 ## Heartbeat
 
 Renova periodicamente um sinal de atividade.
@@ -442,8 +430,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. A timeout suspects failure; this local model does not prove the old primary stopped or supply fencing under a network partition.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/07-resiliencia/#g07-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="hot-standby" />
 
 ## Hot Standby
 
@@ -494,8 +480,6 @@ O vínculo é uma comparação executável de princípio. The steps are state tr
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="hybrid-logical-clock" />
-
 ## Hybrid Logical Clock
 
 Um Hybrid Logical Clock combina tempo físico aproximado e contador lógico para acompanhar causalidade recebida.
@@ -527,8 +511,6 @@ O vínculo é uma comparação executável de princípio. The one receive schedu
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e032) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="lamport-clock" />
-
 ## Lamport Clock
 
 Um Lamport clock conserva uma ordem compatível com acontecimentos causalmente relacionados.
@@ -557,8 +539,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e031) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="leader-election" />
 
 ## Leader Election
 
@@ -626,8 +606,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e002) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="monotonic-reads" />
-
 ## Monotonic Reads
 
 Monotonic reads impede que uma sessão perca alterações já vistas.
@@ -660,8 +638,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e023) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="multi-az" />
-
 ## Multi-AZ
 
 Os componentes se distribuem entre zonas de disponibilidade com domínios de falha identificados.
@@ -692,8 +668,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e006) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="multi-leader" />
 
 ## Multi-Leader
 
@@ -727,8 +701,6 @@ O vínculo é uma comparação executável de princípio. This merge is valid on
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e003) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="multi-primary" />
-
 ## Multi-Primary
 
 Multi-primary permite que mais de um participante aceite escritas sob um contrato de replicação e conflitos.
@@ -761,8 +733,6 @@ O vínculo é uma comparação executável de princípio. This merge is valid on
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="multi-region" />
-
 ## Multi-Region
 
 Os componentes se distribuem entre regiões identificadas, com contratos de dados e encaminhamento entre elas.
@@ -793,8 +763,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. Replication freshness, routing, shared dependencies, quorum and regulatory placement are not inferred from the survivor count.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="paxos" />
 
 ## Paxos
 
@@ -827,8 +795,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. A finite single-decree Paxos schedule with reliable local messages; persistence, liveness and arbitrary faults are not implemented.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e037) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="peer-to-peer" />
 
 ## Peer-to-Peer
 
@@ -902,8 +868,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e001) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="quorum" />
-
 ## Quorum
 
 Um protocolo exige concordância de uma quantidade definida de participantes.
@@ -965,8 +929,6 @@ O vínculo é um mecanismo local executado. A prática mostra requisitos e contr
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e033) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="raft" />
-
 ## Raft
 
 Raft organiza eleição, replicação de log e regras de segurança para consenso.
@@ -1004,8 +966,6 @@ O vínculo é uma comparação executável de princípio. This isolates Raft log
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e036) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="read-replica" />
-
 ## Read Replica
 
 Uma cópia replicada pode atender consultas segundo suas regras de recuperação e acesso.
@@ -1037,8 +997,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Read Replica; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/05-banco-de-dados-e-armazenamento/#g05-e007) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="read-your-writes" />
 
 ## Read-your-writes
 
@@ -1072,8 +1030,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e022) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="replication" />
-
 ## Replication
 
 Replicação propaga dados para cópias operacionais.
@@ -1106,8 +1062,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/data-durability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e016) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="split-brain-prevention" />
-
 ## Split-Brain Prevention
 
 O desenho evita que participantes incompatíveis mantenham autoridade de escrita simultânea após uma divisão.
@@ -1137,8 +1091,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Split-Brain Prevention; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e012) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="stateless-services" />
 
 ## Stateless Services
 
@@ -1175,8 +1127,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. O probe exercita um requisito ou um contraexemplo relacionado a Stateless Services; não implementa o padrão completo. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e017) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="strong-consistency" />
 
 ## Strong Consistency
 
@@ -1225,8 +1175,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é uma comparação executável de princípio. This is one serialized-owner history, not a universal linearizability proof or a distributed strong-consistency system under failures.
 
 A [explicação do capítulo](/explicacoes/read-models/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e021) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="synchronous-replication" />
 
 ## Synchronous Replication
 
@@ -1327,8 +1275,6 @@ O vínculo é uma comparação executável de princípio. O probe exercita um re
 
 A [explicação do capítulo](/explicacoes/reliable-integration/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e009) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
-<span id="version-vector" />
-
 ## Version Vector
 
 Um version vector conserva contadores por participante para distinguir causalidade e concorrência.
@@ -1362,8 +1308,6 @@ Confira os valores do contrato antes e depois, e não apenas se as duas saídas 
 O vínculo é um mecanismo local executado. A prática mostra requisitos e contraexemplos, em um modelo finito. Ela não implementa Raft, Paxos, 2PC ou 3PC completos, não prova linearizabilidade e não cobre todas as falhas assíncronas.
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/02-sistemas-distribuidos-e-consistencia/#g02-e030) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
-
-<span id="warm-standby" />
 
 ## Warm Standby
 
@@ -1414,3 +1358,4 @@ O vínculo é uma comparação executável de princípio. The steps are state tr
 
 A [explicação do capítulo](/explicacoes/availability/) amplia a decisão, e a [entrada de referência](/referencia/catalogo/13-alta-disponibilidade/#g13-e004) descreve o conceito para consulta. A [jornada do caso](/jornadas/consensus/) permite continuar com o mesmo problema.
 
+<CaseSequence caseId="consensus" />

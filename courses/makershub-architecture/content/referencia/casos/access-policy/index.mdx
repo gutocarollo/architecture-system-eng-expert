@@ -3,90 +3,23 @@ asIndexPage: true
 title: "Contratos: a permissão precisa alcançar o objeto certo"
 description: "Entradas, parâmetros, versões, resultados e limites do caso A permissão acompanha a ordem e a identidade."
 diataxis: reference
+searchable: false
 ---
+
+import CaseBody from '../../../../case-content/access-policy/reference.mdx'
+import { CaseBreadcrumb, CaseNavigation, CaseNext, CaseSequence } from '../../../../components/CaseNavigation.jsx'
+import { legacyCaseHeadings } from '../../../../components/LegacyCaseHeadings.jsx'
+
+<CaseBreadcrumb caseId="access-policy" current="reference" />
 
 # Contratos: a permissão precisa alcançar o objeto certo
 
-Esta página reúne os contratos que a prática compara. Você aprenderá a distinguir autenticação, autorização de um objeto e fronteiras de uma credencial. Os valores descritos pertencem a um laboratório local com entradas fictícias.
+<CaseNavigation caseId="access-policy" current="reference" />
 
-Para continuar o mesmo problema, [volte à jornada](/jornadas/access-policy/), [entenda o mecanismo](/explicacoes/casos/access-policy/), [execute o tutorial](/tutoriais/casos/access-policy/) ou [consulte o guia da tarefa](/guias/casos/access-policy/).
+## Referência
 
-## Entradas e ambiente
+<CaseBody components={legacyCaseHeadings} />
 
-Assessora advisor/A/SYNTHETIC-1, objeto B/SYNTHETIC-2 e credencial fictícia com audience position-api, expires 10 e key_id old.
+<CaseNext caseId="access-policy" current="reference" />
 
-| Contrato | Valor do caso |
-| --- | --- |
-| Identidade do caso | `access-policy`. |
-| Símbolos a consultar | `access_policy / object-authorization / credential-boundary / least-network-path`. |
-| Comando completo | `python3 labs/architecture/financial.py access-policy`. |
-| Dados e efeito externo | As entradas são sintéticas. A prática conserva os efeitos em memória ou em um arquivo temporário local. |
-| Versões da execução registrada | Python `3.14.8` e Node `v26.8.1`. |
-| Horário e escopo do recibo | `2026-10-15T01:35:31.080405+00:00`, no laboratório local. |
-
-O tutorial explica a preparação e como reiniciar. O comando acima é uma consulta rápida para quem já preparou o ambiente.
-
-## Fonte do modelo financeiro
-
-Este é um caso financeiro hipotético com participantes e dados fictícios. Uma corretora de maior porte, do setor em que atua a XP, é apenas o contexto de negócio. O texto não descreve um incidente nem uma arquitetura interna real da XP. A busca delimitada localizou candidatos da nossa stack, mas não estabeleceu um caso histórico completo para todos os conceitos desta família.
-
-A função `access_policy` está em `labs/architecture/financial.py`. O artefato `tasks/FBI-4991-arquitetura-nextra/execution/learning/searches/access-policy.json` conserva o alcance da busca por um caso interno. O modelo serve para comparar uma garantia com uma falha delimitada; ele não implementa integralmente todas as tecnologias relacionadas.
-
-## Resultados que o contrato compara
-
-O acesso entre tenants é recusado. O token com validade 10 já expirou no instante 11. A rota direta entre browser e ledger não pertence às ligações permitidas.
-
-### `object-authorization`
-
-A comparação permite executar a seguinte ação de estudo: Avalie advisor/A/SYNTHETIC-1 contra o objeto B/SYNTHETIC-2 e identifique qual relação o papel sozinho deixou de conferir.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `cross_tenant_allowed` | `true` | `false` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/access-policy/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `credential-boundary`
-
-A comparação permite executar a seguinte ação de estudo: Avalie a audience position-api na API order-api e o vencimento 10 no instante 11; separe a decisão de política da prova criptográfica ausente.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `expired_token_accepted` | `true` | O campo não é emitido nesta condição. |
-| `accepted` | O campo não é emitido nesta condição. | `false` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/access-policy/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `rotate-key`
-
-A comparação permite executar a seguinte ação de estudo: Retire old do conjunto aceito e repita a verificação do mesmo key_id, explicitando a assinatura que o modelo não executa.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `old_key_accepted` | `true` | `false` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/access-policy/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-### `least-network-path`
-
-A comparação permite executar a seguinte ação de estudo: Tente o caminho browser→ledger e compare-o com as duas ligações explicitamente permitidas.
-
-| Campo de saída | Condição anterior | Condição posterior |
-| --- | --- | --- |
-| `direct_browser_ledger` | `true` | `false` |
-
-Os conceitos relacionados e seus limites estão na [matriz do mesmo caso](/jornadas/access-policy/conceitos/). Eles compartilham esta comparação; a presença de um nome nessa matriz não amplia a garantia do programa.
-
-## Garantia, parâmetros e limites
-
-A política confere papel, tenant e vínculo da conta. A decisão de credencial confere audience e expires. Uma chave retirada sai do conjunto aceito. As claims não têm assinatura neste modelo. Ele não implementa OAuth2, OIDC, mTLS, bastion, firewall ou service mesh. Não se inferiram permissões reais do MakersHub nem regras regulatórias.
-
-Uma repetição usa a mesma entrada conhecida. Nos modelos financeiros, `--probe <nome>` restringe a comparação ao probe escolhido. Um nome desconhecido encerra o programa; o argumento não cria um novo cenário. Nos recortes históricos, os parâmetros e doubles estão nos runners de cada pasta.
-
-Para localizar as bibliotecas e os produtos OSS correspondentes, use a [curadoria dos 310 conceitos](/referencia/curadoria/). Ela mantém separadas a implementação pública verificada, a demonstração e a lacuna de evidência.
-
-## Recibo e rastreabilidade
-
-A captura fica em `tasks/FBI-4991-arquitetura-nextra/execution/learning/receipts.json`, na entrada `access-policy`. O hash SHA-256 da saída capturada é `76a1cf942b023648840011d96726923c030f1d4229bb4ee2e76e3baeda5d507a`. O recibo registra `exit_code=0`. Uma execução futura precisa produzir seu próprio recibo; estes números descrevem somente a execução e a versão indicadas.
-
-Quando precisar da explicação ou dos passos, [volte à jornada](/jornadas/access-policy/), [leia a explicação](/explicacoes/casos/access-policy/), [abra o tutorial](/tutoriais/casos/access-policy/) ou [consulte o guia](/guias/casos/access-policy/).
+<CaseSequence caseId="access-policy" current="reference" />

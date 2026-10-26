@@ -1,0 +1,60 @@
+Você fará a mesma consulta com uma cópia anterior e uma cópia corrigida. O objetivo desta experiência é verificar: O escritor atrasado não encerra a linha modificada e AZURE-CONFIRMED permanece na única versão atual.
+
+### 1. Prepare o ambiente
+
+Abra o terminal na raiz deste repositório. Você precisa de Python 3.11 ou posterior, da CLI `patch` e dos programas PostgreSQL 16 ou posterior no PATH. O recibo desta execução usou PostgreSQL 16.15. Os binários precisam pertencer à mesma instalação. Não é necessário ter um servidor iniciado.
+
+```sh
+python3 --version
+postgres --version
+initdb --version
+psql --version
+pg_ctl --version
+```
+
+O runner cria um banco descartável dentro de `.pg-learning`, escuta somente em socket Unix local e confirma o diretório de dados antes de executar as fixtures. Ele não usa credenciais ou endereços de produção. Execute os exercícios sequencialmente.
+
+### 2. Veja as duas condições
+
+```sh
+python3 labs/postgres-lineage/run.py --case revision
+```
+
+Você deve encontrar a saída abaixo. PASS significa que o problema esperado apareceu antes e que o invariante delimitado foi respeitado depois.
+
+```text
+revision: before_current_rows=1 lost_azure_update=True after_current_rows=1 stale_writer_rejected=True
+comparison=PASS isolation_verified=True temporary_server_stopped=True
+```
+
+A versão anterior termina com uma única linha atual, mas perde AZURE-CONFIRMED e conserva AZURE-OLD. O predicado alterado rejeita o escritor atrasado e preserva AZURE-CONFIRMED. Os identificadores deste exercício são sintéticos.
+
+### 3. Comece com uma cópia que ainda falha
+
+```sh
+mkdir -p .pg-learning/revision-challenge
+cp labs/postgres-lineage/revision-before.sql.template .pg-learning/revision-challenge/candidate.sql
+python3 labs/postgres-lineage/run.py --case revision --candidate-revision .pg-learning/revision-challenge/candidate.sql
+```
+
+A última execução deve terminar com código 1 porque sua cópia ainda produz o efeito incorreto. Leia o erro do invariante. Não interprete essa falha esperada como uma indisponibilidade do banco.
+
+### 4. Examine e aplique a alteração
+
+Compare o predicado do UPDATE nos dois templates. A alteração acrescenta a comparação com `:source_revision` e devolve as linhas encerradas com `RETURNING _employee_id`. O exercício produz a alteração concorrente antes desse UPDATE e verifica o valor preservado.
+
+```sh
+cat labs/postgres-lineage/revision.patch
+patch -p0 -d .pg-learning/revision-challenge < labs/postgres-lineage/revision.patch
+python3 labs/postgres-lineage/run.py --case revision --candidate-revision .pg-learning/revision-challenge/candidate.sql
+```
+
+Agora a execução deve terminar com código 0. A entrada e a verificação continuam iguais; quem mudou foi a sua cópia da consulta. Abra `candidate.sql` e localize a operação responsável por preservar o invariante.
+
+### 5. Conclua e repita
+
+O runner encerra e remove seu servidor descartável em cada execução. Sua cópia editável permanece em `.pg-learning/revision-challenge`. Para repetir do início, copie novamente o template anterior para ela antes de aplicar o patch.
+
+A revisão baseada em xmin é opaca e transitória. Ela não é uma identidade durável nem um fencing token monotônico. O laboratório isola o predicado de encerramento, com uma atualização concorrente entre leitura e escrita; não executa o método inteiro, a API ou a integração Azure. O commit selecionado pertence a um PR cuja leitura histórica estava aberta; este material não afirma implantação em produção.
+
+Este recorte está ligado ao [card FBI-4924](https://fazcapital.atlassian.net/browse/FBI-4924) e ao [PR 630](https://bitbucket.org/fazcapital/makershub/pull-requests/630). A leitura histórica registrou o PR como **OPEN na leitura histórica registrada**. Compare a [fonte anterior](https://bitbucket.org/fazcapital/makershub/src/3ad846049c32fedee09d458c8d685fb39b675b82/backend/app/repositories/employee_repository.py) com a [fonte alterada](https://bitbucket.org/fazcapital/makershub/src/c5e8efc5913355a8545b8a27b8b72e0828f77660/backend/app/repositories/employee_repository.py). A investigação conserva as descrições de PR e do campo visível do Jira em `execution/history`; o laboratório verifica somente o kernel SQL selecionado.
